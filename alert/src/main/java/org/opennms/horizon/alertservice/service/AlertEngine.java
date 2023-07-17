@@ -34,6 +34,7 @@ import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -81,7 +81,7 @@
               <MonitoringPoliciesThresholdCondition
                 v-for="(cond, index) in store.selectedRule!.alertConditions"
                 :key="cond.id"
-                :index="index"
+                :index="Number(index)"
                 :condition="(cond as ThresholdCondition)"
                 @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
@@ -94,7 +94,8 @@
                 :condition="(cond as EventCondition)"
                 :policy="store.selectedPolicy"
                 :rule="store.selectedRule"
-                :index="index"
+                :event-type="EventType.SnmpTrap"
+                :index="Number(index)"
                 @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
               />
@@ -115,10 +116,11 @@
 </template>
 
 <script setup lang="ts">
-import {useMonitoringPoliciesStore} from '@/store/Views/monitoringPoliciesStore'
-import {EventCondition, Rule, ThresholdCondition} from '@/types/policies'
+import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { EventCondition, Rule, ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
-import {ComponentType, DetectionMethodTypes, EventMetrics, ThresholdMetrics} from './monitoringPolicies.constants'
+import { ComponentType, DetectionMethodTypes, ThresholdMetrics } from './monitoringPolicies.constants'
+import { EventType } from '@/types/graphql'
 
 const store = useMonitoringPoliciesStore()
 const addIcon = markRaw(Add)
@@ -138,6 +140,7 @@ const componentTypeOptions = [
 
 const detectionMethodOptions = [
   // { id: DetectionMethodTypes.THRESHOLD, name: 'Threshold' }, BE not ready yet
+  // TODO: https://opennms.atlassian.net/browse/HS-750
   { id: DetectionMethodTypes.EVENT, name: 'Event' }
 ]
 
@@ -148,17 +151,18 @@ const thresholdMetricsOptions = [
 ]
 
 const eventMetricsOptions = [
-  { id: EventMetrics.SNMP_TRAP, name: 'SNMP Trap' }
-  // { id: EventMetrics.INTERNAL, name: 'Internal' } BE Not ready yet
+  { id: EventType.SnmpTrap, name: 'SNMP Trap' }
+  // { id: EventType.Internal, name: 'Internal' } BE Not ready yet
+  // TODO: https://opennms.atlassian.net/browse/HS-1759
 ]
 
 const selectComponentType = (type: string) => (store.selectedRule!.componentType = type)
 const selectMetric = (metric: string) => (store.selectedRule!.metricName = metric)
-const populateForm = (rule: Rule) => store.displayRuleForm(rule)
+const populateForm = async (rule: Rule) => await store.displayRuleForm(rule)
 
-const selectDetectionMethod = (method: string) => {
+const selectDetectionMethod = async (method: string) => {
   store.selectedRule!.detectionMethod = method
-  store.resetDefaultConditions()
+  await store.resetDefaultConditions()
 }
 </script>
 

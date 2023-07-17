@@ -12,11 +12,19 @@ fragment MonitoringPolicyParts on MonitorPolicy {
     alertConditions {
       id
       count
-      clearEventType
+      clearEvent {
+        id
+        name
+        eventType
+      }
       overtime
       overtimeUnit
       severity
-      triggerEventType
+      triggerEvent {
+        id
+        name
+        eventType
+      }
     }
   }
   tags

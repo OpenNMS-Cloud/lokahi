@@ -35,7 +35,7 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, uses = { EventDefinitionMapper.class })
 public interface AlertConditionMapper {
 
     @Mapping(target = "rule", ignore = true)

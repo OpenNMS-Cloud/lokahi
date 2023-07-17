@@ -4,7 +4,7 @@
     <div
       v-if="index !== 0 && !policy.isDefault"
       class="delete"
-      @click="$emit('deleteCondition', condition.id)"
+      @click="$emit('deleteCondition', alertCondition.id)"
     >
       Delete condition {{ conditionLetters[index].toUpperCase() }}
     </div>
@@ -12,13 +12,14 @@
   <div class="condition">
     <div class="inner-col">
       <div class="text">Trigger Event</div>
-      <BasicSelect
-        label=""
+      <FeatherSelect
+        label="Trigger Event"
         hideLabel
-        :list="triggerEventTypeOptions"
-        @item-selected="(val: number) => updateConditionProp('triggerEventType', val)"
+        :options="triggerEventDefinitionOptions"
+        text-prop="name"
+        v-model="alertCondition.triggerEvent"
         :disabled="policy.isDefault"
-        :selectedId="condition.triggerEventType"
+        @update:modelValue="$emit('updateCondition', alertCondition)"
       />
     </div>
 
@@ -27,10 +28,10 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="(val) => updateConditionProp('count', val as number)"
-        v-model="condition.count"
+        v-model="alertCondition.count"
         type="number"
         :disabled="policy.isDefault"
+        @update:modelValue="$emit('updateCondition', alertCondition)"
       />
     </div>
 
@@ -39,10 +40,10 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="(val) => updateConditionProp('overtime', val as number)"
-        v-model="condition.overtime"
+        v-model="alertCondition.overtime"
         type="number"
         :disabled="policy.isDefault"
+        @update:modelValue="$emit('updateCondition', alertCondition)"
       />
     </div>
 
@@ -50,8 +51,11 @@
       <div class="text">&nbsp;</div>
       <BasicSelect
         :list="durationOptions"
-        @item-selected="(val: number) => updateConditionProp('overtimeUnit', val)"
-        :selectedId="condition.overtimeUnit"
+        @item-selected="(val: string) => {
+          alertCondition.overtimeUnit = val
+          $emit('updateCondition', alertCondition)
+        }"
+        :selectedId="alertCondition.overtimeUnit"
         :disabled="policy.isDefault"
       />
     </div>
@@ -59,22 +63,27 @@
     <div class="inner-col">
       <div class="text">Severity</div>
       <BasicSelect
-        :list="severityList"
-        @item-selected="(val: string) => updateConditionProp('severity', val)"
-        :selectedId="condition.severity"
+        :list="severityOptions"
+        @item-selected="(val: string) => {
+          alertCondition.severity = val
+          $emit('updateCondition', alertCondition)
+        }"
+        :selectedId="alertCondition.severity"
         :disabled="policy.isDefault"
       />
     </div>
 
-    <div
-      class="inner-col"
-      v-if="condition.triggerEventType === SNMPEventType.SNMP_LINK_UP"
-    >
+    <div class="inner-col">
       <div class="text">Clear Event (optional)</div>
-      <BasicSelect
-        :list="clearEventTypeOptions"
-        @item-selected="(val: string) => updateConditionProp('clearEventType', val)"
-        :selectedId="condition.clearEventType"
+      <FeatherSelect
+        label=""
+        hideLabel
+        :options="clearEventDefinitionOptions"
+        text-prop="name"
+        @update:modelValue="$emit('updateCondition', alertCondition)"
+        v-model="alertCondition.clearEvent"
+        :disabled="policy.isDefault"
+        clear="Remove"
       />
     </div>
   </div>
@@ -82,18 +91,28 @@
 
 <script lang="ts" setup>
 import {EventCondition, Policy, Rule} from '@/types/policies'
-import {conditionLetters, SNMPEventType, Unknowns} from './monitoringPolicies.constants'
-import {Severity, TimeRangeUnit} from '@/types/graphql'
+import {conditionLetters, Unknowns} from './monitoringPolicies.constants'
+import { EventType, Severity, TimeRangeUnit } from '@/types/graphql'
+import { Ref } from 'vue'
+import { ISelectItemType } from '@featherds/select'
+import { useAlertEventDefinitionQueries } from '@/store/Queries/alertEventDefinitionQueries'
+import useSnackbar from '@/composables/useSnackbar'
+
+const { showSnackbar } = useSnackbar()
 
 const props = defineProps<{
   condition: EventCondition
   policy: Policy
   rule: Rule
+  eventType: EventType
   index: number
 }>()
 
+const alertEventDefinitionStore = useAlertEventDefinitionQueries()
+
 const emit = defineEmits(['updateCondition', 'deleteCondition'])
-const condition = ref<EventCondition>()
+
+const alertCondition = ref(props.condition)
 
 const durationOptions = [
   { id: Unknowns.UNKNOWN_UNIT, name: '' },
@@ -102,7 +121,7 @@ const durationOptions = [
   { id: TimeRangeUnit.Hour, name: 'Hour(s)' }
 ]
 
-const severityList = [
+const severityOptions = [
   { id: Severity.Critical, name: 'Critical' },
   { id: Severity.Major, name: 'Major' },
   { id: Severity.Minor, name: 'Minor' },
@@ -110,26 +129,22 @@ const severityList = [
   { id: Severity.Cleared, name: 'Cleared'}
 ]
 
-const clearEventTypeOptions = [
-  { id: Unknowns.UNKNOWN_EVENT, name: '' },
-  { id: SNMPEventType.SNMP_LINK_DOWN, name: 'SNMP Link Down'},
-]
+let clearEventDefinitionOptions: Ref<ISelectItemType[]> = ref([])
+let triggerEventDefinitionOptions: Ref<ISelectItemType[]> = ref([])
 
-const triggerEventTypeOptions = [
-  { id: SNMPEventType.SNMP_COLD_START, name: 'SNMP Cold Start' },
-  { id: SNMPEventType.SNMP_WARM_START, name: 'SNMP Warm Start' },
-  { id: SNMPEventType.SNMP_AUTHEN_FAILURE, name: 'SNMP Authentication Failure' },
-  { id: SNMPEventType.SNMP_LINK_DOWN, name: 'SNMP Link Down'},
-  { id: SNMPEventType.SNMP_LINK_UP, name: 'SNMP Link Up'},
-  { id: SNMPEventType.SNMP_EGP_DOWN, name: 'SNMP EGP Down'}
-]
+onMounted(async () => {
+  try {
+    const result = await alertEventDefinitionStore.listAlertEventDefinitions(props.eventType)
 
-watchEffect(() => (condition.value = props.condition))
+    clearEventDefinitionOptions.value = result.value?.listAlertEventDefinitions || []
+    triggerEventDefinitionOptions.value = result.value?.listAlertEventDefinitions || []
+  } catch (err) {
+    showSnackbar({
+      msg: 'Failed to load selectable events.'
+    })
+  }
+})
 
-const updateConditionProp = (property: string, value: number | string) => {
-  condition.value![property] = value
-  emit('updateCondition', condition)
-}
 </script>
 
 <style scoped lang="scss">

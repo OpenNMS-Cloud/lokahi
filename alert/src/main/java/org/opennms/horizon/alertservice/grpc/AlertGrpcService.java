@@ -58,7 +58,7 @@ import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.alertservice.service.AlertMapper;
+import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;

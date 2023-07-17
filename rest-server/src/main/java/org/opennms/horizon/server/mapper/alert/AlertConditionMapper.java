@@ -34,7 +34,7 @@ import org.opennms.horizon.server.model.alerts.AlertCondition;
 import org.opennms.horizon.alerts.proto.AlertConditionProto;
 
 @Mapper(componentModel = "spring",
-    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, uses = { AlertEventDefinitionMapper.class })
 public interface AlertConditionMapper {
     AlertCondition map(AlertConditionProto protoEvent);
     AlertConditionProto map(AlertCondition event);

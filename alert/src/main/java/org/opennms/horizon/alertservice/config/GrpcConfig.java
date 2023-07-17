@@ -88,20 +88,22 @@ public class GrpcConfig {
     private static PublicKey getKey(String key) {
         try{
             byte[] byteKey = Base64.decode(key.getBytes());
-            X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+            X509EncodedKeySpec x509PublicKey = new X509EncodedKeySpec(byteKey);
             KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePublic(X509publicKey);
-        } catch(Exception e) {
+            return kf.generatePublic(x509PublicKey);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Bean(destroyMethod = "stopServer")
     public GrpcServerManager startServer(AlertGrpcService alertGrpc,
-                                         MonitorPolicyGrpc policyGrpc, GrpcTagServiceImpl tagGrpc,
+                                         MonitorPolicyGrpc policyGrpc,
+                                         GrpcTagServiceImpl tagGrpc,
+                                         AlertEventDefinitionGrpcService alertEventDefinitionGrpc,
                                          AlertServerInterceptor interceptor) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
-        manager.startServer(alertGrpc, policyGrpc, tagGrpc);
+        manager.startServer(alertGrpc, policyGrpc, tagGrpc, alertEventDefinitionGrpc);
         return manager;
     }
 }

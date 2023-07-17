@@ -32,17 +32,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.alerts.proto.EventType;
-import org.opennms.horizon.alerts.proto.ManagedObjectType;
-import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
-import org.opennms.horizon.alerts.proto.PolicyRuleProto;
-import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alerts.proto.AlertConditionProto;
+import org.opennms.horizon.alerts.proto.*;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.repository.EventDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
+import org.opennms.horizon.alertservice.mapper.EventDefinitionMapper;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
-import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -60,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Disabled // For developer test only,
 // comment out  @PostUpdate @PostPersist on MonitorPolicyProducer
 // Also enable commented mapper impl in test
-public class MonitoringPolicyRepositoryTest {
+class MonitoringPolicyRepositoryTest {
 
     @Autowired
     private MonitorPolicyRepository repository;
@@ -68,9 +64,17 @@ public class MonitoringPolicyRepositoryTest {
     @Autowired
     private TagRepository tagRepository;
 
+    @Autowired
     private MonitorPolicyMapper monitorPolicyMapper;
 
+    @Autowired
+    private EventDefinitionRepository eventDefinitionRepository;
 
+    @Autowired
+    private EventDefinitionMapper eventDefinitionMapper;
+
+    private static final String COLD_START_TRAP_NAME = "SNMP Cold Start";
+    private static final String WARM_START_TRAP_NAME = "SNMP Warm Start";
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
         .withDatabaseName("alerts").withUsername("alerts")
@@ -95,14 +99,7 @@ public class MonitoringPolicyRepositoryTest {
 
     @Test
     @Transactional
-    public void testPersistence() {
-
-        monitorPolicyMapper = new MonitorPolicyMapperImpl();
-      /*  PolicyRuleMapper policyRuleMapper = new PolicyRuleMapperImpl();
-        TriggerEventMapper triggerEventMapper = new TriggerEventMapperImpl();
-        ReflectionTestUtils.setField(policyRuleMapper, "triggerEventMapper", triggerEventMapper);
-        ReflectionTestUtils.setField(monitorPolicyMapper, "policyRuleMapper", policyRuleMapper);*/
-
+    void testPersistence() {
         var policy = createNewPolicy(monitorPolicyMapper);
         MonitorPolicy policyCreated1 = repository.save(policy);
         Assertions.assertNotNull(policyCreated1);
@@ -137,13 +134,19 @@ public class MonitoringPolicyRepositoryTest {
     }
 
     MonitorPolicy createNewPolicy(MonitorPolicyMapper monitorPolicyMapper) {
+        AlertEventDefinitionProto coldStartTrap = eventDefinitionRepository
+            .findByEventTypeAndName(EventType.SNMP_TRAP, COLD_START_TRAP_NAME)
+            .map(eventDefinitionMapper::entityToProto).orElseThrow();
+        AlertEventDefinitionProto warmStartTrap = eventDefinitionRepository
+            .findByEventTypeAndName(EventType.SNMP_TRAP, WARM_START_TRAP_NAME)
+            .map(eventDefinitionMapper::entityToProto).orElseThrow();
         AlertConditionProto coldReboot = AlertConditionProto.newBuilder()
-            .setTriggerEventType(EventType.SNMP_Cold_Start)
+            .setTriggerEvent(coldStartTrap)
             .setCount(1)
             .setSeverity(Severity.CRITICAL)
             .build();
         AlertConditionProto warmReboot = AlertConditionProto.newBuilder()
-            .setTriggerEventType(EventType.SNMP_Warm_Start)
+            .setTriggerEvent(warmStartTrap)
             .setCount(1)
             .setSeverity(Severity.MAJOR)
             .build();

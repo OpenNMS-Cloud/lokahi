@@ -1,80 +1,45 @@
 <template>
-  <div
-    class="mp-card-alert-row"
-    v-if="condition.detectionMethod === DetectionMethodTypes.THRESHOLD"
-  >
-    <div class="subtitle">{{ conditionLetters[index] + '.' }}</div>
-    <div class="col tripple">Trigger when the metric is:</div>
-    <div class="col box">{{ condition.level }}</div>
-    <div class="col box half">{{ condition.percentage }}</div>
-    <div class="col">for any</div>
-    <div class="col box half">{{ condition.forAny }}</div>
-    <div class="col box double">{{ condition.durationUnit }}</div>
-    <div class="col double">during the last</div>
-    <div class="col box half">{{ condition.duringLast }}</div>
-    <div class="col box double">{{ condition.periodUnit }}</div>
-    <div class="col half">as</div>
-    <div
-      class="col severity double"
-      :class="`${condition.severity}-color`"
-    >
-      {{ condition.severity }}
-    </div>
-  </div>
-
-  <div
-    v-else
-    class="mp-card-alert-container"
-  >
-    <div
-      class="mp-card-alert-titles"
-      v-if="index === 0"
-    >
-      <div>&nbsp</div>
+  <div class="mp-card-alert-container">
+    <div class="mp-card-alert-titles">
+      <div>&nbsp;</div>
       <div class="col double">Trigger Event</div>
       <div class="col half">Count</div>
       <div class="col half">Over</div>
-      <div class="col double">&nbsp</div>
+      <div class="col double">&nbsp;</div>
       <div class="col double">Severity</div>
       <div class="col double">Clear Event</div>
     </div>
 
-    <div class="mp-card-alert-row">
+    <div class="mp-card-alert-row" v-for="(condition, index) in eventConditions" :key="index">
       <div class="subtitle">{{ conditionLetters[index] + '.' }}</div>
-      <div class="col subtitle double">{{ snakeToTitleCase(condition.triggerEventType as string) }}</div>
+      <div class="col subtitle double">{{ condition.triggerEvent?.name }}</div>
       <div class="col half box">{{ condition.count }}</div>
-      <div class="col half box">{{ condition.overtime || '&nbsp' }}</div>
+      <div class="col half box">{{ condition.overtime || '&nbsp;' }}</div>
       <div class="col box double">
         {{
           condition.overtime && condition.overtimeUnit !== Unknowns.UNKNOWN_UNIT
             ? snakeToTitleCase(condition.overtimeUnit as string)
-            : '&nbsp'
+            : '&nbsp;'
         }}
       </div>
-      <div
-        class="col severity double"
-        :class="`${condition.severity!.toLowerCase()}-color`"
-      >
+      <div class="col severity double"
+        :class="`${condition.severity!.toLowerCase()}-color`">
         {{ snakeToTitleCase(condition.severity) }}
       </div>
       <div class="col box double">
-        {{
-          condition.clearEventType !== Unknowns.UNKNOWN_EVENT ? snakeToTitleCase(condition.clearEventType as string) : '&nbsp;'
-        }}
+        {{ condition.clearEvent?.name || '&nbsp;' }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Condition, Rule } from '@/types/policies'
-import { conditionLetters, DetectionMethodTypes, Unknowns } from './monitoringPolicies.constants'
+import { EventCondition } from '@/types/policies'
+import { conditionLetters, Unknowns } from './monitoringPolicies.constants'
 import { snakeToTitleCase } from '../utils'
 
 defineProps<{
-  rule: Rule
-  condition: Condition
-  index: number
+  eventConditions: EventCondition[]
 }>()
 </script>
 

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="rellis" id="hs-0.1.0-alert-definitions">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="event_definition"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="event_definition">
+            <column name="id" type="bigint" autoIncrement="true"/>
+            <column name="event_uei" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reduction_key" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="clear_key" type="text" />
+            <column name="event_type" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="event_definition_pk" tableName="event_definition"/>
+
+        <createIndex tableName="event_definition" indexName="idx_event_definition_event_uei">
+            <column name="event_uei"/>
+        </createIndex>
+
+        <createIndex tableName="event_definition" indexName="idx_event_definition_event_type">
+            <column name="event_type"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

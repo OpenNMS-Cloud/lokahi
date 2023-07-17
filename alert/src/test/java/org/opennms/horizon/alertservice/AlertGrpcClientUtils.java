@@ -3,6 +3,7 @@ package org.opennms.horizon.alertservice;
 import java.util.concurrent.TimeUnit;
 
 import org.opennms.horizon.alert.tag.proto.TagServiceGrpc;
+import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 
@@ -19,6 +20,7 @@ public class AlertGrpcClientUtils {
     private AlertServiceGrpc.AlertServiceBlockingStub alertServiceStub;
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub policyStub;
     private TagServiceGrpc.TagServiceBlockingStub tagStub;
+    private AlertEventDefinitionServiceGrpc.AlertEventDefinitionServiceBlockingStub alertEventDefinitionStub;
 
     public AlertGrpcClientUtils() {
         initStubs();
@@ -41,6 +43,9 @@ public class AlertGrpcClientUtils {
         tagStub = TagServiceGrpc.newBlockingStub(managedChannel)
             .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS)
             .withInterceptors(dynamicTenantIdInterceptor);
+        alertEventDefinitionStub = AlertEventDefinitionServiceGrpc.newBlockingStub(managedChannel)
+            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS)
+            .withInterceptors(dynamicTenantIdInterceptor);
     }
 
     public void setTenantId(String tenantId) {
@@ -57,5 +62,9 @@ public class AlertGrpcClientUtils {
 
     public TagServiceGrpc.TagServiceBlockingStub getTagStub() {
         return tagStub;
+    }
+
+    public AlertEventDefinitionServiceGrpc.AlertEventDefinitionServiceBlockingStub getAlertEventDefinitionStub() {
+        return alertEventDefinitionStub;
     }
 }

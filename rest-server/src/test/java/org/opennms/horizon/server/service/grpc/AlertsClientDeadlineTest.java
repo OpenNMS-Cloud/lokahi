@@ -51,6 +51,7 @@ import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
+import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -71,7 +72,9 @@ public class AlertsClientDeadlineTest {
     @Rule
     public static final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
 
-    private static MonitorPolicyMapper mapper;
+    private static MonitorPolicyMapper monitorPolicyMapper;
+
+    private static AlertEventDefinitionMapper alertEventDefinitionMapper;
     private static AlertsClient client;
     private static MockServerInterceptor mockInterceptor;
     private static AlertServiceGrpc.AlertServiceImplBase mockAlertService;
@@ -99,8 +102,8 @@ public class AlertsClientDeadlineTest {
             .build()
             .start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("AlertsClientDeadlineTest").directExecutor().build());
-        mapper = Mappers.getMapper(MonitorPolicyMapper.class);
-        client = new AlertsClient(channel, 1000, mapper);
+        monitorPolicyMapper = Mappers.getMapper(MonitorPolicyMapper.class);
+        client = new AlertsClient(channel, 1000, monitorPolicyMapper, alertEventDefinitionMapper);
         client.initialStubs();
     }
 
@@ -112,7 +115,7 @@ public class AlertsClientDeadlineTest {
     }
 
     @Test
-    public void testListAlerts() {
+    void testListAlerts() {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<ListAlertsRequest> captor = ArgumentCaptor.forClass(ListAlertsRequest.class);

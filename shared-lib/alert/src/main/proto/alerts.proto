@@ -246,12 +246,12 @@ message PolicyRuleProto {
 message AlertConditionProto {
   int64 id = 1;
   string tenantId = 2;
-  EventType triggerEventType = 3;
+  AlertEventDefinitionProto triggerEvent = 3;
   int32 count = 4;
   int32 overtime = 5;
   OverTimeUnit overtimeUnit = 6;
   Severity severity = 7;
-  EventType clearEventType = 8;
+  AlertEventDefinitionProto clearEvent = 8;
 }
 
 enum OverTimeUnit {
@@ -259,16 +259,6 @@ enum OverTimeUnit {
   SECOND = 1;
   MINUTE = 2;
   HOUR = 3;
-}
-
-enum EventType {
-  UNKNOWN_EVENT = 0;
-  SNMP_Cold_Start = 1;
-  SNMP_Warm_Start = 2;
-  SNMP_Authen_Failure = 3;
-  SNMP_Link_Down = 4;
-  SNMP_Link_Up = 5;
-  SNMP_EGP_Down = 6;
 }
 
 message MonitorPolicyList {
@@ -280,4 +270,30 @@ service MonitorPolicyService {
   rpc listPolicies(google.protobuf.Empty) returns(MonitorPolicyList);
   rpc getPolicyById(google.protobuf.Int64Value) returns(MonitorPolicyProto);
   rpc getDefaultPolicy(google.protobuf.Empty) returns(MonitorPolicyProto);
+}
+
+message AlertEventDefinitionProto {
+  int64 id = 1;
+  string uei = 2;
+  string name = 3;
+  string reductionKey = 4;
+  string clearKey = 5;
+  EventType eventType = 6;
+}
+
+enum EventType {
+  INTERNAL = 0;
+  SNMP_TRAP = 1;
+}
+
+message ListAlertEventDefinitionsRequest {
+  EventType eventType = 1;
+}
+
+message ListAlertEventDefinitionsResponse {
+  repeated AlertEventDefinitionProto alertEventDefinitions = 1;
+}
+
+service AlertEventDefinitionService {
+  rpc listAlertEventDefinitions(ListAlertEventDefinitionsRequest) returns(ListAlertEventDefinitionsResponse);
 }

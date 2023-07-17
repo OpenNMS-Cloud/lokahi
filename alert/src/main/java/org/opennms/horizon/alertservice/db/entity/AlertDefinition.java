@@ -68,11 +68,6 @@ public class AlertDefinition implements Serializable {
     @Column(length=256, nullable=false)
     private String uei;
 
-    @OneToMany(mappedBy = "alertDefinition",
-        orphanRemoval = true,
-        cascade = CascadeType.ALL)
-    private List<EventMatch> match = new ArrayList<>();
-
     @Column(name = "reduction_key", nullable = false)
     private String reductionKey;
 

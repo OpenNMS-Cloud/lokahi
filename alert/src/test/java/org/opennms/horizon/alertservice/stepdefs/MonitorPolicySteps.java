@@ -40,7 +40,9 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Assertions;
 import org.junit.platform.commons.util.StringUtils;
 import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
 import org.opennms.horizon.alerts.proto.EventType;
+import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyList;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
@@ -59,7 +61,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -81,7 +85,10 @@ public class MonitorPolicySteps {
 
     private MonitorPolicyProto policy;
 
-    private EventType eventType;
+    private AlertEventDefinitionProto triggerEventDefinition;
+
+    private Map<String, AlertEventDefinitionProto> snmpTrapDefinitions;
+
 
     @Given("Monitoring policy kafka consumer")
     public void setupMonitoringPolicyTopic() {
@@ -128,18 +135,20 @@ public class MonitorPolicySteps {
 
     @Given("Alert condition data")
     public void alertConditionData(DataTable data) {
+        snmpTrapDefinitions = this.loadSnmpTrapDefinitions();
         List<Map<String, String>> mapList = data.asMaps();
         mapList.forEach(map -> {
-            AlertConditionProto.Builder eventBuilder = AlertConditionProto.newBuilder().setTriggerEventType(EventType.valueOf(map.get("trigger_event_type")))
+            AlertConditionProto.Builder eventBuilder = AlertConditionProto.newBuilder()
+                .setTriggerEvent(snmpTrapDefinitions.get(map.get("trigger_event_name")))
                 .setCount(Integer.parseInt(map.get("count")))
                 .setOvertime(Integer.parseInt(map.get("overtime")))
                 .setOvertimeUnit(OverTimeUnit.valueOf(map.get("overtime_unit").toUpperCase()))
                 .setSeverity(Severity.valueOf(map.get("severity").toUpperCase()));
-            String clearEventType = map.get("clear_event_type");
-            if(StringUtils.isNotBlank(clearEventType)) {
-                eventBuilder.setClearEventType(EventType.valueOf(clearEventType));
+            String clearEventType = map.get("clear_event_name");
+            if (StringUtils.isNotBlank(clearEventType)) {
+                eventBuilder.setClearEvent(snmpTrapDefinitions.get(clearEventType));
             }
-            eventType = eventBuilder.getTriggerEventType();
+            triggerEventDefinition = eventBuilder.getTriggerEvent();
             triggerBuilders.add(eventBuilder);
         });
     }
@@ -156,7 +165,9 @@ public class MonitorPolicySteps {
 
     @Then("Verify the new policy has been created")
     public void verifyTheNewPolicyHasBeenCreated() {
-        AlertConditionProto.Builder triggerBuilder = triggerBuilders.stream().filter(b -> b.getTriggerEventType().equals(eventType)).findFirst().get();
+        AlertConditionProto.Builder triggerBuilder = triggerBuilders.stream()
+            .filter(b -> b.getTriggerEvent().equals(triggerEventDefinition))
+            .findFirst().orElseThrow();
         MonitorPolicyProto policy = grpcClient.getPolicyStub().getPolicyById(Int64Value.of(policyId));
         assertThat(policy).isNotNull()
             .extracting("name", "memo", "tagsList")
@@ -165,9 +176,9 @@ public class MonitorPolicySteps {
             .extracting("name", "componentType")
             .containsExactly(Tuple.tuple(ruleBuilder.getName(), ruleBuilder.getComponentType()));
         assertThat(policy.getRulesList().get(0).getSnmpEventsList()).asList().hasSize(1)
-            .extracting("triggerEventType", "count", "overtime", "overtimeUnit", "severity", "clearEventType")
-            .containsExactly(Tuple.tuple(triggerBuilder.getTriggerEventType(), triggerBuilder.getCount(), triggerBuilder.getOvertime(),
-                triggerBuilder.getOvertimeUnit(), triggerBuilder.getSeverity(), EventType.UNKNOWN_EVENT));
+            .extracting("triggerEvent", "count", "overtime", "overtimeUnit", "severity", "clearEvent")
+            .containsExactly(Tuple.tuple(triggerBuilder.getTriggerEvent(), triggerBuilder.getCount(), triggerBuilder.getOvertime(),
+                triggerBuilder.getOvertimeUnit(), triggerBuilder.getSeverity(), triggerBuilder.getClearEvent()));
     }
 
     @Then("List policy should contain {int}")
@@ -190,10 +201,10 @@ public class MonitorPolicySteps {
         List<Map<String, String>> rows = dataTable.asMaps();
         List<AlertConditionProto> events = policy.getRulesList().get(0).getSnmpEventsList();
         assertThat(events).asList().hasSize(rows.size());
-        for(int i =0; i < events.size(); i++) {
+        for(int i = 0; i < events.size(); i++) {
             assertThat(events.get(i))
-                .extracting(e -> e.getTriggerEventType().name(), e -> e.getSeverity().name())
-                .containsExactly(rows.get(i).get("triggerEventType"), rows.get(i).get("severity"));
+                .extracting(e -> e.getTriggerEvent().getName(), e -> e.getSeverity().name())
+                .containsExactly(rows.get(i).get("triggerEventName"), rows.get(i).get("severity"));
         }
     }
 
@@ -276,4 +287,15 @@ public class MonitorPolicySteps {
         policyId = monitoringPolicy.getId();
     }
 
+    private Map<String, AlertEventDefinitionProto> loadSnmpTrapDefinitions() {
+        ListAlertEventDefinitionsRequest request = ListAlertEventDefinitionsRequest.newBuilder()
+            .setEventType(EventType.SNMP_TRAP)
+            .build();
+        List<AlertEventDefinitionProto> eventDefinitionsList = this.grpcClient.getAlertEventDefinitionStub()
+            .listAlertEventDefinitions(request)
+            .getAlertEventDefinitionsList();
+       return eventDefinitionsList.stream()
+            .collect(Collectors.toMap(
+            AlertEventDefinitionProto::getName, Function.identity()));
+    }
 }

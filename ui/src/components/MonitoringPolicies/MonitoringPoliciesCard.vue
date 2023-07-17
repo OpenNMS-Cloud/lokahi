@@ -54,13 +54,19 @@
 
       <div v-if="ruleStates[rule.id]">
         <div class="alert-title">Alert Conditions</div>
-        <MonitoringPoliciesCardAlertRow
-          v-for="(condition, index) in rule.alertConditions"
-          :key="condition.id"
-          :rule="rule"
-          :condition="condition"
-          :index="index"
+        <MonitoringPoliciesCardEventConditionTable
+          :eventConditions="rule.alertConditions"
         />
+<!--    TODO: Bring this back when thresholding is implemented
+          https://opennms.atlassian.net/browse/HS-750
+        <MonitoringPoliciesCardEventConditionTable
+          v-if="rule.detectionMethod === DetectionMethodTypes.EVENT"
+          :eventConditions="rule.alertConditions"
+        />
+        <MonitoringPoliciesCardThresholdConditionTable
+          v-else-if="rule.detectionMethod === DetectionMethodTypes.THRESHOLD"
+          :thresholdConditions="[]"
+        />-->
       </div>
     </div>
   </div>
@@ -72,6 +78,7 @@ import ExpandLess from '@featherds/icon/navigation/ExpandLess'
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import ContentCopy from '@featherds/icon/action/ContentCopy'
 import Edit from '@featherds/icon/action/Edit'
+import { DetectionMethodTypes } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
 
 const icons = markRaw({
   ExpandLess,

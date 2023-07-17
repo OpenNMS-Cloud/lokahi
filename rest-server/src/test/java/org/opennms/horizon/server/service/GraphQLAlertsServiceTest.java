@@ -29,6 +29,7 @@
 package org.opennms.horizon.server.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,12 +47,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
 import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.DeleteAlertResponse;
+import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.config.DataLoaderFactory;
+import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
 import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
@@ -78,6 +82,8 @@ public class GraphQLAlertsServiceTest {
     private TSDBMetricsService tsdbMetricsService;
     private final String accessToken = "test-token-12345";
     private Alert alerts1, alerts2;
+
+    private AlertEventDefinition alertEventDefinition1, alertEventDefinition2;
     @Captor
     private ArgumentCaptor<List<DataLoaderFactory.Key>> keyCaptor;
 
@@ -85,6 +91,8 @@ public class GraphQLAlertsServiceTest {
     public void setUp() {
         alerts1 = Alert.newBuilder().setDatabaseId(1).setTenantId("tenant1").setReductionKey("reductionKey1").setSeverity(Severity.CRITICAL).build();
         alerts2 = Alert.newBuilder().setDatabaseId(2).setTenantId("tenant2").setReductionKey("reductionKey2").setSeverity(Severity.CRITICAL).build();
+        alertEventDefinition1 = getAlertEventDefinition(1L, "snmpTrap1", "uei1", EventType.SNMP_TRAP, "reductionKey1", "clearKey1");
+        alertEventDefinition2 = getAlertEventDefinition(2L, "snmpTrap2", "uei2", EventType.SNMP_TRAP, "reductionKey2", "clearKey2");
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
@@ -242,8 +250,54 @@ public class GraphQLAlertsServiceTest {
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
+    @Test
+    void testListAlertEventDefinitions() throws JSONException {
+        doReturn(List.of(alertEventDefinition1, alertEventDefinition2))
+            .when(mockClient).listAlertEventDefinitions(EventType.SNMP_TRAP, accessToken);
+        String request = """
+            query {
+              listAlertEventDefinitions(eventType: SNMP_TRAP) {
+                id
+                name
+                uei
+                eventType
+                reductionKey
+                clearKey
+              }
+            }""";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.listAlertEventDefinitions.size()").isEqualTo(2)
+            .jsonPath("$.data.listAlertEventDefinitions[0].id").isEqualTo(alertEventDefinition1.getId())
+            .jsonPath("$.data.listAlertEventDefinitions[0].uei").isEqualTo(alertEventDefinition1.getUei())
+            .jsonPath("$.data.listAlertEventDefinitions[0].name").isEqualTo(alertEventDefinition1.getName())
+            .jsonPath("$.data.listAlertEventDefinitions[0].eventType").isEqualTo(alertEventDefinition1.getEventType().name())
+            .jsonPath("$.data.listAlertEventDefinitions[0].reductionKey").isEqualTo(alertEventDefinition1.getReductionKey())
+            .jsonPath("$.data.listAlertEventDefinitions[0].clearKey").isEqualTo(alertEventDefinition1.getClearKey());
+        verify(mockClient).listAlertEventDefinitions(EventType.SNMP_TRAP, accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+
     private String createPayload(String request) throws JSONException {
         return new JSONObject().put("query", request).toString();
+    }
+
+    private AlertEventDefinition getAlertEventDefinition(Long id, String snmpTrap, String uei, EventType eventType, String reductionKey, String clearKey) {
+        AlertEventDefinition alertEventDefinition = new AlertEventDefinition();
+        alertEventDefinition.setId(id);
+        alertEventDefinition.setName(snmpTrap);
+        alertEventDefinition.setUei(uei);
+        alertEventDefinition.setEventType(eventType);
+        alertEventDefinition.setReductionKey(reductionKey);
+        alertEventDefinition.setClearKey(clearKey);
+        return alertEventDefinition;
     }
 
 }

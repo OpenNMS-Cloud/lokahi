@@ -38,6 +38,7 @@ import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
+import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.alertservice.mapper.NodeMapper;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.inventory.dto.NodeDTO;

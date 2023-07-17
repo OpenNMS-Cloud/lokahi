@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.systemtests.steps.cloud;
 
-import com.codeborne.selenide.Selenide;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.cloud.CloudLeftPanelPage;
 
@@ -37,7 +36,6 @@ public class CloudLeftPanelSteps {
     @Then("Navigate to the {string} through the left panel")
     public void clickOnLeftPanelSection(String section) {
         CloudLeftPanelPage.clickOnPanelSection(section);
-        Selenide.refresh();
     }
 
     @Then("user sees the navigation panel for instance")

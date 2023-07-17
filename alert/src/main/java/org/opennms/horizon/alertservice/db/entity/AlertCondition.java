@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.alertservice.db.entity;
 
-import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.OverTimeUnit;
 import org.opennms.horizon.alerts.proto.Severity;
 import jakarta.persistence.CascadeType;
@@ -59,9 +58,9 @@ public class AlertCondition {
     @Column(name = "tenant_id", nullable = false)
     private String tenantId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "trigger_event_type")
-    private EventType triggerEventType;
+    @ManyToOne
+    @JoinColumn(name = "trigger_event_definition_id", referencedColumnName = "id")
+    private EventDefinition triggerEvent;
 
     @Column(name = "event_count")
     private Integer count;
@@ -76,9 +75,9 @@ public class AlertCondition {
     @Enumerated(EnumType.STRING)
     private Severity severity;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "clear_event_type")
-    private EventType clearEventType;
+    @ManyToOne
+    @JoinColumn(name = "clear_event_definition_id", referencedColumnName = "id")
+    private EventDefinition clearEvent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id", referencedColumnName = "id")

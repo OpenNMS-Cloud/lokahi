@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.alerts.proto.*;
 import org.opennms.horizon.server.model.alerts.AlertCondition;
+import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.PolicyRule;
 import org.opennms.horizon.alerts.proto.AlertConditionProto;
@@ -41,15 +42,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class MonitorPolicyMapperTest {
+class MonitorPolicyMapperTest {
     @Autowired
     private MonitorPolicyMapper mapper;
     private MonitorPolicyProto policyProto;
 
     @BeforeEach
     void before() {
+        AlertEventDefinitionProto triggerEvent = AlertEventDefinitionProto.newBuilder()
+            .setId(1L)
+            .setName("SNMP Warm Start")
+            .setEventType(EventType.SNMP_TRAP)
+            .build();
         AlertConditionProto alertCondition = AlertConditionProto.newBuilder()
-            .setTriggerEventType(EventType.SNMP_Warm_Start)
+            .setTriggerEvent(triggerEvent)
             .setCount(1)
             .setSeverity(Severity.CRITICAL)
             .build();
@@ -79,13 +85,22 @@ public class MonitorPolicyMapperTest {
             .containsExactly(policyProto.getName(), policyProto.getMemo(), policyProto.getTagsList().size(), policyProto.getRulesList().size(),
                 policyProto.getNotifyByEmail(), policyProto.getNotifyByPagerDuty(), policyProto.getNotifyByWebhooks(), policyProto.getNotifyInstruction());
         assertThat(policy.getTags()).isEqualTo(policyProto.getTagsList()); //the order doesn't matter here
-        assertThat(policy.getRules().get(0))
+
+        PolicyRule policyRule = policy.getRules().get(0);
+        assertThat(policyRule)
             .extracting(PolicyRule::getName, PolicyRule::getComponentType, r -> r.getAlertConditions().size())
             .containsExactly("test-rule", ManagedObjectType.NODE.name(), 1);
-        assertThat(policy.getRules().get(0).getAlertConditions().get(0))
-            .extracting(AlertCondition::getTriggerEventType, AlertCondition::getCount, AlertCondition::getOvertime, AlertCondition::getOvertimeUnit,
-                AlertCondition::getSeverity, AlertCondition::getClearEventType)
-            .containsExactly(EventType.SNMP_Warm_Start.name(), 1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), EventType.UNKNOWN_EVENT.name());
+
+        AlertCondition alertCondition = policyRule.getAlertConditions().get(0);
+        assertThat(alertCondition)
+            .extracting(AlertCondition::getCount, AlertCondition::getOvertime, AlertCondition::getOvertimeUnit,
+                AlertCondition::getSeverity, AlertCondition::getClearEvent)
+            .containsExactly(1, 0, OverTimeUnit.UNKNOWN_UNIT.name(), Severity.CRITICAL.name(), null);
+
+        AlertEventDefinition triggerEvent = alertCondition.getTriggerEvent();
+        assertThat(triggerEvent)
+            .extracting(AlertEventDefinition::getId, AlertEventDefinition::getName, AlertEventDefinition::getEventType)
+            .containsExactly(1L, "SNMP Warm Start", EventType.SNMP_TRAP);
     }
 
     @Test

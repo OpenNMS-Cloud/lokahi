@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-alert-condition-event-definition-columns" author="geraldhumphries">
+        <addColumn tableName="alert_condition">
+            <column name="trigger_event_definition_id" type="bigint"/>
+            <column name="clear_event_definition_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint constraintName="fk_alert_condition_trigger_event_definition_id"
+            baseTableName="alert_condition" baseColumnNames="trigger_event_definition_id" referencedTableName="event_definition" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="fk_alert_condition_clear_event_definition_id"
+            baseTableName="alert_condition" baseColumnNames="clear_event_definition_id" referencedTableName="event_definition" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet id="hs-0.1.0-migrate-to-event-definition-table-migration" author="geraldhumphries">
+        <sql>
+            UPDATE alert_condition ac
+            SET trigger_event_definition_id = ed.id
+            FROM event_definition ed
+            WHERE replace(ac.trigger_event_type, '_', ' ') = ed.name;
+            UPDATE alert_condition ac
+            SET clear_event_definition_id = ed.id
+            FROM event_definition ed
+            WHERE replace(ac.clear_event_type, '_', ' ') = ed.name;
+        </sql>
+
+        <addNotNullConstraint tableName="alert_condition" columnName="trigger_event_definition_id"/>
+    </changeSet>
+    <changeSet id="hs-0.1.0-migrate-to-event-definition-drop-old-columns" author="geraldhumphries">
+        <dropColumn tableName="alert_condition" columnName="trigger_event_type"/>
+        <dropColumn tableName="alert_condition" columnName="clear_event_type"/>
+    </changeSet>
+
+</databaseChangeLog>

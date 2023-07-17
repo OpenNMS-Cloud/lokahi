@@ -1,0 +1,7 @@
+id,event_uei,name,reduction_key,clear_key,event_type
+1,uei.opennms.org/generic/traps/SNMP_Cold_Start,SNMP Cold Start,%s:%s:%d,,SNMP_TRAP
+2,uei.opennms.org/generic/traps/SNMP_Warm_Start,SNMP Warm Start,%s:%s:%d,,SNMP_TRAP
+3,uei.opennms.org/generic/traps/SNMP_Authen_Failure,SNMP Authen Failure,%s:%s:%d,,SNMP_TRAP
+4,uei.opennms.org/generic/traps/SNMP_Link_Down,SNMP Link Down,%s:%s:%d,,SNMP_TRAP
+5,uei.opennms.org/generic/traps/SNMP_Link_Up,SNMP Link Up,%s:%s:%d,%s:uei.opennms.org/generic/traps/SNMP_Link_Down:%d,SNMP_TRAP
+6,uei.opennms.org/generic/traps/SNMP_EGP_Down,SNMP EGP Down,%s:%s:%d,,SNMP_TRAP

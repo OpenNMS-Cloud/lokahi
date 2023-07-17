@@ -717,19 +717,19 @@
     "@featherds/styles" "^0.12.16"
     vue "^3.1.0-0"
 
-"@featherds/autocomplete@0.12.20":
-  version "0.12.20"
-  resolved "https://registry.yarnpkg.com/@featherds/autocomplete/-/autocomplete-0.12.20.tgz#da773c92b333fe5529fbe37b44c211f34586f610"
-  integrity sha512-9YzcTDh2qSZ7LHWKoaONVRk9QJ4R5Sj9oU55L7hMS83W3ZxjBHpmOyMy8CoHtt9czQdAIjDn8O1Jeu8404iO8g==
+"@featherds/autocomplete@0.12.16":
+  version "0.12.16"
+  resolved "https://registry.yarnpkg.com/@featherds/autocomplete/-/autocomplete-0.12.16.tgz#3d0c4e1d9ba36edbc9467de36a40d9c5fc1a8d6b"
+  integrity sha512-2z7i1/5TNkkUlO5i8OrjrqNfzmUE0Qi7JW+W0dhTCUmMo5+9lkIKVOT7O0xEABzsn+4OGtAf1kjHeDWHQVAvmg==
   dependencies:
-    "@featherds/chips" "^0.12.20"
-    "@featherds/composables" "^0.12.20"
-    "@featherds/icon" "^0.12.20"
-    "@featherds/input-helper" "^0.12.20"
-    "@featherds/list" "^0.12.20"
-    "@featherds/menu" "^0.12.20"
-    "@featherds/styles" "^0.12.20"
-    "@featherds/utils" "^0.12.20"
+    "@featherds/chips" "^0.12.16"
+    "@featherds/composables" "^0.12.16"
+    "@featherds/icon" "^0.12.16"
+    "@featherds/input-helper" "^0.12.16"
+    "@featherds/list" "^0.12.16"
+    "@featherds/menu" "^0.12.16"
+    "@featherds/styles" "^0.12.16"
+    "@featherds/utils" "^0.12.16"
     vue "^3.1.0-0"
 
 "@featherds/badge@0.12.16":
@@ -780,7 +780,7 @@
     "@featherds/styles" "^0.12.16"
     vue "^3.1.0-0"
 
-"@featherds/chips@^0.12.20":
+"@featherds/chips@^0.12.16":
   version "0.12.20"
   resolved "https://registry.yarnpkg.com/@featherds/chips/-/chips-0.12.20.tgz#982dd451979b66e96729c7447270bcacb9b2d962"
   integrity sha512-EnOiZx6fiCXosHRZeBJLSomKPxxqfW0bhF8OxgzSevz3ONm+BsRVtVXxeuGXMar0xZT3u22sQ5JrNgciIY2F6w==
@@ -961,17 +961,6 @@
     "@featherds/utils" "^0.12.19"
     vue "^3.1.0-0"
 
-"@featherds/list@^0.12.20":
-  version "0.12.20"
-  resolved "https://registry.yarnpkg.com/@featherds/list/-/list-0.12.20.tgz#f63e5bc3c04c79bb8d21cf7948ca85082f06d93f"
-  integrity sha512-Z7a0dR17vK7C6oEifvL6QcoDDrqB0aawj0BcHhjPWRqpNAzTBDaZtspSO/mHucEXiU6Dp3h4hoVo3zYnvl/Elw==
-  dependencies:
-    "@featherds/ripple" "^0.12.20"
-    "@featherds/styles" "^0.12.20"
-    "@featherds/switch" "^0.12.20"
-    "@featherds/utils" "^0.12.20"
-    vue "^3.1.0-0"
-
 "@featherds/menu@^0.12.16", "@featherds/menu@^0.12.19":
   version "0.12.19"
   resolved "https://registry.yarnpkg.com/@featherds/menu/-/menu-0.12.19.tgz#a3319dcaf20b592d589809c513410e776c3954c9"
@@ -981,17 +970,6 @@
     "@featherds/ripple" "^0.12.19"
     "@featherds/styles" "^0.12.19"
     "@featherds/utils" "^0.12.19"
-    vue "^3.1.0-0"
-
-"@featherds/menu@^0.12.20":
-  version "0.12.20"
-  resolved "https://registry.yarnpkg.com/@featherds/menu/-/menu-0.12.20.tgz#32edfba78fe0b7e9d6c682307aa6e7702f003edf"
-  integrity sha512-VnA72fFVxtmtKOoUC6mjti6J7cC6gMMn/Z0IUYgPCFfHNZJ5wzDKnN8rY5xZbAWWbEiXo0ke+Jj0RJwhvuJlyA==
-  dependencies:
-    "@featherds/composables" "^0.12.20"
-    "@featherds/ripple" "^0.12.20"
-    "@featherds/styles" "^0.12.20"
-    "@featherds/utils" "^0.12.20"
     vue "^3.1.0-0"
 
 "@featherds/pagination@0.12.16":
@@ -1143,14 +1121,6 @@
   integrity sha512-rqGjp7LV9zr6m5R/1nvruiQkZ/PIL8ko7VKNWOWvn/fuDOtkhzeOA2ntQL86O/I8W2jWUTXd9dIW8HsoUezZ6Q==
   dependencies:
     "@featherds/styles" "^0.12.19"
-    vue "^3.1.0-0"
-
-"@featherds/switch@^0.12.20":
-  version "0.12.20"
-  resolved "https://registry.yarnpkg.com/@featherds/switch/-/switch-0.12.20.tgz#b79dc18539a3ded27a244439d01b9b83815ae2ff"
-  integrity sha512-hJkVEogbC5P82MywDW4XWrRPdZQUoXmqmc8cKwG5xwE0n43aiYl8hiIt7yk7OzVyjKTCD4QbvBmbDHC6kSsvhw==
-  dependencies:
-    "@featherds/styles" "^0.12.20"
     vue "^3.1.0-0"
 
 "@featherds/table@0.12.16":

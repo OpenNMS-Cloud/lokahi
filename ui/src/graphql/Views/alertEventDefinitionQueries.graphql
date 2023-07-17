@@ -1,0 +1,7 @@
+query ListAlertEventDefinitions($eventType: EventType) {
+    listAlertEventDefinitions(eventType: $eventType) {
+        id
+        name
+        eventType
+    }
+}

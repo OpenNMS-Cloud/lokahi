@@ -4,33 +4,39 @@
     <div
       v-if="index !== 0"
       class="delete"
-      @click="$emit('deleteCondition', condition.id)"
+      @click="$emit('deleteCondition', alertCondition.id)"
     >
       Delete condition {{ conditionLetters[index].toUpperCase() }}
     </div>
   </div>
   <div
     class="condition"
-    v-if="condition"
+    v-if="alertCondition"
   >
     <div class="inner-col">
       <div class="text">Trigger when metric is:</div>
       <BasicSelect
         :list="levelOptions"
-        @item-selected="(val:string) => updateConditionProp('level', val)"
-        :selectedId="condition.level"
+        @item-selected="(val: string) => {
+          alertCondition.level = val
+          $emit('updateCondition', alertCondition)
+        }"
+        :selectedId="alertCondition.level"
       />
     </div>
 
     <div class="inner-col slider">
       <div class="text">Severity threshold %</div>
       <Slider
-        v-model="condition.percentage"
+        v-model="alertCondition.percentage"
         :min="0"
         :max="100"
         :tooltipPosition="'bottom'"
         :format="(num: number) => num + '%'"
-        @change="(val:number) => updateConditionProp('percentage', val)"
+        @change="(val: number) => {
+          alertCondition.percentage = val
+          $emit('updateCondition', alertCondition)
+        }"
       />
     </div>
 
@@ -39,8 +45,8 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="(val) => updateConditionProp('forAny', val as string)"
-        v-model="condition.forAny"
+        @update:model-value="() => $emit('updateCondition', alertCondition)"
+        v-model="alertCondition.forAny"
       />
     </div>
 
@@ -48,8 +54,11 @@
       <div class="text">&nbsp;</div>
       <BasicSelect
         :list="durationOptions"
-        @item-selected="(val:number) => updateConditionProp('duration', val)"
-        :selectedId="condition.durationUnit"
+        @item-selected="(val: string) => {
+          alertCondition.durationUnit = val
+          $emit('updateCondition', alertCondition)
+        }"
+        :selectedId="alertCondition.durationUnit"
       />
     </div>
 
@@ -58,8 +67,8 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="(val) => updateConditionProp('period', val as string)"
-        v-model="condition.duringLast"
+        @update:model-value="() => $emit('updateCondition', alertCondition)"
+        v-model="alertCondition.duringLast"
       />
     </div>
 
@@ -67,8 +76,11 @@
       <div class="text">&nbsp;</div>
       <BasicSelect
         :list="durationOptions"
-        @item-selected="(val:number) => updateConditionProp('duringLast', val)"
-        :selectedId="condition.periodUnit"
+        @item-selected="(val: string) => {
+          alertCondition.periodUnit = val
+          $emit('updateCondition', alertCondition)
+        }"
+        :selectedId="alertCondition.periodUnit"
       />
     </div>
 
@@ -76,8 +88,11 @@
       <div class="text">As</div>
       <BasicSelect
         :list="severityList"
-        @item-selected="(val:string) => updateConditionProp('severity', val)"
-        :selectedId="condition.severity"
+        @item-selected="(val: string) => {
+          alertCondition.severity = val
+          $emit('updateCondition', alertCondition)
+        }"
+        :selectedId="alertCondition.severity"
       />
     </div>
   </div>
@@ -95,7 +110,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['updateCondition', 'deleteCondition'])
-const condition = ref<ThresholdCondition>()
+const alertCondition = ref<ThresholdCondition>(props.condition)
 
 const levelOptions = [
   { id: ThresholdLevels.ABOVE, name: 'above' },
@@ -118,12 +133,7 @@ const severityList = [
   { id: Severity.Warning, name: 'Warning' }
 ]
 
-watchEffect(() => (condition.value = props.condition))
-
-const updateConditionProp = (property: string, value: number | string) => {
-  condition.value![property] = value
-  emit('updateCondition', condition)
-}
+watchEffect(() => (alertCondition.value = props.condition))
 </script>
 
 <style scoped lang="scss">

@@ -26,39 +26,22 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.service;
-
-import java.util.Date;
+package org.opennms.horizon.alertservice.mapper;
 
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
-import org.mapstruct.factory.Mappers;
-import org.opennms.horizon.alertservice.db.entity.Alert;
+import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
+import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 
-@Mapper(componentModel = "spring",
-    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
-    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-public interface AlertMapper {
+@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
+public interface EventDefinitionMapper {
 
-    AlertMapper INSTANCE = Mappers.getMapper( AlertMapper.class );
+    @Mapping(source = "eventUei", target = "uei")
+    AlertEventDefinitionProto entityToProto(EventDefinition entity);
 
-    @Mappings({
-        @Mapping(target = "databaseId", source = "id"),
-        @Mapping(target = "uei", source = "eventUei"),
-        @Mapping(target = "lastUpdateTimeMs", source = "lastEventTime"),
-        @Mapping(target = "isAcknowledged", expression = "java(alert.getAcknowledgedByUser() != null ? true : false)"),
-        @Mapping(target = "ackUser", source = "acknowledgedByUser"),
-        @Mapping(target = "ackTimeMs", source = "acknowledgedAt"),
-        @Mapping(target = "monitoringPolicyIdList", source = "monitoringPolicyId"),
-        @Mapping(target = "label", source = "alertCondition.triggerEventType"),
-        @Mapping(target = "nodeName", source = "nodeLabel")
-    })
-    org.opennms.horizon.alerts.proto.Alert toProto(Alert alert);
-
-    default long mapDateToLongMs(Date value) {
-        return value == null ? 0L : value.getTime();
-    }
+    @Mapping(source = "uei", target = "eventUei")
+    EventDefinition protoToEntity(AlertEventDefinitionProto entity);
 }

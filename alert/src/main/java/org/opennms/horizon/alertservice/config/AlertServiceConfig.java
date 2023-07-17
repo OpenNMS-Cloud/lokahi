@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.alertservice.config;
 
-import org.opennms.horizon.alertservice.service.AlertMapper;
+import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

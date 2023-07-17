@@ -12,11 +12,11 @@ Feature: Node operation feature
     Given Monitor policy name "tenantA-policy" and memo "tenantA policy"
     Given Policy Rule name "tenantA-rule" and componentType "NODE"
     And Alert condition data
-      | trigger_event_type | count | overtime | overtime_unit | severity | clear_event_type |
-      | SNMP_Link_Down     | 1     | 0        | MINUTE        | MINOR    |                  |
-      | SNMP_Link_Up       | 1     | 0        | MINUTE        | CLEARED  | SNMP_Link_Down   |
-      | SNMP_Cold_Start    | 1     | 0        | MINUTE        | MAJOR    |                  |
-      | SNMP_Warm_Start    | 1     | 0        | MINUTE        | CRITICAL |                  |
+      | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
+      | SNMP Link Down     | 1     | 0        | MINUTE        | MINOR    |                  |
+      | SNMP Link Up       | 1     | 0        | MINUTE        | CLEARED  | SNMP Link Down   |
+      | SNMP Cold Start    | 1     | 0        | MINUTE        | MAJOR    |                  |
+      | SNMP Warm Start    | 1     | 0        | MINUTE        | CRITICAL |                  |
     And Create a new policy with give parameters
     Given Tenant id "tenant-3"
     And Create a new policy with give parameters
@@ -32,13 +32,13 @@ Feature: Node operation feature
     Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "tenant-1" with node 1
     Then List alerts for tenant "tenant-1", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | alerts.size() == 2                      |
-      | alerts[0].label == SNMP_Cold_Start      |
+      | alerts[0].label == SNMP Cold Start      |
       | alerts[0].nodeName == BLANK             |
-      | alerts[1].label == SNMP_Link_Down       |
+      | alerts[1].label == SNMP Link Down       |
       | alerts[1].nodeName == first             |
     Then List alerts for tenant "tenant-1" and label "first", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | alerts.size() == 1                      |
-      | alerts[0].label == SNMP_Link_Down       |
+      | alerts[0].label == SNMP Link Down       |
       | alerts[0].nodeName == first             |
 
   Scenario: Update node when receive new message
@@ -56,7 +56,7 @@ Feature: Node operation feature
     Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "tenant-3" with node 1
     Then List alerts for tenant "tenant-3", with timeout 5000ms, until JSON response matches the following JSON path expressions
       | alerts.size() == 2                      |
-      | alerts[0].label == SNMP_Cold_Start      |
+      | alerts[0].label == SNMP Cold Start      |
       | alerts[0].nodeName == BLANK             |
-      | alerts[1].label == SNMP_Link_Down       |
+      | alerts[1].label == SNMP Link Down       |
       | alerts[1].nodeName == third             |

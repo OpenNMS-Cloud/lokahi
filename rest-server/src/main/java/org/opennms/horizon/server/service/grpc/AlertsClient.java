@@ -27,50 +27,56 @@
  *******************************************************************************/
 package org.opennms.horizon.server.service.grpc;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.Timestamp;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
 import org.opennms.horizon.alerts.proto.AlertRequest;
 import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.CountAlertResponse;
 import org.opennms.horizon.alerts.proto.DeleteAlertResponse;
+import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.Filter;
+import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TimeRangeFilter;
+import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
+import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.Timestamp;
-
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import lombok.RequiredArgsConstructor;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class AlertsClient {
     private final ManagedChannel channel;
     private final long deadline;
     private final MonitorPolicyMapper policyMapper;
+    private final AlertEventDefinitionMapper alertEventDefinitionMapper;
 
     private AlertServiceGrpc.AlertServiceBlockingStub alertStub;
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub policyStub;
+    private AlertEventDefinitionServiceGrpc.AlertEventDefinitionServiceBlockingStub alertEventDefinitionStub;
 
     protected void initialStubs() {
         alertStub = AlertServiceGrpc.newBlockingStub(channel);
         policyStub = MonitorPolicyServiceGrpc.newBlockingStub(channel);
+        alertEventDefinitionStub = AlertEventDefinitionServiceGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() {
@@ -206,12 +212,24 @@ public class AlertsClient {
             .getPolicyById(Int64Value.of(id)));
     }
 
+    public List<AlertEventDefinition> listAlertEventDefinitions(EventType eventType, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+
+        var request = ListAlertEventDefinitionsRequest.newBuilder().setEventType(eventType).build();
+
+        return alertEventDefinitionStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .listAlertEventDefinitions(request).getAlertEventDefinitionsList().stream().map(alertEventDefinitionMapper::protoToAlertEventDefinition).toList();
+    }
+
     public static long getStartTime(TimeRange timeRange) {
         LocalDate today = LocalDate.now();
         return switch (timeRange) {
             case TODAY -> today.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
             case SEVEN_DAYS -> today.minusDays(6).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
-            case LAST_24_HOURS -> Instant.now().minusSeconds(24 * 60 * 60).getEpochSecond();
+            case LAST_24_HOURS -> Instant.now().minusSeconds(24L * 60L * 60L).getEpochSecond();
             case ALL -> 0;
             default -> throw new IllegalArgumentException("Invalid time range: " + timeRange);
         };
@@ -229,4 +247,5 @@ public class AlertsClient {
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getDefaultPolicy(Empty.getDefaultInstance()));
     }
+
 }

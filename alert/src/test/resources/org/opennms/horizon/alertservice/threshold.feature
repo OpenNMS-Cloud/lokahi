@@ -9,11 +9,11 @@ Feature: Alert Service Thresholding Functionality
     Given Monitor policy name "thresholdTenantA-policy" and memo "thresholdTenantA policy"
     Given Policy Rule name "thresholdTenantA-rule" and componentType "NODE"
     And Alert condition data
-      | trigger_event_type | count | overtime | overtime_unit | severity | clear_event_type |
-      | SNMP_Link_Down     | 2     | 0        | MINUTE        | MAJOR    |                  |
-      | SNMP_Link_Up       | 1     | 0        | MINUTE        | CLEARED  | SNMP_Link_Down   |
-      | SNMP_Cold_Start    | 3     | 10       | MINUTE        | MAJOR    |                  |
-      | SNMP_Warm_Start    | 1     | 0        | MINUTE        | CLEARED  |                  |
+      | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
+      | SNMP Link Down     | 2     | 0        | MINUTE        | MAJOR    |                  |
+      | SNMP Link Up       | 1     | 0        | MINUTE        | CLEARED  | SNMP Link Down   |
+      | SNMP Cold Start    | 3     | 10       | MINUTE        | MAJOR    |                  |
+      | SNMP Warm Start    | 1     | 0        | MINUTE        | CLEARED  |                  |
     And Create a new policy with give parameters
     Given Tenant id "thresholdTenantF"
     And Create a new policy with give parameters

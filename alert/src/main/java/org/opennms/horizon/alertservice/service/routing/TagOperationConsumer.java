@@ -52,7 +52,6 @@ public class TagOperationConsumer {
         try {
             TagOperationList operationList = TagOperationList.parseFrom(data);
             tagService.insertOrUpdateTags(operationList);
-            log.info("Received tag operation {}", operationList);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
         }

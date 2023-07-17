@@ -73,8 +73,6 @@
                             <textarea :spellcheck="false" ref="textareaRef" @click="highlightStrip"
                                 @input="(e) => updateDockerCommand((e.target as HTMLTextAreaElement)?.value || '')"
                                 :value="welcomeStore.dockerCmd()" class="styled-like-pre" />
-                            <div @click="closeAndHighlight" ref="highlighterRef" class="highlighted-docker"
-                                v-html="highlightedDocker" />
                         </div>
                         <div class="password-right">Password:&nbsp;{{ welcomeStore.minionCert.password }}
                             <span v-if="passwordCopyEnabled">
@@ -129,8 +127,6 @@ import { FeatherSpinner } from '@featherds/progress'
 import { ref } from 'vue';
 
 const textareaRef = ref();
-const highlighterRef = ref();
-const closed = ref(false);
 const copied = ref(false);
 const passwordCopyEnabled = ref(false);
 
@@ -159,15 +155,8 @@ onUnmounted(() => {
 const updateScrollHeight = () => {
     textareaRef.value.style = `height: 0px;`
     textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 20 + 'px'};`
-    if (!closed.value) {
-        highlighterRef.value.style = `width:${Number(textareaRef.value.getBoundingClientRect().width)}px;height:${Number(textareaRef.value.getBoundingClientRect().height)}px;`
-    }
 }
-const closeAndHighlight = () => {
-    closed.value = true;
-    highlighterRef.value.classList.add('highlight-hidden');
-    highlightStrip();
-}
+
 const highlightStrip = () => {
 
     textareaRef.value.classList.add('visible');
@@ -401,7 +390,6 @@ const { isDark } = useTheme();
     resize: none;
     width: 100%;
     outline: 0;
-    opacity: 0;
     transition: none;
 
     &::selection {

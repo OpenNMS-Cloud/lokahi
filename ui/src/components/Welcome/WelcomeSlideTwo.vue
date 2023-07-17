@@ -75,7 +75,14 @@
                             <div @click="closeAndHighlight" ref="highlighterRef" class="highlighted-docker"
                                 v-html="highlightedDocker" />
                         </div>
-                        <div class="password-right">Password:{{ welcomeStore.minionCert.password }}</div>
+                        <div class="password-right">Password:&nbsp;{{ welcomeStore.minionCert.password }}
+                            <span v-if="passwordCopyEnabled">
+                                <FeatherButton icon="CopyIcon" @click="copyPassword" v-if="!copied">
+                                    <FeatherIcon :icon="CopyIcon"></FeatherIcon>
+                                </FeatherButton>
+                                <FeatherIcon class="copy-icon" :icon="CheckIcon" v-if="copied"></FeatherIcon>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -123,6 +130,9 @@ import { ref } from 'vue';
 const textareaRef = ref();
 const highlighterRef = ref();
 const closed = ref(false);
+const copied = ref(false);
+const passwordCopyEnabled = ref(false);
+
 defineProps({
     visible: { type: Boolean, default: false }
 })
@@ -166,6 +176,23 @@ const highlightStrip = () => {
     if (indexOf >= 0) {
         textareaRef.value.focus();
         textareaRef.value.setSelectionRange(indexOf, indexOf + stringToHighlight.length);
+    }
+}
+/**
+ * This is not currently enabled. There is a ref above called passwordCopyEnabled that
+ * is set to false (set it to true to enable). I have a feeling this feature will be 
+ * requested in the future, and I had a few minutes this morning to code it up and 
+ * prep it for that probable request. It looked a little strange to me because of 
+ * the duplicated copy icons, which is why I left it disabled. 
+ * I imagine UX will have a better way to visualize this in the future.
+ */
+const copyPassword = () => {
+    if (welcomeStore.minionCert.password) {
+        navigator.clipboard.writeText(welcomeStore.minionCert.password)
+        copied.value = true;
+        setTimeout(() => {
+            copied.value = false;
+        }, 1500)
     }
 }
 const welcomeStore = useWelcomeStore()
@@ -351,9 +378,20 @@ const { isDark } = useTheme();
 .password-right {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     @include caption();
     color: var(--feather-shade-2);
     padding: var(--feather-spacing-xs) var(--feather-spacing-s);
+
+    span :deep(.btn) {
+        font-size: 15px;
+        margin-left: var(--feather-spacing-s);
+    }
+
+    span :deep(.btn svg) {
+        width: 25px;
+        height: 25px;
+    }
 }
 
 .styled-like-pre {
@@ -428,5 +466,10 @@ const { isDark } = useTheme();
         opacity: 0;
         display: none;
     }
+}
+
+.copy-icon {
+    font-size: 36px;
+    margin-left: var(--feather-spacing-s);
 }
 </style>

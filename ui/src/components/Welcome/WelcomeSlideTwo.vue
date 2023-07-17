@@ -45,8 +45,9 @@
                         </div>
                     </div>
                     <div class="welcome-slide-table-body">
-                        <strong>File Path: </strong>
-                        <span>/tmp/default-certificate.p12</span>
+                        <!-- 
+                            <strong>File Path: </strong>
+                        <span>/tmp/default-certificate.p12</span> -->
                     </div>
                 </div>
             </div>

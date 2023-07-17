@@ -440,7 +440,6 @@ const { isDark } = useTheme();
     color: var(--feather-primary-text-on-surface);
     text-rendering: optimizeLegibility;
     -moz-osx-font-smoothing: grayscale;
-    background-color: transparent;
     border: none;
     resize: none;
     width: 92%;

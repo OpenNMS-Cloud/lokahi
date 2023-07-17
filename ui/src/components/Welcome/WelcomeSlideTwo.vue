@@ -9,8 +9,8 @@
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
                 <h1 data-test="welcome-slide-two-title">Minion Installation</h1>
-                <p>An OpenNMS Minion is a virtual or hardware device for distributed network monitoring. Your network must
-                    include at least one Minion to use Cloud.</p>
+                <p>The Minion installation can take up to 10 minutes. You will download an encrypted certificate for the
+                    Minion and run a Docker command.</p>
             </div>
             <div class="welcome-slide-two-location-callout">
                 <div class="welcome-slide-two-location-callout-left" data-test="welcome-slide-two-callout">

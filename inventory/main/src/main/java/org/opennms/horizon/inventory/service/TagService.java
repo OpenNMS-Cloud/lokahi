@@ -58,6 +58,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -187,6 +188,8 @@ public class TagService {
             return getTagsByActiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
+        } else if (entityId.hasMonitoringPolicyId()) {
+            return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
         }
@@ -426,6 +429,28 @@ public class TagService {
             .stream().map(mapper::modelToDTO).toList();
     }
 
+    private List<TagDTO> getTagsByMonitoryPolicyId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
+        TagEntityIdDTO entityId = listParams.getEntityId();
+        long monitoringPolicyId = entityId.getMonitoringPolicyId();
+        List<Tag> tagList = new ArrayList<>();
+        if (listParams.hasParams()) {
+            TagListParamsDTO params = listParams.getParams();
+            String searchTerm = params.getSearchTerm();
+            if (StringUtils.isNotEmpty(searchTerm)) {
+                tagList = repository.findByTenantIdAndNameLike(tenantId, searchTerm);
+            }
+        } else {
+            tagList = repository.findByTenantId(tenantId);
+        }
+        if (tagList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return tagList.stream().filter(tag -> tag.getMonitorPolicyIds().contains(monitoringPolicyId)).map(mapper::modelToDTO)
+            .toList();
+    }
+
+
+
     @Transactional
     public void insertOrUpdateTags(TagOperationList list) {
         list.getTagsList().forEach(tagOp -> {
@@ -443,16 +468,22 @@ public class TagService {
                                     tag.getMonitorPolicyIds().add(id);
                                 }
                             });
-                            repository.save(tag);
+                            var persisted = repository.save(tag);
                             log.info("added monitoring policyIds with data {} monitoring policy id size from {} to {}",
-                                tagOp, oldSize, tag.getMonitorPolicyIds().size());
+                                tagOp, oldSize, persisted.getMonitorPolicyIds().size());
+                            for (final var node: persisted.getNodes()) {
+                                this.nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
+                            }
                         }, () -> {
                             Tag tag = new Tag();
                             tag.setName(tagOp.getTagName());
                             tag.setTenantId(tagOp.getTenantId());
                             tag.setMonitorPolicyIds(tagOp.getMonitoringPolicyIdList());
-                            repository.save(tag);
+                            var persisted = repository.save(tag);
                             log.info("inserted new tag with data {}", tagOp);
+                            for (final var node: persisted.getNodes()) {
+                                this.nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
+                            }
                         });
                 }
                 case REMOVE_TAG -> {

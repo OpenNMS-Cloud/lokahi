@@ -12,7 +12,6 @@ Feature: Monitored State
     Given [PassiveDiscovery] A clean system
     Given [ActiveDiscovery] A clean system
 
- #@ignore
   Scenario: Discover a node so that it's monitored state is "MONITORED"
     Given Passive discovery tags "my-new-tag"
     Given A new monitoring policy with tags "my-new-tag"
@@ -21,7 +20,6 @@ Feature: Monitored State
 
     Then The monitored state will be "MONITORED"
 
-  #@ignore
   Scenario: Change a "MONITORED" node so that it's state becomes "UNMONITORED"
     Given Passive discovery tags "my-new-tag"
     Given A new monitoring policy with tags "my-new-tag"
@@ -32,7 +30,6 @@ Feature: Monitored State
 
     Then The monitored state will be "UNMONITORED"
 
-  #@ignore
   Scenario: Change a "DETECTED" node so that it's state becomes "MONITORED"
     Given Passive discovery tags "my-new-tag"
     Given A new node with tags "my-new-tag"
@@ -42,7 +39,6 @@ Feature: Monitored State
 
     Then The monitored state will be "MONITORED"
 
-  #@ignore
   Scenario: Assign a default tag to node, node becomes monitored
     Given A new node with tags "default"
     Then The monitored state will be "MONITORED"

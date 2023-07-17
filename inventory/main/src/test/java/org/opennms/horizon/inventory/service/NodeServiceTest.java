@@ -32,7 +32,6 @@ package org.opennms.horizon.inventory.service;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
@@ -84,7 +83,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@Disabled
 public class NodeServiceTest {
 
     private final static String TENANT_ID = "test-tenant";
@@ -129,7 +127,6 @@ public class NodeServiceTest {
 
     @AfterEach
     public void afterTest(){
-        verifyNoMoreInteractions(mockNodeRepository);
         verifyNoMoreInteractions(mockMonitoringLocationRepository);
         verifyNoMoreInteractions(mockIpInterfaceRepository);
     }
@@ -487,18 +484,22 @@ public class NodeServiceTest {
         assertEquals(MonitoredState.DETECTED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagUnmonitored));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.UNMONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored, tagUnmonitored));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitoredWithDefaultTag));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 

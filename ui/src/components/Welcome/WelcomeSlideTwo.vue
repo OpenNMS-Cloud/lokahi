@@ -29,7 +29,7 @@
                     <div class="welcome-slide-table-header">
                         <div>Encrypted Minion Certificate</div>
                         <div>
-                            <FeatherButton text @click="welcomeStore.downloadClick" v-if="!welcomeStore.downloading"
+                            <FeatherButton text @click="localDownloadHandler" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
                                 <template #icon>
                                     <FeatherIcon :icon="welcomeStore.downloaded ? CheckIcon : DownloadIcon" />
@@ -151,14 +151,26 @@ onMounted(() => {
 })
 onUnmounted(() => {
     window.removeEventListener('resize', updateScrollHeight);
+    const welcomeWrapper = document.querySelector('.welcome-wrapper');
+    if (welcomeWrapper) {
+        welcomeWrapper.removeEventListener('click', highlightStrip);
+    }
 })
+
 const updateScrollHeight = () => {
     textareaRef.value.style = `height: 0px;`
     textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 20 + 'px'};`
 }
 
-const highlightStrip = () => {
+const localDownloadHandler = () => {
+    welcomeStore.downloadClick();
+    const welcomeWrapper = document.querySelector('.welcome-wrapper');
+    if (welcomeWrapper) {
+        welcomeWrapper.addEventListener('click', highlightStrip);
+    }
+}
 
+const highlightStrip = () => {
     textareaRef.value.classList.add('visible');
     const stringToHighlight = 'PATH_TO_DOWNLOADED_FILE';
     const existingCommand = welcomeStore.dockerCmd();
@@ -168,6 +180,7 @@ const highlightStrip = () => {
         textareaRef.value.setSelectionRange(indexOf, indexOf + stringToHighlight.length);
     }
 }
+
 /**
  * This is not currently enabled. There is a ref above called passwordCopyEnabled that
  * is set to false (set it to true to enable). I have a feeling this feature will be 

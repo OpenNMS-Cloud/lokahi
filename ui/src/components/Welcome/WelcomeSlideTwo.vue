@@ -45,9 +45,6 @@
                         </div>
                     </div>
                     <div class="welcome-slide-table-body">
-                        <!-- 
-                            <strong>File Path: </strong>
-                        <span>/tmp/default-certificate.p12</span> -->
                     </div>
                 </div>
             </div>
@@ -133,13 +130,7 @@ const passwordCopyEnabled = ref(false);
 defineProps({
     visible: { type: Boolean, default: false }
 })
-const highlightedDocker = computed(() => {
-    const existingCommand = welcomeStore.dockerCmd();
-    const stringToHighlight = 'PATH_TO_DOWNLOADED_FILE';
-    const regexToHighlight = new RegExp(stringToHighlight, 'i')
-    const content = existingCommand.replace(regexToHighlight, '<span style="word-break:break-all;background-color:var(--feather-primary);color:var(--feather-state-color-on-color)">$&</span>')
-    return content;
-})
+
 const updateDockerCommand = async (newCommand: string) => {
     welcomeStore.updateDockerCommand(newCommand)
     await nextTick();
@@ -422,51 +413,6 @@ const { isDark } = useTheme();
 
 .pre-wrap {
     white-space: pre-wrap;
-}
-
-.highlighted-content {
-    display: inline-block;
-    background-color: blue;
-}
-
-.highlighted-docker {
-    background-color: transparent;
-    position: absolute;
-    font-family: monospace;
-    font-size: 13px;
-    line-height: normal;
-    font-weight: var(--feather-body-small-font-weight);
-    text-transform: var(--feather-body-small-text-transform);
-    font-style: var(--feather-body-small-font-style);
-    color: var(--feather-primary-text-on-surface);
-    text-rendering: optimizeLegibility;
-    -moz-osx-font-smoothing: grayscale;
-    border: none;
-    resize: none;
-    width: 92%;
-    outline: 0;
-    box-sizing: border-box;
-    padding-top: 3px;
-    padding-left: 2px;
-    padding-right: 2px;
-    letter-spacing: normal;
-    word-break: break-word;
-    opacity: 1;
-    top: 12px;
-    transition: none;
-
-    @media (min-width:642px) {
-        padding-right: 25px;
-    }
-
-    @media (min-width:500px) and (max-width:547px) {
-        padding-right: 50px;
-    }
-
-    &.highlight-hidden {
-        opacity: 0;
-        display: none;
-    }
 }
 
 .copy-icon {

@@ -14,7 +14,7 @@ import { useDiscoveryQueries } from '../Queries/discoveryQueries'
 import { REGEX_EXPRESSIONS } from '@/components/Discovery/discovery.constants'
 import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
-import { CSSProperties, ComputedRef, StyleValue } from 'vue'
+import { ComputedRef } from 'vue'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
 
 interface WelcomeStoreState {
@@ -53,7 +53,6 @@ interface WelcomeStoreState {
   slide: number
   slideOneCollapseVisible: boolean
   slideThreeDisabled: boolean
-  textStyle: CSSProperties,
   validateOnKeyup: boolean
 }
 
@@ -102,7 +101,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     slideOneCollapseVisible: true,
     slideThreeDisabled: true,
     showOnboarding: false,
-    textStyle: {},
     validateOnKeyup: false
   } as WelcomeStoreState),
   actions: {

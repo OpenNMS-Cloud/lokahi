@@ -33,7 +33,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -53,7 +52,6 @@ public class TagPublishConsumer {
         try {
             TagOperationList operationList = TagOperationList.parseFrom(data);
             tagService.insertOrUpdateTags(operationList);
-            var tags = operationList.getTagsList().stream().map(TagOperationProto::getTagName).toList();
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
         }

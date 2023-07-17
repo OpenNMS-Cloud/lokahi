@@ -66,7 +66,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 List<TagDTO> tags = service.addTags(tenantId, request);
-                request.getEntityIdsList().forEach((entityIdDTO) -> {
+                request.getEntityIdsList().forEach(entityIdDTO -> {
                     if (entityIdDTO.hasNodeId()) {
                         var nodeId = entityIdDTO.getNodeId();
                         nodeService.updateNodeMonitoredState(nodeId, tenantId);
@@ -99,7 +99,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 service.removeTags(tenantId, request);
-                request.getEntityIdsList().forEach((entityIdDTO) -> {
+                request.getEntityIdsList().forEach(entityIdDTO -> {
                     if (entityIdDTO.hasNodeId()) {
                         var nodeId = entityIdDTO.getNodeId();
                         nodeService.updateNodeMonitoredState(nodeId, tenantId);

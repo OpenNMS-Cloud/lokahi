@@ -83,10 +83,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NodeService {
 
+    private final static String DEFAULT_TAG = "default";
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("delete-node-task-publish-%d")
         .build();
-    private final static String DEFAULT_TAG = "default";
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
@@ -269,9 +269,7 @@ public class NodeService {
         }
         var node = optional.get();
         final var monitoredState = monitored ? MonitoredState.MONITORED
-            : node.getMonitoredState() == MonitoredState.DETECTED
-            ? MonitoredState.DETECTED
-            : MonitoredState.UNMONITORED;
+            : (node.getMonitoredState() == MonitoredState.DETECTED ? MonitoredState.DETECTED : MonitoredState.UNMONITORED);
 
         if (node.getMonitoredState() != monitoredState) {
             node.setMonitoredState(monitoredState);

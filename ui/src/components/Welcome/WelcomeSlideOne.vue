@@ -5,7 +5,7 @@
             <h1 data-test="welcome-slide-one-title">Welcome to <br />OpenNMS&nbsp;Cloud</h1>
             <p class="margin-bottom">To start monitoring, you need to install our Minion on your system. This lightweight,
                 secure collector monitors and communicates with the devices on your network, shares collected data,
-                OpenNMS Cloud. The Minion connects your network with OpenNMS&nbsp;Cloud. </p>
+and connects your network with OpenNMS&nbsp;Cloud. </p>
             <p class="margin-bottom">We’ll walk you through this setup, which takes only a few&nbsp;minutes.
             </p>
         </div>

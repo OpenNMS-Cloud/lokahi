@@ -46,6 +46,7 @@ interface WelcomeStoreState {
   minionStatusLoading: boolean
   minionStatusStarted: boolean
   minionStatusSuccess: boolean
+  modifiedDockerCommand: string
   ready: boolean
   refreshing: boolean
   showOnboarding: boolean
@@ -93,10 +94,11 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     minionStatusLoading: false,
     minionStatusStarted: false,
     minionStatusSuccess: false,
+    modifiedDockerCommand: '',
     ready: false,
     refreshing: false,
     slide: 1,
-    slideOneCollapseVisible: false,
+    slideOneCollapseVisible: true,
     slideThreeDisabled: true,
     showOnboarding: false,
     validateOnKeyup: false
@@ -157,9 +159,16 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     },
     dockerCmd() {
       let dcmd = this.minionCmd.minionDockerCmd
+
       if (location.origin === 'https://onmshs.local:1443' || location.origin.startsWith('http://localhost:')) {
-        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 1162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -p 162:162/udp -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' -e MINION_ID='default' --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
+        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 1162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -p 162:162/udp -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' -e MINION_ID='default' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
       }
+
+      //If the user made edits, thats the one we want.
+      if (this.modifiedDockerCommand) {
+        dcmd = this.modifiedDockerCommand
+      }
+
       return dcmd;
     },
     async downloadClick() {
@@ -270,7 +279,16 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       await this.validateFirstDiscovery();
       if (!this.invalidForm) {
         const { createDiscoveryConfig } = useDiscoveryMutations();
-        await createDiscoveryConfig({ request: { ipAddresses: [this.firstDiscovery.ip], locationId: this.firstLocation.id.toString(), name: this.firstDiscovery.name, snmpConfig: { ports: [Number(this.firstDiscovery.port)], readCommunities: [this.firstDiscovery.communityString] } } })
+
+        await createDiscoveryConfig({
+          request: {
+            ipAddresses: [this.firstDiscovery.ip],
+            locationId: this.firstLocation.id.toString(),
+            name: this.firstDiscovery.name,
+            snmpConfig: { ports: [Number(this.firstDiscovery.port)], readCommunities: [this.firstDiscovery.communityString] },
+            tags: [{ name: 'default' }]
+          }
+        })
 
         this.devicePreview.loading = true;
         this.discoverySubmitted = true;
@@ -293,11 +311,14 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         this.minionStatusCopy = 'Waiting for the Docker Install Command to be complete.'
       }
       if (this.minionStatusStarted && this.minionStatusLoading) {
-        this.minionStatusCopy = 'Please wait while we detect your Minion.'
+        this.minionStatusCopy = 'Please wait while we detect your Minion. This can take up to 10 minutes.'
       }
       if (this.minionStatusStarted && !this.minionStatusLoading && this.minionStatusSuccess) {
         this.minionStatusCopy = 'Minion detected.'
       }
+    },
+    updateDockerCommand(newCommand: string) {
+      this.modifiedDockerCommand = newCommand;
     },
     async validateFirstDiscovery() {
       try {

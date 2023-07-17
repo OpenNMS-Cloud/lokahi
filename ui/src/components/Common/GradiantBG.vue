@@ -1,6 +1,6 @@
 <template>
-  <svg :width="width" :height="height" :viewBox="`0 0 ${width} ${height}`" fill="none" xmlns="http://www.w3.org/2000/svg"
-    data-test="gradiant-bg">
+  <svg :width="windowWidth" :height="windowHeight" :viewBox="`0 0 ${windowWidth} ${windowHeight}`" fill="none"
+    xmlns="http://www.w3.org/2000/svg" data-test="gradiant-bg">
     <g clip-path="url(#clip0_2548_16987)">
       <g opacity="0.7" filter="url(#filter0_f_2548_16987)">
         <path d="M507.711 1026.44L-14 1259H1511V634H876.921C716.395 634 563.895 895.628 507.711 1026.44Z"
@@ -31,14 +31,12 @@
         <feGaussianBlur stdDeviation="350" result="effect1_foregroundBlur_2548_16987" />
       </filter>
       <clipPath id="clip0_2548_16987">
-        <rect :width="width" :height="height" fill="white" />
+        <rect :width="windowWidth" :height="windowHeight" fill="white" />
       </clipPath>
     </defs>
   </svg>
 </template>
 <script lang="ts" setup>
-const width = window.innerWidth
-const height = window.innerHeight
 const windowWidth = ref(window.innerWidth)
 const windowHeight = ref(window.innerHeight)
 

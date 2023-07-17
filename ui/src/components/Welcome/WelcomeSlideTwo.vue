@@ -9,8 +9,8 @@
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
                 <h1 data-test="welcome-slide-two-title">Minion Installation</h1>
-                <p>An OpenNMS Minion is a virtual or hardware device for distributed network monitoring. Your network must
-                    include at least one Minion to use Cloud.</p>
+                <p>The Minion installation can take up to 10 minutes. You will download an encrypted certificate for the
+                    Minion and run a Docker command.</p>
             </div>
             <div class="welcome-slide-two-location-callout">
                 <div class="welcome-slide-two-location-callout-left" data-test="welcome-slide-two-callout">
@@ -24,12 +24,12 @@
                 </div>
             </div>
             <div class="welcome-slide-step">
-                <h2>Step 1: Download Minion Installation Bundle</h2>
+                <h2>Step 1: Download Encrypted Minion Certificate</h2>
                 <div class="welcome-slide-table">
                     <div class="welcome-slide-table-header">
-                        <div>Minion Installation Bundle</div>
+                        <div>Encrypted Minion Certificate</div>
                         <div>
-                            <FeatherButton text @click="welcomeStore.downloadClick" v-if="!welcomeStore.downloading"
+                            <FeatherButton text @click="localDownloadHandler" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
                                 <template #icon>
                                     <FeatherIcon :icon="welcomeStore.downloaded ? CheckIcon : DownloadIcon" />
@@ -45,16 +45,14 @@
                         </div>
                     </div>
                     <div class="welcome-slide-table-body">
-                        <strong>File Path: </strong>
-                        <span>/tmp/default-certificate.p12</span>
                     </div>
                 </div>
             </div>
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 2: Copy and Run Docker Install Command</h2>
+                    <h2>Step 2: Copy and Run Docker Install Command in Terminal Window</h2>
                     <pre
-                        class="pre-wrap">Replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate file.</pre>
+                        class="pre-wrap">In the command, replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate you downloaded. Remember to store your password, certificate and Docker command securely. You need all three to run your Minion.</pre>
                     <div class="welcome-slide-table">
                         <div class="welcome-slide-table-header">
                             <span>Command</span>
@@ -69,9 +67,17 @@
                             </div>
                         </div>
                         <div class="welcome-slide-table-body">
-                            <pre class="pre-wrap">
-                            {{ dockerCmd }}
-                        </pre>
+                            <textarea :spellcheck="false" ref="textareaRef" @click="highlightStrip"
+                                @input="(e) => updateDockerCommand((e.target as HTMLTextAreaElement)?.value || '')"
+                                :value="welcomeStore.dockerCmd()" class="styled-like-pre" />
+                        </div>
+                        <div class="password-right">Password:&nbsp;{{ welcomeStore.minionCert.password }}
+                            <span v-if="passwordCopyEnabled">
+                                <FeatherButton icon="CopyIcon" @click="copyPassword" v-if="!copied">
+                                    <FeatherIcon :icon="CopyIcon"></FeatherIcon>
+                                </FeatherButton>
+                                <FeatherIcon class="copy-icon" :icon="CheckIcon" v-if="copied"></FeatherIcon>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -115,10 +121,74 @@ import InformationIcon from '@featherds/icon/action/Info'
 import useTheme from '@/composables/useTheme'
 import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
+import { ref } from 'vue';
+
+const textareaRef = ref();
+const copied = ref(false);
+const passwordCopyEnabled = ref(false);
+
 defineProps({
     visible: { type: Boolean, default: false }
 })
-const dockerCmd = computed(() => welcomeStore.dockerCmd());
+
+const updateDockerCommand = async (newCommand: string) => {
+    welcomeStore.updateDockerCommand(newCommand)
+    await nextTick();
+    updateScrollHeight();
+}
+onMounted(() => {
+    updateScrollHeight();
+    window.addEventListener('resize', updateScrollHeight);
+})
+onUnmounted(() => {
+    window.removeEventListener('resize', updateScrollHeight);
+    const welcomeWrapper = document.querySelector('.welcome-wrapper');
+    if (welcomeWrapper) {
+        welcomeWrapper.removeEventListener('click', highlightStrip);
+    }
+})
+
+const updateScrollHeight = () => {
+    textareaRef.value.style = `height: 0px;`
+    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 20 + 'px'};`
+}
+
+const localDownloadHandler = () => {
+    welcomeStore.downloadClick();
+    const welcomeWrapper = document.querySelector('.welcome-wrapper');
+    if (welcomeWrapper) {
+        welcomeWrapper.addEventListener('click', highlightStrip);
+    }
+}
+
+const highlightStrip = () => {
+    textareaRef.value.classList.add('visible');
+    const stringToHighlight = 'PATH_TO_DOWNLOADED_FILE';
+    const existingCommand = welcomeStore.dockerCmd();
+    const indexOf = existingCommand.indexOf(stringToHighlight);
+    if (indexOf >= 0) {
+        textareaRef.value.focus();
+        textareaRef.value.setSelectionRange(indexOf, indexOf + stringToHighlight.length);
+    }
+}
+
+/**
+ * This is not currently enabled. There is a ref above called passwordCopyEnabled that
+ * is set to false (set it to true to enable). I have a feeling this feature will be 
+ * requested in the future, and I had a few minutes this morning to code it up and 
+ * prep it for that probable request. It looked a little strange to me because of 
+ * the duplicated copy icons, which is why I left it disabled. 
+ * I imagine UX will have a better way to visualize this in the future.
+ */
+const copyPassword = () => {
+    if (welcomeStore.minionCert.password) {
+        navigator.clipboard.writeText(welcomeStore.minionCert.password)
+        copied.value = true;
+        setTimeout(() => {
+            copied.value = false;
+        }, 1500)
+    }
+}
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
 </script>
@@ -136,6 +206,8 @@ const { isDark } = useTheme();
     margin-top: -4px;
     width: 100%;
     position: absolute;
+    left: 0;
+    right: 0;
 
     h1 {
         @include headline1();
@@ -156,6 +228,10 @@ const { isDark } = useTheme();
 
     .welcome-slide-two-location-callout,
     .welcome-slide-table-body {
+        background-color: var(--feather-background);
+    }
+
+    .welcome-slide-two-location-callout {
         background-color: #e5f4f9;
     }
 }
@@ -206,6 +282,7 @@ const { isDark } = useTheme();
 
         .welcome-slide-table-body {
             padding: 12px 24px;
+            position: relative;
 
             pre {
                 margin: 0;
@@ -220,7 +297,7 @@ const { isDark } = useTheme();
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 0;
+    padding: 24px;
     border: 1px solid var($border-on-surface);
     border-radius: 3px;
     margin-top: 24px;
@@ -292,7 +369,54 @@ const { isDark } = useTheme();
     }
 }
 
+.password-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    @include caption();
+    color: var(--feather-shade-2);
+    padding: var(--feather-spacing-xs) var(--feather-spacing-s);
+
+    span :deep(.btn) {
+        font-size: 15px;
+        margin-left: var(--feather-spacing-s);
+    }
+
+    span :deep(.btn svg) {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+.styled-like-pre {
+    background-color: transparent;
+    border: none;
+    resize: none;
+    width: 100%;
+    outline: 0;
+    transition: none;
+
+    &::selection {
+        background-color: var(--feather-primary);
+        color: var(--feather-state-color-on-color);
+    }
+
+    &.visible {
+        opacity: 1;
+    }
+
+    @media (min-width:500px) and (max-width:547px) {
+        padding-right: 50px;
+    }
+
+}
+
 .pre-wrap {
     white-space: pre-wrap;
+}
+
+.copy-icon {
+    font-size: 36px;
+    margin-left: var(--feather-spacing-s);
 }
 </style>

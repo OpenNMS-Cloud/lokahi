@@ -350,7 +350,7 @@ jib_project_multi_module(
     'opennms/lokahi-minion-gateway',
     'minion-gateway',
     'opennms-minion-gateway',
-    port_forwards=['16080:9090', '16050:5005'],
+    port_forwards=['16080:8080', '16050:5005'],
     resource_deps=['shared-lib'],
 )
 

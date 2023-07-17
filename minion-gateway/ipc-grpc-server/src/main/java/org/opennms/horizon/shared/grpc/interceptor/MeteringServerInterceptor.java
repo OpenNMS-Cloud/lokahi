@@ -1,12 +1,5 @@
 package org.opennms.horizon.shared.grpc.interceptor;
 
-import static com.codahale.metrics.MetricRegistry.name;
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.ExponentiallyDecayingReservoir;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Metric;
-
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
 import io.grpc.KnownLength;
 import io.grpc.Metadata;
@@ -15,15 +8,17 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCall.Listener;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-
-import java.io.IOException;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MeteringServerInterceptor implements ServerInterceptor {
+import java.io.IOException;
 
+public class MeteringServerInterceptor implements ServerInterceptor {
+  public static final String SERVICE_TAG_NAME = "service";
+  public static final String METHOD_TAG_NAME =  "method";
   private final Logger logger = LoggerFactory.getLogger(MeteringServerInterceptor.class);
   private final MeterRegistry meterRegistry;
 
@@ -34,19 +29,19 @@ public class MeteringServerInterceptor implements ServerInterceptor {
   @Override
   public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
     final var counter = meterRegistry.counter("grpc.calls",
-        "service", call.getMethodDescriptor().getServiceName(),
-        "method", call.getMethodDescriptor().getBareMethodName());
+        SERVICE_TAG_NAME, call.getMethodDescriptor().getServiceName(),
+        METHOD_TAG_NAME, call.getMethodDescriptor().getBareMethodName());
     counter.increment();
 
     SimpleForwardingServerCall<ReqT, RespT> serverCall = new SimpleForwardingServerCall<>(call) {
       @Override
       public void sendMessage(RespT message) {
-        if (message instanceof KnownLength) {
+        if (message instanceof KnownLength knownLength) {
           try {
-            int bytes = ((KnownLength) message).available();
+            int bytes = knownLength.available();
             final var histogram = meterRegistry.summary("grpc.outgoing.size",
-                "service", call.getMethodDescriptor().getServiceName(),
-                "method", call.getMethodDescriptor().getBareMethodName());
+                SERVICE_TAG_NAME, call.getMethodDescriptor().getServiceName(),
+                METHOD_TAG_NAME, call.getMethodDescriptor().getBareMethodName());
             histogram.record(bytes);
           } catch (IOException e) {
             logger.warn("Error while obtaining payload length", e);
@@ -54,8 +49,8 @@ public class MeteringServerInterceptor implements ServerInterceptor {
         }
 
         final var counter = meterRegistry.counter("grpc.outgoing.count",
-            "service", call.getMethodDescriptor().getServiceName(),
-            "method", call.getMethodDescriptor().getBareMethodName());
+            SERVICE_TAG_NAME, call.getMethodDescriptor().getServiceName(),
+            METHOD_TAG_NAME, call.getMethodDescriptor().getBareMethodName());
         counter.increment();
         super.sendMessage(message);
       }
@@ -65,35 +60,36 @@ public class MeteringServerInterceptor implements ServerInterceptor {
   }
 
   static class MeteredListener<ReqT> extends Listener<ReqT> {
-
-    private final MeterRegistry meterRegistry;
     private final Listener<ReqT> delegate;
 
     private final MethodDescriptor<?, ?> methodDescriptor;
 
+    private final DistributionSummary incomingSummary;
+    private final Counter incomingCounter;
+
     public MeteredListener(MeterRegistry meterRegistry, Listener<ReqT> delegate, MethodDescriptor<?, ?> methodDescriptor) {
-      this.meterRegistry = meterRegistry;
       this.delegate = delegate;
       this.methodDescriptor = methodDescriptor;
+
+      incomingSummary = meterRegistry.summary("grpc.incoming.size",
+        SERVICE_TAG_NAME, methodDescriptor.getServiceName(),
+        METHOD_TAG_NAME, methodDescriptor.getBareMethodName());
+      incomingCounter = meterRegistry.counter("grpc.incoming.count",
+        SERVICE_TAG_NAME, methodDescriptor.getServiceName(),
+        METHOD_TAG_NAME, methodDescriptor.getBareMethodName());
     }
 
     @Override
     public void onMessage(ReqT message) {
-      if (message instanceof KnownLength) {
-        final var incoming = meterRegistry.summary("grpc.incoming.size",
-            "service", methodDescriptor.getServiceName(),
-            "method", methodDescriptor.getBareMethodName());
-
+      if (message instanceof KnownLength knownLength) {
         try {
-          incoming.record(((KnownLength) message).available());
+            incomingSummary.record(knownLength.available());
         } catch (IOException e) {
           //logger.warn("");
         }
       }
-      final var counter = meterRegistry.counter("grpc.incoming.count",
-        "service", methodDescriptor.getServiceName(),
-            "method", methodDescriptor.getBareMethodName());
-      counter.increment();
+
+      incomingCounter.increment();
       delegate.onMessage(message);
     }
 

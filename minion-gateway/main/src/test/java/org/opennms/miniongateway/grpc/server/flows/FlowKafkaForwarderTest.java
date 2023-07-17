@@ -29,6 +29,8 @@
 package org.opennms.miniongateway.grpc.server.flows;
 
 import com.google.protobuf.Message;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,8 +58,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FlowKafkaForwarderTest {
-
-
     private final String kafkaTopic = "kafkaTopic";
 
     @Mock
@@ -72,7 +72,7 @@ public class FlowKafkaForwarderTest {
     @Before
     public void setUp() {
         when(publisherFactory.create(any(SinkMessageMapper.class), eq(kafkaTopic))).thenReturn(publisher);
-        flowKafkaForwarder = new FlowKafkaForwarder(publisherFactory, mapper, kafkaTopic);
+        flowKafkaForwarder = new FlowKafkaForwarder(publisherFactory, mapper, kafkaTopic, new PrometheusMeterRegistry(PrometheusConfig.DEFAULT));
     }
 
     @Test

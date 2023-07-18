@@ -99,7 +99,7 @@ class GraphQLPassiveDiscoveryServiceTest {
             "    upsertPassiveDiscovery( " +
             "        discovery: { " +
             "            name: \"passive-discovery-name\", " +
-            "            location: \"Default\", " +
+            "            locationId: \"Default\", " +
             "            snmpPorts: [ 161 ], " +
             "            snmpCommunities: [ \"public\" ], " +
             "            tags: [ " +
@@ -111,7 +111,7 @@ class GraphQLPassiveDiscoveryServiceTest {
             "    ) { " +
             "        id, " +
             "        name, " +
-            "        location, " +
+            "        locationId, " +
             "        toggle, " +
             "        snmpPorts, " +
             "        snmpCommunities, " +
@@ -169,7 +169,7 @@ class GraphQLPassiveDiscoveryServiceTest {
             "    passiveDiscoveries { " +
             "        id, " +
             "        name, " +
-            "        location, " +
+            "        locationId, " +
             "        toggle, " +
             "        snmpPorts, " +
             "        snmpCommunities, " +

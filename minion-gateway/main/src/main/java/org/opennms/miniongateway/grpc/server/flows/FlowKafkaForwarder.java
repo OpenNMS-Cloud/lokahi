@@ -28,7 +28,6 @@
 
 package org.opennms.miniongateway.grpc.server.flows;
 
-import com.codahale.metrics.MetricRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.opennms.horizon.flows.document.FlowDocumentLog;

@@ -98,7 +98,7 @@ describe('DiscoverySyslogSNMPTrapsForm', () => {
   test('Should call the upsert with the correct payload', async () => {
     const discoveryMutations = useDiscoveryMutations()
     const discoveryStore = useDiscoveryStore()
-    discoveryStore.selectedLocation = { id: 1, location: 'Default' }
+    discoveryStore.selectedLocation = { id: '1', location: 'Default' }
     wrapper.find('form').trigger('submit.prevent')
     delete passiveDiscovery.toggle
     expect(discoveryMutations.upsertPassiveDiscovery).toHaveBeenCalledTimes(1)

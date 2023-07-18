@@ -51,11 +51,12 @@ import java.util.Objects;
 @Component
 public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, FlowDocumentLog> {
     public static final String DEFAULT_FLOW_RESULTS_TOPIC = "flows";
+
+    public static final String FLOW_DOCUMENT_TAG = "FlowDocument";
+    public static final String FLOW_DOCUMENT_LOG_TAG = "FlowDocumentLog";
     private final SinkMessageKafkaPublisher<FlowDocumentLog, TenantLocationSpecificFlowDocumentLog> kafkaPublisher;
     private final Counter flowCounter;
     private final Counter flowLogCounter;
-
-    private final Counter flowSizeCounter;
 
     @Autowired
     public FlowKafkaForwarder(SinkMessageKafkaPublisherFactory messagePublisherFactory, TenantLocationSpecificFlowDocumentLogMapper mapper,
@@ -66,9 +67,10 @@ public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, Flow
             kafkaTopic
         );
         Objects.requireNonNull(registry);
-        flowCounter = registry.counter(FlowKafkaForwarder.class.getName(), MeteringServerInterceptor.SERVICE_TAG_NAME, "FlowDocument");
-        flowLogCounter = registry.counter(FlowKafkaForwarder.class.getName(), MeteringServerInterceptor.SERVICE_TAG_NAME, "FlowDocumentLog");
-        flowSizeCounter = registry.counter(FlowKafkaForwarder.class.getName(), MeteringServerInterceptor.SERVICE_TAG_NAME, "FlowDocumentSize");
+        flowCounter = registry.counter(FlowKafkaForwarder.class.getName(),
+            MeteringServerInterceptor.SERVICE_TAG_NAME, FLOW_DOCUMENT_TAG);
+        flowLogCounter = registry.counter(FlowKafkaForwarder.class.getName(),
+            MeteringServerInterceptor.SERVICE_TAG_NAME, FLOW_DOCUMENT_LOG_TAG);
     }
 
     @Override
@@ -79,8 +81,6 @@ public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, Flow
     @Override
     public void handleMessage(FlowDocumentLog messageLog) {
         flowCounter.increment(messageLog.getMessageCount());
-        // getSerializedSize is heavy duty should remove before production
-        flowSizeCounter.increment(messageLog.getSerializedSize());
         flowLogCounter.increment();
         this.kafkaPublisher.send(messageLog);
     }

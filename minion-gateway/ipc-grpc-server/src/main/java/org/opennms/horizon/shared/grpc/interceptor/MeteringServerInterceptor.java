@@ -60,6 +60,8 @@ public class MeteringServerInterceptor implements ServerInterceptor {
   }
 
   static class MeteredListener<ReqT> extends Listener<ReqT> {
+    private final Logger logger = LoggerFactory.getLogger(MeteredListener.class);
+
     private final Listener<ReqT> delegate;
 
     private final MethodDescriptor<?, ?> methodDescriptor;
@@ -85,7 +87,7 @@ public class MeteringServerInterceptor implements ServerInterceptor {
         try {
             incomingSummary.record(knownLength.available());
         } catch (IOException e) {
-          //logger.warn("");
+            logger.warn("Fail to get message length.", e);
         }
       }
 

@@ -25,29 +25,23 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
 package org.opennms.horizon.systemtests.pages.cloud;
 
-
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
-import java.time.Duration;
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
 
-public class CloudLeftPanelPage {
-    private static final SelenideElement leftPanel = $(".app-aside");
+public class InventoryPage {
 
-    public static void verifyLeftPanelIsDisplayed() {
-        leftPanel.shouldBe(visible);
+    private static final SelenideElement monitoredNodesTab = $$("[data-ref-id='feather-tab']").get(0);
+    private static final ElementsCollection nodesList = $$("[class='cards']");
+
+    public static void clickOnMonitoredNodesTab() {
+        monitoredNodesTab.shouldBe(Condition.visible, Condition.enabled).click();
     }
 
-    public static void clickOnPanelSection(String section) {
-        $("div.feather-app-rail").shouldBe(visible, Duration.ofSeconds(15)).hover().shouldNotHave(cssClass("narrow"));
-        SelenideElement menuOption = $(String.format("[href='/%s']", section)).shouldBe(enabled);
-        menuOption.click();
-        if (!"".equals(section)) {
-            menuOption.shouldHave(cssClass("selected"));
-        }
-        $("div.right").click();
+    public static boolean checkIfMonitoredNodeExist(String nodeSysName) {
+       return nodesList.findBy(Condition.text(nodeSysName)).isDisplayed();
     }
 }

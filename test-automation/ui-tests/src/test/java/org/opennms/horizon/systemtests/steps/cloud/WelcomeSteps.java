@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.opennms.horizon.systemtests.steps.cloud;
 
+import com.codeborne.selenide.Selenide;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.cloud.LocationsPage;
@@ -71,9 +72,9 @@ public class WelcomeSteps {
         WelcomePage.clickStartDiscovery();
     }
 
-    @Then("first node with IP {string} discovered successfully")
-    public static void nodeDiscovered(String ip) {
-        WelcomePage.nodeDiscovered(ip);
+    @Then("first node with system name {string} discovered successfully")
+    public static void nodeDiscovered(String sysName) {
+        WelcomePage.nodeDiscovered(sysName);
     }
 
     @Then("click on 'Continue' button to end the wizard")
@@ -106,4 +107,8 @@ public class WelcomeSteps {
         LocationsPage.checkMinionDoesntExist(minionId);
     }
 
+    @Given("skip welcome wizard")
+    public void skipWelcomWizard() {
+        Selenide.localStorage().setItem("welcomeOverride", "true");
+    }
 }

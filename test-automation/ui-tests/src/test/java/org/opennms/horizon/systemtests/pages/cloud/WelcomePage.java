@@ -30,9 +30,14 @@ package org.opennms.horizon.systemtests.pages.cloud;
 import com.codeborne.selenide.*;
 import lombok.SneakyThrows;
 import org.junit.Assert;
+import org.opennms.horizon.systemtests.utils.MinionStarter;
+import org.openqa.selenium.NoSuchElementException;
 import testcontainers.DockerComposeMinionContainer;
 import java.io.File;
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
@@ -41,15 +46,15 @@ public class WelcomePage {
 
     private static final SelenideElement startSetupButton = $("[data-test='welcome-slide-one-setup-button']");
     private static final SelenideElement downloadCertificateButton = $("[data-test='welcome-slide-two-download-button']");
-    private static final SelenideElement dockerRunCLTextField =  $(withText("GRPC_CLIENT_KEYSTORE_PASSWORD"));
-    private static final SelenideElement minionStatusField =  $("[data-test='welcome-minion-status-txt']");
-    private static final SelenideElement continueButton =  $("[data-id='welcome-slide-two-continue-button']");
-    private static final SelenideElement discoveryIPField =  $$("[data-test='welcome-slide-three-ip-input']").get(1);
-    private static final SelenideElement startDiscoveryButton =  $("[data-test='welcome-store-page-three-start-discovery-button']");
-    private static final SelenideElement discoveryLoadingField =  $("[data-test='welcome-discovery-status-txt']");
-    private static final SelenideElement discoveryResultNodeIPField =  $("[data-test='item-preview-meta-id']");
-    private static final ElementsCollection discoveryResultNodeStatusFields =  $$("[data-test='item-preview-status-id']");
-    private static final SelenideElement discoveryFinalContinueButton =  $("[data-test='welcome-store-slide-three-continue-button']");
+    private static final SelenideElement dockerRunCLTextField = $(withText("GRPC_CLIENT_KEYSTORE_PASSWORD"));
+    private static final SelenideElement minionStatusField = $("[data-test='welcome-minion-status-txt']");
+    private static final SelenideElement continueButton = $("[data-id='welcome-slide-two-continue-button']");
+    private static final SelenideElement discoveryIPField = $$("[data-test='welcome-slide-three-ip-input']").get(1);
+    private static final SelenideElement startDiscoveryButton = $("[data-test='welcome-store-page-three-start-discovery-button']");
+    private static final SelenideElement discoveryLoadingField = $("[data-test='welcome-discovery-status-txt']");
+    private static final SelenideElement discoveryResultNodeNameField = $("[data-test='item-preview-meta-id']");
+    private static final ElementsCollection discoveryResultNodeStatusFields = $$("[data-test='item-preview-status-id']");
+    private static final SelenideElement discoveryFinalContinueButton = $("[data-test='welcome-store-slide-three-continue-button']");
     public static void checkIsStartSetupButtonVisible() {
         startSetupButton.shouldBe(enabled);
     }
@@ -61,25 +66,7 @@ public class WelcomePage {
 
     @SneakyThrows
     public static void downloadCertificateAndStartMinion(String minionID, String dockerComposeFile) {
-        Configuration.fileDownload = FileDownloadMode.FOLDER;
-        File cert = downloadCertificateButton.shouldBe(enabled).download(60000);
-        Assert.assertTrue(cert.exists());
-
-        String dockerCL = null;
-        for (int i = 0; i < 10; i++) {
-            Selenide.sleep(3000);
-            dockerCL = dockerRunCLTextField.getText();
-            if (dockerCL.indexOf("GRPC_CLIENT_KEYSTORE_PASSWORD='") > 0) {
-                break;
-            }
-        }
-
-        int start = dockerCL.indexOf("GRPC_CLIENT_KEYSTORE_PASSWORD='") + "GRPC_CLIENT_KEYSTORE_PASSWORD='".length();
-        int end = dockerCL.indexOf("' -e MINION_ID=");
-        Assert.assertTrue (end > start && start > 0);
-
-        String password = dockerCL.substring(start, end);
-        DockerComposeMinionContainer.createNewContainer("src/test/resources/" + dockerComposeFile, cert, minionID, password);
+        MinionStarter.downloadCertificateAndStartMinion(minionID, dockerComposeFile, downloadCertificateButton, dockerRunCLTextField);
     }
 
     public static void checkMinionConnection() {
@@ -105,7 +92,7 @@ public class WelcomePage {
         startDiscoveryButton.shouldBe(enabled).click();
     }
 
-    public static void nodeDiscovered(String ip) {
+    public static void nodeDiscovered(String sysName) {
         try {
             for (int i = 0; i < 50; i++) {
                 Selenide.sleep(3000);
@@ -115,7 +102,7 @@ public class WelcomePage {
             }
         }
         catch (com.codeborne.selenide.ex.ElementNotFound e) {
-            Assert.assertEquals(ip, discoveryResultNodeIPField.getText());
+            Assert.assertEquals(sysName, discoveryResultNodeNameField.getText());
             Assert.assertEquals("Minion status should be 'UP'", "UP", discoveryResultNodeStatusFields.get(0).getText());
             Assert.assertTrue("ICMP should be less then 500", 500 >= Double.valueOf(discoveryResultNodeStatusFields.get(1).getText()));
         }
@@ -123,5 +110,9 @@ public class WelcomePage {
 
     public static void clickContinueToEndWizard() {
         discoveryFinalContinueButton.shouldBe(enabled).click();
+    }
+
+    public static void waitPageLoaded() {
+        startSetupButton.shouldBe(visible, Duration.ofSeconds(5));
     }
 }

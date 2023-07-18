@@ -20,6 +20,8 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 9090
+    #PortHealth: 8080
+    PortHealth: 9090
     Resources:
       Limits:
         Cpu: "2"
@@ -180,6 +182,7 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     GrpcPort: 6565
+    Port: 8080
     DbName: "horizon_stream"
     DbSchemaName: "notification"
     DbHost: "postgres"
@@ -237,6 +240,7 @@ OpenNMS:
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8990
+    PortHealth: 8080
     VolumeSize: 1Gi
     Resources:
       Limits:

@@ -72,6 +72,26 @@ spec:
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"
+          livenessProbe:
+            httpGet:
+              path: "/actuator/health/liveness"
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 150
+          readinessProbe:
+            httpGet:
+              path: "/actuator/health/readiness"
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 250
       {{- if .Values.OpenNMS.MetricsProcessor.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

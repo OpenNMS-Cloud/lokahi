@@ -1,6 +1,23 @@
 server:
   port: 9090
 
+management:
+  server:
+    port: 8080
+  endpoints:
+    health:
+      probes:
+        enabled: true
+        #add-additional-paths: true
+    web:
+      exposure:
+        include: "*"
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
 spring:
   jackson:
     default-property-inclusion: non_null

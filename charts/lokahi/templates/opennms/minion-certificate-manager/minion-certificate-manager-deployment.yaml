@@ -73,6 +73,8 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
+            - name: http
+              containerPort: {{ .Values.OpenNMS.MinionCertificateManager.PortHealth }}
           volumeMounts:
             - name: certificate-secrets
               mountPath: "/run/secrets/certificates"
@@ -84,6 +86,26 @@ spec:
               mountPath: "/app/config"
             - name: rocksdb
               mountPath: "/app/rocks-db"
+          livenessProbe:
+            httpGet:
+              path: "/actuator/health/liveness"
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 150
+          readinessProbe:
+            httpGet:
+              path: "/actuator/health/readiness"
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 250
       {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

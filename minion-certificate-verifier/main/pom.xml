@@ -28,6 +28,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>spring-boot-logback-json</artifactId>
             <version>${project.version}</version>

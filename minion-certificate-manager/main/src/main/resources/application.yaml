@@ -10,6 +10,13 @@ manager:
   # Server CA, certificate which might be added to archive to provide a trust root for minions
   server:
     certificate:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    web:
+      exposure:
+        include: "*"
 
 grpc:
   server:

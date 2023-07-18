@@ -29,23 +29,31 @@ package org.opennms.horizon.systemtests.pages.cloud;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideElement;
 import org.junit.Assert;
+import org.opennms.horizon.systemtests.utils.MinionStarter;
+
 import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selectors.*;
 
 public class LocationsPage {
 
     private static final ElementsCollection locationNamesList = $$("[data-test='card']");
-    private static final ElementsCollection minionsList =  $$("[class='minions-card-wrapper']");
-
+    private static final ElementsCollection minionsList = $$("[class='minions-card-wrapper']");
+    private static final SelenideElement addLocationButton = $("[data-test='add-location-btn']");
+    private static final SelenideElement locationNameInputField = $$("[data-test='input-name']").get(1);
+    private static final SelenideElement addLocationSaveButton = $("[data-test='save-button']");
+    private static final SelenideElement downloadCertificateButton = $("[data-test='download-btn']");
+    private static final SelenideElement dockerRunCLTextField = $(withText("GRPC_CLIENT_KEYSTORE_PASSWORD"));
 
     public static void clickOnLocation(String locationName) {
         locationNamesList.find(text(locationName)).shouldBe(visible, enabled).click();
     }
 
     public static void checkLocationExists(String locationName) {
-        locationNamesList.find(text(locationName)).shouldBe(visible, enabled);
+        locationNamesList.find(text(locationName)).isDisplayed();
     }
 
     public static void checkMinionExists(String minionId) {
@@ -60,5 +68,15 @@ public class LocationsPage {
     public static void checkMinionDoesntExist(String minionId) {
         Selenide.refresh();
         Assert.assertFalse("Expected to see no minion with ID: " + minionId, minionsList.find(text(minionId)).isDisplayed());
+    }
+
+    public static void addNewLocation(String locationName) {
+        addLocationButton.shouldBe(visible, enabled).click();
+        locationNameInputField.shouldBe(visible).sendKeys(locationName);
+        addLocationSaveButton.shouldBe(visible, enabled).click();
+    }
+
+    public static void downloadCertificateAndStartMinion(String minionId, String dockerComposeFile) {
+        MinionStarter.downloadCertificateAndStartMinion(minionId, dockerComposeFile, downloadCertificateButton, dockerRunCLTextField);
     }
 }

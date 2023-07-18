@@ -25,29 +25,33 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+package org.opennms.horizon.systemtests.steps.cloud;
 
-package org.opennms.horizon.systemtests.pages.cloud;
+import com.codeborne.selenide.Selenide;
+import io.cucumber.java.en.Then;
+import org.opennms.horizon.systemtests.pages.cloud.CloudHomePage;
 
-
-import com.codeborne.selenide.SelenideElement;
-import java.time.Duration;
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
-
-public class CloudLeftPanelPage {
-    private static final SelenideElement leftPanel = $(".app-aside");
-
-    public static void verifyLeftPanelIsDisplayed() {
-        leftPanel.shouldBe(visible);
+public class CloudHomeSteps {
+    @Then("sees {string} subtitle in the 'Top 10 Applications' chart")
+    public void verifyErrorMessage(String subtitle) {
+        CloudHomePage.verifyTop10ApplicationsSubtitle(subtitle);
     }
 
-    public static void clickOnPanelSection(String section) {
-        $("div.feather-app-rail").shouldBe(visible, Duration.ofSeconds(15)).hover().shouldNotHave(cssClass("narrow"));
-        SelenideElement menuOption = $(String.format("[href='/%s']", section)).shouldBe(enabled);
-        menuOption.click();
-        if (!"".equals(section)) {
-            menuOption.shouldHave(cssClass("selected"));
+    @Then("wait until the 'Top 10 Applications' chart will reflect the received data")
+    public void waitFlowsChart() {
+        for (int i = 0; i < 6; i++) {
+            Selenide.sleep(5_000);
+            Selenide.refresh();
+            if (CloudHomePage.verifyTop10Applications()) {
+                break;
+            }
         }
-        $("div.right").click();
+        CloudHomePage.verifyNoDataTop10ApplicationsState(false);
     }
+
+    @Then("click on 'Flows' link")
+    public void clickOnFlows() {
+        CloudHomePage.clickOnFlowsLink();
+    }
+
 }

@@ -34,6 +34,7 @@ import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
 import org.opennms.horizon.systemtests.pages.cloud.CloudLoginPage;
 import org.opennms.horizon.systemtests.pages.cloud.CloudInstanceLoginPage;
+import org.opennms.horizon.systemtests.pages.cloud.WelcomePage;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.GenericContainer;
 import testcontainers.DockerComposeMinionContainer;
@@ -61,17 +62,15 @@ public class CucumberHooks {
     private static final String ADMIN_DEFAULT_USERNAME = "admin";
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
     private static final String CLOUD_MINION_GATEWAY_HOST_PORT = "443";
-    private static final String CLOUD_MINION_GATEWAY_HOST_DEFAULT = "minion.onms-fb-dev.dev.nonprod.dataservice.opennms.com";
+    private static final String CLOUD_MINION_GATEWAY_HOST = "CLOUD_MINION_GATEWAY_HOST";
     // for example: https://2e6975ac-12c0-47db-9213-3975e8dc6092.tnnt.onms-fb-dev.dev.nonprod.dataservice.opennms.com
-    private static final String CLOUD_INSTANCE_URL_DEFAULT = "";
-    private static final String CLOUD_USERNAME = "";
-    private static final String CLOUD_PASSWORD = "";
-
-    private static boolean cloudEnv;
+    private static final String CLOUD_INSTANCE_URL = "CLOUD_INSTANCE_URL";
+    private static final String CLOUD_USERNAME = "CLOUD_USERNAME";
+    private static final String CLOUD_PASSWORD = "CLOUD_PASSWORD";
     private static final String IS_CLOUD_TESTING_TARGET = "IS_CLOUD_TESTING_TARGET";
+    private static boolean cloudEnv;
 
-    @Before("@cloud")
-    public static void setUp() {
+    private static void setUp() {
         if (Selenide.webdriver().driver().hasWebDriverStarted()) {
             return;
         }
@@ -81,11 +80,10 @@ public class CucumberHooks {
             cloudEnv = Boolean.valueOf(is_cloud_testing_target);
         }
 
-
         if (cloudEnv) {
-            instanceUrl = CLOUD_INSTANCE_URL_DEFAULT;
+            instanceUrl = System.getenv().get(CLOUD_INSTANCE_URL);
             gatewayPort = CLOUD_MINION_GATEWAY_HOST_PORT;
-            gatewayUrl = CLOUD_MINION_GATEWAY_HOST_DEFAULT;
+            gatewayUrl = System.getenv().get(CLOUD_MINION_GATEWAY_HOST);
             Selenide.open(instanceUrl);
             loginToCloudInstance();
         } else {
@@ -97,6 +95,23 @@ public class CucumberHooks {
         }
     }
 
+    @Before("@cloud_welcome")
+    public static void setupWithEnabledWelcomeWizard() {
+        setUp();
+    }
+
+    @Before("@cloud")
+    public static void setupWithDisabledWelcomeWizard() {
+        setUp();
+        try {
+            WelcomePage.waitPageLoaded();
+            Selenide.sessionStorage().setItem("welcomeOverride", "true");
+            Selenide.open(instanceUrl);
+        } catch (com.codeborne.selenide.ex.ElementNotFound e) {
+            // in case there is no welcome page after login, do nothing and continue
+        }
+    }
+
     private static void loginToLocalInstance() {
         CloudLoginPage.checkPageTitle();
         CloudLoginPage.setUsername(ADMIN_DEFAULT_USERNAME);
@@ -105,13 +120,13 @@ public class CucumberHooks {
     }
 
     private static void loginToCloudInstance() {
-        CloudInstanceLoginPage.setUsername(CLOUD_USERNAME);
+        CloudInstanceLoginPage.setUsername(System.getenv().get(CLOUD_USERNAME));
         CloudInstanceLoginPage.clickNextBtn();
-        CloudInstanceLoginPage.setPassword(CLOUD_PASSWORD);
+        CloudInstanceLoginPage.setPassword(System.getenv().get(CLOUD_PASSWORD));
         CloudInstanceLoginPage.clickSubmitBtn();
     }
 
-    @After("@cloud")
+    @After("@cloud or @cloud_welcome")
     public static void tearDownCloud() {
         Selenide.open(instanceUrl);
 

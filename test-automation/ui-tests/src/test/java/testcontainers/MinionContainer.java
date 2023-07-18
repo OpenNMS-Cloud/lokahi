@@ -81,7 +81,8 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
         // expose UDP ports here
         this.getPortBindings().addAll(List.of(
             ExposedPort.udp(4729).toString(),
-            ExposedPort.udp(8877).toString()
+            ExposedPort.udp(8877).toString(),
+            ExposedPort.udp(9999).toString()
         ));
 
         this.gatewayHost = gatewayHost;

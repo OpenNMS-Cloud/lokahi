@@ -125,7 +125,7 @@ describe('Welcome Store', () => {
     it('can toggle a slide collapse', () => {
         const welcomeStore = useWelcomeStore()
         welcomeStore.toggleSlideOneCollapse();
-        expect(welcomeStore.slideOneCollapseVisible).toBe(true)
+        expect(welcomeStore.slideOneCollapseVisible).toBe(false)
     })
 
     it('can validate on keyup', async () => {

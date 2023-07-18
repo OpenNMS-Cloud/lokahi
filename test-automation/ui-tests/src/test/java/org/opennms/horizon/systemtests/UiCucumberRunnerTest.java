@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
     plugin = {"pretty",
         "json:cucumber.reports/cucumber-report.json",
         "html:cucumber.reports/cucumber-report.html"},
-    tags = "@cloud and not @ignore"
+    tags = "@cloud and @cloud_welcome and not @ignore"
 )
 public class UiCucumberRunnerTest {
 }

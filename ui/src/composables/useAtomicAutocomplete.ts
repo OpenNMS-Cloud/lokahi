@@ -1,7 +1,7 @@
 import { QueryApi } from 'villus'
 
 const useAtomicAutocomplete = (
-  searchFn: (searchTerm?: string) => Promise<void> | QueryApi<any, { searchTerm: string }>,
+  searchFn: (searchTerm: string) => Promise<void> | QueryApi<any, { searchTerm: string }>,
   getResultsLength: () => number,
   itemClickedCallback: (...p: any) => any
 ) => {

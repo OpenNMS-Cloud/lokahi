@@ -51,52 +51,21 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useTagStore } from '@/store/Components/tagStore'
 import CancelIcon from '@featherds/icon/navigation/Cancel'
-import { FeatherTooltip } from '@featherds/tooltip';
-import AtomicAutocomplete from '../Common/AtomicAutocomplete.vue';
+import { FeatherTooltip } from '@featherds/tooltip'
+import AtomicAutocomplete from '../Common/AtomicAutocomplete.vue'
+import useAtomicAutocomplete from '@/composables/useAtomicAutocomplete'
 
-const autoCompleteOpen = ref(false);
-const inputValue = ref('');
 const inventoryStore = useInventoryStore()
 const tagQueries = useTagQueries()
 const tagStore = useTagStore()
 
-const isAutoCompleteOpen = computed(() => {
-  let open = false;
-  if (autoCompleteOpen.value) {
-    if (inputValue.value) {
-      open = true;
-    }
-    if (tagQueries.tagsSearched.length > 0) {
-      open = true;
-    }
-  }
-  return open;
-})
+const { isAutoCompleteOpen, closeAutocomplete, wrapperClicked, onFocusLost, itemClicked, textChanged, inputValue } = 
+  useAtomicAutocomplete(tagQueries.getTagsSearch, () => tagQueries.tagsSearched.length, tagStore.addNewTag)
 
 defineProps({
   visible: { type: Boolean, default: false },
   state: { type: String, default: '' }
 })
-
-const closeAutocomplete = () => {
-  autoCompleteOpen.value = false;
-  document.removeEventListener('click', closeChecker);
-}
-
-const closeChecker = (e: MouseEvent) => {
-  if (!(e?.target as HTMLInputElement).closest('.atomic-input-wrapper')) {
-    closeAutocomplete();
-  }
-}
-const wrapperClicked = () => {
-  autoCompleteOpen.value = true;
-  tagQueries.getTagsSearch(inputValue.value);
-  document.addEventListener('click', closeChecker);
-}
-
-const onFocusLost = () => {
-  closeAutocomplete();
-}
 
 const tagManagerTip = computed(() => {
   let val = 'Find or create a tag to get started'
@@ -108,20 +77,6 @@ const tagManagerTip = computed(() => {
   }
   return val
 })
-
-const itemClicked = (item: unknown, index: number) => {
-  if (item) {
-    tagStore.addNewTag({ name: item as string, id: index.toString() });
-  }
-}
-
-const textChanged = (newVal: string) => {
-  if (newVal) {
-    autoCompleteOpen.value = true;
-  }
-  inputValue.value = newVal;
-  tagQueries.getTagsSearch(newVal)
-}
 </script>
 
 <style scoped lang="scss">
@@ -160,39 +115,6 @@ const textChanged = (newVal: string) => {
       margin-right: var(variables.$spacing-m);
     }
 
-    .heading-total-selected {
-      width: 35%;
-
-      .total-selected {
-        display: flex;
-        flex-direction: column;
-        padding-top: 8px;
-        margin-bottom: var(variables.$spacing-l);
-
-        .total {
-          >span {
-            font-weight: bold;
-          }
-
-          .pipe {
-            color: var(variables.$secondary-text-on-surface);
-            margin: 0 var(variables.$spacing-s);
-            display: none;
-          }
-        }
-
-        .selected {
-          >span {
-            font-weight: bold;
-          }
-        }
-      }
-
-      @include mediaQueriesMixins.screen-lg {
-        width: 50%;
-      }
-    }
-
     .search-add {
       display: flex;
       flex-wrap: wrap;
@@ -219,25 +141,6 @@ const textChanged = (newVal: string) => {
 
     @include mediaQueriesMixins.screen-md {
       margin-bottom: 0;
-
-      .heading-total-selected {
-        .total-selected {
-          flex-direction: row;
-
-          .total {
-            .pipe {
-              display: inline;
-            }
-          }
-        }
-      }
-    }
-
-    @include mediaQueriesMixins.screen-lg {
-      .heading-total-selected {
-        display: flex;
-        flex-direction: row;
-      }
     }
   }
 

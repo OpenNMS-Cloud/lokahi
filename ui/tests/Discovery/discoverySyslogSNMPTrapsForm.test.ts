@@ -8,7 +8,7 @@ let wrapper: any
 
 const passiveDiscovery: Partial<PassiveDiscovery> = {
   id: 1,
-  location: 'Default',
+  locationId: "1",
   name: 'Passive Discovery',
   snmpCommunities: ['public'],
   snmpPorts: [161],

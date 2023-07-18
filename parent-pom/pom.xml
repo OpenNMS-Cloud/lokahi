@@ -113,6 +113,7 @@
         <opentelemetry.version>1.25.0</opentelemetry.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <osgi.version>7.0.0</osgi.version>
+        <micrometer.version>1.11.1</micrometer.version>
         <pax.jdbc.version>1.5.2</pax.jdbc.version>
         <postgresql.version>42.5.1</postgresql.version>
         <testcontainers.version>1.17.4</testcontainers.version>
@@ -878,6 +879,11 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
+                <version>${micrometer.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>

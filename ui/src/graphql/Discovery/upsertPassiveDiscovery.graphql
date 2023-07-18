@@ -1,7 +1,7 @@
 mutation UpsertPassiveDiscovery($passiveDiscovery: PassiveDiscoveryUpsertInput!) {
   upsertPassiveDiscovery(discovery: $passiveDiscovery) {
     id
-    location
+    locationId
     name
     snmpCommunities
     snmpPorts

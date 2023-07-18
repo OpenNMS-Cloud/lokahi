@@ -87,7 +87,7 @@ public class FlowSinkModule implements SinkModule<FlowDocument, FlowDocumentLog>
     }
 
     @Override
-    public AggregationPolicy<FlowDocument, FlowDocumentLog, FlowDocumentLog> getAggregationPolicy() {
+    public AggregationPolicy<FlowDocument, FlowDocumentLog, FlowDocumentLog.Builder> getAggregationPolicy() {
         return new AggregationPolicy<>() {
             //TODO: hardcode for now. Will fix in DC-455
             @Override
@@ -107,22 +107,22 @@ public class FlowSinkModule implements SinkModule<FlowDocument, FlowDocumentLog>
             }
 
             @Override
-            public FlowDocumentLog aggregate(FlowDocumentLog accumulator, FlowDocument newMessage) {
+            public FlowDocumentLog.Builder aggregate(FlowDocumentLog.Builder accumulator, FlowDocument newMessage) {
                 if (accumulator == null) {
                     accumulator = FlowDocumentLog.newBuilder()
                         .setSystemId(identity.getId())
-                        .addMessage(newMessage).build();
+                        .addMessage(newMessage);
                 } else {
                     if (newMessage != null) {
-                        FlowDocumentLog.newBuilder(accumulator).addMessage(newMessage);
+                        accumulator.addMessage(newMessage);
                     }
                 }
                 return accumulator;
             }
 
             @Override
-            public FlowDocumentLog build(FlowDocumentLog message) {
-                return message;
+            public FlowDocumentLog build(FlowDocumentLog.Builder message) {
+                return message.build();
             }
         };
     }

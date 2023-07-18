@@ -120,6 +120,22 @@ spec:
               value: "Default"
             - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
               value: "false"
+            {{- if .Values.OpenNMS.Minion.addDefaultLocation }}
+            - name: GRPC_CLIENT_KEYSTORE
+              value: "/opt/karaf/certs/minion.p12"
+            - name: GRPC_CLIENT_KEYSTORE_PASSWORD
+              value: "changeme"
+            - name: MINION_GATEWAY_HOST
+              value: "ingress-nginx-controller"
+            - name: MINION_GATEWAY_PORT
+              value: "443"
+            - name: MINION_GATEWAY_TLS
+              value: "true"
+            - name: GRPC_CLIENT_TRUSTSTORE
+              value: "/run/secrets/certificates/tls.crt"
+            - name: GRPC_CLIENT_OVERRIDE_AUTHORITY
+              value: "minion.{{ .Values.Host }}"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Minion.Port }}
@@ -135,9 +151,6 @@ spec:
               protocol: UDP
               containerPort: {{ .Values.OpenNMS.Minion.Netflow9ListenerPort }}
           volumeMounts:
-            - name: minion-config-volume
-              mountPath: "/opt/karaf/etc/org.opennms.core.ipc.grpc.client.cfg"
-              subPath: "grpc-config"
             - name: minion-config-volume
               mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
               subPath: "opennms-minion-identity"

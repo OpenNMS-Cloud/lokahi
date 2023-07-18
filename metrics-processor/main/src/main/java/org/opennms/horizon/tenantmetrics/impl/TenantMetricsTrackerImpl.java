@@ -41,7 +41,9 @@ import java.util.List;
 public class TenantMetricsTrackerImpl implements TenantMetricsTracker {
 
     public static final String METRIC_SAMPLE_COUNT_NAME = "metric_sample_count";
-    public static final String FLOW_SAMPLE_COUNT_NAME = "flow_sample_count";
+    public static final String FLOW_RECEIVED_COUNT_NAME = "flow_received_count";
+
+    public static final String FLOW_COMPLETED_COUNT_NAME = "flow_completed_count";
     public static final String SAMPLE_COUNT_TENANT_LABEL_NAME = "tenant";
 
     @Autowired
@@ -59,9 +61,20 @@ public class TenantMetricsTrackerImpl implements TenantMetricsTracker {
     }
 
     @Override
-    public void addTenantFlowSampleCount(String tenant, int count) {
+    public void addTenantFlowReceviedCount(String tenant, int count) {
         Counter counter =
-            meterRegistry.counter(FLOW_SAMPLE_COUNT_NAME,
+            meterRegistry.counter(FLOW_RECEIVED_COUNT_NAME,
+                List.of(
+                    Tag.of(SAMPLE_COUNT_TENANT_LABEL_NAME, tenant)
+                ));
+
+        counter.increment(count);
+    }
+
+    @Override
+    public void addTenantFlowCompletedCount(String tenant, int count) {
+        Counter counter =
+            meterRegistry.counter(FLOW_COMPLETED_COUNT_NAME,
                 List.of(
                     Tag.of(SAMPLE_COUNT_TENANT_LABEL_NAME, tenant)
                 ));

@@ -95,7 +95,6 @@ OpenNMS:
     ExtraVolumes: []
     ExtraMounts: []
     ExtraInitContainers: []
-    GrpcConfig: {}
     addDefaultLocation: false
   MinionGateway:
     ServiceName: opennms-minion-gateway
@@ -113,13 +112,11 @@ OpenNMS:
     DbHost: "postgres"
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
-    env:
-      OTEL_JAVAAGENT_ENABLED: "false"
+        Cpu: "1"
+        Memory: 2Gi
     IngressAnnotations:
       nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"

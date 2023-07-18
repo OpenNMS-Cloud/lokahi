@@ -54,12 +54,10 @@
       />
     </div>
 
-    <DiscoveryLocationsAutocomplete
-      @locationSelected="selectLocation"
-      class="locations"
-      type="single"
-      :disabled="isDisabled"
-    />
+    <div class="locations">
+      <DiscoveryLocationsAutocomplete :disabled="isDisabled" />
+    </div>
+    
     <BasicAutocomplete
       class="tags"
       @items-selected="tagsSelectedListener"
@@ -94,7 +92,7 @@
 <script setup lang="ts">
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { Azure, Common } from './discovery.text'
-import { AzureActiveDiscovery, MonitoringLocation } from '@/types/graphql'
+import { AzureActiveDiscovery } from '@/types/graphql'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
@@ -125,8 +123,6 @@ onMounted(() => {
     tagsAutocompleteRef.value.addValue('default')
   }
 })
-
-const selectLocation = (location: MonitoringLocation) => location && store.selectLocation(location, true)
 
 const tagsAutocompleteRef = ref()
 const tagsSelectedListener = (tags: Record<string, string>[]) => {
@@ -188,10 +184,6 @@ onMounted(() => store.clearAzureForm())
   .buttons {
     flex-direction: row;
     align-self: flex-end;
-  }
-
-  .locations {
-    margin-bottom: var(variables.$spacing-l);
   }
 
   @include mediaQueriesMixins.screen-md {

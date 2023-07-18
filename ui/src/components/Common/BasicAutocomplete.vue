@@ -188,7 +188,6 @@ defineExpose({
 :deep(.chip-label-button) {
   display: flex;
   .chip-icon {
-    order: 2;
     &:hover {
       cursor: pointer;
     }

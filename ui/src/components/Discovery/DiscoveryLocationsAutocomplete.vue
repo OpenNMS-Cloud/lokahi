@@ -53,10 +53,11 @@ const locationStore = useLocationStore()
 const discoveryStore = useDiscoveryStore()
 const validationResults = ref()
 const allErrorMsgs = inject<Ref<IValidationFailure[]>>('featherFormErrors')
+const locationErrId = 'no-location'
 
 const errMsg = computed<string>(() => {
   if (allErrorMsgs?.value) {
-    const noLocationMsg = allErrorMsgs.value.filter((error: any) => error.inputId === 'no-location')[0]
+    const noLocationMsg = allErrorMsgs.value.filter((error: any) => error.inputId === locationErrId)[0]
     if (noLocationMsg) {
       return noLocationMsg.message
     }
@@ -86,13 +87,13 @@ const { closeAutocomplete, itemClicked, isAutoCompleteOpen, onFocusLost, wrapper
   useAtomicAutocomplete(locationStore.searchLocations, () => locationStore.locationsList.length, selectLocation)
 
 const locationV = string().test(
-  'no-location',
+  locationErrId,
   'Location is required.',
   () => discoveryStore.selectedLocation !== undefined
 )
 
 const schema = useValidation(
-  ref('no-location'),
+  ref(locationErrId),
   toRef(discoveryStore.selectedLocation?.location),
   'Location',
   locationV

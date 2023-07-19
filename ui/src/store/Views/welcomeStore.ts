@@ -16,6 +16,7 @@ import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
 import { ComputedRef } from 'vue'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
+import { activateDiscoveryHelpGuide, activateMinionHelpGuide, disableMinionHelpGuide } from '@/services/pendoService'
 
 interface WelcomeStoreState {
   copied: boolean
@@ -25,6 +26,7 @@ interface WelcomeStoreState {
   detectedDevice: Partial<Node> | undefined
   devicePreview: ItemPreviewProps
   discoverySubmitted: boolean
+  discoveryErrorTimeout: number
   doneLoading: boolean
   doneGradient: boolean
   downloading: boolean;
@@ -42,6 +44,7 @@ interface WelcomeStoreState {
     setMinionId: (minionIdString: string) => string;
     clearMinionCmdVals: () => void;
   }
+  minionErrorTimeout: number,
   minionStatusCopy: string
   minionStatusLoading: boolean
   minionStatusStarted: boolean
@@ -62,7 +65,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     copied: false,
     copyButtonCopy: 'Copy',
     delayCounter: 0,
-    discoverySubmitted: false,
     defaultLocationName: 'default',
     detectedDevice: {},
     devicePreview: {
@@ -73,6 +75,8 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       itemStatuses: [
       ]
     },
+    discoverySubmitted: false,
+    discoveryErrorTimeout: -1,
     doneGradient: false,
     doneLoading: false,
     downloadCopy: 'Download',
@@ -89,6 +93,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     firstLocation: { id: -1, location: '' },
     invalidForm: true,
     minionCert: { password: '', certificate: '' },
+    minionErrorTimeout: -1,
     minionCmd: useMinionCmd(),
     minionStatusCopy: 'Waiting for the Docker Install Command to be complete.',
     minionStatusLoading: false,
@@ -193,6 +198,11 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         this.downloadCopy = 'Download';
         this.downloaded = false;
       }, 5000)
+
+      this.minionErrorTimeout = window.setTimeout(() => {
+        activateMinionHelpGuide();
+      }, 600000)
+
     },
     async getFirstNode() {
       const defaultLatency = 0;
@@ -204,6 +214,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       const details = await getNodeDetails(this.firstDiscovery.name);
       const metric = details?.metrics?.nodeLatency?.data?.result?.[0]?.values?.[0]?.[1]
       if ((details.detail && metric) || details.detail && this.delayCounter > maxDelayLoops) {
+        this.stopDiscoveryErrorTimeout();
         this.setDevicePreview(details.detail, details.metrics, metric ?? defaultLatency);
         this.devicePreview.loading = false;
         this.slideThreeDisabled = false;
@@ -231,16 +242,24 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     },
     nextSlide() {
       this.slide = this.slide + 1
+      if (this.slide !== 2) {
+        this.stopMinionErrorTimeout()
+      }
+      if (this.slide !== 3) {
+        this.stopDiscoveryErrorTimeout();
+      }
       if (this.slide === 3) {
         this.loadDevicePreview()
       }
       this.scrollTop()
     },
+
     async refreshMinions() {
       if (this.refreshing && this.firstLocation.location) {
         const { getAllMinions } = useWelcomeQueries();
         const localMinions = await getAllMinions()
         if (localMinions?.length > 0) {
+          this.stopMinionErrorTimeout();
           this.refreshing = false
           this.minionStatusSuccess = true
           this.minionStatusLoading = false
@@ -273,6 +292,8 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       });
     },
     skipSlideThree() {
+      this.stopMinionErrorTimeout();
+      this.stopDiscoveryErrorTimeout();
       router.push('Dashboard')
     },
     async startDiscovery() {
@@ -292,8 +313,15 @@ export const useWelcomeStore = defineStore('welcomeStore', {
 
         this.devicePreview.loading = true;
         this.discoverySubmitted = true;
+        this.discoveryErrorTimeout = window.setTimeout(() => activateDiscoveryHelpGuide(), 180000);
         this.getFirstNode();
       }
+    },
+    stopDiscoveryErrorTimeout() {
+      window.clearTimeout(this.discoveryErrorTimeout)
+    },
+    stopMinionErrorTimeout() {
+      window.clearTimeout(this.minionErrorTimeout)
     },
     toggleSlideOneCollapse() {
       this.slideOneCollapseVisible = !this.slideOneCollapseVisible

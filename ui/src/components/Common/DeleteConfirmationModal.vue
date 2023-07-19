@@ -18,7 +18,7 @@
       <ButtonWithSpinner
         data-test="delete-btn"
         primary
-        :click="deleteHandler"
+        :click="deleteAndCloseModal"
         :isFetching="isDeleting"
       >
         Delete
@@ -28,11 +28,16 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  name: string
+const props = defineProps<{
+  name?: string
   isVisible: boolean
-  deleteHandler: (...p: any) => any
+  deleteHandler: (...p: any) => Promise<any>
   closeModal: () => void
-  isDeleting: boolean
+  isDeleting?: boolean
 }>()
+
+const deleteAndCloseModal = async () => {
+  await props.deleteHandler()
+  props.closeModal()
+} 
 </script>

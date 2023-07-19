@@ -20,7 +20,7 @@
                 @click="() => itemClicked(listItem, index)" @keydown="(d) => itemKey(d, listItem, index)">
                 {{ listItem }}
             </div>
-            <div class='list-item' tabIndex="0" v-if="inputValue && !results.find((d) => d === inputValue)"
+            <div class='list-item' tabIndex="0" v-if="inputValue && !results.find((d) => d === inputValue) && allowNew"
                 @click="() => itemClicked(inputValue, -1)" @keydown="(d) => itemKey(d, inputValue, -1)">
                 {{ inputValue }}
             </div>
@@ -41,6 +41,7 @@ const listRef = ref()
 const props = defineProps({
     errMsg: { type: String, default: '' },
     disabled: { type: Boolean, default: false },
+    allowNew: { type: Boolean, default: true },
     inputValue: { type: String, default: '' },
     inputLabel: { type: String, default: '' },
     itemClicked: { type: Function as PropType<(listItem: unknown, index: number) => void>, default: () => { } },

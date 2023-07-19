@@ -13,6 +13,7 @@
     :textChanged="textChanged"
     :errMsg="errMsg"
     :disabled="disabled"
+    :allowNew="false"
   />
 
   <FeatherChipList

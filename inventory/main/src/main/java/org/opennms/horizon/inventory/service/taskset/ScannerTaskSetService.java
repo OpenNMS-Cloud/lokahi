@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.service.taskset;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.net.util.SubnetUtils;
 import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -136,6 +137,20 @@ public class ScannerTaskSetService {
                 } catch (Exception e) {
                     LOG.error("Not able to parse IP range from {}", ipAddressDTO);
                 }
+            } else if (ipAddressDTO.contains("/")) {
+                try {
+                    var utils = new SubnetUtils(ipAddressDTO);
+                    var info = utils.getInfo();
+                    var lowAddress = info.getLowAddress();
+                    var highAddress = info.getHighAddress();
+                    var ipRangeBuilder = IpRange.newBuilder();
+                    ipRangeBuilder.setBegin(lowAddress);
+                    ipRangeBuilder.setEnd(highAddress);
+                    ipRanges.add(ipRangeBuilder.build());
+                } catch (Exception e) {
+                    LOG.error("Exception while parsing cidr notation {}", ipAddressDTO, e);
+                }
+
             } else {
                 // Assume it's only one IpAddress
                 try {

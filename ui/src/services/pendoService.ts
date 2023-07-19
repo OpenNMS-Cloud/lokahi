@@ -21,6 +21,7 @@ const addDivToPendoAreaWithID = (id: string) => {
         if (!existingOption) {
             const newDiv = document.createElement('div');
             newDiv.id = id.replace('#', '');
+            newDiv.innerText = '1';
             pendoArea.appendChild(newDiv)
         }
     }

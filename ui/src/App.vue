@@ -12,7 +12,7 @@
       <Spinner />
       <Snackbar />
       <router-view />
-      <div id="pendo-area"></div>
+      <div id="pendo-area" style="display:none;"></div>
     </div>
   </FeatherAppLayout>
 </template>

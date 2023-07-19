@@ -53,6 +53,7 @@ import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.AzureInterfaceService;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
@@ -93,6 +94,7 @@ public class ScannerResponseService {
     private final TaskSetHandler taskSetHandler;
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
+    private final AzureInterfaceService azureInterfaceService;
     private final TagService tagService;
     private final SnmpConfigService snmpConfigService;
     private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
@@ -203,7 +205,8 @@ public class ScannerResponseService {
                     nodeService.updateNodeInfo(node, nodeInfoResult);
 
                     for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {
-                        ipInterfaceService.createFromAzureScanResult(tenantId, node, networkInterfaceItem);
+                        var ipInterface = ipInterfaceService.createFromAzureScanResult(tenantId, node, networkInterfaceItem);
+                        azureInterfaceService.createOrUpdateFromScanResult(tenantId, ipInterface, networkInterfaceItem);
                     }
 
                     long nodeId = node.getId();

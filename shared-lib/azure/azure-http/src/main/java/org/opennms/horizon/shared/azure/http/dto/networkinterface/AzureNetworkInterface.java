@@ -24,5 +24,7 @@ public class AzureNetworkInterface {
     @Expose
     private NetworkInterfaceProps properties;
 
-
+    @SerializedName("location")
+    @Expose
+    private String location;
 }

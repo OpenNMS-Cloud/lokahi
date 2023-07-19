@@ -104,6 +104,7 @@ public class AzureScanner implements Scanner {
             );
 
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Failed to scan azure resources", e);
             future.complete(
                 ScanResultsResponseImpl.builder()
@@ -133,7 +134,7 @@ public class AzureScanner implements Scanner {
         AzurePublicIpAddresses publicIpAddresses = client.getPublicIpAddresses(token, request.getSubscriptionId(),
             resourceGroup, request.getTimeoutMs(), request.getRetries());
 
-        return filteredResources.stream()
+        var tmp = filteredResources.stream()
             .map(resource -> {
                 AzureInstanceView azureInstanceView = null;
                 try {
@@ -158,6 +159,7 @@ public class AzureScanner implements Scanner {
             })
             .map(scanItem -> scanNetworkInterfaces(scanItem, networkInterfaces, publicIpAddresses))
             .toList();
+        return tmp;
     }
 
     private AzureScanItem scanNetworkInterfaces(AzureScanItem scanItem,
@@ -172,17 +174,17 @@ public class AzureScanner implements Scanner {
 
             NetworkInterfaceProps networkInterfaceProps = networkInterface.getProperties();
 
-            //note: maybe even consider getting just primary ip configuration for now - needs tested for more than 1 ip configuration
             for (IpConfiguration ipConfiguration : networkInterfaceProps.getIpConfigurations()) {
+                final var scannedNetworkInterface = AzureScanNetworkInterfaceItem.newBuilder();
                 IpConfigurationProps ipConfigurationProps = ipConfiguration.getProperties();
 
-                scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
-                    .setId(networkInterface.getId())
-                    .setName(networkInterface.getName())
+                scannedNetworkInterface
+                    .setInterfaceName(networkInterface.getName())
+                    .setId(ipConfiguration.getId())
+                    .setName(ipConfiguration.getName())
                     .setIpAddress(ipConfigurationProps.getPrivateIPAddress())
                     .setIsPrimary(ipConfiguration.getProperties().isPrimary())
-                    .setIsPublic(false)
-                    .build());
+                    .setLocation(networkInterface.getLocation());
 
                 PublicIPAddress publicIPAddress = ipConfigurationProps.getPublicIPAddress();
                 if (publicIPAddress != null) {
@@ -193,14 +195,15 @@ public class AzureScanner implements Scanner {
                         AzurePublicIPAddress azurePublicIPAddress = publicAddressOpt.get();
                         PublicIpAddressProps properties = azurePublicIPAddress.getProperties();
 
-                        scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
+                        scannedNetworkInterface.setPublicIpAddress(AzureScanNetworkInterfaceItem.newBuilder()
+                            .setInterfaceName(networkInterface.getName())
                             .setId(publicIpId)
                             .setName(azurePublicIPAddress.getName())
-                            .setIpAddress(properties.getIpAddress())
-                            .setIsPublic(true)
-                            .build());
+                            .setIpAddress(properties.getIpAddress()))
+                            .setLocation(networkInterface.getLocation());
                     }
                 }
+                scannedNetworkInterfaces.add(scannedNetworkInterface.build());
             }
         }
         if (!scannedNetworkInterfaces.isEmpty()) {

@@ -52,8 +52,10 @@ message AzureScanNetworkInterfaceItem {
   string id = 1;
   string name = 2;
   string ip_address = 3;
-  bool is_public = 4;
+  string interface_name = 4;
   bool is_primary = 5;
+  AzureScanNetworkInterfaceItem public_ip_address = 6;
+  string location = 7;
 }
 
 // TODO: the naming here is not Real Obvious - "what's the difference between AzureResponseMetric and AzureResultMetric?"

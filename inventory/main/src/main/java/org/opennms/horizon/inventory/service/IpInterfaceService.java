@@ -47,13 +47,13 @@ public class IpInterfaceService {
             return optional.map(mapper::modelToDTO);
     }
 
-    public void createFromAzureScanResult(String tenantId, Node node, AzureScanNetworkInterfaceItem networkInterfaceItem) {
+    public IpInterface createFromAzureScanResult(String tenantId, Node node, AzureScanNetworkInterfaceItem networkInterfaceItem) {
         IpInterface ipInterface = new IpInterface();
         ipInterface.setNode(node);
         ipInterface.setTenantId(tenantId);
         ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
         ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
-        modelRepo.save(ipInterface);
+        return modelRepo.save(ipInterface);
     }
 
     // TODO: is this executed inside a transaction?  If not, there is a race condition in this code (find-then-save).

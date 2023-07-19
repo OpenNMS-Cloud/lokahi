@@ -132,7 +132,6 @@ public class CollectorTaskSetService {
                 .addAllInterfaces(scanItem.getNetworkInterfaceItemsList()
                     .stream().map(interfaceItem -> AzureCollectorInterfaceRequest.newBuilder()
                         .setResource(interfaceItem.getName())
-                        .setIsPublic(interfaceItem.getIsPublic())
                         .build())
                     .toList())
                 .build());

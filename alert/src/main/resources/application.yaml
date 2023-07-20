@@ -28,7 +28,7 @@ spring:
 management:
   endpoints:
     web:
-      base-path: "/"
+      #base-path: "/"
       exposure:
         include: "*"
     health:

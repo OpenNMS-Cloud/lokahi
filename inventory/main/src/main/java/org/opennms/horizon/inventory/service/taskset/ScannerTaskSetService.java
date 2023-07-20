@@ -140,6 +140,7 @@ public class ScannerTaskSetService {
             } else if (ipAddressDTO.contains("/")) {
                 try {
                     var utils = new SubnetUtils(ipAddressDTO);
+                    utils.setInclusiveHostCount(true);
                     var info = utils.getInfo();
                     var lowAddress = info.getLowAddress();
                     var highAddress = info.getHighAddress();

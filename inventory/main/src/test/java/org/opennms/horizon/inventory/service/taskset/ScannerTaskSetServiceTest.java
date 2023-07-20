@@ -124,8 +124,8 @@ public class ScannerTaskSetServiceTest {
             locationId, 1);
         Assertions.assertTrue(optional.isPresent());
         var ipRanges = optional.get().getConfiguration().unpack(PingSweepRequest.class);
-        var firstValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.4.1") &&
-            ipRange.getEnd().equals("192.168.4.254"));
+        var firstValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.4.0") &&
+            ipRange.getEnd().equals("192.168.4.255"));
         Assertions.assertTrue(firstValidRange);
         var secondValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.3.1") &&
             ipRange.getEnd().equals("192.168.3.254"));

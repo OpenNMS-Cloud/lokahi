@@ -28,7 +28,10 @@ spring:
 management:
   endpoints:
     web:
-      #base-path: "/"
+      base-path: "/"
+      path-mapping:
+        health: "healthz"
+        # With the basepath set to /, need to specify the path-mapping.
       exposure:
         include: "*"
     health:

@@ -53,7 +53,8 @@ spec:
           image: {{ .Values.OpenNMS.UI.Image }}
           imagePullPolicy: {{ .Values.OpenNMS.UI.ImagePullPolicy }}
           ports:
-            - containerPort: {{ .Values.OpenNMS.UI.Port }}
+            - name: http
+              containerPort: {{ .Values.OpenNMS.UI.Port }}
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.UI.Resources.Limits.Cpu }}"
@@ -67,3 +68,23 @@ spec:
           volumeMounts:
             - name: nginx-cache-volume
               mountPath: /var/cache/nginx
+          livenessProbe:
+            httpGet:
+              path: "/testinghealth"
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 150
+          readinessProbe:
+            httpGet:
+              path: "/testinghealth"
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 250

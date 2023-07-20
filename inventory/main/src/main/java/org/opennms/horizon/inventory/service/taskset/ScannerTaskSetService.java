@@ -142,11 +142,9 @@ public class ScannerTaskSetService {
                     var utils = new SubnetUtils(ipAddressDTO);
                     utils.setInclusiveHostCount(true);
                     var info = utils.getInfo();
-                    var lowAddress = info.getLowAddress();
-                    var highAddress = info.getHighAddress();
                     var ipRangeBuilder = IpRange.newBuilder();
-                    ipRangeBuilder.setBegin(lowAddress);
-                    ipRangeBuilder.setEnd(highAddress);
+                    ipRangeBuilder.setBegin(info.getLowAddress());
+                    ipRangeBuilder.setEnd(info.getHighAddress());
                     ipRanges.add(ipRangeBuilder.build());
                 } catch (Exception e) {
                     LOG.error("Exception while parsing cidr notation {}", ipAddressDTO, e);

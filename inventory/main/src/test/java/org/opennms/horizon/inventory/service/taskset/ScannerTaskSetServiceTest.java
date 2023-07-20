@@ -34,6 +34,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -117,22 +119,19 @@ public class ScannerTaskSetServiceTest {
         verifyNoInteractions(mockPublisher);
     }
 
-    @Test
-    void testIpAddressParsing() throws InvalidProtocolBufferException {
+    @ParameterizedTest
+    @CsvSource({
+        "192.168.34.0/24, 192.168.34.0, 192.168.34.255",
+        "192.168.45.1-192.168.45.254, 192.168.45.1, 192.168.45.254",
+        "192.168.2.45, 192.168.2.45, 192.168.2.45"
+    })
+    void testIpAddressParsing(String ipAddressNotation, String begin, String end) throws InvalidProtocolBufferException {
 
-        var optional = service.createDiscoveryTask(List.of("192.168.4.0/24", "192.168.2.2", "192.168.3.1-192.168.3.254"),
+        var optional = service.createDiscoveryTask(List.of(ipAddressNotation),
             locationId, 1);
         Assertions.assertTrue(optional.isPresent());
         var ipRanges = optional.get().getConfiguration().unpack(PingSweepRequest.class);
-        var firstValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.4.0") &&
-            ipRange.getEnd().equals("192.168.4.255"));
-        Assertions.assertTrue(firstValidRange);
-        var secondValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.3.1") &&
-            ipRange.getEnd().equals("192.168.3.254"));
-        Assertions.assertTrue(secondValidRange);
-        var thirdValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.2.2") &&
-            ipRange.getEnd().equals("192.168.2.2"));
-        Assertions.assertTrue(thirdValidRange);
-
+        Assertions.assertEquals(begin, ipRanges.getIpRange(0).getBegin());
+        Assertions.assertEquals(end, ipRanges.getIpRange(0).getEnd());
     }
 }

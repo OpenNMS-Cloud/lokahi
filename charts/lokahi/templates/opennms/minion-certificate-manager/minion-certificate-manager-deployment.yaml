@@ -10,6 +10,8 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+  strategy:
+    type: Recreate
   replicas: {{ .Values.OpenNMS.MinionCertificateManager.Replicas }}
   template:
     metadata:
@@ -96,16 +98,6 @@ spec:
             periodSeconds: 2
             successThreshold: 1
             failureThreshold: 150
-          readinessProbe:
-            httpGet:
-              path: "/actuator/health/readiness"
-              port: http
-              scheme: HTTP
-            initialDelaySeconds: 20
-            timeoutSeconds: 1
-            periodSeconds: 2
-            successThreshold: 1
-            failureThreshold: 250
       {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

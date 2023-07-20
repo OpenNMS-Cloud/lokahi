@@ -355,8 +355,9 @@ public class DiscoveryTestSteps {
             return false;
         }
 
-        for (Integer nextId : nodeIds) {
-            Map<String, Object> queryVariables = Map.of("id", nextId);
+        for (Iterator<Integer> iterator = nodeIds.iterator(); iterator.hasNext(); ) {
+            Integer nextId = iterator.next();
+            Map<String, Object> queryVariables = Map.of("id", nextId.intValue());
 
             GQLQuery gqlQuery = new GQLQuery();
             gqlQuery.setQuery(queryList);

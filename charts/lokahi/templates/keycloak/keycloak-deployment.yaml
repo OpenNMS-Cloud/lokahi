@@ -144,18 +144,18 @@ spec:
             {{- end }}
             - mountPath: /opt/keycloak/data/import
               name: realm-config
-          startupProbe:
-            httpGet:
-              {{- if and .Values.TLS.Enabled .Values.Keycloak.TlsSecretName }}
-              scheme: HTTPS
-              port: https
-              {{- else }}
-              scheme: HTTP
-              port: http
-              {{- end }}
-              path: {{ .Values.Keycloak.Path }}/health/live
-            failureThreshold: 150
-            periodSeconds: 5
+          #startupProbe:
+          #  httpGet:
+          #    {{- if and .Values.TLS.Enabled .Values.Keycloak.TlsSecretName }}
+          #    scheme: HTTPS
+          #    port: https
+          #    {{- else }}
+          #    scheme: HTTP
+          #    port: http
+          #    {{- end }}
+          #    path: {{ .Values.Keycloak.Path }}/health/live
+          #  failureThreshold: 150
+          #  periodSeconds: 5
           livenessProbe:
             httpGet:
               {{- if and .Values.TLS.Enabled .Values.Keycloak.TlsSecretName }}

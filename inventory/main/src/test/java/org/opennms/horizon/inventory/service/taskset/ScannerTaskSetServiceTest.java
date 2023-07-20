@@ -26,10 +26,11 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.service.taskset.publiser;
+package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +42,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.service.SnmpConfigService;
-import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
+import org.opennms.icmp.contract.PingSweepRequest;
 import org.opennms.node.scan.contract.NodeScanRequest;
 import org.opennms.taskset.contract.TaskDefinition;
 
@@ -114,5 +115,24 @@ public class ScannerTaskSetServiceTest {
         NodeDTO node = nodeBuilder.build();
         service.sendNodeScannerTask(List.of(node), locationId, tenantId);
         verifyNoInteractions(mockPublisher);
+    }
+
+    @Test
+    void testIpAddressParsing() throws InvalidProtocolBufferException {
+
+        var optional = service.createDiscoveryTask(List.of("192.168.4.0/24", "192.168.2.2", "192.168.3.1-192.168.3.254"),
+            locationId, 1);
+        Assertions.assertTrue(optional.isPresent());
+        var ipRanges = optional.get().getConfiguration().unpack(PingSweepRequest.class);
+        var firstValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.4.1") &&
+            ipRange.getEnd().equals("192.168.4.254"));
+        Assertions.assertTrue(firstValidRange);
+        var secondValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.3.1") &&
+            ipRange.getEnd().equals("192.168.3.254"));
+        Assertions.assertTrue(secondValidRange);
+        var thirdValidRange = ipRanges.getIpRangeList().stream().anyMatch(ipRange -> ipRange.getBegin().equals("192.168.2.2") &&
+            ipRange.getEnd().equals("192.168.2.2"));
+        Assertions.assertTrue(thirdValidRange);
+
     }
 }

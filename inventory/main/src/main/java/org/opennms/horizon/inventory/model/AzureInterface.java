@@ -60,16 +60,16 @@ public class AzureInterface {
     @JoinColumn(name = "ip_interface_id", referencedColumnName = "id")
     private IpInterface ipInterface;
 
-    @Column(name = "interface_name")
-    private String interfaceName;
-
     @Column(name = "ip_interface_id", insertable = false, updatable = false)
     private long interfaceId;
+
+    @NotNull
+    @Column(name = "interface_name")
+    private String interfaceName;
 
     @Column(name = "private_ip_id")
     private String privateIpId;
 
-    @NotNull
     @Column(name = "public_ip_address", columnDefinition = "inet")
     private InetAddress publicIpAddress;
 

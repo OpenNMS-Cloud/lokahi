@@ -29,8 +29,8 @@
 package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
-import org.opennms.azure.contract.AzureCollectorInterfaceRequest;
 import org.opennms.azure.contract.AzureCollectorRequest;
+import org.opennms.azure.contract.AzureCollectorResourcesRequest;
 import org.opennms.horizon.azure.api.AzureResponseMetric;
 import org.opennms.horizon.azure.api.AzureResultMetric;
 import org.opennms.horizon.azure.api.AzureValueMetric;
@@ -48,7 +48,10 @@ import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +62,10 @@ public class AzureCollector implements ServiceCollector {
 
     private static final String INTERVAL_PARAM = "interval";
     private static final String METRIC_NAMES_PARAM = "metricnames";
+
+    private static final String TIMESPAN_PARAM = "timespan";
+
+    private static final int TIMESPAN_MINS = 15;
 
 
     //   Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
@@ -77,6 +84,12 @@ public class AzureCollector implements ServiceCollector {
     static {
         AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesReceivedRate", "bytes_received_rate");
         AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesSentRate", "bytes_sent_rate");
+    }
+
+    private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = new HashMap<>();
+
+    static {
+        AZURE_IPINTERFACE_METRIC_TO_ALIAS.put("ByteCount", "bytes_received");
     }
 
     private static final String METRIC_DELIMITER = ",";
@@ -106,14 +119,16 @@ public class AzureCollector implements ServiceCollector {
 
             if (instanceView.isUp()) {
 
+                // host metrics
                 List<AzureResultMetric> metricResults = new ArrayList<>(collectNodeMetrics(request, token)
                     .entrySet().stream().map(nodeMetric -> mapNodeResult(request, nodeMetric))
                     .toList());
 
-                for (AzureCollectorInterfaceRequest interfaceRequest : request.getInterfacesList()) {
-
-                    metricResults.addAll(collectInterfaceMetrics(request, interfaceRequest, token)
-                        .entrySet().stream().map(interfaceMetric -> mapInterfaceResult(request, interfaceRequest, interfaceMetric))
+                // interface metrics
+                for (var resources : request.getCollectorResourcesList()) {
+                    var label = resources.getType() + "/" + resources.getResource();
+                    metricResults.addAll(collectInterfaceMetrics(request, resources, token)
+                        .entrySet().stream().map(interfaceMetric -> mapInterfaceResult(request, label, interfaceMetric))
                         .toList());
                 }
 
@@ -158,8 +173,7 @@ public class AzureCollector implements ServiceCollector {
     }
 
     private Map<String, Double> collectNodeMetrics(AzureCollectorRequest request, AzureOAuthToken token) throws AzureHttpException {
-        String[] metricNames = AZURE_NODE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
-        Map<String, String> params = getMetricsParams(metricNames);
+        Map<String, String> params = getMetricsParams(AZURE_NODE_METRIC_TO_ALIAS.keySet());
 
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
             request.getResourceGroup(), request.getResource(), params, request.getTimeoutMs(), request.getRetries());
@@ -168,25 +182,31 @@ public class AzureCollector implements ServiceCollector {
     }
 
     private Map<String, Double> collectInterfaceMetrics(AzureCollectorRequest request,
-                                                        AzureCollectorInterfaceRequest interfaceRequest, AzureOAuthToken token) throws AzureHttpException {
+                                                        AzureCollectorResourcesRequest resource,
+                                                        AzureOAuthToken token) throws AzureHttpException {
+        try {
+            var type = AzureHttpClient.ResourcesType.valueOf(resource.getType());
+            Map<String, String> params =
+                getMetricsParams(AzureHttpClient.ResourcesType.networkInterfaces == type ?
+                    AZURE_INTERFACE_METRIC_TO_ALIAS.keySet() : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());
 
-        //todo: not supported, the API is only returning number of packets, will need to find out how to get this data
-        if (interfaceRequest.getIsPublic()) {
-            return new HashMap<>();
+            AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),
+                request.getResourceGroup(), resource.getType() + "/" + resource.getResource(), params,
+                request.getTimeoutMs(), request.getRetries());
+
+            return metrics.collect();
+        } catch (IllegalArgumentException ex) {
+            throw new AzureHttpException("Unknown type: " + resource.getType());
         }
-
-        String[] metricNames = AZURE_INTERFACE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
-        Map<String, String> params = getMetricsParams(metricNames);
-
-        AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),
-            request.getResourceGroup(), interfaceRequest.getResource(), params, request.getTimeoutMs(), request.getRetries());
-
-        return metrics.collect();
     }
 
-    private Map<String, String> getMetricsParams(String[] metricNames) {
+    private Map<String, String> getMetricsParams(Collection<String> metricNames) {
         Map<String, String> params = new HashMap<>();
         params.put(INTERVAL_PARAM, METRIC_INTERVAL);
+        // limit cost, start time must be at least 1 min before
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES).plusSeconds(-60L);
+        String toTime = now.toString();
+        params.put(TIMESPAN_PARAM, now.plusSeconds(-TIMESPAN_MINS * 60L).toString() + "/" + toTime);
         params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
         return params;
     }
@@ -205,11 +225,11 @@ public class AzureCollector implements ServiceCollector {
     }
 
     private AzureResultMetric mapInterfaceResult(AzureCollectorRequest request,
-                                                 AzureCollectorInterfaceRequest interfaceRequest,
+                                                 String interfaceName,
                                                  Map.Entry<String, Double> metricData) {
         return AzureResultMetric.newBuilder()
             .setResourceGroup(request.getResourceGroup())
-            .setResourceName(interfaceRequest.getResource())
+            .setResourceName(interfaceName)
             .setAlias(getInterfaceMetricAlias(metricData.getKey()))
             .setValue(
                 AzureValueMetric.newBuilder()
@@ -229,6 +249,9 @@ public class AzureCollector implements ServiceCollector {
     private String getInterfaceMetricAlias(String metricName) {
         if (AZURE_INTERFACE_METRIC_TO_ALIAS.containsKey(metricName)) {
             return AZURE_INTERFACE_METRIC_TO_ALIAS.get(metricName);
+        }
+        if (AZURE_IPINTERFACE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_IPINTERFACE_METRIC_TO_ALIAS.get(metricName);
         }
         throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
     }

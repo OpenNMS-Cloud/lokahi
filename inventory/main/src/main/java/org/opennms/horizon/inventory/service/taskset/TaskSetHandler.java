@@ -41,6 +41,7 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +68,7 @@ public class TaskSetHandler {
         Long locationId = discovery.getLocationId();
 
         TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, nodeId);
-        taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, Collections.singletonList(task));
     }
 
     public void sendCollectorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -87,7 +88,7 @@ public class TaskSetHandler {
         Long locationId = discovery.getLocationId();
 
         TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, nodeId);
-        taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, Collections.singletonList(task));
     }
 
 }

@@ -53,13 +53,12 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
 public class AzureHttpClient {
+    public enum ResourcesType {publicIPAddresses,  networkInterfaces}
 
     /*
      * Base URLs
@@ -78,7 +77,7 @@ public class AzureHttpClient {
     public static final String PUBLIC_IP_ADDRESSES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses%s";
     public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView%s";
     public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics%s";
-    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces/%s/providers/Microsoft.Insights/metrics%s";
+    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/%s/providers/Microsoft.Insights/metrics%s";
 
     /*
      * Headers
@@ -141,11 +140,11 @@ public class AzureHttpClient {
             .POST(HttpRequest.BodyPublishers.ofString(postBody.toString()))
             .build();
 
-        log.error("========");
-        log.error("Request: {}", request);
-        log.error("bodyPublisher: {}", request.bodyPublisher().get().contentLength());
-        log.error("parameters: {}", postBody);
-        log.error("========");
+        log.info("========");
+        log.info("Request: {}", request);
+        log.info("bodyPublisher: {}", request.bodyPublisher().get().contentLength());
+        log.info("postBody: {}", postBody);
+        log.info("========");
         try{
             return performRequest(AzureOAuthToken.class, request, retries);
         } catch (Exception ex){
@@ -174,7 +173,7 @@ public class AzureHttpClient {
     }
 
     public AzureNetworkInterfaces getNetworkInterfaces(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                                       long timeoutMs, int retries) throws AzureHttpException {
+                                                      long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(NETWORK_INTERFACES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureNetworkInterfaces.class);
@@ -201,10 +200,22 @@ public class AzureHttpClient {
         return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }
 
+    /**
+     * https://learn.microsoft.com/en-us/rest/api/monitor/metrics/list?tabs=HTTP#resulttype
+     * @param token
+     * @param subscriptionId
+     * @param resourceGroup
+     * @param resourceUri (simplified version of resourceUri e.g. publicIPAddresses/PUBLIC_IP_ID , networkInterfaces/NETWORK_INTERFACE_ID)
+     * @param params (extra parameter e.g. , metricnames, interval)
+     * @param timeoutMs
+     * @param retries
+     * @return AzureMetrics
+     * @throws AzureHttpException
+     */
     public AzureMetrics getNetworkInterfaceMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                                   String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
+                                                   String resourceUri, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
-        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
+        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceUri, versionQueryParam);
         url = addUrlParams(url, params);
         return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }

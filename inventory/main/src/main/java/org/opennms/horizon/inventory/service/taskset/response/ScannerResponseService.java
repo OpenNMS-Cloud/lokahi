@@ -182,7 +182,6 @@ public class ScannerResponseService {
 
             String nodeLabel = String.format("%s (%s)", azureScanItem.getName(), azureScanItem.getResourceGroup());
 
-            //todo: store the ID in the database, currently this is the only way to identify the node at this point
             Optional<Node> nodeOpt = nodeRepository.findByTenantLocationIdAndNodeLabel(tenantId, locationId, nodeLabel);
 
             try {
@@ -201,7 +200,9 @@ public class ScannerResponseService {
 
                     var nodeInfoResult = NodeInfoResult.newBuilder()
                         .setSystemLocation(azureScanItem.getLocation())
-                        .setSystemDescr(azureScanItem.getOsName() + " (" + azureScanItem.getOsVersion() + ")").build();
+                        .setSystemName(azureScanItem.getOsName())
+                        .setSystemDescr(azureScanItem.getOsVersion())
+                        .build();
                     nodeService.updateNodeInfo(node, nodeInfoResult);
 
                     for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {

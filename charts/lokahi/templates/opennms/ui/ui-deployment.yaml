@@ -70,7 +70,7 @@ spec:
               mountPath: /var/cache/nginx
           livenessProbe:
             httpGet:
-              path: "/testinghealth"
+              path: "/healthz"
               port: http
               scheme: HTTP
             initialDelaySeconds: 20
@@ -80,7 +80,7 @@ spec:
             failureThreshold: 150
           readinessProbe:
             httpGet:
-              path: "/testinghealth"
+              path: "/healthz"
               port: http
               scheme: HTTP
             initialDelaySeconds: 20

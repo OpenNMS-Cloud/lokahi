@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -25,20 +25,29 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+package org.opennms.horizon.inventory.mapper;
 
-package org.opennms.horizon.server.model.inventory;
+import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+@Mapper(componentModel = "spring")
+public interface IpAddressMapper {
+    default InetAddress map(String value) throws UnknownHostException {
+        if(StringUtils.isNotEmpty(value)) {
+            return InetAddressUtils.getInetAddress(value);
+        } else {
+            return null;
+        }
+    }
 
-@Getter
-@Setter
-public class IpInterface {
-    private long id;
-    private long nodeId;
-    private String ipAddress;
-    private Boolean snmpPrimary;
-    private String hostname;
-    private String netmask;
-    private AzureInterface azureInterface;
+    default String map(InetAddress value) {
+        if (value != null) {
+            return InetAddressUtils.toIpAddrString(value);
+        } else {
+            return null;
+        }
+    }
 }

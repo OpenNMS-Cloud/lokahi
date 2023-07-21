@@ -35,5 +35,5 @@ import org.opennms.horizon.server.model.inventory.IpInterface;
 @Mapper(componentModel = "spring")
 public interface IpInterfaceMapper {
 
-    IpInterface protoToIpInterface(IpInterfaceDTO nodeDTO);
+    IpInterface protoToIpInterface(IpInterfaceDTO ipInterfaceDTO);
 }

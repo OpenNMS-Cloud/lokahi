@@ -42,6 +42,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_AZURE_NODE_TYPE;
+import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_INSTANCE_LABEL;
+
 @Component
 public class TaskSetCollectorAzureResponseProcessor {
 
@@ -67,25 +73,30 @@ public class TaskSetCollectorAzureResponseProcessor {
                     .setValue(CortexTSS.sanitizeMetricName(azureResult.getAlias())));
 
                 for (int i = 0; i < MetricNameConstants.MONITOR_METRICS_LABEL_NAMES.length; i++) {
+                    final var label = MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i];
+                    var value = labelValues[i];
+                    if (METRIC_INSTANCE_LABEL.equals(label)){
+                        if(METRIC_AZURE_NODE_TYPE.equals(azureResult.getType())){
+                            value = METRIC_AZURE_NODE_TYPE;
+                        } else {
+                            value = azureResult.getType() + "/" + azureResult.getResourceName();
+                        }
+                    }
                     builder.addLabels(PrometheusTypes.Label.newBuilder()
-                        .setName(CortexTSS.sanitizeLabelName(MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i]))
-                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
+                        .setName(CortexTSS.sanitizeLabelName(label))
+                        .setValue(CortexTSS.sanitizeLabelValue(value)));
                 }
 
                 int type = azureResult.getValue().getTypeValue();
-                switch (type) {
-                    case AzureValueType.INT64_VALUE:
-                        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(response.getTimestamp())
-                            .setValue(azureResult.getValue().getUint64()));
-                        break;
-                    default:
-                        LOG.warn("Unrecognized azure value type");
-                        // TODO: in this case, should cortexTSS.store() be called?
+                if (type == AzureValueType.INT64_VALUE) {
+                    builder.addSamples(PrometheusTypes.Sample.newBuilder()
+                        .setTimestamp(response.getTimestamp())
+                        .setValue(azureResult.getValue().getUint64()));
+                    cortexTSS.store(tenantId, builder);
+                    tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
+                } else {
+                    LOG.warn("SKIP Unrecognized azure value type: {} azureResult: {}", type,  azureResult);
                 }
-
-                cortexTSS.store(tenantId, builder);
-                tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
             } catch (Exception e) {
                 LOG.warn("Exception parsing azure metrics", e);
             }

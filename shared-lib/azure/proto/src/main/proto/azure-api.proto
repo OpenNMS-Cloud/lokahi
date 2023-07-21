@@ -79,4 +79,5 @@ message AzureResultMetric {
   string resource_group = 2;
   AzureValueMetric value = 3;
   string alias = 4;
+  string type = 5;
 }

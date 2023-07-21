@@ -28,6 +28,13 @@ fragment NodeByIdParts on Query {
       netmask
       nodeId
       snmpPrimary
+      azureInterface {
+        interfaceName
+        privateIpId
+        publicIpAddress
+        publicIpId
+        location
+      }
     }
     snmpInterfaces {
       id

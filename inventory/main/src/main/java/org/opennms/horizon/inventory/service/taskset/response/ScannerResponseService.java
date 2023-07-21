@@ -200,8 +200,8 @@ public class ScannerResponseService {
 
                     var nodeInfoResult = NodeInfoResult.newBuilder()
                         .setSystemLocation(azureScanItem.getLocation())
-                        .setSystemName(azureScanItem.getOsName())
-                        .setSystemDescr(azureScanItem.getOsVersion())
+                        .setSystemName(azureScanItem.getName())
+                        .setSystemDescr(String.format("%s (%s)", azureScanItem.getOsName(), azureScanItem.getOsVersion()))
                         .build();
                     nodeService.updateNodeInfo(node, nodeInfoResult);
 

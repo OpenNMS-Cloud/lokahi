@@ -28,35 +28,19 @@
 
 package org.opennms.horizon.inventory.mapper;
 
-
-import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
+import org.mapstruct.NullValueCheckStrategy;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
+import org.opennms.horizon.inventory.dto.AzureInterfaceDTO;
 import org.opennms.horizon.inventory.model.AzureInterface;
-import org.opennms.horizon.inventory.model.SnmpInterface;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.opennms.node.scan.contract.SnmpInterfaceResult;
 
-import java.net.InetAddress;
-
-@Mapper(componentModel = "spring", uses = EmptyStringMapper.class)
+@Mapper(componentModel = "spring", uses = {EmptyStringMapper.class, IpAddressMapper.class})
 public interface AzureInterfaceMapper {
-    default InetAddress map(String value) {
-        if(StringUtils.isNotEmpty(value)) {
-            return InetAddressUtils.getInetAddress(value);
-        } else {
-            return null;
-        }
-    }
-
-    default String map(InetAddress value) {
-        return InetAddressUtils.toIpAddrString(value);
-    }
-
-
     @Mappings({
         @Mapping(target = "id", ignore = true),
         @Mapping(target = "publicIpAddress", source = "publicIpAddress.ipAddress", qualifiedByName = "emptyString"),
@@ -76,4 +60,13 @@ public interface AzureInterfaceMapper {
         @Mapping(target = "location", source = "location", qualifiedByName = "emptyString")
     })
     void updateFromScanResult(@MappingTarget AzureInterface result, AzureScanNetworkInterfaceItem scanResult);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    AzureInterfaceDTO modelToDTO(AzureInterface model);
+
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    AzureInterface dtoToModel(AzureInterfaceDTO model);
 }

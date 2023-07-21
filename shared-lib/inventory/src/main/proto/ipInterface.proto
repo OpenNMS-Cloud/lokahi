@@ -27,6 +27,7 @@
  *******************************************************************************/
 syntax = "proto3";
 
+import "azureInterface.proto";
 import "google/protobuf/any.proto";
 
 package opennms.inventory;
@@ -43,4 +44,5 @@ message IpInterfaceDTO {
   string netmask = 7;
   int64 snmpInterfaceId = 8;
   int64 if_index = 9;
+  optional opennms.inventory.AzureInterfaceDTO azure_interface = 10;
 }

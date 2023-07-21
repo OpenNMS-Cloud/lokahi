@@ -38,7 +38,8 @@ import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 
 
-@Mapper(componentModel = "spring", uses = {TagMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class},
+@Mapper(componentModel = "spring", uses = {TagMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class,
+    AzureInterfaceMapper.class},
     // Needed for grpc proto mapping
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface NodeMapper {

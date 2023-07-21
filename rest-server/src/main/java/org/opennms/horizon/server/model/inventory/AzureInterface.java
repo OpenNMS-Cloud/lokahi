@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -31,14 +31,18 @@ package org.opennms.horizon.server.model.inventory;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.net.InetAddress;
+
 @Getter
 @Setter
-public class IpInterface {
+public class AzureInterface {
     private long id;
-    private long nodeId;
-    private String ipAddress;
-    private Boolean snmpPrimary;
-    private String hostname;
-    private String netmask;
-    private AzureInterface azureInterface;
+    private String tenantId;
+    private IpInterface ipInterface;
+    private long interfaceId;
+    private String interfaceName;
+    private String privateIpId;
+    private String publicIpAddress;
+    private String publicIpId;
+    private String location;
 }

@@ -66,7 +66,7 @@ public class NodeStatusService {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
 
         if (AZURE_SCAN_TYPE.equals(node.getScanType())) {
-            return getStatusMetric(id, "azure-node-" + id, monitorType, env)
+            return getStatusMetric(id, "azure-node-" + id, "AZURE", env)
                 .map(result -> getNodeStatus(id, result));
         } else {
             if (node.getIpInterfacesCount() > 0) {

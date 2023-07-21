@@ -8,6 +8,7 @@
         </div>
         <div class="metrics">
           <LineGraph :graph="bitsInOut" type="bytes" @has-data="displayEmptyMsgIfNoData" />
+          <LineGraph v-if="isAzure && azureInterface?.publicIpId != ''" type="bytes" :graph="publicInterfaceByteCount" @has-data="displayEmptyMsgIfNoData" />
           <LineGraph v-if="!isAzure" type="percentage" :graph="bandwidthInOut" @has-data="displayEmptyMsgIfNoData" />
           <LineGraph v-if="!isAzure" :graph="nodeLatency" @has-data="displayEmptyMsgIfNoData" />
           <LineGraph v-if="!isAzure" :graph="errorsInOut" @has-data="displayEmptyMsgIfNoData" />
@@ -35,6 +36,7 @@ const instance = ref()
 const ifName = ref()
 const hasMetricData = ref(false)
 const isAzure = ref(false)
+const azureInterface = ref()
 
 const bandwidthInOut = computed<GraphProps>(() => {
   return {
@@ -50,15 +52,34 @@ const bandwidthInOut = computed<GraphProps>(() => {
 })
 
 const bitsInOut = computed<GraphProps>(() => {
+  const props =  {
+      label: 'Bits Inbound / Outbound',
+      metrics: ['network_in_bits', 'network_out_bits'],
+      monitor: 'SNMP',
+      nodeId: route.params.id as string,
+      instance: instance.value,
+      timeRange: 10,
+      timeRangeUnit: TimeRangeUnit.Minute,
+      ifName: ifName.value
+  }
+
+  if(isAzure.value) {
+    props.monitor = 'AZURE'
+    props.label = 'Interface Bytes Inbound / Outbound',
+    props.metrics = ['bytes_received_rate', 'bytes_sent_rate']
+  }
+  return props
+})
+
+const publicInterfaceByteCount = computed<GraphProps>(() => {
   return {
-    label: 'Bits Inbound / Outbound',
-    metrics: ['network_in_bits', 'network_out_bits'],
-    monitor: 'SNMP',
-    nodeId: route.params.id as string,
-    instance: instance.value,
-    timeRange: 10,
-    timeRangeUnit: TimeRangeUnit.Minute,
-    ifName: ifName.value
+      label: 'Bytes Count',
+      metrics: ['bytes_received'],
+      monitor: 'AZURE',
+      nodeId: route.params.id as string,
+      instance: 'publicIPAddresses/' + azureInterface.value?.publicIpId,
+      timeRange: 10,
+      timeRangeUnit: TimeRangeUnit.Minute
   }
 })
 
@@ -88,10 +109,10 @@ const errorsInOut = computed<GraphProps>(() => {
   }
 })
 
-const openAzureMetrics = (inst: string) => {
+const openAzureMetrics = (inst: object) => {
   isAzure.value = true // azure nodes can only display bytes in/out
-  interfaceName.value = inst
-  instance.value = inst
+  instance.value = 'networkInterfaces/' + inst?.interfaceName
+  azureInterface.value = inst
   openModal()
 }
 

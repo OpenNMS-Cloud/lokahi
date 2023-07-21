@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,19 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.inventory;
+package org.opennms.horizon.server.mapper;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.inventory.dto.AzureInterfaceDTO;
+import org.opennms.horizon.server.model.inventory.AzureInterface;
 
-@Getter
-@Setter
-public class IpInterface {
-    private long id;
-    private long nodeId;
-    private String ipAddress;
-    private Boolean snmpPrimary;
-    private String hostname;
-    private String netmask;
-    private AzureInterface azureInterface;
+@Mapper(componentModel = "spring")
+public interface AzureInterfaceMapper {
+
+    AzureInterface dtoToModel(AzureInterfaceDTO nodeDTO);
+    AzureInterfaceDTO modelToDTO(AzureInterface model);
 }

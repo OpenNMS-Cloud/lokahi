@@ -33,8 +33,11 @@ public interface MetricNameConstants {
     String METRICS_NAME_RESPONSE = "response_time_msec";
     String METRIC_NAME_LABEL = "__name__";
 
+    String METRIC_INSTANCE_LABEL = "instance";
+    String METRIC_AZURE_NODE_TYPE = "node";
+
     String[] MONITOR_METRICS_LABEL_NAMES = {
-        "instance",
+        METRIC_INSTANCE_LABEL,
         "location_id",
         "system_id",
         "monitor",

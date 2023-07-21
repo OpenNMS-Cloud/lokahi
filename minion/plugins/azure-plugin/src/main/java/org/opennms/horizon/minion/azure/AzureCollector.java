@@ -49,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -65,10 +64,11 @@ public class AzureCollector implements ServiceCollector {
 
     private static final String TIMESPAN_PARAM = "timespan";
 
-    private static final int TIMESPAN_MINS = 15;
+    // Reference inventory: TaskUtils.DEFAULT_SCHEDULE
+    private static final int TIMESPAN_SECOND = 60;
 
 
-    //   Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
+    // Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
     private static final String METRIC_INTERVAL = "PT1M";
 
     private static final Map<String, String> AZURE_NODE_METRIC_TO_ALIAS = new HashMap<>();
@@ -82,13 +82,16 @@ public class AzureCollector implements ServiceCollector {
     private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = new HashMap<>();
 
     static {
+        // Valid metrics: BytesSentRate,BytesReceivedRate,PacketsSentRate,PacketsReceivedRate
         AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesReceivedRate", "bytes_received_rate");
         AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesSentRate", "bytes_sent_rate");
     }
 
+
     private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = new HashMap<>();
 
     static {
+        // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
         AZURE_IPINTERFACE_METRIC_TO_ALIAS.put("ByteCount", "bytes_received");
     }
 
@@ -126,16 +129,15 @@ public class AzureCollector implements ServiceCollector {
 
                 // interface metrics
                 for (var resources : request.getCollectorResourcesList()) {
-                    var label = resources.getType() + "/" + resources.getResource();
                     metricResults.addAll(collectInterfaceMetrics(request, resources, token)
-                        .entrySet().stream().map(interfaceMetric -> mapInterfaceResult(request, label, interfaceMetric))
+                        .entrySet().stream().map(interfaceMetric ->
+                            mapInterfaceResult(request, resources.getResource(), resources.getType(), interfaceMetric))
                         .toList());
                 }
 
-
-                log.info("****************************************************");
-                log.info("AZURE COLLECTOR metricResults LIST: \n{}", metricResults);
-                log.info("****************************************************");
+                log.debug("****************************************************");
+                log.debug("AZURE COLLECTOR metricResults LIST: \n{}", metricResults);
+                log.debug("****************************************************");
 
                 AzureResponseMetric results = AzureResponseMetric.newBuilder()
                     .addAllResults(metricResults)
@@ -204,9 +206,9 @@ public class AzureCollector implements ServiceCollector {
         Map<String, String> params = new HashMap<>();
         params.put(INTERVAL_PARAM, METRIC_INTERVAL);
         // limit cost, start time must be at least 1 min before
-        Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES).plusSeconds(-60L);
+        Instant now = Instant.now().plusSeconds(-60L);
         String toTime = now.toString();
-        params.put(TIMESPAN_PARAM, now.plusSeconds(-TIMESPAN_MINS * 60L).toString() + "/" + toTime);
+        params.put(TIMESPAN_PARAM, now.plusSeconds(-TIMESPAN_SECOND).toString() + "/" + toTime);
         params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
         return params;
     }
@@ -215,6 +217,7 @@ public class AzureCollector implements ServiceCollector {
         return AzureResultMetric.newBuilder()
             .setResourceGroup(request.getResourceGroup())
             .setResourceName(request.getResource())
+            .setType("node")
             .setAlias(getNodeMetricAlias(metricData.getKey()))
             .setValue(
                 AzureValueMetric.newBuilder()
@@ -225,11 +228,12 @@ public class AzureCollector implements ServiceCollector {
     }
 
     private AzureResultMetric mapInterfaceResult(AzureCollectorRequest request,
-                                                 String interfaceName,
+                                                 String resourceName, String type,
                                                  Map.Entry<String, Double> metricData) {
         return AzureResultMetric.newBuilder()
             .setResourceGroup(request.getResourceGroup())
-            .setResourceName(interfaceName)
+            .setResourceName(resourceName)
+            .setType(type)
             .setAlias(getInterfaceMetricAlias(metricData.getKey()))
             .setValue(
                 AzureValueMetric.newBuilder()

@@ -64,5 +64,6 @@ query FindAllNodesByMonitoredState($monitoredState: String!) {
     }
     monitoringLocationId
     nodeLabel
+    scanType
   }
 }

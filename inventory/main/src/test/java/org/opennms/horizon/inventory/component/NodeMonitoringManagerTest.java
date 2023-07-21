@@ -37,6 +37,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
@@ -114,7 +115,8 @@ class NodeMonitoringManagerTest {
         doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         doReturn(passiveDiscovery).when(passiveDiscoveryRepository).findByTenantIdAndLocationId(tenantId, locationId);
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
-        internalEventConsumer.receiveNewSuspectEvent(event.toByteArray());
+        var eventLog = EventLog.newBuilder().addEvents(event);
+        internalEventConsumer.receiveNewSuspectEvent(eventLog.build().toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
         verify(passiveDiscoveryService).sendNodeScan(node);
         NodeCreateDTO createDTO = argumentCaptor.getValue();
@@ -128,7 +130,8 @@ class NodeMonitoringManagerTest {
     void testReceiveEventWithDifferentUEI() {
         var anotherEvent = Event.newBuilder()
             .setUei("something else").build();
-        internalEventConsumer.receiveNewSuspectEvent(anotherEvent.toByteArray());
+        var eventLog = EventLog.newBuilder().addEvents(anotherEvent);
+        internalEventConsumer.receiveNewSuspectEvent(eventLog.build().toByteArray());
         verifyNoInteractions(passiveDiscoveryService);
         verifyNoInteractions(nodeService);
     }
@@ -136,14 +139,16 @@ class NodeMonitoringManagerTest {
     @Test
     void testMissingTenantID() {
         Event testEvent = Event.newBuilder().setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI).build();
-        assertThatThrownBy(() -> internalEventConsumer.receiveNewSuspectEvent(testEvent.toByteArray())).isInstanceOf(InventoryRuntimeException.class);
+        var eventLog = EventLog.newBuilder().addEvents(testEvent).build();
+        assertThatThrownBy(() -> internalEventConsumer.receiveNewSuspectEvent(eventLog.toByteArray())).isInstanceOf(InventoryRuntimeException.class);
     }
 
     @Test
     void testEntityExistException() throws EntityExistException, LocationNotFoundException {
         doThrow(new EntityExistException("bad request")).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
-        internalEventConsumer.receiveNewSuspectEvent(event.toByteArray());
+        var eventLog = EventLog.newBuilder().addEvents(event).build();
+        internalEventConsumer.receiveNewSuspectEvent(eventLog.toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocationId()).isEqualTo(event.getLocationId());

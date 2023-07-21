@@ -33,7 +33,7 @@ import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
@@ -71,41 +71,46 @@ public class InternalEventConsumer {
     @Transactional
     public void receiveNewSuspectEvent(@Payload byte[] data) {
         try {
-            var event = Event.parseFrom(data);
-            if(event.getUei().equals(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)) {
-                if (Strings.isNullOrEmpty(event.getTenantId())) {
-                    throw new InventoryRuntimeException("Missing tenant id on event: " + event);
+            var eventLog = EventLog.parseFrom(data);
+            eventLog.getEventsList().forEach((event) -> {
+                try {
+                    if (event.getUei().equals(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)) {
+                        if (Strings.isNullOrEmpty(event.getTenantId())) {
+                            throw new InventoryRuntimeException("Missing tenant id on event: " + event);
+                        }
+                        var tenantId = event.getTenantId();
+                        var locationId = event.getLocationId();
+                        log.debug("Create new node from event with tenantId={}; locationId={}; interface={}", event.getIpAddress(), locationId, tenantId);
+
+                        NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
+                            .setLocationId(locationId)
+                            .setManagementIp(event.getIpAddress())
+                            .setLabel(event.getIpAddress())
+                            .setMonitoredState(MonitoredState.DETECTED);
+
+                        Optional<PassiveDiscovery> discoveryOpt = passiveDiscoveryRepository.findByTenantIdAndLocationId(tenantId, Long.valueOf(locationId));
+
+                        if (discoveryOpt.isPresent()) {
+                            PassiveDiscovery discovery = discoveryOpt.get();
+
+                            List<TagCreateDTO> tagCreateDtoList = discovery.getTags().stream().map((Function<Tag, TagCreateDTO>) tag ->
+                                TagCreateDTO.newBuilder().setName(tag.getName()).build()).toList();
+
+                            nodeCreateBuilder.addAllTags(tagCreateDtoList);
+                        }
+
+                        Node node = nodeService.createNode(nodeCreateBuilder.build(), ScanType.NODE_SCAN, tenantId);
+                        passiveDiscoveryService.sendNodeScan(node);
+                    }
+                } catch (EntityExistException e) {
+                    log.error("Duplicated device error.", e);
+                } catch (LocationNotFoundException e) {
+                    log.error("Location not found.", e);
                 }
-                var tenantId = event.getTenantId();
-                var locationId = event.getLocationId();
-                log.debug("Create new node from event with tenantId={}; locationId={}; interface={}", event.getIpAddress(), locationId, tenantId);
+            });
 
-                NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
-                    .setLocationId(locationId)
-                    .setManagementIp(event.getIpAddress())
-                    .setLabel(event.getIpAddress())
-                    .setMonitoredState(MonitoredState.DETECTED);
-
-                Optional<PassiveDiscovery> discoveryOpt = passiveDiscoveryRepository.findByTenantIdAndLocationId(tenantId, Long.valueOf(locationId));
-
-                if (discoveryOpt.isPresent()){
-                    PassiveDiscovery discovery = discoveryOpt.get();
-
-                    List<TagCreateDTO> tagCreateDtoList = discovery.getTags().stream().map((Function<Tag, TagCreateDTO>) tag ->
-                            TagCreateDTO.newBuilder().setName(tag.getName()).build()).toList();
-
-                    nodeCreateBuilder.addAllTags(tagCreateDtoList);
-                }
-
-                Node node = nodeService.createNode(nodeCreateBuilder.build(), ScanType.NODE_SCAN, tenantId);
-                passiveDiscoveryService.sendNodeScan(node);
-            }
         } catch (InvalidProtocolBufferException e) {
             log.error("Error while parsing Event. Payload: {}", Arrays.toString(data), e);
-        } catch (EntityExistException e) {
-            log.error("Duplicated device error.", e);
-        } catch (LocationNotFoundException e) {
-            log.error("Location not found.", e);
         }
     }
 }

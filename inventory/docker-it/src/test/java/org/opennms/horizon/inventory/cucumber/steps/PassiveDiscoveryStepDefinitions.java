@@ -41,6 +41,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
@@ -55,7 +56,6 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.shared.events.EventConstants;
 
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -244,8 +244,9 @@ public class PassiveDiscoveryStepDefinitions {
             .setLocationId(String.valueOf(locationDTO.getId()))
             .setIpAddress(ipAddress)
             .setTenantId(backgroundHelper.getTenantId());
+        var eventLog = EventLog.newBuilder().addEvents(eventBuilder.build()).build();
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
-            var producerRecord = new ProducerRecord<String, byte[]>(internalEventTopic, eventBuilder.build().toByteArray());
+            var producerRecord = new ProducerRecord<String, byte[]>(internalEventTopic, eventLog.toByteArray());
             kafkaProducer.send(producerRecord);
         }
 
@@ -268,5 +269,6 @@ public class PassiveDiscoveryStepDefinitions {
             }
         });
     }
+
 
 }

@@ -33,7 +33,6 @@ import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -65,7 +64,8 @@ public class EventForwarder {
     public void sendInternalEvent(Event event) {
         LOG.info("Sending event with UEI: {} for interface: {} for tenantId={}; locationId={}", event.getUei(),
             event.getIpAddress(), event.getTenantId(), event.getLocationId());
-        var producerRecord = new ProducerRecord<String, byte[]>(internalEventsTopic, event.toByteArray());
+        var eventLog = EventLog.newBuilder().addEvents(event).build();
+        var producerRecord = new ProducerRecord<String, byte[]>(internalEventsTopic, eventLog.toByteArray());
         kafkaTemplate.send(producerRecord);
     }
 }

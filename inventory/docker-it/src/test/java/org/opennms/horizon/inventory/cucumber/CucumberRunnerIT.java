@@ -109,7 +109,7 @@ public class CucumberRunnerIT {
         System.setProperty(KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME, bootstrapServers);
         LOG.info("KAFKA LOCALHOST BOOTSTRAP SERVERS {}", bootstrapServers);
         
-        startApplicationContainer(false);   // DEBUGGING - set to true to expose the application debugging on host port 5005
+        startApplicationContainer(true);   // DEBUGGING - set to true to expose the application debugging on host port 5005
     }
 
     @AfterAll

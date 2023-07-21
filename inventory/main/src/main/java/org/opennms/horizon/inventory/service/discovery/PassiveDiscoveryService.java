@@ -208,7 +208,7 @@ public class PassiveDiscoveryService {
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
         String location = monitoringLocation.getLocation();
 
-        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(location));
+        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, monitoringLocation.getId());
         if (discoveryOpt.isPresent()) {
             PassiveDiscovery discovery = discoveryOpt.get();
             if (discovery.isToggle()) {

@@ -83,7 +83,7 @@ public class InternalEventConsumer {
                 NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
                     .setLocationId(locationId)
                     .setManagementIp(event.getIpAddress())
-                    .setLabel("trap-" + event.getIpAddress())
+                    .setLabel(event.getIpAddress())
                     .setMonitoredState(MonitoredState.DETECTED);
 
                 Optional<PassiveDiscovery> discoveryOpt = passiveDiscoveryRepository.findByTenantIdAndLocationId(tenantId, Long.valueOf(locationId));

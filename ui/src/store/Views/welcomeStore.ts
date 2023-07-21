@@ -16,7 +16,6 @@ import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
 import { ComputedRef } from 'vue'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
-import { activateDiscoveryHelpGuide, activateMinionHelpGuide, disableMinionHelpGuide } from '@/services/pendoService'
 
 interface WelcomeStoreState {
   copied: boolean
@@ -70,6 +69,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     devicePreview: {
       title: 'Node Discovery',
       loading: false,
+      loadingCopy: 'Loading first discovery.',
       itemTitle: '',
       itemSubtitle: '',
       itemStatuses: [
@@ -200,7 +200,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       }, 5000)
 
       this.minionErrorTimeout = window.setTimeout(() => {
-        activateMinionHelpGuide();
+        this.minionStatusCopy = 'Please wait while we detect your Minion. This can sometimes take more than 10 minutes.'
       }, 600000)
 
     },
@@ -313,7 +313,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
 
         this.devicePreview.loading = true;
         this.discoverySubmitted = true;
-        this.discoveryErrorTimeout = window.setTimeout(() => activateDiscoveryHelpGuide(), 180000);
+        this.discoveryErrorTimeout = window.setTimeout(() => this.devicePreview.loadingCopy = 'Still loading first discovery.', 180000);
         this.getFirstNode();
       }
     },

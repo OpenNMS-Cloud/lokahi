@@ -24,8 +24,8 @@
             </div>
 
             <ItemPreview v-if="welcomeStore.discoverySubmitted" :loading="welcomeStore.devicePreview.loading"
-                :title="welcomeStore.devicePreview.title" :itemTitle="welcomeStore.devicePreview.itemTitle"
-                :itemSubtitle="welcomeStore.devicePreview.itemSubtitle"
+                :title="welcomeStore.devicePreview.title" :loadingCopy="welcomeStore.devicePreview.loadingCopy"
+                :itemTitle="welcomeStore.devicePreview.itemTitle" :itemSubtitle="welcomeStore.devicePreview.itemSubtitle"
                 :itemStatuses="welcomeStore.devicePreview.itemStatuses" />
             <div class="welcome-slide-footer">
                 <FeatherButton data-test="welcome-store-slide-three-skip-button" text @click="welcomeStore.skipSlideThree">

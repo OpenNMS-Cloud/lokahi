@@ -12,7 +12,8 @@
         <div class="item-preview-statuses">
           <div class="item-preview-status" v-for="(item, index) in itemStatuses" :key="index">
             <span>{{ item.title }}</span>
-            <div data-test="item-preview-status-id" :style="{ backgroundColor: item.statusColor, color: item.statusText }">{{ item.status }}</div>
+            <div data-test="item-preview-status-id"
+              :style="{ backgroundColor: item.statusColor, color: item.statusText }">{{ item.status }}</div>
           </div>
         </div>
       </div>
@@ -21,7 +22,7 @@
       <div>
         <FeatherSpinner />
       </div>
-      <div data-test="welcome-discovery-status-txt">Loading first discovery.</div>
+      <div data-test="welcome-discovery-status-txt">{{ loadingCopy }}</div>
     </div>
   </div>
 </template>
@@ -30,6 +31,7 @@ import { ItemPreviewProps } from './commonTypes'
 
 withDefaults(defineProps<ItemPreviewProps>(), {
   loading: false,
+  loadingCopy: '',
   title: '',
   itemTitle: '',
   itemSubtitle: '',

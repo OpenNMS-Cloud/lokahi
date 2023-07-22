@@ -76,11 +76,7 @@ public class TaskSetCollectorAzureResponseProcessor {
                     final var label = MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i];
                     var value = labelValues[i];
                     if (METRIC_INSTANCE_LABEL.equals(label)){
-                        if(METRIC_AZURE_NODE_TYPE.equals(azureResult.getType())){
-                            value = METRIC_AZURE_NODE_TYPE;
-                        } else {
-                            value = azureResult.getType() + "/" + azureResult.getResourceName();
-                        }
+                        value = getInstance(azureResult);
                     }
                     builder.addLabels(PrometheusTypes.Label.newBuilder()
                         .setName(CortexTSS.sanitizeLabelName(label))
@@ -100,6 +96,14 @@ public class TaskSetCollectorAzureResponseProcessor {
             } catch (Exception e) {
                 LOG.warn("Exception parsing azure metrics", e);
             }
+        }
+    }
+
+    private String getInstance(AzureResultMetric azureResult) {
+        if (METRIC_AZURE_NODE_TYPE.equals(azureResult.getType())) {
+            return METRIC_AZURE_NODE_TYPE;
+        } else {
+            return azureResult.getType() + "/" + azureResult.getResourceName();
         }
     }
 }

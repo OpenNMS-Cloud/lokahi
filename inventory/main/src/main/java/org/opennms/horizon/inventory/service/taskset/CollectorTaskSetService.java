@@ -136,7 +136,6 @@ public class CollectorTaskSetService {
             publicIpNames.add(interfaceItem.getPublicIpAddress().getName());
             targetInterfaceNames.add(interfaceItem.getInterfaceName());
         }
-        AzureCollectorResourcesRequest.newBuilder().setResource(AzureHttpClient.ResourcesType.publicIPAddresses.toString());
 
         Any configuration =
             Any.pack(AzureCollectorRequest.newBuilder()
@@ -150,12 +149,12 @@ public class CollectorTaskSetService {
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .addAllCollectorResources(targetInterfaceNames.stream().map(name ->
                     AzureCollectorResourcesRequest.newBuilder()
-                        .setType(AzureHttpClient.ResourcesType.networkInterfaces.name())
+                        .setType(AzureHttpClient.ResourcesType.NETWOR_INTERFACES.toString())
                         .setResource(name)
                         .build()).toList())
                 .addAllCollectorResources(publicIpNames.stream().map(name ->
                     AzureCollectorResourcesRequest.newBuilder()
-                        .setType(AzureHttpClient.ResourcesType.publicIPAddresses.name())
+                        .setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString())
                         .setResource(name)
                         .build()).toList())
                 .build());

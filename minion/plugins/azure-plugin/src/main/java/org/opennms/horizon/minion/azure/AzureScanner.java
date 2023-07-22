@@ -104,7 +104,6 @@ public class AzureScanner implements Scanner {
             );
 
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Failed to scan azure resources", e);
             future.complete(
                 ScanResultsResponseImpl.builder()
@@ -134,7 +133,7 @@ public class AzureScanner implements Scanner {
         AzurePublicIpAddresses publicIpAddresses = client.getPublicIpAddresses(token, request.getSubscriptionId(),
             resourceGroup, request.getTimeoutMs(), request.getRetries());
 
-        var tmp = filteredResources.stream()
+        return filteredResources.stream()
             .map(resource -> {
                 AzureInstanceView azureInstanceView = null;
                 try {
@@ -159,7 +158,6 @@ public class AzureScanner implements Scanner {
             })
             .map(scanItem -> scanNetworkInterfaces(scanItem, networkInterfaces, publicIpAddresses))
             .toList();
-        return tmp;
     }
 
     private AzureScanItem scanNetworkInterfaces(AzureScanItem scanItem,

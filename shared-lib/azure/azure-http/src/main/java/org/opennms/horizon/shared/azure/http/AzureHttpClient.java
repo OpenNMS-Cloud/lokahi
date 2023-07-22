@@ -58,7 +58,26 @@ import java.util.Objects;
 
 @Slf4j
 public class AzureHttpClient {
-    public enum ResourcesType {publicIPAddresses,  networkInterfaces}
+    public enum ResourcesType {
+        PUBLIC_IP_ADDRESSES("publicIPAddresses"), NETWOR_INTERFACES("networkInterfaces");
+        private String value;
+        ResourcesType(String value) {
+            this.value = value;
+        }
+        @Override
+        public String toString() {
+            return value;
+        }
+
+        public static ResourcesType fromString(String value) {
+            for (var item : ResourcesType.values()) {
+                if (item.value.equals(value)) {
+                    return item;
+                }
+            }
+            throw new IllegalArgumentException();
+        }
+    }
 
     /*
      * Base URLs
@@ -140,17 +159,11 @@ public class AzureHttpClient {
             .POST(HttpRequest.BodyPublishers.ofString(postBody.toString()))
             .build();
 
-        log.info("========");
-        log.info("Request: {}", request);
-        log.info("bodyPublisher: {}", request.bodyPublisher().get().contentLength());
-        log.info("postBody: {}", postBody);
-        log.info("========");
-        try{
-            return performRequest(AzureOAuthToken.class, request, retries);
-        } catch (Exception ex){
-            ex.printStackTrace();
-            throw ex;
-        }
+        log.debug("========");
+        log.debug("Request: {}", request);
+        log.debug("postBody: {}", postBody);
+        log.debug("========");
+         return performRequest(AzureOAuthToken.class, request, retries);
     }
 
     public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
@@ -242,8 +255,6 @@ public class AzureHttpClient {
             } catch (AzureHttpException ex) {
                 if (ex.getHttpStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     log.error("Request: {}, HTTP_UNAUTHORIZED: {}", request, ex.getMessage(), ex);
-                    ex.printStackTrace();
-
                     throw ex;
                 }
                 lastException = ex;

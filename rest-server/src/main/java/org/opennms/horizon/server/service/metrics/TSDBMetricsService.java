@@ -49,9 +49,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.opennms.horizon.server.service.metrics.Constants.AZURE_MONITOR_TYPE;
-import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
-
 @Slf4j
 @GraphQLApi
 @Service

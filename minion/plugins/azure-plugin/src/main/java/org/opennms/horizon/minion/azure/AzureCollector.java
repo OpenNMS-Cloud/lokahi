@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -94,7 +94,7 @@ public class AzureCollector implements ServiceCollector {
         // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
         AZURE_IPINTERFACE_METRIC_TO_ALIAS.put("ByteCount", "bytes_received");
     }
-
+    private static final String AZURE_NODE_PREFIX = "azure-node-";
     private static final String METRIC_DELIMITER = ",";
 
     private final AzureHttpClient client;
@@ -149,7 +149,7 @@ public class AzureCollector implements ServiceCollector {
                     .monitorType(MonitorType.AZURE)
                     .status(true)
                     .timeStamp(System.currentTimeMillis())
-                    .ipAddress("azure-node-" + collectionRequest.getNodeId())
+                    .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                     .build());
 
             } else {
@@ -158,7 +158,7 @@ public class AzureCollector implements ServiceCollector {
                     .monitorType(MonitorType.AZURE)
                     .status(false)
                     .timeStamp(System.currentTimeMillis())
-                    .ipAddress("azure-node-" + collectionRequest.getNodeId())
+                    .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                     .build());
             }
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class AzureCollector implements ServiceCollector {
                 .monitorType(MonitorType.AZURE)
                 .status(false)
                 .timeStamp(System.currentTimeMillis())
-                .ipAddress("azure-node-" + collectionRequest.getNodeId())
+                .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                 .build());
         }
         return future;
@@ -187,9 +187,9 @@ public class AzureCollector implements ServiceCollector {
                                                         AzureCollectorResourcesRequest resource,
                                                         AzureOAuthToken token) throws AzureHttpException {
         try {
-            var type = AzureHttpClient.ResourcesType.valueOf(resource.getType());
+            var type = AzureHttpClient.ResourcesType.fromString(resource.getType());
             Map<String, String> params =
-                getMetricsParams(AzureHttpClient.ResourcesType.networkInterfaces == type ?
+                getMetricsParams(AzureHttpClient.ResourcesType.NETWOR_INTERFACES == type ?
                     AZURE_INTERFACE_METRIC_TO_ALIAS.keySet() : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());
 
             AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),

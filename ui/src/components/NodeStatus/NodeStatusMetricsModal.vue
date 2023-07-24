@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { TimeRangeUnit } from '@/types/graphql'
+import { TimeRangeUnit, AzureInterface } from '@/types/graphql'
 import useModal from '@/composables/useModal'
 import Close from '@featherds/icon/navigation/Cancel'
 import { GraphProps } from '@/types/graphs'
@@ -109,7 +109,7 @@ const errorsInOut = computed<GraphProps>(() => {
   }
 })
 
-const openAzureMetrics = (inst: object) => {
+const openAzureMetrics = (inst: AzureInterface) => {
   isAzure.value = true // azure nodes can only display bytes in/out
   instance.value = 'networkInterfaces/' + inst?.interfaceName
   azureInterface.value = inst

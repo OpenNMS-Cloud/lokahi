@@ -190,7 +190,7 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
       metricsVariables.id = node.id
       metricsVariables.instance = instance
       if( node.scanType === AZURE_SCAN ){
-        metricsVariables.monitor = 'AZURE'
+        metricsVariables.monitor = Monitor.AZURE
       }
       await getMetrics()
     }

@@ -45,11 +45,13 @@ public class AzureHttpException extends Exception {
     public AzureHttpException(String message) {
         super(message);
         this.httpError = null;
+        this.httpStatusCode = 0;
     }
 
     public AzureHttpException(String message, Throwable t) {
         super(message, t);
         this.httpError = null;
+        this.httpStatusCode = 0;
     }
 
     public boolean hasHttpError() {

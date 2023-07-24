@@ -58,7 +58,8 @@ export interface ChartData {
 export const enum Monitor {
   ICMP = 'ICMP',
   SNMP = 'SNMP',
-  ECHO = 'ECHO'
+  ECHO = 'ECHO',
+  AZURE = 'AZURE'
 }
 
 export interface TagSelectItem {

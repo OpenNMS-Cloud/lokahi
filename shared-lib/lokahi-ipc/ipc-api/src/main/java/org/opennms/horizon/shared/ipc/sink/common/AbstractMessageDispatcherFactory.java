@@ -35,7 +35,6 @@ import org.opennms.horizon.shared.ipc.sink.aggregation.AggregatingMessageDispatc
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
-import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
@@ -62,8 +61,6 @@ import io.opentracing.Tracer;
  */
 public abstract class AbstractMessageDispatcherFactory<W> implements MessageDispatcherFactory {
 
-    private ServiceRegistration<MetricSet> metricsServiceRegistration = null;
-
     protected abstract <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, W metadata, byte[] message);
 
     public abstract Tracer getTracer();
@@ -74,6 +71,8 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
      * Invokes dispatch within a timer context.
      */
     private <S extends Message, T extends Message> void timedDispatch(DispatcherState<W, S, T> state, byte[] message) {
+        state.getDispatchCounter().inc();
+
         try (Context ctx = state.getDispatchTimer().time();
              Scope scope = getTracer().buildSpan(state.getModule().getId()).startActive(true)) {
             dispatch(state.getModule(), state.getMetaData(), message);

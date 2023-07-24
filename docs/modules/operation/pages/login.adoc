@@ -1,5 +1,6 @@
 
 = Getting Started
+:description: Get started with OpenNMS Lōkahi, an open source network monitoring project designed for cloud-native deployments: first-time login.
 
 After you log in, there are several different ways to proceed.
 This getting started section provides instructions on how to xref:get-started/discovery/introduction.adoc[discover] your inventory and xref:get-started/policies/create.adoc[create monitoring policies] to ensure you are monitoring what you want to monitor.

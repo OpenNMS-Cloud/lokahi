@@ -2,6 +2,7 @@
 :!sectids:
 
 = Monitoring Policies
+:description: Learn how monitoring policies in OpenNMS Lōkahi/Cloud can define a set of rules for monitoring nodes and taking action under certain conditions.
 
 A monitoring policy defines a set of rules for monitoring nodes and automatically taking action under certain conditions (for example, sending alerts, enforcing thresholds).
 You can apply a monitoring policy to multiple devices, allowing for easy management of the devices on your network.

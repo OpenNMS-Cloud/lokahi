@@ -32,8 +32,11 @@ import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.InternetProtocol;
 import org.opennms.horizon.systemtests.CucumberHooks;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.MountableFile;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.List;
 
@@ -41,9 +44,7 @@ import static org.opennms.horizon.systemtests.CucumberHooks.MINIONS;
 import static org.testcontainers.containers.Network.SHARED;
 
 public class MinionContainer extends GenericContainer<MinionContainer> {
-    public String gatewayHost;
     public String minionId;
-    public String minionLocation;
 
     /*
     ## -- Karaf SSH            8101/TCP
@@ -54,20 +55,27 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
     ## -- Flows v5             8877/UDP
     ## -- Flows v9             4729/UDP
      */
-    public MinionContainer(String gatewayHost, String minionId, String minionLocation) {
-        super("opennms/lokahi-minion:latest");
+    public MinionContainer(String minionId, String netalias, Network network, File certBundle, String bundlePwd) {
+        super("opennms/lokahi-minion:" + CucumberHooks.minionDockerTag);
+
         // expose TCP ports here
         withExposedPorts(8101, 8181)
-            .withNetworkAliases("lokahi")
-            .withNetwork(SHARED)
-            .withEnv("TZ", "America/New_York")
+            .withNetworkAliases(netalias)
+            .withNetwork(network)
+//            .withEnv("TZ", "America/New_York")
             .withEnv("MINION_ID", minionId)
-            .withEnv("MINION_LOCATION", minionLocation)
             .withEnv("USE_KUBERNETES", "false")
             .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
-            .withEnv("MINION_GATEWAY_HOST", gatewayHost)
-            .withEnv("MINION_GATEWAY_PORT", "443")
+            .withEnv("MINION_GATEWAY_HOST", CucumberHooks.gatewayHost)
+            .withEnv("MINION_GATEWAY_PORT", CucumberHooks.gatewayPort)
             .withEnv("MINION_GATEWAY_TLS", "true")
+
+            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
+            .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", bundlePwd)
+            .withCopyFileToContainer(MountableFile.forHostPath(certBundle.getPath()), "/opt/karaf/minion.p12")
+            .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", CucumberHooks.overrideAuthority)
+            .withLabel("label", minionId)
+
             .waitingFor(
                 Wait.forLogMessage(".* Udp Flow Listener started at .*", 3)
                     .withStartupTimeout(Duration.ofMinutes(5))
@@ -76,23 +84,40 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
                 Wait.forLogMessage(".*Sending heartbeat from Minion.*", 2)
                     .withStartupTimeout(Duration.ofMinutes(2))
             )
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
+            .waitingFor(
+                Wait.forLogMessage(".*Ignite node started OK.*", 1)
+            )
+            .waitingFor(
+                Wait.forLogMessage(".*Initialized RPC stream.*", 1)
+            )
+            .waitingFor(
+                Wait.forLogMessage(".*Initialized Sink stream.*", 1)
+            )
+            .waitingFor(
+                Wait.forLogMessage(".*Initialized cloud receiver stream.*", 1)
+            )
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(3)));
+
+        String ca = System.getenv("MINION_INGRESS_CA");
+        if (ca != null) {
+            withCopyFileToContainer(MountableFile.forHostPath(ca), "/opt/karaf/ca.crt")
+            .withEnv("GRPC_CLIENT_TRUSTSTORE", "/opt/karaf/ca.crt");
+        }
 
         // expose UDP ports here
         this.getPortBindings().addAll(List.of(
             ExposedPort.udp(4729).toString(),
-            ExposedPort.udp(8877).toString()
+            ExposedPort.udp(8877).toString(),
+            ExposedPort.udp(9999).toString()
         ));
 
-        this.gatewayHost = gatewayHost;
         this.minionId = minionId.toUpperCase();
-        this.minionLocation = minionLocation;
     }
 
-    public static void createNewOne(String minionId, String minionLocation) {
-        MinionContainer minionContainer = new MinionContainer(CucumberHooks.gatewayUrl, minionId, minionLocation);
+    public static void createNewOne(String minionId, String netalias, Network network, File certBundle, String bundlePwd) {
+        MinionContainer minionContainer = new MinionContainer(minionId, "minion-" + minionId.toLowerCase(),
+            network, certBundle, bundlePwd);
         minionContainer.start();
-        MINIONS.add(minionContainer);
     }
 
     public String getUdpPortBinding(int portNumber) {

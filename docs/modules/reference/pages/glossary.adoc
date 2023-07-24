@@ -1,4 +1,9 @@
 
 = Glossary
+:description: Glossary of terms related to OpenNMS Lōkahi/Cloud.
 
-Tags:
+== M
+Minion:: A Minion is a lightweight, secure collector that monitors and communicates with the devices on your network, shares collected data, and connects your network with OpenNMS Cloud/Lōkahi.
+
+== L
+location:: A location defines a network area where you installed your Minion.

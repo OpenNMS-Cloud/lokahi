@@ -1,4 +1,5 @@
 = Create an Active Discovery
+:description: Learn how to identify network inventory with OpenNMS Lōkahi/Cloud using ICMP/SNMP or Azure (active discovery).
 
 An xref:get-started/discovery/introduction.adoc#active-discovery[active discovery] is one method to identify the devices on your network and add them to your monitoring inventory.
 You may also choose to xref:get-started/discovery/passive.adoc[create a passive discovery].

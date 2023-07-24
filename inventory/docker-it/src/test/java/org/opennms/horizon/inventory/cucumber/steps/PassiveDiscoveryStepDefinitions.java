@@ -30,12 +30,21 @@ package org.opennms.horizon.inventory.cucumber.steps;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
@@ -45,8 +54,15 @@ import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
+import org.opennms.horizon.shared.events.EventConstants;
 
-import static org.junit.Assert.*;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class PassiveDiscoveryStepDefinitions {
@@ -56,6 +72,7 @@ public class PassiveDiscoveryStepDefinitions {
     private PassiveDiscoveryListDTO fetchedPassiveDiscoveryList;
     private TagListDTO tagList;
     private long fetchedId;
+    private final String internalEventTopic  = "internal-event";
 
     public PassiveDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -201,4 +218,57 @@ public class PassiveDiscoveryStepDefinitions {
             passiveDiscoveryServiceBlockingStub.deleteDiscovery(Int64Value.of(discoveryDTO.getId()));
         }
     }
+
+    @Given("A GRPC request to enable a passive discovery")
+    public void aGRPCRequestToEnableAPassiveDiscovery() {
+        PassiveDiscoveryToggleDTO toggleDTO = PassiveDiscoveryToggleDTO.newBuilder()
+            .setId(fetchedId)
+            .setToggle(true)
+            .build();
+
+        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
+            = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        upsertedDiscovery = stub.toggleDiscovery(toggleDTO);
+    }
+
+    @When("A new suspect event sent to Inventory for location named {string} and IP Address {string}")
+    public void aNewSuspectEventSentToInventoryForLocationNamedAndIPAddress(String location , String ipAddress) throws InterruptedException {
+
+        var locationDTO = backgroundHelper.getMonitoringLocationStub().getLocationByName(StringValue.of(location));
+        Properties producerConfig = new Properties();
+        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
+        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
+
+        var eventBuilder = Event.newBuilder().setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
+            .setLocationId(String.valueOf(locationDTO.getId()))
+            .setIpAddress(ipAddress)
+            .setTenantId(backgroundHelper.getTenantId());
+        var eventLog = EventLog.newBuilder().addEvents(eventBuilder.build()).build();
+        try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
+            var producerRecord = new ProducerRecord<String, byte[]>(internalEventTopic, eventLog.toByteArray());
+            kafkaProducer.send(producerRecord);
+        }
+
+    }
+
+
+    @Then("A new node should be created with location {string} and IP Address {string}")
+    public void aNewNodeShouldBeCreatedWithLocationAndIPAddress(String location, String ipAddress) {
+
+        var locationDTO = backgroundHelper.getMonitoringLocationStub().getLocationByName(StringValue.of(location));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+            try {
+                var result = backgroundHelper.getNodeServiceBlockingStub().getNodeIdFromQuery(NodeIdQuery.newBuilder()
+                    .setIpAddress(ipAddress).setLocationId(String.valueOf(locationDTO.getId())).build());
+                var nodeDTO = backgroundHelper.getNodeServiceBlockingStub().getNodeById(result);
+                return nodeDTO.getIpInterfacesList().get(0).getIpAddress().equals(ipAddress);
+            } catch (Exception e) {
+                return false;
+            }
+        });
+    }
+
+
 }

@@ -1,0 +1,92 @@
+
+= Minion Management
+:description: Learn how to manage data collectors (Minions) in OpenNMS Cloud/Lōkahi, including how to add a location, review flows and events, and remove a location.
+
+A Minion is a lightweight, secure collector that monitors and communicates with the devices on your network, shares collected data, and connects your network with OpenNMS Cloud/Lōkahi.
+
+This section describes management tasks for installed Minions.
+If you have not yet installed at least one Minion, see <documentation> for instructions.
+
+Each Minion is associated with a location.
+A location defines a network area where you installed your Minion.
+The Minion's security certificate is closely tied to the location.
+With OpenNMS Cloud, you install your first Minion as part of the onboarding process.
+We create a location called "default" to associate with this Minion.
+
+Before you can add a Minion, you need to create a location.
+
+== Create a location
+A location defines the network area where you installed your Minion.
+
+Follow these steps to add a location:
+
+. Click *Locations* in the left navigation menu.
+. Click the *+ Location* button.
+. Type the location name in the field.
++
+Note that you cannot edit the location name after you save the location.
+. Click *Save*.
+
+The new location is saved.
+From the Locations list, you can edit the location (to add a Minion to it) or delete it.
+
+== Associate a Minion with a location
+To install a Minion on your system and associate it with a location, make sure your system meets the following requirements:
+
+* CPU: 3GHz quad core x86_64 and above
+* RAM: 8GB (physical) and above
+* Storage (disk space): 100GB with SSD and above
+* Docker environment with Docker Compose (installation instructions: https://docs.docker.com/desktop/install/mac-install/[Mac], https://docs.docker.com/desktop/install/linux-install/[Linux], https://docs.docker.com/desktop/install/windows-install/[Windows])
+* Access to a terminal window
+* Network Time Protocol (NTP) installed and configured
+
+NOTE: We recommend using Linux for production environments.
+Mac and Windows work as test environments for the Minion, but sending traps to the Minion does not work correctly.
+Traps will not be associated with the correct node, and xref:get-started/discovery/introduction.adoc#passive-discovery[passive discovery] will not be able to find the node that is sending traps.
+
+To associate a Minion with a location, follow these steps:
+
+. Click *Locations* in the left navigation menu.
+. In the *Locations* list, click the vertical ellipsis (*⋮*) next to the location you want to add the Minion to.
+. Click *Edit*.
+. Click *Download Certifcate*.
+. Create a permanent directory for the Minion on the device where you want to run it.
+. Copy the downloaded security certificate to the permanent directory.
+Do not change its name.
+. Copy the password in the *Unlock File Password* field.
+. Open the certificate file and, when prompted, enter the password in the field.
+. Open a terminal window.
+. In OpenNMS, copy the Docker command.
+. Paste the command into the terminal window.
+. Edit the `PATH_TO_DOWNLOADED_FILE` with the full path to the certificate file.
+. Run the command.
+. In OpenNMS, click *Save*.
+
+Your Minion will appear in the Locations screen once it is running and OpenNMS detects it.
+
+// do they click save after the Minion has been discovered or will it show up in the UI when it's been detected?
+
+== View Minion details
+
+You can view details about the Minion including latency and status on both the Locations page (select *Locations* from the left navigation menu) and the Minions page (select *Minions* from the left navigation menu).
+
+== Delete a location
+
+To delete a location, follow these steps:
+
+. Click *Locations* in the left navigation menu.
+. Find the location that you want to remove and select the vertical ellipsis beside its name.
+. Choose *Delete* and confirm deletion.
+
+== Delete a Minion
+
+If you delete your only Minion, you will no longer receive network monitoring data.
+
+Follow these steps to delete a Minion:
+
+. Click *Locations* in the left navigation menu.
+. In the locations list, click the location with the Minion you want to delete.
+. Click the vertical ellipsis beside the Minion name and click *Delete*.
++
+You are prompted to confirm deletion.
+. Click *Delete*.

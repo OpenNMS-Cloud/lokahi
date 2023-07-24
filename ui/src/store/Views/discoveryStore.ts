@@ -13,7 +13,7 @@ const defaultAzureForm = {
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
-    selectedLocations: <string[]>[],
+    selectedLocation: undefined as undefined | MonitoringLocation,
     selectedTags: [] as TagCreateInput[],
     ipAddresses: <string[]>[],
     ipRange: {
@@ -28,18 +28,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     selectedDiscovery: {}
   }),
   actions: {
-    selectLocation(location: MonitoringLocation, single?: boolean) {
-      if (single) {
-        this.selectedLocations = location ? [location.id] : []
-        return
-      }
-
-      if (this.selectedLocations.includes(location.id)) {
-        this.selectedLocations = this.selectedLocations.filter((x) => x !== location.id)
-      } else {
-        this.selectedLocations.push(location.id)
-      }
-    },
     selectTags(tags: TagCreateInput[]) {
       this.selectedTags = tags
     },
@@ -48,7 +36,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
 
       await addAzureCreds({
         discovery: {
-          locationId: this.selectedLocations[0],
+          locationId: this.selectedLocation?.id,
           tags: this.selectedTags,
           ...this.azure
         }

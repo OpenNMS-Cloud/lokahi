@@ -117,11 +117,36 @@ describe('Flows', () => {
     appStore.createApplicationLineChartData()
     expect(appStore.lineChartData.datasets.length).toBe(2)
   })
+
   test('The Flows store createTableChart should populate TableGraphData', () => {
     appStore.tableChartData = { labels: [], datasets: [] }
     expect(appStore.tableChartData.datasets.length).toBe(0)
     appStore.tableData = TableGraphData
     appStore.createApplicationTableChartData()
     expect(appStore.tableChartData.datasets.length).toBe(2)
+  })
+
+  test('The step from the getRequestData function returns properly', () => {
+    const store = useFlowsStore()
+    const testDataPoints = 500
+    store.filters.maxDataPoints = testDataPoints
+    const data = store.getRequestData(10, [], [])
+    const startTime = new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+    const result = Math.floor((Date.now() - startTime) / testDataPoints)
+
+    // helps prevent flakiness from exact ms match
+    const lowerResult = result - 5
+    const upperResult = result + 5
+    expect(data.step).toBeGreaterThan(lowerResult)
+    expect(data.step).toBeLessThan(upperResult)
+  })
+
+  test('The span gap fn', () => {
+    const store = useFlowsStore()
+    let spanGap = store.getSpanGap()
+    expect(spanGap).toBe(300000)
+    store.filters.dateFilter = TimeRange.SevenDays
+    spanGap = store.getSpanGap()
+    expect(spanGap).toBe(3600000)
   })
 })

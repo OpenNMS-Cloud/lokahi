@@ -10,10 +10,10 @@ Feature: Tag operation feature
     Given Kafka alert topic "alerts"
 
   Scenario: Insert tag when receive new message
-    Given Tenant "tenant-1"
+    Given A new tenant
     Given Tag operation data
       | action     | name     | node_ids | policy_ids |
-      | ASSIGN_TAG | test-tag | 100,200  | 101,201   |
+      | ASSIGN_TAG | test-tag | 100,200  | 101,201    |
     And Sent tag operation message to Kafka topic
     Then Verify list tag with size 1 and node ids
       | 100 | 200 |

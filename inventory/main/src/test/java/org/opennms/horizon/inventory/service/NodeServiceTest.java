@@ -29,47 +29,21 @@
 package org.opennms.horizon.inventory.service;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.net.InetAddress;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
-import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.component.TagPublisher;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
-import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -84,6 +58,30 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.taskset.contract.ScanType;
+
+import java.net.InetAddress;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class NodeServiceTest {
 
@@ -120,8 +118,6 @@ public class NodeServiceTest {
             mock(TaskSetPublisher.class),
             tagService,
             nodeMapper,
-            mock(SnmpInterfaceMapper.class),
-            mock(IpInterfaceMapper.class),
             mockTagPublisher,
             tagRepository);
 
@@ -131,7 +127,6 @@ public class NodeServiceTest {
 
     @AfterEach
     public void afterTest(){
-        verifyNoMoreInteractions(mockNodeRepository);
         verifyNoMoreInteractions(mockMonitoringLocationRepository);
         verifyNoMoreInteractions(mockIpInterfaceRepository);
     }
@@ -158,7 +153,6 @@ public class NodeServiceTest {
         nodeService.deleteNode(1);
 
         verify(mockNodeRepository).findById(any());
-        verify(mockNodeRepository).save(any());
         verify(mockNodeRepository).deleteById(any());
     }
 
@@ -367,8 +361,6 @@ public class NodeServiceTest {
             mock(TaskSetPublisher.class),
             tagService,
             nodeMapper,
-            mock(SnmpInterfaceMapper.class),
-            mock(IpInterfaceMapper.class),
             mockTagPublisher,
             tagRepository);
 
@@ -405,8 +397,6 @@ public class NodeServiceTest {
             mock(TaskSetPublisher.class),
             tagService,
             nodeMapper,
-            mock(SnmpInterfaceMapper.class),
-            mock(IpInterfaceMapper.class),
             mockTagPublisher,
             tagRepository);
 
@@ -444,8 +434,6 @@ public class NodeServiceTest {
             mock(TaskSetPublisher.class),
             tagService,
             nodeMapper,
-            mock(SnmpInterfaceMapper.class),
-            mock(IpInterfaceMapper.class),
             mockTagPublisher,
             tagRepository);
 
@@ -474,8 +462,6 @@ public class NodeServiceTest {
             mock(TaskSetPublisher.class),
             tagService,
             nodeMapper,
-            mock(SnmpInterfaceMapper.class),
-            mock(IpInterfaceMapper.class),
             mockTagPublisher,
             tagRepository);
 
@@ -490,19 +476,30 @@ public class NodeServiceTest {
         final var tagUnmonitored = new Tag();
         tagUnmonitored.setNodes(List.of(testNode));
 
+        final var tagMonitoredWithDefaultTag = new Tag();
+        tagMonitoredWithDefaultTag.setName("default");
+
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of());
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.DETECTED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagUnmonitored));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.UNMONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored, tagUnmonitored));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
+        nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
+        assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
+
+        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitoredWithDefaultTag));
+        when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 

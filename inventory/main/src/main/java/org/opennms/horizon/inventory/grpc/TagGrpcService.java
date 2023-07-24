@@ -44,6 +44,7 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
+import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +57,7 @@ import java.util.Optional;
 public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
     private final TagService service;
     private final TenantLookup tenantLookup;
+    private final NodeService nodeService;
 
     @Override
     public void addTags(TagCreateListDTO request, StreamObserver<TagListDTO> responseObserver) {
@@ -64,7 +66,12 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 List<TagDTO> tags = service.addTags(tenantId, request);
-
+                request.getEntityIdsList().forEach(entityIdDTO -> {
+                    if (entityIdDTO.hasNodeId()) {
+                        var nodeId = entityIdDTO.getNodeId();
+                        nodeService.updateNodeMonitoredState(nodeId, tenantId);
+                    }
+                });
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
@@ -92,7 +99,12 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 service.removeTags(tenantId, request);
-
+                request.getEntityIdsList().forEach(entityIdDTO -> {
+                    if (entityIdDTO.hasNodeId()) {
+                        var nodeId = entityIdDTO.getNodeId();
+                        nodeService.updateNodeMonitoredState(nodeId, tenantId);
+                    }
+                });
                 responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
             } catch (Exception e) {

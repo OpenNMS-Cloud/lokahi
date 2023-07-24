@@ -46,6 +46,9 @@ import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class SinkMessageKafkaPublisherTest {
 
     public static final String TEST_TENANT_ID = "opennms-opti-prime";
@@ -61,7 +64,7 @@ public class SinkMessageKafkaPublisherTest {
     @Before
     public void setUp() {
         messagePublisher = new SinkMessageKafkaPublisher<>(
-            kafkaTemplate, tenantIDGrpcInterceptor, locationServerInterceptor, mapper, TEST_TOPIC_NAME
+            kafkaTemplate, tenantIDGrpcInterceptor, locationServerInterceptor, mapper, TEST_TOPIC_NAME, new SimpleMeterRegistry()
         );
     }
 

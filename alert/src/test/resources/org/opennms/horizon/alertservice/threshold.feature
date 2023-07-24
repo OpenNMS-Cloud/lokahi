@@ -5,91 +5,82 @@ Feature: Alert Service Thresholding Functionality
     Given Kafka bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
-    Given Tenant id "thresholdTenantA"
-    Given Monitor policy name "thresholdTenantA-policy" and memo "thresholdTenantA policy"
-    Given Policy Rule name "thresholdTenantA-rule" and componentType "NODE"
-    And Alert condition data
+    Given A new tenant
+    And A monitoring policy named "my-policy" with tag "tag1"
+    And The policy has a rule named "my-rule" with component type "NODE" and trap definitions
       | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
       | SNMP Link Down     | 2     | 0        | MINUTE        | MAJOR    |                  |
       | SNMP Link Up       | 1     | 0        | MINUTE        | CLEARED  | SNMP Link Down   |
       | SNMP Cold Start    | 3     | 10       | MINUTE        | MAJOR    |                  |
       | SNMP Warm Start    | 1     | 0        | MINUTE        | CLEARED  |                  |
-    And Create a new policy with give parameters
-    Given Tenant id "thresholdTenantF"
-    And Create a new policy with give parameters
-    Given Tenant id "thresholdTenantG"
-    And Create a new policy with give parameters
-    Given Tenant id "thresholdTenantH"
-    And Create a new policy with give parameters
-    Given Tenant id "thresholdTenantB"
-    And Create a new policy with give parameters
+    And The policy is created in the tenant
 
-  Scenario: Verify when a thresholding event is received from Kafka, a new alert is only created on passing the threshold
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantA" with node 10
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantA"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantA" with node 10
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantA"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantA" with node 10
-    Then List alerts for tenant "thresholdTenantA", with timeout 15000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
-      | alerts[0].counter == 1 |
+  Scenario: When a thresholding event is received from Kafka, a new alert is only created on passing the threshold
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10
+    Then List alerts for the tenant, with timeout 15000ms, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1          |
+      | alerts[0].counter == 1      |
       | alerts[0].severity == MAJOR |
-    Then Verify alert topic has 1 messages with tenant "thresholdTenantA"
+    Then Verify alert topic has 1 messages for the tenant
 
-  Scenario: Verify when a thresholding event is received from Kafka, a new alert is only created on passing the threshold within the timeframe
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 15 minutes ago
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantB"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 7 minutes ago
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantB"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 3 minutes ago
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantB"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "thresholdTenantB" with node 10 at 2 minutes ago
-    Then List alerts for tenant "thresholdTenantB", with timeout 5000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
-      | alerts[0].counter == 1 |
+  Scenario: When a thresholding event is received from Kafka, a new alert is only created on passing the threshold within the timeframe
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10 with produced time 15 MINUTES ago
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10 with produced time 7 MINUTES ago
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10 with produced time 3 MINUTES ago
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10 with produced time 2 MINUTES ago
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1          |
+      | alerts[0].counter == 1      |
       | alerts[0].severity == MAJOR |
-    Then Verify alert topic has 1 messages with tenant "thresholdTenantB"
+    Then Verify alert topic has 1 messages for the tenant
 
-  Scenario: Verify when a thresholding event with no time limit is received from Kafka, a new alert is only created on passing the threshold
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantF" with node 10
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantF"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantF" with node 10
-    Then List alerts for tenant "thresholdTenantF", with timeout 15000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
-      | alerts[0].counter == 1 |
+  Scenario: When a thresholding event with no time limit is received from Kafka, a new alert is only created on passing the threshold
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then List alerts for the tenant, with timeout 15000ms, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1          |
+      | alerts[0].counter == 1      |
       | alerts[0].severity == MAJOR |
-    Then Verify alert topic has 1 messages with tenant "thresholdTenantF"
+    Then Verify alert topic has 1 messages for the tenant
 
 
-  Scenario: Verify a thresholded alert can be cleared by other events
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantG" with node 10
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantG"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantG" with node 10
-    Then List alerts for tenant "thresholdTenantG", with timeout 15000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
-      | alerts[0].counter == 1 |
+  Scenario: A thresholded alert can be cleared by other events
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1          |
+      | alerts[0].counter == 1      |
       | alerts[0].severity == MAJOR |
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Up" with tenant "thresholdTenantG" with node 10
-    Then List alerts for tenant "thresholdTenantG", with timeout 5000ms, until JSON response matches the following JSON path expressions
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Up" on node 10
+    Then List alerts for the tenant, with timeout 15000ms, until JSON response matches the following JSON path expressions
       | alerts.size() == 1            |
       | alerts[0].counter == 2        |
       | alerts[0].severity == CLEARED |
 
-  Scenario: Verify a thresholded alert can be cleared by other events, and then recreated
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantH" with node 10
-    Then Verify alert topic has 0 messages with tenant "thresholdTenantH"
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantH" with node 10
-    Then List alerts for tenant "thresholdTenantH", with timeout 5000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
-      | alerts[0].counter == 1 |
+  Scenario: A thresholded alert can be cleared by other events, and then recreated
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then Verify alert topic has 0 messages for the tenant
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1          |
+      | alerts[0].counter == 1      |
       | alerts[0].severity == MAJOR |
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Up" with tenant "thresholdTenantH" with node 10
-    Then List alerts for tenant "thresholdTenantH", with timeout 5000ms, until JSON response matches the following JSON path expressions
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Up" on node 10
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
       | alerts.size() == 1            |
       | alerts[0].counter == 2        |
       | alerts[0].severity == CLEARED |
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" with tenant "thresholdTenantH" with node 10
-    Then List alerts for tenant "thresholdTenantH", with timeout 5000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
-      | alerts[0].counter == 3 |
+    Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1          |
+      | alerts[0].counter == 3      |
       | alerts[0].severity == MAJOR |

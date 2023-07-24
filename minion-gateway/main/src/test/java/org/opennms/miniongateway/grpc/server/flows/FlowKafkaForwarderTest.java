@@ -29,7 +29,11 @@
 package org.opennms.miniongateway.grpc.server.flows;
 
 import com.google.protobuf.Message;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +46,7 @@ import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.shared.flows.mapper.TenantLocationSpecificFlowDocumentLogMapper;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
+import org.opennms.horizon.shared.grpc.interceptor.MeteringServerInterceptor;
 import org.opennms.miniongateway.grpc.server.flows.FlowApplicationConfig;
 import org.opennms.miniongateway.grpc.server.flows.FlowKafkaForwarder;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisher;
@@ -56,8 +61,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FlowKafkaForwarderTest {
-
-
     private final String kafkaTopic = "kafkaTopic";
 
     @Mock
@@ -69,10 +72,12 @@ public class FlowKafkaForwarderTest {
 
     private FlowKafkaForwarder flowKafkaForwarder;
 
+    private MeterRegistry meterRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+
     @Before
     public void setUp() {
         when(publisherFactory.create(any(SinkMessageMapper.class), eq(kafkaTopic))).thenReturn(publisher);
-        flowKafkaForwarder = new FlowKafkaForwarder(publisherFactory, mapper, kafkaTopic);
+        flowKafkaForwarder = new FlowKafkaForwarder(publisherFactory, mapper, kafkaTopic, meterRegistry);
     }
 
     @Test
@@ -81,10 +86,17 @@ public class FlowKafkaForwarderTest {
             .setSystemId("systemId")
             .addMessage(FlowDocument.newBuilder()
                 .setSrcAddress("127.0.0.1"))
+            .addMessage(FlowDocument.newBuilder()
+                .setSrcAddress("0.0.0.0"))
             .build();
-
 
         flowKafkaForwarder.handleMessage(message);
         Mockito.verify(publisher).send(message);
+        var flowCounter = meterRegistry.counter(FlowKafkaForwarder.class.getName(),
+            MeteringServerInterceptor.SERVICE_TAG_NAME, FlowKafkaForwarder.FLOW_DOCUMENT_TAG);
+        var flowLogCounter = meterRegistry.counter(FlowKafkaForwarder.class.getName(),
+            MeteringServerInterceptor.SERVICE_TAG_NAME, FlowKafkaForwarder.FLOW_DOCUMENT_LOG_TAG);
+        Assert.assertEquals(message.getMessageCount(), (int) flowCounter.count());
+        Assert.assertEquals(1, (int) flowLogCounter.count());
     }
 }

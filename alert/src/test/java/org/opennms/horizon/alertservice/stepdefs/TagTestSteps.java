@@ -56,32 +56,26 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor
 public class TagTestSteps {
     private static final long TIME_OUT = 5000;
+    private final TenantSteps tenantSteps;
     private final KafkaTestHelper kafkaTestHelper;
     private final BackgroundSteps background;
     private final AlertGrpcClientUtils grpcClient;
     private final RetryUtils retryUtils;
 
-    private String tagTopic;
-    private String tenantId;
     private TagOperationProto.Builder builder;
 
-
-    @Given("Kafka tag topic {string}")
-    public void kafkaTagTopic(String tagTopic) {
-        this.tagTopic = tagTopic;
-        kafkaTestHelper.setKafkaBootstrapUrl(background.getKafkaBootstrapUrl());
-        kafkaTestHelper.startConsumerAndProducer(tagTopic, tagTopic);
-    }
-
-    @Given("Tenant {string}")
-    public void tenant(String tenantId) {
-        this.tenantId = tenantId;
-        grpcClient.setTenantId(tenantId);
-
+    @Given("Tag operations are applied to the tenant")
+    public void tagOperationDataForTenant(DataTable data) {
+        tagOperationData(data, tenantSteps.getTenantId());
+        sentMessageToKafkaTopic(tenantSteps.getTenantId());
     }
 
     @Given("Tag operation data")
     public void tagOperationData(DataTable data) {
+        tagOperationData(data, tenantSteps.getTenantId());
+    }
+
+    public void tagOperationData(DataTable data, String tenantId) {
         Map<String, String> map = data.asMaps().get(0);
         List<Long> nodIds = Arrays.stream(map.get("node_ids").split(",")).map(s -> Long.parseLong(s)).collect(Collectors.toList());
         List<Long> policyIds = map.get("policy_ids") != null ?
@@ -96,9 +90,13 @@ public class TagTestSteps {
 
     @And("Sent tag operation message to Kafka topic")
     public void sentMessageToKafkaTopic() {
+        sentMessageToKafkaTopic(tenantSteps.getTenantId());
+    }
+
+    public void sentMessageToKafkaTopic(String tenantId) {
         TagOperationList tagList = TagOperationList.newBuilder()
             .addTags(builder.build()).build();
-        kafkaTestHelper.sendToTopic(tagTopic, tagList.toByteArray(), tenantId);
+        kafkaTestHelper.sendToTopic(background.getTagTopic(), tagList.toByteArray(), tenantId);
     }
 
     @Then("Verify list tag with size {int} and node ids")

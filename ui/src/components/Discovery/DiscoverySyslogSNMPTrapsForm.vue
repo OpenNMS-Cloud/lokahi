@@ -21,14 +21,11 @@
           label="Name"
           v-model="discoveryInfo.name"
           :schema="nameV"
+          class="flex-width"
         />
-        <DiscoveryLocationsAutocomplete
-          @location-selected="(loc: MonitoringLocation) => setDiscoveryValues('locationId', loc.id)"
-          ref="locationsAutocompleteRef"
-          data-test="locations-autocomplete"
-          :preLoadedlocation="props.discovery?.id"
-          type="single"
-        />
+        <div class="flex-width" data-test="locations-autocomplete">
+          <DiscoveryLocationsAutocomplete />
+        </div>
         <DiscoveryHelpConfiguring data-test="help-configuring" />
         <BasicAutocomplete
           @items-selected="tagsSelectedListener"
@@ -36,7 +33,7 @@
           :items="tagQueries.tagsSearched"
           :label="Common.tagsInput"
           ref="tagsAutocompleteRef"
-          class="tags-autocomplete"
+          class="flex-width"
           data-test="tags-autocomplete"
           :preselectedItems="tags"
         />
@@ -95,7 +92,8 @@ import { ContentEditableType, COMMUNITY_STRING, UDP_PORT, REGEX_EXPRESSIONS } fr
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
-import { MonitoringLocation, PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { PassiveDiscovery, PassiveDiscoveryUpsertInput } from '@/types/graphql'
 import { cloneDeep, set } from 'lodash'
 import { useForm } from '@featherds/input-helper'
 import { string } from 'yup'
@@ -111,6 +109,7 @@ const props = defineProps<{
 const tagQueries = useTagQueries()
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
+const discoveryStore = useDiscoveryStore()
 const discoveryInfo = ref<PassiveDiscoveryUpsertInput>(props.discovery || ({} as PassiveDiscoveryUpsertInput))
 const tags = computed(() => (props.discovery?.id ? discoveryQueries.tagsByPassiveDiscoveryId : []))
 
@@ -151,6 +150,7 @@ const submitHandler = async () => {
 
   // clone and remove unused props from payload
   const payload = cloneDeep(discoveryInfo.value) as Partial<PassiveDiscovery>
+  payload.locationId = discoveryStore.selectedLocation?.id
   if (Object.hasOwn(payload, 'toggle')) delete payload.toggle
 
   await discoveryMutations.upsertPassiveDiscovery({ passiveDiscovery: payload })
@@ -201,7 +201,7 @@ const cancelHandler = () => {
   }
 }
 
-.tags-autocomplete {
+.flex-width {
   width: 100%;
 
   @include mediaQueriesMixins.screen-xl {

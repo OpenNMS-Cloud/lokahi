@@ -36,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 /**
  * A helper class which produces kafka messages.
  *
@@ -51,15 +53,17 @@ public class SinkMessageKafkaPublisher<I extends Message, O extends Message> {
     private final LocationServerInterceptor locationInterceptor;
     private final SinkMessageMapper<I, O> mapper;
     private final String topic;
+    private final MeterRegistry meterRegistry;
 
     public SinkMessageKafkaPublisher(KafkaTemplate<String, byte[]> kafkaTemplate,
-        TenantIDGrpcServerInterceptor tenantInterceptor, LocationServerInterceptor locationInterceptor,
-        SinkMessageMapper<I, O> mapper, String topic) {
+                                     TenantIDGrpcServerInterceptor tenantInterceptor, LocationServerInterceptor locationInterceptor,
+                                     SinkMessageMapper<I, O> mapper, String topic, MeterRegistry meterRegistry) {
         this.kafkaTemplate = kafkaTemplate;
         this.tenantInterceptor = tenantInterceptor;
         this.locationInterceptor = locationInterceptor;
         this.mapper = mapper;
         this.topic = topic;
+        this.meterRegistry = meterRegistry;
     }
 
     /**
@@ -75,6 +79,12 @@ public class SinkMessageKafkaPublisher<I extends Message, O extends Message> {
         logger.trace("Received {}; sending a {} to kafka topic {}; tenantId: {}; locationId={}; message={}",
             message.getDescriptorForType().getName(), mapped.getDescriptorForType().getName(), topic, tenantId, locationId, mapped);
 
-        kafkaTemplate.send(new ProducerRecord<>(topic, mapped.toByteArray()));
+        this.meterRegistry.timer("kafka.send",
+                "topic", this.topic,
+                "tenant", tenantId,
+                "location", locationId)
+            .record(() -> {
+                kafkaTemplate.send(new ProducerRecord<>(topic, mapped.toByteArray()));
+            });
     }
 }

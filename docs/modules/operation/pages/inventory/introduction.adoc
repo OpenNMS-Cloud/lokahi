@@ -1,5 +1,6 @@
 
 = Network Inventory
+:description: Overview of network inventory in OpenNMS Lōkahi/Cloud, including monitored, unmonitored, and detected nodes.
 
 Inventory refers to the devices and entities in your network that OpenNMS Cloud has identified through the xref:get-started/discovery/introduction.adoc[discovery] process.
 OpenNMS displays these nodes on the *Network Inventory* page under the following categories:

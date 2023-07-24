@@ -34,11 +34,11 @@ import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-    features = {"src/test/resources/cloud-features"},
+    features = {"src/test/resources/features"},
     plugin = {"pretty",
         "json:cucumber.reports/cucumber-report.json",
         "html:cucumber.reports/cucumber-report.html"},
-    tags = "@cloud and not @ignore"
+    tags = "not @ignore"
 )
 public class UiCucumberRunnerTest {
 }

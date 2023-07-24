@@ -2,6 +2,7 @@
 :!sectids:
 
 = Requirements
+:description: See the requirements to set up OpenNMS Lōkahi, an open source network monitoring project designed for cloud-native deployments.
 
 OpenNMS Lōkahi uses PostgreSQL as a relational database for its inventory and configuration, and big data systems such as Cortex and Elasticsearch for persistence of historical monitoring data.
 

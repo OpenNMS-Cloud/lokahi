@@ -18,6 +18,9 @@ spec:
         app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
         ignite-cluster: core
       annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.OpenNMS.MinionGateway.Port }}"
+        prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"

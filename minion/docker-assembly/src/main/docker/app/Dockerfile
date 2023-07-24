@@ -12,6 +12,7 @@ FROM ${BASE_IMAGE} as tarball
 RUN mkdir -p /opt
 
 ADD --chown=10001:0 work/karaf/ /opt/karaf/
+ADD --chown=10001:0 work/entrypoint/ /
 
 # Set karaf.clean.cache = true in system.properties
 RUN sed -i 's/^karaf.clean.cache *=.*/karaf.clean.cache = true/' /opt/karaf/etc/system.properties
@@ -45,6 +46,7 @@ RUN groupadd --gid 10001 minion && \
 
 RUN mkdir -p /opt
 COPY --chown=10001:0 --from=tarball /opt/karaf /opt/karaf
+COPY --chown=10001:0 --from=tarball /entrypoint.sh /entrypoint.sh
 
 # Arguments for labels should not invalidate caches
 ARG BUILD_DATE="1970-01-01T00:00:00+0000"
@@ -74,7 +76,7 @@ WORKDIR /opt/karaf
 
 USER 10001
 
-ENTRYPOINT [ "/opt/karaf/bin/karaf" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 # Use CMD to pass the "daemon" command-line argument to bin/karaf; this way, it can easily be changed to
 #  other arguments such as "debug" without having to remember the path to the entrypoint script.

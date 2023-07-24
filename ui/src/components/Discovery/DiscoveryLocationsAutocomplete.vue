@@ -1,204 +1,128 @@
-<!--
-    Autocomplete locations
-    props: 
-        preLoadedlocation: location name
-    emits: 
-        location-selected: location name
--->
 <template>
-  <div class="search-location">
-    <!-- Search client side -->
-    <FeatherAutocomplete
-      class="search"
-      label="Select a location"
-      type="single"
-      v-model="searchValue"
-      :loading="loading"
-      :results="filteredLocations"
-      @search="search"
-      @update:modelValue="deboncedFn"
-      :schema="locationV"
-      ref="inputRef"
-      :disabled="disabled"
-    ></FeatherAutocomplete>
+  <AtomicAutocomplete
+    class="locations"
+    inputLabel="Search Locations"
+    :loading="locationStore.isSearching"
+    :outsideClicked="closeAutocomplete"
+    :itemClicked="itemClicked"
+    :resultsVisible="isAutoCompleteOpen"
+    :focusLost="onFocusLost"
+    :wrapperClicked="wrapperClicked"
+    :results="locationStore.locationsList.map((d) => d.location)"
+    :inputValue="inputValue"
+    :textChanged="textChanged"
+    :errMsg="errMsg"
+    :disabled="disabled"
+    :allowNew="false"
+  />
 
-    <!-- Locations selection -->
-    <FeatherChipList
-      v-if="selectedLocation && selectedLocation.location"
-      label="Locations"
-    >
-      <FeatherChip class="location-chip">
-        <span>{{ selectedLocation.location }}</span>
-        <template v-slot:icon
-          ><FeatherIcon
-            v-if="!disabled"
-            @click="removeLocation"
-            :icon="Icons.Cancel"
-        /></template>
-      </FeatherChip>
-    </FeatherChipList>
-  </div>
+  <FeatherChipList
+    v-if="discoveryStore.selectedLocation"
+    label="Locations"
+    class="loc-chip-list"
+  >
+    <FeatherChip class="pointer">
+      <template v-slot:icon>
+        <FeatherIcon
+          v-if="!disabled"
+          @click="removeLocation"
+          :icon="cancelIcon"
+        />
+      </template>
+      {{ discoveryStore.selectedLocation.location }}
+    </FeatherChip>
+  </FeatherChipList>
 </template>
 
 <script setup lang="ts">
-import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
-import Cancel from '@featherds/icon/navigation/Cancel'
-import { markRaw } from 'vue'
-import { debounce, first } from 'lodash'
-import { MonitoringLocation } from '@/types/graphql'
-import { IAutocompleteItemType } from '@featherds/autocomplete'
-import { watchOnce } from '@vueuse/core'
-import { object } from 'yup'
+import useAtomicAutocomplete from '@/composables/useAtomicAutocomplete'
+import { useLocationStore } from '@/store/Views/locationStore'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { useValidation } from '@featherds/input-helper'
+import CancelIcon from '@featherds/icon/navigation/Cancel'
+import { string } from 'yup'
+import { Ref } from 'vue'
+import { IValidationFailure } from '@featherds/input-helper/src/composables/useForm'
 
-const Icons = markRaw({
-  Cancel
-})
-const emit = defineEmits(['location-selected'])
-type TLocationAutocomplete = MonitoringLocation & { _text?: string }
-const discoveryQueries = useDiscoveryQueries()
-const searchValue = ref<MonitoringLocation | undefined>()
-const selectedLocation = ref<TLocationAutocomplete | null>(null)
-const loading = ref(false)
-const locations = ref() //locations without selected items
-const filteredLocations = ref() //results in autocomplete
-const inputRef = ref() // actual autocomplete input
-const errMsgDisplay = ref('none') // for sub text css display
-const computedLocations = computed(() => discoveryQueries.locations)
-
-const props = defineProps<{
-  preLoadedlocation?: string,
+defineProps<{
   disabled?: boolean
 }>()
 
-onMounted(() => discoveryQueries.getLocations())
+const cancelIcon = markRaw(CancelIcon)
 
-const initLocations = () => {
-  filteredLocations.value = computedLocations.value as MonitoringLocation[]
-  locations.value = computedLocations.value as MonitoringLocation[]
-  selectedLocation.value = null
-  if (props.preLoadedlocation) {
-    selectedLocation.value = locations.value.filter((l: MonitoringLocation) => l.id == props.preLoadedlocation)[0]
-    locations.value = locations.value.filter((l: MonitoringLocation) => l.id !== props.preLoadedlocation)
-    filteredLocations.value = locations.value
-  }
-}
-watchOnce(computedLocations, () => {
-  initLocations()
-  if (computedLocations.value.length == 1) {
-    selectedLocation.value = first(computedLocations.value) as MonitoringLocation
-    locations.value = []
-    filteredLocations.value = []
-    emit('location-selected', selectedLocation.value)
-  }
-})
+const locationStore = useLocationStore()
+const discoveryStore = useDiscoveryStore()
+const validationResults = ref()
+const allErrorMsgs = inject<Ref<IValidationFailure[]>>('featherFormErrors')
+const locationErrId = 'no-location'
 
-watch(props, () => {
-  initLocations()
-})
-
-const search = (q: string) => {
-  if (!q) {
-    searchValue.value = undefined
-    return []
-  }
-  loading.value = true
-  const query = q.toLowerCase()
-  filteredLocations.value = locations.value
-    .filter((x: any) => x.location?.toLowerCase().indexOf(query) > -1)
-    .map((x: any) => ({
-      _text: x?.location,
-      location: x?.location,
-      id: x?.id
-    }))
-  loading.value = false
-}
-
-//using debounce temporary because of bug in feather/autocomplete
-const deboncedFn = debounce(
-  (item: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
-    const selected = item as IAutocompleteItemType
-    if (selected && selected._text) {
-      selectedLocation.value = selected as TLocationAutocomplete
-      locations.value = computedLocations.value.filter((l: MonitoringLocation) => l.id !== selectedLocation.value?.id)
-      searchValue.value = undefined
-      inputRef.value?.handleOutsideClick()
-      emit('location-selected', selectedLocation.value)
-      handleErrDisplay()
+const errMsg = computed<string>(() => {
+  if (allErrorMsgs?.value) {
+    const noLocationMsg = allErrorMsgs.value.filter((error: any) => error.inputId === locationErrId)[0]
+    if (noLocationMsg) {
+      return noLocationMsg.message
     }
-  },
-  200,
-  {
-    leading: false,
-    trailing: true
   }
-)
+
+  if (validationResults.value?.success === false) {
+    return validationResults.value?.message
+  }
+})
+
+const selectLocation = (item: { name: string }) => {
+  for (const loc of locationStore.locationsList) {
+    if (loc.location === item.name) {
+      discoveryStore.selectedLocation = loc
+      validationResults.value = schema.validate()
+      return
+    }
+  }
+}
 
 const removeLocation = () => {
-  if (selectedLocation.value) {
-    locations.value.push(selectedLocation.value)
-    selectedLocation.value = null
-    searchValue.value = undefined
-    handleErrDisplay()
-  }
+  discoveryStore.selectedLocation = undefined
+  validationResults.value = schema.validate()
 }
 
-const locationErrMsg = 'Location is required.'
-const locationV = object().test({
-  name: 'has-location',
-  test: () => Boolean(selectedLocation.value),
-  message: locationErrMsg
+const { closeAutocomplete, itemClicked, isAutoCompleteOpen, onFocusLost, wrapperClicked, textChanged, inputValue } =
+  useAtomicAutocomplete(locationStore.searchLocations, () => locationStore.locationsList.length, selectLocation)
+
+const locationV = string().test(
+  locationErrId,
+  'Location is required.',
+  () => discoveryStore.selectedLocation !== undefined
+)
+
+const schema = useValidation(
+  ref(locationErrId),
+  toRef(discoveryStore.selectedLocation?.location),
+  'Location',
+  locationV
+)
+
+const marginBottom = computed(() =>
+  discoveryStore.selectedLocation || validationResults.value?.success === false ? '10px' : '25px'
+)
+
+onMounted(async () => {
+  await locationStore.searchLocations()
+  if (locationStore.locationsList.length === 1) {
+    selectLocation({ name: locationStore.locationsList[0].location! })
+  }
 })
-const handleErrDisplay = () => {
-  if (inputRef.value) {
-    inputRef.value.handleInputBlur() // runs yup validate
-
-    nextTick(() => {
-      // add/remove the feather input subtext display
-      errMsgDisplay.value =
-        document.getElementById(inputRef.value.subTextId)?.children[0].innerHTML === locationErrMsg ? 'flex' : 'none'
-    })
-  }
-}
 </script>
 
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
-@use '@/styles/mediaQueriesMixins';
+.locations {
+  margin-bottom: v-bind(marginBottom);
+}
 
-.search-location {
-  display: flex;
-  flex-direction: column;
+.loc-chip-list {
+  margin: 0 0 10px 0;
+}
 
-  .search {
-    width: 100%;
-  }
-  .location-chip {
-    cursor: pointer;
-  }
-}
-:deep(.feather-input-sub-text) {
-  display: v-bind(errMsgDisplay) !important;
-}
-:deep(.chip-label-button) {
-  display: flex;
-  .chip-icon {
-    order: 2;
-    &:hover {
-      cursor: pointer;
-    }
-    > svg {
-      &:hover {
-        cursor: pointer;
-      }
-    }
-  }
-  > .label {
-    order: 1;
-  }
-}
-:deep(.post) {
-  &:last-child {
-    display: none !important;
-  }
+:deep(.atomic-input-wrapper) {
+  height: 40px;
 }
 </style>

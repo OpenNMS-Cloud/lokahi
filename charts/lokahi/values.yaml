@@ -97,7 +97,6 @@ OpenNMS:
     ExtraVolumes: []
     ExtraMounts: []
     ExtraInitContainers: []
-    GrpcConfig: {}
     addDefaultLocation: false
   MinionGateway:
     ServiceName: opennms-minion-gateway
@@ -115,13 +114,11 @@ OpenNMS:
     DbHost: "postgres"
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
-    env:
-      OTEL_JAVAAGENT_ENABLED: "false"
+        Cpu: "1"
+        Memory: 2Gi
     IngressAnnotations:
       nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
@@ -195,6 +192,13 @@ OpenNMS:
         Memory: 250Mi
     PrivateRepoEnabled: false
     kafkaSecretName: ~
+    retry:
+      delay: 1000
+      maxDelay: 60000
+      multiplier: 2
+      max: 10
+    acsConnectionSecretName: {} # the ACS connection string is expected in the 'connection-string' key
+
   Events:
     ServiceName: opennms-events
     Image: opennms/lokahi-events
@@ -367,6 +371,7 @@ Kafka:
       Memory: 512Mi
   VolumeSize: 10Gi
 MailServer:
+  Enabled: false
   ServiceName: mail-server
   Image: mailhog/mailhog:v1.0.1
   ImagePullPolicy: IfNotPresent

@@ -16,6 +16,9 @@ Keycloak:
 Ingress:
   Enabled: false
 
+MailServer:
+  Enabled: true
+
 OpenNMS:
   global:
     openTelemetry:
@@ -37,7 +40,8 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
-    IngressAnnotations: {}
+    IngressAnnotations:
+      nginx.ingress.kubernetes.io/configuration-snippet: ~
   Minion:
     Enabled: true
     addDefaultLocation: true
@@ -56,8 +60,6 @@ OpenNMS:
       Requests:
         Cpu: '0'
         Memory: '0'
-    env:
-      OTEL_JAVAAGENT_ENABLED: "true" # Enable for local development since it adds useful data
     IngressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         # This adds the tenant-id and location to the response headers sent to the client so we can use them in

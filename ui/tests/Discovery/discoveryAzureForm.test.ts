@@ -30,7 +30,7 @@ test('The azure form payload when saving.', async () => {
   const store = useDiscoveryStore()
   const mutations = useDiscoveryMutations()
 
-  await wrapper.vm.selectLocation({ id: '1' })
+  store.selectedLocation = { id: '1', location: 'Default'}
   await wrapper.get('[data-test="azure-name-input"] .feather-input').setValue('azure1')
   await wrapper.get('[data-test="azure-client-input"] .feather-input').setValue('client1')
   await wrapper.get('[data-test="azure-secret-input"] .feather-input').setValue('secret1')

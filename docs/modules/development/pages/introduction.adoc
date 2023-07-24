@@ -2,5 +2,7 @@
 :!sectids:
 
 = Development
+:description: Link to the developer's guide for OpenNMS Lōkahi/Cloud, an open source network monitoring project designed for cloud-native deployments.
+.
 
 For a complete development guide including getting started, design considerations, test strategies, database conventions, and so on, see the https://github.com/OpenNMS-Cloud/lokahi/wiki/Getting-Started[Lōkahi wiki] on GitHub.

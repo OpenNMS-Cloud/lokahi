@@ -3,8 +3,9 @@
 :!sectids:
 
 = Alerts
+:description: Learn about alerts in OpenNMS Lōkahi/Cloud.
 
-Alerts are representations of potential and actual problems in your monitored network.
+Alerts represent potential and actual problems in your monitored network.
 Your environment's xref:get-started/policies/introduction.adoc[monitoring policies] define the conditions under which alerts are generated.
 
 The xref:visualizations/introduction.adoc[Insights Dashboard] displays a summary of alerts over a selected period of time.
@@ -16,7 +17,7 @@ For information about severities, see xref:reference:severities.adoc[Alert Sever
 
 == Before you begin
 
-Before Lōkahi begins generating alerts, you must configure the following:
+Before OpenNMS can generate alerts, you must configure the following:
 
 * Your xref:get-started/discovery/introduction.adoc[network discovery] settings.
 * (Optional) At least one monitoring policy.

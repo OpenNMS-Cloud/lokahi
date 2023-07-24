@@ -2,17 +2,17 @@ spring:
   application:
     name: lokahi-minion-certificate-verifier
 
-management:
-  endpoints:
-    web:
-      #base-path: "/"
-      exposure:
-        include: "*"
-    health:
-      probes:
-        enabled: true
 grpc:
   server:
     deadline: 6000
   url:
     inventory: opennms-inventory:6565
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      probes:
+        enabled: true

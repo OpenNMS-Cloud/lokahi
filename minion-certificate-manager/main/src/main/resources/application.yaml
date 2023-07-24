@@ -3,6 +3,12 @@ keycloak:
   base-url: http://onms-keycloak:8080/auth
   public-key: ""
 
+grpc:
+  server:
+    port: 8990
+    deadline: 60000
+    bypassTokenMethods: isCertValid # comma separated list
+
 manager:
   mtls:
     certificate: /run/secrets/mtls/tls.crt
@@ -17,9 +23,3 @@ manager:
     web:
       exposure:
         include: "*"
-
-grpc:
-  server:
-    port: 8990
-    deadline: 60000
-    bypassTokenMethods: isCertValid # comma separated list

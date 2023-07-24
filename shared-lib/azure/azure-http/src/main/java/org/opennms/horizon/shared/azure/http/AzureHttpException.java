@@ -34,7 +34,7 @@ import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 @Getter
 public class AzureHttpException extends Exception {
     private final transient AzureHttpError httpError;
-    private transient int httpStatusCode;
+    private final transient int httpStatusCode;
 
     public AzureHttpException(AzureHttpError httpError, int httpStatusCode) {
         super(httpError.getErrorDescription());

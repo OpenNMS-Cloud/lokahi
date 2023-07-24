@@ -31,8 +31,6 @@ package org.opennms.horizon.server.model.inventory;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.net.InetAddress;
-
 @Getter
 @Setter
 public class AzureInterface {

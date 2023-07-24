@@ -65,7 +65,7 @@ const bitsInOut = computed<GraphProps>(() => {
 
   if(isAzure.value) {
     props.monitor = 'AZURE'
-    props.label = 'Interface Bytes Inbound / Outbound',
+    props.label = 'Interface Bytes Inbound / Outbound'
     props.metrics = ['bytes_received_rate', 'bytes_sent_rate']
   }
   return props

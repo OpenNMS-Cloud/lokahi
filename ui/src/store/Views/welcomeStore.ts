@@ -241,8 +241,12 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     },
     nextSlide() {
       this.slide = this.slide + 1
+      if (this.slide === 2) {
+        if (this.firstLocation.id === -1) {
+          this.createDefaultLocation();
+        }
+      }
       if (this.slide !== 2) {
-        this.createDefaultLocation();
         this.stopMinionErrorTimeout()
       }
       if (this.slide !== 3) {

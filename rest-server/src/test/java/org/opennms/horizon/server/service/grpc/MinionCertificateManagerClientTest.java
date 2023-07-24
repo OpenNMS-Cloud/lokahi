@@ -66,14 +66,14 @@ public class MinionCertificateManagerClientTest {
 
     private static MinionCertificateManagerClient client;
     private static MockServerInterceptor mockInterceptor;
-    private static MinionCertificateManagerGrpc.MinionCertificateManagerImplBase mockAlertService;
+    private static MinionCertificateManagerGrpc.MinionCertificateManagerImplBase mockMCMService;
     private final String accessToken = "test-token";
 
     @BeforeAll
     public static void startGrpc() throws IOException {
         mockInterceptor = new MockServerInterceptor();
 
-        mockAlertService = mock(MinionCertificateManagerGrpc.MinionCertificateManagerImplBase.class, delegatesTo(
+        mockMCMService = mock(MinionCertificateManagerGrpc.MinionCertificateManagerImplBase.class, delegatesTo(
             new MinionCertificateManagerGrpc.MinionCertificateManagerImplBase() {
                 @Override
                 public void getMinionCert(MinionCertificateRequest request, StreamObserver<GetMinionCertificateResponse> responseObserver) {
@@ -93,7 +93,7 @@ public class MinionCertificateManagerClientTest {
             }));
 
         grpcCleanUp.register(InProcessServerBuilder.forName("MinionCertificateManagerClientTest").intercept(mockInterceptor)
-            .addService(mockAlertService).directExecutor().build().start());
+            .addService(mockMCMService).directExecutor().build().start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("MinionCertificateManagerClientTest").directExecutor().build());
         client = new MinionCertificateManagerClient(channel, 1000L);
         client.initialStubs();
@@ -101,8 +101,8 @@ public class MinionCertificateManagerClientTest {
 
     @AfterEach
     public void afterTest() {
-        verifyNoMoreInteractions(mockAlertService);
-        reset(mockAlertService);
+        verifyNoMoreInteractions(mockMCMService);
+        reset(mockMCMService);
         mockInterceptor.reset();
     }
 
@@ -113,7 +113,7 @@ public class MinionCertificateManagerClientTest {
         ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
         GetMinionCertificateResponse result = client.getMinionCert("tenantId", 333L, accessToken + methodName);
         Assertions.assertFalse(result.getPassword().isEmpty());
-        verify(mockAlertService).getMinionCert(captor.capture(), any());
+        verify(mockMCMService).getMinionCert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
@@ -124,11 +124,11 @@ public class MinionCertificateManagerClientTest {
         }.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
         client.revokeCertificate("tenantId", 333L, accessToken + methodName);
-        verify(mockAlertService).revokeMinionCert(captor.capture(), any());
+        verify(mockMCMService).revokeMinionCert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
-
+    
     private static class MockServerInterceptor implements ServerInterceptor {
         private String authHeader;
 

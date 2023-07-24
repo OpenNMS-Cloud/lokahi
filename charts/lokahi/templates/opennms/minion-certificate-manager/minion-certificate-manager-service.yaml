@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
+    - port: {{ .Values.OpenNMS.MinionCertificateManager.GrpcPort }}
       protocol: TCP
       name: grpc
   selector:

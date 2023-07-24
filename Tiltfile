@@ -368,11 +368,6 @@ if is_devmode_enabled(uiDevmodeKey):
 docker_build(
     'opennms/lokahi-ui',
     'ui',
-    target='development',
-    live_update=[
-        sync('./ui', '/app'),
-        run('yarn install', trigger=['./ui/package.json', './ui/yarn.lock']),
-    ],
 )
 #target='production', # To simulate production for debugging pipeline issues.
 

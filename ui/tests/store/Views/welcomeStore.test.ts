@@ -23,7 +23,7 @@ describe('Welcome Store', () => {
 
         const welcomeStore = useWelcomeStore()
         await welcomeStore.init();
-        expect(welcomeStore.firstLocation).toStrictEqual({ id: 1, location: 'default' })
+        expect(welcomeStore.firstLocation).toStrictEqual({ id: -1, location: '' })
     })
 
     it('can build an item status ', async () => {

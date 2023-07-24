@@ -246,9 +246,17 @@ jobs:
                 kubectl -n $NAMESPACE describe "pod/${pod#pod/}" | sed 's,^,    ,'
             done
 
-            echo ""
             echo "=== K8S APPLICATION LOGS ==="
-            kubectl logs -n $NAMESPACE -l appdomain=opennms --tail=-1 --prefix --all-containers --ignore-errors=true
+            for pod in $(kubectl -n $NAMESPACE get pod | awk '$1 != "NAME" { print $1; }')
+            do
+                echo ""
+                echo "=== DIAG POD LOGS - ${pod} ==="
+                echo ""
+                kubectl -n $NAMESPACE logs "pod/${pod#pod/}" --tail=-1 --prefix --all-containers --ignore-errors=true
+            done
+            echo ""
+            #echo "=== K8S APPLICATION LOGS ==="
+            #kubectl logs -n $NAMESPACE -l appdomain=opennms --tail=-1 --prefix --all-containers --ignore-errors=true
 
             echo ${{ github.ref  }}
 

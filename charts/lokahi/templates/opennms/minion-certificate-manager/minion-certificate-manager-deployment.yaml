@@ -67,7 +67,7 @@ spec:
             - name: KEYCLOAK_REALM
               value: "{{ .Values.Keycloak.RealmName }}"
             - name: GRPC_SERVER_PORT
-              value: "{{ .Values.OpenNMS.MinionCertificateManager.Port }}"
+              value: "{{ .Values.OpenNMS.MinionCertificateManager.GrpcPort }}"
             {{- include "deployment.env" .Values.OpenNMS.MinionCertificateManager | nindent 12 }}
           envFrom:
           - configMapRef:

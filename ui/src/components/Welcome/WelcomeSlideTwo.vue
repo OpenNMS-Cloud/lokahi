@@ -8,23 +8,19 @@
     ]">
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
-                <h1 data-test="welcome-slide-two-title">Minion Installation</h1>
+                <h1 data-test="welcome-slide-two-title">Minion<FeatherIcon class="info-icon" :icon="InformationIcon">
+                    </FeatherIcon>
+                    Installation
+                </h1>
                 <p>The Minion installation can take up to 10 minutes. You will download an encrypted certificate for the
                     Minion and run a Docker command.</p>
             </div>
-            <div class="welcome-slide-two-location-callout">
-                <div class="welcome-slide-two-location-callout-left" data-test="welcome-slide-two-callout">
-                    <InformationIcon />
-                </div>
-                <div class="welcome-slide-two-location-callout-right">
-                    <span>We have created a default location for your first Minion.</span>
-                    <a href="https://docs.opennms.com/cloud/locations.html" target="_blank" rel="noopener noreferrer">Learn
-                        More About
-                        Locations</a>
-                </div>
-            </div>
+
             <div class="welcome-slide-step">
                 <h2>Step 1: Download Encrypted Minion Certificate</h2>
+                <pre
+                    class="pre-wrap">Select a permanent location for the download (e.g., /minion/default-certificate.p12). Future Minion restarts require the certificate.</pre>
+
                 <div class="welcome-slide-table">
                     <div class="welcome-slide-table-header">
                         <div>Encrypted Minion Certificate</div>
@@ -43,8 +39,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="welcome-slide-table-body">
                     </div>
                 </div>
             </div>
@@ -72,6 +66,7 @@
                                 :value="welcomeStore.dockerCmd()" class="styled-like-pre" />
                         </div>
                         <div class="password-right">Password:&nbsp;{{ welcomeStore.minionCert.password }}
+                            Save the password somewhere safe.
                             <span v-if="passwordCopyEnabled">
                                 <FeatherButton icon="CopyIcon" @click="copyPassword" v-if="!copied">
                                     <FeatherIcon :icon="CopyIcon"></FeatherIcon>
@@ -217,7 +212,6 @@ const { isDark } = useTheme();
 
 .welcome-slide-two-wrapper.dark {
 
-    .welcome-slide-two-location-callout,
     .welcome-slide-table-body {
         background-color: #e5f4f9;
         color: var($primary-text-on-color);
@@ -226,39 +220,12 @@ const { isDark } = useTheme();
 
 .welcome-slide-two-wrapper.light {
 
-    .welcome-slide-two-location-callout,
     .welcome-slide-table-body {
         background-color: var(--feather-background);
     }
 
-    .welcome-slide-two-location-callout {
-        background-color: #e5f4f9;
-    }
 }
 
-
-.welcome-slide-two-location-callout {
-    display: flex;
-    align-items: center;
-    border-radius: 3px;
-    gap: 16px;
-    padding: 12px 16px;
-    margin: 28px 0;
-
-    .welcome-slide-two-location-callout-left {
-        width: 30px;
-        font-size: 24px;
-
-        svg {
-            fill: #5cb9db;
-        }
-    }
-
-    a {
-        color: #273180;
-        display: block;
-    }
-}
 
 .welcome-slide-step {
     margin-bottom: 32px;
@@ -302,6 +269,7 @@ const { isDark } = useTheme();
     border-radius: 3px;
     margin-top: 24px;
     color: var($disabled-text-on-surface);
+    font-size: 0.9em;
 
     :deep(.spinner-container) {
         width: 24px;
@@ -349,6 +317,7 @@ const { isDark } = useTheme();
 .welcome-slide-minion-success .copy {
     color: var($primary-text-on-surface);
     font-weight: 700;
+    font-size: 0.9em;
 }
 
 .loader-button {
@@ -413,10 +382,28 @@ const { isDark } = useTheme();
 
 .pre-wrap {
     white-space: pre-wrap;
+    @include body-small();
 }
 
 .copy-icon {
     font-size: 36px;
     margin-left: var(--feather-spacing-s);
+}
+
+.welcome-slide-two-title {
+    margin-bottom: 16px;
+
+    :deep(svg) {
+        cursor: pointer;
+    }
+}
+
+.info-icon {
+    color: var(--feather-shade-2);
+    font-size: 22px;
+    top: -3px;
+    position: relative;
+    margin-left: 4px;
+    margin-right: 8px;
 }
 </style>

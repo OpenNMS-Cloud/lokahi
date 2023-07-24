@@ -12,16 +12,18 @@
         <div class="item-preview-statuses">
           <div class="item-preview-status" v-for="(item, index) in itemStatuses" :key="index">
             <span>{{ item.title }}</span>
-            <div data-test="item-preview-status-id" :style="{ backgroundColor: item.statusColor, color: item.statusText }">{{ item.status }}</div>
+            <div data-test="item-preview-status-id"
+              :style="{ backgroundColor: item.statusColor, color: item.statusText }">{{ item.status }}</div>
           </div>
         </div>
       </div>
     </div>
+    <div v-if="bottomCopy" class="bottom-copy">{{ bottomCopy }}</div>
     <div class="item-preview-loading" v-if="loading">
       <div>
         <FeatherSpinner />
       </div>
-      <div data-test="welcome-discovery-status-txt">Loading first discovery.</div>
+      <div data-test="welcome-discovery-status-txt">Loading first discovery. This can take up to 3 minutes.</div>
     </div>
   </div>
 </template>
@@ -33,6 +35,7 @@ withDefaults(defineProps<ItemPreviewProps>(), {
   title: '',
   itemTitle: '',
   itemSubtitle: '',
+  bottomCopy: '',
   itemStatuses: () => []
 })
 </script>
@@ -112,5 +115,10 @@ withDefaults(defineProps<ItemPreviewProps>(), {
     height: 24px;
     margin-right: 12px;
   }
+}
+
+.bottom-copy {
+  padding: 2px 12px;
+  @include caption();
 }
 </style>

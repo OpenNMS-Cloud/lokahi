@@ -280,6 +280,7 @@ docker_build(
     'opennms/lokahi-ui',
     'ui',
     target='development',
+    #target='production', # To simulate production for debugging pipeline issues.
     live_update=[
         sync('./ui', '/app'),
         run('yarn install', trigger=['./ui/package.json', './ui/yarn.lock']),

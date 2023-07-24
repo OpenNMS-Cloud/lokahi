@@ -48,14 +48,16 @@ import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.TagCreateDTO;
-import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.dto.TagListParamsDTO;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
@@ -69,7 +71,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -101,6 +102,7 @@ public class InventoryProcessingStepDefinitions {
     private String taskIpAddress;
     private MonitorType monitorType;
     private KafkaConsumerRunner kafkaConsumerRunner;
+    private final String tagTopic = "tag-operation";
     public enum PublishType {
         UPDATE,
         REMOVE
@@ -496,16 +498,31 @@ public class InventoryProcessingStepDefinitions {
     @Given("A new monitoring policy with tags {string}")
     public void aNewMonitoringPolicyWithTags(final String tags) {
         final var tagService = this.backgroundHelper.getTagServiceBlockingStub();
-
-        final var builder = TagCreateListDTO.newBuilder();
+        final var tagListBuilder = TagOperationList.newBuilder();
         for (final var tag :  tags.split(",")) {
-            builder.addTags(TagCreateDTO.newBuilder().setName(tag).build());
+            var tagBuilder = TagOperationProto.newBuilder()
+                .setTenantId(backgroundHelper.getTenantId())
+                .setTagName(tag)
+                .setOperation(Operation.ASSIGN_TAG)
+                .addMonitoringPolicyId(9999);
+            tagListBuilder.addTags(tagBuilder);
         }
 
-        builder.addEntityIds(TagEntityIdDTO.newBuilder()
-            .setMonitoringPolicyId(9999) // We can face the ID here because there is no real alarm service running
-            .build());
+        Properties producerConfig = new Properties();
+        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
+        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
 
-        tagService.addTags(builder.build());
+        try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
+            var producerRecord = new ProducerRecord<String, byte[]>(tagTopic, tagListBuilder.build().toByteArray());
+            kafkaProducer.send(producerRecord);
+        }
+        var expectedTags = tags.split(",");
+        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+            return tagService.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+                .setEntityId(TagEntityIdDTO.newBuilder().setMonitoringPolicyId(9999).build())
+                .setParams(TagListParamsDTO.newBuilder().setSearchTerm(expectedTags[0]).build()).build()).getTagsList().size() > 0;
+        });
+
     }
 }

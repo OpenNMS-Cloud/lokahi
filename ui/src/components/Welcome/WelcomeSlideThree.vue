@@ -4,13 +4,13 @@
         <div class="welcome-slide-three-inner">
             <div class="welcome-slide-three-title">
                 <h2 data-test="welcome-slide-three-title">Start Your First Discovery</h2>
-                <p>We will try to discover one network device associated with the specified IP. </p>
+                <p>We will try to discover one network device associated with the specified IP address. </p>
             </div>
             <div class="welcome-slide-three-form">
                 <FeatherInput label="Name" data-test="welcome-slide-three-name-input"
                     :modelValue="welcomeStore.firstDiscovery.name" :error="welcomeStore.firstDiscoveryErrors.name"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('name', e)" />
-                <FeatherInput label="Management IPV4/IPV6" data-test="welcome-slide-three-ip-input"
+                <FeatherInput label="Management IPV4" data-test="welcome-slide-three-ip-input"
                     :modelValue="welcomeStore.firstDiscovery.ip" :error="welcomeStore.firstDiscoveryErrors.ip"
                     @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('ip', e)" />
                 <FeatherInput label="Community String (optional)" data-test="welcome-slide-three-community-string-input"
@@ -24,8 +24,9 @@
             </div>
 
             <ItemPreview v-if="welcomeStore.discoverySubmitted" :loading="welcomeStore.devicePreview.loading"
-                :title="welcomeStore.devicePreview.title" :itemTitle="welcomeStore.devicePreview.itemTitle"
-                :itemSubtitle="welcomeStore.devicePreview.itemSubtitle"
+                :title="welcomeStore.devicePreview.title" :loadingCopy="welcomeStore.devicePreview.loadingCopy"
+                :itemTitle="welcomeStore.devicePreview.itemTitle" :itemSubtitle="welcomeStore.devicePreview.itemSubtitle"
+                :bottomCopy="welcomeStore.devicePreview.bottomCopy"
                 :itemStatuses="welcomeStore.devicePreview.itemStatuses" />
             <div class="welcome-slide-footer">
                 <FeatherButton data-test="welcome-store-slide-three-skip-button" text @click="welcomeStore.skipSlideThree">
@@ -65,6 +66,9 @@ const welcomeStore = useWelcomeStore()
     margin-bottom: 40px;
     background-color: var($surface);
     position: absolute;
+
+    left: 0;
+    right: 0;
 
     h2 {
         @include headline2();

@@ -39,7 +39,7 @@ import java.util.List;
 public class PassiveDiscoveryUpsert {
     private Long id;
     private String name;
-    private String location;
+    private String locationId;
     private List<Integer> snmpPorts;
     private List<String> snmpCommunities;
     private List<TagCreate> tags;

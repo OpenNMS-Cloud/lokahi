@@ -16,6 +16,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   const updateIsFetching = ref()
   const certIsFetching = ref()
   const isDeleting = ref()
+  const isSearching = ref()
 
   const locationQueries = useLocationQueries()
   const minionsQueries = useMinionsQueries()
@@ -34,11 +35,14 @@ export const useLocationStore = defineStore('locationStore', () => {
 
   const searchLocations = async (searchTerm = '') => {
     try {
+      isSearching.value = true
       const locations = await locationQueries.searchLocation(searchTerm)
 
       locationsList.value = locations?.data?.value?.searchLocation ?? []
     } catch (err) {
       locationsList.value = []
+    } finally {
+      isSearching.value = false
     }
   }
 
@@ -153,6 +157,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     updateIsFetching,
     certIsFetching,
     isDeleting,
+    isSearching,
     deleteLocation,
     getMinionCertificate,
     revokeMinionCertificate,

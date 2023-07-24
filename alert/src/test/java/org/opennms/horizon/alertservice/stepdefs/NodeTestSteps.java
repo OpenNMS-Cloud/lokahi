@@ -28,34 +28,24 @@
 
 package org.opennms.horizon.alertservice.stepdefs;
 
-import com.google.protobuf.MessageOrBuilder;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.Transpose;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.alert.tag.proto.TagListProto;
-import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @RequiredArgsConstructor
 public class NodeTestSteps {
     private final KafkaTestHelper kafkaTestHelper;
     private final BackgroundSteps background;
+    private final TenantSteps tenantSteps;
     private String nodeTopic;
-    private String tenantId;
-    private List<NodeDTO.Builder> builders = new ArrayList<>();
+    private final List<NodeDTO.Builder> builders = new ArrayList<>();
 
     @Given("Kafka node topic {string}")
     public void kafkaTagTopic(String nodeTopic) {
@@ -64,17 +54,12 @@ public class NodeTestSteps {
         kafkaTestHelper.startConsumerAndProducer(nodeTopic, nodeTopic);
     }
 
-    @Given("[Node] Tenant {string}")
-    public void tenant(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
     @Given("[Node] operation data")
     public void nodeData(DataTable data) {
         for (Map<String, String> map : data.asMaps()) {
             NodeDTO.Builder builder = NodeDTO.newBuilder();
             builder.setNodeLabel(map.get("label"))
-                .setId(Long.valueOf(map.get("id")))
+                .setId(Long.parseLong(map.get("id")))
                 .setTenantId(map.get("tenant_id"));
 
             builders.add(builder);
@@ -85,7 +70,7 @@ public class NodeTestSteps {
     public void sentMessageToKafkaTopic() {
         for (NodeDTO.Builder builder : builders) {
             NodeDTO node = builder.build();
-            kafkaTestHelper.sendToTopic(nodeTopic, node.toByteArray(), tenantId);
+            kafkaTestHelper.sendToTopic(nodeTopic, node.toByteArray(), tenantSteps.getTenantId());
         }
     }
 }

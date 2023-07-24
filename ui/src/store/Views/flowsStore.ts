@@ -20,6 +20,7 @@ export const useFlowsStore = defineStore('flowsStore', {
         selectedItem: 'table'
       },
       steps: 2000000,
+      maxDataPoints: undefined as undefined | number,
       //Application AutoComplete
       applications: [] as IAutocompleteItemType[],
       selectedApplications: [],
@@ -43,7 +44,7 @@ export const useFlowsStore = defineStore('flowsStore', {
     },
     async getApplications() {
       const flowsQueries = useflowsQueries()
-      const requestData = this.getRequestData(50, undefined, [], [])
+      const requestData = this.getRequestData(50, [], [])
 
       const applications = (await flowsQueries.getApplications(requestData)) || []
       const applicationsAutocompleteObject = applications.value?.findApplications?.map((item: string) => ({
@@ -54,7 +55,7 @@ export const useFlowsStore = defineStore('flowsStore', {
     },
     async getExporters() {
       const flowsQueries = useflowsQueries()
-      const requestData = this.getRequestData(undefined, undefined, [], [])
+      const requestData = this.getRequestData(undefined, [], [])
 
       const exporters = (await flowsQueries.getExporters(requestData)) || []
       const exportersAutocompleteObject = exporters.value?.findExporters?.map((item: any) => ({
@@ -63,12 +64,15 @@ export const useFlowsStore = defineStore('flowsStore', {
       })) as IAutocompleteItemType[]
       this.filters.exporters = exportersAutocompleteObject
     },
-    getRequestData(count = 10, step?: number, exporter?: object[], applications?: string[]) {
+    getRequestData(count = 10, exporter?: object[], applications?: string[]) {
+      const timeRange = this.getTimeRange(this.filters.dateFilter)
+      const step = this.calculateStep(timeRange.startTime, timeRange.endTime, this.filters.maxDataPoints)
+
       return {
-        count: count,
-        step: step || this.filters.steps,
+        count,
+        step,
         exporter: exporter || this.filters.selectedExporters.map((exp: any) => exp.value),
-        timeRange: this.getTimeRange(this.filters.dateFilter),
+        timeRange,
         applications: applications || this.filters.selectedApplications.map((app: any) => app.value)
       } as RequestCriteriaInput
     },
@@ -108,9 +112,25 @@ export const useFlowsStore = defineStore('flowsStore', {
       }
       return format(new Date(ts), dateFormat())
     },
+    getSpanGap() {
+      switch (this.filters.dateFilter) {
+        case TimeRange.Today:
+          return 1000 * 60 * 5 // 5 mins 
+        case TimeRange.Last_24Hours:
+          return 1000 * 60 * 10 // 10 mins 
+        case TimeRange.SevenDays:
+          return 1000 * 60 * 60 // 1 hour 
+        default:
+          return 1000 * 60 * 5 // 5 mins 
+      }
+    },
     async onDateFilterUpdate(e: any) {
       this.filters.dateFilter = e
       await this.updateChartData()
+    },
+    calculateStep(start: number, end: number, maxDataPoints?: number) {
+      if (!maxDataPoints) return
+      return Math.floor((end - start) / maxDataPoints)
     },
     getTimeRange(range: string) {
       const now = new Date()

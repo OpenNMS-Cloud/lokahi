@@ -42,23 +42,8 @@ import com.google.protobuf.Message;
 public interface MessageConsumerManager {
 
     static final String LOG_PREFIX = "ipc";
-    static final String METRIC_MESSAGES_RECEIVED = "messagesReceived";
-    static final String METRIC_MESSAGE_SIZE = "messageSize";
-    static final String METRIC_DISPATCH_TIME = "dispatchTime";
 
     <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, T message);
 
     <S extends Message, T extends Message> void registerConsumer(MessageConsumer<S, T> consumer);
-
-    <S extends Message, T extends Message> void unregisterConsumer(MessageConsumer<S, T> consumer);
-
-    static void updateMessageSize(MetricRegistry metricRegistry, String location, String moduleId, int messageSize) {
-        Histogram messageSizeHistogram = metricRegistry.histogram(MetricRegistry.name(location, moduleId, METRIC_MESSAGE_SIZE));
-        messageSizeHistogram.update(messageSize);
-    }
-
-    static Timer getDispatchTimerMetric(MetricRegistry metricRegistry, String location, String moduleId) {
-        return metricRegistry.timer(MetricRegistry.name(location, moduleId, METRIC_DISPATCH_TIME));
-    }
-
 }

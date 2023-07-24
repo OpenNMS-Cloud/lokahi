@@ -28,9 +28,12 @@
 
 package org.opennms.miniongateway.grpc.server.flows;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.opennms.horizon.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.shared.flows.mapper.TenantLocationSpecificFlowDocumentLogMapper;
+import org.opennms.horizon.shared.grpc.interceptor.MeteringServerInterceptor;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.miniongateway.grpc.server.kafka.SinkMessageKafkaPublisher;
@@ -39,21 +42,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * Forwarder of Flow messages - received via GRPC and forwarded to Kafka.
  */
 @Component
 public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, FlowDocumentLog> {
     public static final String DEFAULT_FLOW_RESULTS_TOPIC = "flows";
+
+    public static final String FLOW_DOCUMENT_TAG = "FlowDocument";
+    public static final String FLOW_DOCUMENT_LOG_TAG = "FlowDocumentLog";
     private final SinkMessageKafkaPublisher<FlowDocumentLog, TenantLocationSpecificFlowDocumentLog> kafkaPublisher;
+    private final Counter flowCounter;
+    private final Counter flowLogCounter;
 
     @Autowired
     public FlowKafkaForwarder(SinkMessageKafkaPublisherFactory messagePublisherFactory, TenantLocationSpecificFlowDocumentLogMapper mapper,
-        @Value("${flow.results.kafka-topic:" + DEFAULT_FLOW_RESULTS_TOPIC + "}") String kafkaTopic) {
+                              @Value("${flow.results.kafka-topic:" + DEFAULT_FLOW_RESULTS_TOPIC + "}") String kafkaTopic,
+                              MeterRegistry registry) {
         this.kafkaPublisher = messagePublisherFactory.create(
             mapper::mapBareToTenanted,
             kafkaTopic
         );
+        Objects.requireNonNull(registry);
+        flowCounter = registry.counter(FlowKafkaForwarder.class.getName(),
+            MeteringServerInterceptor.SERVICE_TAG_NAME, FLOW_DOCUMENT_TAG);
+        flowLogCounter = registry.counter(FlowKafkaForwarder.class.getName(),
+            MeteringServerInterceptor.SERVICE_TAG_NAME, FLOW_DOCUMENT_LOG_TAG);
     }
 
     @Override
@@ -63,7 +79,8 @@ public class FlowKafkaForwarder implements MessageConsumer<FlowDocumentLog, Flow
 
     @Override
     public void handleMessage(FlowDocumentLog messageLog) {
+        flowCounter.increment(messageLog.getMessageCount());
+        flowLogCounter.increment();
         this.kafkaPublisher.send(messageLog);
     }
-
 }

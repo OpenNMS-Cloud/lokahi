@@ -20,4 +20,6 @@ management:
     health:
       probes:
         enabled: true
-
+    web:
+      exposure:
+        include: "*"

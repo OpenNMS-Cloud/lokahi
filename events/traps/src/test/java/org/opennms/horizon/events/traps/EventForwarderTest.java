@@ -4,14 +4,15 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,7 +65,7 @@ public class EventForwarderTest {
 
         ProducerRecord<String, byte[]> producerRecord = producerRecordCaptor.getValue();
         assertThat(producerRecord.topic()).isEqualTo(internalEventsTopic);
-        assertThat(producerRecord.value()).isEqualTo(testEvent.toByteArray());
+        assertThat(producerRecord.value()).isEqualTo(EventLog.newBuilder().addEvents(testEvent).build().toByteArray());
     }
 
 

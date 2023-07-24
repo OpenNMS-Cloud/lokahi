@@ -50,6 +50,10 @@ const props = defineProps({
   format: {
     required: true,
     type: Function as PropType<(val: string) => string>
+  },
+  getChartAreaWidthForDataPoints: {
+    required: true,
+    type: Function as PropType<(width: number) => void>
   }
 })
 const lineChart = ref()
@@ -148,6 +152,14 @@ onThemeChange(() => {
   chartOptions.value.plugins.legend.labels.color = isDark.value ? 'rgba(10, 12, 27, .9)' : '#000000'
 })
 
+const getChartAreaWidth = () => {
+  if (lineChart.value?.chart) {
+    props.getChartAreaWidthForDataPoints(lineChart.value.chart.chartArea.width)
+  }
+}
+
+onMounted(() => getChartAreaWidth())
+useResizeObserver(lineChart, () => getChartAreaWidth())
 
 defineExpose({
   downloadChart

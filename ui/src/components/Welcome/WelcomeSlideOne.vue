@@ -2,19 +2,15 @@
     <div :class="['welcome-slide-one-wrapper', visible ? 'visible' : 'hidden',
     ]">
         <div class="welcome-text">
-            <h1 data-test="welcome-slide-one-title">Welcome to <br />OpenNMS&nbsp;Cloud!</h1>
-            <p class="margin-bottom">Our mission is to make monitoring just&nbsp;happen.</p>
-            <p class="margin-bottom">To start monitoring, your network must include at least one OpenNMS Minion for
-                distributed network monitoring. We'll walk you through that setup, which takes only a
-                few&nbsp;minutes.</p>
+            <h1 data-test="welcome-slide-one-title">Welcome to OpenNMS&nbsp;Cloud</h1>
+            <p class="margin-bottom">To start monitoring, you need to install our Minion on your system. This lightweight,
+                secure collector monitors and communicates with the devices on your network, shares collected data,
+                and connects your network with OpenNMS&nbsp;Cloud. </p>
+            <p class="margin-bottom">We’ll walk you through this setup, which takes only a few&nbsp;minutes.
+            </p>
         </div>
         <CollapsingCard title="Requirements: Before You Begin" data-test="welcome-slide-one-toggler"
             :open="welcomeStore.slideOneCollapseVisible" :headerClicked="welcomeStore.toggleSlideOneCollapse">
-            <template #icon>
-                <div>
-                    <FeatherIcon :icon="Lightbulb" title="Lightbulb" :class="isDark ? 'icon-dark' : 'icon-light'" />
-                </div>
-            </template>
             <template #body>
                 <div>
                     <h4>Minimum System Requirements:</h4>
@@ -52,25 +48,37 @@
                 <h4>Make sure you have the following:</h4>
                 <ul>
                     <li>Docker environment with Docker Compose</li>
+                    <li>Access to a terminal window</li>
                     <li>Network Time Protocol (NTP) installed and configured</li>
                 </ul>
-                <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank" rel="noopener noreferrer">How
-                    to set up
-                    Docker
-                    <FeatherIcon :icon="ChevronRight" />
-                </a>
+                <div>
+                    <span class="docker-setup">How to set up Docker:&nbsp;
+
+                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                            rel="noopener noreferrer">Linux
+                        </a>
+                        <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank"
+                            rel="noopener noreferrer">Mac
+                        </a>
+                        <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank"
+                            rel="noopener noreferrer">Windows
+                        </a>
+                    </span>
+                </div>
             </template>
         </CollapsingCard>
-        <FeatherButton primary @click="welcomeStore.nextSlide" data-test="welcome-slide-one-setup-button">Start Setup
-        </FeatherButton>
+        <div class="footer-button">
+            <FeatherButton primary @click="welcomeStore.nextSlide" data-test="welcome-slide-one-setup-button">Start Setup
+            </FeatherButton>
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
 import CollapsingCard from '../Common/CollapsingCard.vue'
 import Lightbulb from '../Common/LightbulbIcon.vue'
-import ChevronRight from '@featherds/icon/navigation/ChevronRight'
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import useTheme from '@/composables/useTheme';
+
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
 defineProps({
@@ -128,7 +136,12 @@ ul li {
 .welcome-text {
     margin-top: 24px;
     margin-bottom: 24px;
+
+    h1 {
+        font-size: 28px;
+    }
 }
+
 
 .visible {
     opacity: 1;
@@ -148,6 +161,9 @@ ul li {
     position: absolute;
     padding-bottom: 40px;
 
+    left: 0;
+    right: 0;
+
     a {
         color: var($clickable-normal);
     }
@@ -159,5 +175,23 @@ ul li {
 
 .icon-light {
     color: blue;
+}
+
+.docker-setup {
+    display: flex;
+
+    a {
+        margin-left: 16px;
+        display: inline-block;
+        color: var(--feather-primary);
+        text-decoration: underline;
+        font-weight: 700;
+    }
+}
+
+.footer-button {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
 }
 </style>

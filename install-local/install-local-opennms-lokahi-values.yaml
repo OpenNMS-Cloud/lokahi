@@ -82,3 +82,5 @@ Ingress:
   Enabled: true
 Postgres:
   Pvc: false
+MailServer:
+  Enabled: true

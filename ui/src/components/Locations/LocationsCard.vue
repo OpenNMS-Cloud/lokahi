@@ -33,13 +33,6 @@
       />
     </div>
   </div>
-  <DeleteConfirmationModal
-    :isVisible="isVisible"
-    :name="item.location!"
-    :closeModal="() => closeModal()"
-    :deleteHandler="() => deleteLocation()"
-    :isDeleting="locationStore.isDeleting"
-  />
 </template>
 
 <script lang="ts" setup>
@@ -49,13 +42,12 @@ import { Severity } from '@/types/graphql'
 import { LocationTemp } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
 import { useMinionsQueries } from '@/store/Queries/minionsQueries'
-import useModal from '@/composables/useModal'
 
 const props = defineProps<{
-  item: LocationTemp
+  item: LocationTemp,
+  openModalForDelete: (item: LocationTemp) => void
 }>()
 
-const { openModal, closeModal, isVisible } = useModal()
 const locationStore = useLocationStore()
 const minionsQueries = useMinionsQueries()
 
@@ -72,14 +64,9 @@ const statusPill = {
   style: props.item.status === 'UP' ? Severity.Normal : Severity.Critical
 }
 
-const deleteLocation = async () => {
-  await locationStore.deleteLocation(props.item.id)
-  await minionsQueries.refreshMinionsById()
-}
-
 const contextMenuItems = [
   { label: 'Edit', handler: () => locationStore.selectLocation(props.item.id) },
-  { label: 'Delete', handler: () => openModal() }
+  { label: 'Delete', handler: () => props.openModalForDelete(props.item) }
 ]
 
 const icons = markRaw({

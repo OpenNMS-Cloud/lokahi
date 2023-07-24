@@ -33,8 +33,6 @@ import com.google.protobuf.Int64Value;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -53,8 +51,9 @@ import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -301,4 +300,6 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         }
         return tagCreateList;
     }
+
+
 }

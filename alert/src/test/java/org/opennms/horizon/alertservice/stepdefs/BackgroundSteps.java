@@ -30,11 +30,17 @@ package org.opennms.horizon.alertservice.stepdefs;
 
 import io.cucumber.java.en.Given;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
 
+@RequiredArgsConstructor
 @Slf4j
 @Getter
 public class BackgroundSteps {
+
+    private final KafkaTestHelper kafkaTestHelper;
+
     //Test configuration
     private String applicationBaseHttpUrl;
     private String applicationBaseGrpcUrl;
@@ -42,21 +48,30 @@ public class BackgroundSteps {
     private String eventTopic;
     private String alertTopic;
     private String monitoringPolicyTopic;
-
+    private String tagTopic;
 
     @Given("Kafka event topic {string}")
     public void createKafkaTopicForEvents(String eventTopic) {
         this.eventTopic = eventTopic;
+        kafkaTestHelper.startConsumerAndProducer(eventTopic, eventTopic);
     }
 
     @Given("Kafka alert topic {string}")
     public void createKafkaTopicForAlerts(String alertTopic) {
         this.alertTopic = alertTopic;
+        kafkaTestHelper.startConsumerAndProducer(alertTopic, alertTopic);
     }
 
     @Given("Kafka monitoring policy topic {string}")
     public void createKafkaTopicForMonitoringPolicy(String monitoringPolicyTopic) {
         this.monitoringPolicyTopic = monitoringPolicyTopic;
+        kafkaTestHelper.startConsumerAndProducer(monitoringPolicyTopic, monitoringPolicyTopic);
+    }
+
+    @Given("Kafka tag topic {string}")
+    public void createKafkaTopicForTags(String tagTopic) {
+        this.tagTopic = tagTopic;
+        kafkaTestHelper.startConsumerAndProducer(tagTopic, tagTopic);
     }
 
     @Given("Application base HTTP URL in system property {string}")
@@ -77,6 +92,6 @@ public class BackgroundSteps {
     public void kafkaRestServerURLInSystemProperty(String systemProperty) {
         this.kafkaBootstrapUrl = System.getProperty(systemProperty);
         log.info("Using Kafka base URL: {}", this.kafkaBootstrapUrl);
+        kafkaTestHelper.setKafkaBootstrapUrl(kafkaBootstrapUrl);
     }
-
 }

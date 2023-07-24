@@ -110,11 +110,19 @@ onUnmounted(() => {
 }
 
 .welcome-inner {
-  max-width: 660px;
   padding-top: 132px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
+  max-width: calc(100% - 20px);
+  padding-left: 10px;
+  padding-right: 10px;
+
+  @media (min-width:700px) {
+    max-width: 660px;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 .welcome-logo svg {

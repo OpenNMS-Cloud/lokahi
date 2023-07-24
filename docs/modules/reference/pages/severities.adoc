@@ -2,6 +2,7 @@
 :!sectids:
 
 = Alert Severities
+:description: Find out the types of alert severities OpenNMS Lōkahi/Cloud uses.
 
 Lōkahi uses the following alert severities:
 

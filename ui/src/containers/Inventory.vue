@@ -20,7 +20,7 @@
     </template>
     <!-- Monitored Nodes -->
     <FeatherTabPanel>
-      <InventoryFilter v-if="tabMonitoredContent.length" :state="MonitoredStates.MONITORED"
+      <InventoryFilter v-if="inventoryStore.monitoredFilterActive" :state="MonitoredStates.MONITORED"
         :nodes="tabMonitoredContent" />
       <InventoryTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent"
         :state="MonitoredStates.MONITORED" />
@@ -31,7 +31,7 @@
 
     <!-- Unmonitored Nodes -->
     <FeatherTabPanel>
-      <InventoryFilter v-if="tabUnmonitoredContent.length" :state="MonitoredStates.UNMONITORED" onlyTags
+      <InventoryFilter v-if="inventoryStore.unmonitoredFilterActive" :state="MonitoredStates.UNMONITORED" onlyTags
         :nodes="tabUnmonitoredContent" />
       <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
         :state="MonitoredStates.UNMONITORED" />
@@ -42,7 +42,7 @@
 
     <!-- Detected Nodes -->
     <FeatherTabPanel>
-      <InventoryFilter v-if="tabDetectedContent.length" :state="MonitoredStates.DETECTED" onlyTags
+      <InventoryFilter v-if="inventoryStore.detectedFilterActive" :state="MonitoredStates.DETECTED" onlyTags
         :nodes="tabDetectedContent" />
       <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
         :state="MonitoredStates.DETECTED" />
@@ -68,10 +68,27 @@ const tabMonitoredContent = computed((): MonitoredNode[] => inventoryQueries.nod
 const tabUnmonitoredContent = computed((): UnmonitoredNode[] => inventoryQueries.unmonitoredNodes)
 const tabDetectedContent = computed((): DetectedNode[] => inventoryQueries.detectedNodes)
 
-onMounted(() => {
+onMounted(async () => {
   inventoryQueries.getMonitoredNodes()
   inventoryQueries.getUnmonitoredNodes();
   inventoryQueries.getDetectedNodes();
+})
+
+/**
+ * If at any point, a tab of content is more than zero, 
+ * show the corresponding filter. Prior to this change, it 
+ * was hidden on zero results, which meant hidden when no search results.
+ */
+watchEffect(() => {
+  if (inventoryQueries.nodes.length > 0) {
+    inventoryStore.monitoredFilterActive = true;
+  }
+  if (inventoryQueries.unmonitoredNodes.length > 0) {
+    inventoryStore.unmonitoredFilterActive = true;
+  }
+  if (inventoryQueries.detectedNodes.length > 0) {
+    inventoryStore.detectedFilterActive = true;
+  }
 })
 
 </script>

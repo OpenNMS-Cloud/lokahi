@@ -31,7 +31,6 @@ package org.opennms.horizon.inventory.component;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -47,8 +46,7 @@ public class TagPublishConsumer {
 
     private final TagService tagService;
 
-    // auto.offset.reset = earliest needed here to consume all tags if Inventory service started much later than Alerts
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", properties = ConsumerConfig.AUTO_OFFSET_RESET_CONFIG + "=earliest")
+    @KafkaListener(topics = "${kafka.topics.tag-operation}")
     public void receiveMessage(@Payload byte[] data) {
 
         try {

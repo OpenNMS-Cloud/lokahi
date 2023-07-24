@@ -20,7 +20,6 @@ setActiveClient(
 const timeRange = { startTime: 1682025158863, endTime: 1682111558863 }
 const filterValuesMock = {
   count: 10,
-  step: 2000000,
   exporter: [{ nodeId: 1, ipInterfaceId: 1 }],
   timeRange,
   applications: []

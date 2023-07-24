@@ -77,7 +77,7 @@ public class FlowProcessorTest {
         processor.consume(flows.toByteArray());
 
         verify(pipeline, timeout(5000).only()).process(flows);
-        verify(metricsTracker, timeout(5000).times(1)).addTenantFlowSampleCount(TENANT_ID, 2);
+        verify(metricsTracker, timeout(5000).times(1)).addTenantFlowReceviedCount(TENANT_ID, 2);
+        verify(metricsTracker, timeout(5000).times(1)).addTenantFlowCompletedCount(TENANT_ID, 2);
     }
-
 }

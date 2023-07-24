@@ -7,9 +7,8 @@ Feature: Monitor policy gRPC Functionality
     Given Kafka bootstrap URL in system property "kafka.bootstrap-servers"
     Given Kafka event topic "events"
     Given Kafka alert topic "alerts"
-    Given Kafka topic for tags "tag-operation"
+    Given Kafka tag topic "tag-operation"
     Given Kafka monitoring policy topic "monitoring-policy"
-    Given Monitoring policy kafka consumer
 
   Scenario: The default monitoring policy should exist
     Given Tenant id "different-tenant"
@@ -21,20 +20,19 @@ Feature: Monitor policy gRPC Functionality
       | SNMP Warm Start  | MAJOR    |
 
   Scenario: Verify alert can be created based on the default policy
-    Then Send event with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" with tenant "new-tenant" with node 10
-    Then List alerts for tenant "new-tenant", with timeout 5000ms, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1 |
+    Given Tenant id "new-tenant"
+    When An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1     |
       | alerts[0].counter == 1 |
 
   Scenario: Create a monitor policy with SNMP Trap event rule
     Given Tenant id "test-tenant"
-    Given Monitor policy name "test-policy" and memo "the test policy"
-    Given Notify by email "true"
-    Given Policy Rule name "snmp rule" and componentType "NODE"
-    Given Alert condition data
+    Given A monitoring policy named "test-policy" with tag "tag1", notifying by email
+    Given The policy has a rule named "snmp-rule" with component type "NODE" and trap definitions
       | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
       | SNMP Cold Start    | 1     | 3        | MINUTE        | MAJOR    |                  |
-    Then Create a new policy with give parameters
+    And The policy is created in the tenant
     Then Verify the new policy has been created
     Then List policy should contain 1
     Then Verify monitoring policy for tenant "test-tenant" is sent to Kafka

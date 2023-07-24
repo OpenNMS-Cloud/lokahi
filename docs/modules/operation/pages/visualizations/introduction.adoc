@@ -1,5 +1,6 @@
 
-= Vizualizations
+= Visualizations
+:description: Learn about the types of visualizations available in OpenNMS Lōkahi/Cloud: insights dashboard, top 10 applications and talkers, total network traffic.
 
 The Insights Dashboard is the home page for your Horizon Stream instance.
 It displays statistics and visualizations that represent the current state of your monitored network.
@@ -21,12 +22,10 @@ By default, information is shown for the last 24 hours.
 
 == Shortcuts
 
-The Insights Dashboard includes shortcuts for the following functions:
+The Insights Dashboard includes shortcuts for the following functions through the *Quick Actions* button:
 
-* *Add New Device:* Provision a device to your monitored network. <this button will be removed; remove this line when prototype is updated>
-* *New Discovery:* Create a new xref:get-started/discovery/active.adoc[active] or xref:get-started/discovery/passive.adoc[passive discovery].
+* *Add Discovery:* Create a new xref:get-started/discovery/active.adoc[active] or xref:get-started/discovery/passive.adoc[passive discovery].
 * *Add Monitoring Policy:* Define a new xref:get-started/policies/create.adoc[monitoring policy].
-* *View Locations:* View the locations associated with your monitored network.
 * *View Flows:* View visualizations of flows data collected from your monitored network.
 
-<"Download entire page" function may be in the works>
+You can also view inventory by clicking the *inventory* link on the Total Network Traffic graph.

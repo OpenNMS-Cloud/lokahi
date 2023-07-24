@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      port: parseInt(env.VITE_SERVER_PORT)
+      port: parseInt(env.VITE_SERVER_PORT) || 8080
     },
     resolve: {
       alias: {

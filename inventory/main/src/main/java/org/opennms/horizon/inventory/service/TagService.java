@@ -58,6 +58,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -108,7 +109,9 @@ public class TagService {
         return tags.stream().toList();
     }
 
+
     private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
+
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
@@ -121,8 +124,6 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
             tagPublisher.publishTagUpdate(tagOpList);
-            // See HS-1812
-            //nodeService.updateNodeMonitoredState(node);
             return result;
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery discovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
@@ -166,24 +167,15 @@ public class TagService {
                 .addNodeId(node.getId())
                 .build()).collect(Collectors.toList());
             tagPublisher.publishTagUpdate(tagOpList);
-            nodeService.updateNodeMonitoredState(node);
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
             tags.forEach(tag -> {
                 tag.getActiveDiscoveries().remove(activeDiscovery);
-
-                for (final var node: tag.getNodes()) {
-                    this.nodeService.updateNodeMonitoredState(node);
-                }
             });
         } else if (entityId.hasPassiveDiscoveryId()) {
             PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
             tags.forEach(tag -> {
                 tag.getPassiveDiscoveries().remove(discovery);
-
-                for (final var node: tag.getNodes()) {
-                    this.nodeService.updateNodeMonitoredState(node);
-                }
             });
         }
     }
@@ -196,6 +188,8 @@ public class TagService {
             return getTagsByActiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
+        } else if (entityId.hasMonitoringPolicyId()) {
+            return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
         }
@@ -235,7 +229,7 @@ public class TagService {
                 repository.delete(tag);
 
                 for (final var node: nodes) {
-                    this.nodeService.updateNodeMonitoredState(node);
+                    this.nodeService.updateNodeMonitoredState(node.getId(),  node.getTenantId());
                 }
             }
         }
@@ -259,27 +253,19 @@ public class TagService {
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             node.getTags().forEach(tag -> tag.getNodes().remove(node));
-            this.nodeService.updateNodeMonitoredState(node);
         } else if (entityId.hasActiveDiscoveryId()) {
             ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
             activeDiscovery.getTags().forEach(tag -> {
                 tag.getActiveDiscoveries().remove(activeDiscovery);
-
-                for (final var node: tag.getNodes()) {
-                    this.nodeService.updateNodeMonitoredState(node);
-                }
             });
         } else if (entityId.hasPassiveDiscoveryId()) {
             PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
             discovery.getTags().forEach(tag -> {
                 tag.getPassiveDiscoveries().remove(discovery);
-
-                for (final var node: tag.getNodes()) {
-                    this.nodeService.updateNodeMonitoredState(node);
-                }
             });
         }
     }
+
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
@@ -316,10 +302,6 @@ public class TagService {
         tag.getActiveDiscoveries().add(discovery);
         tag = repository.save(tag);
 
-        for (final var node: tag.getNodes()) {
-            this.nodeService.updateNodeMonitoredState(node);
-        }
-
         return mapper.modelToDTO(tag);
     }
 
@@ -339,10 +321,6 @@ public class TagService {
         tag.getPassiveDiscoveries().add(discovery);
         tag = repository.save(tag);
 
-        for (final var node: tag.getNodes()) {
-            this.nodeService.updateNodeMonitoredState(node);
-        }
-
         return mapper.modelToDTO(tag);
     }
 
@@ -356,32 +334,11 @@ public class TagService {
         tag = repository.save(tag);
 
         for (final var node: tag.getNodes()) {
-            this.nodeService.updateNodeMonitoredState(node);
+            this.nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
         }
 
         return mapper.modelToDTO(tag);
     }
-
-    private void removeTagsFromMonitoringPolicy(String tenantId, long monitoringPolicyId, TagCreateDTO tagCreateDTO) {
-        String tagName = tagCreateDTO.getName();
-        Tag tag = repository.findByTenantIdAndName(tenantId, tagName)
-        .orElseGet(() -> mapCreateTag(tenantId, tagCreateDTO));
-
-        tag.getMonitorPolicyIds().remove(monitoringPolicyId);
-        tag = repository.save(tag);
-
-        if (tag.getMonitorPolicyIds().isEmpty() && tag.getNodes().isEmpty() &&
-            tag.getActiveDiscoveries().isEmpty() && tag.getPassiveDiscoveries().isEmpty()) {
-            // If no other elements on tag, remove tag.
-            repository.delete(tag);
-        }
-
-        for (final var node: tag.getNodes()) {
-            this.nodeService.updateNodeMonitoredState(node);
-        }
-
-    }
-
 
     private Tag mapCreateTag(String tenantId, TagCreateDTO request) {
         Tag tag = mapper.createDtoToModel(request);
@@ -472,6 +429,28 @@ public class TagService {
             .stream().map(mapper::modelToDTO).toList();
     }
 
+    private List<TagDTO> getTagsByMonitoryPolicyId(String tenantId, ListTagsByEntityIdParamsDTO listParams) {
+        TagEntityIdDTO entityId = listParams.getEntityId();
+        long monitoringPolicyId = entityId.getMonitoringPolicyId();
+        List<Tag> tagList = new ArrayList<>();
+        if (listParams.hasParams()) {
+            TagListParamsDTO params = listParams.getParams();
+            String searchTerm = params.getSearchTerm();
+            if (StringUtils.isNotEmpty(searchTerm)) {
+                tagList = repository.findByTenantIdAndNameLike(tenantId, searchTerm);
+            }
+        } else {
+            tagList = repository.findByTenantId(tenantId);
+        }
+        if (tagList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return tagList.stream().filter(tag -> tag.getMonitorPolicyIds().contains(monitoringPolicyId)).map(mapper::modelToDTO)
+            .toList();
+    }
+
+
+
     @Transactional
     public void insertOrUpdateTags(TagOperationList list) {
         list.getTagsList().forEach(tagOp -> {
@@ -489,16 +468,22 @@ public class TagService {
                                     tag.getMonitorPolicyIds().add(id);
                                 }
                             });
-                            repository.save(tag);
+                            var persisted = repository.save(tag);
                             log.info("added monitoring policyIds with data {} monitoring policy id size from {} to {}",
-                                tagOp, oldSize, tag.getMonitorPolicyIds().size());
+                                tagOp, oldSize, persisted.getMonitorPolicyIds().size());
+                            for (final var node: persisted.getNodes()) {
+                                this.nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
+                            }
                         }, () -> {
                             Tag tag = new Tag();
                             tag.setName(tagOp.getTagName());
                             tag.setTenantId(tagOp.getTenantId());
                             tag.setMonitorPolicyIds(tagOp.getMonitoringPolicyIdList());
-                            repository.save(tag);
+                            var persisted = repository.save(tag);
                             log.info("inserted new tag with data {}", tagOp);
+                            for (final var node: persisted.getNodes()) {
+                                this.nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
+                            }
                         });
                 }
                 case REMOVE_TAG -> {

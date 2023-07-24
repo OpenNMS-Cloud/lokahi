@@ -1,4 +1,5 @@
 
 = Installation
+:description: Link to installation instructions for OpenNMS Lōkahi, an open source network monitoring project designed for cloud-native deployments.
 
 For installation instructions, see the https://github.com/OpenNMS-Cloud/lokahi/wiki/Getting-Started---Admin[administrator's getting started guide] in the project's wiki on GitHub.

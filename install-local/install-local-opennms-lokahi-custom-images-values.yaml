@@ -122,3 +122,5 @@ Keycloak:
   AdminPassword: admin
 Grafana:
   Image: opennms/lokahi-grafana:local
+MailServer:
+  Enabled: true

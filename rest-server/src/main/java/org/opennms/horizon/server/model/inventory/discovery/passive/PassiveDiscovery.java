@@ -38,7 +38,7 @@ import java.util.List;
 public class PassiveDiscovery {
     private Long id;
     private String name;
-    private String location;
+    private String locationId;
     private boolean toggle;
     private List<Integer> snmpPorts;
     private List<String> snmpCommunities;

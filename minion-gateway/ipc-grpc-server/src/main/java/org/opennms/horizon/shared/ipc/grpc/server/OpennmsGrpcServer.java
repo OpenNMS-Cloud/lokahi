@@ -30,9 +30,9 @@ package org.opennms.horizon.shared.ipc.grpc.server;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +52,7 @@ import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.InterceptorFactory;
+import org.opennms.horizon.shared.grpc.interceptor.MeteringInterceptorFactory;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageHandler;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.RpcConnectionTracker;
@@ -78,6 +79,7 @@ import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
@@ -132,17 +134,19 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     private Tracer tracer = GlobalOpenTelemetry.get().getTracer(getClass().getName());
 
+    private MeterRegistry meterRegistry;
+
 //========================================
 // Constructor
 //----------------------------------------
 
-    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer) {
-        this(grpcIpcServer, Collections.emptyList());
-    }
-
-    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer, List<InterceptorFactory> interceptors) {
+    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer, final MeterRegistry meterRegistry) {
         this.grpcIpcServer = grpcIpcServer;
-        this.interceptors = interceptors;
+        this.interceptors = List.of(
+            new MeteringInterceptorFactory(meterRegistry)
+        );
+
+        this.meterRegistry = Objects.requireNonNull(meterRegistry);
     }
 
 //========================================
@@ -288,7 +292,14 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         sinkDispatcherById.remove(module.getId());
     }
 
-//========================================
+    @Override
+    public <S extends Message, T extends Message> void dispatch(final SinkModule<S, T> module, final T message) {
+        this.meterRegistry.timer("consumer.dispatch",
+            "module", module.getId())
+            .record(() -> super.dispatch(module, message));
+    }
+
+    //========================================
 // Internals
 //----------------------------------------
 

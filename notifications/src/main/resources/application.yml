@@ -4,9 +4,6 @@ spring:
 
   mail:
     template: alert.html.vm
-    from: noreply@opennms.com
-    host: mail-server
-    port: 1025
 
   datasource:
     driver-class-name: org.postgresql.Driver

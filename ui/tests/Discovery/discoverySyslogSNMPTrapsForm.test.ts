@@ -3,12 +3,13 @@ import DiscoverySyslogSNMPTrapsForm from '@/components/Discovery/DiscoverySyslog
 import tabIndexDirective from '@/directives/v-tabindex'
 import { PassiveDiscovery } from '@/types/graphql'
 import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 
 let wrapper: any
 
 const passiveDiscovery: Partial<PassiveDiscovery> = {
   id: 1,
-  location: 'Default',
+  locationId: "1",
   name: 'Passive Discovery',
   snmpCommunities: ['public'],
   snmpPorts: [161],
@@ -95,10 +96,12 @@ describe('DiscoverySyslogSNMPTrapsForm', () => {
   })
 
   test('Should call the upsert with the correct payload', async () => {
-    const store = useDiscoveryMutations()
+    const discoveryMutations = useDiscoveryMutations()
+    const discoveryStore = useDiscoveryStore()
+    discoveryStore.selectedLocation = { id: '1', location: 'Default' }
     wrapper.find('form').trigger('submit.prevent')
     delete passiveDiscovery.toggle
-    expect(store.upsertPassiveDiscovery).toHaveBeenCalledTimes(1)
-    expect(store.upsertPassiveDiscovery).toHaveBeenCalledWith({ passiveDiscovery })
+    expect(discoveryMutations.upsertPassiveDiscovery).toHaveBeenCalledTimes(1)
+    expect(discoveryMutations.upsertPassiveDiscovery).toHaveBeenCalledWith({ passiveDiscovery })
   })
 })

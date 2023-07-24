@@ -8,7 +8,8 @@
                 <label for="atomic-input">{{ inputLabel }}</label>
                 <input id="atomic-input" tabIndex="0" :value="inputValue" @keydown="keyDownCheck"
                     @input="(event) => textChanged((event.target as HTMLInputElement)?.value)" :placeholder="inputLabel"
-                    class="atomic-auto-input" data-ref-id="feather-autocomplete-input" />
+                    class="atomic-auto-input" :class="{ 'err-input' : errMsg }" data-ref-id="feather-autocomplete-input"
+                    :disabled="disabled" />
             </div>
             <div class="post">
                 <FeatherIcon :icon="KeyboardArrowDown" class="drop-icon" />
@@ -19,23 +20,28 @@
                 @click="() => itemClicked(listItem, index)" @keydown="(d) => itemKey(d, listItem, index)">
                 {{ listItem }}
             </div>
-            <div class='list-item' tabIndex="0" v-if="inputValue && !results.find((d) => d === inputValue)"
+            <div class='list-item' tabIndex="0" v-if="inputValue && !results.find((d) => d === inputValue) && allowNew"
                 @click="() => itemClicked(inputValue, -1)" @keydown="(d) => itemKey(d, inputValue, -1)">
                 {{ inputValue }}
             </div>
             <FeatherSpinner v-if="loading" />
         </div>
+        <div v-if="errMsg" class="err-msg">
+            {{ errMsg }}
+        </div>
     </div>
 </template>
 <script setup lang="ts">
-import { FeatherList, FeatherListItem } from '@featherds/list'
-import Search from "@featherds/icon/action/Search";
-import KeyboardArrowDown from "@featherds/icon/navigation/ExpandMore";
-import { PropType } from 'vue';
+import Search from "@featherds/icon/action/Search"
+import KeyboardArrowDown from "@featherds/icon/navigation/ExpandMore"
+import { PropType } from 'vue'
 
-const wrapper = ref();
-const listRef = ref();
+const wrapper = ref()
+const listRef = ref()
 const props = defineProps({
+    errMsg: { type: String, default: '' },
+    disabled: { type: Boolean, default: false },
+    allowNew: { type: Boolean, default: true },
     inputValue: { type: String, default: '' },
     inputLabel: { type: String, default: '' },
     itemClicked: { type: Function as PropType<(listItem: unknown, index: number) => void>, default: () => { } },
@@ -49,7 +55,7 @@ const props = defineProps({
 
 const keyDownCheck = (key: KeyboardEvent) => {
     if (key.key === 'ArrowDown') {
-        listRef.value.querySelector('.list-item').focus();
+        listRef.value.querySelector('.list-item').focus()
     }
 }
 
@@ -154,7 +160,7 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
 }
 
 .wrapper {
-    max-width: 420px;
+    max-width: 100%;
     position: relative;
 
     :focus-within {
@@ -188,7 +194,21 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
     }
 }
 
-.main label {
-    display: none;
+.main {
+    width: 100%;
+    label {
+        display: none;
+    }
 }
+
+.err-msg {
+    @include typography.caption;
+    color: var(variables.$error);
+    margin: var(variables.$spacing-xxs) 0 0 var(variables.$spacing-m);
+}
+
+.err-input::placeholder {
+    color: var(variables.$error);
+}
+
 </style>

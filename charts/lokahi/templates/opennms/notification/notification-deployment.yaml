@@ -64,6 +64,28 @@ spec:
                 secretKeyRef:
                   name: postgres
                   key: notificationPwd
+            - name: SPRING_MAIL_FROM
+              value: "{{ .Values.OpenNMS.Notification.mailFrom }}"
+            - name: HORIZON_EMAIL_RETRY_DELAY
+              value: "{{ .Values.OpenNMS.Notification.retry.delay }}"
+            - name: HORIZON_EMAIL_RETRY_MAXDELAY
+              value: "{{ .Values.OpenNMS.Notification.retry.maxDelay }}"
+            - name: HORIZON_EMAIL_RETRY_MULTIPLIER
+              value: "{{ .Values.OpenNMS.Notification.retry.multiplier }}"
+            - name: HORIZON_EMAIL_RETRY_MAX
+              value: "{{ .Values.OpenNMS.Notification.retry.max }}"
+            {{- if .Values.OpenNMS.Notification.acsConnectionSecretName }}
+            - name: SPRING_MAIL_ACS_CONNECTION_STRING # spring.mail.acs-connection-string
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.OpenNMS.Notification.acsConnectionSecretName }}
+                  key: connection-string
+            {{- else }}
+            - name: SPRING_MAIL_HOST
+              value: "{{ .Values.OpenNMS.Notification.smtpHost }}"
+            - name: SPRING_MAIL_PORT
+              value: "{{ .Values.OpenNMS.Notification.smtpPort }}"
+            {{- end }}
             - name: HORIZON_KEYCLOAK_BASE_URL
               value: "http://{{ .Values.Keycloak.ServiceName }}:{{ .Values.Keycloak.Port }}{{ .Values.Keycloak.Path }}/"
             - name: HORIZON_KEYCLOAK_ADMIN_USERNAME

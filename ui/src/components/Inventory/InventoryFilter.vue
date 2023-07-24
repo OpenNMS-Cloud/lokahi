@@ -6,7 +6,7 @@
         @update:modelValue="inventoryStore.setSearchType">
       </FeatherSelect>
       <FeatherAutocomplete v-if="inventoryStore.searchType.name === 'Tags'" type="multi"
-        :modelValue="inventoryStore.tagsSelected" @update:modelValue="inventoryStore.addSelectedTag"
+        :modelValue="inventoryStore.tagsSelected" @update:modelValue="searchNodesByTags"
         :results="tagQueries.tagsSearched" @search="tagQueries.getTagsSearch" class="inventory-auto" label="Search"
         :allow-new="false" textProp="name" render-type="multi" data-test="search-by-tags" ref="searchNodesByTagsRef" />
       <FeatherInput v-if="inventoryStore.searchType.name === 'Labels'" @update:model-value="searchNodesByLabel"
@@ -80,9 +80,7 @@ const searchNodesByLabel: fncArgVoid = useDebounceFn((val: string | undefined) =
 })
 
 const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
-  // clear label search
-  searchNodesByLabelRef.value.internalValue = undefined
-
+  inventoryStore.tagsSelected = tags
   // if empty tags array, call regular fetch
   if (!tags.length) {
     inventoryQueries.getMonitoredNodes()

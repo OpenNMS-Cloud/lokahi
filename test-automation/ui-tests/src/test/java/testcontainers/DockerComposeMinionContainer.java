@@ -7,7 +7,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import java.io.File;
 import java.time.Duration;
-import static org.opennms.horizon.systemtests.CucumberHooks.DC_MINIONS;
 
 
 public class DockerComposeMinionContainer extends DockerComposeContainer<DockerComposeMinionContainer> {
@@ -20,7 +19,7 @@ public class DockerComposeMinionContainer extends DockerComposeContainer<DockerC
         DockerComposeMinionContainer dockerComposeMinionContainer = new DockerComposeMinionContainer(dockerComposeYamlFile);
 
         dockerComposeMinionContainer.withEnv("MINION_ID", minionId)
-            .withEnv("MINION_GATEWAY_HOST", CucumberHooks.gatewayUrl)
+            .withEnv("MINION_GATEWAY_HOST", CucumberHooks.gatewayHost)
             .withEnv("MINION_GATEWAY_PORT", CucumberHooks.gatewayPort)
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", password)
             .withEnv("CERT_FOLDER", cert.getAbsolutePath())
@@ -44,8 +43,6 @@ public class DockerComposeMinionContainer extends DockerComposeContainer<DockerC
                     .withStartupTimeout(Duration.ofMinutes(2))
             );
 
-
-        DC_MINIONS.put(minionId, dockerComposeMinionContainer);
         dockerComposeMinionContainer.start();
     }
 

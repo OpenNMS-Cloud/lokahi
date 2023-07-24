@@ -54,10 +54,10 @@
         <camel.version>3.20.0</camel.version>
         <commons.io.version>2.11.0</commons.io.version>
         <commons.lang.version>2.6</commons.lang.version>
+        <commons.net.version>3.9.0</commons.net.version>
         <cucumber.version>7.1.0</cucumber.version>
         <cxf.version>3.5.5</cxf.version>
         <dhcp4java.version>1.1.0</dhcp4java.version>
-        <drools.version>7.60.0.Final</drools.version>
         <dropwizard.metrics.version>4.2.10</dropwizard.metrics.version>
         <geohash.version>1.4.0</geohash.version>
         <glassfish.jaxb.version>2.3.2</glassfish.jaxb.version>
@@ -113,9 +113,10 @@
         <opentelemetry.version>1.25.0</opentelemetry.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <osgi.version>7.0.0</osgi.version>
+        <micrometer.version>1.11.1</micrometer.version>
         <pax.jdbc.version>1.5.2</pax.jdbc.version>
         <postgresql.version>42.5.1</postgresql.version>
-        <testcontainers.version>1.17.4</testcontainers.version>
+        <testcontainers.version>1.18.3</testcontainers.version>
         <prometheus.version>0.16.0</prometheus.version>
         <protobuf.version>3.19.6</protobuf.version>   <!-- WARNING: this also controls the version of the protobuf compiler, change at your risk!-->
         <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>
@@ -701,21 +702,6 @@
                 <version>${karaf.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.drools</groupId>
-                <artifactId>drools-core</artifactId>
-                <version>${drools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.drools</groupId>
-                <artifactId>drools-compiler</artifactId>
-                <version>${drools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.drools</groupId>
-                <artifactId>drools-mvel</artifactId>
-                <version>${drools.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-admin-client</artifactId>
                 <version>${keycloak.version}</version>
@@ -745,26 +731,6 @@
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
                 <version>${jboss-logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.kie</groupId>
-                <artifactId>kie-api</artifactId>
-                <version>${drools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.kie.soup</groupId>
-                <artifactId>kie-soup-commons</artifactId>
-                <version>${drools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.kie.soup</groupId>
-                <artifactId>kie-soup-maven-support</artifactId>
-                <version>${drools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.kie.soup</groupId>
-                <artifactId>kie-soup-project-datamodel-commons</artifactId>
-                <version>${drools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
@@ -878,6 +844,11 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
+                <version>${micrometer.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>

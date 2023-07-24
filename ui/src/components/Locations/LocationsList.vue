@@ -41,23 +41,53 @@
           :key="index"
           data-test="card"
         >
-          <LocationsCard :item="item" />
+          <LocationsCard :item="item" :openModalForDelete="openModalForDelete" />
         </li>
       </ul>
     </div>
   </div>
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :name="locationToDelete?.location"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => deleteLocation()"
+    :isDeleting="locationStore.isDeleting"
+  />
 </template>
 
 <script setup lang="ts">
 import HeadlineSection from '@/components/Common/HeadlineSection.vue'
 import Help from '@featherds/icon/action/Help'
 import { LocationTemp } from '@/types/locations.d'
+import useModal from '@/composables/useModal'
+import { useLocationStore } from '@/store/Views/locationStore'
+import { useMinionsQueries } from '@/store/Queries/minionsQueries'
+import { MonitoringLocation } from '@/types/graphql'
 
 const props = defineProps<{
   items: LocationTemp[]
 }>()
 
+defineEmits(['show-instructions'])
+
+const locationStore = useLocationStore()
+const minionsQueries = useMinionsQueries()
+const { openModal, closeModal, isVisible } = useModal()
+
+const locationToDelete = ref<MonitoringLocation>()
 const locationsList = computed(() => props.items)
+
+const deleteLocation = async () => {
+  if (locationToDelete.value) {
+    await locationStore.deleteLocation(locationToDelete.value.id)
+    await minionsQueries.refreshMinionsById()
+  }
+}
+
+const openModalForDelete = (item: MonitoringLocation) => {
+  locationToDelete.value = item
+  openModal()
+}
 
 const icons = markRaw({
   Help

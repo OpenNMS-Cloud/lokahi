@@ -239,8 +239,8 @@ OpenNMS:
     Image: opennms/lokahi-minion-certificate-manager
     ImagePullPolicy: IfNotPresent
     Replicas: 1
-    Port: 8990
-    PortHealth: 8080
+    GrpcPort: 8990
+    Port: 8080
     VolumeSize: 1Gi
     Resources:
       Limits:

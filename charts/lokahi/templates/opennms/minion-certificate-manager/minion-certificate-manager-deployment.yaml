@@ -74,9 +74,9 @@ spec:
               name: spring-boot-env
           ports:
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
+              containerPort: {{ .Values.OpenNMS.MinionCertificateManager.GrpcPort }}
             - name: http
-              containerPort: {{ .Values.OpenNMS.MinionCertificateManager.PortHealth }}
+              containerPort: {{ .Values.OpenNMS.MinionCertificateManager.Port }}
           volumeMounts:
             - name: certificate-secrets
               mountPath: "/run/secrets/certificates"

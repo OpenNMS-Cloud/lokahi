@@ -88,9 +88,6 @@ spec:
             - containerPort: {{ .Values.OpenNMS.API.Port }}
             - name: http
               containerPort: 8080
-          {{/*  TODO    livenessProbe:*/}}
-          {{/*          readinessProbe:*/}}
-          {{/*          startupProbe:*/}}
           resources:
             limits:
               cpu: "{{ .Values.OpenNMS.API.Resources.Limits.Cpu }}"

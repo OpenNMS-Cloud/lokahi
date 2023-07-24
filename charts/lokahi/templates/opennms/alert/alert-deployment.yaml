@@ -79,7 +79,7 @@ spec:
               mountPath: "/app/config"
           livenessProbe:
             httpGet:
-              path: "/healthz/liveness"
+              path: "/actuator/health/liveness"
               port: http
               scheme: HTTP
             initialDelaySeconds: 20
@@ -89,7 +89,7 @@ spec:
             failureThreshold: 150
           readinessProbe:
             httpGet:
-              path: "/healthz/readiness"
+              path: "/actuator/health/readiness"
               port: http
               scheme: HTTP
             initialDelaySeconds: 20

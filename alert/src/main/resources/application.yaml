@@ -58,7 +58,7 @@ management:
     web:
       base-path: "/"
       path-mapping:
-        health: "healthz"
+        health: "actuator/health"
         # With the basepath set to /, need to specify the path-mapping.
       exposure:
         include: "*"

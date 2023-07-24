@@ -76,6 +76,8 @@ declare module '@vue/runtime-core' {
     FeatherSelect: typeof import('@featherds/select')['FeatherSelect']
     FeatherSnackbar: typeof import('@featherds/snackbar')['FeatherSnackbar']
     FeatherSpinner: typeof import('@featherds/progress')['FeatherSpinner']
+    FeatherTab: typeof import('@featherds/tabs')['FeatherTab']
+    FeatherTabContainer: typeof import('@featherds/tabs')['FeatherTabContainer']
     FeatherTextarea: typeof import('@featherds/textarea')['FeatherTextarea']
     FeatherTooltip: typeof import('@featherds/tooltip')['FeatherTooltip']
     FooterSection: typeof import('./src/components/Common/FooterSection.vue')['default']

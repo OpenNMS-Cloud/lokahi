@@ -18,6 +18,7 @@
         </div>
       </div>
     </div>
+    <div v-if="bottomCopy" class="bottom-copy">{{ bottomCopy }}</div>
     <div class="item-preview-loading" v-if="loading">
       <div>
         <FeatherSpinner />
@@ -35,6 +36,7 @@ withDefaults(defineProps<ItemPreviewProps>(), {
   title: '',
   itemTitle: '',
   itemSubtitle: '',
+  bottomCopy: '',
   itemStatuses: () => []
 })
 </script>
@@ -114,5 +116,10 @@ withDefaults(defineProps<ItemPreviewProps>(), {
     height: 24px;
     margin-right: 12px;
   }
+}
+
+.bottom-copy {
+  padding: 2px 12px;
+  @include caption();
 }
 </style>

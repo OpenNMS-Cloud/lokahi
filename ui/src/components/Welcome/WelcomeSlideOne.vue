@@ -2,7 +2,7 @@
     <div :class="['welcome-slide-one-wrapper', visible ? 'visible' : 'hidden',
     ]">
         <div class="welcome-text">
-            <h1 data-test="welcome-slide-one-title">Welcome to <br />OpenNMS&nbsp;Cloud</h1>
+            <h1 data-test="welcome-slide-one-title">Welcome to OpenNMS&nbsp;Cloud</h1>
             <p class="margin-bottom">To start monitoring, you need to install our Minion on your system. This lightweight,
                 secure collector monitors and communicates with the devices on your network, shares collected data,
                 and connects your network with OpenNMS&nbsp;Cloud. </p>
@@ -11,11 +11,6 @@
         </div>
         <CollapsingCard title="Requirements: Before You Begin" data-test="welcome-slide-one-toggler"
             :open="welcomeStore.slideOneCollapseVisible" :headerClicked="welcomeStore.toggleSlideOneCollapse">
-            <template #icon>
-                <div>
-                    <FeatherIcon :icon="Lightbulb" title="Lightbulb" :class="isDark ? 'icon-dark' : 'icon-light'" />
-                </div>
-            </template>
             <template #body>
                 <div>
                     <h4>Minimum System Requirements:</h4>
@@ -62,22 +57,20 @@
                         <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
                             rel="noopener noreferrer">Linux
                         </a>
-                        ,&nbsp;
                         <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank"
                             rel="noopener noreferrer">Mac
                         </a>
-                        ,&nbsp;
                         <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank"
                             rel="noopener noreferrer">Windows
                         </a>
-
-
                     </span>
                 </div>
             </template>
         </CollapsingCard>
-        <FeatherButton primary @click="welcomeStore.nextSlide" data-test="welcome-slide-one-setup-button">Start Setup
-        </FeatherButton>
+        <div class="footer-button">
+            <FeatherButton primary @click="welcomeStore.nextSlide" data-test="welcome-slide-one-setup-button">Start Setup
+            </FeatherButton>
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
@@ -143,7 +136,12 @@ ul li {
 .welcome-text {
     margin-top: 24px;
     margin-bottom: 24px;
+
+    h1 {
+        font-size: 28px;
+    }
 }
+
 
 .visible {
     opacity: 1;
@@ -181,5 +179,19 @@ ul li {
 
 .docker-setup {
     display: flex;
+
+    a {
+        margin-left: 16px;
+        display: inline-block;
+        color: var(--feather-primary);
+        text-decoration: underline;
+        font-weight: 700;
+    }
+}
+
+.footer-button {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
 }
 </style>

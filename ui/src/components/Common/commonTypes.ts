@@ -12,4 +12,5 @@ export interface ItemPreviewProps {
     itemTitle: string;
     itemSubtitle: string;
     itemStatuses: ItemStatus[];
+    bottomCopy: string;
 }

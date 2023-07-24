@@ -88,13 +88,13 @@ const createData = (list: [number, number][]) => {
       {
         borderWidth: 0,
         data: networkTrafficIn.value,
-        label: 'Outbound',
+        label: 'Inbound',
         spanGaps: 1000 * 60 * 3 // no line over 3+ minute gaps
       },
       {
         borderWidth: 0,
         data: networkTrafficOut.value,
-        label: 'Inbound',
+        label: 'Outbound',
         spanGaps: 1000 * 60 * 3
       }
     ]

@@ -69,11 +69,12 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     devicePreview: {
       title: 'Node Discovery',
       loading: false,
-      loadingCopy: 'Loading first discovery.',
+      loadingCopy: 'Loading first discovery. This can take up to 3 minutes.',
       itemTitle: '',
       itemSubtitle: '',
       itemStatuses: [
-      ]
+      ],
+      bottomCopy: 'We assigned your device to a location called \'default.\''
     },
     discoverySubmitted: false,
     discoveryErrorTimeout: -1,
@@ -86,7 +87,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     firstDiscoveryErrors: { name: '', ip: '', communityString: '', port: '' },
     firstDiscoveryValidation: yup.object().shape({
       name: yup.string().required("Please enter a name."),
-      ip: yup.string().required("Please enter an IP.").matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Must be a valid IP.'),
+      ip: yup.string().required("Please enter an IP.").matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
       communityString: yup.string(),
       port: yup.number()
     }).required(),
@@ -313,7 +314,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
 
         this.devicePreview.loading = true;
         this.discoverySubmitted = true;
-        this.discoveryErrorTimeout = window.setTimeout(() => this.devicePreview.loadingCopy = 'Still loading first discovery.', 180000);
+        this.discoveryErrorTimeout = window.setTimeout(() => this.devicePreview.loadingCopy = 'Loading first discovery. This can take more than 3 minutes.', 180000);
         this.getFirstNode();
       }
     },

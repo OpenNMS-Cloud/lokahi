@@ -116,7 +116,7 @@
         <micrometer.version>1.11.1</micrometer.version>
         <pax.jdbc.version>1.5.2</pax.jdbc.version>
         <postgresql.version>42.5.1</postgresql.version>
-        <testcontainers.version>1.17.4</testcontainers.version>
+        <testcontainers.version>1.18.3</testcontainers.version>
         <prometheus.version>0.16.0</prometheus.version>
         <protobuf.version>3.19.6</protobuf.version>   <!-- WARNING: this also controls the version of the protobuf compiler, change at your risk!-->
         <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>

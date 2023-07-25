@@ -17,9 +17,9 @@ spring:
 
 management:
   endpoints:
-    health:
-      probes:
-        enabled: true
     web:
       exposure:
         include: "*"
+    health:
+      probes:
+        enabled: true

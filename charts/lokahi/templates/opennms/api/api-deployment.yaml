@@ -72,7 +72,7 @@ spec:
               value: "{{ .Values.OpenNMS.Alert.ServiceName }}:{{ .Values.OpenNMS.Alert.GrpcPort }}"
             - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
               value: {{ if or (eq .Values.OpenNMS.API.CertificateManagerUrl "") (eq .Values.OpenNMS.API.CertificateManagerUrl "dev")
-                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.Port }}"{{
+                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.GrpcPort }}"{{
               else
                 }}"{{ .Values.OpenNMS.API.CertificateManagerUrl }}"{{ end }}
             - name: GRPC_URL_FLOWS

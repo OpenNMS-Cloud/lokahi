@@ -37,9 +37,9 @@ management:
   server:
     port: 8080
   endpoints:
-    health:
-      probes:
-        enabled: true
     web:
       exposure:
         include: "*"
+    health:
+      probes:
+        enabled: true

@@ -176,12 +176,12 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.Minion.Resources.Requests.Cpu }}"
               memory: "{{ .Values.OpenNMS.Minion.Resources.Requests.Memory }}"
-          #startupProbe:
-          #  exec:
-          #    command:
-          #    - sh
-          #    - -c
-          #    - unset JAVA_TOOL_OPTIONS; echo "opennms:task-set-print" | bin/client -b | grep -q taskDefinition
-          #  initialDelaySeconds: 25
-          #  periodSeconds: 5
+          startupProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - unset JAVA_TOOL_OPTIONS; echo "opennms:task-set-print" | bin/client -b | grep -q taskDefinition
+            initialDelaySeconds: 25
+            periodSeconds: 5
 {{- end }}

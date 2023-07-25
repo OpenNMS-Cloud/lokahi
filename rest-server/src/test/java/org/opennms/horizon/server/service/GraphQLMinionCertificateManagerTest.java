@@ -59,8 +59,8 @@ class GraphQLMinionCertificateManagerTest {
         var status = Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
             .setMessage("Given location doesn't exist.").build();
-        var exception = StatusProto.toStatusException(status);
-        doThrow(new RuntimeException(exception)).when(inventoryClient).getLocationById(INVALID_LOCATION_ID, accessToken);
+        var exception = StatusProto.toStatusRuntimeException(status);
+        doThrow(exception).when(inventoryClient).getLocationById(INVALID_LOCATION_ID, accessToken);
     }
 
     @AfterEach

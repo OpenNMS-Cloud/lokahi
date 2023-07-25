@@ -1,11 +1,14 @@
 package org.opennms.horizon.server.service;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.server.exception.LocationNotFoundException;
 import org.opennms.horizon.server.mapper.certificate.CertificateMapper;
 import org.opennms.horizon.server.model.certificate.CertificateResponse;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
@@ -33,10 +36,13 @@ public class GrpcMinionCertificateManager {
             var location = monitoringLocation.getId();
             CertificateResponse minionCert = mapper.protoToCertificateResponse(client.getMinionCert(tenantId, location, authHeader));
             return Mono.just(minionCert);
-        } catch (Exception e) {
-            return Mono.error(e);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.Code.NOT_FOUND)) {
+                return Mono.error(new LocationNotFoundException("Invalid location id " + locationId));
+            }
+            // fallback to generic exception
+            return Mono.error(new IllegalArgumentException("Exception while fetching Minion certificate for location {}" + locationId));
         }
-
     }
 
     @GraphQLMutation(name = "revokeMinionCertificate")

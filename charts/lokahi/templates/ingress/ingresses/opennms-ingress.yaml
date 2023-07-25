@@ -39,7 +39,7 @@ spec:
               service:
                 name: {{ .Values.OpenNMS.API.ServiceName }}
                 port:
-                  number: {{ .Values.OpenNMS.API.Port }}
+                  number: 8080
           - path: {{ .Values.Grafana.Path }}
             pathType: Prefix
             backend:

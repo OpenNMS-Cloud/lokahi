@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
-import { useFlowsStore } from './flowsStore'
 import { AZURE_SCAN, DeepPartial } from '@/types'
 import { Exporter, RequestCriteriaInput } from '@/types/graphql'
 

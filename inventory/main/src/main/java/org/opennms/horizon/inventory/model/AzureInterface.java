@@ -57,11 +57,11 @@ public class AzureInterface {
     private String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ip_interface_id", referencedColumnName = "id")
-    private IpInterface ipInterface;
+    @JoinColumn(name = "node_id", referencedColumnName = "id")
+    private Node node;
 
-    @Column(name = "ip_interface_id", insertable = false, updatable = false)
-    private long interfaceId;
+    @Column(name = "node_id", insertable = false, updatable = false)
+    private long nodeId;
 
     @NotNull
     @Column(name = "interface_name")

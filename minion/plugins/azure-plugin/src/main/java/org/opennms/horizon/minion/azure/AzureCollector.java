@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -94,6 +95,7 @@ public class AzureCollector implements ServiceCollector {
         // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
         AZURE_IPINTERFACE_METRIC_TO_ALIAS.put("ByteCount", "bytes_received");
     }
+
     private static final String AZURE_NODE_PREFIX = "azure-node-";
     private static final String METRIC_DELIMITER = ",";
 
@@ -206,9 +208,10 @@ public class AzureCollector implements ServiceCollector {
         Map<String, String> params = new HashMap<>();
         params.put(INTERVAL_PARAM, METRIC_INTERVAL);
         // limit cost, start time must be at least 1 min before
-        Instant now = Instant.now().plusSeconds(-60L);
+        Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS).plusSeconds(-60L);
         String toTime = now.toString();
-        params.put(TIMESPAN_PARAM, now.plusSeconds(-TIMESPAN_SECOND).toString() + "/" + toTime);
+        // at least 2 min range
+        params.put(TIMESPAN_PARAM, now.plusSeconds(-TIMESPAN_SECOND - 60L).toString() + "/" + toTime);
         params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
         return params;
     }

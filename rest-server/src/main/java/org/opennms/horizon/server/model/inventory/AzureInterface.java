@@ -35,9 +35,8 @@ import lombok.Setter;
 @Setter
 public class AzureInterface {
     private long id;
+    private long nodeId;
     private String tenantId;
-    private IpInterface ipInterface;
-    private long interfaceId;
     private String interfaceName;
     private String privateIpId;
     private String publicIpAddress;

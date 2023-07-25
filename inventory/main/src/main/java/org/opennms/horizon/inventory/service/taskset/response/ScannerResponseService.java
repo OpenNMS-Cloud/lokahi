@@ -197,6 +197,7 @@ public class ScannerResponseService {
                         .build();
 
                     node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+                    long nodeId = node.getId();
 
                     var nodeInfoResult = NodeInfoResult.newBuilder()
                         .setSystemLocation(azureScanItem.getLocation())
@@ -206,11 +207,10 @@ public class ScannerResponseService {
                     nodeService.updateNodeInfo(node, nodeInfoResult);
 
                     for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {
-                        var ipInterface = ipInterfaceService.createFromAzureScanResult(tenantId, node, networkInterfaceItem);
-                        azureInterfaceService.createOrUpdateFromScanResult(tenantId, ipInterface, networkInterfaceItem);
+                        var azureInterface = azureInterfaceService.createOrUpdateFromScanResult(tenantId, node, null, networkInterfaceItem);
+                        ipInterfaceService.createFromAzureScanResult(tenantId, node, azureInterface, networkInterfaceItem);
                     }
 
-                    long nodeId = node.getId();
                     taskSetHandler.sendAzureMonitorTasks(discovery, azureScanItem, nodeId);
                     taskSetHandler.sendAzureCollectorTasks(discovery, azureScanItem, nodeId);
                 }

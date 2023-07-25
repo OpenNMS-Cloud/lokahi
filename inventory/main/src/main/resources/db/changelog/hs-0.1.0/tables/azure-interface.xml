@@ -18,11 +18,11 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="interface_name" type="text"/>
-
-            <column name="ip_interface_id" type="BIGINT">
+            <column name="node_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+
+            <column name="interface_name" type="text"/>
 
             <column name="private_ip_id" type="text"/>
 
@@ -36,8 +36,17 @@
         <addPrimaryKey tableName="azure_interface" columnNames="id" constraintName="pk_azure_interface_id"/>
 
         <addForeignKeyConstraint constraintName="fk_azure_interface_node_id" onDelete="CASCADE"
-                                 baseTableName="azure_interface" baseColumnNames="ip_interface_id"
-                                 referencedTableName="ip_interface" referencedColumnNames="id"/>
+                                 baseTableName="azure_interface" baseColumnNames="node_id"
+                                 referencedTableName="node" referencedColumnNames="id"/>
+
+        <addColumn tableName="ip_interface">
+            <column name="azure_interface_id" type="bigint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="ip_interface" baseColumnNames="azure_interface_id"
+                                 constraintName="fk_ip_azure_interface_id"
+                                 referencedTableName="azure_interface"
+                                 referencedColumnNames="id" onDelete="SET NULL"/>
 
     </changeSet>
 </databaseChangeLog>

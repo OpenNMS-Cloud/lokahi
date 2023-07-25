@@ -68,7 +68,7 @@ public class TaskSetHandler {
         Long locationId = discovery.getLocationId();
 
         TaskDefinition task = monitorTaskSetService.addAzureMonitorTask(discovery, item, nodeId);
-        taskSetPublisher.publishNewTasks(tenantId, locationId, Collections.singletonList(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
     }
 
     public void sendCollectorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId) {
@@ -88,7 +88,7 @@ public class TaskSetHandler {
         Long locationId = discovery.getLocationId();
 
         TaskDefinition task = collectorTaskSetService.addAzureCollectorTask(discovery, item, nodeId);
-        taskSetPublisher.publishNewTasks(tenantId, locationId, Collections.singletonList(task));
+        taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
     }
 
 }

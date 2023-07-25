@@ -36,10 +36,10 @@ option java_package = "org.opennms.horizon.inventory.dto";
 message AzureInterfaceDTO {
   int64 id = 1;
   string tenant_id = 2;
-  int64 ip_interface_id = 3;
   string interface_name = 4;
   string private_ip_id = 5;
-  optional string public_ip_address = 6;
-  optional string public_ip_id = 7;
+  string public_ip_address = 6;
+  string public_ip_id = 7;
   string location = 8;
+  int64 node_id = 9;
 }

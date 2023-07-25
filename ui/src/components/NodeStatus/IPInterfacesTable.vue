@@ -35,23 +35,24 @@
             :key="ipInterface.id"
           >
             <td>{{ ipInterface.ipAddress }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ ipInterface.azureInterface?.privateIpId }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ ipInterface.azureInterface?.interfaceName }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ ipInterface.azureInterface?.publicIpAddress }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ ipInterface.azureInterface?.publicIpId }}</td>
+            {{ console.log( nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress ) }}
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.privateIpId }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.interfaceName }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpId }}</td>
             <td v-if="nodeStatusStore.isAzure">
               <FeatherTooltip
                 title="Traffic"
               >
-                <FeatherButton v-if="ipInterface.azureInterface?.publicIpAddress != null"
+                <FeatherButton v-if="nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress != ''"
                   icon="Traffic"
                   text
-                  @click="metricsModal.openAzureMetrics(ipInterface.azureInterface)"
+                  @click="metricsModal.openAzureMetrics(nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId))"
                   ><FeatherIcon :icon="icons.Traffic" />
                 </FeatherButton>
               </FeatherTooltip>
             </td>
-            <td v-if="nodeStatusStore.isAzure">{{ ipInterface.azureInterface?.location }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.location }}</td>
             <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.hostname }}</td>
             <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.netmask }}</td>
             <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.snmpPrimary }}</td>

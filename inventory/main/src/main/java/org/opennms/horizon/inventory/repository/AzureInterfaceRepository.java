@@ -11,5 +11,8 @@ import java.util.Optional;
 public interface AzureInterfaceRepository extends JpaRepository<AzureInterface, Long> {
     List<AzureInterface> findByTenantId(String tenantId);
 
-    Optional<AzureInterface> findByIpInterfaceIdAndTenantId(long ipInterfaceId, String tenantId);
+    Optional<AzureInterface> findByIdAndTenantId(long id, String tenantId);
+
+    Optional<AzureInterface> findByTenantIdAndPrivateIpId(String tenantId, String privateIpId);
+
 }

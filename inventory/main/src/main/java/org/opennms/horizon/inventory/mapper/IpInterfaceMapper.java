@@ -29,19 +29,13 @@
 package org.opennms.horizon.inventory.mapper;
 
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 
 @Mapper(componentModel = "spring", uses = {EmptyStringMapper.class, AzureInterfaceMapper.class, IpAddressMapper.class})

@@ -74,8 +74,11 @@ public class IpInterface {
     private Long snmpInterfaceId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name ="id", referencedColumnName = "interface_id", insertable = false, updatable = false)
+    @JoinColumn(name ="azure_interface_id", referencedColumnName = "id")
     private AzureInterface azureInterface;
+
+    @Column(name = "azure_interface_id", insertable = false, updatable = false)
+    private Long azureInterfaceId;
 
     @Column(name = "node_id", insertable = false, updatable = false)
     private long nodeId;

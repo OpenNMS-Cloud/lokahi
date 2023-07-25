@@ -44,6 +44,7 @@ public class Node {
     private long monitoringLocationId;
     private List<IpInterface> ipInterfaces;
     private List<SnmpInterface> snmpInterfaces;
+    private List<AzureInterface> azureInterfaces;
     private String objectId;
     private String systemName;
     private String systemDescr;

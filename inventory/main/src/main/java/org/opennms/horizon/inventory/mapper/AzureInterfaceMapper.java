@@ -57,14 +57,12 @@ public interface AzureInterfaceMapper {
         @Mapping(target = "privateIpId", source = "name", qualifiedByName = "emptyString"),
         @Mapping(target = "publicIpId", source = "publicIpAddress.name", qualifiedByName = "emptyString"),
         @Mapping(target = "interfaceName", source = "interfaceName", qualifiedByName = "emptyString"),
-        @Mapping(target = "location", source = "location", qualifiedByName = "emptyString")
     })
     void updateFromScanResult(@MappingTarget AzureInterface result, AzureScanNetworkInterfaceItem scanResult);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     AzureInterfaceDTO modelToDTO(AzureInterface model);
-
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)

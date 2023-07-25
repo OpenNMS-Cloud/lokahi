@@ -30,7 +30,6 @@ package org.opennms.horizon.inventory.service.taskset;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
-
 import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.azure.contract.AzureCollectorResourcesRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
@@ -55,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;

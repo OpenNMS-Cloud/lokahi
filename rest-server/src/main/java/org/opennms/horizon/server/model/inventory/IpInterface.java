@@ -40,5 +40,5 @@ public class IpInterface {
     private Boolean snmpPrimary;
     private String hostname;
     private String netmask;
-    private AzureInterface azureInterface;
+    private long azureInterfaceId;
 }

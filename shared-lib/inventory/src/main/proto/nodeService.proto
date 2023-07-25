@@ -31,6 +31,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "ipInterface.proto";
 import "snmpInterface.proto";
+import "azureInterface.proto";
 import "tag.proto";
 
 package opennms.inventory;
@@ -52,6 +53,7 @@ message NodeDTO {
   repeated opennms.inventory.SnmpInterfaceDTO snmp_interfaces = 12;
   string scan_type = 13;
   optional MonitoredState monitored_state = 14;
+  repeated opennms.inventory.AzureInterfaceDTO azure_interfaces = 15;
 }
 
 message NodeCreateDTO {

@@ -17,6 +17,16 @@ describe('Node Status Store', () => {
 
     const store = useNodeStatusStore()
     const queries = useNodeStatusQueries()
+
+    const capturedNowInMs = new Date().getTime()
+    const testDate = new Date(capturedNowInMs)
+    
+    global.Date = vitest.fn().mockImplementation(() => testDate) as any
+    global.Date.now = vitest.fn().mockImplementation(() => capturedNowInMs)
+    
+    const endTime = Date.now()
+    const startTime = endTime - 1000 * 60 * 60 * 24 * 7 // endTime - 7 days
+
     await store.fetchExporters(1)
 
     expect(queries.fetchExporters).toHaveBeenCalledOnce()
@@ -25,7 +35,11 @@ describe('Node Status Store', () => {
         {
           nodeId: 1
         }
-      ]
+      ],
+      timeRange: {
+        startTime,
+        endTime
+      }
     })
   })
 })

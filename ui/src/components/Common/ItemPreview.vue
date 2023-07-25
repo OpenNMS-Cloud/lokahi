@@ -18,7 +18,7 @@
         </div>
       </div>
     </div>
-    <div v-if="bottomCopy" class="bottom-copy">{{ bottomCopy }}</div>
+    <div v-if="bottomCopy && !loading" class="bottom-copy">{{ bottomCopy }}</div>
     <div class="item-preview-loading" v-if="loading">
       <div>
         <FeatherSpinner />

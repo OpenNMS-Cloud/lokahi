@@ -67,14 +67,14 @@ spec:
             - name: KEYCLOAK_REALM
               value: "{{ .Values.Keycloak.RealmName }}"
             - name: GRPC_SERVER_PORT
-              value: "6565"
+              value: "8990"
             {{- include "deployment.env" .Values.OpenNMS.MinionCertificateManager | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
           ports:
             - name: grpc
-              containerPort: 6565
+              containerPort: 8990
           volumeMounts:
             - name: certificate-secrets
               mountPath: "/run/secrets/certificates"

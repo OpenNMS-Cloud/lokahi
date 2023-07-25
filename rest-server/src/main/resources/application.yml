@@ -1,5 +1,6 @@
 server:
   port: 9090
+# Tried using default 8080, get 404 error.
 
 spring:
   jackson:

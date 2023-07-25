@@ -63,16 +63,16 @@ spec:
             - name: GRAPHQL_SPQR_GUI_TARGET_ENDPOINT
               value: /api/graphql
             - name: GRPC_URL_INVENTORY
-              value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:{{ .Values.OpenNMS.Inventory.GrpcPort }}"
+              value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:6565"
             - name: GRPC_URL_EVENTS
-              value: "{{ .Values.OpenNMS.Events.ServiceName }}:{{ .Values.OpenNMS.Events.GrpcPort }}"
+              value: "{{ .Values.OpenNMS.Events.ServiceName }}:6565"
             - name: GRPC_URL_NOTIFICATION
-              value: "{{ .Values.OpenNMS.Notification.ServiceName }}:{{ .Values.OpenNMS.Notification.GrpcPort }}"
+              value: "{{ .Values.OpenNMS.Notification.ServiceName }}:6565"
             - name: GRPC_URL_ALERT
-              value: "{{ .Values.OpenNMS.Alert.ServiceName }}:{{ .Values.OpenNMS.Alert.GrpcPort }}"
+              value: "{{ .Values.OpenNMS.Alert.ServiceName }}:6565"
             - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
               value: {{ if or (eq .Values.OpenNMS.API.CertificateManagerUrl "") (eq .Values.OpenNMS.API.CertificateManagerUrl "dev")
-                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.GrpcPort }}"{{
+                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:8990"{{
               else
                 }}"{{ .Values.OpenNMS.API.CertificateManagerUrl }}"{{ end }}
             - name: GRPC_URL_FLOWS
@@ -85,7 +85,8 @@ spec:
           - configMapRef:
               name: spring-boot-env
           ports:
-            - containerPort: {{ .Values.OpenNMS.API.Port }}
+            - name: grpc
+              containerPort: 9090
             - name: http
               containerPort: 8080
           resources:

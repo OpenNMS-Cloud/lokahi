@@ -8,10 +8,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.OpenNMS.Events.Port }}
+    - port: 8080
       protocol: TCP
       name: http
-    - port: {{ .Values.OpenNMS.Events.GrpcPort }}
+    - port: 6565
       protocol: TCP
       name: grpc
   selector:

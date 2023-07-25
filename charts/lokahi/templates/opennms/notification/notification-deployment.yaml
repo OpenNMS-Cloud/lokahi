@@ -105,9 +105,9 @@ spec:
           {{- include "kafkaSecretFrom" .Values.OpenNMS.Notification | indent 10 }}
           ports:
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.Notification.GrpcPort }}
+              containerPort: 6565
             - name: http
-              containerPort: {{ .Values.OpenNMS.Notification.Port }}
+              containerPort: 8080
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"

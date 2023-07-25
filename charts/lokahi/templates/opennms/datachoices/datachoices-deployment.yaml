@@ -74,9 +74,9 @@ spec:
               name: spring-boot-env
           ports:
             - name: http
-              containerPort: {{ .Values.OpenNMS.DataChoices.Port }}
+              containerPort: 8080
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.DataChoices.GrpcPort }}
+              containerPort: 6565
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"

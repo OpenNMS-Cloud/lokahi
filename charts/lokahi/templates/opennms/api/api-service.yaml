@@ -7,7 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
-    - port: {{ .Values.OpenNMS.API.Port }}
+    - port: 9090
       protocol: TCP
       name: http
   selector:

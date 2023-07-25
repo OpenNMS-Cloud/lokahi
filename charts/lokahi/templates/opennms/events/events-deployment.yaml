@@ -17,7 +17,7 @@ spec:
         app: {{ .Values.OpenNMS.Events.ServiceName }}
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.OpenNMS.Events.Port }}"
+        prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
@@ -68,7 +68,7 @@ spec:
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: GRPC_URL_INVENTORY
-              value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:{{ .Values.OpenNMS.Inventory.GrpcPort }}"
+              value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:6565"
             {{- include "deployment.env" .Values.OpenNMS.Events | nindent 12 }}
           envFrom:
           - configMapRef:
@@ -76,9 +76,9 @@ spec:
           {{- include "kafkaSecretFrom" .Values.OpenNMS.Events | indent 10 }}
           ports:
             - name: http
-              containerPort: {{ .Values.OpenNMS.Events.Port }}
+              containerPort: 8080
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.Events.GrpcPort }}
+              containerPort: 6565
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"

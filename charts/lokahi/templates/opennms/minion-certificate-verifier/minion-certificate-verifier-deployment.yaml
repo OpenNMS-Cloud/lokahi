@@ -53,7 +53,7 @@ spec:
             {{- include "deployment.env" .Values.OpenNMS.MinionCertificateVerifier | nindent 12 }}
             - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
               value: {{ if or (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "") (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "dev")
-                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:{{ .Values.OpenNMS.MinionCertificateManager.GrpcPort }}"{{
+                }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:8990"{{
               else
                 }}"{{ .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl }}"{{ end }}
           envFrom:
@@ -61,7 +61,7 @@ spec:
               name: spring-boot-env
           ports:
             - name: http
-              containerPort: {{ .Values.OpenNMS.MinionCertificateVerifier.Port }}
+              containerPort: 8080
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"

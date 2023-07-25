@@ -19,7 +19,7 @@ spec:
         ignite-cluster: core
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.OpenNMS.MinionGateway.Port }}"
+        prometheus.io/port: 8080
         prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
@@ -90,9 +90,9 @@ spec:
           {{- include "kafkaSecretFrom" .Values.OpenNMS.MinionGateway | indent 10 }}
           ports:
             - name: http
-              containerPort: {{ .Values.OpenNMS.MinionGateway.Port }}
+              containerPort: 8080
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
+              containerPort: 8990
             - name: internal-grpc
               containerPort: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
             - name: ig-client

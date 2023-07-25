@@ -17,7 +17,7 @@ spec:
         app: {{ .Values.OpenNMS.Inventory.ServiceName }}
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.OpenNMS.Inventory.Port }}"
+        prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
@@ -83,9 +83,9 @@ spec:
           {{- include "kafkaSecretFrom" .Values.OpenNMS.Inventory | indent 10 }}
           ports:
             - name: http
-              containerPort: {{ .Values.OpenNMS.Inventory.Port }}
+              containerPort: 8080
             - name: grpc
-              containerPort: {{ .Values.OpenNMS.Inventory.GrpcPort }}
+              containerPort: 6565
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"

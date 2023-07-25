@@ -1,21 +1,32 @@
 
 = Create a Monitoring Policy
-:description: How to create a monitoring policy in OpenNMS Lōkahi/Cloud to define a set of rules for monitoring nodes and taking action under certain conditions.
+:description: Learn how to create a monitoring policy in OpenNMS Lōkahi/Cloud to define a set of rules for monitoring nodes and taking action under certain conditions.
 
 A monitoring policy uses tags and rules to customize the type of monitoring data that you collect and the notifications you receive about that data.
+
+Note that you can also create a monitoring policy by copying an existing one and editing it.
+Click the *copy* symbol next to the policy name field label.
 
 To create a monitoring policy, follow these steps:
 
 . Choose *Monitoring Policies* in the left navigation menu.
-. Click *+ New Policy** or *Add*.
+. Click *New Policy*.
 . Type a name for the policy.
 . In the *Memo* box, type details about the policy you might want as a reference (for example, its basic use case).
-. (Optional) Select the types of notifications that you want to receive for any alerts.
-. \<Instructions box>
-. Add xref:inventory/nodes.adoc#tag-create[tags] to categorize the policy.
-. To add a rule to the policy, click *Add* or *+New Rule*.
-. Specify the *Name*, *Component Type*, and *Detection Method*.
+. (Optional) Select the type of notifications that you want to receive for any alerts.
+. Add xref:inventory/nodes.adoc#tag-create[tags] to include in the policy.
+.. Select an existing tag from the drop-down list, or type a name and click *New* to create a tag.
++
+This policy will apply to any nodes that have the same tags.
+. To add a rule to the policy, click *New Rule*, near the bottom of the page.
++
+A rule specifies the conditions under which OpenNMS generates alerts.
+Rules are available only with the policy in which they were created.
+8. Set the criteria that will trigger an alert.
+. Specify the name, component type, detection method, and event type to include.
+. Set the criteria that will trigger an alert.
+.. To include multiple criteria, click *Additional Conditions*.
 . Click *Save Rule*.
-. \<Save Policy button?>
+. Click *Save Policy*.
 
-TBD: multiple rules per policy? Guidelines around conflicts with rules. Does saving a rule save the policy (not clear from prototype).
+// Are there guidelines around conflicts with rules? 

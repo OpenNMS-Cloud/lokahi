@@ -2,7 +2,7 @@
 :!sectids:
 
 = Notifications
-:description: Overview of the the types of notifications available in OpenNMS Lōkahi/Cloud: daily digest email, PagerDuty, and webhooks.
+:description: Learn about the types of notifications available in OpenNMS Lōkahi/Cloud: email and PagerDuty.
 
 Notifications inform users about events in the network without requiring them to log in to the web UI.
 You can receive notifications through a daily digest email, PagerDuty, and webhooks.

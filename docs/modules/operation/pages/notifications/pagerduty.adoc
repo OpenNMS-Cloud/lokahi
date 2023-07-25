@@ -2,7 +2,7 @@
 :imagesdir: ../assets/images
 
 = Set up Notifications through PagerDuty
-:description: How to set up notifications through PagerDuty for OpenNMS Lōkahi/Cloud.
+:description: Learn how to set up notifications through PagerDuty for OpenNMS Lōkahi/Cloud.
 
 Instead of using the Lōkahi UI to view notifications, you can receive them as they occur via PagerDuty.
 

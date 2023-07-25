@@ -1,8 +1,10 @@
 = Create a Passive Discovery
-:description: How to identify network inventory with OpenNMS Lōkahi/Cloud using Syslog and SNMP traps (passive discovery).
+:description: Learn how to identify network inventory with OpenNMS Lōkahi/Cloud using Syslog and SNMP traps (passive discovery).
 
 A xref:get-started/discovery/introduction.adoc#passive-discovery[passive discovery] is one method to identify the devices on your network and add them to your monitoring inventory.
 You may also choose to xref:get-started/discovery/active.adoc[create an active discovery].
+
+NOTE: Passive discovery works only with Minions running on Linux.
 
 You can create only one passive discovery:
 

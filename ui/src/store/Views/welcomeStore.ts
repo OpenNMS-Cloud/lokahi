@@ -16,7 +16,6 @@ import { validationErrorsToStringRecord } from '@/services/validationService'
 import useMinionCmd from '@/composables/useMinionCmd'
 import { ComputedRef } from 'vue'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
-import { activateDiscoveryHelpGuide, activateMinionHelpGuide, disableMinionHelpGuide } from '@/services/pendoService'
 
 interface WelcomeStoreState {
   copied: boolean
@@ -70,10 +69,12 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     devicePreview: {
       title: 'Node Discovery',
       loading: false,
+      loadingCopy: 'Loading first discovery. This can take up to 3 minutes.',
       itemTitle: '',
       itemSubtitle: '',
       itemStatuses: [
-      ]
+      ],
+      bottomCopy: 'We assigned your device to a location called \'default.\''
     },
     discoverySubmitted: false,
     discoveryErrorTimeout: -1,
@@ -86,7 +87,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     firstDiscoveryErrors: { name: '', ip: '', communityString: '', port: '' },
     firstDiscoveryValidation: yup.object().shape({
       name: yup.string().required("Please enter a name."),
-      ip: yup.string().required("Please enter an IP.").matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Must be a valid IP.'),
+      ip: yup.string().required("Please enter an IP.").matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
       communityString: yup.string(),
       port: yup.number()
     }).required(),
@@ -113,7 +114,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       let onboardingState = true
       const { getAllMinions } = useWelcomeQueries()
       const minions = await getAllMinions();
-      await this.createDefaultLocation();
       if (minions?.length > 0) {
         onboardingState = false
       } else {
@@ -200,7 +200,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       }, 5000)
 
       this.minionErrorTimeout = window.setTimeout(() => {
-        activateMinionHelpGuide();
+        this.minionStatusCopy = 'Please wait while we detect your Minion. This can sometimes take more than 10 minutes.'
       }, 600000)
 
     },
@@ -242,6 +242,11 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     },
     nextSlide() {
       this.slide = this.slide + 1
+      if (this.slide === 2) {
+        if (this.firstLocation.id === -1) {
+          this.createDefaultLocation();
+        }
+      }
       if (this.slide !== 2) {
         this.stopMinionErrorTimeout()
       }
@@ -313,7 +318,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
 
         this.devicePreview.loading = true;
         this.discoverySubmitted = true;
-        this.discoveryErrorTimeout = window.setTimeout(() => activateDiscoveryHelpGuide(), 180000);
+        this.discoveryErrorTimeout = window.setTimeout(() => this.devicePreview.loadingCopy = 'Loading first discovery. This can take more than 3 minutes.', 180000);
         this.getFirstNode();
       }
     },

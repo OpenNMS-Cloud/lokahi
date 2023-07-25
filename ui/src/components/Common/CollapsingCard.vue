@@ -3,7 +3,7 @@
     <div :class="['collapse-box', open ? 'collapse-box-open' : 'collapse-box-closed']" data-test="collapsing-card-wrapper">
         <div class="collapse-box-header" @click="headerClicked" v-bind="$attrs">
             <span class="collapse-box-header-icon-wrapper">
-                <span class="collapse-box-header-icon">
+                <span class="collapse-box-header-icon" v-if="slots.icon">
                     <slot name="icon"></slot>
                 </span>
                 <span class="collapse-box-header-title">{{ title }}</span>
@@ -20,6 +20,7 @@
 <script lang='ts' setup>
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import { PropType } from 'vue'
+const slots = useSlots();
 defineOptions({ inheritAttrs: false })
 defineProps({
     title: { type: String, default: '' },
@@ -33,8 +34,7 @@ defineProps({
 @import '@featherds/styles/themes/variables';
 
 .collapse-box {
-    border: 1px solid var($border-light-on-surface);
-    padding: 8px 16px;
+    border: 1px solid rgb(0, 146, 199, 0.4);
     margin-bottom: 16px;
     color: var($secondary-text-on-surface);
     background-color: var($surface);
@@ -43,11 +43,13 @@ defineProps({
 
 .collapse-box-header {
     display: flex;
+    height: 44px;
+    padding: 4px 16px;
     justify-content: space-between;
     align-items: center;
-    max-height: 26px;
     cursor: pointer;
     color: var($secondary-text-on-surface);
+    background-color: rgba(0, 146, 199, 0.16);
 }
 
 .collapse-box-contents :deep(a) {
@@ -84,8 +86,8 @@ defineProps({
     max-height: 0vh;
     padding-top: 0px;
     padding-bottom: 0px;
-    padding-left: 32px;
-    padding-right: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .collapse-box-open .collapse-box-contents {
@@ -94,8 +96,8 @@ defineProps({
     max-height: 100vh;
     padding-top: 16px;
     padding-bottom: 16px;
-    padding-left: 32px;
-    padding-right: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .collapse-box-header svg {

@@ -35,4 +35,15 @@ Feature: Passive Discovery
     And A GRPC request to get passive discovery list
     Then The passive discovery toggle should be false
 
+  Scenario: Send new suspect event and create node
+    Given Passive Discovery fields to persist for location named "Testing Passive Discovery"
+    When A GRPC request to upsert a passive discovery
+    And A GRPC request to get passive discovery list
+    Then The upserted and the get of passive discovery should be the same
+    Given A GRPC request to enable a passive discovery
+    When A new suspect event sent to Inventory for location named "Testing Passive Discovery" and IP Address "192.168.5.1"
+    Then A new node should be created with location "Testing Passive Discovery" and IP Address "192.168.5.1"
+
+
+
 

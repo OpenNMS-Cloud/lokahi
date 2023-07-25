@@ -2,7 +2,7 @@
 :!sectids:
 
 =  Lōkahi/Cloud Documentation
-:description: Overview of OpenNMS Lōkahi/Cloud documentation, network monitoring designed for cloud-native deployments: value propositions.
+:description: Learn about the OpenNMS Lōkahi/Cloud documentation and network monitoring designed for cloud-native deployments.
 
 Lōkahi (pronounced "loh-KAH-hee") is an open source network monitoring project designed for Cloud-native deployments: the next generation of OpenNMS Horizon.
 Both the word lōkahi, which means unity, unison, and harmony, and David Hustace, one of The OpenNMS Group's founders, share Hawaiian roots.

@@ -17,4 +17,4 @@ query:
 allInOne:
   enabled: true
   args:
-    - --memory.max-traces=10000
+    - --memory.max-traces=1000

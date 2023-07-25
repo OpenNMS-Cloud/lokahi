@@ -2,7 +2,7 @@
 :!sectids:
 
 = Network Discovery
-:description: Overview of network discovery with OpenNMS Lōkahi/Cloud using ICMP/SNMP, Azure, or Syslog and SNMP traps to identify monitoring inventory and devices.
+:description: Learn about network discovery with OpenNMS Lōkahi/Cloud using ICMP/SNMP, Azure, or Syslog and SNMP traps to identify monitoring inventory and devices.
 
 The discovery process identifies devices and entities on your monitored network through either active or passive discovery.
 

@@ -199,20 +199,17 @@ public class PassiveDiscoveryService {
         }
     }
 
-    public void sendNodeScan(Node node) {
+    public void sendNodeScan(Node node, PassiveDiscovery passiveDiscovery) {
         if (node.getMonitoredState() != MonitoredState.DETECTED) {
             log.info("Node is not in monitored state DETECTED, so not sending node scan for node {}", node.getNodeLabel());
             return;
         }
-        String tenantId = node.getTenantId();
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
         String location = monitoringLocation.getLocation();
 
-        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(location));
-        if (discoveryOpt.isPresent()) {
-            PassiveDiscovery discovery = discoveryOpt.get();
-            if (discovery.isToggle()) {
-                sendTaskSetsToMinion(node, discovery);
+        if (passiveDiscovery != null) {
+            if (passiveDiscovery.isToggle()) {
+                sendTaskSetsToMinion(node, passiveDiscovery);
             } else {
                 log.info("Passive discovery is toggled off for location {}", location);
             }

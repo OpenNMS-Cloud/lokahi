@@ -10,6 +10,8 @@
 * xref:inventory/introduction.adoc[]
 ** xref:inventory/nodes.adoc[]
 * xref:alerts/introduction.adoc[]
+** xref:alerts/manage.adoc[]
 * xref:visualizations/introduction.adoc[]
+* xref:minions/introduction.adoc[]
 * xref:notifications/introduction.adoc[]
 ** xref:notifications/pagerduty.adoc[]

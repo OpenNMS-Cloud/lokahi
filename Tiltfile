@@ -61,8 +61,9 @@ cmd_button(name='reload-helm',
            location=location.NAV,
            icon_name='system_update_alt')
 
-# Give ourselves more time
-update_settings(k8s_upsert_timeout_secs=60)
+# Give ourselves more time -- this needs to include enough time to download container images (cert-manager, nginx, etc.)
+# if we don't have them locally. We try to be nice to people with slower connections.
+update_settings(k8s_upsert_timeout_secs=600)
 if os.getenv('CI'):
     # Be a little bit more aggressive in CI
     update_settings(max_parallel_updates=4)

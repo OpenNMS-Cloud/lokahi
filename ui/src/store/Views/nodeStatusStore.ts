@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
+import { useFlowsStore } from './flowsStore'
 import { AZURE_SCAN, DeepPartial } from '@/types'
 import { Exporter, RequestCriteriaInput } from '@/types/graphql'
 
@@ -13,10 +14,20 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   }
 
   const fetchExporters = async (id: number) => {
+    // flows can be queried up to last 7 days.
+    const now = new Date()
+    const startTime = now.setDate(now.getDate() - 7)
+    const endTime = Date.now()
+
     const payload: RequestCriteriaInput = {
+      count: 1000,
       exporter: [{
         nodeId: id
-      }]
+      }],
+      timeRange: {
+        startTime,
+        endTime
+      }
     }
     const data = await nodeStatusQueries.fetchExporters(payload)
     exporters.value = data.value?.findExporters || []

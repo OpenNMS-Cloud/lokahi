@@ -234,7 +234,7 @@ export type IcmpActiveDiscoveryCreateInput = {
 
 export type IpInterface = {
   __typename?: 'IpInterface';
-  azureInterfaceId: Scalars['Long'];
+  azureInterfaceId?: Maybe<Scalars['Long']>;
   hostname?: Maybe<Scalars['String']>;
   id: Scalars['Long'];
   ipAddress?: Maybe<Scalars['String']>;
@@ -1345,14 +1345,14 @@ export type ListMonitoryPoliciesQuery = { __typename?: 'Query', listMonitoryPoli
 
 export type EventsByNodeIdPartsFragment = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }> };
 
-export type NodeByIdPartsFragment = { __typename?: 'Query', node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'MonitoringLocation', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean, azureInterfaceId: any }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }>, azureInterfaces?: Array<{ __typename?: 'AzureInterface', id: any, nodeId: any, interfaceName?: string, privateIpId?: string, publicIpAddress?: string, publicIpId?: string, location?: string }> } };
+export type NodeByIdPartsFragment = { __typename?: 'Query', node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'MonitoringLocation', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean, azureInterfaceId?: any }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }>, azureInterfaces?: Array<{ __typename?: 'AzureInterface', id: any, nodeId: any, interfaceName?: string, privateIpId?: string, publicIpAddress?: string, publicIpId?: string, location?: string }> } };
 
 export type ListNodeStatusQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Long']>;
 }>;
 
 
-export type ListNodeStatusQuery = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }>, node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'MonitoringLocation', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean, azureInterfaceId: any }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }>, azureInterfaces?: Array<{ __typename?: 'AzureInterface', id: any, nodeId: any, interfaceName?: string, privateIpId?: string, publicIpAddress?: string, publicIpId?: string, location?: string }> } };
+export type ListNodeStatusQuery = { __typename?: 'Query', events?: Array<{ __typename?: 'Event', id: number, uei?: string, nodeId: number, ipAddress?: string, producedTime: any }>, node?: { __typename?: 'Node', id: any, nodeLabel?: string, objectId?: string, systemContact?: string, systemDescr?: string, systemLocation?: string, systemName?: string, scanType?: string, location?: { __typename?: 'MonitoringLocation', location?: string }, ipInterfaces?: Array<{ __typename?: 'IpInterface', id: any, hostname?: string, ipAddress?: string, netmask?: string, nodeId: any, snmpPrimary?: boolean, azureInterfaceId?: any }>, snmpInterfaces?: Array<{ __typename?: 'SnmpInterface', id: any, ifAdminStatus: number, ifAlias?: string, ifDescr?: string, ifIndex: number, ifName?: string, ifOperatorStatus: number, ifSpeed: any, ifType: number, ipAddress?: string, nodeId: any, physicalAddr?: string }>, azureInterfaces?: Array<{ __typename?: 'AzureInterface', id: any, nodeId: any, interfaceName?: string, privateIpId?: string, publicIpAddress?: string, publicIpId?: string, location?: string }> } };
 
 export type FindExportersForNodeStatusQueryVariables = Exact<{
   requestCriteria: RequestCriteriaInput;

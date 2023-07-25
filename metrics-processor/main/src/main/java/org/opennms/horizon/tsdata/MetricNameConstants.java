@@ -43,5 +43,4 @@ public interface MetricNameConstants {
         "monitor",
         "node_id"
     };
-
 }

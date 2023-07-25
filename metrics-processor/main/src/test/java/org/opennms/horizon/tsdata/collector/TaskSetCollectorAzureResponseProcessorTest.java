@@ -95,7 +95,8 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         //
         // Verify the Results
         //
-        var timeSeriesBuilderMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(TEST_AZURE_METRIC_VALUE, MonitorType.ICMP, "x_alias_x");
+        var timeSeriesBuilderMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(TEST_AZURE_METRIC_VALUE,
+            MonitorType.ICMP, "x_alias_x", MetricNameConstants.METRIC_AZURE_NODE_TYPE);
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesBuilderMatcher));
     }
 
@@ -144,6 +145,8 @@ public class TaskSetCollectorAzureResponseProcessorTest {
             AzureResultMetric.newBuilder()
                 .setAlias("x_alias_x")
                 .setValue(azureValueMetric)
+                .setType(MetricNameConstants.METRIC_AZURE_NODE_TYPE)
+                .setResourceName("resourceName")
                 .build();
 
         testAzureResponseMetric =
@@ -167,10 +170,13 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         private final MonitorType monitorType;
         private final String metricName;
 
-        public PrometheusTimeSeriersBuilderArgumentMatcher(double metricValue, MonitorType monitorType, String metricName) {
+        private final String instance;
+
+        public PrometheusTimeSeriersBuilderArgumentMatcher(double metricValue, MonitorType monitorType, String metricName, String instance) {
             this.metricValue = metricValue;
             this.monitorType = monitorType;
             this.metricName = metricName;
+            this.instance = instance;
         }
 
         @Override
@@ -193,7 +199,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
 
                 return (
                     (Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL))) &&
-                    (Objects.equals("x-instance-x", labelMap.get("instance"))) &&
+                    (Objects.equals(instance, labelMap.get("instance"))) &&
                     (Objects.equals("x-location-x", labelMap.get("location_id"))) &&
                     (Objects.equals("x-system-id-x", labelMap.get("system_id"))) &&
                     (Objects.equals(monitorType.name(), labelMap.get("monitor"))) &&

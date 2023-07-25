@@ -41,7 +41,7 @@ public class GrpcMinionCertificateManager {
                 return Mono.error(new LocationNotFoundException("Invalid location id " + locationId));
             }
             // fallback to generic exception
-            return Mono.error(new IllegalArgumentException("Exception while fetching Minion certificate for location {}" + locationId));
+            return Mono.error(new IllegalArgumentException("Exception while fetching Minion certificate for location id " + locationId));
         }
     }
 

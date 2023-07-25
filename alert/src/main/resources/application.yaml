@@ -56,6 +56,11 @@ kafka:
 management:
   endpoints:
     web:
+      base-path: "/"
+      # The pipeline fails without this. 
+      path-mapping:
+        health: "actuator/health"
+        # With the basepath set to /, need to specify the path-mapping.
       exposure:
         include: "*"
     health:

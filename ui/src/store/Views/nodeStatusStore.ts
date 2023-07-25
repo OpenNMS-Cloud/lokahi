@@ -55,7 +55,6 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   return {
     fetchedData,
     setNodeId,
-    getAzureInterface,
     isAzure: computed(() => fetchedData.value.node.scanType === AZURE_SCAN),
     fetchExporters,
     exporters,

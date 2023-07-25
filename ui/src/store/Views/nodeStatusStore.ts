@@ -19,7 +19,6 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     const endTime = Date.now()
 
     const payload: RequestCriteriaInput = {
-      count: 1000,
       exporter: [{
         nodeId: id
       }],

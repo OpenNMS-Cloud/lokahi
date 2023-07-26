@@ -33,15 +33,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.IpInterface;
-import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.service.SnmpConfigService;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor

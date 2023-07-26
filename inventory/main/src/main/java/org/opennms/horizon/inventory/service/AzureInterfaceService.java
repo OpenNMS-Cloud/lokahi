@@ -22,10 +22,10 @@ public class AzureInterfaceService {
         return modelRepo.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
 
-    public AzureInterface createOrUpdateFromScanResult(String tenantId, Node node, String privateIpId,
+    public AzureInterface createOrUpdateFromScanResult(String tenantId, Node node,
                                                        AzureScanNetworkInterfaceItem azureScanNetworkInterfaceItem) {
         Objects.requireNonNull(azureScanNetworkInterfaceItem);
-        return modelRepo.findByTenantIdAndPrivateIpId(tenantId, privateIpId)
+        return modelRepo.findByTenantIdAndPrivateIpId(tenantId, azureScanNetworkInterfaceItem.getName())
             .map(azure -> {
                 mapper.updateFromScanResult(azure, azureScanNetworkInterfaceItem);
                 return modelRepo.save(azure);

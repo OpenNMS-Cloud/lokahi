@@ -39,7 +39,6 @@ import org.opennms.horizon.inventory.mapper.AzureInterfaceMapperImpl;
 import org.opennms.horizon.inventory.mapper.EmptyStringMapperImpl;
 import org.opennms.horizon.inventory.mapper.IpAddressMapperImpl;
 import org.opennms.horizon.inventory.model.AzureInterface;
-import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.repository.AzureInterfaceRepository;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -124,7 +123,7 @@ public class AzureInterfaceServiceTest {
         //
         // Execute
         //
-        var result = target.createOrUpdateFromScanResult(TEST_TENANT_ID, node, privateIpId, networkInterfaceItem);
+        var result = target.createOrUpdateFromScanResult(TEST_TENANT_ID, node, networkInterfaceItem);
 
         //
         // Verify the Results
@@ -166,7 +165,7 @@ public class AzureInterfaceServiceTest {
         //
         // Execute
         //
-        var result = target.createOrUpdateFromScanResult(TEST_TENANT_ID, node, privateIpId, networkInterfaceItem);
+        var result = target.createOrUpdateFromScanResult(TEST_TENANT_ID, node, networkInterfaceItem);
 
         //
         // Verify the Results

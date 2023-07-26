@@ -34,7 +34,11 @@ public interface MetricNameConstants {
     String METRIC_NAME_LABEL = "__name__";
 
     String METRIC_INSTANCE_LABEL = "instance";
+    // refer to AzureHttpClient.ResourcesType
     String METRIC_AZURE_NODE_TYPE = "node";
+    String METRIC_AZURE_PUBLIC_IP_TYPE = "publicIPAddresses";
+    String METRIC_AZURE_NETWORK_INTERFACE_TYPE = "networkInterfaces";
+
 
     String[] MONITOR_METRICS_LABEL_NAMES = {
         METRIC_INSTANCE_LABEL,

@@ -42,9 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_AZURE_NODE_TYPE;
 import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_INSTANCE_LABEL;
 

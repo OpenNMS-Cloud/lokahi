@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.azure.contract.AzureCollectorResourcesRequest;
-import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;

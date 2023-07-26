@@ -35,7 +35,6 @@
             :key="ipInterface.id"
           >
             <td>{{ ipInterface.ipAddress }}</td>
-            {{ console.log( nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress ) }}
             <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.privateIpId }}</td>
             <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.interfaceName }}</td>
             <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress }}</td>

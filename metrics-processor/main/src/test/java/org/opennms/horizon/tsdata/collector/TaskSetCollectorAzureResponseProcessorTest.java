@@ -72,8 +72,6 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         mockCortexTSS = Mockito.mock(CortexTSS.class);
         mockTenantMetricsTracker = Mockito.mock(TenantMetricsTracker.class);
 
-        createTestAzureResponseData();
-
         testLabelValues = new String[] {
             "x-instance-x",
             "x-location-x",
@@ -86,7 +84,24 @@ public class TaskSetCollectorAzureResponseProcessorTest {
     }
 
     @Test
-    void testProcessCollectorResponse() throws IOException {
+    void testInterfaceProcessCollectorResponse() throws IOException {
+        createTestAzureResponseData("resourceName", MetricNameConstants.METRIC_AZURE_PUBLIC_IP_TYPE);
+        //
+        // Execute
+        //
+        target.processAzureCollectorResponse("x-tenant-id-x", "x-location-x", testCollectorResponse, testLabelValues);
+
+        //
+        // Verify the Results
+        //
+        var timeSeriesBuilderMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(TEST_AZURE_METRIC_VALUE,
+            MonitorType.ICMP, "x_alias_x", MetricNameConstants.METRIC_AZURE_PUBLIC_IP_TYPE + "/resourceName");
+        Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesBuilderMatcher));
+    }
+
+    @Test
+    void testNodeProcessCollectorResponse() throws IOException {
+        createTestAzureResponseData("resourceName", MetricNameConstants.METRIC_AZURE_NODE_TYPE);
         //
         // Execute
         //
@@ -102,6 +117,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
 
     @Test
     void testExceptionOnSendToCortex() throws IOException {
+        createTestAzureResponseData("resourceName", MetricNameConstants.METRIC_AZURE_NODE_TYPE);
         //
         // Setup Test Data and Interactions
         //
@@ -134,7 +150,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
 // Internals
 //----------------------------------------
 
-    private void createTestAzureResponseData() {
+    private void createTestAzureResponseData(String resourceName, String type) {
         AzureValueMetric azureValueMetric =
             AzureValueMetric.newBuilder()
                 .setType(AzureValueType.INT64)
@@ -142,10 +158,10 @@ public class TaskSetCollectorAzureResponseProcessorTest {
                 .build();
 
         AzureResultMetric azureResultMetric =
-            AzureResultMetric.newBuilder()
+            AzureResultMetric.newBuilder().setResourceName(resourceName)
                 .setAlias("x_alias_x")
                 .setValue(azureValueMetric)
-                .setType(MetricNameConstants.METRIC_AZURE_NODE_TYPE)
+                .setType(type)
                 .setResourceName("resourceName")
                 .build();
 

@@ -207,7 +207,7 @@ public class ScannerResponseService {
                     nodeService.updateNodeInfo(node, nodeInfoResult);
 
                     for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {
-                        var azureInterface = azureInterfaceService.createOrUpdateFromScanResult(tenantId, node, null, networkInterfaceItem);
+                        var azureInterface = azureInterfaceService.createOrUpdateFromScanResult(tenantId, node, networkInterfaceItem);
                         ipInterfaceService.createFromAzureScanResult(tenantId, node, azureInterface, networkInterfaceItem);
                     }
 

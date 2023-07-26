@@ -3,7 +3,6 @@ import { Tag } from '@/types/graphql'
 import { useInventoryStore } from '../Views/inventoryStore'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { useInventoryQueries } from '../Queries/inventoryQueries'
-import { useTagQueries } from '../Queries/tagQueries'
 
 export const useTagStore = defineStore('tagStore', () => {
   const tagSelected = ref<Tag>();
@@ -58,12 +57,11 @@ export const useTagStore = defineStore('tagStore', () => {
     tagsSelected.value = [];
   }
 
-  const saveTagsToSelectedNodes = async (state: string) => {
+  const saveTagsToSelectedNodes = async () => {
     const tags = tagsSelected.value.map(({ name }) => ({ name }))
     const inventoryStore = useInventoryStore();
     const nodeMutations = useNodeMutations();
     const inventoryQueries = useInventoryQueries();
-    const tagQueries = useTagQueries();
     const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
     await nodeMutations.addTagsToNodes({ nodeIds, tags })
     await inventoryQueries.fetchByLastState();

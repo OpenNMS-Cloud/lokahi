@@ -69,7 +69,7 @@ const emits = defineEmits(['items-selected'])
 const props = defineProps({
   label: {
     type: String,
-    requied: true
+    required: true
   },
   getItems: {
     type: Function,
@@ -77,7 +77,7 @@ const props = defineProps({
   },
   items: {
     type: [Object],
-    reqired: true
+    required: true
   },
   renderType: {
     type: String as PropType<TypeSingle | TypeMulti>,
@@ -96,8 +96,7 @@ const props = defineProps({
     type: Boolean
   },
   preselectedItems: {
-    type: [Object],
-    reqired: false
+    type: [Object]
   }
 })
 

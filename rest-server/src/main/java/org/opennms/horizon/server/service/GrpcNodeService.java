@@ -37,6 +37,7 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.dataloader.DataLoader;
+import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
@@ -69,22 +70,30 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery
-    public Flux<Node> findAllNodesByMonitoredState(@GraphQLArgument(name = "monitoredState") String monitoredState, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Flux<Node> findAllNodesByMonitoredState(@GraphQLArgument(name = "monitoredState") MonitoredState monitoredState,
+                                                   @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listNodesByMonitoredState(monitoredState, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
     }
 
     @GraphQLQuery
-    public Flux<Node> findAllNodesByNodeLabelSearch(@GraphQLArgument(name = "labelSearchTerm") String labelSearchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodesByNodeLabelSearch(labelSearchTerm, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+    public Flux<Node> findAllNodesByNodeLabelSearch(@GraphQLArgument(name = "labelSearchTerm") String labelSearchTerm,
+                                                    @GraphQLArgument(name = "monitoredState") MonitoredState monitoredState,
+                                                    @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listNodesByNodeLabelSearch(labelSearchTerm, monitoredState, headerUtil.getAuthHeader(env))
+            .stream().map(mapper::protoToNode).toList());
     }
 
     @GraphQLQuery
-    public Flux<Node> findAllNodesByTags(@GraphQLArgument(name = "tags") List<String> tags, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodesByTags(tags, headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+    public Flux<Node> findAllNodesByTags(@GraphQLArgument(name = "tags") List<String> tags,
+                                         @GraphQLArgument(name = "monitoredState") MonitoredState monitoredState,
+                                         @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listNodesByTags(tags, monitoredState, headerUtil.getAuthHeader(env))
+            .stream().map(mapper::protoToNode).toList());
     }
 
     @GraphQLQuery
-    public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Node> findNodeById(@GraphQLArgument(name = "id") Long id,
+                                   @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
     }
 
@@ -94,19 +103,22 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery
-    public CompletableFuture<MonitoringLocation> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {
+    public CompletableFuture<MonitoringLocation> location(@GraphQLContext Node node,
+                                                          @GraphQLEnvironment ResolutionEnvironment env) {
         DataLoader<DataLoaderFactory.Key, MonitoringLocation> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
         DataLoaderFactory.Key key = new DataLoaderFactory.Key(node.getMonitoringLocationId(), headerUtil.getAuthHeader(env));
         return locationLoader.load(key);
     }
 
     @GraphQLQuery
-    public Mono<NodeStatus> getNodeStatus(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<NodeStatus> getNodeStatus(@GraphQLArgument(name = "id") Long id,
+                                          @GraphQLEnvironment ResolutionEnvironment env) {
         return nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
     }
 
     @GraphQLMutation
-    public Mono<Boolean> deleteNode(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Boolean> deleteNode(@GraphQLArgument(name = "id") Long id,
+                                    @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteNode(id, headerUtil.getAuthHeader(env)));
     }
 

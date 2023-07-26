@@ -1,21 +1,21 @@
 <template>
   <ul class="cards">
-    <li v-for="node in tabContent" :key="node?.id">
+    <li v-for="node in tabContent" :key="node.id">
       <section class="header">
         <Icon :icon="storageIcon" data-test="icon-storage" />
-        <h4 data-test="heading">{{ node?.label }}</h4>
+        <h4 data-test="heading">{{ node.label }}</h4>
       </section>
       <section class="content">
         <div>
           <FeatherChipList label="List of metric chips" data-test="metric-chip-list" v-if="isMonitored(node)">
-            <MetricChip v-for="metric in node?.metrics" :key="metric?.type" :metric="metric" />
+            <MetricChip v-for="metric in (node as MonitoredNode).metrics" :key="metric?.type" :metric="metric" />
           </FeatherChipList>
 
           <div class="tags-count-box" @click="openModalForDeletingTags(node)">
             Tags: <span class="count">{{ node.anchor.tagValue.length }}</span>
           </div>
 
-          <InventoryTextAnchorList :anchor="node?.anchor" data-test="text-anchor-list" />
+          <InventoryTextAnchorList :anchor="node.anchor" data-test="text-anchor-list" />
         </div>
         <InventoryIconActionList :node="node" class="icon-action" data-test="icon-action-list" />
       </section>
@@ -43,29 +43,22 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
-import { IIcon, InventoryNode } from '@/types'
+import { IIcon, InventoryNode, MonitoredNode } from '@/types'
 import { useTagStore } from '@/store/Components/tagStore'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { ModalPrimary } from '@/types/modal'
 import useModal from '@/composables/useModal'
-import { Tag, TagListNodesRemoveInput } from '@/types/graphql'
+import { MonitoredState, Tag, TagListNodesRemoveInput } from '@/types/graphql'
 import { isMonitored } from './inventory.utils'
 
 // TODO: sort tabContent alpha (default)? to keep list display consistently in same order (e.g. page refresh)
-const props = defineProps({
-  tabContent: {
-    type: Object as PropType<InventoryNode[]>,
-    required: true
-  },
-  state: {
-    type: String,
-    required: true
-  }
-})
+const props = defineProps<{
+  tabContent: InventoryNode[],
+  state: MonitoredState
+}>()
 
 const availableTagsToDelete = ref(<Tag[]>[])
 const tagsForDeletion = ref([] as Tag[])

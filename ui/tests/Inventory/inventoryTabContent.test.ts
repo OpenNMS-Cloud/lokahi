@@ -1,6 +1,7 @@
 import mount from '../mountWithPiniaVillus'
 import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
-import { InventoryNode, MonitoredStates, TimeUnit } from '@/types'
+import { InventoryNode, TimeUnit } from '@/types'
+import { MonitoredState } from '@/types/graphql'
 
 const tabContent: InventoryNode[] = [
   {
@@ -38,7 +39,7 @@ const tabContent: InventoryNode[] = [
       tagValue: []
     },
     isNodeOverlayChecked: false,
-    type: MonitoredStates.MONITORED
+    type: MonitoredState.Monitored
   }
 ]
 
@@ -50,7 +51,7 @@ describe.skip('InventoryTabContent.vue', () => {
       component: InventoryTabContent,
       props: {
         tabContent,
-        state: MonitoredStates.MONITORED
+        state: MonitoredState.Monitored
       }
     })
   })

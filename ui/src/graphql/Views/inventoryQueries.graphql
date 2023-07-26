@@ -13,8 +13,8 @@ query NodeLatencyMetric(
   ...NodeStatusParts
 }
 
-query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!) {
-  findAllNodesByNodeLabelSearch(labelSearchTerm: $labelSearchTerm) {
+query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!, $monitoredState: MonitoredState!) {
+  findAllNodesByNodeLabelSearch(labelSearchTerm: $labelSearchTerm, monitoredState: $monitoredState) {
     id
     ipInterfaces {
       id
@@ -31,8 +31,8 @@ query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!) {
   }
 }
 
-query FindAllNodesByTags($tags: [String]) {
-  findAllNodesByTags(tags: $tags) {
+query FindAllNodesByTags($tags: [String], $monitoredState: MonitoredState!) {
+  findAllNodesByTags(tags: $tags, monitoredState: $monitoredState) {
     id
     ipInterfaces {
       id
@@ -49,7 +49,7 @@ query FindAllNodesByTags($tags: [String]) {
   }
 }
 
-query FindAllNodesByMonitoredState($monitoredState: String!) {
+query FindAllNodesByMonitoredState($monitoredState: MonitoredState!) {
   findAllNodesByMonitoredState(monitoredState: $monitoredState) {
     id
     ipInterfaces {

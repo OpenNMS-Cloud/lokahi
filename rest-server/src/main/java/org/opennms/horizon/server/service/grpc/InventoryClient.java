@@ -150,25 +150,33 @@ public class InventoryClient {
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodes(Empty.newBuilder().build()).getNodesList();
     }
 
-    public List<NodeDTO> listNodesByMonitoredState(String monitoredState, String accessToken) {
+    public List<NodeDTO> listNodesByMonitoredState(MonitoredState monitoredState, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        MonitoredStateQuery query = MonitoredStateQuery.newBuilder().setMonitoredState(MonitoredState.valueOf(monitoredState)).build();
+        MonitoredStateQuery query = MonitoredStateQuery.newBuilder().setMonitoredState(monitoredState).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByMonitoredState(query).getNodesList();
     }
 
-    public List<NodeDTO> listNodesByNodeLabelSearch(String labelSearchTerm, String accessToken) {
+    public List<NodeDTO> listNodesByNodeLabelSearch(String labelSearchTerm, MonitoredState monitoredState, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        NodeLabelSearchQuery query = NodeLabelSearchQuery.newBuilder().setSearchTerm(labelSearchTerm).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByNodeLabel(query).getNodesList();
+        NodeLabelSearchQuery query = NodeLabelSearchQuery.newBuilder()
+            .setSearchTerm(labelSearchTerm)
+            .setMonitoredState(monitoredState)
+            .build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .listNodesByNodeLabel(query).getNodesList();
     }
 
-    public List<NodeDTO> listNodesByTags(List<String> tags, String accessToken) {
+    public List<NodeDTO> listNodesByTags(List<String> tags, MonitoredState monitoredState, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        TagNameQuery query = TagNameQuery.newBuilder().addAllTags(tags).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByTags(query).getNodesList();
+        TagNameQuery query = TagNameQuery.newBuilder()
+            .addAllTags(tags)
+            .setMonitoredState(monitoredState)
+            .build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .listNodesByTags(query).getNodesList();
     }
 
     public NodeDTO getNodeById(long id, String accessToken) {

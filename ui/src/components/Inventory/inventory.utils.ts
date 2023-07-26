@@ -1,5 +1,6 @@
-import { DetectedNode, MonitoredStates, MonitoredNode, UnmonitoredNode } from '@/types'
+import { InventoryNode, MonitoredNode } from '@/types'
+import { MonitoredState } from '@/types/graphql'
 
-export const isMonitored = (node: MonitoredNode | UnmonitoredNode | DetectedNode): node is MonitoredNode => {
-  return (node as MonitoredNode).type === MonitoredStates.MONITORED
+export const isMonitored = (node: InventoryNode): node is MonitoredNode => {
+  return node.type === MonitoredState.Monitored
 }

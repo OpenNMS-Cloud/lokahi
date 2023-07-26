@@ -70,7 +70,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class FLowClientTest {
+public class FlowClientTest {
     @Rule
     public final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
 
@@ -170,13 +170,13 @@ public class FLowClientTest {
             }
         ));
 
-        grpcCleanUp.register(InProcessServerBuilder.forName(FLowClientTest.class.getName())
+        grpcCleanUp.register(InProcessServerBuilder.forName(FlowClientTest.class.getName())
             .addService(applicationsServiceBlockingStub)
             .addService(exporterServiceStub)
             .directExecutor()
             .build()
             .start());
-        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName(FLowClientTest.class.getName())
+        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName(FlowClientTest.class.getName())
             .directExecutor().build());
         flowClient = new FlowClient(inventoryClient, channel, 600);
         flowClient.initialStubs();

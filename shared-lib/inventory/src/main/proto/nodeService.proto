@@ -83,10 +83,12 @@ message MonitoredStateQuery {
 
 message TagNameQuery {
   repeated string tags = 1;
+  MonitoredState monitored_state = 2;
 }
 
 message NodeLabelSearchQuery {
   string search_term = 1;
+  MonitoredState monitored_state = 2;
 }
 
 message NodeIdList {

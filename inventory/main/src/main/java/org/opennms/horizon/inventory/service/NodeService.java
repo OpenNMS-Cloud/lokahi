@@ -345,14 +345,14 @@ public class NodeService {
     }
 
     @Transactional(readOnly = true)
-    public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
-        return nodeRepository.findByTenantIdAndNodeLabelLike(tenantId, nodeLabelSearchTerm).stream()
+    public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm, MonitoredState monitoredState) {
+        return nodeRepository.findByTenantIdAndNodeLabelLikeAndMonitoredStateEquals(tenantId, nodeLabelSearchTerm, monitoredState).stream()
             .map(mapper::modelToDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<NodeDTO> listNodesByTags(String tenantId, List<String> tags) {
-        return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
+    public List<NodeDTO> listNodesByTags(String tenantId, List<String> tags, MonitoredState monitoredState) {
+        return nodeRepository.findByTenantIdEqualsAndMonitoredStateEqualsAndTagNamesIn(tenantId, tags, monitoredState).stream()
             .map(mapper::modelToDTO).toList();
     }
 

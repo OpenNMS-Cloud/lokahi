@@ -1,4 +1,4 @@
-import { Tag } from './graphql'
+import { MonitoredState, Tag } from './graphql'
 import { Chip } from './metric'
 
 export interface Anchor {
@@ -18,7 +18,7 @@ interface MonitoredNode {
   metrics: Chip[]
   anchor: Anchor
   isNodeOverlayChecked: boolean
-  type: MonitoredStates.MONITORED
+  type: MonitoredState.Monitored
 }
 
 interface UnmonitoredNode {
@@ -26,7 +26,7 @@ interface UnmonitoredNode {
   label: string
   anchor: Anchor
   isNodeOverlayChecked: boolean
-  type: MonitoredStates.UNMONITORED
+  type: MonitoredState.Unmonitored
 }
 
 interface DetectedNode {
@@ -34,13 +34,7 @@ interface DetectedNode {
   label: string
   anchor: Anchor
   isNodeOverlayChecked: boolean
-  type: MonitoredStates.DETECTED
-}
-
-export const enum MonitoredStates {
-  MONITORED = 'MONITORED',
-  UNMONITORED = 'UNMONITORED',
-  DETECTED = 'DETECTED'
+  type: MonitoredState.Detected
 }
 
 type InventoryNode = MonitoredNode | UnmonitoredNode | DetectedNode

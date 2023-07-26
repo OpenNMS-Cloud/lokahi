@@ -210,7 +210,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
-                List<NodeDTO> nodes = nodeService.listNodesByNodeLabelSearch(tenantId, request.getSearchTerm());
+                List<NodeDTO> nodes = nodeService.listNodesByNodeLabelSearch(tenantId, request.getSearchTerm(), request.getMonitoredState());
                 responseObserver.onNext(NodeList.newBuilder().addAllNodes(nodes).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
@@ -237,7 +237,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
-                List<NodeDTO> nodes = nodeService.listNodesByTags(tenantId, request.getTagsList());
+                List<NodeDTO> nodes = nodeService.listNodesByTags(tenantId, request.getTagsList(), request.getMonitoredState());
                 responseObserver.onNext(NodeList.newBuilder().addAllNodes(nodes).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {

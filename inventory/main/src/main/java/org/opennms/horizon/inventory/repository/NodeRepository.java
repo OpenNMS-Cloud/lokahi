@@ -44,7 +44,6 @@ import java.util.Optional;
 public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByTenantId(String tenantId);
     Optional<Node> findByIdAndTenantId(long id, String tenantID);
-    List<Node> findByNodeLabel(String label);
     List<Node> findByTenantIdAndMonitoredStateEquals(String tenantId, MonitoredState monitoredState);
 
     @Query("SELECT n " +
@@ -59,9 +58,11 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +
-        "AND LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%'))")
-    List<Node> findByTenantIdAndNodeLabelLike(@Param("tenantId") String tenantId,
-                                              @Param("nodeLabelSearchTerm") String nodeLabelSearchTerm);
+        "AND n.monitoredState = :monitoredState " +
+        "AND LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%')) ")
+    List<Node> findByTenantIdAndNodeLabelLikeAndMonitoredStateEquals(@Param("tenantId") String tenantId,
+                                                                     @Param("nodeLabelSearchTerm") String nodeLabelSearchTerm,
+                                                                     @Param("monitoredState") MonitoredState monitoredState);
 
     List<Node> findByIdInAndTenantId(List<Long> ids, String tenantId);
 
@@ -85,7 +86,9 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
         "FROM Node n " +
         "JOIN n.tags tag " +
         "WHERE n.tenantId = :tenantId " +
-        "AND tag.name IN :tags")
-    List<Node> findByTenantIdAndTagNamesIn(@Param("tenantId") String tenantId,
-                                           @Param("tags") List<String> tags);
+        "AND n.monitoredState = :monitoredState " +
+        "AND tag.name IN :tags ")
+    List<Node> findByTenantIdEqualsAndMonitoredStateEqualsAndTagNamesIn(@Param("tenantId") String tenantId,
+                                                                        @Param("tags") List<String> tags,
+                                                                        @Param("monitoredState") MonitoredState monitoredState);
 }

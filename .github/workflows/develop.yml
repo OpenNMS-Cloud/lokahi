@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - 'develop'
+    paths-ignore:
+      - 'docs/**'
+      - 'doc/**'
   pull_request:
 # This workflow is triggered instead of individual workflows that filter based on paths.
 # If we want to fully separate individual workflows out of this one, we need fully reproducible builds.
 # Just use this one for now. The downside is it will run redundant workflows for code that didn't change.
     branches:
       - 'develop'
+    paths-ignore:
+      - 'docs/**'
+      - 'doc/**'
   workflow_call:
     inputs:
       image-tag:

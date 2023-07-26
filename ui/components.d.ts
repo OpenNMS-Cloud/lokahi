@@ -81,7 +81,7 @@ declare module '@vue/runtime-core' {
     FeatherTextarea: typeof import('@featherds/textarea')['FeatherTextarea']
     FeatherTooltip: typeof import('@featherds/tooltip')['FeatherTooltip']
     FooterSection: typeof import('./src/components/Common/FooterSection.vue')['default']
-    GradiantBG: typeof import('./src/components/Common/GradiantBG.vue')['default']
+    GradientBG: typeof import('./src/components/Common/GradientBG.vue')['default']
     GridTabs: typeof import('./src/components/Map/GridTabs.vue')['default']
     HeadlinePage: typeof import('./src/components/Common/HeadlinePage.vue')['default']
     HeadlineSection: typeof import('./src/components/Common/HeadlineSection.vue')['default']

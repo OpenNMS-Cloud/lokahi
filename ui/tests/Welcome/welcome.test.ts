@@ -23,8 +23,8 @@ describe('WelcomeGuide', () => {
         expect(elem.exists()).toBeTruthy()
     })
 
-    test('Should have a gradiant background', () => {
-        const elem = wrapper.get('[data-test="gradiant-bg"]')
+    test('Should have a gradient background', () => {
+        const elem = wrapper.get('[data-test="gradient-bg"]')
         expect(elem.exists()).toBeTruthy()
     })
 

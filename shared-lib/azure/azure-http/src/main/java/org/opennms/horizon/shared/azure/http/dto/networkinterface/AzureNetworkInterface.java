@@ -7,19 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AzureNetworkInterface {
-    @SerializedName("id")
-    @Expose
-    private String id;
-
-    @SerializedName("name")
-    @Expose
-    private String name;
-
-    @SerializedName("etag")
-    @Expose
-    private String etag;
-
+public class AzureNetworkInterface extends AzureBaseModel {
     @SerializedName("properties")
     @Expose
     private NetworkInterfaceProps properties;

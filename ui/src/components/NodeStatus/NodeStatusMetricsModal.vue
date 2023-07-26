@@ -35,11 +35,9 @@ const interfaceName = ref()
 const instance = ref()
 const ifName = ref()
 const hasMetricData = ref(false)
-const azureInterface = ref()
+const azureInterface = ref({} as AzureInterface)
 const isAzure = ref(false)
-const isAzureAndHasPublicIP = computed<boolean>(() => {
-  return isAzure && azureInterface?.publicIpId != ''
-})
+const isAzureAndHasPublicIP = ref(false)
 
 const bandwidthInOut = computed<GraphProps>(() => {
   return {
@@ -116,6 +114,7 @@ const openAzureMetrics = (inst: AzureInterface) => {
   isAzure.value = true // azure nodes can only display bytes in/out
   instance.value = 'networkInterfaces/' + inst?.interfaceName
   azureInterface.value = inst
+  isAzureAndHasPublicIP.value = isAzure.value && azureInterface.value.publicIpId != ''
   openModal()
 }
 

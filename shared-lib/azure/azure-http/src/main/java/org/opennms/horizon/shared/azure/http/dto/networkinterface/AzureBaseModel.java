@@ -7,11 +7,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class IpConfiguration extends AzureBaseModel {
-    @SerializedName("type")
+public class AzureBaseModel {
+    @SerializedName("id")
     @Expose
-    private String type;
-    @SerializedName("properties")
+    private String id;
+
+    @SerializedName("name")
     @Expose
-    private IpConfigurationProps properties;
+    private String name;
+
+    @SerializedName("etag")
+    @Expose
+    private String etag;
 }

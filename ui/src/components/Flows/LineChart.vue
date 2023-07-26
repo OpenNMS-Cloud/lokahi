@@ -140,7 +140,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         },
         ticks: {
           callback: function (value: any) {
-            return humanFileSize(value)
+            return humanFileSize(value) + props.labelSuffix
           }
         },
         title: {

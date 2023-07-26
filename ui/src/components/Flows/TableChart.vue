@@ -107,7 +107,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
             const value = context.dataset.data[context.dataIndex]
             const labelAbbrev = context.dataset.label.substring(0, 3).toLowerCase()
             const appName = context.label
-            return `${appName}(${labelAbbrev}): ` + humanFileSize(value)
+            return `${appName}(${labelAbbrev}): ` + humanFileSize(value) + props.labelSuffix
           }
         }
       }
@@ -121,7 +121,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         },
         ticks: {
           callback: function (value: any) {
-            return humanFileSize(value)
+            return humanFileSize(value) + props.labelSuffix
           }
         }
       },

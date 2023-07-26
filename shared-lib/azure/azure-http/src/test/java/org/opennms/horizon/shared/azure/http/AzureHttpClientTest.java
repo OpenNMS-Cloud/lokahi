@@ -33,15 +33,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureStatus;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
@@ -63,7 +59,6 @@ import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 
-import java.text.DateFormat;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,12 +73,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.INSTANCE_VIEW_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.METRICS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.NETWORK_INTERFACES_ENDPOINT;
+import static org.opennms.horizon.shared.azure.http.AzureHttpClient.NETWORK_INTERFACE_METRICS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.PUBLIC_IP_ADDRESSES_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.RESOURCES_ENDPOINT;
@@ -124,6 +121,13 @@ public class AzureHttpClientTest {
         this.params.setMetricsApiVersion("2");
 
         this.client = new AzureHttpClient(this.params);
+    }
+
+    @Test
+    public void testEnum() {
+        assertEquals("publicIPAddresses", AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString());
+        assertEquals(AzureHttpClient.ResourcesType.NETWORK_INTERFACES,
+            AzureHttpClient.ResourcesType.fromString("networkInterfaces"));
     }
 
     @Test
@@ -175,6 +179,28 @@ public class AzureHttpClientTest {
         verify(exactly(1), postRequestedFor(urlEqualTo(url)));
     }
 
+
+    @Test
+    public void testLoginWithJsonError() {
+        String url = String.format(OAUTH2_TOKEN_ENDPOINT, "", TEST_DIRECTORY_ID
+            , "?api-version=" + this.params.getApiVersion());
+
+        wireMock.stubFor(post(url)
+            .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
+            .willReturn(ResponseDefinitionBuilder.responseDefinition()
+                .withBody("error")
+                .withStatus(HttpStatus.SC_OK)));
+
+        AzureHttpException e = assertThrows(AzureHttpException.class, () -> {
+            this.client.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT, TEST_RETRIES);
+        });
+
+        assertFalse(e.hasHttpError());
+        assertTrue(e.getMessage().startsWith("Failed to get for endpoint"));
+
+        // should not retry more than once for auth error
+        verify(exactly(TEST_RETRIES), postRequestedFor(urlEqualTo(url)));
+    }
     @Test
     public void testGetSubscription() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
@@ -329,27 +355,11 @@ public class AzureHttpClientTest {
             + "&metricnames=Network+In+Total%2CNetwork+Out+Total"
             + "&interval=PT1M");
 
-        AzureMetrics azureMetrics = new AzureMetrics();
-
-        org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue azureValue
-            = new org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue();
-        AzureName azureName = new AzureName();
-        azureName.setValue("name");
-        azureValue.setName(azureName);
-
-        AzureTimeseries azureTimeseries = new AzureTimeseries();
-        AzureDatum azureDatum = new AzureDatum();
         Instant now = Instant.now();
-        azureDatum.setTimeStamp(now.toString());
-        azureDatum.setTotal(1234d);
-
-        azureTimeseries.setData(Collections.singletonList(azureDatum));
-        azureValue.setTimeseries(Collections.singletonList(azureTimeseries));
-        azureMetrics.setValue(Collections.singletonList(azureValue));
 
         wireMock.stubFor(get(url)
             .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
-            .willReturn(ResponseDefinitionBuilder.okForJson(azureMetrics)));
+            .willReturn(ResponseDefinitionBuilder.okForJson(generateAzureMetrics(now))));
 
         Map<String, String> params = new HashMap<>();
         params.put("metricnames", "Network In Total,Network Out Total");
@@ -386,6 +396,68 @@ public class AzureHttpClientTest {
         assertNotNull(result.getBaseManagementUrl());
         assertNotNull(result.getApiVersion());
         assertNotNull(result.getMetricsApiVersion());
+    }
+
+    @Test
+    public void testGetNetworkInterfaceMetrics() throws AzureHttpException {
+        AzureOAuthToken token = getAzureOAuthToken();
+        Instant now = Instant.now();
+
+        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP,
+            "publicIPAddresses/PUBLIC_IP_ID", "?api-version=" + this.params.getMetricsApiVersion()
+                + "&metricnames=ByteCount&interval=PT1M");
+
+        wireMock.stubFor(get(url)
+            .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
+            .willReturn(ResponseDefinitionBuilder.okForJson(generateAzureMetrics(now))));
+
+        Map<String, String> params = new HashMap<>();
+        params.put("metricnames", "ByteCount");
+        params.put("interval", "PT1M");
+
+        AzureMetrics metrics =
+            this.client.getNetworkInterfaceMetrics(token, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, "publicIPAddresses/PUBLIC_IP_ID", params, TEST_TIMEOUT, TEST_RETRIES);
+
+        verify(exactly(1), getRequestedFor(urlEqualTo(url)));
+
+        assertNotNull(metrics.getValue());
+        assertEquals(1, metrics.getValue().size());
+
+        org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue value = metrics.getValue().get(0);
+        assertNotNull(value.getName());
+        assertEquals("name", value.getName().getValue());
+        assertNotNull(value.getTimeseries());
+        assertEquals(1, value.getTimeseries().size());
+
+        AzureTimeseries timeseries = value.getTimeseries().get(0);
+        assertNotNull(timeseries.getData());
+        assertEquals(1, timeseries.getData().size());
+
+        AzureDatum datum = timeseries.getData().get(0);
+        assertEquals(1234d, datum.getTotal(), 0d);
+        assertEquals(now.toString(), datum.getTimeStamp());
+    }
+
+
+    private AzureMetrics generateAzureMetrics(Instant now){
+        AzureMetrics azureMetrics = new AzureMetrics();
+
+        org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue azureValue
+            = new org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue();
+        AzureName azureName = new AzureName();
+        azureName.setValue("name");
+        azureValue.setName(azureName);
+
+        AzureTimeseries azureTimeseries = new AzureTimeseries();
+        AzureDatum azureDatum = new AzureDatum();
+
+        azureDatum.setTimeStamp(now.toString());
+        azureDatum.setTotal(1234d);
+
+        azureTimeseries.setData(Collections.singletonList(azureDatum));
+        azureValue.setTimeseries(Collections.singletonList(azureTimeseries));
+        azureMetrics.setValue(Collections.singletonList(azureValue));
+        return azureMetrics;
     }
 
     private static AzureNetworkInterfaces getAzureNetworkInterfaces() {

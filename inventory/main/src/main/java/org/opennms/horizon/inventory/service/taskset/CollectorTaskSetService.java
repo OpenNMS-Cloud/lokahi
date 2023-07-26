@@ -147,7 +147,7 @@ public class CollectorTaskSetService {
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .addAllCollectorResources(targetInterfaceNames.stream().map(name ->
                     AzureCollectorResourcesRequest.newBuilder()
-                        .setType(AzureHttpClient.ResourcesType.NETWOR_INTERFACES.toString())
+                        .setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.toString())
                         .setResource(name)
                         .build()).toList())
                 .addAllCollectorResources(publicIpNames.stream().map(name ->

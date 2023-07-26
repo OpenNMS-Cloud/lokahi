@@ -59,7 +59,7 @@ import java.util.Objects;
 @Slf4j
 public class AzureHttpClient {
     public enum ResourcesType {
-        PUBLIC_IP_ADDRESSES("publicIPAddresses"), NETWOR_INTERFACES("networkInterfaces"), NODE("node");
+        PUBLIC_IP_ADDRESSES("publicIPAddresses"), NETWORK_INTERFACES("networkInterfaces"), NODE("node");
         private String value;
         ResourcesType(String value) {
             this.value = value;

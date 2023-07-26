@@ -68,7 +68,6 @@ public class AzureCollector implements ServiceCollector {
     // Reference inventory: TaskUtils.DEFAULT_SCHEDULE
     private static final int TIMESPAN_SECOND = 60;
 
-
     // Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
     private static final String METRIC_INTERVAL = "PT1M";
 
@@ -87,7 +86,6 @@ public class AzureCollector implements ServiceCollector {
         AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesReceivedRate", "bytes_received_rate");
         AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesSentRate", "bytes_sent_rate");
     }
-
 
     private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = new HashMap<>();
 
@@ -191,7 +189,7 @@ public class AzureCollector implements ServiceCollector {
         try {
             var type = AzureHttpClient.ResourcesType.fromString(resource.getType());
             Map<String, String> params =
-                getMetricsParams(AzureHttpClient.ResourcesType.NETWOR_INTERFACES == type ?
+                getMetricsParams(AzureHttpClient.ResourcesType.NETWORK_INTERFACES == type ?
                     AZURE_INTERFACE_METRIC_TO_ALIAS.keySet() : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());
 
             AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),

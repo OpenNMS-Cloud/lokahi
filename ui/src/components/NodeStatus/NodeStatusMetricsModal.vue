@@ -8,7 +8,7 @@
         </div>
         <div class="metrics">
           <LineGraph :graph="bitsInOut" type="bytes" @has-data="displayEmptyMsgIfNoData" />
-          <LineGraph v-if="isAzure && azureInterface?.publicIpId != ''" type="bytes" :graph="publicInterfaceByteCount" @has-data="displayEmptyMsgIfNoData" />
+          <LineGraph v-if="isAzureAndHasPublicIP" type="bytes" :graph="publicInterfaceByteCount" @has-data="displayEmptyMsgIfNoData" />
           <LineGraph v-if="!isAzure" type="percentage" :graph="bandwidthInOut" @has-data="displayEmptyMsgIfNoData" />
           <LineGraph v-if="!isAzure" :graph="nodeLatency" @has-data="displayEmptyMsgIfNoData" />
           <LineGraph v-if="!isAzure" :graph="errorsInOut" @has-data="displayEmptyMsgIfNoData" />
@@ -35,8 +35,11 @@ const interfaceName = ref()
 const instance = ref()
 const ifName = ref()
 const hasMetricData = ref(false)
-const isAzure = ref(false)
 const azureInterface = ref()
+const isAzure = ref(false)
+const isAzureAndHasPublicIP = computed<boolean>(() => {
+  return isAzure && azureInterface?.publicIpId != ''
+})
 
 const bandwidthInOut = computed<GraphProps>(() => {
   return {
@@ -52,7 +55,7 @@ const bandwidthInOut = computed<GraphProps>(() => {
 })
 
 const bitsInOut = computed<GraphProps>(() => {
-  const props =  {
+  const bitsInOutProperties =  {
       label: 'Bits Inbound / Outbound',
       metrics: ['network_in_bits', 'network_out_bits'],
       monitor: 'SNMP',
@@ -64,11 +67,11 @@ const bitsInOut = computed<GraphProps>(() => {
   }
 
   if(isAzure.value) {
-    props.monitor = 'AZURE'
-    props.label = 'Interface Bytes Inbound / Outbound'
-    props.metrics = ['bytes_received_rate', 'bytes_sent_rate']
+    bitsInOutProperties.monitor = 'AZURE'
+    bitsInOutProperties.label = 'Interface Bytes Inbound / Outbound'
+    bitsInOutProperties.metrics = ['bytes_received_rate', 'bytes_sent_rate']
   }
-  return props
+  return bitsInOutProperties
 })
 
 const publicInterfaceByteCount = computed<GraphProps>(() => {

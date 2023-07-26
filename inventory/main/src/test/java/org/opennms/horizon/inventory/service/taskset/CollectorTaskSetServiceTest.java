@@ -60,7 +60,7 @@ public class CollectorTaskSetServiceTest {
         Assert.assertEquals(SUBSCRIPTION_ID, request.getSubscriptionId());
         Assert.assertEquals(DIRECTORY_ID, request.getDirectoryId());
         var resourceList = request.getCollectorResourcesList();
-        var interfaceList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.NETWOR_INTERFACES.toString()))
+        var interfaceList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.toString()))
             .map(AzureCollectorResourcesRequest::getResource).toArray();
         var publicIpList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString()))
             .map(AzureCollectorResourcesRequest::getResource).toArray();

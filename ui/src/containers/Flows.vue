@@ -133,6 +133,7 @@
         ref="tableChartApplications"
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="appStore.tableChartData"
+        labelSuffix=" /sec"
         :table-data="appStore.tableData"
       />
       <LineChart
@@ -142,6 +143,7 @@
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="appStore.lineChartData"
         :table-data="appStore.tableData"
+        labelSuffix=" /sec"
         :format="flowsStore.convertToDate"
         :get-chart-area-width-for-data-points="setMaxDataPointsAndUpdateCharts"
       />

@@ -54,6 +54,11 @@ const props = defineProps({
   getChartAreaWidthForDataPoints: {
     required: true,
     type: Function as PropType<(width: number) => void>
+  },
+  labelSuffix: {
+    required: false,
+    type: String,
+    default: ''
   }
 })
 const lineChart = ref()
@@ -112,7 +117,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           title: (context: any) => context.label,
           label: (context: any) => {
             const appName = context.dataset.label
-            return `${appName} : ` + humanFileSize(context.parsed.y)
+            return `${appName} : ` + humanFileSize(context.parsed.y) + props.labelSuffix
           }
         }
       }

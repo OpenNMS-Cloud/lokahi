@@ -25,7 +25,9 @@ public class AzureInterfaceService {
     public AzureInterface createOrUpdateFromScanResult(String tenantId, Node node,
                                                        AzureScanNetworkInterfaceItem azureScanNetworkInterfaceItem) {
         Objects.requireNonNull(azureScanNetworkInterfaceItem);
-        return modelRepo.findByTenantIdAndPrivateIpId(tenantId, azureScanNetworkInterfaceItem.getName())
+        String publicIpId = azureScanNetworkInterfaceItem.hasPublicIpAddress() ?
+            azureScanNetworkInterfaceItem.getPublicIpAddress().getName() : null;
+        return modelRepo.findByTenantIdAndPublicIpId(tenantId, publicIpId)
             .map(azure -> {
                 mapper.updateFromScanResult(azure, azureScanNetworkInterfaceItem);
                 return modelRepo.save(azure);

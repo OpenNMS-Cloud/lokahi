@@ -13,6 +13,6 @@ public interface AzureInterfaceRepository extends JpaRepository<AzureInterface, 
 
     Optional<AzureInterface> findByIdAndTenantId(long id, String tenantId);
 
-    Optional<AzureInterface> findByTenantIdAndPrivateIpId(String tenantId, String privateIpId);
+    Optional<AzureInterface> findByTenantIdAndPublicIpId(String tenantId, String publicIpId);
 
 }

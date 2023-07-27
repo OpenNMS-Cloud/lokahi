@@ -158,7 +158,7 @@ public class AzureInterfaceServiceTest {
                 .setIpAddress(publicIp).setLocation(azureLocation)).build();
 
 
-        Mockito.when(mockAzureInterfaceRepository.findByTenantIdAndPrivateIpId(TEST_TENANT_ID, privateIpId))
+        Mockito.when(mockAzureInterfaceRepository.findByTenantIdAndPublicIpId(TEST_TENANT_ID, publicIpId))
             .thenReturn(Optional.of(azureInterface));
         Mockito.when(mockAzureInterfaceRepository.save(isA(AzureInterface.class))).thenAnswer(in -> in.getArguments()[0]);
 

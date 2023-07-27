@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class AzureCollector implements ServiceCollector {
     private final Logger log = LoggerFactory.getLogger(AzureCollector.class);
@@ -71,28 +72,22 @@ public class AzureCollector implements ServiceCollector {
     // Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
     private static final String METRIC_INTERVAL = "PT1M";
 
-    private static final Map<String, String> AZURE_NODE_METRIC_TO_ALIAS = new HashMap<>();
+    // Azure Metric Key - Metrics Processor Key
+    private static final Map<String, String> AZURE_NODE_METRIC_TO_ALIAS = Map.of(
+        "Network In Total", "network_in_total_bytes",
+        "Network Out Total", "network_out_total_bytes"
+    );
 
-    static {
-        // Azure Metric Key - Metrics Processor Key
-        AZURE_NODE_METRIC_TO_ALIAS.put("Network In Total", "network_in_total_bytes");
-        AZURE_NODE_METRIC_TO_ALIAS.put("Network Out Total", "network_out_total_bytes");
-    }
+    // Valid metrics: BytesSentRate,BytesReceivedRate,PacketsSentRate,PacketsReceivedRate
+    private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = Map.of(
+        "BytesReceivedRate", "bytes_received_rate",
+        "BytesSentRate", "bytes_sent_rate"
+    );
 
-    private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = new HashMap<>();
-
-    static {
-        // Valid metrics: BytesSentRate,BytesReceivedRate,PacketsSentRate,PacketsReceivedRate
-        AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesReceivedRate", "bytes_received_rate");
-        AZURE_INTERFACE_METRIC_TO_ALIAS.put("BytesSentRate", "bytes_sent_rate");
-    }
-
-    private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = new HashMap<>();
-
-    static {
-        // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
-        AZURE_IPINTERFACE_METRIC_TO_ALIAS.put("ByteCount", "bytes_received");
-    }
+    // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
+    private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = Map.of(
+        "ByteCount", "bytes_received"
+    );
 
     private static final String AZURE_NODE_PREFIX = "azure-node-";
     private static final String METRIC_DELIMITER = ",";
@@ -123,9 +118,9 @@ public class AzureCollector implements ServiceCollector {
             if (instanceView.isUp()) {
 
                 // host metrics
-                List<AzureResultMetric> metricResults = new ArrayList<>(collectNodeMetrics(request, token)
-                    .entrySet().stream().map(nodeMetric -> mapNodeResult(request, nodeMetric))
-                    .toList());
+                List<AzureResultMetric> metricResults = collectNodeMetrics(request, token).entrySet().stream()
+                    .map(nodeMetric -> mapNodeResult(request, nodeMetric))
+                    .collect(Collectors.toCollection(ArrayList::new));
 
                 // interface metrics
                 for (var resources : request.getCollectorResourcesList()) {
@@ -135,9 +130,7 @@ public class AzureCollector implements ServiceCollector {
                         .toList());
                 }
 
-                log.debug("****************************************************");
-                log.debug("AZURE COLLECTOR metricResults LIST: \n{}", metricResults);
-                log.debug("****************************************************");
+                log.debug("AZURE COLLECTOR metricResults LIST: {}", metricResults);
 
                 AzureResponseMetric results = AzureResponseMetric.newBuilder()
                     .addAllResults(metricResults)
@@ -248,7 +241,7 @@ public class AzureCollector implements ServiceCollector {
         if (AZURE_NODE_METRIC_TO_ALIAS.containsKey(metricName)) {
             return AZURE_NODE_METRIC_TO_ALIAS.get(metricName);
         }
-        throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
+        throw new IllegalArgumentException("Failed to find alias '" + metricName + "' - shouldn't be reached");
     }
 
     private String getInterfaceMetricAlias(String metricName) {
@@ -258,6 +251,6 @@ public class AzureCollector implements ServiceCollector {
         if (AZURE_IPINTERFACE_METRIC_TO_ALIAS.containsKey(metricName)) {
             return AZURE_IPINTERFACE_METRIC_TO_ALIAS.get(metricName);
         }
-        throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
+        throw new IllegalArgumentException("Failed to find alias '" + metricName + "' - shouldn't be reached");
     }
 }

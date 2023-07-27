@@ -32,7 +32,6 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
@@ -41,23 +40,21 @@ import org.opennms.horizon.inventory.model.AzureInterface;
 
 @Mapper(componentModel = "spring", uses = {EmptyStringMapper.class, IpAddressMapper.class})
 public interface AzureInterfaceMapper {
-    @Mappings({
-        @Mapping(target = "id", ignore = true),
-        @Mapping(target = "publicIpAddress", source = "publicIpAddress.ipAddress", qualifiedByName = "emptyString"),
-        @Mapping(target = "privateIpId", source = "name", qualifiedByName = "emptyString"),
-        @Mapping(target = "publicIpId", source = "publicIpAddress.name", qualifiedByName = "emptyString"),
-        @Mapping(target = "interfaceName", source = "interfaceName", qualifiedByName = "emptyString"),
-        @Mapping(target = "location", source = "location", qualifiedByName = "emptyString")
-    })
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "publicIpAddress", source = "publicIpAddress.ipAddress", qualifiedByName = "emptyString")
+    @Mapping(target = "privateIpId", source = "name", qualifiedByName = "emptyString")
+    @Mapping(target = "publicIpId", source = "publicIpAddress.name", qualifiedByName = "emptyString")
+    @Mapping(target = "interfaceName", source = "interfaceName", qualifiedByName = "emptyString")
+    @Mapping(target = "location", source = "location", qualifiedByName = "emptyString")
     AzureInterface scanResultToModel(AzureScanNetworkInterfaceItem scanResult);
 
-    @Mappings({
-        @Mapping(target = "id", ignore = true),
-        @Mapping(target = "publicIpAddress", source = "publicIpAddress.ipAddress", qualifiedByName = "emptyString"),
-        @Mapping(target = "privateIpId", source = "name", qualifiedByName = "emptyString"),
-        @Mapping(target = "publicIpId", source = "publicIpAddress.name", qualifiedByName = "emptyString"),
-        @Mapping(target = "interfaceName", source = "interfaceName", qualifiedByName = "emptyString"),
-    })
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "publicIpAddress", source = "publicIpAddress.ipAddress", qualifiedByName = "emptyString")
+    @Mapping(target = "privateIpId", source = "name", qualifiedByName = "emptyString")
+    @Mapping(target = "publicIpId", source = "publicIpAddress.name", qualifiedByName = "emptyString")
+    @Mapping(target = "interfaceName", source = "interfaceName", qualifiedByName = "emptyString")
     void updateFromScanResult(@MappingTarget AzureInterface result, AzureScanNetworkInterfaceItem scanResult);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,

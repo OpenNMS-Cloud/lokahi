@@ -83,7 +83,7 @@ public class AzureHttpClient {
             if (type != null) {
                 return type;
             }
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid value: " + metricName);
         }
     }
 
@@ -167,10 +167,6 @@ public class AzureHttpClient {
             .POST(HttpRequest.BodyPublishers.ofString(postBody.toString()))
             .build();
 
-        log.debug("========");
-        log.debug("Request: {}", request);
-        log.debug("postBody: {}", postBody);
-        log.debug("========");
          return performRequest(AzureOAuthToken.class, request, retries);
     }
 
@@ -262,7 +258,7 @@ public class AzureHttpClient {
                 return this.performSingleRequest(clazz, request);
             } catch (AzureHttpException ex) {
                 if (ex.getHttpStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    log.error("Request: {}, HTTP_UNAUTHORIZED: {}", request, ex.getMessage(), ex);
+                    log.error("Request uri: {}, HTTP_UNAUTHORIZED: {}", request.uri(), ex.getMessage(), ex);
                     throw ex;
                 }
                 lastException = ex;
@@ -288,12 +284,7 @@ public class AzureHttpClient {
 
             String httpBody = httpResponse.body();
 
-            log.info("============================");
-            log.info("request: {}", request);
-            log.info("header: {}", request.headers());
-            log.info("statusCode: {}", httpResponse.statusCode());
-            log.info("httpBody: {}", httpBody);
-            log.info("============================");
+            log.info("Response statusCode: {}, body: {}", httpResponse.statusCode(), httpBody);
 
             var statusCode = httpResponse.statusCode();
             if(statusCode == HttpURLConnection.HTTP_OK){

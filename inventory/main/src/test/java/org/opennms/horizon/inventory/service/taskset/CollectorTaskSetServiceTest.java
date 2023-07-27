@@ -60,9 +60,9 @@ public class CollectorTaskSetServiceTest {
         Assert.assertEquals(SUBSCRIPTION_ID, request.getSubscriptionId());
         Assert.assertEquals(DIRECTORY_ID, request.getDirectoryId());
         var resourceList = request.getCollectorResourcesList();
-        var interfaceList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.toString()))
+        var interfaceList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName()))
             .map(AzureCollectorResourcesRequest::getResource).toArray();
-        var publicIpList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString()))
+        var publicIpList = resourceList.stream().filter(r -> r.getType().equals(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName()))
             .map(AzureCollectorResourcesRequest::getResource).toArray();
         // interface3 should not be included due to no public interface
         Assert.assertArrayEquals(new String[]{"interface1", "interface2"}, interfaceList);

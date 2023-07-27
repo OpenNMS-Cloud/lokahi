@@ -125,9 +125,9 @@ public class AzureHttpClientTest {
 
     @Test
     public void testEnum() {
-        assertEquals("publicIPAddresses", AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString());
+        assertEquals("publicIPAddresses", AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName());
         assertEquals(AzureHttpClient.ResourcesType.NETWORK_INTERFACES,
-            AzureHttpClient.ResourcesType.fromString("networkInterfaces"));
+            AzureHttpClient.ResourcesType.fromMetricName("networkInterfaces"));
     }
 
     @Test

@@ -53,6 +53,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -60,20 +61,27 @@ import java.util.Objects;
 public class AzureHttpClient {
     public enum ResourcesType {
         PUBLIC_IP_ADDRESSES("publicIPAddresses"), NETWORK_INTERFACES("networkInterfaces"), NODE("node");
-        private String value;
-        ResourcesType(String value) {
-            this.value = value;
-        }
-        @Override
-        public String toString() {
-            return value;
+        private final String metricName;
+        private static final Map<String, ResourcesType> metricNameMap = new HashMap<>();
+
+        static {
+            for (ResourcesType value : ResourcesType.values()) {
+                metricNameMap.put(value.getMetricName(), value);
+            }
         }
 
-        public static ResourcesType fromString(String value) {
-            for (var item : ResourcesType.values()) {
-                if (item.value.equals(value)) {
-                    return item;
-                }
+        ResourcesType(String metricName) {
+            this.metricName = metricName;
+        }
+
+        public String getMetricName() {
+            return metricName;
+        }
+
+        public static ResourcesType fromMetricName(String metricName) {
+            var type = metricNameMap.get(metricName);
+            if (type != null) {
+                return type;
             }
             throw new IllegalArgumentException();
         }

@@ -96,11 +96,11 @@ public class AzureCollectorTest {
 
 
         when(client.getNetworkInterfaceMetrics(eq(token), eq(subscriptionId), eq(resourceGroup),
-            eq(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.toString() + "/" + "interface"), any(),
+            eq(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName() + "/" + "interface"), any(),
             eq(timeout), eq(rety))).thenReturn(generateMetrics(Arrays.asList("BytesReceivedRate", "BytesSentRate")));
 
         when(client.getNetworkInterfaceMetrics(eq(token), eq(subscriptionId), eq(resourceGroup),
-            eq(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString() + "/" + "publicIp"), any(),
+            eq(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName() + "/" + "publicIp"), any(),
             eq(timeout), eq(rety))).thenReturn(generateMetrics(Arrays.asList("ByteCount")));
     }
 
@@ -136,8 +136,8 @@ public class AzureCollectorTest {
             .setResource(resourceName)
             .setTimeoutMs(timeout)
             .setRetries(rety)
-            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.toString()).setResource("interface").build())
-            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString()).setResource("publicIp").build())
+            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName()).setResource("interface").build())
+            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName()).setResource("publicIp").build())
             .build();
         var config = Any.pack(collectorRequest);
         CollectionRequest request = CollectorRequestImpl.builder()

@@ -187,7 +187,7 @@ public class AzureCollector implements ServiceCollector {
                                                         AzureCollectorResourcesRequest resource,
                                                         AzureOAuthToken token) throws AzureHttpException {
         try {
-            var type = AzureHttpClient.ResourcesType.fromString(resource.getType());
+            var type = AzureHttpClient.ResourcesType.fromMetricName(resource.getType());
             Map<String, String> params =
                 getMetricsParams(AzureHttpClient.ResourcesType.NETWORK_INTERFACES == type ?
                     AZURE_INTERFACE_METRIC_TO_ALIAS.keySet() : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());

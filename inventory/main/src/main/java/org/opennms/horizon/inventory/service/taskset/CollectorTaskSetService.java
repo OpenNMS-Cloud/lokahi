@@ -147,12 +147,12 @@ public class CollectorTaskSetService {
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
                 .addAllCollectorResources(targetInterfaceNames.stream().map(name ->
                     AzureCollectorResourcesRequest.newBuilder()
-                        .setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.toString())
+                        .setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName())
                         .setResource(name)
                         .build()).toList())
                 .addAllCollectorResources(publicIpNames.stream().map(name ->
                     AzureCollectorResourcesRequest.newBuilder()
-                        .setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.toString())
+                        .setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName())
                         .setResource(name)
                         .build()).toList())
                 .build());

@@ -3,6 +3,7 @@ package org.opennms.horizon.events.persistence.mapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
@@ -14,9 +15,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EventMapper extends DateTimeMapper {
 
-    @Mapping(source = "eventUei", target = "uei")
-    @Mapping(source = "producedTime", target = "producedTimeMs")
-    @Mapping(source = "eventInfo", target = "info")
+    @Mappings({
+        @Mapping(source = "eventUei", target = "uei"),
+        @Mapping(source = "producedTime", target = "producedTimeMs"),
+        @Mapping(source = "eventInfo", target = "info"),
+        @Mapping(source = "id", target = "databaseId"),
+    })
     org.opennms.horizon.events.proto.Event modelToDTO(Event event);
 
     default org.opennms.horizon.events.proto.Event modelToDtoWithParams(Event event) {

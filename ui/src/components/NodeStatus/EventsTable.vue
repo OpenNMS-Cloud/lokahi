@@ -11,19 +11,15 @@
       <table class="data-table" aria-label="Events Table" data-test="data-table">
         <thead>
           <tr>
-            <th scope="col">ID</th>
             <th scope="col">Time</th>
             <th scope="col">UEI</th>
-            <th scope="col">Node Id</th>
             <th scope="col">IP Address</th>
           </tr>
         </thead>
         <TransitionGroup name="data-table" tag="tbody">
           <tr v-for="event in nodeData.events" :key="event.id as number" data-test="data-item">
-            <td>{{ event.id }}</td>
-            <td>{{ event.producedTime }}</td>
+            <td>{{ fnsFormat(event.producedTime, 'M/dd/yyyy HH:mm:ssxxx') }}</td>
             <td>{{ event.uei }}</td>
-            <td>{{ event.nodeId }}</td>
             <td>{{ event.ipAddress }}</td>
           </tr>
         </TransitionGroup>
@@ -42,6 +38,7 @@
 
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import {format as fnsFormat} from 'date-fns'
 
 const nodeStatusStore = useNodeStatusStore()
 

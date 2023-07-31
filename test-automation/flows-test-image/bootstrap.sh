@@ -17,7 +17,7 @@ if [ ! -z "USER_PARAMS" ]; then
               UDPGEN=${OPTARG}
               ;;
           *)
-              echo "-u 'udpgne args' -s 'snmp args'"
+              echo "-u 'udpgen args' -s 'snmp args'"
               ;;
       esac
   done

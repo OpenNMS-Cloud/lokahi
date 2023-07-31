@@ -1,5 +1,5 @@
 # snmpd-udpgen
-It is a image for generate flow data while it still can receive snmp. It is valicating docker philosophy. However, it is for testing purpose. 
+It is an image for generate flow data while still receiving snmp data. However, it is for testing purpose. 
 It is base on ehazlett/snmpd and https://github.com/OpenNMS/udpgen
 
 # parameters

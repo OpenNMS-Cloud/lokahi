@@ -32,6 +32,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
@@ -202,7 +203,7 @@ public class ScannerResponseService {
                     var nodeInfoResult = NodeInfoResult.newBuilder()
                         .setSystemLocation(azureScanItem.getLocation())
                         .setSystemName(azureScanItem.getName())
-                        .setSystemDescr(String.format("%s (%s)", azureScanItem.getOsName(), azureScanItem.getOsVersion()))
+                        .setSystemDescr(getSystemDescr(azureScanItem))
                         .build();
                     nodeService.updateNodeInfo(node, nodeInfoResult);
 
@@ -226,6 +227,16 @@ public class ScannerResponseService {
             } catch (LocationNotFoundException e) {
                 log.error("Location not found while adding new Azure device for tenantId={}; locationId={}", tenantId, locationId);
             }
+        }
+    }
+
+    private String getSystemDescr(AzureScanItem azureScanItem) {
+        if (Strings.isNotEmpty(azureScanItem.getOsName()) && Strings.isNotEmpty(azureScanItem.getOsVersion())) {
+            return String.format("%s (%s)", azureScanItem.getOsName(), azureScanItem.getOsVersion());
+        } else if (Strings.isNotEmpty(azureScanItem.getOsName())) {
+            return azureScanItem.getOsName();
+        } else {
+            return azureScanItem.getOsVersion();
         }
     }
 

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -37,41 +37,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class AzureInstanceView {
-    private static final String POWER_STATE_RUNNING = "PowerState/running";
-    private static final String PROVISIONING_STATE_SUCCEEDED = "ProvisioningState/succeeded";
-
-    @SerializedName("vmAgent")
-    private VmAgent vmAgent;
-    @SerializedName("computerName")
-    private String computerName;
-    @SerializedName("osName")
-    private String osName;
-    @SerializedName("osVersion")
-    private String osVersion;
+public class VmAgent {
+    @SerializedName("vmAgentVersion")
+    private String vmAgentVersion;
     @SerializedName("statuses")
     private List<AzureStatus> statuses = new ArrayList<>();
-
-    public boolean isReady() {
-        if (vmAgent != null) {
-            for (AzureStatus status : vmAgent.getStatuses()) {
-                String code = status.getCode();
-                if (code.equalsIgnoreCase(PROVISIONING_STATE_SUCCEEDED)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isUp() {
-
-        for (AzureStatus status : getStatuses()) {
-            String code = status.getCode();
-            if (code.equalsIgnoreCase(POWER_STATE_RUNNING)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

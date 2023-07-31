@@ -41,6 +41,7 @@ import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.AzureHttpException;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureStatus;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.VmAgent;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureDatum;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
@@ -89,6 +90,15 @@ public class AzureCollectorTest {
         AzureStatus status = new AzureStatus();
         status.setCode("PowerState/running");
         view.setStatuses(Collections.singletonList(status));
+
+        List<AzureStatus> readyStatuses = new ArrayList<>();
+        AzureStatus readyStatus = new AzureStatus();
+        readyStatuses.add(readyStatus);
+        readyStatus.setCode("ProvisioningState/succeeded");
+        VmAgent vmAgent = new VmAgent();
+        vmAgent.setStatuses(readyStatuses);
+        view.setVmAgent(vmAgent);
+
         when(client.getInstanceView(token, subscriptionId, resourceGroup, resourceName, timeout, rety)).thenReturn(view);
 
         when(client.getMetrics(eq(token), eq(subscriptionId), eq(resourceGroup), eq(resourceName), any(),

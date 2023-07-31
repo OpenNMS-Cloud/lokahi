@@ -2,13 +2,9 @@ name: SNMPD Udpgen Build
 
 on:
   push:
-    branches:
-      - 'develop'
     paths:
       - 'test-automation/flows-test-image/**'
   pull_request:
-    branches:
-      - 'develop'
     paths:
       - 'test-automation/flows-test-image/**'
 

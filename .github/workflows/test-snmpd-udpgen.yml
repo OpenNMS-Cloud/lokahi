@@ -30,10 +30,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PASS }}
 
-      - name: Build & Push Images
+      - name: Build
         working-directory: test-automation/flows-test-image
         shell: bash
         run: |
 
           docker build . --file Dockerfile --tag opennms/lokahi-snmpd-udpgen:latest
+
+      - name: Push Images
+        if: github.ref == 'refs/heads/develop'
+        # Only push on merging PR to develop branch.
+        shell: bash
+        run: |
+
           docker push opennms/lokahi-snmpd-udpgen:latest

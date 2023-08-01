@@ -133,7 +133,6 @@
         ref="tableChartApplications"
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="appStore.tableChartData"
-        labelSuffix=" /sec"
         :table-data="appStore.tableData"
       />
       <LineChart

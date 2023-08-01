@@ -15,9 +15,9 @@
         </thead>
         <tbody>
           <tr v-for="(data, index) in tableData" :key="index">
-            <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) + labelSuffix }} </td>
-            <td>{{ humanFileSize(data.bytesIn) + labelSuffix }}</td>
-            <td>{{ humanFileSize(data.bytesOut) + labelSuffix }}</td>
+            <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) }} </td>
+            <td>{{ humanFileSize(data.bytesIn) }}</td>
+            <td>{{ humanFileSize(data.bytesOut) }}</td>
           </tr>
         </tbody>
       </table>
@@ -53,11 +53,6 @@ const props = defineProps({
   selectedFilterRange: {
     required: true,
     type: String
-  },
-  labelSuffix: {
-    required: false,
-    type: String,
-    default: ''
   }
 })
 
@@ -107,7 +102,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
             const value = context.dataset.data[context.dataIndex]
             const labelAbbrev = context.dataset.label.substring(0, 3).toLowerCase()
             const appName = context.label
-            return `${appName}(${labelAbbrev}): ` + humanFileSize(value) + props.labelSuffix
+            return `${appName}(${labelAbbrev}): ` + humanFileSize(value)
           }
         }
       }
@@ -121,7 +116,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         },
         ticks: {
           callback: function (value: any) {
-            return humanFileSize(value) + props.labelSuffix
+            return humanFileSize(value)
           }
         }
       },

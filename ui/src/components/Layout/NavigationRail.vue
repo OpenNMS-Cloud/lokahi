@@ -28,12 +28,6 @@
         :icon="Icons.Home"
       />
 
-      <NavigationRailNavItem
-        title="Minions"
-        href="/minions"
-        :icon="Icons.Appliances"
-      />
-
       <!-- Hidden until after EAR -->
       <!-- <NavigationRailNavItem
         title="Map"

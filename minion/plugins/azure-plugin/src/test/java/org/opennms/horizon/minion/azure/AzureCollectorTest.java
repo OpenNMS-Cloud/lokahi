@@ -77,6 +77,8 @@ public class AzureCollectorTest {
 
     final String resourceName = "resourceName";
 
+    final String resourceNameNotReady = "resourceNameNotReady";
+
     final long timeout = 1000L;
     final int rety = 2;
 
@@ -100,6 +102,10 @@ public class AzureCollectorTest {
         view.setVmAgent(vmAgent);
 
         when(client.getInstanceView(token, subscriptionId, resourceGroup, resourceName, timeout, rety)).thenReturn(view);
+        // empty instance view to simulate not ready
+        when(client.getInstanceView(token, subscriptionId, resourceGroup, resourceNameNotReady, timeout, rety))
+            .thenReturn(new AzureInstanceView());
+
 
         when(client.getMetrics(eq(token), eq(subscriptionId), eq(resourceGroup), eq(resourceName), any(),
             eq(timeout), eq(rety))).thenReturn(generateMetrics(Arrays.asList("Network In Total", "Network Out Total")));
@@ -166,5 +172,34 @@ public class AzureCollectorTest {
         Assert.assertEquals(2, results.getResultsList().stream().filter(r -> r.getResourceName().equals("resourceName")).count());
         Assert.assertEquals(2, results.getResultsList().stream().filter(r -> r.getResourceName().equals("interface")).count());
         Assert.assertEquals(1, results.getResultsList().stream().filter(r -> r.getResourceName().equals("publicIp")).count());
+    }
+
+    @Test
+    public void testNotReadyCollect() {
+        var collectorRequest = AzureCollectorRequest.newBuilder()
+            .setClientId(clientId)
+            .setClientSecret(clientSecret)
+            .setSubscriptionId(subscriptionId)
+            .setDirectoryId(directoryId)
+            .setResourceGroup(resourceGroup)
+            .setResource(resourceNameNotReady)
+            .setTimeoutMs(timeout)
+            .setRetries(rety)
+            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName()).setResource("interface").build())
+            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName()).setResource("publicIp").build())
+            .build();
+        var config = Any.pack(collectorRequest);
+        CollectionRequest request = CollectorRequestImpl.builder()
+            .build();
+
+        AzureCollector collector = new AzureCollector(client);
+
+        var future = collector.collect(request, config);
+        var response = future.join();
+
+        Assert.assertFalse(response.getStatus());
+        Assert.assertEquals("azure-node-0", response.getIpAddress());
+        Assert.assertEquals(MonitorType.AZURE, response.getMonitorType());
+        Assert.assertNull(response.getResults());
     }
 }

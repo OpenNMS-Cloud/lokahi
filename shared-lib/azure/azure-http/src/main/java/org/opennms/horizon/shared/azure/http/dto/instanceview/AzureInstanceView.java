@@ -65,7 +65,6 @@ public class AzureInstanceView {
     }
 
     public boolean isUp() {
-
         for (AzureStatus status : getStatuses()) {
             String code = status.getCode();
             if (code.equalsIgnoreCase(POWER_STATE_RUNNING)) {

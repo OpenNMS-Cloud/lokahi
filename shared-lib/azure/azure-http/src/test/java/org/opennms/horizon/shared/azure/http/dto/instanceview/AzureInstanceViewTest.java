@@ -23,6 +23,12 @@ public class AzureInstanceViewTest {
     }
 
     @Test
+    public void testNullVmAgent() {
+        AzureInstanceView instanceView = new AzureInstanceView();
+        assertFalse(instanceView.isReady());
+    }
+
+    @Test
     public void testIsUp() {
         AzureInstanceView instanceView = getInstanceView(true, true);
         assertTrue(instanceView.isUp());
@@ -47,14 +53,16 @@ public class AzureInstanceViewTest {
             status2.setCode("PowerState/running");
             statuses.add(status2);
         }
+        List<AzureStatus> readyStatuses = new ArrayList<>();
+        AzureStatus readyStatus = new AzureStatus();
+        readyStatuses.add(readyStatus);
+        VmAgent vmAgent = new VmAgent();
+        vmAgent.setStatuses(readyStatuses);
+        instanceView.setVmAgent(vmAgent);
         if (ready) {
-            List<AzureStatus> readyStatuses = new ArrayList<>();
-            AzureStatus readyStatus = new AzureStatus();
-            readyStatuses.add(readyStatus);
             readyStatus.setCode("ProvisioningState/succeeded");
-            VmAgent vmAgent = new VmAgent();
-            vmAgent.setStatuses(readyStatuses);
-            instanceView.setVmAgent(vmAgent);
+        } else {
+            readyStatus.setCode("ProvisioningState/failed");
         }
 
         instanceView.setStatuses(statuses);

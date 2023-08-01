@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
+import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,12 +49,15 @@ public class IpInterfaceService {
             return optional.map(mapper::modelToDTO);
     }
 
-    public void createFromAzureScanResult(String tenantId, Node node, AzureScanNetworkInterfaceItem networkInterfaceItem) {
+    public void createFromAzureScanResult(String tenantId, Node node, AzureInterface azureInterface,
+                                                 AzureScanNetworkInterfaceItem networkInterfaceItem) {
+        Objects.requireNonNull(azureInterface);
         IpInterface ipInterface = new IpInterface();
         ipInterface.setNode(node);
         ipInterface.setTenantId(tenantId);
-        ipInterface.setSnmpPrimary(false);
+        ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
         ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
+        ipInterface.setAzureInterface(azureInterface);
         modelRepo.save(ipInterface);
     }
 

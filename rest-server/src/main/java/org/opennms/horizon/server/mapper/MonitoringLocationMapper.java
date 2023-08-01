@@ -47,10 +47,6 @@ public interface MonitoringLocationMapper {
     @Mapping(target = "geoLocation.longitude", source = "longitude")
     MonitoringLocationDTO locationUpdateToLocationProto(MonitoringLocationUpdate location);
 
-    @Mapping(target = "geoLocation.latitude", source = "latitude")
-    @Mapping(target = "geoLocation.longitude", source = "longitude")
-    MonitoringLocationDTO locationToLocationProto(MonitoringLocation location);
-
     @Mapping(target = "latitude", source = "geoLocation.latitude")
     @Mapping(target = "longitude", source = "geoLocation.longitude")
     MonitoringLocation protoToLocation(MonitoringLocationDTO location);

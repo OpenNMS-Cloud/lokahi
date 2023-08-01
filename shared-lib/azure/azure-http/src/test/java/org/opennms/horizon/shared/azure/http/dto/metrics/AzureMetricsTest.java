@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -14,9 +13,8 @@ public class AzureMetricsTest {
     @Test
     public void testCollect() {
         AzureMetrics metrics = getMetrics();
-        Map<String, Double> collectedData = new HashMap<>();
 
-        metrics.collect(collectedData);
+        Map<String, Double> collectedData = metrics.collect();
 
         assertEquals(1, collectedData.size());
         Map.Entry<String, Double> next = collectedData.entrySet().iterator().next();

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -30,6 +30,7 @@ package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
 import org.opennms.azure.contract.AzureCollectorRequest;
+import org.opennms.azure.contract.AzureCollectorResourcesRequest;
 import org.opennms.horizon.azure.api.AzureResponseMetric;
 import org.opennms.horizon.azure.api.AzureResultMetric;
 import org.opennms.horizon.azure.api.AzureValueMetric;
@@ -47,10 +48,15 @@ import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class AzureCollector implements ServiceCollector {
     private final Logger log = LoggerFactory.getLogger(AzureCollector.class);
@@ -58,18 +64,32 @@ public class AzureCollector implements ServiceCollector {
     private static final String INTERVAL_PARAM = "interval";
     private static final String METRIC_NAMES_PARAM = "metricnames";
 
+    private static final String TIMESPAN_PARAM = "timespan";
 
-    //   Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
+    // Reference inventory: TaskUtils.DEFAULT_SCHEDULE
+    private static final int TIMESPAN_SECOND = 60;
+
+    // Supported intervals: PT1M,PT5M,PT15M,PT30M,PT1H,PT6H,PT12H,P1D
     private static final String METRIC_INTERVAL = "PT1M";
 
-    private static final Map<String, String> AZURE_METRIC_TO_ALIAS = new HashMap<>();
+    // Azure Metric Key - Metrics Processor Key
+    private static final Map<String, String> AZURE_NODE_METRIC_TO_ALIAS = Map.of(
+        "Network In Total", "network_in_total_bytes",
+        "Network Out Total", "network_out_total_bytes"
+    );
 
-    static {
-        // Azure Metric Key - Metrics Processor Key
-        AZURE_METRIC_TO_ALIAS.put("Network In Total", "network_in_total_bytes");
-        AZURE_METRIC_TO_ALIAS.put("Network Out Total", "network_out_total_bytes");
-    }
+    // Valid metrics: BytesSentRate,BytesReceivedRate,PacketsSentRate,PacketsReceivedRate
+    private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = Map.of(
+        "BytesReceivedRate", "bytes_received_rate",
+        "BytesSentRate", "bytes_sent_rate"
+    );
 
+    // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
+    private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = Map.of(
+        "ByteCount", "bytes_received"
+    );
+
+    private static final String AZURE_NODE_PREFIX = "azure-node-";
     private static final String METRIC_DELIMITER = ",";
 
     private final AzureHttpClient client;
@@ -97,12 +117,23 @@ public class AzureCollector implements ServiceCollector {
 
             if (instanceView.isUp()) {
 
-                Map<String, Double> collectedData = new HashMap<>();
+                // host metrics
+                List<AzureResultMetric> metricResults = collectNodeMetrics(request, token).entrySet().stream()
+                    .map(nodeMetric -> mapNodeResult(request, nodeMetric))
+                    .collect(Collectors.toCollection(ArrayList::new));
 
-                collect(request, token, collectedData);
+                // interface metrics
+                for (var resources : request.getCollectorResourcesList()) {
+                    metricResults.addAll(collectInterfaceMetrics(request, resources, token)
+                        .entrySet().stream().map(interfaceMetric ->
+                            mapInterfaceResult(request, resources.getResource(), resources.getType(), interfaceMetric))
+                        .toList());
+                }
+
+                log.debug("AZURE COLLECTOR metricResults LIST: {}", metricResults);
 
                 AzureResponseMetric results = AzureResponseMetric.newBuilder()
-                    .addAllResults(mapCollectedDataToResults(request, collectedData))
+                    .addAllResults(metricResults)
                     .build();
 
                 future.complete(ServiceCollectorResponseImpl.builder()
@@ -111,7 +142,7 @@ public class AzureCollector implements ServiceCollector {
                     .monitorType(MonitorType.AZURE)
                     .status(true)
                     .timeStamp(System.currentTimeMillis())
-                    .ipAddress("azure-node-" + collectionRequest.getNodeId())
+                    .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                     .build());
 
             } else {
@@ -119,7 +150,8 @@ public class AzureCollector implements ServiceCollector {
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(false)
-                    .ipAddress("azure-node-" + collectionRequest.getNodeId())
+                    .timeStamp(System.currentTimeMillis())
+                    .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                     .build());
             }
         } catch (Exception e) {
@@ -128,54 +160,97 @@ public class AzureCollector implements ServiceCollector {
                 .nodeId(collectionRequest.getNodeId())
                 .monitorType(MonitorType.AZURE)
                 .status(false)
-                .ipAddress("azure-node-" + collectionRequest.getNodeId())
+                .timeStamp(System.currentTimeMillis())
+                .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                 .build());
         }
         return future;
     }
 
-    private void collect(AzureCollectorRequest request,
-                         AzureOAuthToken token,
-                         Map<String, Double> collectedData) throws AzureHttpException {
-
-        String[] metricNames = AZURE_METRIC_TO_ALIAS.keySet().toArray(new String[0]);
-
-        Map<String, String> params = new HashMap<>();
-        params.put(INTERVAL_PARAM, METRIC_INTERVAL);
-        params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
+    private Map<String, Double> collectNodeMetrics(AzureCollectorRequest request, AzureOAuthToken token) throws AzureHttpException {
+        Map<String, String> params = getMetricsParams(AZURE_NODE_METRIC_TO_ALIAS.keySet());
 
         AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
             request.getResourceGroup(), request.getResource(), params, request.getTimeoutMs(), request.getRetries());
 
-        metrics.collect(collectedData);
+        return metrics.collect();
     }
 
-    private List<AzureResultMetric> mapCollectedDataToResults(AzureCollectorRequest request,
-                                                              Map<String, Double> collectedData) {
-        return collectedData.entrySet().stream()
-            .map(collectedMetric -> mapMetric(request, collectedMetric))
-            .toList();
+    private Map<String, Double> collectInterfaceMetrics(AzureCollectorRequest request,
+                                                        AzureCollectorResourcesRequest resource,
+                                                        AzureOAuthToken token) throws AzureHttpException {
+        try {
+            var type = AzureHttpClient.ResourcesType.fromMetricName(resource.getType());
+            Map<String, String> params =
+                getMetricsParams(AzureHttpClient.ResourcesType.NETWORK_INTERFACES == type ?
+                    AZURE_INTERFACE_METRIC_TO_ALIAS.keySet() : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());
+
+            AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),
+                request.getResourceGroup(), resource.getType() + "/" + resource.getResource(), params,
+                request.getTimeoutMs(), request.getRetries());
+
+            return metrics.collect();
+        } catch (IllegalArgumentException ex) {
+            throw new AzureHttpException("Unknown type: " + resource.getType());
+        }
     }
 
-    private AzureResultMetric mapMetric(AzureCollectorRequest request,
-                                        Map.Entry<String, Double> collectedMetric) {
+    private Map<String, String> getMetricsParams(Collection<String> metricNames) {
+        Map<String, String> params = new HashMap<>();
+        params.put(INTERVAL_PARAM, METRIC_INTERVAL);
+        // limit cost, start time must be at least 1 min before
+        Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS).plusSeconds(-60L);
+        String toTime = now.toString();
+        // at least 2 min range
+        params.put(TIMESPAN_PARAM, now.plusSeconds(-TIMESPAN_SECOND - 60L).toString() + "/" + toTime);
+        params.put(METRIC_NAMES_PARAM, String.join(METRIC_DELIMITER, metricNames));
+        return params;
+    }
 
+    private AzureResultMetric mapNodeResult(AzureCollectorRequest request, Map.Entry<String, Double> metricData) {
         return AzureResultMetric.newBuilder()
             .setResourceGroup(request.getResourceGroup())
             .setResourceName(request.getResource())
-            .setAlias(getAlias(collectedMetric.getKey()))
+            .setType("node")
+            .setAlias(getNodeMetricAlias(metricData.getKey()))
             .setValue(
                 AzureValueMetric.newBuilder()
                     .setType(AzureValueType.INT64)
-                    .setUint64(collectedMetric.getValue().longValue())
+                    .setUint64(metricData.getValue().longValue())
                     .build())
             .build();
     }
 
-    private String getAlias(String metricName) {
-        if (AZURE_METRIC_TO_ALIAS.containsKey(metricName)) {
-            return AZURE_METRIC_TO_ALIAS.get(metricName);
+    private AzureResultMetric mapInterfaceResult(AzureCollectorRequest request,
+                                                 String resourceName, String type,
+                                                 Map.Entry<String, Double> metricData) {
+        return AzureResultMetric.newBuilder()
+            .setResourceGroup(request.getResourceGroup())
+            .setResourceName(resourceName)
+            .setType(type)
+            .setAlias(getInterfaceMetricAlias(metricData.getKey()))
+            .setValue(
+                AzureValueMetric.newBuilder()
+                    .setType(AzureValueType.INT64)
+                    .setUint64(metricData.getValue().longValue())
+                    .build())
+            .build();
+    }
+
+    private String getNodeMetricAlias(String metricName) {
+        if (AZURE_NODE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_NODE_METRIC_TO_ALIAS.get(metricName);
         }
-        throw new IllegalArgumentException("Failed to find alias - shouldn't be reached");
+        throw new IllegalArgumentException("Failed to find alias '" + metricName + "' - shouldn't be reached");
+    }
+
+    private String getInterfaceMetricAlias(String metricName) {
+        if (AZURE_INTERFACE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_INTERFACE_METRIC_TO_ALIAS.get(metricName);
+        }
+        if (AZURE_IPINTERFACE_METRIC_TO_ALIAS.containsKey(metricName)) {
+            return AZURE_IPINTERFACE_METRIC_TO_ALIAS.get(metricName);
+        }
+        throw new IllegalArgumentException("Failed to find alias '" + metricName + "' - shouldn't be reached");
     }
 }

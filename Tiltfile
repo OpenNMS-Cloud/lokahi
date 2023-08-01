@@ -339,7 +339,7 @@ jib_project(
     'opennms/lokahi-notification',
     'notifications',
     'opennms-notifications',
-    port_forwards=['15065:6565', '15050:5005'],
+    port_forwards=['15065:6565', '15050:5005', '15080:8080'],
     resource_deps=['shared-lib'],
 )
 

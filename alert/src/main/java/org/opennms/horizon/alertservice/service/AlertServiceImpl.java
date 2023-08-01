@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -58,10 +59,10 @@ public class AlertServiceImpl implements AlertService {
     private final NodeMapper nodeMapper;
 
     @Override
-    public Optional<Alert> reduceEvent(Event e) {
-        Optional<Alert> alert = alertEventProcessor.process(e);
-        alert.ifPresent(value -> alertListenerRegistry.forEachListener((l) -> l.handleNewOrUpdatedAlert(value)));
-        return alert;
+    public List<Alert> reduceEvent(Event e) {
+        List<Alert> alerts = alertEventProcessor.process(e);
+        alerts.forEach(value -> alertListenerRegistry.forEachListener((l) -> l.handleNewOrUpdatedAlert(value)));
+        return alerts;
     }
 
     @Override

@@ -40,20 +40,23 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.node.scan.contract.NodeInfoResult;
 
 
-@Mapper(componentModel = "spring", uses = {EmptyStringMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class},
+@Mapper(componentModel = "spring", uses = {EmptyStringMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class,
+    AzureInterfaceMapper.class},
     // Needed for grpc proto mapping
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface NodeMapper extends DateTimeMapper {
 
     @Mappings({
         @Mapping(source = "ipInterfacesList", target = "ipInterfaces"),
-        @Mapping(source = "snmpInterfacesList", target = "snmpInterfaces")
+        @Mapping(source = "snmpInterfacesList", target = "snmpInterfaces"),
+        @Mapping(source = "azureInterfacesList", target = "azureInterfaces")
     })
     Node dtoToModel(NodeDTO dto);
 
     @Mappings({
         @Mapping(source = "ipInterfaces", target = "ipInterfacesList"),
         @Mapping(source = "snmpInterfaces", target = "snmpInterfacesList"),
+        @Mapping(source = "azureInterfaces", target = "azureInterfacesList")
     })
     @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     NodeDTO modelToDTO(Node model);

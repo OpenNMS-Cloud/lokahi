@@ -42,6 +42,7 @@ management:
     web:
       exposure:
         include: "*"
+  endpoint:
     health:
       probes:
         enabled: true

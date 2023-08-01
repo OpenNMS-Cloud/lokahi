@@ -15,7 +15,12 @@
         <thead>
           <tr>
             <th scope="col">IP Address</th>
+            <th scope="col" v-if="nodeStatusStore.isAzure">Private IP ID</th>
+            <th scope="col" v-if="nodeStatusStore.isAzure">Interface Name</th>
+            <th scope="col" v-if="nodeStatusStore.isAzure">Public IP</th>
+            <th scope="col" v-if="nodeStatusStore.isAzure">Public IP ID</th>
             <th scope="col" v-if="nodeStatusStore.isAzure">Graphs</th>
+            <th scope="col" v-if="nodeStatusStore.isAzure">Location</th>
             <th scope="col" v-if="!nodeStatusStore.isAzure">IP Hostname</th>
             <th scope="col" v-if="!nodeStatusStore.isAzure">Netmask</th>
             <th scope="col" v-if="!nodeStatusStore.isAzure">Primary</th>
@@ -30,13 +35,23 @@
             :key="ipInterface.id"
           >
             <td>{{ ipInterface.ipAddress }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.privateIpId }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.interfaceName }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress }}</td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpId }}</td>
             <td v-if="nodeStatusStore.isAzure">
-              <FeatherButton
-                text
-                @click="metricsModal.openAzureMetrics(ipInterface.ipAddress)"
-                >Traffic
-              </FeatherButton>
+              <FeatherTooltip
+                title="Traffic"
+              >
+                <FeatherButton v-if="nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress != ''"
+                  icon="Traffic"
+                  text
+                  @click="metricsModal.openAzureMetrics(nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId))"
+                  ><FeatherIcon :icon="icons.Traffic" />
+                </FeatherButton>
+              </FeatherTooltip>
             </td>
+            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.location }}</td>
             <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.hostname }}</td>
             <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.netmask }}</td>
             <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.snmpPrimary }}</td>
@@ -50,8 +65,13 @@
 
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import Traffic from '@featherds/icon/action/Workflow'
 const nodeStatusStore = useNodeStatusStore()
 const metricsModal = ref()
+
+const icons = markRaw({
+  Traffic
+})
 </script>
 
 <style lang="scss" scoped>

@@ -152,7 +152,7 @@ public class NodeService {
     private MonitoringLocation findMonitoringLocation(NodeCreateDTO request, String tenantId) throws LocationNotFoundException {
         Optional<MonitoringLocation> found = monitoringLocationRepository.findByIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
 
-        return found.orElseThrow(() -> new LocationNotFoundException("Location not found " + request.getLocationId()));
+        return found.orElseThrow(() -> new LocationNotFoundException("Location not found with ID " + request.getLocationId()));
     }
 
     private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation,

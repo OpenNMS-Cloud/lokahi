@@ -1,11 +1,12 @@
 package org.opennms.horizon.alertservice.service;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.Alert;
@@ -21,12 +22,13 @@ import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.events.proto.Event;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AlertEventProcessorTest {
+public class AlertEventProcessorTest {
 
     @InjectMocks
     AlertEventProcessor processor;
@@ -41,6 +43,9 @@ class AlertEventProcessorTest {
     AlertConditionRepository alertConditionRepository;
 
     @Mock
+    ReductionKeyService reductionKeyService;
+
+    @Mock
     MeterRegistry registry;
 
     @Mock
@@ -49,8 +54,18 @@ class AlertEventProcessorTest {
     @Mock
     TenantLookup tenantLookup;
 
+    @Mock
+    Counter counter;
+
+    @BeforeEach
+    void setUp() {
+        when(registry.counter(any())).thenReturn(counter);
+
+        processor.init();
+    }
+
     @Test
-    void generateAlert() {
+    public void generateAlert() {
         Event event = Event.newBuilder()
             .setTenantId("tenantA")
             .setUei("uei")
@@ -76,13 +91,17 @@ class AlertEventProcessorTest {
         var tag = new Tag();
         tag.getPolicies().add(monitorPolicy);
 
-        Mockito.when(alertDefinitionRepository.findFirstByTenantIdAndUei(event.getTenantId(), event.getUei()))
-            .thenReturn(Optional.of(alertDefinition));
-        Mockito.when(tagRepository.findByTenantIdAndNodeId(Mockito.anyString(), Mockito.anyLong())).thenReturn(List.of(tag));
+        when(alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei()))
+            .thenReturn(List.of(alertDefinition));
 
-        Alert alert = processor.addOrReduceEventAsAlert(event);
-        assertEquals("tenantA", alert.getTenantId());
-        assertEquals(alertCondition.getSeverity(), alert.getSeverity());
-        assertEquals(List.of(monitorPolicy.getId()), alert.getMonitoringPolicyId());
+        when(tagRepository.findByTenantIdAndNodeId(anyString(), anyLong())).thenReturn(List.of(tag));
+
+        List<Alert> alerts = processor.addOrReduceEventAsAlert(event);
+
+        assertThat(alerts).hasSize(1);
+        assertThat(alerts.get(0))
+            .returns("tenantA", Alert::getTenantId)
+            .returns(alertCondition.getSeverity(), Alert::getSeverity)
+            .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyId);
     }
 }

@@ -39,6 +39,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +72,13 @@ public class IpInterface {
 
     @Column(name = "snmp_interface_id", insertable = false, updatable = false)
     private Long snmpInterfaceId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name ="azure_interface_id", referencedColumnName = "id")
+    private AzureInterface azureInterface;
+
+    @Column(name = "azure_interface_id", insertable = false, updatable = false)
+    private Long azureInterfaceId;
 
     @Column(name = "node_id", insertable = false, updatable = false)
     private long nodeId;

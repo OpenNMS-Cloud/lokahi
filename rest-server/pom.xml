@@ -132,6 +132,10 @@
             <artifactId>flows-grpc</artifactId>
             <version>${flows.gateway.grpc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
 
 		<!-- Test -->
 		<dependency>

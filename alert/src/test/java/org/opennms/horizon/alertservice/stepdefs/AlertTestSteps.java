@@ -32,7 +32,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.JsonFormat;
-import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
@@ -88,16 +87,6 @@ public class AlertTestSteps {
     private JsonPath parsedJsonResponse;
     private List<Alert> alertsFromLastResponse;
     private Alert firstAlertFromLastResponse;
-
-    @After
-    public void cleanData() {
-        log.info("clean alert data");
-        if (alertsFromLastResponse != null) {
-            alertsFromLastResponse.forEach(alert -> clientUtils.getAlertServiceStub().deleteAlert(
-                AlertRequest.newBuilder().addAlertId(alert.getDatabaseId()).build())
-            );
-        }
-    }
 
     //========================================
     // Gherkin Rules

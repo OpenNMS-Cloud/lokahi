@@ -115,7 +115,6 @@ class GraphQLAzureActiveDiscoveryServiceTest {
             "        id, " +
             "        locationId, " +
             "        name, " +
-            "        tenantId, " +
             "        clientId, " +
             "        subscriptionId, " +
             "        directoryId, " +
@@ -134,7 +133,6 @@ class GraphQLAzureActiveDiscoveryServiceTest {
             .jsonPath("$.data.createAzureActiveDiscovery.id").isEqualTo(azureActiveDiscoveryDTO.getId())
             .jsonPath("$.data.createAzureActiveDiscovery.locationId").isEqualTo(azureActiveDiscoveryDTO.getLocationId())
             .jsonPath("$.data.createAzureActiveDiscovery.name").isEqualTo(azureActiveDiscoveryDTO.getName())
-            .jsonPath("$.data.createAzureActiveDiscovery.tenantId").isEqualTo(azureActiveDiscoveryDTO.getTenantId())
             .jsonPath("$.data.createAzureActiveDiscovery.clientId").isEqualTo(azureActiveDiscoveryDTO.getClientId())
             .jsonPath("$.data.createAzureActiveDiscovery.subscriptionId").isEqualTo(azureActiveDiscoveryDTO.getSubscriptionId())
             .jsonPath("$.data.createAzureActiveDiscovery.directoryId").isEqualTo(azureActiveDiscoveryDTO.getDirectoryId())

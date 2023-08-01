@@ -35,7 +35,6 @@ import lombok.Setter;
 @Setter
 public class SnmpInterface {
     private long id;
-    private String tenantId;
     private long nodeId;
     private String ipAddress;
     private int ifIndex;

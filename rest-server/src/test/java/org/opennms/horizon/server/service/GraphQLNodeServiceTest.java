@@ -147,7 +147,6 @@ public class GraphQLNodeServiceTest {
         String request = "query {\n" +
             "    findAllNodesByNodeLabelSearch(labelSearchTerm: \"test-search-term\") {\n" +
             "       id, " +
-            "       tenantId, " +
             "       nodeLabel, " +
             "       createTime " +
             "    } " +
@@ -173,7 +172,6 @@ public class GraphQLNodeServiceTest {
         String request = "query { " +
             "    findAllNodesByTags(tags: [\"tag1\"]) { " +
             "       id, " +
-            "       tenantId, " +
             "       nodeLabel, " +
             "       createTime " +
             "    } " +

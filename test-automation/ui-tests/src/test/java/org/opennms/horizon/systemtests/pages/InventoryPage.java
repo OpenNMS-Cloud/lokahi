@@ -34,6 +34,8 @@ import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Selenide.$;
@@ -45,42 +47,64 @@ public class InventoryPage {
         DOWN
     }
 
-    private static final SelenideElement monitoredNodesTab = $$("[data-ref-id='feather-tab']").get(0);
+    private static final SelenideElement firstSnmpInterfaceInTable = $(By.xpath("//table[@aria-label='SNMP Interfaces Table']/tbody/tr[1]"));
+
     private static final ElementsCollection nodesList = $$("[class='cards']");
 
-    public static void clickOnMonitoredNodesTab() {
-        monitoredNodesTab.shouldBe(Condition.visible, enabled).click();
-    }
 
     public static boolean checkIfMonitoredNodeExist(String nodeSysName) {
         return nodesList.findBy(Condition.text(nodeSysName)).isDisplayed();
     }
 
-    public static void verifyNodeStatus(Status status, String nodename) {
+    public static void verifyNodeStatus(Status status, String nodeManagementIp) {
+        LeftPanelPage.clickOnPanelSection("inventory");
+
         // The inventory page doesn't refresh on its own. Need to periodically check and force a refresh
-        String itemStatusSearch = "//ul[@class='cards']/li[//li[@data-test='management-ip']/span/text()='" + nodename + "']//div[@title='Status']//span[text()='" + status + "']";
+        String itemStatusSearch = "//ul[@class='cards']/li[.//li[@data-test='management-ip']/span/text()='" + nodeManagementIp + "']//div[@title='Status']//span[text()='" + status + "']";
         SelenideElement statusCheck = $(By.xpath(itemStatusSearch));
         int iterations = 20;
         while (!statusCheck.exists() && iterations > 0) {
             --iterations;
-            Selenide.refresh();
-            LeftPanelPage.clickOnPanelSection("inventory");
-
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 // Ignore and busy-loop it
             }
+
+            Selenide.refresh();
+
+            LeftPanelPage.clickOnPanelSection("inventory");
         }
         statusCheck.should(exist);
     }
 
-    public static void deleteNode(String node) {
-        String deleteNodeButtonSearch = "//ul[@class='cards']/li[//li[@data-test='management-ip']/span/text()='" + node + "']//li[@data-test='delete']";
+    public static void verifyNodeDoesNotExist(String nodeManagementIp) {
+        LeftPanelPage.clickOnPanelSection("inventory");
+
+        // The inventory page doesn't refresh on its own. Need to periodically check and force a refresh
+        String itemStatusSearch = "//ul[@class='cards']/li[.//li[@data-test='management-ip']/span/text()='" + nodeManagementIp + "']";
+
+        SelenideElement nodeCheck = $(By.xpath(itemStatusSearch));
+        nodeCheck.should(Condition.not(exist));
+    }
+
+    public static void deleteNode(String nodeManagementIp) {
+        LeftPanelPage.clickOnPanelSection("inventory");
+
+        String deleteNodeButtonSearch = "//ul[@class='cards']/li[.//li[@data-test='management-ip']/span/text()='" + nodeManagementIp + "']//li[@data-test='delete']";
         $(By.xpath(deleteNodeButtonSearch)).should(exist).shouldBe(enabled).click();
 
         String deleteConfirm = "//button[@data-testid='save-btn']";
         $(By.xpath(deleteConfirm)).should(exist).shouldBe(enabled).click();
+    }
+
+    public static void verifyNodeContainsSnmpInterfaces(String nodeIp) {
+        LeftPanelPage.clickOnPanelSection("inventory");
+
+        String nodeEventsAlarmsButton = "//ul[@class='cards']/li[.//li[@data-test='management-ip']/span/text()='" + nodeIp + "']//li[@data-test='warning']";
+        $(By.xpath(nodeEventsAlarmsButton)).should(exist).shouldBe(enabled).click();
+
+        firstSnmpInterfaceInTable.should(exist);
     }
 
 }

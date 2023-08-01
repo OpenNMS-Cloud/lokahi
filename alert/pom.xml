@@ -182,6 +182,11 @@
             <artifactId>hypersistence-utils-hibernate-60</artifactId>
             <version>${io.hypersistence.verion}</version>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
         <!-- test -->
 
         <dependency>

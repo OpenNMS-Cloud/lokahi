@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
+import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
@@ -101,6 +102,8 @@ public class IpInterfaceServiceTest {
         // Setup Test Data and Interactions
         //
         var testNode = new Node();
+        var azureInterface = new AzureInterface();
+        azureInterface.setId(1L);
         var testAzureScanNetworkInterfaceItem =
             AzureScanNetworkInterfaceItem.newBuilder()
                 .setIpAddress("11.11.11.11")
@@ -109,7 +112,7 @@ public class IpInterfaceServiceTest {
         //
         // Execute
         //
-        target.createFromAzureScanResult(TEST_TENANT_ID, testNode, testAzureScanNetworkInterfaceItem);
+        target.createFromAzureScanResult(TEST_TENANT_ID, testNode, azureInterface, testAzureScanNetworkInterfaceItem);
 
         //
         // Verify the Results

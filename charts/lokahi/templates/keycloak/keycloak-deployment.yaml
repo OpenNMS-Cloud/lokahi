@@ -17,6 +17,9 @@ spec:
         app: {{ .Values.Keycloak.ServiceName }}
       annotations:
         kubectl.kubernetes.io/default-container: "keycloak"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/auth/metrics"
     spec:
       {{- if .Values.NodeRestrictions.Enabled }}
       nodeSelector:

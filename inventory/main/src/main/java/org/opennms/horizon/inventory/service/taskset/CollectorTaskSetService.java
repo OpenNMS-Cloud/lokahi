@@ -31,11 +31,13 @@ package org.opennms.horizon.inventory.service.taskset;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.azure.contract.AzureCollectorRequest;
+import org.opennms.azure.contract.AzureCollectorResourcesRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
@@ -48,8 +50,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
 import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForIpTask;
@@ -117,7 +121,20 @@ public class CollectorTaskSetService {
         return builder.build();
     }
 
+
     public TaskDefinition addAzureCollectorTask(AzureActiveDiscovery discovery, AzureScanItem scanItem, long nodeId) {
+        // uniq interface names
+        Set<String> targetInterfaceNames = new HashSet<>();
+        Set<String> publicIpNames = new HashSet<>();
+        for (final var interfaceItem : scanItem.getNetworkInterfaceItemsList()) {
+            // Azure only provide traffic data for IP with public IP
+            if(!interfaceItem.hasPublicIpAddress()){
+                continue;
+            }
+            publicIpNames.add(interfaceItem.getPublicIpAddress().getName());
+            targetInterfaceNames.add(interfaceItem.getInterfaceName());
+        }
+
         Any configuration =
             Any.pack(AzureCollectorRequest.newBuilder()
                 .setResource(scanItem.getName())
@@ -128,6 +145,16 @@ public class CollectorTaskSetService {
                 .setDirectoryId(discovery.getDirectoryId())
                 .setTimeoutMs(TaskUtils.AZURE_DEFAULT_TIMEOUT_MS)
                 .setRetries(TaskUtils.AZURE_DEFAULT_RETRIES)
+                .addAllCollectorResources(targetInterfaceNames.stream().map(name ->
+                    AzureCollectorResourcesRequest.newBuilder()
+                        .setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName())
+                        .setResource(name)
+                        .build()).toList())
+                .addAllCollectorResources(publicIpNames.stream().map(name ->
+                    AzureCollectorResourcesRequest.newBuilder()
+                        .setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName())
+                        .setResource(name)
+                        .build()).toList())
                 .build());
 
         String name = String.join("-", "azure", "collector", scanItem.getId());

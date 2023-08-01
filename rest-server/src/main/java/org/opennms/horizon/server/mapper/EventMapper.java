@@ -37,5 +37,7 @@ import org.opennms.horizon.server.model.events.Event;
 public interface EventMapper {
 
     @Mapping(source = "parametersList", target = "eventParams")
+    @Mapping(source = "producedTimeMs", target = "producedTime")
+    @Mapping(source = "databaseId", target = "id")
     Event protoToEvent(org.opennms.horizon.events.proto.Event eventProto);
 }

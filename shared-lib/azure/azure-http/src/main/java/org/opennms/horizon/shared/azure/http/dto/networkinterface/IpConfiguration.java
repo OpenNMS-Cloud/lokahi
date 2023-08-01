@@ -7,10 +7,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class IpConfiguration {
-    @SerializedName("id")
+public class IpConfiguration extends AzureBaseModel {
+    @SerializedName("type")
     @Expose
-    private String id;
+    private String type;
     @SerializedName("properties")
     @Expose
     private IpConfigurationProps properties;

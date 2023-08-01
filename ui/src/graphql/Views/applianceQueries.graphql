@@ -2,7 +2,6 @@ fragment NodesTableParts on Query {
   findAllNodes {
     id
     nodeLabel
-    tenantId
     createTime
     monitoringLocationId
     ipInterfaces {

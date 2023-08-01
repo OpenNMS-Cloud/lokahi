@@ -35,7 +35,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Alert {
-    private String tenantId;
     private long databaseId;
     private String uei;
     private String reductionKey;

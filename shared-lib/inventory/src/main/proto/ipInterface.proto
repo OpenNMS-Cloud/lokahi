@@ -43,4 +43,5 @@ message IpInterfaceDTO {
   string netmask = 7;
   int64 snmpInterfaceId = 8;
   int64 if_index = 9;
+  int64 azureInterfaceId = 10;
 }

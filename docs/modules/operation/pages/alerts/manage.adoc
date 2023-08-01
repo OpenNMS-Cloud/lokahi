@@ -2,48 +2,51 @@
 = Manage Alerts
 :description: Learn how to search, filter, acknowledge, and resolve alerts, and how to test nodes affected by alerts.
 
-You can manage your network's alerts on the *Alerts Table* page.
+You can manage your network's alerts on the *Alerts* page.
 (Select **Alerts** in the left navigation menu.)
+The page displays alerts, categorized by xref:reference:severities.adoc[severity], and a list of alerts filtered by time and type.
 
 == Search
 
-You can search for specific text in alerts.
+You can search alerts by name or IP address.
 To do so, type your search term in the *Search Alerts* box.
+Note that the search works only with the full name or IP address associated with the alert.
+It will not search for partial terms.
+The search returns results only for alerts that occurred during the selected time range.
+For example, if an alert occurred 7 days earlier, but you search for it in the *Today* tab, it will not appear.
 
 == Filter
 
-You can filter alerts by severity and by time span.
+You can filter alerts by severity and time range.
 
-To filter alerts by severity, select a severity (for example, *Major*) from the list at the top of the page.
+To filter alerts by severity, at the top of the screen click the plus sign beside the severity (for example, *Major*) that has alerts.
 The associated alerts are displayed.
 
-To filter alerts by time span, select an option from the time filter settings (for example, *7D*).
+To filter alerts by time range, select an option from the time filter settings (for example, *7D*).
 The alerts that occurred over the specified time period are displayed.
 By default, the page displays alerts that occurred within the last 24 hours.
 
 === Clear filters
 
-To clear any filters on your alerts, click *Clear All Filters*.
+To clear filters on your alerts click *Clear All Filters*.
 The alerts list displays all alerts.
+You can also click the `X` beside any alert severities at the top of the screen that you filtered on.
 
-== Acknowledge an alert
+== View alert type definitions
 
-To acknowledge an alert, find the alert that you want to acknowledge and select the *Acknowledge* symbol beside its creation time.
+To view a description of the alert type (for example, SNMP Cold Start), click the down arrow symbol (`ˇ`) to the right of the alert.
 
-An alert is acknowledged when the symbol is green with a white check.
-An alert is unacknowledged when the symbol is white with a green outline and check.
+== Acknowledge or clear an alert
 
-// Resolve an alert topic
+Acknowledging an alert lets others know that someone has seen it.
+Clearing an alert marks it as resolved.
 
-//<steps to resolve an alert>
+To acknowledge or clear an alert, follow these steps:
 
-== Test affected node
+. Choose *Alerts* in the left navigation menu.
+. Filter to locate the alert you want to acknowledge or clear.
+. Place a check in the checkbox beside each alert you want to acknowledge or clear.
+. Beside the *Select All* field, click *Acknowledge* or *Clear*.
 
-Follow these steps to test a node affected by an alert:
-
-. Find the alert whose affected node you want to test.
-. Click the *Expand* symbol to show the alert's details.
-. Select *Run Test*.
-The node's status (*Degraded*, *Success*, and so on) is displayed.
-
-// <these instructions will be updated in the future, when the process is closer to finalized>
+An acknowledged alert has a green check mark beside its date.
+An unacknowledged alert has a grey checkmark.

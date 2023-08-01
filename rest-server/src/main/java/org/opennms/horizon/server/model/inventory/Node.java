@@ -37,7 +37,6 @@ import java.util.List;
 @Setter
 public class Node {
     private long id;
-    private String tenantId;
     private String nodeLabel;
     private String scanType;
     private String monitoredState;
@@ -45,6 +44,7 @@ public class Node {
     private long monitoringLocationId;
     private List<IpInterface> ipInterfaces;
     private List<SnmpInterface> snmpInterfaces;
+    private List<AzureInterface> azureInterfaces;
     private String objectId;
     private String systemName;
     private String systemDescr;

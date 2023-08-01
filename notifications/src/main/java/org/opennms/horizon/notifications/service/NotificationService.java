@@ -62,10 +62,22 @@ public class NotificationService {
 
     @WithTenant(tenantIdArg = 0, tenantIdArgInternalMethod = "getTenantId", tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
     public void postNotification(Alert alert) {
+        if (alert.getMonitoringPolicyIdList().isEmpty()) {
+            log.info("Alert has no associated monitoring policies, dropping alert[id: {}, tenant: {}]",
+                alert.getDatabaseId(), alert.getTenantId());
+            return;
+        }
+
         List<MonitoringPolicy> dbPolicies = monitoringPolicyRepository.findByTenantIdAndIdIn(
             alert.getTenantId(),
             alert.getMonitoringPolicyIdList()
         );
+
+        if (dbPolicies.isEmpty()) {
+            log.warn("Associated policies {} not found, dropping alert[id: {}, tenant: {}]",
+                alert.getMonitoringPolicyIdList(), alert.getDatabaseId(), alert.getTenantId());
+            return;
+        }
 
         boolean notifyPagerDuty = false;
         boolean notifyEmail = false;
@@ -80,30 +92,34 @@ public class NotificationService {
         }
 
         if (notifyPagerDuty) {
-            // Wrap in a try/catch, we don't want a failure to notify via PagerDuty to prevent us from sending an
-            // email notification, etc.
-            try {
-                pagerDutyAPI.postNotification(alert);
-            } catch (NotificationException e) {
-                log.warn("Unable to send alert to PagerDuty: {}", alert, e);
-            }
+            postPagerDutyNotification(alert);
         }
         if (notifyEmail) {
-            try {
-                for (String emailAddress: keyCloakAPI.getTenantEmailAddresses(alert.getTenantId())) {
-                    emailAPI.sendEmail(
-                        emailAddress,
-                        String.format("%s severity alert", StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName())),
-                        velocity.populateTemplate(emailAddress, alert)
-                    );
-                }
-            }catch (NotificationException e) {
-                log.warn("Unable to send alert to Email: {}", alert, e);
-            }
+            postEmailNotification(alert);
         }
+    }
 
-        if (dbPolicies.isEmpty()) {
-            log.debug("No monitoring policy found, dropping alert: {}", alert);
+    private void postPagerDutyNotification(Alert alert) {
+        try {
+            pagerDutyAPI.postNotification(alert);
+        } catch (NotificationException e) {
+            log.warn("Unable to send alert[id: {}, tenant: {}] to PagerDuty:",
+                alert.getDatabaseId(), alert.getTenantId(), e);
+        }
+    }
+
+    private void postEmailNotification(Alert alert) {
+        try {
+            for (String emailAddress : keyCloakAPI.getTenantEmailAddresses(alert.getTenantId())) {
+                String subject = String.format("%s severity alert",
+                    StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName()));
+                String htmlBody = velocity.populateTemplate(emailAddress, alert);
+
+                emailAPI.sendEmail(emailAddress, subject, htmlBody);
+            }
+        } catch (NotificationException e) {
+            log.warn("Unable to send alert[id: {}, tenant: {}] to Email:",
+                alert.getDatabaseId(), alert.getTenantId(), e);
         }
     }
 

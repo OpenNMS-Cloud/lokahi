@@ -35,5 +35,4 @@ import lombok.Setter;
 @Setter
 public abstract class BaseModel {
     private Long id;
-    private String tenantId;
 }

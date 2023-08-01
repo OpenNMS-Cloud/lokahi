@@ -50,6 +50,10 @@ horizon:
     client-id: admin-cli
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
   endpoint:
     health:
       probes:

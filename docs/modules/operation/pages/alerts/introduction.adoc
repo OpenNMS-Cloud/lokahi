@@ -8,8 +8,8 @@
 Alerts represent potential and actual problems in your monitored network.
 Your environment's xref:get-started/policies/introduction.adoc[monitoring policies] define the conditions under which alerts are generated.
 
-The xref:visualizations/introduction.adoc[Insights Dashboard] displays a summary of alerts over a selected period of time.
-For more detailed insights into your network's alerts, including the monitoring policies that defined them, select *Alerts List* in the left navigation menu.
+The xref:visualizations/introduction.adoc[Insights Dashboard] displays a summary of alerts over the past 24 hours.
+For more detailed insights into your network's alerts, including the monitoring policies that defined them, select *Alerts* in the left navigation menu.
 
 For information about severities, see xref:reference:severities.adoc[Alert Severities].
 

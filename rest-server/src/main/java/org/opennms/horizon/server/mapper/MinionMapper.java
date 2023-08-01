@@ -30,23 +30,14 @@ package org.opennms.horizon.server.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.server.model.inventory.Minion;
 
 @Mapper(componentModel = "spring")
 public interface MinionMapper {
-    @Mappings({
-        @Mapping(target = "locationId", source = "monitoringLocationId"),
-        @Mapping(target = "lastCheckedTime", source = "lastCheckedIn")
-    })
+    @Mapping(target = "locationId", source = "monitoringLocationId")
+    @Mapping(target = "lastCheckedTime", source = "lastCheckedIn")
     Minion protoToMinion(MonitoringSystemDTO dto);
-
-    @Mappings({
-        @Mapping(source = "locationId", target = "monitoringLocationId"),
-        @Mapping(source = "lastCheckedTime", target = "lastCheckedIn")
-    })
-    MonitoringSystemDTO minionToProto(Minion minion);
 
     default String statusToStatus(boolean status) {
         return status ? "UP" : "DOWN";

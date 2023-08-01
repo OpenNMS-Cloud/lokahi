@@ -37,7 +37,6 @@ public class AzureActiveDiscovery {
     private Long id;
     private String locationId;
     private String name;
-    private String tenantId;
     private String clientId;
     private String subscriptionId;
     private String directoryId;

@@ -53,6 +53,7 @@ import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.AzureInterfaceService;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceService;
 import org.opennms.horizon.inventory.service.MonitoredServiceTypeService;
@@ -64,6 +65,7 @@ import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscover
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
+import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
@@ -92,6 +94,7 @@ public class ScannerResponseService {
     private final TaskSetHandler taskSetHandler;
     private final IpInterfaceService ipInterfaceService;
     private final SnmpInterfaceService snmpInterfaceService;
+    private final AzureInterfaceService azureInterfaceService;
     private final TagService tagService;
     private final SnmpConfigService snmpConfigService;
     private final IcmpActiveDiscoveryService icmpActiveDiscoveryService;
@@ -179,7 +182,6 @@ public class ScannerResponseService {
 
             String nodeLabel = String.format("%s (%s)", azureScanItem.getName(), azureScanItem.getResourceGroup());
 
-            //todo: store the ID in the database, currently this is the only way to identify the node at this point
             Optional<Node> nodeOpt = nodeRepository.findByTenantLocationIdAndNodeLabel(tenantId, locationId, nodeLabel);
 
             try {
@@ -195,11 +197,20 @@ public class ScannerResponseService {
                         .build();
 
                     node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
+                    long nodeId = node.getId();
+
+                    var nodeInfoResult = NodeInfoResult.newBuilder()
+                        .setSystemLocation(azureScanItem.getLocation())
+                        .setSystemName(azureScanItem.getName())
+                        .setSystemDescr(String.format("%s (%s)", azureScanItem.getOsName(), azureScanItem.getOsVersion()))
+                        .build();
+                    nodeService.updateNodeInfo(node, nodeInfoResult);
+
                     for (AzureScanNetworkInterfaceItem networkInterfaceItem : azureScanItem.getNetworkInterfaceItemsList()) {
-                        ipInterfaceService.createFromAzureScanResult(tenantId, node, networkInterfaceItem);
+                        var azureInterface = azureInterfaceService.createOrUpdateFromScanResult(tenantId, node, networkInterfaceItem);
+                        ipInterfaceService.createFromAzureScanResult(tenantId, node, azureInterface, networkInterfaceItem);
                     }
 
-                    long nodeId = node.getId();
                     taskSetHandler.sendAzureMonitorTasks(discovery, azureScanItem, nodeId);
                     taskSetHandler.sendAzureCollectorTasks(discovery, azureScanItem, nodeId);
                 }

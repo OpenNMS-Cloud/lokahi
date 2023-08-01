@@ -2,7 +2,6 @@ fragment TagsParts on Query {
   tags {
     id
     name
-    tenantId
   }
 }
 
@@ -14,7 +13,6 @@ fragment TagsSearchParts on Query {
   tags(searchTerm: $searchTerm) {
     id
     name
-    tenantId
   }
 }
 

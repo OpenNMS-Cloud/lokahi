@@ -1,5 +1,8 @@
 package org.opennms.horizon.server.service;
 
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import io.grpc.protobuf.StatusProto;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,12 +23,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -42,6 +49,7 @@ class GraphQLMonitoringLocationServiceTest {
     private ServerHeaderUtil mockHeaderUtil;
 
     private final String accessToken = "test-token-12345";
+    private static final Long INVALID_LOCATION_ID = 404L;
     private MonitoringLocationDTO location1, location2;
 
     @BeforeEach
@@ -49,6 +57,14 @@ class GraphQLMonitoringLocationServiceTest {
         location1 = getLocationDTO("tenant1", "LOC1", 1L, "address1");
         location2 = getLocationDTO("tenant2", "LOC2", 2L, "address2");
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
+
+        var status = Status.newBuilder()
+            .setCode(Code.NOT_FOUND_VALUE)
+            .setMessage("Given location doesn't exist.").build();
+        var exception = StatusProto.toStatusRuntimeException(status);
+
+        doThrow(exception).when(mockClient).deleteLocation(INVALID_LOCATION_ID, accessToken);
+        doThrow(exception).when(mockClient).getLocationById(INVALID_LOCATION_ID, accessToken);
     }
 
     @AfterEach
@@ -59,12 +75,11 @@ class GraphQLMonitoringLocationServiceTest {
 
     @Test
     void testFindLocation() throws JSONException {
-        doReturn(Arrays.asList(location1, location2)).when(mockClient).listLocations(accessToken);
+        doReturn(Collections.singletonList(location1)).when(mockClient).listLocations(accessToken);
         String request = """
             query {
                 findAllLocations {
                     location
-                    tenantId
                 }
             }""";
         webClient.post()
@@ -76,10 +91,7 @@ class GraphQLMonitoringLocationServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.findAllLocations").isArray()
-            .jsonPath("$.data.findAllLocations[0].location").isEqualTo("LOC1")
-            .jsonPath("$.data.findAllLocations[0].tenantId").isEqualTo("tenant1")
-            .jsonPath("$.data.findAllLocations[1].location").isEqualTo("LOC2")
-            .jsonPath("$.data.findAllLocations[1].tenantId").isEqualTo("tenant2");
+            .jsonPath("$.data.findAllLocations[0].location").isEqualTo("LOC1");
         verify(mockClient).listLocations(accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -91,7 +103,6 @@ class GraphQLMonitoringLocationServiceTest {
             query {
                 findLocationById(id: 1) {
                     location
-                    tenantId
                 }
             }""";
         webClient.post()
@@ -102,20 +113,40 @@ class GraphQLMonitoringLocationServiceTest {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.data.findLocationById.location").isEqualTo("LOC1")
-            .jsonPath("$.data.findLocationById.tenantId").isEqualTo("tenant1");
+            .jsonPath("$.data.findLocationById.location").isEqualTo("LOC1");
         verify(mockClient).getLocationById(1, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @Test
+    void testGetLocationByName() throws JSONException {
+        doReturn(location1).when(mockClient).getLocationByName("LOC1", accessToken);
+        String request = """
+            query {
+                locationByName(locationName: "LOC1") {
+                    location
+                }
+            }""";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.locationByName.location").isEqualTo("LOC1");
+        verify(mockClient).getLocationByName("LOC1", accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
     void testSearchLocation() throws JSONException {
-        doReturn(Arrays.asList(location1, location2)).when(mockClient).searchLocations("LOC", accessToken);
+        doReturn(Collections.singletonList(location1)).when(mockClient).searchLocations("LOC", accessToken);
         String request = """
             query {
                 searchLocation(searchTerm: "LOC") {
                     location
-                    tenantId
                 }
             }""";
         webClient.post()
@@ -127,10 +158,7 @@ class GraphQLMonitoringLocationServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.searchLocation").isArray()
-            .jsonPath("$.data.searchLocation[0].location").isEqualTo("LOC1")
-            .jsonPath("$.data.searchLocation[0].tenantId").isEqualTo("tenant1")
-            .jsonPath("$.data.searchLocation[1].location").isEqualTo("LOC2")
-            .jsonPath("$.data.searchLocation[1].tenantId").isEqualTo("tenant2");
+            .jsonPath("$.data.searchLocation[0].location").isEqualTo("LOC1");
         verify(mockClient).searchLocations("LOC", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -150,7 +178,6 @@ class GraphQLMonitoringLocationServiceTest {
                 }) {
                     id
                     location
-                    tenantId
                     latitude
                     longitude
                     address
@@ -166,7 +193,6 @@ class GraphQLMonitoringLocationServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.createLocation.location").isEqualTo("LOC1")
-            .jsonPath("$.data.createLocation.tenantId").isEqualTo("tenant1")
             .jsonPath("$.data.createLocation.address").isEqualTo("address create")
             .jsonPath("$.data.createLocation.latitude").isEqualTo(1.0)
             .jsonPath("$.data.createLocation.longitude").isEqualTo(2.0);
@@ -189,7 +215,6 @@ class GraphQLMonitoringLocationServiceTest {
                 }) {
                     id
                     location
-                    tenantId
                     latitude
                     longitude
                     address
@@ -205,7 +230,6 @@ class GraphQLMonitoringLocationServiceTest {
             .expectBody()
             .jsonPath("$.data.updateLocation.location").isEqualTo("LOC2")
             .jsonPath("$.data.updateLocation.id").isEqualTo(2)
-            .jsonPath("$.data.updateLocation.tenantId").isEqualTo("tenant2")
             .jsonPath("$.data.updateLocation.address").isEqualTo("address2")
             .jsonPath("$.data.updateLocation.latitude").isEqualTo(1.0)
             .jsonPath("$.data.updateLocation.longitude").isEqualTo(2.0);
@@ -233,6 +257,56 @@ class GraphQLMonitoringLocationServiceTest {
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
         verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
         verify(mockCertificateClient).revokeCertificate(any(), eq(1L), eq(accessToken));
+    }
+
+    @Test
+    void testDeleteNonExistentLocation() throws JSONException {
+        String request = """
+            mutation {
+                deleteLocation(id: %s)
+            }""".formatted(INVALID_LOCATION_ID);
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.deleteLocation").isEmpty()
+            .jsonPath("$.errors").isNotEmpty();
+        verify(mockClient, times(1)).deleteLocation(INVALID_LOCATION_ID, accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verifyNoInteractions(mockCertificateClient);
+    }
+
+    @Test
+    void testDeleteLocationError() throws JSONException {
+        var status = Status.newBuilder()
+            .setCode(Code.INTERNAL_VALUE)
+            .setMessage("Test exception").build();
+        var exception = StatusProto.toStatusRuntimeException(status);
+        doThrow(exception).when(mockClient).deleteLocation(INVALID_LOCATION_ID, accessToken);
+
+        String request = """
+            mutation {
+                deleteLocation(id: %s)
+            }""".formatted(INVALID_LOCATION_ID);
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.deleteLocation").isEmpty()
+            .jsonPath("$.errors").isNotEmpty();
+        verify(mockClient, times(1)).deleteLocation(INVALID_LOCATION_ID, accessToken);
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verifyNoInteractions(mockCertificateClient);
     }
 
     private static MonitoringLocationDTO getLocationToUpdate() {

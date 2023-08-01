@@ -35,10 +35,11 @@ import lombok.Setter;
 @Setter
 public class IpInterface {
     private long id;
-    private String tenantId;
     private long nodeId;
     private String ipAddress;
     private Boolean snmpPrimary;
     private String hostname;
     private String netmask;
+    // must be object to generate optional field for graphql
+    private Long azureInterfaceId;
 }

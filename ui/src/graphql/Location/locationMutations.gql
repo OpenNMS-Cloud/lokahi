@@ -6,7 +6,6 @@ mutation CreateLocation($location: MonitoringLocationCreateInput!) {
     address
     longitude
     latitude
-    tenantId
   }
 }
 
@@ -18,7 +17,6 @@ mutation UpdateLocation($location: MonitoringLocationUpdateInput) {
     address
     longitude
     latitude
-    tenantId
   }
 }
 

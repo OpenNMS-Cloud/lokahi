@@ -43,11 +43,19 @@ message AzureScanItem {
   string resource_group = 3;
   int64 active_discovery_id = 4;
   repeated AzureScanNetworkInterfaceItem network_interface_items = 5;
+  string osName = 6;
+  string osVersion = 7;
+  string location = 8;
 }
 
 message AzureScanNetworkInterfaceItem {
   string id = 1;
-  string ip_address = 2;
+  string name = 2;
+  string ip_address = 3;
+  string interface_name = 4;
+  bool is_primary = 5;
+  AzureScanNetworkInterfaceItem public_ip_address = 6;
+  string location = 7;
 }
 
 // TODO: the naming here is not Real Obvious - "what's the difference between AzureResponseMetric and AzureResultMetric?"
@@ -71,4 +79,5 @@ message AzureResultMetric {
   string resource_group = 2;
   AzureValueMetric value = 3;
   string alias = 4;
+  string type = 5;
 }

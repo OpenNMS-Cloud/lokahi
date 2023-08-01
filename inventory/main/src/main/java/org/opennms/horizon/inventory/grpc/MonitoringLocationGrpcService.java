@@ -44,6 +44,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,9 +126,7 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
                     responseObserver.onCompleted();
                 } catch (Exception e) {
                     LOG.error("Error while creating location with name {}", request.getLocation(), e);
-                    Status status = Status.newBuilder()
-                        .setCode(Code.INTERNAL_VALUE)
-                        .setMessage("Error while creating location with name " + request.getLocation()).build();
+                    Status status = handleException(e);
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                 }
             });
@@ -141,10 +140,8 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
                     responseObserver.onNext(service.upsert(MonitoringLocationDTO.newBuilder(request).setTenantId(tenantId).build()));
                     responseObserver.onCompleted();
                 } catch (Exception e) {
-                    LOG.error("Error while updating location with ID {}", request.getId(), e);
-                    Status status = Status.newBuilder()
-                        .setCode(Code.INTERNAL_VALUE)
-                        .setMessage("Error while updating location with ID " + request.getId()).build();
+                    LOG.error("Error while updating location with ID : {}", request.getId(), e);
+                    Status status = handleException(e);
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                 }
             });
@@ -159,10 +156,8 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
                     responseObserver.onNext(BoolValue.of(true));
                     responseObserver.onCompleted();
                 } catch (Exception e) {
-                    LOG.error("Error while deleting location with ID {}", request.getValue(), e);
-                    Status status = Status.newBuilder()
-                        .setCode(Code.INTERNAL_VALUE)
-                        .setMessage("Error while deleting location with ID " + request.getValue()).build();
+                    LOG.error("Error while deleting location with ID : {}", request.getValue(), e);
+                    Status status = handleException(e);
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                 }
             });
@@ -174,6 +169,18 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
             .setAddress(request.getAddress())
             .setGeoLocation(request.getGeoLocation())
             .setTenantId(tenantId).build();
+    }
+
+    private Status handleException(Throwable e) {
+        if (e instanceof LocationNotFoundException) {
+            return Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage(e.getMessage()).build();
+        } else {
+            return Status.newBuilder()
+                .setCode(Code.INTERNAL_VALUE)
+                .setMessage(e.getMessage()).build();
+        }
     }
 }
 

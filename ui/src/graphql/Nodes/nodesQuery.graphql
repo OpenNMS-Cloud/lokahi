@@ -6,17 +6,14 @@ fragment NodesParts on Query {
       id
       ipAddress
       nodeId
-      tenantId
       snmpPrimary
     }
     location {
       id
       location
-      tenantId
     }
     monitoringLocationId
     nodeLabel
-    tenantId,
     scanType
   }
 }

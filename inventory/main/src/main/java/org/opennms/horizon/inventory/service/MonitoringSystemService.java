@@ -53,7 +53,7 @@ public class MonitoringSystemService {
         Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), message.getTenantId());
         if (msOp.isEmpty()) {
             MonitoringLocation location = locationRepository.findByIdAndTenantId(Long.parseLong(message.getLocationId()), message.getTenantId())
-                .orElseThrow(() -> new LocationNotFoundException("Location not found " + message.getLocationId()));
+                .orElseThrow(() -> new LocationNotFoundException("Location not found with ID " + message.getLocationId()));
             monitoringSystem = new MonitoringSystem();
             monitoringSystem.setSystemId(identity.getSystemId());
             monitoringSystem.setMonitoringLocation(location);

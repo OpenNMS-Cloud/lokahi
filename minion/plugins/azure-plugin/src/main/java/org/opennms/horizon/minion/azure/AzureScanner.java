@@ -38,6 +38,7 @@ import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.AzureHttpException;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterface;
 import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
@@ -50,7 +51,6 @@ import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIP
 import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIpAddresses;
 import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.PublicIpAddressProps;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
-import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +91,7 @@ public class AzureScanner implements Scanner {
             AzureResourceGroups resourceGroups = client
                 .getResourceGroups(token, request.getSubscriptionId(), request.getTimeoutMs(), request.getRetries());
 
-            for (AzureValue resourceGroupValue : resourceGroups.getValue()) {
+            for (var resourceGroupValue : resourceGroups.getValue()) {
                 String resourceGroup = resourceGroupValue.getName();
                 scannedItems.addAll(scanForResourceGroup(request, token, resourceGroup));
             }
@@ -118,21 +118,44 @@ public class AzureScanner implements Scanner {
         AzureResources resources = client.getResources(token, request.getSubscriptionId(),
             resourceGroup, request.getTimeoutMs(), request.getRetries());
 
+        // currently we only care VM
+        var filteredResources = resources.getValue().stream()
+            .filter(azureValue -> azureValue.getType().equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES)).toList();
+
+        if (filteredResources.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+
         AzureNetworkInterfaces networkInterfaces = client.getNetworkInterfaces(token, request.getSubscriptionId(),
             resourceGroup, request.getTimeoutMs(), request.getRetries());
 
         AzurePublicIpAddresses publicIpAddresses = client.getPublicIpAddresses(token, request.getSubscriptionId(),
             resourceGroup, request.getTimeoutMs(), request.getRetries());
 
-        return resources.getValue().stream()
-            .filter(azureValue -> azureValue.getType()
-                .equalsIgnoreCase(MICROSOFT_COMPUTE_VIRTUAL_MACHINES))
-            .map(resource -> AzureScanItem.newBuilder()
-                .setId(resource.getId())
-                .setName(resource.getName())
-                .setResourceGroup(resourceGroup)
-                .setActiveDiscoveryId(request.getActiveDiscoveryId())
-                .build())
+        return filteredResources.stream()
+            .map(resource -> {
+                AzureInstanceView azureInstanceView = null;
+                try {
+                    azureInstanceView = client.getInstanceView(token, request.getSubscriptionId(), resourceGroup,
+                        resource.getName(), request.getTimeoutMs(), request.getRetries());
+                } catch (AzureHttpException ex) {
+                    log.warn("Fail to get InstanceView error: {}", ex.getMessage());
+                }
+
+                var scanItem = AzureScanItem.newBuilder()
+                    .setId(resource.getId())
+                    .setName(resource.getName())
+                    .setLocation(resource.getLocation())
+                    .setResourceGroup(resourceGroup)
+                    .setActiveDiscoveryId(request.getActiveDiscoveryId());
+                if (azureInstanceView != null) {
+                    scanItem.setOsName(azureInstanceView.getOsName())
+                        .setOsVersion(azureInstanceView.getOsVersion());
+                }
+
+                return scanItem.build();
+            })
             .map(scanItem -> scanNetworkInterfaces(scanItem, networkInterfaces, publicIpAddresses))
             .toList();
     }
@@ -150,12 +173,16 @@ public class AzureScanner implements Scanner {
             NetworkInterfaceProps networkInterfaceProps = networkInterface.getProperties();
 
             for (IpConfiguration ipConfiguration : networkInterfaceProps.getIpConfigurations()) {
+                final var scannedNetworkInterface = AzureScanNetworkInterfaceItem.newBuilder();
                 IpConfigurationProps ipConfigurationProps = ipConfiguration.getProperties();
 
-                scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
+                scannedNetworkInterface
+                    .setInterfaceName(networkInterface.getName())
                     .setId(ipConfiguration.getId())
+                    .setName(ipConfiguration.getName())
                     .setIpAddress(ipConfigurationProps.getPrivateIPAddress())
-                    .build());
+                    .setIsPrimary(ipConfiguration.getProperties().isPrimary())
+                    .setLocation(networkInterface.getLocation());
 
                 PublicIPAddress publicIPAddress = ipConfigurationProps.getPublicIPAddress();
                 if (publicIPAddress != null) {
@@ -163,14 +190,18 @@ public class AzureScanner implements Scanner {
 
                     Optional<AzurePublicIPAddress> publicAddressOpt = findPublicIpAddressForId(publicIpAddresses, publicIpId);
                     if (publicAddressOpt.isPresent()) {
-                        PublicIpAddressProps properties = publicAddressOpt.get().getProperties();
+                        AzurePublicIPAddress azurePublicIPAddress = publicAddressOpt.get();
+                        PublicIpAddressProps properties = azurePublicIPAddress.getProperties();
 
-                        scannedNetworkInterfaces.add(AzureScanNetworkInterfaceItem.newBuilder()
+                        scannedNetworkInterface.setPublicIpAddress(AzureScanNetworkInterfaceItem.newBuilder()
+                            .setInterfaceName(networkInterface.getName())
                             .setId(publicIpId)
-                            .setIpAddress(properties.getIpAddress())
-                            .build());
+                            .setName(azurePublicIPAddress.getName())
+                            .setIpAddress(properties.getIpAddress()))
+                            .setLocation(networkInterface.getLocation());
                     }
                 }
+                scannedNetworkInterfaces.add(scannedNetworkInterface.build());
             }
         }
         if (!scannedNetworkInterfaces.isEmpty()) {

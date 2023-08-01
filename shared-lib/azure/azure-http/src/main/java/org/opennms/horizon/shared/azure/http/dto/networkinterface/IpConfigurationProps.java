@@ -14,4 +14,7 @@ public class IpConfigurationProps {
     @SerializedName("publicIPAddress")
     @Expose
     private PublicIPAddress publicIPAddress;
+    @SerializedName("primary")
+    @Expose
+    private boolean primary;
 }

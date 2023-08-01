@@ -34,7 +34,7 @@ Feature: Alert Service Basic Functionality
 
   Scenario: When an event is received from Kafka, with no matching alert configuration, no new alert is created
     When An event is sent with UEI "uei.opennms.org/perspective/nodes/nodeLostService" on node 10
-    Then Send GET request to application at path "/metrics/events_without_alert_data_counter", with timeout 5000ms, until JSON response matches the following JSON path expressions
+    Then Send GET request to application at path "/actuator/metrics/events_without_alert_data_counter", with timeout 10000ms, until JSON response matches the following JSON path expressions
       | measurements[0].value == 1.0 |
     Then Verify alert topic has 0 messages for the tenant
 

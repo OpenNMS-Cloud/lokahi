@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="freddy" id="0.1.0-azure-interface">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="azure_interface"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="azure_interface">
+            <column name="id" type="BIGINT" autoIncrement="true"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="node_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="interface_name" type="text"/>
+
+            <column name="private_ip_id" type="text"/>
+
+            <column name="public_ip_address" type="INET"/>
+
+            <column name="public_ip_id" type="text"/>
+
+            <column name="location" type="text"/>
+        </createTable>
+
+        <addPrimaryKey tableName="azure_interface" columnNames="id" constraintName="pk_azure_interface_id"/>
+
+        <addForeignKeyConstraint constraintName="fk_azure_interface_node_id" onDelete="CASCADE"
+                                 baseTableName="azure_interface" baseColumnNames="node_id"
+                                 referencedTableName="node" referencedColumnNames="id"/>
+
+        <addColumn tableName="ip_interface">
+            <column name="azure_interface_id" type="bigint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="ip_interface" baseColumnNames="azure_interface_id"
+                                 constraintName="fk_ip_azure_interface_id"
+                                 referencedTableName="azure_interface"
+                                 referencedColumnNames="id" onDelete="SET NULL"/>
+
+    </changeSet>
+</databaseChangeLog>

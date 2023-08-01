@@ -1,7 +1,7 @@
 <template>
   <div class="welcome-wrapper">
-    <div :class="['gradiant', welcomeStore.doneGradient ? 'loaded' : '']" data-test="gradiant-bg">
-      <GradiantBG />
+    <div :class="['gradient', welcomeStore.doneGradient ? 'loaded' : '']" data-test="gradient-bg">
+      <GradientBG />
     </div>
     <div :class="['welcome-contain', welcomeStore.doneLoading ? 'loaded' : '']">
       <div class="welcome-inner">
@@ -23,7 +23,7 @@ import WelcomeSlideOne from '../components/Welcome/WelcomeSlideOne.vue'
 import WelcomeSlideTwo from '../components/Welcome/WelcomeSlideTwo.vue'
 import WelcomeSlideThree from '../components/Welcome/WelcomeSlideThree.vue'
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
-import GradiantBG from '../components/Common/GradiantBG.vue'
+import GradientBG from '../components/Common/GradientBG.vue'
 import useTheme from '@/composables/useTheme'
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
@@ -130,7 +130,7 @@ onUnmounted(() => {
   margin-bottom: 24px;
 }
 
-.gradiant {
+.gradient {
   position: fixed;
   z-index: 0;
   left: 0;
@@ -142,7 +142,7 @@ onUnmounted(() => {
   transition: opacity 0.4s ease-in-out;
 }
 
-.gradiant.loaded {
+.gradient.loaded {
   opacity: 1;
 }
 </style>

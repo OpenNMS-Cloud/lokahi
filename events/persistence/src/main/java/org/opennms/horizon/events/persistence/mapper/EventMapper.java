@@ -17,6 +17,7 @@ public interface EventMapper extends DateTimeMapper {
     @Mapping(source = "eventUei", target = "uei")
     @Mapping(source = "producedTime", target = "producedTimeMs")
     @Mapping(source = "eventInfo", target = "info")
+    @Mapping(source = "id", target = "databaseId")
     org.opennms.horizon.events.proto.Event modelToDTO(Event event);
 
     default org.opennms.horizon.events.proto.Event modelToDtoWithParams(Event event) {

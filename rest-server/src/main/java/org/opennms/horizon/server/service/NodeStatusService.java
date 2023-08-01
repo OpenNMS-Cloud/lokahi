@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static org.opennms.horizon.server.service.metrics.Constants.AZURE_MONITOR_TYPE;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -66,11 +67,10 @@ public class NodeStatusService {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
 
         if (AZURE_SCAN_TYPE.equals(node.getScanType())) {
-            return getStatusMetric(id, "azure-node-" + id, monitorType, env)
+            return getStatusMetric(id, "azure-node-" + id, AZURE_MONITOR_TYPE, env)
                 .map(result -> getNodeStatus(id, result));
         } else {
             if (node.getIpInterfacesCount() > 0) {
-
                 IpInterfaceDTO ipInterface = getPrimaryInterface(node);
                 return getNodeStatusByInterface(id, monitorType, ipInterface, env);
             }

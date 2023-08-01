@@ -12,6 +12,7 @@ import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterface;
 import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
@@ -51,6 +52,14 @@ public class AzureScannerTest {
     private static final String TEST_PRIVATE_IP_ADDRESS = "127.0.1.1";
     private static final String TEST_PUBLIC_IP_ID = "test-public-ip-id";
     private static final String TEST_PUBLIC_IP_ADDRESS = "10.20.30.40";
+    private static final String TEST_PUBLIC_IP_ADDRESS_NAME = "test-public-ip-address-name";
+    private static final String TEST_NETWORK_INTERFACE_ID = "test-network-interface-id";
+    private static final String TEST_NETWORK_INTERFACE_NAME = "test-network-interface-name";
+    private static final String TEST_LOCATION = "test-location";
+    private static final String TEST_OS = "test-os";
+    private static final String TEST_OS_VERSION = "test-version";
+    private static final String TEST_IP_CONF_NAME = "ip-config-name";
+
     private AzureHttpClient mockAzureHttpClient;
     private AzureScanner scanner;
     private AzureOAuthToken token;
@@ -80,6 +89,13 @@ public class AzureScannerTest {
         AzurePublicIpAddresses azurePublicIpAddresses = getAzurePublicIpAddresses();
         when(mockAzureHttpClient.getPublicIpAddresses(token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES)).thenReturn(azurePublicIpAddresses);
 
+        AzureInstanceView instanceView = new AzureInstanceView();
+        instanceView.setOsName(TEST_OS);
+        instanceView.setOsVersion(TEST_OS_VERSION);
+        when(mockAzureHttpClient.getInstanceView(token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP,
+            azureResources.getValue().get(0).getName(), TEST_TIMEOUT_MS, TEST_RETRIES))
+            .thenReturn(instanceView);
+
         AzureScanRequest request = AzureScanRequest.newBuilder()
             .setClientId(TEST_CLIENT_ID).setClientSecret(TEST_CLIENT_SECRET)
             .setSubscriptionId(TEST_SUBSCRIPTION_ID).setDirectoryId(TEST_DIRECTORY_ID)
@@ -102,15 +118,21 @@ public class AzureScannerTest {
         assertEquals(TEST_RESOURCE_NAME, scanItem.getName());
         assertEquals(TEST_RESOURCE_GROUP, scanItem.getResourceGroup());
         assertEquals(TEST_ACTIVE_DISCOVERY_ID, scanItem.getActiveDiscoveryId());
+        assertEquals(TEST_LOCATION, scanItem.getLocation());
+        assertEquals(TEST_OS, scanItem.getOsName());
+        assertEquals(TEST_OS_VERSION, scanItem.getOsVersion());
 
-        assertEquals(2, scanItem.getNetworkInterfaceItemsCount());
+        assertEquals(1, scanItem.getNetworkInterfaceItemsCount());
         List<AzureScanNetworkInterfaceItem> interfaceList = scanItem.getNetworkInterfaceItemsList();
         AzureScanNetworkInterfaceItem interface1 = interfaceList.get(0);
         assertEquals(TEST_IP_CONF_ID, interface1.getId());
+        assertEquals(TEST_NETWORK_INTERFACE_NAME, interface1.getInterfaceName());
+        assertEquals(TEST_IP_CONF_NAME, interface1.getName());
         assertEquals(TEST_PRIVATE_IP_ADDRESS, interface1.getIpAddress());
 
-        AzureScanNetworkInterfaceItem interface2 = interfaceList.get(1);
+        AzureScanNetworkInterfaceItem interface2 = interface1.getPublicIpAddress();
         assertEquals(TEST_PUBLIC_IP_ID, interface2.getId());
+        assertEquals(TEST_PUBLIC_IP_ADDRESS_NAME, interface2.getName());
         assertEquals(TEST_PUBLIC_IP_ADDRESS, interface2.getIpAddress());
     }
 
@@ -118,6 +140,7 @@ public class AzureScannerTest {
         AzurePublicIpAddresses azurePublicIpAddresses = new AzurePublicIpAddresses();
         AzurePublicIPAddress azurePublicIPAddress = new AzurePublicIPAddress();
         azurePublicIPAddress.setId(TEST_PUBLIC_IP_ID);
+        azurePublicIPAddress.setName(TEST_PUBLIC_IP_ADDRESS_NAME);
         PublicIpAddressProps props = new PublicIpAddressProps();
         props.setIpAddress(TEST_PUBLIC_IP_ADDRESS);
         azurePublicIPAddress.setProperties(props);
@@ -132,6 +155,7 @@ public class AzureScannerTest {
         azureValue.setId(TEST_RESOURCE_ID);
         azureValue.setName(TEST_RESOURCE_NAME);
         azureValue.setType(resourceType);
+        azureValue.setLocation(TEST_LOCATION);
         azureResources.setValue(Collections.singletonList(azureValue));
         return azureResources;
     }
@@ -139,9 +163,13 @@ public class AzureScannerTest {
     private AzureNetworkInterfaces getAzureNetworkInterfaces() {
         AzureNetworkInterfaces azureNetworkInterfaces = new AzureNetworkInterfaces();
         AzureNetworkInterface azureNetworkInterface = new AzureNetworkInterface();
+        azureNetworkInterface.setId(TEST_NETWORK_INTERFACE_ID);
+        azureNetworkInterface.setName(TEST_NETWORK_INTERFACE_NAME);
+        azureNetworkInterface.setLocation(TEST_LOCATION);
         NetworkInterfaceProps props = new NetworkInterfaceProps();
         IpConfiguration ipConfiguration = new IpConfiguration();
         ipConfiguration.setId(TEST_IP_CONF_ID);
+        ipConfiguration.setName(TEST_IP_CONF_NAME);
         IpConfigurationProps ipConfProps = new IpConfigurationProps();
         ipConfProps.setPrivateIPAddress(TEST_PRIVATE_IP_ADDRESS);
         PublicIPAddress publicIPAddress = new PublicIPAddress();

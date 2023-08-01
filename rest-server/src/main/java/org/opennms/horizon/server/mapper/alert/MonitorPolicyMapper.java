@@ -31,7 +31,6 @@ package org.opennms.horizon.server.mapper.alert;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
@@ -39,15 +38,13 @@ import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 @Mapper(componentModel = "spring", uses = {PolicyRuleMapper.class}, nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface MonitorPolicyMapper {
-    @Mappings({
-        @Mapping(target = "tags", source = "tagsList"),
-        @Mapping(target = "rules", source = "rulesList")
-    })
+
+    @Mapping(target = "tags", source = "tagsList")
+    @Mapping(target = "rules", source = "rulesList")
     MonitorPolicy map(MonitorPolicyProto proto);
 
-    @Mappings({
-        @Mapping(target = "rulesList", source = "rules"),
-        @Mapping(target = "tagsList", source = "tags")
-    })
+    @Mapping(target = "rulesList", source = "rules")
+    @Mapping(target = "tagsList", source = "tags")
     MonitorPolicyProto map(MonitorPolicy policy);
+
 }

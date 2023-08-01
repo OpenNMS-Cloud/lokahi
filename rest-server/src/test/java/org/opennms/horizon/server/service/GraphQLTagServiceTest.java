@@ -98,7 +98,6 @@ class GraphQLTagServiceTest {
             "        } " +
             "    ) { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    } " +
             "}";
@@ -111,10 +110,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.addTagsToNodes[0].id").isEqualTo(1)
-            .jsonPath("$.data.addTagsToNodes[0].tenantId").isNotEmpty()
             .jsonPath("$.data.addTagsToNodes[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.addTagsToNodes[1].id").isEqualTo(2)
-            .jsonPath("$.data.addTagsToNodes[1].tenantId").isNotEmpty()
             .jsonPath("$.data.addTagsToNodes[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient).addTags(any(TagCreateListDTO.class), eq(accessToken));
@@ -132,7 +129,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tagsByNodeId (nodeId: 1) { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -145,10 +141,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tagsByNodeId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByNodeId[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByNodeId[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tagsByNodeId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByNodeId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByNodeId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByNodeId(1L, null, accessToken);
@@ -167,7 +161,6 @@ class GraphQLTagServiceTest {
             "        nodeId, " +
             "        tags { " +
             "            id, " +
-            "            tenantId, " +
             "            name " +
             "        } " +
             "    } " +
@@ -205,7 +198,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tagsByNodeId (nodeId: 1, searchTerm: \"abc\") { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -218,10 +210,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tagsByNodeId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByNodeId[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByNodeId[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tagsByNodeId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByNodeId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByNodeId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByNodeId(1L, "abc", accessToken);
@@ -239,7 +229,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tagsByActiveDiscoveryId (activeDiscoveryId: 1) { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -252,10 +241,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tagsByActiveDiscoveryId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByActiveDiscoveryId[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByActiveDiscoveryId[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tagsByActiveDiscoveryId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByActiveDiscoveryId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByActiveDiscoveryId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByActiveDiscoveryId(1L, null, accessToken);
@@ -273,7 +260,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tagsByActiveDiscoveryId (activeDiscoveryId: 1, searchTerm: \"abc\") { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -286,10 +272,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tagsByActiveDiscoveryId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByActiveDiscoveryId[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByActiveDiscoveryId[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tagsByActiveDiscoveryId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByActiveDiscoveryId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByActiveDiscoveryId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByActiveDiscoveryId(1L, "abc", accessToken);
@@ -307,7 +291,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tagsByPassiveDiscoveryId (passiveDiscoveryId: 1) { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -320,10 +303,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tagsByPassiveDiscoveryId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByPassiveDiscoveryId[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByPassiveDiscoveryId[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tagsByPassiveDiscoveryId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByPassiveDiscoveryId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByPassiveDiscoveryId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByPassiveDiscoveryId(1L, null, accessToken);
@@ -341,7 +322,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tagsByPassiveDiscoveryId (passiveDiscoveryId: 1, searchTerm: \"abc\") { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -354,10 +334,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tagsByPassiveDiscoveryId[0].id").isEqualTo(1)
-            .jsonPath("$.data.tagsByPassiveDiscoveryId[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByPassiveDiscoveryId[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tagsByPassiveDiscoveryId[1].id").isEqualTo(2)
-            .jsonPath("$.data.tagsByPassiveDiscoveryId[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tagsByPassiveDiscoveryId[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTagsByPassiveDiscoveryId(1L, "abc", accessToken);
@@ -375,7 +353,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tags { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -388,10 +365,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tags[0].id").isEqualTo(1)
-            .jsonPath("$.data.tags[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tags[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tags[1].id").isEqualTo(2)
-            .jsonPath("$.data.tags[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tags[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTags(null, accessToken);
@@ -409,7 +384,6 @@ class GraphQLTagServiceTest {
         String getRequest = "query { " +
             "    tags (searchTerm: \"abc\") { " +
             "        id, " +
-            "        tenantId, " +
             "        name " +
             "    }" +
             "}";
@@ -422,10 +396,8 @@ class GraphQLTagServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.tags[0].id").isEqualTo(1)
-            .jsonPath("$.data.tags[0].tenantId").isNotEmpty()
             .jsonPath("$.data.tags[0].name").isEqualTo(TEST_TAG_NAME_1)
             .jsonPath("$.data.tags[1].id").isEqualTo(2)
-            .jsonPath("$.data.tags[1].tenantId").isNotEmpty()
             .jsonPath("$.data.tags[1].name").isEqualTo(TEST_TAG_NAME_2);
 
         verify(mockClient, times(1)).getTags("abc", accessToken);

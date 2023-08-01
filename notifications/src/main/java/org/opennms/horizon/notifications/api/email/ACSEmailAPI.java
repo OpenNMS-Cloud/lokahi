@@ -29,8 +29,13 @@
 package org.opennms.horizon.notifications.api.email;
 
 import com.azure.communication.email.EmailClient;
+import com.azure.communication.email.implementation.models.ErrorResponseException;
 import com.azure.communication.email.models.EmailMessage;
 import lombok.RequiredArgsConstructor;
+import org.apache.http.HttpStatus;
+import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
+import org.opennms.horizon.notifications.exceptions.NotificationBadDataException;
+import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
@@ -46,7 +51,7 @@ public class ACSEmailAPI implements EmailAPI {
     private final EmailClient client;
 
     @Override
-    public void sendEmail(String emailAddress, String subject, String bodyHtml) {
+    public void sendEmail(String emailAddress, String subject, String bodyHtml) throws NotificationException {
         EmailMessage message = new EmailMessage();
 
         message.setSenderAddress(fromAddress);
@@ -54,6 +59,14 @@ public class ACSEmailAPI implements EmailAPI {
         message.setSubject(subject);
         message.setBodyHtml(bodyHtml);
 
-        client.beginSend(message);
+        try {
+            client.beginSend(message);
+        } catch (ErrorResponseException e) {
+            if (e.getResponse().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+                throw new NotificationBadDataException(e);
+            } else {
+                throw new NotificationAPIException(e);
+            }
+        }
     }
 }

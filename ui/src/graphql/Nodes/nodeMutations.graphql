@@ -4,7 +4,6 @@ mutation AddNode($node: NodeCreateInput!) {
     id
     monitoringLocationId
     nodeLabel
-    tenantId
   }
 }
 
@@ -16,7 +15,6 @@ mutation AddTagsToNodes($tags: TagListNodesAddInput!) {
   addTagsToNodes(tags: $tags) {
     id
     name
-    tenantId
   }
 }
 

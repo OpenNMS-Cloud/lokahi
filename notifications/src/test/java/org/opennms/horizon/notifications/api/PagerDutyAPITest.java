@@ -28,13 +28,13 @@
 
 package org.opennms.horizon.notifications.api;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
@@ -51,10 +51,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PagerDutyAPITest {
     @InjectMocks
     PagerDutyAPI pagerDutyAPI;
+
+    @Mock
+    PagerDutyEventFactory eventFactory;
 
     @Mock
     RestTemplate restTemplate;
@@ -71,7 +74,6 @@ public class PagerDutyAPITest {
 
     @Test
     public void postNotifications() throws Exception {
-        Mockito.when(pagerDutyDao.getConfig(any())).thenReturn(getConfigDTO());
         Alert alert = getAlert();
         pagerDutyAPI.postNotification(alert);
     }
@@ -84,7 +86,6 @@ public class PagerDutyAPITest {
     @Test
     public void postNotificationsWithRetry() throws Exception {
         // Depending on the response, we should retry
-        Mockito.when(pagerDutyDao.getConfig(any())).thenReturn(getConfigDTO());
         Mockito.when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
             .thenThrow(new RestClientResponseException("Failed", HttpStatus.TOO_MANY_REQUESTS, "Failed", null, null, null))
             .thenReturn(ResponseEntity.ok(null));
@@ -96,7 +97,6 @@ public class PagerDutyAPITest {
     @Test
     public void postNotificationsWithoutRetry() throws Exception {
         // Some exceptions should just fail and not retry.
-        Mockito.when(pagerDutyDao.getConfig(any())).thenReturn(getConfigDTO());
         Mockito.when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
             .thenThrow(new RestClientResponseException("Failed", HttpStatus.BAD_REQUEST, "Failed", null, null, null));
 

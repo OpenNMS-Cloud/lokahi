@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
@@ -80,18 +81,23 @@ public class MonitoringLocationService {
             .stream().map(mapper::modelToDTO).toList();
     }
 
-    public MonitoringLocationDTO upsert(MonitoringLocationDTO dto) {
+    public MonitoringLocationDTO upsert(MonitoringLocationDTO dto) throws LocationNotFoundException {
+        if (dto.hasField(MonitoringLocationDTO.getDescriptor().findFieldByNumber(MonitoringLocationDTO.ID_FIELD_NUMBER))
+            && modelRepo.findByIdAndTenantId(dto.getId(), dto.getTenantId()).isEmpty()) {
+            throw new LocationNotFoundException("Location not found with ID " + dto.getId());
+        }
+
         MonitoringLocation model = mapper.dtoToModel(dto);
         return mapper.modelToDTO(modelRepo.save(model));
     }
 
-    public void delete(Long id, String tenantId) {
-        modelRepo.findByIdAndTenantId(id, tenantId).ifPresent(monitoringLocation ->  {
-            modelRepo.delete(monitoringLocation);
-            var systems = monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, tenantId);
-            if (!systems.isEmpty()) {
-                monitoringSystemRepository.deleteAll(systems);
-            }
-        });
+    public void delete(Long id, String tenantId) throws LocationNotFoundException {
+        MonitoringLocation monitoringLocation = modelRepo.findByIdAndTenantId(id, tenantId)
+            .orElseThrow(() -> new LocationNotFoundException("Location not found with ID " + id));
+        modelRepo.delete(monitoringLocation);
+        var systems = monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, tenantId);
+        if (!systems.isEmpty()) {
+            monitoringSystemRepository.deleteAll(systems);
+        }
     }
 }

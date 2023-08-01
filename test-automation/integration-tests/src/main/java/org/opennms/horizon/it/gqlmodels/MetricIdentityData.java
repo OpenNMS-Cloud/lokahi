@@ -16,7 +16,4 @@ public class MetricIdentityData {
 
     @JsonProperty("system_id")
     private String systemId;
-
-    @JsonProperty("tenant_id")
-    private String tenantId;
 }

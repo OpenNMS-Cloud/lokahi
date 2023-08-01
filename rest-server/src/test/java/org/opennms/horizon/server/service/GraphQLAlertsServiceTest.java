@@ -104,13 +104,12 @@ public class GraphQLAlertsServiceTest {
 
     @Test
     public void testFindAllAlerts() throws JSONException {
-        doReturn(ListAlertsResponse.newBuilder().addAlerts(alerts1).addAlerts(alerts2).build()).when(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, "node", accessToken);
+        doReturn(ListAlertsResponse.newBuilder().addAlerts(alerts1).addAlerts(alerts2).build()).when(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "databaseId", true, "node", accessToken);
         String request = """
             query {
-              findAllAlerts(pageSize: 5, page: 0, timeRange: TODAY, severities: ["CRITICAL"], sortBy: "tenantId", sortAscending: true, nodeLabel: "node") {
+              findAllAlerts(pageSize: 5, page: 0, timeRange: TODAY, severities: ["CRITICAL"], sortBy: "databaseId", sortAscending: true, nodeLabel: "node") {
                 nextPage
                 alerts {
-                  tenantId
                   databaseId
                   uei
                   counter
@@ -130,17 +129,16 @@ public class GraphQLAlertsServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.findAllAlerts.alerts.size()").isEqualTo(2)
-            .jsonPath("$.data.findAllAlerts.alerts[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.findAllAlerts.alerts[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.findAllAlerts.alerts[0].reductionKey").isEqualTo(alerts1.getReductionKey());
-        verify(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "tenantId", true, "node", accessToken);
+        verify(mockClient).listAlerts(5, 0, Collections.singletonList("CRITICAL"), TimeRange.TODAY, "databaseId", true, "node", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @Test
     public void testAcknowledgeAlert() throws JSONException {
         doReturn(AlertResponse.newBuilder().addAlert(Alert.newBuilder(alerts1).setIsAcknowledged(true).build()).build()).when(mockClient).acknowledgeAlert(List.of(1L), accessToken);
-        String request = "mutation {acknowledgeAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{tenantId severity reductionKey acknowledged}}}";
+        String request = "mutation {acknowledgeAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{severity reductionKey acknowledged}}}";
         webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
@@ -150,7 +148,6 @@ public class GraphQLAlertsServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.acknowledgeAlert.alertList.size()").isEqualTo(1)
-            .jsonPath("$.data.acknowledgeAlert.alertList[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.acknowledgeAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.acknowledgeAlert.alertList[0].acknowledged").isEqualTo(true)
             .jsonPath("$.data.acknowledgeAlert.alertList[0].reductionKey").isEqualTo(alerts1.getReductionKey());
@@ -164,7 +161,6 @@ public class GraphQLAlertsServiceTest {
         String request = "mutation {\n" +
             "  unacknowledgeAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]) {\n" +
             "    alertList {\n" +
-            "      tenantId\n" +
             "      acknowledged\n" +
             "      ackUser\n" +
             "      severity\n" +
@@ -185,7 +181,6 @@ public class GraphQLAlertsServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.unacknowledgeAlert.alertList.size()").isEqualTo(1)
-            .jsonPath("$.data.unacknowledgeAlert.alertList[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.unacknowledgeAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.unacknowledgeAlert.alertList[0].acknowledged").isEqualTo(false);
         verify(mockClient).unacknowledgeAlert(List.of(1L), accessToken);
@@ -195,7 +190,7 @@ public class GraphQLAlertsServiceTest {
     @Test
     public void testEscalateAlert() throws JSONException {
         doReturn(AlertResponse.newBuilder().addAlert(alerts1).build()).when(mockClient).escalateAlert(List.of(1L), accessToken);
-        String request = "mutation {escalateAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{tenantId reductionKey severity}}}";
+        String request = "mutation {escalateAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{reductionKey severity}}}";
         webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
@@ -205,7 +200,6 @@ public class GraphQLAlertsServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.escalateAlert.alertList.size()").isEqualTo(1)
-            .jsonPath("$.data.escalateAlert.alertList[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.escalateAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.escalateAlert.alertList[0].reductionKey").isEqualTo(alerts1.getReductionKey());
         verify(mockClient).escalateAlert(List.of(1L), accessToken);
@@ -215,7 +209,7 @@ public class GraphQLAlertsServiceTest {
     @Test
     public void testClearAlert() throws JSONException {
         doReturn(AlertResponse.newBuilder().addAlert(alerts1).build()).when(mockClient).clearAlert(List.of(1L), accessToken);
-        String request = "mutation {clearAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{tenantId reductionKey severity}}}";
+        String request = "mutation {clearAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{reductionKey severity}}}";
         webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
@@ -225,7 +219,6 @@ public class GraphQLAlertsServiceTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.clearAlert.alertList.size()").isEqualTo(1)
-            .jsonPath("$.data.clearAlert.alertList[0].tenantId").isEqualTo(alerts1.getTenantId())
             .jsonPath("$.data.clearAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.clearAlert.alertList[0].reductionKey").isEqualTo(alerts1.getReductionKey());
         verify(mockClient).clearAlert(List.of(1L), accessToken);

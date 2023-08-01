@@ -25,16 +25,29 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+package org.opennms.horizon.inventory.mapper;
 
-package org.opennms.horizon.server.exception;
+import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.Mapper;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
-import java.io.Serial;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+@Mapper(componentModel = "spring")
+public interface IpAddressMapper {
+    default InetAddress map(String value) throws UnknownHostException {
+        if(StringUtils.isNotEmpty(value)) {
+            return InetAddressUtils.getInetAddress(value);
+        } else {
+            return null;
+        }
+    }
 
-public class LocationNotFoundException extends Exception{
-    @Serial
-    private static final long serialVersionUID = -4543741752174882855L;
-
-    public LocationNotFoundException(String message) {
-        super(message);
+    default String map(InetAddress value) {
+        if (value != null) {
+            return InetAddressUtils.toIpAddrString(value);
+        } else {
+            return null;
+        }
     }
 }

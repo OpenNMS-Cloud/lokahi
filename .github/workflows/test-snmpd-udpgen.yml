@@ -1,0 +1,42 @@
+name: SNMPD Udpgen Build
+
+on:
+  push:
+    paths:
+      - 'test-automation/flows-test-image/**'
+  pull_request:
+    paths:
+      - 'test-automation/flows-test-image/**'
+
+jobs:
+  flows-test-image:
+    runs-on: ubuntu-latest
+    environment: docker-publish-account
+    # Environment that contains the required secrets.
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        # Is required to call actions.
+
+      - name: Log in to Dockerhub
+        # Need to log into Dockerhub to push images.
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Build
+        working-directory: test-automation/flows-test-image
+        shell: bash
+        run: |
+
+          docker build . --file Dockerfile --tag opennms/lokahi-snmpd-udpgen:latest
+
+      - name: Push Images
+        if: github.ref == 'refs/heads/develop'
+        # Only push on merging PR to develop branch.
+        shell: bash
+        run: |
+
+          docker push opennms/lokahi-snmpd-udpgen:latest

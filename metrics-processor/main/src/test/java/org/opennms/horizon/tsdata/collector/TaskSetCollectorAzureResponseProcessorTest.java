@@ -72,8 +72,6 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         mockCortexTSS = Mockito.mock(CortexTSS.class);
         mockTenantMetricsTracker = Mockito.mock(TenantMetricsTracker.class);
 
-        createTestAzureResponseData();
-
         testLabelValues = new String[] {
             "x-instance-x",
             "x-location-x",
@@ -86,7 +84,8 @@ public class TaskSetCollectorAzureResponseProcessorTest {
     }
 
     @Test
-    void testProcessCollectorResponse() throws IOException {
+    void testInterfaceProcessCollectorResponse() throws IOException {
+        createTestAzureResponseData("resourceName", MetricNameConstants.METRIC_AZURE_PUBLIC_IP_TYPE);
         //
         // Execute
         //
@@ -95,12 +94,30 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         //
         // Verify the Results
         //
-        var timeSeriesBuilderMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(TEST_AZURE_METRIC_VALUE, MonitorType.ICMP, "x_alias_x");
+        var timeSeriesBuilderMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(TEST_AZURE_METRIC_VALUE,
+            MonitorType.ICMP, "x_alias_x", MetricNameConstants.METRIC_AZURE_PUBLIC_IP_TYPE + "/resourceName");
+        Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesBuilderMatcher));
+    }
+
+    @Test
+    void testNodeProcessCollectorResponse() throws IOException {
+        createTestAzureResponseData("resourceName", MetricNameConstants.METRIC_AZURE_NODE_TYPE);
+        //
+        // Execute
+        //
+        target.processAzureCollectorResponse("x-tenant-id-x", "x-location-x", testCollectorResponse, testLabelValues);
+
+        //
+        // Verify the Results
+        //
+        var timeSeriesBuilderMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(TEST_AZURE_METRIC_VALUE,
+            MonitorType.ICMP, "x_alias_x", MetricNameConstants.METRIC_AZURE_NODE_TYPE);
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesBuilderMatcher));
     }
 
     @Test
     void testExceptionOnSendToCortex() throws IOException {
+        createTestAzureResponseData("resourceName", MetricNameConstants.METRIC_AZURE_NODE_TYPE);
         //
         // Setup Test Data and Interactions
         //
@@ -133,7 +150,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
 // Internals
 //----------------------------------------
 
-    private void createTestAzureResponseData() {
+    private void createTestAzureResponseData(String resourceName, String type) {
         AzureValueMetric azureValueMetric =
             AzureValueMetric.newBuilder()
                 .setType(AzureValueType.INT64)
@@ -141,9 +158,11 @@ public class TaskSetCollectorAzureResponseProcessorTest {
                 .build();
 
         AzureResultMetric azureResultMetric =
-            AzureResultMetric.newBuilder()
+            AzureResultMetric.newBuilder().setResourceName(resourceName)
                 .setAlias("x_alias_x")
                 .setValue(azureValueMetric)
+                .setType(type)
+                .setResourceName("resourceName")
                 .build();
 
         testAzureResponseMetric =
@@ -167,10 +186,13 @@ public class TaskSetCollectorAzureResponseProcessorTest {
         private final MonitorType monitorType;
         private final String metricName;
 
-        public PrometheusTimeSeriersBuilderArgumentMatcher(double metricValue, MonitorType monitorType, String metricName) {
+        private final String instance;
+
+        public PrometheusTimeSeriersBuilderArgumentMatcher(double metricValue, MonitorType monitorType, String metricName, String instance) {
             this.metricValue = metricValue;
             this.monitorType = monitorType;
             this.metricName = metricName;
+            this.instance = instance;
         }
 
         @Override
@@ -193,7 +215,7 @@ public class TaskSetCollectorAzureResponseProcessorTest {
 
                 return (
                     (Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL))) &&
-                    (Objects.equals("x-instance-x", labelMap.get("instance"))) &&
+                    (Objects.equals(instance, labelMap.get("instance"))) &&
                     (Objects.equals("x-location-x", labelMap.get("location_id"))) &&
                     (Objects.equals("x-system-id-x", labelMap.get("system_id"))) &&
                     (Objects.equals(monitorType.name(), labelMap.get("monitor"))) &&

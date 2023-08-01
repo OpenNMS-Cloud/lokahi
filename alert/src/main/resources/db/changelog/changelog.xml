@@ -24,4 +24,5 @@
     <include file="/db/changelog/hs-0.1.0/data/event_definition_data.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/alert_condition_event_definition.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/policy_rule_condition_type_fields.xml" />
+    <include file="/db/changelog/hs-0.1.0/data/update_reduction_key.xml"/>
 </databaseChangeLog>

@@ -35,7 +35,6 @@ import lombok.Setter;
 @Setter
 public class Minion {
     private long id;
-    private String tenantId;
     private String systemId;
     private String label;
     private long locationId;

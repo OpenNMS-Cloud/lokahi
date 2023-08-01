@@ -78,7 +78,6 @@ describe('Welcome Queries', () => {
             detail: {
                 id: 1,
                 nodeLabel: '192.168.1.1',
-                tenantId: 'opennms-prime',
                 createTime: dateN,
                 monitoringLocationId: 1,
                 ipInterfaces: [{ ipAddress: '192.168.1.1', snmpPrimary: true }], scanType: 'DISCOVERY_SCAN'

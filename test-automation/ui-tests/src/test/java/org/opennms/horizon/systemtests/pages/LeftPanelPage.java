@@ -30,9 +30,13 @@ package org.opennms.horizon.systemtests.pages;
 
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+
+import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.actions;
 
 public class LeftPanelPage {
     private static final SelenideElement leftPanel = $(".app-aside");
@@ -74,10 +78,29 @@ public class LeftPanelPage {
             width = previous;
             previous = leftPanelWide.getSize().getWidth();
         }
-        topRightBorder.click();
 
-        // Now wait for the left border to animate away before returning
-        leftPanelSmall.should(exist);
+        topRightBorder.hover().click();
+
+        try {
+            leftPanelSmall.should(exist, Duration.ofSeconds(4));
+        } catch (com.codeborne.selenide.ex.ElementNotFound e) {
+
+        }
+
+        // The panel doesn't always want to resize properly. Occasionally it will ignore the clicks
+        // on the main parts of the page and not resize. In these cases, the mouse needs to go back
+        // into the panel and then back to the page again.
+        int maxRetries = 5;
+        while (! leftPanelSmall.exists() && maxRetries > 0) {
+            --maxRetries;
+            $(url).shouldBe(enabled).hover().click();
+            topRightBorder.hover().click();
+            try {
+                leftPanelSmall.should(exist, Duration.ofSeconds(4));
+            } catch (com.codeborne.selenide.ex.ElementNotFound e) {
+            }
+        }
+
         width = 0;
         previous = leftPanelSmall.getSize().getWidth();
         while (width != previous) {

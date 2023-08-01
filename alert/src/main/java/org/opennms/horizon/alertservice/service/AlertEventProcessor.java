@@ -28,22 +28,22 @@
 
 package org.opennms.horizon.alertservice.service;
 
-import com.google.common.base.Strings;
 import io.grpc.Context;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alertservice.db.entity.*;
+import org.opennms.horizon.alertservice.db.entity.AlertCondition;
+import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
+import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
-import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.events.proto.Event;
@@ -56,6 +56,7 @@ import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -76,13 +77,15 @@ public class AlertEventProcessor {
 
     private final ThresholdedEventRepository thresholdedEventRepository;
 
+    private final ReductionKeyService reductionKeyService;
+
     private final TagRepository tagRepository;
 
     private final MeterRegistry registry;
 
+    private final TenantLookup tenantLookup;
     private Counter eventsWithoutAlertDataCounter;
 
-    private final TenantLookup tenantLookup;
 
     @PostConstruct
     public void init() {
@@ -90,22 +93,43 @@ public class AlertEventProcessor {
     }
 
     @Transactional
-    public Optional<Alert> process(Event e) {
+    public List<Alert> process(Event e) {
         LOG.trace("Processing event with UEI: {} for tenant id: {}", e.getUei(), e.getTenantId());
-        org.opennms.horizon.alertservice.db.entity.Alert dbAlert = addOrReduceEventAsAlert(e);
-        if (dbAlert == null) {
+        List<org.opennms.horizon.alertservice.db.entity.Alert> dbAlerts = addOrReduceEventAsAlert(e);
+        if (dbAlerts.isEmpty()) {
             LOG.debug("No alert returned from processing event with UEI: {} for tenant id: {}", e.getUei(), e.getTenantId());
-            return Optional.empty();
+            return Collections.emptyList();
         }
-        return Optional.of(alertMapper.toProto(dbAlert));
+        return dbAlerts.stream().map(alertMapper::toProto).toList();
+    }
+
+
+    protected List<org.opennms.horizon.alertservice.db.entity.Alert> addOrReduceEventAsAlert(Event event) {
+        List<AlertDefinition> alertDefinitions = alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei());
+        if (alertDefinitions.isEmpty()) {
+            alertDefinitions = alertDefinitionRepository.findByTenantIdAndUei(MonitorPolicyService.SYSTEM_TENANT, event.getUei());
+        }
+        if (alertDefinitions.isEmpty()) {
+            // No alert definition matching, no alert to create
+            eventsWithoutAlertDataCounter.increment();
+            return Collections.emptyList();
+        }
+
+        List<org.opennms.horizon.alertservice.db.entity.Alert> alerts = alertDefinitions.stream()
+            .map(alertDefinition -> getAlertData(event, alertDefinition))
+            .map(alertData -> createOrUpdateAlert(event, alertData))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .toList();
+
+        // FIXME: If the alert is going to be delete immediately, should we even bother creating it?
+        alertRepository.saveAll(alerts);
+        return alerts;
     }
 
     private AlertData getAlertData(Event event, AlertDefinition alertDefinition) {
-        var reductionKey = String.format(alertDefinition.getReductionKey(), event.getTenantId(), event.getUei(), event.getNodeId());
-        String clearKey = null;
-        if (!Strings.isNullOrEmpty(alertDefinition.getClearKey())) {
-            clearKey = String.format(alertDefinition.getClearKey(), event.getTenantId(), event.getNodeId());
-        }
+        String reductionKey = reductionKeyService.renderReductionKey(event, alertDefinition);
+        String clearKey = reductionKeyService.renderClearKey(event, alertDefinition);
         AlertCondition alertCondition = alertDefinition.getAlertCondition();
         var tags = tagRepository.findByTenantIdAndNodeId(event.getTenantId(), event.getNodeId());
         List<MonitorPolicy> matchingPolicies = new ArrayList<>();
@@ -120,57 +144,41 @@ public class AlertEventProcessor {
         );
     }
 
-    protected @Nullable org.opennms.horizon.alertservice.db.entity.Alert addOrReduceEventAsAlert(Event event) {
-        Optional<AlertDefinition> alertDefOpt = alertDefinitionRepository.findFirstByTenantIdAndUei(event.getTenantId(), event.getUei());
-        if (alertDefOpt.isEmpty()) {
-            alertDefOpt = alertDefinitionRepository.findFirstByTenantIdAndUei(MonitorPolicyService.SYSTEM_TENANT, event.getUei());
-        }
-        if (alertDefOpt.isEmpty()) {
-            // No alert definition matching, no alert to create
-            eventsWithoutAlertDataCounter.increment();
-            return null;
-        }
-        AlertData alertData = getAlertData(event, alertDefOpt.get());
-
-        Optional<org.opennms.horizon.alertservice.db.entity.Alert> optionalAlert = Optional.empty();
+    private Optional<org.opennms.horizon.alertservice.db.entity.Alert> createOrUpdateAlert(Event event, AlertData alertData) {
+        Optional<org.opennms.horizon.alertservice.db.entity.Alert> queryResult = Optional.empty();
         if (alertData.clearKey() != null) {
             // If a clearKey is set, determine if there is an existing alert, and reduce onto that one
-            optionalAlert = tenantLookup.lookupTenantId(Context.current())
-                .map(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.clearKey(), tenantId));
-            if (optionalAlert.isEmpty()) {
+            queryResult = tenantLookup.lookupTenantId(Context.current())
+                .flatMap(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.clearKey(), tenantId));
+            if (queryResult.isEmpty()) {
                 LOG.debug("No existing alert found with clear key: {}. This is possibly an out-of-order event: {}", alertData.clearKey(), event);
             }
         }
-        if (optionalAlert.isEmpty()) {
+        if (queryResult.isEmpty()) {
             // If we didn't find an existing alert to reduce to with the clearKey, the lookup by reductionKey
-            optionalAlert = tenantLookup.lookupTenantId(Context.current())
-                .map(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.reductionKey(), tenantId));
+            queryResult = tenantLookup.lookupTenantId(Context.current())
+                .flatMap(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.reductionKey(), tenantId));
         }
 
-        boolean thresholding = isThresholding(alertData);
-        boolean thresholdMet = true;
-        if (thresholding) {
-            if (!AlertType.CLEAR.equals(alertData.type())) {
-                // TODO: (Quote from Jose) We will have to add an option to auto close if rate is no longer met - that will be post FMA.
-                // If we don't wish to use SQL, this can be done by passing the ThresholdedEvent to the AlertEngine,
-                // using the tick() method to check for expiredEvents.
-                // In AlertEngine, need id, tenant, expiryDate. Save in a TreeMap sorted by expiryDate.
-                saveThresholdEvent(event.getUei(), alertData, event);
-                thresholdMet = isThresholdMet(alertData, event.getTenantId());
-            }
-        }
-
-        org.opennms.horizon.alertservice.db.entity.Alert alert = null;
-        if (optionalAlert.isEmpty()) {
-            // No existing alert found, create a new one
-            if (thresholdMet) {
-                alert = createNewAlert(event, alertData);
-            } else {
-                return null;
-            }
+        boolean thresholdMet;
+        if (isThresholding(alertData) && !AlertType.CLEAR.equals(alertData.type())) {
+            // TODO: (Quote from Jose) We will have to add an option to auto close if rate is no longer met - that will be post FMA.
+            // If we don't wish to use SQL, this can be done by passing the ThresholdedEvent to the AlertEngine,
+            // using the tick() method to check for expiredEvents.
+            // In AlertEngine, need id, tenant, expiryDate. Save in a TreeMap sorted by expiryDate.
+            saveThresholdEvent(event.getUei(), alertData, event);
+            thresholdMet = isThresholdMet(alertData, event.getTenantId());
         } else {
-            // Existing alert found, update it
-            alert = optionalAlert.get();
+            thresholdMet = true;
+        }
+
+        if (queryResult.isEmpty() && thresholdMet) {
+            var newAlert = createNewAlert(event, alertData);
+            newAlert.setMonitoringPolicyId(alertData.monitoringPolicyId());
+            return Optional.of(newAlert);
+        }
+
+        queryResult.ifPresent(alert -> {
             alert.incrementCount();
             if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.DATABASE_ID_FIELD_NUMBER))) {
                 alert.setLastEventId(event.getDatabaseId());
@@ -189,12 +197,10 @@ public class AlertEventProcessor {
             } else {
                 alert.setSeverity(alertData.alertCondition().getSeverity());
             }
-        }
-        alert.setMonitoringPolicyId(alertData.monitoringPolicyId());
+            alert.setMonitoringPolicyId(alertData.monitoringPolicyId());
+        });
 
-        // FIXME: If the alert is going to be delete immediately, should we even bother creating it?
-        alertRepository.save(alert);
-        return alert;
+        return queryResult;
     }
 
     private boolean isThresholdMet(AlertData alertData, String tenantId) {
@@ -280,6 +286,12 @@ public class AlertEventProcessor {
         return alert;
     }
 
-    private record AlertData(String reductionKey, String clearKey, AlertType type, List<Long> monitoringPolicyId, AlertCondition alertCondition) {
+    private record AlertData(
+        String reductionKey,
+        String clearKey,
+        AlertType type,
+        List<Long> monitoringPolicyId,
+        AlertCondition alertCondition
+    ) {
     }
 }

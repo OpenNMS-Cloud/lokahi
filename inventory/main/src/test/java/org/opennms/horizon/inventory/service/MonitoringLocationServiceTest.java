@@ -35,22 +35,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 
+import javax.xml.stream.Location;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -71,6 +76,12 @@ class MonitoringLocationServiceTest {
     @Mock
     private MonitoringLocationMapper mapper;
 
+    private static final Long INVALID_LOCATION_ID = 404L;
+
+    private static final String TENANT_ID = "tenantId";
+
+
+
     @AfterEach
     void tearDown() {
         verifyNoMoreInteractions(modelRepo, mapper);
@@ -79,20 +90,19 @@ class MonitoringLocationServiceTest {
     @Test
     void testFindByTenantId() {
         // Mock data
-        String tenantId = "testTenantId";
         List<MonitoringLocation> monitoringLocationList = new ArrayList<>();
         monitoringLocationList.add(new MonitoringLocation());
         monitoringLocationList.add(new MonitoringLocation());
-        when(modelRepo.findByTenantId(tenantId)).thenReturn(monitoringLocationList);
+        when(modelRepo.findByTenantId(TENANT_ID)).thenReturn(monitoringLocationList);
         when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(MonitoringLocationDTO.newBuilder().build());
 
         // Test
-        List<MonitoringLocationDTO> result = monitoringLocationService.findByTenantId(tenantId);
+        List<MonitoringLocationDTO> result = monitoringLocationService.findByTenantId(TENANT_ID);
 
         // Assertions
         assertNotNull(result);
         assertEquals(2, result.size());
-        verify(modelRepo, times(1)).findByTenantId(tenantId);
+        verify(modelRepo, times(1)).findByTenantId(TENANT_ID);
         verify(mapper, times(2)).modelToDTO(any(MonitoringLocation.class));
     }
 
@@ -100,18 +110,17 @@ class MonitoringLocationServiceTest {
     void testFindByLocationAndTenantId() {
         // Mock data
         String location = "testLocation";
-        String tenantId = "testTenantId";
         MonitoringLocation monitoringLocation = new MonitoringLocation();
-        when(modelRepo.findByLocationAndTenantId(location, tenantId)).thenReturn(Optional.of(monitoringLocation));
+        when(modelRepo.findByLocationAndTenantId(location, TENANT_ID)).thenReturn(Optional.of(monitoringLocation));
         when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(MonitoringLocationDTO.newBuilder().build());
 
         // Test
-        Optional<MonitoringLocationDTO> result = monitoringLocationService.findByLocationAndTenantId(location, tenantId);
+        Optional<MonitoringLocationDTO> result = monitoringLocationService.findByLocationAndTenantId(location, TENANT_ID);
 
         // Assertions
         assertNotNull(result);
         assertTrue(result.isPresent());
-        verify(modelRepo, times(1)).findByLocationAndTenantId(location, tenantId);
+        verify(modelRepo, times(1)).findByLocationAndTenantId(location, TENANT_ID);
         verify(mapper, times(1)).modelToDTO(any(MonitoringLocation.class));
     }
 
@@ -119,18 +128,17 @@ class MonitoringLocationServiceTest {
     void testGetByIdAndTenantId() {
         // Mock data
         long id = 1L;
-        String tenantId = "testTenantId";
         MonitoringLocation monitoringLocation = new MonitoringLocation();
-        when(modelRepo.findByIdAndTenantId(id, tenantId)).thenReturn(Optional.of(monitoringLocation));
+        when(modelRepo.findByIdAndTenantId(id, TENANT_ID)).thenReturn(Optional.of(monitoringLocation));
         when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(MonitoringLocationDTO.newBuilder().build());
 
         // Test
-        Optional<MonitoringLocationDTO> result = monitoringLocationService.getByIdAndTenantId(id, tenantId);
+        Optional<MonitoringLocationDTO> result = monitoringLocationService.getByIdAndTenantId(id, TENANT_ID);
 
         // Assertions
         assertNotNull(result);
         assertTrue(result.isPresent());
-        verify(modelRepo, times(1)).findByIdAndTenantId(id, tenantId);
+        verify(modelRepo, times(1)).findByIdAndTenantId(id, TENANT_ID);
         verify(mapper, times(1)).modelToDTO(any(MonitoringLocation.class));
     }
 
@@ -178,27 +186,91 @@ class MonitoringLocationServiceTest {
     @Test
     void testSearchLocationsByTenantId() {
         // Mock data
-        String tenantId = "testTenantId";
         String search = "testSearch";
         List<MonitoringLocation> monitoringLocationList = new ArrayList<>();
         monitoringLocationList.add(new MonitoringLocation());
         monitoringLocationList.add(new MonitoringLocation());
         monitoringLocationList.add(new MonitoringLocation());
-        when(modelRepo.findByLocationContainingIgnoreCaseAndTenantId(tenantId, search)).thenReturn(monitoringLocationList);
+        when(modelRepo.findByLocationContainingIgnoreCaseAndTenantId(TENANT_ID, search)).thenReturn(monitoringLocationList);
         when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(MonitoringLocationDTO.newBuilder().build());
 
         // Test
-        List<MonitoringLocationDTO> result = monitoringLocationService.searchLocationsByTenantId(tenantId, search);
+        List<MonitoringLocationDTO> result = monitoringLocationService.searchLocationsByTenantId(TENANT_ID, search);
 
         // Assertions
         assertNotNull(result);
         assertEquals(3, result.size());
-        verify(modelRepo, times(1)).findByLocationContainingIgnoreCaseAndTenantId(tenantId, search);
+        verify(modelRepo, times(1)).findByLocationContainingIgnoreCaseAndTenantId(TENANT_ID, search);
         verify(mapper, times(3)).modelToDTO(any(MonitoringLocation.class));
     }
 
     @Test
-    void testUpsertAddressIsNull() {
+    void testUpsertWithExistingId() throws LocationNotFoundException {
+        // Mock data
+        long id = 1L;
+        MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder()
+            .setId(id)
+            .setTenantId(TENANT_ID)
+            .build();
+        MonitoringLocation monitoringLocation = new MonitoringLocation();
+        monitoringLocation.setId(id);
+        monitoringLocation.setTenantId(TENANT_ID);
+        when(mapper.dtoToModel(any(MonitoringLocationDTO.class))).thenReturn(monitoringLocation);
+        when(modelRepo.findByIdAndTenantId(id, TENANT_ID)).thenReturn(Optional.of(monitoringLocation));
+        when(modelRepo.save(monitoringLocation)).thenReturn(monitoringLocation);
+        when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(monitoringLocationDTO);
+
+        // Test
+        MonitoringLocationDTO result = monitoringLocationService.upsert(monitoringLocationDTO);
+
+        // Assertions
+        assertNotNull(result);
+        verify(mapper, times(1)).dtoToModel(any(MonitoringLocationDTO.class));
+        verify(modelRepo, times(1)).save(monitoringLocation);
+        verify(mapper, times(1)).modelToDTO(any(MonitoringLocation.class));
+    }
+
+    @Test
+    void testUpsertWithoutId() throws LocationNotFoundException {
+        // Mock data
+        MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder()
+            .setTenantId(TENANT_ID)
+            .build();
+        MonitoringLocation monitoringLocation = new MonitoringLocation();
+        monitoringLocation.setTenantId(TENANT_ID);
+        when(mapper.dtoToModel(any(MonitoringLocationDTO.class))).thenReturn(monitoringLocation);
+        when(modelRepo.save(monitoringLocation)).thenReturn(monitoringLocation);
+        when(mapper.modelToDTO(any(MonitoringLocation.class))).thenReturn(monitoringLocationDTO);
+
+        // Test
+        MonitoringLocationDTO result = monitoringLocationService.upsert(monitoringLocationDTO);
+
+        // Assertions
+        assertNotNull(result);
+        verify(mapper, times(1)).dtoToModel(any(MonitoringLocationDTO.class));
+        verify(modelRepo, times(1)).save(monitoringLocation);
+        verify(mapper, times(1)).modelToDTO(any(MonitoringLocation.class));
+    }
+
+    @Test
+    void testUpsertWithInvalidId() {
+        // Mock data
+        MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder()
+            .setId(INVALID_LOCATION_ID)
+            .setTenantId(TENANT_ID)
+            .build();
+        when(modelRepo.findByIdAndTenantId(INVALID_LOCATION_ID, TENANT_ID)).thenReturn(Optional.empty());
+
+        // Test
+        assertThrows(LocationNotFoundException.class, () -> monitoringLocationService.upsert(monitoringLocationDTO));
+
+        // Assertions
+        verify(modelRepo, never()).save(any());
+    }
+
+
+    @Test
+    void testUpsertAddressIsNull() throws LocationNotFoundException {
         // Mock data
         MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder().build();
         MonitoringLocation monitoringLocation = new MonitoringLocation();
@@ -217,7 +289,7 @@ class MonitoringLocationServiceTest {
     }
 
     @Test
-    void testUpsertAddressIsNotNull() {
+    void testUpsertAddressIsNotNull() throws LocationNotFoundException {
         // Mock data
         MonitoringLocationDTO monitoringLocationDTO = MonitoringLocationDTO.newBuilder().build();
         MonitoringLocation monitoringLocation = new MonitoringLocation();
@@ -237,25 +309,32 @@ class MonitoringLocationServiceTest {
     }
 
     @Test
-    void testDelete() {
+    void testDelete() throws LocationNotFoundException {
         // Mock data
         long id = 1L;
-        String tenantId = "testTenantId";
         MonitoringLocation monitoringLocation = new MonitoringLocation();
         monitoringLocation.setId(id);
-        when(modelRepo.findByIdAndTenantId(id, tenantId)).thenReturn(Optional.of(monitoringLocation));
-        when(monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, tenantId)).thenReturn(new ArrayList<>());
+        when(modelRepo.findByIdAndTenantId(id, TENANT_ID)).thenReturn(Optional.of(monitoringLocation));
+        when(monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, TENANT_ID)).thenReturn(new ArrayList<>());
 
         // Test
-        monitoringLocationService.delete(id, tenantId);
+        monitoringLocationService.delete(id, TENANT_ID);
 
         // Assertions
-        verify(modelRepo, times(1)).findByIdAndTenantId(id, tenantId);
+        verify(modelRepo, times(1)).findByIdAndTenantId(id, TENANT_ID);
         verify(modelRepo, times(1)).delete(monitoringLocation);
-        verify(monitoringSystemRepository, times(1)).findByMonitoringLocationIdAndTenantId(id, tenantId);
+        verify(monitoringSystemRepository, times(1)).findByMonitoringLocationIdAndTenantId(id, TENANT_ID);
         verify(monitoringSystemRepository, times(0)).deleteAll(new ArrayList<>());
+    }
 
-        // with minion
+    @Test
+    void testDeleteWithMinions() throws LocationNotFoundException {
+        // Mock data
+        long id = 1L;
+        MonitoringLocation monitoringLocation = new MonitoringLocation();
+        monitoringLocation.setId(id);
+        when(modelRepo.findByIdAndTenantId(id, TENANT_ID)).thenReturn(Optional.of(monitoringLocation));
+        when(monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, TENANT_ID)).thenReturn(new ArrayList<>());
         MonitoringSystem monitoringSystem = new MonitoringSystem();
         monitoringSystem.setMonitoringLocationId(id);
         monitoringSystem.setId(1L);
@@ -263,16 +342,29 @@ class MonitoringLocationServiceTest {
         monitoringSystem.setMonitoringLocationId(id);
         monitoringSystem.setId(2L);
         var systems = Arrays.asList(monitoringSystem, monitoringSystem2);
-        when(monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, tenantId)).thenReturn(systems);
+        when(monitoringSystemRepository.findByMonitoringLocationIdAndTenantId(id, TENANT_ID)).thenReturn(systems);
 
         // Test
-        monitoringLocationService.delete(id, tenantId);
+        monitoringLocationService.delete(id, TENANT_ID);
 
         // Assertions
-        verify(modelRepo, times(2)).findByIdAndTenantId(id, tenantId);
-        verify(modelRepo, times(2)).delete(monitoringLocation);
-        verify(monitoringSystemRepository, times(2)).findByMonitoringLocationIdAndTenantId(id, tenantId);
+        verify(modelRepo, times(1)).findByIdAndTenantId(id, TENANT_ID);
+        verify(modelRepo, times(1)).delete(monitoringLocation);
+        verify(monitoringSystemRepository, times(1)).findByMonitoringLocationIdAndTenantId(id, TENANT_ID);
         verify(monitoringSystemRepository, times(1)).deleteAll(systems);
+    }
+
+    @Test()
+    void testDeleteLocationNotFound() {
+        // Mock data
+        when(modelRepo.findByIdAndTenantId(INVALID_LOCATION_ID, TENANT_ID)).thenReturn(Optional.empty());
+
+        // Test
+        assertThrows(LocationNotFoundException.class, () -> monitoringLocationService.delete(INVALID_LOCATION_ID, TENANT_ID));
+
+        // Assertions
+        verify(modelRepo, never()).delete(any());
+        verify(monitoringSystemRepository, never()).deleteAll(any());
     }
 }
 

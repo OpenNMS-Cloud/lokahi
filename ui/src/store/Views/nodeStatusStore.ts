@@ -36,6 +36,10 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const node = computed(() => {
     const node = nodeStatusQueries.fetchedData.node
 
+    const azureInterfaces = new Map(node.azureInterfaces?.map((azureInterface) => {
+      return [azureInterface.id, azureInterface]
+    }))
+
     const snmpInterfaces = node.snmpInterfaces?.map((snmpInterface) => {
       for (const exporter of exporters.value) {
         if (exporter.snmpInterface?.ifIndex === snmpInterface.ifIndex) {
@@ -45,7 +49,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
       return { ...snmpInterface, exporter: {} }
     }) || []
 
-    return { ...node, snmpInterfaces }
+    return { ...node, snmpInterfaces, azureInterfaces }
   })
 
   return {

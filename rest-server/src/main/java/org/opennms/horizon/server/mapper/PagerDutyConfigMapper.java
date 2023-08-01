@@ -38,6 +38,4 @@ public interface PagerDutyConfigMapper {
 
     @Mapping(source = "integrationkey", target = "integrationKey")
     PagerDutyConfigDTO pagerDutyConfigToProto(PagerDutyConfig config);
-    @Mapping(source = "integrationKey", target = "integrationkey")
-    PagerDutyConfig protoToConfig(PagerDutyConfigDTO configDTO);
 }

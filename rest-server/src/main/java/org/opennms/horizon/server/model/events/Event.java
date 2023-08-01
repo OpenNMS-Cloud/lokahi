@@ -9,7 +9,6 @@ import java.util.List;
 @Setter
 public class Event {
     private int id;
-    private String tenantId;
     private String uei;
     private int nodeId;
     private String ipAddress;

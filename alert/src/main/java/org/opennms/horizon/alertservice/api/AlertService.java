@@ -29,6 +29,7 @@
 package org.opennms.horizon.alertservice.api;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.opennms.horizon.alerts.proto.Alert;
@@ -36,7 +37,7 @@ import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 
 public interface AlertService {
-    Optional<Alert> reduceEvent(Event e);
+    List<Alert> reduceEvent(Event e);
 
     boolean deleteByIdAndTenantId(long id, String tenantId);
 

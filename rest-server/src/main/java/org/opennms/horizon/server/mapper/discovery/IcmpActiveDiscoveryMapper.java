@@ -31,7 +31,6 @@ package org.opennms.horizon.server.mapper.discovery;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
@@ -46,29 +45,23 @@ import java.util.List;
 @Mapper(componentModel = "spring",
     uses = {TagMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface IcmpActiveDiscoveryMapper {
-    @Mappings({
-        @Mapping(source = "readCommunityList", target = "readCommunities"),
-        @Mapping(source = "portsList", target = "ports")
-    })
+
+    @Mapping(source = "readCommunityList", target = "readCommunities")
+    @Mapping(source = "portsList", target = "ports")
     SNMPConfig snmpDtoToModel(SNMPConfigDTO snmpDto);
 
-    @Mappings({
-        @Mapping(source = "readCommunities", target = "readCommunityList"),
-        @Mapping(source = "ports", target = "portsList")
-    })
+    @Mapping(source = "readCommunities", target = "readCommunityList")
+    @Mapping(source = "ports", target = "portsList")
     SNMPConfigDTO snmpConfigToDTO(SNMPConfig snmpConfig);
 
-    @Mappings({
-        @Mapping(target = "ipAddressesList", source = "ipAddresses"),
-        @Mapping(target = "snmpConfig", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
-        @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    })
+    @Mapping(target = "ipAddressesList", source = "ipAddresses")
+    @Mapping(target = "snmpConfig", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscoveryCreateDTO mapRequest(IcmpActiveDiscoveryCreate request);
 
-    @Mappings({
-        @Mapping(source = "ipAddressesList", target = "ipAddresses"),
-        @Mapping(target = "snmpConfig", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS),
-    })
+
+    @Mapping(source = "ipAddressesList", target = "ipAddresses")
+    @Mapping(target = "snmpConfig", source = "snmpConfig", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscovery dtoToIcmpActiveDiscovery(IcmpActiveDiscoveryDTO configDTO);
 
     List<IcmpActiveDiscovery> dtoListToIcmpActiveDiscoveryList(List<IcmpActiveDiscoveryDTO> dtoList);

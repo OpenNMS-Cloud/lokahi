@@ -35,6 +35,5 @@ import lombok.Setter;
 @Setter
 public class Tag {
     private long id;
-    private String tenantId;
     private String name;
 }

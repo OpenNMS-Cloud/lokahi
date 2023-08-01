@@ -16,7 +16,7 @@ public abstract class GQLQueryConstants {
         "query { metric(name:\"response_time_msec\", labels: {monitor:\"ECHO\", instance:\"%s\"}) { status, data { result { metric }}} }";
 
     public static final String CREATE_NODE_QUERY =
-        "mutation AddNode($node: NodeCreateInput!) { addNode(node: $node) { createTime id monitoringLocationId nodeLabel tenantId }}";
+        "mutation AddNode($node: NodeCreateInput!) { addNode(node: $node) { createTime id monitoringLocationId nodeLabel }}";
 
     public static final String LIST_NODE_METRICS =
         "query NodeStatusParts($id: Long!) {nodeStatus(id: $id) {id status  }}";

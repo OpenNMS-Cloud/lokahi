@@ -5,7 +5,6 @@ public class CreateNodeResponseData {
     private long id;
     private long monitoringLocationId;
     private String nodeLabel;
-    private String tenantId;
 
     public long getCreateTime() {
         return createTime;
@@ -37,13 +36,5 @@ public class CreateNodeResponseData {
 
     public void setNodeLabel(String nodeLabel) {
         this.nodeLabel = nodeLabel;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 }

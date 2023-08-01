@@ -56,7 +56,7 @@ public class MonitoringPolicyKafkaConsumer {
         try {
             MonitorPolicyProto monitoringPolicyProto = MonitorPolicyProto.parseFrom(data);
             if (Strings.isNullOrEmpty(monitoringPolicyProto.getTenantId())) {
-                LOG.warn("TenantId is empty, dropping alert {}", monitoringPolicyProto);
+                LOG.warn("TenantId is empty, dropping Monitoring Policy {}", monitoringPolicyProto);
                 return;
             }
             monitoringPolicyService.saveMonitoringPolicy(monitoringPolicyProto);

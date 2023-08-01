@@ -73,12 +73,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.INSTANCE_VIEW_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.METRICS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.NETWORK_INTERFACES_ENDPOINT;
+import static org.opennms.horizon.shared.azure.http.AzureHttpClient.NETWORK_INTERFACE_METRICS_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.OAUTH2_TOKEN_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.PUBLIC_IP_ADDRESSES_ENDPOINT;
 import static org.opennms.horizon.shared.azure.http.AzureHttpClient.RESOURCES_ENDPOINT;
@@ -122,11 +124,18 @@ public class AzureHttpClientTest {
     }
 
     @Test
+    public void testEnum() {
+        assertEquals("publicIPAddresses", AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName());
+        assertEquals(AzureHttpClient.ResourcesType.NETWORK_INTERFACES,
+            AzureHttpClient.ResourcesType.fromMetricName("networkInterfaces"));
+    }
+
+    @Test
     public void testLogin() throws Exception {
         AzureOAuthToken oAuthToken = getAzureOAuthToken();
 
-        String url = String.format(OAUTH2_TOKEN_ENDPOINT, TEST_DIRECTORY_ID)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(OAUTH2_TOKEN_ENDPOINT, "", TEST_DIRECTORY_ID
+            ,"?api-version=" + this.params.getApiVersion());
 
         wireMock.stubFor(post(url)
             .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
@@ -150,32 +159,54 @@ public class AzureHttpClientTest {
 
     @Test
     public void testLoginWithRetriesAndFails() {
-        String url = String.format(OAUTH2_TOKEN_ENDPOINT, TEST_DIRECTORY_ID)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(OAUTH2_TOKEN_ENDPOINT, "", TEST_DIRECTORY_ID
+            , "?api-version=" + this.params.getApiVersion());
 
         wireMock.stubFor(post(url)
             .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
             .willReturn(ResponseDefinitionBuilder.responseDefinition()
-                .withBody("{\"error\":{\"code\":\"AuthorizationFailed\",\"message\":\"authorization failed message\"}}")
-                .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
+                .withBody("{\"error\":\"invalid_client\",\"error_description\":\"AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app 'da5b5bcb-589c-43d3-a7dd-af0900393c20'.\\r\\nTrace ID: d8e73b43-ae4d-40f9-9c4e-2404d5f30300\\r\\nCorrelation ID: fbf5bdb8-ac14-4f77-9941-5a5fb89112fc\\r\\nTimestamp: 2023-07-12 02:48:42Z\",\"error_codes\":[7000215],\"timestamp\":\"2023-07-12 02:48:42Z\",\"trace_id\":\"d8e73b43-ae4d-40f9-9c4e-2404d5f30300\",\"correlation_id\":\"fbf5bdb8-ac14-4f77-9941-5a5fb89112fc\",\"error_uri\":\"https://login.microsoftonline.com/error?code=7000215\"}")
+                .withStatus(HttpStatus.SC_UNAUTHORIZED)));
 
         AzureHttpException e = assertThrows(AzureHttpException.class, () -> {
             this.client.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT, TEST_RETRIES);
         });
 
-        assertTrue(e.hasDescription());
-        assertEquals("AuthorizationFailed: authorization failed message", e.getDescription().toString());
+        assertTrue(e.hasHttpError());
+        assertEquals("invalid_client", e.getHttpError().getError());
 
-        verify(exactly(TEST_RETRIES), postRequestedFor(urlEqualTo(url)));
-        assertEquals("Failed to get for endpoint: /%s/oauth2/token, status: 500, body: {\"error\":{\"code\":\"AuthorizationFailed\",\"message\":\"authorization failed message\"}}, retry: 2/2", e.getMessage());
+        // should not retry more than once for auth error
+        verify(exactly(1), postRequestedFor(urlEqualTo(url)));
     }
 
+
+    @Test
+    public void testLoginWithJsonError() {
+        String url = String.format(OAUTH2_TOKEN_ENDPOINT, "", TEST_DIRECTORY_ID
+            , "?api-version=" + this.params.getApiVersion());
+
+        wireMock.stubFor(post(url)
+            .withHeader("Content-Type", new EqualToPattern("application/x-www-form-urlencoded"))
+            .willReturn(ResponseDefinitionBuilder.responseDefinition()
+                .withBody("error")
+                .withStatus(HttpStatus.SC_OK)));
+
+        AzureHttpException e = assertThrows(AzureHttpException.class, () -> {
+            this.client.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT, TEST_RETRIES);
+        });
+
+        assertFalse(e.hasHttpError());
+        assertTrue(e.getMessage().startsWith("Failed to get for endpoint"));
+
+        // should not retry more than once for auth error
+        verify(exactly(TEST_RETRIES), postRequestedFor(urlEqualTo(url)));
+    }
     @Test
     public void testGetSubscription() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(SUBSCRIPTION_ENDPOINT, TEST_SUBSCRIPTION)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(SUBSCRIPTION_ENDPOINT, TEST_SUBSCRIPTION
+            , "?api-version=" + this.params.getApiVersion());
 
         AzureSubscription azureSubscription = new AzureSubscription();
         azureSubscription.setSubscriptionId(TEST_SUBSCRIPTION);
@@ -198,8 +229,8 @@ public class AzureHttpClientTest {
     public void testGetResourceGroups() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(RESOURCE_GROUPS_ENDPOINT, TEST_SUBSCRIPTION)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(RESOURCE_GROUPS_ENDPOINT, TEST_SUBSCRIPTION
+            , "?api-version=" + this.params.getApiVersion());
 
         AzureResourceGroups azureResourceGroups = new AzureResourceGroups();
         AzureValue azureValue = new AzureValue();
@@ -224,8 +255,8 @@ public class AzureHttpClientTest {
     public void testGetResources() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(RESOURCES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(RESOURCES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP
+            , "?api-version=" + this.params.getApiVersion());
 
         AzureResources azureResources = new AzureResources();
         org.opennms.horizon.shared.azure.http.dto.resources.AzureValue azureValue
@@ -250,8 +281,8 @@ public class AzureHttpClientTest {
     public void testGetNetworkInterfaces() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(NETWORK_INTERFACES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(NETWORK_INTERFACES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP
+            , "?api-version=" + this.params.getApiVersion());
 
         AzureNetworkInterfaces azureNetworkInterfaces = getAzureNetworkInterfaces();
 
@@ -271,8 +302,8 @@ public class AzureHttpClientTest {
     public void testGetPublicIpAddresses() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP
+            , "?api-version=" + this.params.getApiVersion());
 
         AzurePublicIpAddresses azurePublicIpAddresses = new AzurePublicIpAddresses();
         AzurePublicIPAddress azurePublicIPAddress = new AzurePublicIPAddress();
@@ -294,8 +325,8 @@ public class AzureHttpClientTest {
     public void testGetInstanceView() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(INSTANCE_VIEW_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, TEST_RESOURCE_NAME)
-            + "?api-version=" + this.params.getApiVersion();
+        String url = String.format(INSTANCE_VIEW_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, TEST_RESOURCE_NAME,
+            "?api-version=" + this.params.getApiVersion());
 
         AzureInstanceView azureInstanceView = new AzureInstanceView();
         AzureStatus azureStatus = new AzureStatus();
@@ -319,32 +350,16 @@ public class AzureHttpClientTest {
     public void testGetMetrics() throws Exception {
         AzureOAuthToken token = getAzureOAuthToken();
 
-        String url = String.format(METRICS_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, TEST_RESOURCE_NAME)
-            + "?api-version=" + this.params.getMetricsApiVersion()
+        String url = String.format(METRICS_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, TEST_RESOURCE_NAME,
+             "?api-version=" + this.params.getMetricsApiVersion()
             + "&metricnames=Network+In+Total%2CNetwork+Out+Total"
-            + "&interval=PT1M";
+            + "&interval=PT1M");
 
-        AzureMetrics azureMetrics = new AzureMetrics();
-
-        org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue azureValue
-            = new org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue();
-        AzureName azureName = new AzureName();
-        azureName.setValue("name");
-        azureValue.setName(azureName);
-
-        AzureTimeseries azureTimeseries = new AzureTimeseries();
-        AzureDatum azureDatum = new AzureDatum();
         Instant now = Instant.now();
-        azureDatum.setTimeStamp(now.toString());
-        azureDatum.setTotal(1234d);
-
-        azureTimeseries.setData(Collections.singletonList(azureDatum));
-        azureValue.setTimeseries(Collections.singletonList(azureTimeseries));
-        azureMetrics.setValue(Collections.singletonList(azureValue));
 
         wireMock.stubFor(get(url)
             .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
-            .willReturn(ResponseDefinitionBuilder.okForJson(azureMetrics)));
+            .willReturn(ResponseDefinitionBuilder.okForJson(generateAzureMetrics(now))));
 
         Map<String, String> params = new HashMap<>();
         params.put("metricnames", "Network In Total,Network Out Total");
@@ -383,6 +398,68 @@ public class AzureHttpClientTest {
         assertNotNull(result.getMetricsApiVersion());
     }
 
+    @Test
+    public void testGetNetworkInterfaceMetrics() throws AzureHttpException {
+        AzureOAuthToken token = getAzureOAuthToken();
+        Instant now = Instant.now();
+
+        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP,
+            "publicIPAddresses/PUBLIC_IP_ID", "?api-version=" + this.params.getMetricsApiVersion()
+                + "&metricnames=ByteCount&interval=PT1M");
+
+        wireMock.stubFor(get(url)
+            .withHeader("Authorization", new EqualToPattern("Bearer " + token.getAccessToken()))
+            .willReturn(ResponseDefinitionBuilder.okForJson(generateAzureMetrics(now))));
+
+        Map<String, String> params = new HashMap<>();
+        params.put("metricnames", "ByteCount");
+        params.put("interval", "PT1M");
+
+        AzureMetrics metrics =
+            this.client.getNetworkInterfaceMetrics(token, TEST_SUBSCRIPTION, TEST_RESOURCE_GROUP, "publicIPAddresses/PUBLIC_IP_ID", params, TEST_TIMEOUT, TEST_RETRIES);
+
+        verify(exactly(1), getRequestedFor(urlEqualTo(url)));
+
+        assertNotNull(metrics.getValue());
+        assertEquals(1, metrics.getValue().size());
+
+        org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue value = metrics.getValue().get(0);
+        assertNotNull(value.getName());
+        assertEquals("name", value.getName().getValue());
+        assertNotNull(value.getTimeseries());
+        assertEquals(1, value.getTimeseries().size());
+
+        AzureTimeseries timeseries = value.getTimeseries().get(0);
+        assertNotNull(timeseries.getData());
+        assertEquals(1, timeseries.getData().size());
+
+        AzureDatum datum = timeseries.getData().get(0);
+        assertEquals(1234d, datum.getTotal(), 0d);
+        assertEquals(now.toString(), datum.getTimeStamp());
+    }
+
+
+    private AzureMetrics generateAzureMetrics(Instant now){
+        AzureMetrics azureMetrics = new AzureMetrics();
+
+        org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue azureValue
+            = new org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue();
+        AzureName azureName = new AzureName();
+        azureName.setValue("name");
+        azureValue.setName(azureName);
+
+        AzureTimeseries azureTimeseries = new AzureTimeseries();
+        AzureDatum azureDatum = new AzureDatum();
+
+        azureDatum.setTimeStamp(now.toString());
+        azureDatum.setTotal(1234d);
+
+        azureTimeseries.setData(Collections.singletonList(azureDatum));
+        azureValue.setTimeseries(Collections.singletonList(azureTimeseries));
+        azureMetrics.setValue(Collections.singletonList(azureValue));
+        return azureMetrics;
+    }
+
     private static AzureNetworkInterfaces getAzureNetworkInterfaces() {
         AzureNetworkInterfaces azureNetworkInterfaces = new AzureNetworkInterfaces();
         AzureNetworkInterface azureNetworkInterface = new AzureNetworkInterface();
@@ -416,4 +493,3 @@ public class AzureHttpClientTest {
         return token;
     }
 }
-

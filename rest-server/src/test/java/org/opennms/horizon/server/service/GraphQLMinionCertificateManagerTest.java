@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -123,6 +124,35 @@ class GraphQLMinionCertificateManagerTest {
     }
 
     @Test
+    void testGetMinionCertError() throws JSONException {
+            var status = Status.newBuilder()
+                .setCode(Code.INTERNAL_VALUE)
+                .setMessage("Test exception").build();
+            var exception = StatusProto.toStatusRuntimeException(status);
+            when(inventoryClient.getLocationById(LOCATION_ID, accessToken)).thenThrow(exception);
+
+        String request = """
+            query {
+              getMinionCertificate(locationId: 404){
+                certificate
+                password
+              }
+            }""";
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+                .expectBody()
+                    .jsonPath("$.data.getMinionCertificate").isEqualTo(null);
+
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
     void testRevokeMinionCertificate() throws JSONException {
         String request = """
             mutation {
@@ -138,6 +168,55 @@ class GraphQLMinionCertificateManagerTest {
             .expectBody()
             .jsonPath("$.data.revokeMinionCertificate").isBoolean();
         verify(mockClient,  times(1)).revokeCertificate(TENANT_ID, LOCATION_ID, accessToken);
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    void testRevokeMinionCertificateForInvalidLocation() throws JSONException {
+        String request = """
+            mutation {
+              revokeMinionCertificate(locationId: %s)
+            }""".formatted(INVALID_LOCATION_ID);
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.revokeMinionCertificate").isEmpty()
+            .jsonPath("$.errors").isNotEmpty();
+        verifyNoInteractions(mockClient);
+        verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
+        verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
+    }
+
+    @Test
+    void testRevokeMinionCertificateError() throws JSONException {
+        var status = Status.newBuilder()
+            .setCode(Code.INTERNAL_VALUE)
+            .setMessage("Test exception").build();
+        var exception = StatusProto.toStatusRuntimeException(status);
+        when(inventoryClient.getLocationById(LOCATION_ID, accessToken)).thenThrow(exception);
+
+        String request = """
+            mutation {
+              revokeMinionCertificate(locationId: %s)
+            }""".formatted(INVALID_LOCATION_ID);
+        webClient.post()
+            .uri(GRAPHQL_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(createPayload(request))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.data.revokeMinionCertificate").isEmpty()
+            .jsonPath("$.errors").isNotEmpty();
+
+        verifyNoInteractions(mockClient);
         verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }

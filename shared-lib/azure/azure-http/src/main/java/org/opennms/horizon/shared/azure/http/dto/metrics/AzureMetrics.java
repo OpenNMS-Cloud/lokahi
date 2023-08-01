@@ -33,6 +33,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,9 +43,11 @@ public class AzureMetrics {
     @SerializedName("value")
     private List<AzureValue> value = new ArrayList<>();
 
-    public void collect(Map<String, Double> collectedData) {
+    public Map<String, Double> collect() {
+        Map<String, Double> collectedData = new HashMap<>();
         for (AzureValue metric : value) {
             metric.collect(collectedData);
         }
+        return collectedData;
     }
 }

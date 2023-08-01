@@ -49,9 +49,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.opennms.horizon.server.service.metrics.Constants.AZURE_MONITOR_TYPE;
-import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
-
 @Slf4j
 @GraphQLApi
 @Service
@@ -103,10 +100,6 @@ public class TSDBMetricsService {
 
         //in the case of minion echo, there is no node information
         Optional<NodeDTO> nodeOpt = getNode(env, metricLabels);
-        if (nodeOpt.isPresent()) {
-            NodeDTO node = nodeOpt.get();
-            setMonitorTypeByScanType(node, metricLabels);
-        }
 
         String queryString = queryService.getQueryString(nodeOpt, name, metricLabels, timeRange, timeRangeUnit);
 
@@ -123,12 +116,6 @@ public class TSDBMetricsService {
         }).orElse(Optional.empty());
     }
 
-    private void setMonitorTypeByScanType(NodeDTO node, Map<String, String> metricLabels) {
-        String scanType = node.getScanType();
-        if (AZURE_SCAN_TYPE.equals(scanType)) {
-            metricLabels.put(MetricLabelUtils.MONITOR_KEY, AZURE_MONITOR_TYPE);
-        }
-    }
 
     private Mono<TimeSeriesQueryResult> getMetrics(String tenantId, String queryString) {
         return tsdbQueryWebClient.post()

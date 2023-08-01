@@ -41,7 +41,7 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.azure.http.AzureHttpException;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureErrorDescription;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
 import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
 import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 import org.springframework.stereotype.Component;
@@ -87,9 +87,9 @@ public class AzureActiveDiscoveryService {
             token = client.login(request.getDirectoryId(), request.getClientId(),
                 request.getClientSecret(), TaskUtils.AZURE_DEFAULT_TIMEOUT_MS, TaskUtils.AZURE_DEFAULT_RETRIES);
         } catch (AzureHttpException e) {
-            if (e.hasDescription()) {
-                AzureErrorDescription description = e.getDescription();
-                throw new InventoryRuntimeException(description.toString(), e);
+            if (e.hasHttpError()) {
+                AzureHttpError httpError = e.getHttpError();
+                throw new InventoryRuntimeException(httpError.toString(), e);
             }
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         } catch (Exception e) {
@@ -100,9 +100,9 @@ public class AzureActiveDiscoveryService {
             subscription = client.getSubscription(token, request.getSubscriptionId(),
                 TaskUtils.AZURE_DEFAULT_TIMEOUT_MS, TaskUtils.AZURE_DEFAULT_RETRIES);
         } catch (AzureHttpException e) {
-            if (e.hasDescription()) {
-                AzureErrorDescription description = e.getDescription();
-                throw new InventoryRuntimeException(description.toString(), e);
+            if (e.hasHttpError()) {
+                AzureHttpError httpError = e.getHttpError();
+                throw new InventoryRuntimeException(httpError.toString(), e);
             }
             String message = String.format("Failed to get azure subscription %s", request.getSubscriptionId());
             throw new InventoryRuntimeException(message, e);

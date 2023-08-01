@@ -91,9 +91,17 @@ public class MonitorPolicySteps {
 
     @Given("A monitoring policy named {string} with tag {string}")
     public void defineNewPolicy(String name, String tag) {
+        defineNewPolicy(name);
+        policyBuilder.addTags(tag);
+
+        ruleBuilder = PolicyRuleProto.newBuilder();
+        triggerBuilders = new ArrayList<>();
+    }
+
+    @Given("A monitoring policy named {string}")
+    public void defineNewPolicy(String name) {
         policyBuilder = MonitorPolicyProto.newBuilder()
-            .setName(name)
-            .addTags(tag);
+            .setName(name);
 
         ruleBuilder = PolicyRuleProto.newBuilder();
         triggerBuilders = new ArrayList<>();

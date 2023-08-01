@@ -7,9 +7,10 @@
   </div>
   <div id="graphs-container" v-if="store.fetchIsDone">
     <LineGraph :graph="nodeLatency" type="latency" />
-    <LineGraph :graph="bytesInOut" type="bytes" />
-    <LineGraph :graph="bytesIn" type="bytes" />
-    <LineGraph :graph="bytesOut" type="bytes" />
+    <LineGraph :graph="azureNodeBytesInOut" type="bytes" v-if="isAzure"/>
+    <LineGraph :graph="bytesInOut" type="bytes" v-if="!isAzure"/>
+    <LineGraph :graph="bytesIn" type="bytes" v-if="!isAzure"/>
+    <LineGraph :graph="bytesOut" type="bytes" v-if="!isAzure"/>
   </div>
 </template>
 
@@ -23,16 +24,22 @@ import { AZURE_SCAN } from '@/types'
 
 const route = useRoute()
 const store = useGraphsQueries()
+const isAzure = computed(() => {
+  return store.node.scanType === AZURE_SCAN
+})
 const instance = computed(() => {
   const snmpPrimaryIpAddress = store.node.ipInterfaces?.filter(({ snmpPrimary }) => snmpPrimary === true)[0]?.ipAddress
-  return store.node.scanType === AZURE_SCAN ? `azure-node-${store.node.id}` : snmpPrimaryIpAddress!
+  return isAzure.value ? `azure-node-${store.node.id}` : snmpPrimaryIpAddress!
+})
+const monitor = computed(() => {
+  return isAzure.value ? 'AZURE' : 'ICMP'
 })
 
 const nodeLatency = computed<GraphProps>(() => {
   return {
     label: 'ICMP Response Time',
     metrics: ['response_time_msec'],
-    monitor: 'ICMP',
+    monitor: monitor.value,
     nodeId: route.params.id as string,
     instance: instance.value,
     timeRange: 10,
@@ -71,6 +78,18 @@ const bytesInOut = computed<GraphProps>(() => {
     monitor: 'SNMP',
     nodeId: route.params.id as string,
     instance: instance.value,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute
+  }
+})
+
+const azureNodeBytesInOut = computed<GraphProps>(() => {
+  return {
+    label: 'Bytes Inbound / Outbound Total',
+    metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
+    monitor: monitor.value,
+    nodeId: route.params.id as string,
+    instance: 'node',
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
   }

@@ -23,6 +23,11 @@ const wrapper = mount({
     directives: {
       tabindex: tabIndexDirective
     }
+  },
+  props: {
+    successCallback: vi.fn(),
+    cancel: vi.fn(),
+    discovery: null
   }
 })
 

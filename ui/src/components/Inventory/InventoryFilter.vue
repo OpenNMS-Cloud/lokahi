@@ -40,8 +40,6 @@ import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { Tag } from '@/types/graphql'
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import MenuIcon from "@featherds/icon/navigation/MoreHoriz";
 import { PropType } from 'vue'
 import { FeatherButton } from '@featherds/button'
 import { useTagStore } from '@/store/Components/tagStore'

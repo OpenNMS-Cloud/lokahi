@@ -1,13 +1,16 @@
-import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import mount from '../mountWithPiniaVillus'
 import Welcome from '@/containers/Welcome.vue'
+import router from '@/router'
 
 let wrapper: any
 
 describe('WelcomeGuide', () => {
     beforeAll(() => {
         wrapper = mount({
-            component: Welcome
+            component: Welcome,
+            global: {
+                plugins: [router]
+            }
         })
     })
     afterAll(() => {

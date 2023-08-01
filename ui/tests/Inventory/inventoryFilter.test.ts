@@ -1,6 +1,5 @@
 import InventoryFilter from '@/components/Inventory/InventoryFilter.vue'
 import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
-import { useInventoryStore } from '@/store/Views/inventoryStore'
 
 let wrapper: any
 
@@ -8,7 +7,11 @@ describe('InventoryFilter.vue', () => {
   beforeAll(() => {
     wrapper = mountWithPiniaVillus({
       component: InventoryFilter,
-      shallow: true
+      shallow: true,
+      props: {
+        state: '',
+        nodes: []
+      }
     })
   })
   afterAll(() => {

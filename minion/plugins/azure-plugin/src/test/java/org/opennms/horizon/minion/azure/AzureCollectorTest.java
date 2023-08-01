@@ -142,7 +142,6 @@ public class AzureCollectorTest {
 
     @Test
     public void testCollect() {
-
         var collectorRequest = AzureCollectorRequest.newBuilder()
             .setClientId(clientId)
             .setClientSecret(clientSecret)

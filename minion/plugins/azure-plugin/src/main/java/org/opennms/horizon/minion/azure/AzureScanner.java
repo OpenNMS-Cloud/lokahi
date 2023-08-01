@@ -94,7 +94,9 @@ public class AzureScanner implements Scanner {
 
             for (var resourceGroupValue : resourceGroups.getValue()) {
                 String resourceGroup = resourceGroupValue.getName();
-                scannedItems.addAll(scanForResourceGroup(request, token, resourceGroup));
+                if (StringUtils.isNotEmpty(resourceGroup)) {
+                    scannedItems.addAll(scanForResourceGroup(request, token, resourceGroup));
+                }
             }
 
             future.complete(
@@ -175,12 +177,15 @@ public class AzureScanner implements Scanner {
 
         for (AzureNetworkInterface networkInterface : interfaceList) {
             NetworkInterfaceProps networkInterfaceProps = networkInterface.getProperties();
+            if (networkInterfaceProps == null) {
+                continue;
+            }
 
             for (IpConfiguration ipConfiguration : networkInterfaceProps.getIpConfigurations()) {
                 final var scannedNetworkInterface = AzureScanNetworkInterfaceItem.newBuilder();
                 IpConfigurationProps ipConfigurationProps = ipConfiguration.getProperties();
 
-                if (StringUtils.isEmpty(ipConfigurationProps.getPrivateIPAddress())) {
+                if (ipConfigurationProps == null || StringUtils.isEmpty(ipConfigurationProps.getPrivateIPAddress())) {
                     log.warn("SKIP ipConfig that don't have IP address. {}", ipConfiguration);
                     continue;
                 }
@@ -233,6 +238,9 @@ public class AzureScanner implements Scanner {
         List<AzureNetworkInterface> networkInterfacesList = new ArrayList<>();
         for (AzureNetworkInterface networkInterface : networkInterfaces.getValue()) {
             NetworkInterfaceProps properties = networkInterface.getProperties();
+            if (properties == null) {
+                continue;
+            }
             VirtualMachine virtualMachine = properties.getVirtualMachine();
             if (Objects.nonNull(virtualMachine) && vmId.equalsIgnoreCase(virtualMachine.getId())) {
                 networkInterfacesList.add(networkInterface);

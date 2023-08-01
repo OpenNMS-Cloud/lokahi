@@ -1,22 +1,27 @@
-import { mount } from '@vue/test-utils'
+import mount from '../mountWithPiniaVillus'
 import InventoryIconActionList from '@/components/Inventory/InventoryIconActionList.vue'
+import { MonitoredStates } from '@/types'
 
 let wrapper: any
 
-/*
-TODO: TypeError: Cannot read properties of undefined (reading 'title')
-❯ Proxy._sfc_render src/components/Inventory/InventoryIconActionList.vue:9:27
-     7|     <li @click="onDelete" data-test="delete"><Icon :icon="deleteIcon" /></li>
-     8|   </ul>
-     9|   <PrimaryModal :visible="isVisible" :title="modal.title" :class="modal.cssClass">
-      |                           ^
-    10|     <template #content>
-    11|       <p>{{ modal.content }}</p>
-*/
-describe.skip('InventoryIconActionList.vue', () => {
+const mockMonitoredNode = {
+  id: 1,
+  label: 'node',
+  status: 'UP',
+  metrics: [],
+  anchor: {},
+  isNodeOverlayChecked: false,
+  type: MonitoredStates.MONITORED
+}
+
+describe('InventoryIconActionList.vue', () => {
   beforeAll(() => {
-    wrapper = mount(InventoryIconActionList, {
-      shallow: true
+    wrapper = mount({
+      component: InventoryIconActionList,
+      shallow: false,
+      props: {
+        node: mockMonitoredNode
+      }
     })
   })
   afterAll(() => {
@@ -24,9 +29,7 @@ describe.skip('InventoryIconActionList.vue', () => {
   })
 
   const actionList = [
-    // 'bubble-chart',
     'line-chart',
-    // 'pie-chart',
     'warning',
     'delete'
   ]

@@ -27,8 +27,7 @@ const metrics: Chip[] = [
 
 let wrapper: any
 
-// TODO: will fix after demo
-describe.skip('InventoryMetricChipList.vue', () => {
+describe('InventoryMetricChipList.vue', () => {
   beforeAll(() => {
     wrapper = mount(InventoryMetricChipList, {
       props: {
@@ -41,7 +40,7 @@ describe.skip('InventoryMetricChipList.vue', () => {
   })
 
   it(`should have ${metrics.length} metric chip(s)`, () => {
-    const chipItem = wrapper.findAllComponents('[data-test="metric-chip"]')
+    const chipItem = wrapper.findAllComponents('[data-test="chip"]')
     expect(chipItem.length).toEqual(metrics.length)
   })
 })

@@ -14,13 +14,14 @@ const mock = [
 
 let wrapper: any
 
-describe.skip('LocationsList', () => {
+describe('LocationsList', () => {
   beforeAll(() => {
     wrapper = mount({
       component: LocationsList,
       props: {
         items: mock
-      }
+      },
+      shallow: false
     })
   })
   afterAll(() => {
@@ -47,10 +48,7 @@ describe.skip('LocationsList', () => {
   })
 
   test('Should have a header', () => {
-    let elem = wrapper.get('[data-test="name"]')
-    expect(elem.exists()).toBeTruthy()
-
-    elem = wrapper.get('[data-test="status"]')
+    let elem = wrapper.get('[data-test="header"]')
     expect(elem.exists()).toBeTruthy()
   })
 

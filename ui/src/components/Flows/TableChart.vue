@@ -15,7 +15,7 @@
         </thead>
         <tbody>
           <tr v-for="(data, index) in tableData" :key="index">
-            <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) }} </td>
+            <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) }}</td>
             <td>{{ humanFileSize(data.bytesIn) }}</td>
             <td>{{ humanFileSize(data.bytesOut) }}</td>
           </tr>

@@ -178,6 +178,7 @@ public class AzureScanner implements Scanner {
         for (AzureNetworkInterface networkInterface : interfaceList) {
             NetworkInterfaceProps networkInterfaceProps = networkInterface.getProperties();
             if (networkInterfaceProps == null) {
+                log.warn("SKIP AzureNetworkInterfaces: {} that don't have Properties", networkInterface.getName());
                 continue;
             }
 
@@ -239,6 +240,7 @@ public class AzureScanner implements Scanner {
         for (AzureNetworkInterface networkInterface : networkInterfaces.getValue()) {
             NetworkInterfaceProps properties = networkInterface.getProperties();
             if (properties == null) {
+                log.warn("SKIP AzureNetworkInterfaces: {} that don't have Properties", networkInterface.getName());
                 continue;
             }
             VirtualMachine virtualMachine = properties.getVirtualMachine();

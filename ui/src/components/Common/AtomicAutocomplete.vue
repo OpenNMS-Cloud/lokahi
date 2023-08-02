@@ -8,19 +8,19 @@
                 <label for="atomic-input">{{ inputLabel }}</label>
                 <input id="atomic-input" tabIndex="0" :value="inputValue" @keydown="keyDownCheck"
                     @input="(event) => textChanged((event.target as HTMLInputElement)?.value)" :placeholder="inputLabel"
-                    class="atomic-auto-input" :class="{ 'err-input' : errMsg }" data-ref-id="feather-autocomplete-input"
+                    class="atomic-auto-input" :class="{ 'err-input': errMsg }" data-ref-id="feather-autocomplete-input"
                     :disabled="disabled" />
             </div>
             <div class="post">
                 <FeatherIcon :icon="KeyboardArrowDown" class="drop-icon" />
             </div>
         </div>
-        <div label='' :class="['list', resultsVisible ? 'visible' : 'hidden']" ref="listRef" tabIndex="0">
+        <div label="" :class="['list', resultsVisible ? 'visible' : 'hidden']" ref="listRef" tabIndex="0">
             <div class="list-item" tabIndex="0" :label="listItem" v-for="(listItem, index)  in shortenedList" :key="index"
                 @click="() => itemClicked(listItem, index)" @keydown="(d) => itemKey(d, listItem, index)">
                 {{ listItem }}
             </div>
-            <div class='list-item' tabIndex="0" v-if="inputValue && !results.find((d) => d === inputValue) && allowNew"
+            <div class="list-item" tabIndex="0" v-if="inputValue && !results.find((d) => d === inputValue) && allowNew"
                 @click="() => itemClicked(inputValue, -1)" @keydown="(d) => itemKey(d, inputValue, -1)">
                 {{ inputValue }}
             </div>
@@ -32,43 +32,43 @@
     </div>
 </template>
 <script setup lang="ts">
-import Search from "@featherds/icon/action/Search"
-import KeyboardArrowDown from "@featherds/icon/navigation/ExpandMore"
+import Search from '@featherds/icon/action/Search'
+import KeyboardArrowDown from '@featherds/icon/navigation/ExpandMore'
 import { PropType } from 'vue'
 
 const wrapper = ref()
 const listRef = ref()
 const props = defineProps({
-    errMsg: { type: String, default: '' },
-    disabled: { type: Boolean, default: false },
-    allowNew: { type: Boolean, default: true },
-    inputValue: { type: String, default: '' },
-    inputLabel: { type: String, default: '' },
-    itemClicked: { type: Function as PropType<(listItem: unknown, index: number) => void>, default: () => { } },
-    loading: { type: Boolean, default: false },
-    outsideClicked: { type: Function as PropType<() => void>, default: () => { } },
-    resultsVisible: { type: Boolean, default: false },
-    results: { type: Array, default: () => [] },
-    textChanged: { type: Function as PropType<(text: string) => void>, default: () => { } },
-    wrapperClicked: { type: Function as PropType<() => void>, default: () => { } },
+  errMsg: { type: String, default: '' },
+  disabled: { type: Boolean, default: false },
+  allowNew: { type: Boolean, default: true },
+  inputValue: { type: String, default: '' },
+  inputLabel: { type: String, default: '' },
+  itemClicked: { type: Function as PropType<(listItem: unknown, index: number) => void>, default: () => null },
+  loading: { type: Boolean, default: false },
+  outsideClicked: { type: Function as PropType<() => void>, default: () => null },
+  resultsVisible: { type: Boolean, default: false },
+  results: { type: Array, default: () => [] },
+  textChanged: { type: Function as PropType<(text: string) => void>, default: () => null },
+  wrapperClicked: { type: Function as PropType<() => void>, default: () => null }
 })
 
 const keyDownCheck = (key: KeyboardEvent) => {
-    if (key.key === 'ArrowDown') {
-        listRef.value.querySelector('.list-item').focus()
-    }
+  if (key.key === 'ArrowDown') {
+    listRef.value.querySelector('.list-item').focus()
+  }
 }
 
 const itemKey = (keypress: KeyboardEvent, listItem: unknown, index: number) => {
-    if (keypress.key === 'Enter') {
-        props.itemClicked(listItem, index);
-    }
-    if (keypress.key === 'ArrowDown') {
-        ((keypress.target as HTMLInputElement)?.nextElementSibling as HTMLElement)?.focus();
-    }
-    if (keypress.key === 'ArrowUp') {
-        ((keypress.target as HTMLInputElement)?.previousElementSibling as HTMLElement)?.focus();
-    }
+  if (keypress.key === 'Enter') {
+    props.itemClicked(listItem, index)
+  }
+  if (keypress.key === 'ArrowDown') {
+    ((keypress.target as HTMLInputElement)?.nextElementSibling as HTMLElement)?.focus()
+  }
+  if (keypress.key === 'ArrowUp') {
+    ((keypress.target as HTMLInputElement)?.previousElementSibling as HTMLElement)?.focus()
+  }
 }
 
 const shortenedList = computed(() => props.results?.length > 10 ? props.results?.slice(0, 10) : props.results)
@@ -196,6 +196,7 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
 
 .main {
     width: 100%;
+
     label {
         display: none;
     }
@@ -210,5 +211,4 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
 .err-input::placeholder {
     color: var(variables.$error);
 }
-
 </style>

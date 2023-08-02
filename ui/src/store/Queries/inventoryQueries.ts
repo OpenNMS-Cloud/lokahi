@@ -247,7 +247,6 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   }
 
   const formatUnmonitoredNodes = async (data: Partial<Node>[]) => {
-
     if (data.length) {
 
       await getTagsForData(data)
@@ -299,18 +298,18 @@ export const useInventoryQueries = defineStore('inventoryQueries', () => {
   const fetchByState = async (stateIn: string) => {
     if (stateIn === MonitoredStates.MONITORED) {
       await getMonitoredNodes()
-      state.value = MonitoredStates.MONITORED;
+      state.value = MonitoredStates.MONITORED
     } else if (stateIn === MonitoredStates.UNMONITORED) {
       await getUnmonitoredNodes()
-      state.value = MonitoredStates.UNMONITORED;
+      state.value = MonitoredStates.UNMONITORED
     } else if (stateIn === MonitoredStates.DETECTED) {
       await getDetectedNodes()
-      state.value = MonitoredStates.DETECTED;
+      state.value = MonitoredStates.DETECTED
     }
   }
 
   const fetchByLastState = async () => {
-    await fetchByState(state.value);
+    await fetchByState(state.value)
   }
 
   return {

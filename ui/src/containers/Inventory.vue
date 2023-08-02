@@ -70,8 +70,8 @@ const tabDetectedContent = computed((): DetectedNode[] => inventoryQueries.detec
 
 onMounted(async () => {
   inventoryQueries.getMonitoredNodes()
-  inventoryQueries.getUnmonitoredNodes();
-  inventoryQueries.getDetectedNodes();
+  inventoryQueries.getUnmonitoredNodes()
+  inventoryQueries.getDetectedNodes()
 })
 
 /**
@@ -81,13 +81,13 @@ onMounted(async () => {
  */
 watchEffect(() => {
   if (inventoryQueries.nodes.length > 0) {
-    inventoryStore.monitoredFilterActive = true;
+    inventoryStore.monitoredFilterActive = true
   }
   if (inventoryQueries.unmonitoredNodes.length > 0) {
-    inventoryStore.unmonitoredFilterActive = true;
+    inventoryStore.unmonitoredFilterActive = true
   }
   if (inventoryQueries.detectedNodes.length > 0) {
-    inventoryStore.detectedFilterActive = true;
+    inventoryStore.detectedFilterActive = true
   }
 })
 

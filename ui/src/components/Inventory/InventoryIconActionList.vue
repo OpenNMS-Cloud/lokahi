@@ -1,48 +1,24 @@
 <template>
   <ul class="icon-action-list">
-    <li
-      v-if="isMonitored(node)"
-      @click="onLineChart"
-      data-test="line-chart"
-      class="pointer"
-    >
+    <li v-if="isMonitored(node)" @click="onLineChart" data-test="line-chart" class="pointer">
       <Icon :icon="lineChartIcon" />
     </li>
-    <li
-      @click="onWarning"
-      data-test="warning"
-      class="pointer"
-    >
+    <li @click="onWarning" data-test="warning" class="pointer">
       <Icon :icon="warningIcon" />
     </li>
-    <li
-      @click="onDelete"
-      data-test="delete"
-    >
+    <li @click="onDelete" data-test="delete">
       <Icon :icon="deleteIcon" />
     </li>
   </ul>
-  <PrimaryModal
-    :visible="isVisible"
-    :title="modal.title"
-    :class="modal.cssClass"
-  >
+  <PrimaryModal :visible="isVisible" :title="modal.title" :class="modal.cssClass">
     <template #content>
       <p>{{ modal.content }}</p>
     </template>
     <template #footer>
-      <FeatherButton
-        data-testid="cancel-btn"
-        secondary
-        @click="closeModal"
-      >
+      <FeatherButton data-testid="cancel-btn" secondary @click="closeModal">
         {{ modal.cancelLabel }}
       </FeatherButton>
-      <FeatherButton
-        data-testid="save-btn"
-        primary
-        @click="deleteHandler"
-      >
+      <FeatherButton data-testid="save-btn" primary @click="deleteHandler">
         {{ modal.saveLabel }}
       </FeatherButton>
     </template>
@@ -78,7 +54,8 @@ const onLineChart = () => {
 const lineChartIcon: IIcon = {
   image: MultilineChart,
   tooltip: 'Graphs',
-  size: 1.5
+  size: 1.5,
+  cursorHover: true
 }
 
 const onWarning = () => {
@@ -90,7 +67,8 @@ const onWarning = () => {
 const warningIcon: IIcon = {
   image: markRaw(Warning),
   tooltip: 'Events/Alarms',
-  size: 1.5
+  size: 1.5,
+  cursorHover: true
 }
 
 const modal = ref<ModalPrimary>({
@@ -133,6 +111,7 @@ const onDelete = () => {
 const deleteIcon: IIcon = {
   image: markRaw(Delete),
   tooltip: 'Delete',
+  cursorHover: true,
   size: 1.5
 }
 </script>
@@ -142,13 +121,16 @@ const deleteIcon: IIcon = {
 
 ul.icon-action-list {
   display: flex;
-  flex-direction: column;
   gap: 0.2rem;
-  > li {
+
+  li {
     padding: var(variables.$spacing-xxs);
     font-size: 1.5rem;
-    color: var(variables.$secondary-text-on-surface);
+    color: var(variables.$primary);
+    cursor: pointer;
+
     &:hover {
+      cursor: pointer;
       color: var(variables.$disabled-text-on-surface);
     }
   }

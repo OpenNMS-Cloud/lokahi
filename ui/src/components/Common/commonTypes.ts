@@ -14,3 +14,9 @@ export interface ItemPreviewProps {
     itemStatuses: ItemStatus[];
     bottomCopy: string;
 }
+
+export enum BadgeTypes {
+    info = 'info',
+    error = 'error',
+    success = 'success'
+}

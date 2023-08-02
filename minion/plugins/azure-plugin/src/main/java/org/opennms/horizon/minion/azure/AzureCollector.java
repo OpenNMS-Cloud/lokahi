@@ -125,7 +125,7 @@ public class AzureCollector implements ServiceCollector {
                     .collect(Collectors.toCollection(ArrayList::new));
 
                 // interface metrics
-                this.collectNetworkMetrics(request, token, metricResults);
+                collectNetworkMetrics(request, token, metricResults);
 
                 log.debug("AZURE COLLECTOR metricResults LIST: {}", metricResults);
 

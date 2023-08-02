@@ -28,8 +28,8 @@
 
 package org.opennms.horizon.minion.azure;
 
+import com.google.common.base.Strings;
 import com.google.protobuf.Any;
-import org.apache.commons.lang3.StringUtils;
 import org.opennms.azure.contract.AzureScanRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
@@ -94,7 +94,7 @@ public class AzureScanner implements Scanner {
 
             for (var resourceGroupValue : resourceGroups.getValue()) {
                 String resourceGroup = resourceGroupValue.getName();
-                if (StringUtils.isNotEmpty(resourceGroup)) {
+                if (!Strings.isNullOrEmpty(resourceGroup)) {
                     scannedItems.addAll(scanForResourceGroup(request, token, resourceGroup));
                 }
             }
@@ -186,7 +186,7 @@ public class AzureScanner implements Scanner {
                 final var scannedNetworkInterface = AzureScanNetworkInterfaceItem.newBuilder();
                 IpConfigurationProps ipConfigurationProps = ipConfiguration.getProperties();
 
-                if (ipConfigurationProps == null || StringUtils.isEmpty(ipConfigurationProps.getPrivateIPAddress())) {
+                if (ipConfigurationProps == null || Strings.isNullOrEmpty(ipConfigurationProps.getPrivateIPAddress())) {
                     log.warn("SKIP ipConfig that don't have IP address. {}", ipConfiguration);
                     continue;
                 }
@@ -222,7 +222,7 @@ public class AzureScanner implements Scanner {
             AzurePublicIPAddress azurePublicIPAddress = publicAddressOpt.get();
             PublicIpAddressProps properties = azurePublicIPAddress.getProperties();
 
-            if (StringUtils.isEmpty(properties.getIpAddress()) || StringUtils.isEmpty(azurePublicIPAddress.getName())) {
+            if (Strings.isNullOrEmpty(properties.getIpAddress()) || Strings.isNullOrEmpty(azurePublicIPAddress.getName())) {
                 log.warn("SKIP azurePublicIPAddress that don't have name / IP address. {}", azurePublicIPAddress);
                 return;
             }

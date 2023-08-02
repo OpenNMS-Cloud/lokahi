@@ -30,7 +30,7 @@ describe('LocationsCard', () => {
   })
 
   test('Should have a text button', () => {
-    const elem = wrapper.get('[data-test="name"]')
+    const elem = wrapper.get('[data-test="locationNameButton"]')
     expect(elem.exists()).toBeTruthy()
   })
 

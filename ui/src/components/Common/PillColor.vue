@@ -24,7 +24,7 @@
       :class="['pill-style', `${item.style.toLowerCase()}-color`]"
       data-test="pill-style"
     >
-      {{ item.label?.toLowerCase() || item.style.toLocaleLowerCase() }}
+      {{ item.label?.toLowerCase() || item.style.toLowerCase() }}
     </span>
   </div>
 </template>

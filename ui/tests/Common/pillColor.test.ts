@@ -8,7 +8,7 @@ describe('PillColor', () => {
     wrapper = mount({
       component: PillColor,
       props: {
-        item: { type: 'CRITICAL' }
+        item: { style: 'CRITICAL' }
       }
     })
   })

@@ -1,41 +1,58 @@
+/* 
+  The class names are based on the `severity` type of the graphql schema.
+    enum Severity {
+      CLEARED
+      CRITICAL
+      INDETERMINATE
+      MAJOR
+      MINOR
+      NORMAL
+      SEVERITY_UNDEFINED
+      UNRECOGNIZED
+      WARNING
+    }
+*/
+
+@use '@featherds/styles/themes/utils';
 @use '@featherds/styles/themes/variables';
 
+$opacity: 0.2;
+
 .critical-color {
-  background-color: rgba(255, 163, 181, 0.2); // #FFA3B5
-  color: #A5021F !important;
+  background-color: utils.alpha(variables.$error, $opacity);
+  color: var(variables.$error) !important;
 }
 
 .major-color {
-  background-color: rgba(227, 83, 2, 0.2); // #E35302
-  color: #E35302 !important;
+  background-color: utils.alpha(variables.$major, $opacity);
+  color: var(variables.$major) !important;
 }
 
 .minor-color {
-  background-color: rgba(255, 172, 38, 0.5); // #FFAC26
-  color: #5B2F00 !important;
+  background-color: utils.alpha(variables.$minor, $opacity);
+  color: var(variables.$minor) !important;
 }
 
 .warning-color {
-  background-color: rgba(251, 233, 71, 0.5); // #FBE947
-  color: #5B2F00 !important;
+  background-color: utils.alpha(variables.$warning, $opacity);
+  color: var(variables.$warning) !important;
 }
 
 .indeterminate-color {
-  background-color: rgba(0, 146, 199, 0.2); // #0092C7
-  color: #0D6B90 !important;
+  background-color: utils.alpha(variables.$indeterminate, $opacity);
+  color: var(variables.$indeterminate) !important;
 }
 
 .normal-color {
-  background-color: rgba(11, 114, 12, 0.2); // #0B720C
-  color: #0b720c !important;
+  background-color: utils.alpha(variables.$success, $opacity);
+  color: var(variables.$success) !important;
 }
 
 .cleared-color {
-  background-color: rgba(117, 117, 117, 0.2);
-  color: #757575 !important;
+  background-color: utils.alpha(variables.$cleared, $opacity);
+  color: var(variables.$cleared) !important;
 }
 
 .severity_undefined-color {
   border: 1px solid var(variables.$border-on-surface);
 }
-

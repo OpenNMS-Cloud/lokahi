@@ -50,3 +50,28 @@ Feature: Minion Basic Functionality
     Then delay 5000ms
     Then Send net flow package
     Then Verify gateway has received netflow packages
+
+  Scenario: Interrupt Minion Connection and recover data
+    Given MOCK twin update in resource file "/testdata/task-set.flows.001.json"
+    Then MOCK send twin update for topic "task-set"
+    Then delay 5000ms
+
+    Then Send 2 net flow package
+    # The two flows are send in a single package
+    Then Verify gateway has received 1 netflow packages
+
+    Then Interrupt minion connection
+    Then delay 1000ms
+    Then Send 3 net flow package
+
+    # Verify that we have not received the other flows somehow but give it enough time for the aggregator to be flushed
+    Then delay 2000ms
+    Then Verify gateway has received 1 netflow packages
+
+    Then Restore minion connection
+    # The three flows are stuffed in the second package
+    Then Verify gateway has received 2 netflow packages
+
+    Then Send 2 net flow package
+    # Connection is fully restored and we receive the last two flows in a third package
+    Then Verify gateway has received 3 netflow packages

@@ -37,12 +37,15 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.InternetProtocol;
 import org.testcontainers.utility.MountableFile;
+
+import eu.rekawek.toxiproxy.ToxiproxyClient;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestContainerRunnerClassRule extends ExternalResource {
@@ -56,6 +59,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
     private GenericContainer mockMinionGatewayContainer;
     private GenericContainer applicationContainer;
     private GenericContainer sslGatewayContainer;
+    private GenericContainer toxiProxyContainer;
     private static final int UDP_NETFLOW5_PORT = 8877;
     private static final int UDP_NETFLOW9_PORT = 4729;
 
@@ -72,6 +76,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         mockMinionGatewayContainer = new GenericContainer(DockerImageName.parse("opennms/lokahi-mock-minion-gateway").withTag("latest"));
         applicationContainer = new GenericContainer(DockerImageName.parse(applicationDockerImageName).toString());
         sslGatewayContainer = new GenericContainer(DockerImageName.parse("nginx:1.21.6-alpine").toString());
+        toxiProxyContainer = new GenericContainer("ghcr.io/shopify/toxiproxy:2.5.0");
     }
 
     @Override
@@ -84,12 +89,14 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
         startMockMinionGatewayContainer();
         startSslGatewayContainer();
+        startToxiProxyContainer();
         startApplicationContainer();
     }
 
     @Override
     protected void after() {
         applicationContainer.stop();
+        toxiProxyContainer.stop();
         sslGatewayContainer.stop();
         mockMinionGatewayContainer.stop();
     }
@@ -108,10 +115,32 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .start();
     }
 
+    private void startToxiProxyContainer() {
+        this.toxiProxyContainer
+            .dependsOn(this.sslGatewayContainer)
+            .withNetwork(this.network)
+            .withNetworkAliases("toxiproxy", "opennms-minion-ssl-gateway") // Use the name of the container we try to intercept connections for
+            .withExposedPorts(8474, 19443)
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("TOXI-PROXY"))
+            .withCopyToContainer(Transferable.of("""
+                [ {
+                    "name": "gateway",
+                    "listen": "[::]:19443",
+                    "upstream": "opennms-minion-ssl-gateway-raw:443",
+                    "enabled": true
+                } ]
+            """), "/config.json")
+            .withCommand("-config=/config.json", "-host=")
+            .start();
+
+        System.setProperty("toxiproxy.host", this.toxiProxyContainer.getHost());
+        System.setProperty("toxiproxy.port", Integer.toString(this.toxiProxyContainer.getMappedPort(8474)));
+    }
+
     private void startSslGatewayContainer() {
         sslGatewayContainer
             .withNetwork(network)
-            .withNetworkAliases("opennms-minion-ssl-gateway")
+            .withNetworkAliases("opennms-minion-ssl-gateway-raw") // We shadow the name to allow toxiproxy to intercept the connection
             .withExposedPorts(443)
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("ssl-gateway/nginx.conf"), "/etc/nginx/nginx.conf"
@@ -142,12 +171,13 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withNetworkAliases("application", "application-host")
             .dependsOn(mockMinionGatewayContainer)
             .dependsOn(sslGatewayContainer)
+            .dependsOn(toxiProxyContainer)
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("MINION_LOCATION", "Default")
             .withEnv("USE_KUBERNETES", "false")
-            .withEnv("MINION_GATEWAY_HOST", "opennms-minion-ssl-gateway")
-            .withEnv("MINION_GATEWAY_PORT", "443")
+            .withEnv("MINION_GATEWAY_HOST", "opennms-minion-ssl-gateway") // Despite the name, this is toxiproxy intercepting the connections
+            .withEnv("MINION_GATEWAY_PORT", "19443")
             .withEnv("MINION_GATEWAY_TLS", "true")
             .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", "passw0rd")

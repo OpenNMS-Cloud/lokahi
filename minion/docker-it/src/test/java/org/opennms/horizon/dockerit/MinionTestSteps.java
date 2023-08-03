@@ -37,12 +37,14 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.dockerit.testcontainers.TestContainerRunnerClassRule;
 import org.opennms.horizon.minion.flows.shell.SendFlowCmd;
 import org.opennms.horizon.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
 import org.opennms.horizon.testtool.miniongateway.wiremock.client.RetryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.rekawek.toxiproxy.ToxiproxyClient;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
@@ -77,13 +79,18 @@ public class MinionTestSteps {
     private Response rememberedRestAssuredResponse;
     private JsonPath parsedJsonResponse;
 
+    private final TestContainerRunnerClassRule containers;
+
 //========================================
 // Constructor
 //========================================
 
-    public MinionTestSteps(MinionGatewayWiremockTestSteps minionGatewayWiremockTestSteps, RetryUtils retryUtils) {
+    public MinionTestSteps(final MinionGatewayWiremockTestSteps minionGatewayWiremockTestSteps,
+                           final RetryUtils retryUtils,
+                           final TestContainerRunnerClassRule containers) {
         this.minionGatewayWiremockTestSteps = minionGatewayWiremockTestSteps;
         this.retryUtils = retryUtils;
+        this.containers = Objects.requireNonNull(containers);
     }
 
 
@@ -158,11 +165,28 @@ public class MinionTestSteps {
 
     @Then("Send net flow package")
     public void sendNetflowPackage() throws Exception {
-        SendFlowCmd cmd = new SendFlowCmd();
-        cmd.setHost(applicationHostName);
-        cmd.setPort(netflow5ListenerPort); // netflow 5 port enabled by default
-        cmd.setFile("netflow5.dat");
-        cmd.execute();
+        sendNetflowPackage(1);
+    }
+
+    @Then("Send {int} net flow package")
+    public void sendNetflowPackage(final int count) throws Exception {
+        for (int i = 0; i < count; i++) {
+            SendFlowCmd cmd = new SendFlowCmd();
+            cmd.setHost(applicationHostName);
+            cmd.setPort(netflow5ListenerPort); // netflow 5 port enabled by default
+            cmd.setFile("netflow5.dat");
+            cmd.execute();
+        }
+    }
+
+    @Then("Interrupt minion connection")
+    public void interruptConnection() throws Exception {
+        this.toxiproxy().getProxy("gateway").disable();
+    }
+
+    @Then("Restore minion connection")
+    public void restoreConnection() throws Exception {
+        this.toxiproxy().getProxy("gateway").enable();
     }
 
 //========================================
@@ -269,5 +293,12 @@ public class MinionTestSteps {
         }
 
         return false;
+    }
+
+    private ToxiproxyClient toxiproxy() {
+        final var host = System.getProperty("toxiproxy.host");
+        final var port = Integer.parseInt(System.getProperty("toxiproxy.port"));
+
+        return new ToxiproxyClient(host, port);
     }
 }

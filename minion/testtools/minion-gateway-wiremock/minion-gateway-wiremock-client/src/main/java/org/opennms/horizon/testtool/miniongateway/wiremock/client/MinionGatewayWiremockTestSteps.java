@@ -120,7 +120,6 @@ public class MinionGatewayWiremockTestSteps {
 
     @Then("Verify gateway has received netflow packages")
     public void checkIfGatewayReceivedNetflowPackages() throws InterruptedException {
-
         final List<SinkMessageDto> messages = retryUtils.retry(
             this::getFlowMessages,
             list -> !list.isEmpty(),
@@ -129,6 +128,17 @@ public class MinionGatewayWiremockTestSteps {
             Collections.emptyList()
         );
         assertFalse(messages.isEmpty());
+    }
+
+    @Then("Verify gateway has received {int} netflow packages")
+    public void checkIfGatewayReceivedNetflowPackages(final int count) throws InterruptedException {
+        final List<SinkMessageDto> messages = retryUtils.retry(
+            this::getFlowMessages,
+            list -> list.size() == count,
+            500,
+            300000,
+            Collections.emptyList());
+        assertEquals(count, messages.size());
     }
 
 

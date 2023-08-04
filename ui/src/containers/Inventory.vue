@@ -3,19 +3,20 @@
     <HeadlinePage text="Network Inventory" class="header" data-test="page-header" />
   </div>
 
+  <InventoryTagModal :visible="tagStore.isVisible" :node="tagStore.activeNode" :closeModal="tagStore.closeModal"  />
   <FeatherTabContainer class="tab-container" data-test="tab-container">
     <template v-slot:tabs>
-      <FeatherTab @click="inventoryQueries.getMonitoredNodes">Monitored Nodes
-        <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.nodes.length > 0">{{
-          inventoryQueries.nodes.length }}</FeatherTextBadge>
+      <FeatherTab>Monitored Nodes
+        <FeatherTextBadge :type="BadgeTypes.info" v-if="tabMonitoredContent.length > 0">{{
+          tabMonitoredContent.length }}</FeatherTextBadge>
       </FeatherTab>
-      <FeatherTab @click="inventoryQueries.getUnmonitoredNodes">Unmonitored Nodes
-        <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.unmonitoredNodes.length > 0">{{
-          inventoryQueries.unmonitoredNodes.length }}</FeatherTextBadge>
+      <FeatherTab>Unmonitored Nodes
+        <FeatherTextBadge :type="BadgeTypes.info" v-if="tabUnmonitoredContent.length > 0">{{
+          tabUnmonitoredContent.length }}</FeatherTextBadge>
       </FeatherTab>
-      <FeatherTab @click="inventoryQueries.getDetectedNodes">Detected Nodes
-        <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.detectedNodes.length > 0">{{
-          inventoryQueries.detectedNodes.length }}</FeatherTextBadge>
+      <FeatherTab>Detected Nodes
+        <FeatherTextBadge :type="BadgeTypes.info" v-if="tabDetectedContent.length > 0">{{
+          tabDetectedContent.length }}</FeatherTextBadge>
       </FeatherTab>
     </template>
     <!-- Monitored Nodes -->
@@ -26,7 +27,7 @@
         :state="MonitoredStates.MONITORED" />
       <EmptyList data-test="monitored-empty" v-if="!tabMonitoredContent.length" bg
         :content="{ msg: 'No monitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
-      <FeatherSpinner v-if="inventoryQueries.isFetching" />
+      <FeatherSpinner v-if="inventoryStore.loading" />
     </FeatherTabPanel>
 
     <!-- Unmonitored Nodes -->
@@ -37,7 +38,7 @@
         :state="MonitoredStates.UNMONITORED" />
       <EmptyList data-test="unmonitored-empty" v-if="!tabUnmonitoredContent.length" bg
         :content="{ msg: 'No unmonitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
-      <FeatherSpinner v-if="inventoryQueries.isFetching" />
+      <FeatherSpinner v-if="inventoryStore.loading" />
     </FeatherTabPanel>
 
     <!-- Detected Nodes -->
@@ -48,7 +49,7 @@
         :state="MonitoredStates.DETECTED" />
       <EmptyList data-test="discovery-empty" v-if="!tabDetectedContent.length" bg
         :content="{ msg: 'No detected nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
-      <FeatherSpinner v-if="inventoryQueries.isFetching" />
+      <FeatherSpinner v-if="inventoryStore.loading" />
     </FeatherTabPanel>
   </FeatherTabContainer>
 </template>
@@ -57,21 +58,19 @@
 import { FeatherTab, FeatherTabContainer, FeatherTabPanel } from '@featherds/tabs'
 import InventoryFilter from '@/components/Inventory/InventoryFilter.vue'
 import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
-import { MonitoredNode, UnmonitoredNode, DetectedNode, MonitoredStates } from '@/types'
-import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
+import { MonitoredStates, InventoryItem } from '@/types'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { FeatherTextBadge, BadgeTypes } from '@featherds/badge'
+import { useTagStore } from '@/store/Components/tagStore'
 
 const inventoryStore = useInventoryStore()
-const inventoryQueries = useInventoryQueries()
-const tabMonitoredContent = computed((): MonitoredNode[] => inventoryQueries.nodes)
-const tabUnmonitoredContent = computed((): UnmonitoredNode[] => inventoryQueries.unmonitoredNodes)
-const tabDetectedContent = computed((): DetectedNode[] => inventoryQueries.detectedNodes)
+const tabMonitoredContent = computed((): InventoryItem[] => inventoryStore.nodes.filter((d) => d.monitoredState === MonitoredStates.MONITORED))
+const tabUnmonitoredContent = computed((): InventoryItem[] => inventoryStore.nodes.filter((d) => d.monitoredState === MonitoredStates.UNMONITORED))
+const tabDetectedContent = computed((): InventoryItem[] => inventoryStore.nodes.filter((d) => d.monitoredState === MonitoredStates.DETECTED))
+const tagStore = useTagStore()
 
 onMounted(async () => {
-  inventoryQueries.getMonitoredNodes()
-  inventoryQueries.getUnmonitoredNodes()
-  inventoryQueries.getDetectedNodes()
+  inventoryStore.init()
 })
 
 /**
@@ -80,13 +79,13 @@ onMounted(async () => {
  * was hidden on zero results, which meant hidden when no search results.
  */
 watchEffect(() => {
-  if (inventoryQueries.nodes.length > 0) {
+  if (tabMonitoredContent.value.length > 0) {
     inventoryStore.monitoredFilterActive = true
   }
-  if (inventoryQueries.unmonitoredNodes.length > 0) {
+  if (tabUnmonitoredContent.value.length > 0) {
     inventoryStore.unmonitoredFilterActive = true
   }
-  if (inventoryQueries.detectedNodes.length > 0) {
+  if (tabDetectedContent.value.length > 0) {
     inventoryStore.detectedFilterActive = true
   }
 })

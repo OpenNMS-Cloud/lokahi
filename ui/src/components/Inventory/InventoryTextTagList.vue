@@ -2,38 +2,24 @@
   <ul class="text-anchor-list">
     <li data-test="location">
       <label :for="label.location">{{ label.location }}: </label>
-      <a v-if="anchor.locationLink" @click="goto(anchor.locationLink)" :id="label.location">{{ anchor?.locationValue
-      }}</a>
-      <span v-else :id="label.location">{{ anchor.locationValue }}</span>
+     
+      <span  :id="label.location">{{ location }}</span>
     </li>
     <li data-test="management-ip">
       <label :for="label.managementIp">{{ label.managementIp }}: </label>
-      <a v-if="anchor.managementIpLink" @click="goto(anchor.managementIpLink)" :id="label.managementIp">{{
-        anchor.managementIpValue }}</a>
-      <span v-else :id="label.managementIp">{{ anchor.managementIpValue }}</span>
+      <span  :id="label.managementIp">{{ ipAddress }}</span>
     </li>
   </ul>
 </template>
 
 <script lang="ts" setup>
-import { Anchor } from '@/types/inventory'
-
-const router = useRouter()
 
 defineProps<{
-  anchor: Anchor
+  location: string,
+  ipAddress: string
 }>()
 
-const goto = (path: string | undefined) => {
-  if (!path) return
-
-  router.push({
-    path
-  })
-}
-
 const label = {
-  profile: 'Monitoring Profile',
   location: 'Monitoring Location',
   managementIp: 'Management IP'
 }

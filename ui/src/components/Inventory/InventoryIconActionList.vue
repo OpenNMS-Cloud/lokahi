@@ -1,6 +1,6 @@
 <template>
   <ul class="icon-action-list">
-    <li v-if="isMonitored(node)" @click="onLineChart" data-test="line-chart" class="pointer">
+    <li v-if="node.monitoredState === 'MONITORED'" @click="onLineChart" data-test="line-chart" class="pointer">
       <Icon :icon="lineChartIcon" />
     </li>
     <li @click="onWarning" data-test="warning" class="pointer">
@@ -26,16 +26,15 @@
 </template>
 
 <script lang="ts" setup>
-import MultilineChart from '@material-design-icons/svg/outlined/multiline_chart.svg'
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
-import { IIcon, MonitoredNode, UnmonitoredNode, DetectedNode } from '@/types'
+import GraphIcon from '@/components/Common/GraphIcon.vue'
+import { IIcon, InventoryItem } from '@/types'
 import { ModalPrimary } from '@/types/modal'
 import useSnackbar from '@/composables/useSnackbar'
 import useModal from '@/composables/useModal'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
-import { isMonitored } from './inventory.utils'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
@@ -43,7 +42,7 @@ const inventoryQueries = useInventoryQueries()
 const nodeMutations = useNodeMutations()
 
 const router = useRouter()
-const props = defineProps<{ node: MonitoredNode | UnmonitoredNode | DetectedNode }>()
+const props = defineProps<{ node: InventoryItem }>()
 
 const onLineChart = () => {
   router.push({
@@ -52,7 +51,7 @@ const onLineChart = () => {
   })
 }
 const lineChartIcon: IIcon = {
-  image: MultilineChart,
+  image: markRaw(GraphIcon),
   tooltip: 'Graphs',
   size: 1.5,
   cursorHover: true
@@ -92,14 +91,14 @@ const deleteHandler = async () => {
     // Timeout because minion may not be available right away
     // TODO: Replace timeout with websocket/polling
     setTimeout(() => {
-      inventoryQueries.fetchByState(props.node.type)
+      inventoryQueries.buildNetworkInventory()
     }, 350)
   }
 }
 const onDelete = () => {
   modal.value = {
     ...modal.value,
-    title: props.node.label || '',
+    title: props.node.nodeLabel || '',
     cssClass: 'modal-delete',
     content: 'Do you want to delete?',
     id: props.node.id

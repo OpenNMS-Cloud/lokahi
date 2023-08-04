@@ -54,6 +54,7 @@ message NodeDTO {
   string scan_type = 13;
   optional MonitoredState monitored_state = 14;
   repeated opennms.inventory.AzureInterfaceDTO azure_interfaces = 15;
+  repeated opennms.inventory.TagDTO tags = 16;
 }
 
 message NodeCreateDTO {

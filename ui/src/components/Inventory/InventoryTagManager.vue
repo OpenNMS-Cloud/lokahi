@@ -20,7 +20,7 @@
             </AtomicAutocomplete>
             <FeatherTooltip :title="tagManagerTip" v-slot="{ attrs, on }">
               <FeatherButton v-bind="attrs" v-on="tagManagerTip ? on : null"
-                @click="() => tagStore.saveTagsToSelectedNodes(state)" :disabled="!inventoryStore.nodesSelected.length"
+                @click="() => tagStore.saveTagsToSelectedNodes()" :disabled="!inventoryStore.nodesSelected.length"
                 primary data-test="save-tags-button">
                 {{ `Save tags to node${inventoryStore.nodesSelected.length > 1 ? 's' : ''}` }}
               </FeatherButton>

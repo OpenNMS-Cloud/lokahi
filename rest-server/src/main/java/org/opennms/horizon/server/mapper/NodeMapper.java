@@ -47,6 +47,7 @@ public interface NodeMapper {
     @Mapping(source = "ipInterfacesList", target = "ipInterfaces")
     @Mapping(source = "snmpInterfacesList", target = "snmpInterfaces")
     @Mapping(source = "azureInterfacesList", target = "azureInterfaces")
+    @Mapping(target = "tags", source = "tagsList", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     Node protoToNode(NodeDTO nodeDTO);
 
     @Mapping(target = "locationId", source = "locationId", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)

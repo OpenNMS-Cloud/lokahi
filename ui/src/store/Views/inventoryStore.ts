@@ -1,31 +1,45 @@
 import { defineStore } from 'pinia'
-import { InventoryNode } from '@/types/inventory'
+import { InventoryItem, InventoryPage, NewInventoryNode, RawMetrics } from '@/types/inventory'
 import { Tag } from '@/types/graphql'
 import { useTagStore } from '../Components/tagStore'
+import { useInventoryQueries } from '../Queries/inventoryQueries'
+import { InventoryMapper } from '@/mappers'
+
 
 export const useInventoryStore = defineStore('inventoryStore', {
   state: () => ({
     isTagManagerOpen: false,
     isTagManagerReset: false,
     isFilterOpen: false,
+    loading: false,
     monitoredFilterActive: false,
+    nodes: [] as InventoryItem[],
     unmonitoredFilterActive: false,
     detectedFilterActive: false,
-    nodesSelected: [] as InventoryNode[],
+    nodesSelected: [] as NewInventoryNode[],
     searchType: { id: 1, name: 'Labels' },
     tagsSelected: [] as Tag[],
     isEditMode: false
   }),
   actions: {
+    init(){
+      const {buildNetworkInventory, receivedNetworkInventory} = useInventoryQueries()
+      receivedNetworkInventory(this.receivedNetworkInventory as any)
+      buildNetworkInventory()
+    },
+    receivedNetworkInventory(d: {findAllNodes:Array<NewInventoryNode>,allMetrics: RawMetrics}) {
+      const b= InventoryMapper.fromServer(d.findAllNodes,d.allMetrics)
+      this.nodes = b.nodes
+    },
     toggleTagManager() {
       this.isTagManagerOpen = !this.isTagManagerOpen
 
       if (!this.isTagManagerOpen) {
-        this.tagsSelected = [];
-        this.isEditMode = false;
-        const tagStore = useTagStore();
-        tagStore.tagsSelected = [];
-        tagStore.setTagEditMode(false);
+        this.tagsSelected = []
+        this.isEditMode = false
+        const tagStore = useTagStore()
+        tagStore.tagsSelected = []
+        tagStore.setTagEditMode(false)
       }
     },
     toggleFilter() {
@@ -35,26 +49,26 @@ export const useInventoryStore = defineStore('inventoryStore', {
       this.isEditMode = !this.isEditMode
     },
     addSelectedTag(beep: Tag[]) {
-      this.tagsSelected = beep;
+      this.tagsSelected = beep
     },
     resetNodeEditMode() {
       this.isEditMode = false
     },
-    addRemoveNodesSelected(node: InventoryNode) {
+    addRemoveNodesSelected(node: NewInventoryNode) {
       if (this.nodesSelected.find((d) => d.id === node.id)) {
-        this.nodesSelected = this.nodesSelected.filter(({ id }) => id !== node.id);
+        this.nodesSelected = this.nodesSelected.filter(({ id }) => id !== node.id)
       } else {
         this.nodesSelected.push(node)
       }
     },
-    selectAll(allNodes: InventoryNode[]) {
+    selectAll(allNodes: NewInventoryNode[]) {
       this.nodesSelected = [...allNodes]
     },
     clearAll() {
-      this.nodesSelected = [];
+      this.nodesSelected = []
     },
     setSearchType(searchType: { id: number, name: string }) {
-      this.searchType = searchType;
+      this.searchType = searchType
     },
     resetSelectedNode() {
       this.nodesSelected = []

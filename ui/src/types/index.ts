@@ -39,7 +39,7 @@ export interface IIcon {
   title?: string
   tooltip?: string
   size?: number // rem
-  cursorHover?: string
+  cursorHover?: boolean
 }
 
 export interface IInputButtonPopover {

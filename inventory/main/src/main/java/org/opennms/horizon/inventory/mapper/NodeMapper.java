@@ -49,14 +49,16 @@ public interface NodeMapper extends DateTimeMapper {
     @Mappings({
         @Mapping(source = "ipInterfacesList", target = "ipInterfaces"),
         @Mapping(source = "snmpInterfacesList", target = "snmpInterfaces"),
-        @Mapping(source = "azureInterfacesList", target = "azureInterfaces")
+        @Mapping(source = "azureInterfacesList", target = "azureInterfaces"),
+        @Mapping(source = "tagsList", target = "tags")
     })
     Node dtoToModel(NodeDTO dto);
 
     @Mappings({
         @Mapping(source = "ipInterfaces", target = "ipInterfacesList"),
         @Mapping(source = "snmpInterfaces", target = "snmpInterfacesList"),
-        @Mapping(source = "azureInterfaces", target = "azureInterfacesList")
+        @Mapping(source = "azureInterfaces", target = "azureInterfacesList"),
+        @Mapping(source = "tags", target = "tagsList")
     })
     @BeanMapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     NodeDTO modelToDTO(Node model);

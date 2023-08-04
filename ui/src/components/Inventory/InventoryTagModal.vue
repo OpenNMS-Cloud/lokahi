@@ -2,7 +2,7 @@
   <PrimaryModal :visible="visible" :title="title" :class="[modal.cssClass, 'inventory-tag-modal']">
     <template #content>
       <h3>Tags</h3>
-      <h4 class="subhead-1">{{ node.label }}</h4>
+      <h4 class="subhead-1">{{ node.nodeLabel }}</h4>
       <p>A short line of instructions for the user on managing tags for this node</p>
       <h4 class="subhead-1 existing-tags">Existing Tags</h4>
       <FeatherChipList label="Tags">
@@ -32,10 +32,8 @@
 </template>
 
 <script setup lang="ts">
-import { useNodeMutations } from '@/store/Mutations/nodeMutations'
-import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
-import { Tag, TagListNodesRemoveInput } from '@/types/graphql'
-import { InventoryNode } from '@/types/inventory'
+import { Tag } from '@/types/graphql'
+import { InventoryItem, InventoryNode } from '@/types/inventory'
 import { ModalPrimary } from '@/types/modal'
 import { PropType } from 'vue'
 import deleteIcon from '@featherds/icon/navigation/Cancel'
@@ -44,10 +42,8 @@ import { useTagQueries } from '@/store/Queries/tagQueries'
 import { useTagStore } from '@/store/Components/tagStore'
 
 const props = defineProps({
-  closeModal: { type: Function, default: () => null, required: true },
-  node: { type: Object as PropType<InventoryNode>, default: () => ({}), required: true },
-  resetState: { type: Function, default: () => null, required: true },
-  state: { type: String, default: '', required: true },
+  closeModal: { type: Function as PropType<(payload: any[]) => void>, default: () => null, required: true },
+  node: { type: Object as PropType<InventoryItem>, default: () => ({}), required: true },
   title: { type: String, default: '', required: true },
   visible: { type: Boolean, default: false, required: true }
 })
@@ -55,8 +51,6 @@ const props = defineProps({
 const tagQueries = useTagQueries()
 const tagsForDeletion = ref([] as Tag[])
 const nodeIdForDeletingTags = ref()
-const nodeMutations = useNodeMutations()
-const inventoryQueries = useInventoryQueries()
 const tagStore = useTagStore()
 
 const { 
@@ -81,11 +75,11 @@ const modal = ref<ModalPrimary>({
 })
 
 watchEffect(() => {
-  if (props.visible && props.node && props.node.anchor) {
+  if (props.visible && props.node && props.node.tags) {
     modal.value.saveLabel = 'Apply'
     nodeIdForDeletingTags.value = props.node.id
-    tagStore.setFilteredTags(props.node.anchor.tagValue)
-    modal.value.title = props.node.label || ''
+    tagStore.setFilteredTags(props.node.tags)
+    modal.value.title = props.node.nodeLabel || ''
   } else if (!props.visible){
     inputValue.value = ''
   }

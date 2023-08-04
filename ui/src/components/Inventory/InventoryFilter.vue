@@ -34,19 +34,16 @@
 </template>
 
 <script lang="ts" setup>
-import Search from '@featherds/icon/action/Search'
-import { InventoryNode, fncArgVoid } from '@/types'
+import { NewInventoryNode, fncArgVoid } from '@/types'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { Tag } from '@/types/graphql'
-import { FeatherDropdown, FeatherDropdownItem } from '@featherds/dropdown'
-import MenuIcon from "@featherds/icon/navigation/MoreHoriz";
 import { PropType } from 'vue'
 import { FeatherButton } from '@featherds/button'
 import { useTagStore } from '@/store/Components/tagStore'
 const inventoryStore = useInventoryStore()
-const tagStore = useTagStore();
+const tagStore = useTagStore()
 const inventoryQueries = useInventoryQueries()
 const tagQueries = useTagQueries()
 
@@ -60,34 +57,25 @@ defineProps({
     required: true
   },
   nodes: {
-    type: Object as PropType<InventoryNode[]>,
+    type: Object as PropType<NewInventoryNode[]>,
     required: true
-  },
+  }
 })
 
 const searchNodesByLabelRef = ref()
 
-const icons = markRaw({
-  Search
-})
 
 // Current BE setup only allows search by names OR tags.
 // so we clear the other search to avoid confusion
 const searchNodesByLabel: fncArgVoid = useDebounceFn((val: string | undefined) => {
 
   if (val === undefined) return
-  inventoryQueries.getNodesByLabel(val)
+  inventoryQueries.buildNetworkInventory()
 })
 
 const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
   inventoryStore.tagsSelected = tags
-  // if empty tags array, call regular fetch
-  if (!tags.length) {
-    inventoryQueries.getMonitoredNodes()
-    return
-  }
-  const tagNames = tags.map((tag) => tag.name!)
-  inventoryQueries.getNodesByTags(tagNames)
+  inventoryQueries.buildNetworkInventory()
 }
 </script>
 

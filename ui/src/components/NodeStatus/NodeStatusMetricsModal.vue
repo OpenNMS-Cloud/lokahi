@@ -54,14 +54,14 @@ const bandwidthInOut = computed<GraphProps>(() => {
 
 const bitsInOut = computed<GraphProps>(() => {
   const bitsInOutProperties =  {
-      label: 'Bits Inbound / Outbound',
-      metrics: ['network_in_bits', 'network_out_bits'],
-      monitor: 'SNMP',
-      nodeId: route.params.id as string,
-      instance: instance.value,
-      timeRange: 10,
-      timeRangeUnit: TimeRangeUnit.Minute,
-      ifName: ifName.value
+    label: 'Bits Inbound / Outbound',
+    metrics: ['network_in_bits', 'network_out_bits'],
+    monitor: 'SNMP',
+    nodeId: route.params.id as string,
+    instance: instance.value,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute,
+    ifName: ifName.value
   }
 
   if(isAzure.value) {
@@ -74,13 +74,13 @@ const bitsInOut = computed<GraphProps>(() => {
 
 const publicInterfaceByteCount = computed<GraphProps>(() => {
   return {
-      label: 'Bytes Count',
-      metrics: ['bytes_received'],
-      monitor: 'AZURE',
-      nodeId: route.params.id as string,
-      instance: 'publicIPAddresses/' + azureInterface.value?.publicIpId,
-      timeRange: 10,
-      timeRangeUnit: TimeRangeUnit.Minute
+    label: 'Bytes Count',
+    metrics: ['bytes_received'],
+    monitor: 'AZURE',
+    nodeId: route.params.id as string,
+    instance: 'publicIPAddresses/' + azureInterface.value?.publicIpId,
+    timeRange: 10,
+    timeRangeUnit: TimeRangeUnit.Minute
   }
 })
 

@@ -3,7 +3,7 @@ import { Tag } from '@/types/graphql'
 import { useInventoryStore } from '../Views/inventoryStore'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { useInventoryQueries } from '../Queries/inventoryQueries'
-import { InventoryNode, MonitoredStates } from '@/types'
+import { NewInventoryNode } from '@/types'
 import useSnackbar from '@/composables/useSnackbar'
 import useModal from '@/composables/useModal'
 
@@ -22,7 +22,7 @@ export const useTagStore = defineStore('tagStore', () => {
     originalTags.value = [...inFilteredTags]
     filteredTags.value = [...inFilteredTags]
   }
-  const setActiveNode = (node: InventoryNode) => {
+  const setActiveNode = (node: NewInventoryNode) => {
     activeNode.value = node
   }
 
@@ -38,9 +38,7 @@ export const useTagStore = defineStore('tagStore', () => {
   }
   const updateAllNodeTypes = async () => {
     const inventoryQueries = useInventoryQueries()
-    await inventoryQueries.fetchByState(MonitoredStates.MONITORED)
-    await inventoryQueries.fetchByState(MonitoredStates.UNMONITORED)
-    await inventoryQueries.fetchByState(MonitoredStates.DETECTED)
+    inventoryQueries.buildNetworkInventory()
   }
   const saveFilteredTagsToNode = async () => {
     const nodeMutations = useNodeMutations()

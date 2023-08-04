@@ -4,7 +4,7 @@
       class="tag-node-checkbox" data-test="tab-node-checkbox" />
     <section class="overlay-header">
       <Icon :icon="storage" data-test="icon-storage" />
-      <h4 data-test="heading">{{ node?.label }}</h4>
+      <h4 data-test="heading">{{ node?.nodeLabel }}</h4>
     </section>
     <section class="overlay-content">
       <div class="title">
@@ -12,11 +12,11 @@
       </div>
       <div class="inline">
         <FeatherChipList condensed label="Tag list" data-test="tag-list">
-          <FeatherChip v-for="tag in node.anchor.tagValue" :key="tag.id">{{ tag.name }}</FeatherChip>
+          <FeatherChip v-for="tag in node.tags" :key="tag.id">{{ tag.name }}</FeatherChip>
         </FeatherChipList>
         <FeatherChipList condensed label="Tag list" data-test="tag-list" v-if="isChecked">
           <FeatherChip class="new-chip"
-            v-for="tag in tagStore.tagsSelected.filter((d) => !node.anchor.tagValue.find((e) => e.name === d.name))"
+            v-for="tag in tagStore.tagsSelected.filter((d) => !node.tags.find((e) => e.name === d.name))"
             :key="tag.id">{{ tag.name }}</FeatherChip>
         </FeatherChipList>
       </div>
@@ -27,21 +27,21 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import Storage from '@material-design-icons/svg/outlined/storage.svg'
-import { InventoryNode } from '@/types/inventory'
+import { NewInventoryNode } from '@/types/inventory'
 import { IIcon } from '@/types'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useTagStore } from '@/store/Components/tagStore'
 
 const inventoryStore = useInventoryStore()
-const tagStore = useTagStore();
+const tagStore = useTagStore()
 const props = defineProps({
   node: {
-    type: Object as PropType<InventoryNode>,
+    type: Object as PropType<NewInventoryNode>,
     required: true
   }
 })
 
-const isChecked = computed(() => !!inventoryStore.nodesSelected.find((d) => d.id === props.node.id) || false);
+const isChecked = computed(() => !!inventoryStore.nodesSelected.find((d) => d.id === props.node.id) || false)
 
 
 
@@ -64,9 +64,9 @@ const storage: IIcon = {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(10, 12, 27, 1);
+  background-color: var(--feather-secondary);
   padding: var(variables.$spacing-s) var(variables.$spacing-l);
-  border-radius: 0 vars.$border-radius-m vars.$border-radius-m 0;
+  border-radius: vars.$border-radius-xs;
   overflow-y: auto;
 
   .tag-node-checkbox {

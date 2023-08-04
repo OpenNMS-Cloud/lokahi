@@ -30,6 +30,7 @@ package org.opennms.horizon.server.model.inventory;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.opennms.horizon.server.model.inventory.tag.Tag;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class Node {
     private String monitoredState;
     private long createTime;
     private long monitoringLocationId;
+    private List<Tag> tags;
     private List<IpInterface> ipInterfaces;
     private List<SnmpInterface> snmpInterfaces;
     private List<AzureInterface> azureInterfaces;

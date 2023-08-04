@@ -1,10 +1,10 @@
 <template>
   <div class="cards">
-    <div v-for="node in tabContent" :key="node?.id" class="card">
+    <div v-for="node in tabContent" :key="node.id" class="card">
       <section class="node-header">
-        <h5 data-test="heading" class="node-label">{{ node?.label }}</h5>
+        <h5 data-test="heading" class="node-label">{{ node?.nodeLabel }}</h5>
         <div class="card-chip-list">
-          <div>
+          <div class="text-badge-row">
             <div v-for="badge, index in metricsAsTextBadges(node?.metrics)" :key="index">
               <TextBadge v-if="badge.label" :type="badge.type">{{ badge.label }}</TextBadge>
             </div>
@@ -13,25 +13,23 @@
       </section>
       <section class="node-content">
         <div>
-          <InventoryTextAnchorList :anchor="node?.anchor" data-test="text-anchor-list" />
+          <InventoryTextTagList :location="node.location.location" :ipAddress="node.ipInterfaces[0].ipAddress" data-test="text-anchor-list" />
         </div>
       </section>
       <div class="node-footer">
         <FeatherButton class="tags-count-box" @click="openModalForDeletingTags(node)">
-          Tags: <span class="count">{{ node.anchor.tagValue.length }}</span>
+          Tags: <span class="count">{{ node.tags.length }}</span>
         </FeatherButton>
         <InventoryIconActionList :node="node" class="icon-action" data-test="icon-action-list" />
       </div>
       <InventoryNodeTagEditOverlay v-if="tagStore.isTagEditMode" :node="node" />
     </div>
   </div>
-  <InventoryTagModal :visible="tagStore.isVisible" :node="tagStore.activeNode" :closeModal="tagStore.closeModal" :state="state"
-    :resetState="resetState" />
 </template>
 
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { InventoryNode } from '@/types'
+import { NewInventoryNode, RawMetric, InventoryItem } from '@/types'
 import { useTagStore } from '@/store/Components/tagStore'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { BadgeTypes } from '../Common/commonTypes'
@@ -40,7 +38,7 @@ import TextBadge from '../Common/TextBadge.vue'
 
 defineProps({
   tabContent: {
-    type: Object as PropType<InventoryNode[]>,
+    type: Object as PropType<InventoryItem[]>,
     required: true
   },
   state: {
@@ -67,31 +65,22 @@ const resetState = () => {
   inventoryStore.isTagManagerReset = false
 }
 
-const openModalForDeletingTags = (node: InventoryNode) => {
-  if (!node.anchor.tagValue.length) return
+const openModalForDeletingTags = (node: NewInventoryNode) => {
+  if (!node.tags.length) return
   tagStore.setActiveNode(node)
   tagStore.openModal()
 }
 
 
-const metricsAsTextBadges = (metrics?: [{ type: string, value: string | number, status: string }]) => {
-  return metrics?.map((m) => {
-    let badge = { type: BadgeTypes.info, label: '' }
-    if (m.type === 'latency') {
-      if (typeof m.value !== 'undefined') {
-        badge = { type: BadgeTypes.success, label: m.value.toString() }
-      } else {
-        badge = { type: BadgeTypes.error, label: '' }
-      }
-    } else if (m.type === 'status') {
-      if (m.status === 'UP') {
-        badge = { type: BadgeTypes.success, label: m.status.toLowerCase() }
-      } else {
-        badge = { type: BadgeTypes.error, label: m.status.toLowerCase() }
-      }
-    }
-    return badge
-  }) || []
+const metricsAsTextBadges = (metrics?: RawMetric) => {
+  const badges = []
+  if (metrics?.value[1]){
+    badges.push({type: BadgeTypes.success,label:metrics.value[1] + 'ms'})
+    badges.push({type: BadgeTypes.success,label:'Up'})
+  }else {
+    badges.push({type: BadgeTypes.error,label:'Down'})
+  }
+  return badges
 }
 
 </script>
@@ -130,7 +119,7 @@ const metricsAsTextBadges = (metrics?: [{ type: string, value: string | number, 
 
     @include mediaQueriesMixins.screen-md {
       width: auto;
-      min-width: 443px;
+      min-width: 438px;
     }
 
 
@@ -166,5 +155,8 @@ const metricsAsTextBadges = (metrics?: [{ type: string, value: string | number, 
   display: flex;
   justify-content: space-between;
   margin-top: 40px;
+}
+.text-badge-row {
+  display:flex;
 }
 </style>

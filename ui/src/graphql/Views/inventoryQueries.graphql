@@ -67,3 +67,38 @@ query FindAllNodesByMonitoredState($monitoredState: String!) {
     scanType
   }
 }
+
+query BuildNetworkInventoryPage {
+  findAllNodes {
+    id
+    ipInterfaces {
+      id
+      ipAddress
+      nodeId
+      snmpPrimary
+    }
+    location {
+      id
+      location
+    }
+    tags {
+      id
+      name
+    }
+    monitoredState
+    monitoringLocationId
+    nodeLabel
+    scanType
+  }
+  allMetrics: metric(name: "response_time_msec") {
+    status
+    data {
+      resultType
+      result {
+        metric
+        value
+        values
+      }
+    }
+  }
+}

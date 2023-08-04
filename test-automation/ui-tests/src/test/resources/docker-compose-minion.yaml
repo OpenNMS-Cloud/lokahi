@@ -15,7 +15,7 @@ services:
       MINION_GATEWAY_PORT: ${MINION_GATEWAY_PORT}
     ports:
       - '8181:8181/tcp'
-      - '8101:8101/tcp'
+      - '8102:8101/tcp'
       - "8877:8877/udp" # netflow5
       - "4729:4729/udp" # netflow9
       - "9999:9999/udp" # netflow

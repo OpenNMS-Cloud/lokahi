@@ -3,7 +3,7 @@
     <HeadlinePage text="Network Inventory" class="header" data-test="page-header" />
   </div>
 
-  <InventoryTagModal :visible="tagStore.isVisible" :node="tagStore.activeNode" :closeModal="tagStore.closeModal"  />
+  <InventoryTagModal :visible="tagStore.isVisible" :title="''" :node="tagStore.activeNode" :closeModal="tagStore.closeModal"  />
   <FeatherTabContainer class="tab-container" data-test="tab-container">
     <template v-slot:tabs>
       <FeatherTab>Monitored Nodes
@@ -23,9 +23,9 @@
     <FeatherTabPanel>
       <InventoryFilter v-if="inventoryStore.monitoredFilterActive" :state="MonitoredStates.MONITORED"
         :nodes="tabMonitoredContent" />
-      <InventoryTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent"
+      <InventoryTabContent v-if="tabMonitoredContent.length && !inventoryStore.loading" :tabContent="tabMonitoredContent"
         :state="MonitoredStates.MONITORED" />
-      <EmptyList data-test="monitored-empty" v-if="!tabMonitoredContent.length" bg
+      <EmptyList data-test="monitored-empty" v-if="!tabMonitoredContent.length && !inventoryStore.loading" bg
         :content="{ msg: 'No monitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
       <FeatherSpinner v-if="inventoryStore.loading" />
     </FeatherTabPanel>
@@ -34,9 +34,9 @@
     <FeatherTabPanel>
       <InventoryFilter v-if="inventoryStore.unmonitoredFilterActive" :state="MonitoredStates.UNMONITORED" onlyTags
         :nodes="tabUnmonitoredContent" />
-      <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
+      <InventoryTabContent v-if="tabUnmonitoredContent.length && !inventoryStore.loading" :tabContent="tabUnmonitoredContent"
         :state="MonitoredStates.UNMONITORED" />
-      <EmptyList data-test="unmonitored-empty" v-if="!tabUnmonitoredContent.length" bg
+      <EmptyList data-test="unmonitored-empty" v-if="!tabUnmonitoredContent.length && !inventoryStore.loading" bg
         :content="{ msg: 'No unmonitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
       <FeatherSpinner v-if="inventoryStore.loading" />
     </FeatherTabPanel>
@@ -45,9 +45,9 @@
     <FeatherTabPanel>
       <InventoryFilter v-if="inventoryStore.detectedFilterActive" :state="MonitoredStates.DETECTED" onlyTags
         :nodes="tabDetectedContent" />
-      <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
+      <InventoryTabContent v-if="tabDetectedContent.length && !inventoryStore.loading" :tabContent="tabDetectedContent"
         :state="MonitoredStates.DETECTED" />
-      <EmptyList data-test="discovery-empty" v-if="!tabDetectedContent.length" bg
+      <EmptyList data-test="discovery-empty" v-if="!tabDetectedContent.length && !inventoryStore.loading" bg
         :content="{ msg: 'No detected nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
       <FeatherSpinner v-if="inventoryStore.loading" />
     </FeatherTabPanel>

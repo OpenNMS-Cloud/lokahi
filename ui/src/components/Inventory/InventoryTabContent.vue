@@ -20,7 +20,7 @@
         <FeatherButton class="tags-count-box" @click="openModalForDeletingTags(node)">
           Tags: <span class="count">{{ node.tags.length }}</span>
         </FeatherButton>
-        <InventoryIconActionList :node="node" class="icon-action" data-test="icon-action-list" />
+        <InventoryIconActionList :node="node" className="icon-action" data-test="icon-action-list" />
       </div>
       <InventoryNodeTagEditOverlay v-if="tagStore.isTagEditMode" :node="node" />
     </div>
@@ -66,7 +66,6 @@ const resetState = () => {
 }
 
 const openModalForDeletingTags = (node: NewInventoryNode) => {
-  if (!node.tags.length) return
   tagStore.setActiveNode(node)
   tagStore.openModal()
 }

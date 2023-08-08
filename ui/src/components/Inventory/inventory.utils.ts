@@ -1,5 +1,5 @@
-import { DetectedNode, MonitoredStates, MonitoredNode, UnmonitoredNode } from '@/types'
+import { InventoryNode, MonitoredStates } from '@/types'
 
-export const isMonitored = (node: MonitoredNode | UnmonitoredNode | DetectedNode): node is MonitoredNode => {
-  return (node as MonitoredNode).type === MonitoredStates.MONITORED
+export const isMonitored = (node: InventoryNode): node is InventoryNode => {
+  return (node as InventoryNode).type === MonitoredStates.MONITORED
 }

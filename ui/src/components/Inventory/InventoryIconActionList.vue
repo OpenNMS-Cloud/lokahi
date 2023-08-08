@@ -1,5 +1,5 @@
 <template>
-  <ul class="icon-action-list">
+  <ul :class="[`icon-action-list`,className]">
     <li v-if="node.monitoredState === 'MONITORED'" @click="onLineChart" data-test="line-chart" class="pointer">
       <Icon :icon="lineChartIcon" />
     </li>
@@ -35,6 +35,7 @@ import useSnackbar from '@/composables/useSnackbar'
 import useModal from '@/composables/useModal'
 import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
+import { PropType } from 'vue'
 
 const { showSnackbar } = useSnackbar()
 const { openModal, closeModal, isVisible } = useModal()
@@ -42,7 +43,11 @@ const inventoryQueries = useInventoryQueries()
 const nodeMutations = useNodeMutations()
 
 const router = useRouter()
-const props = defineProps<{ node: InventoryItem }>()
+const props = defineProps({
+  node: {type:Object as PropType<InventoryItem>, default: () => ({})},
+  className:{type: String, default: ''},
+  ['data-test']:{type: String, default: ''}
+})
 
 const onLineChart = () => {
   router.push({

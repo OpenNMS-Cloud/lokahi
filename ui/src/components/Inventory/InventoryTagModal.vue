@@ -6,7 +6,7 @@
       <p>A short line of instructions for the user on managing tags for this node</p>
       <h4 class="subhead-1 existing-tags">Existing Tags</h4>
       <FeatherChipList label="Tags">
-        <FeatherChip v-for="(tag, index) in tagStore.filteredTags" :key="index" @click="tagStore.filterTag(tag)"
+        <FeatherChip v-for="(tag) in tagStore.filteredTags" :key="tag.id" @click="tagStore.filterTag(tag)"
           :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }" class="pointer">
           {{ tag.name }}
           <template v-slot:icon>

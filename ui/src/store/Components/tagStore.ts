@@ -124,6 +124,7 @@ export const useTagStore = defineStore('tagStore', () => {
     selectAllTags(areAllTagsSelected.value)
   }
   const filterTag = (tag: Tag) => {
+    console.log('trying to filter tag!',tag)
     filteredTags.value = filteredTags.value.filter((d) => d.name !== tag.name)
   }
   return {

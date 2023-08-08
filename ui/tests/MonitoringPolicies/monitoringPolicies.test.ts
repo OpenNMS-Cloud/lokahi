@@ -13,7 +13,7 @@ const testingPayload: MonitorPolicy = {
   notifyByEmail: false,
   notifyByPagerDuty: false,
   notifyByWebhooks: false,
-  tags: [],
+  tags: ['default'],
   rules: [
     {
       name: 'Rule1',

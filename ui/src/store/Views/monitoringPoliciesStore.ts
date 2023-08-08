@@ -33,7 +33,7 @@ const defaultPolicy: Policy = {
   notifyByEmail: false,
   notifyByPagerDuty: false,
   notifyByWebhooks: false,
-  tags: [],
+  tags: ['default'],
   rules: []
 }
 

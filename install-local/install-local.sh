@@ -66,12 +66,12 @@ cluster_install_kubelet_config() {
 
 create_ssl_cert_secret () {
   # generate CA and ingress certs
-  ./load-or-generate-secret.sh $NAMESPACE "opennms-ca" "root-ca-certificate" "tmp/ca.key" "tmp/ca.crt"
-  ./generate-and-sign-certificate.sh $NAMESPACE "minion.$DOMAIN" "opennms-minion-gateway-certificate" "tmp/ca.key" "tmp/ca.crt"
-  ./generate-and-sign-certificate.sh $NAMESPACE "$DOMAIN" "opennms-ui-certificate" "tmp/ca.key" "tmp/ca.crt"
+  ./load-or-generate-secret.sh "opennms-ca" "root-ca-certificate" "tmp/ca.key" "tmp/ca.crt" -n "$NAMESPACE"
+  ./generate-and-sign-certificate.sh "minion.$DOMAIN" "opennms-minion-gateway-certificate" "tmp/ca.key" "tmp/ca.crt" -n "$NAMESPACE"
+  ./generate-and-sign-certificate.sh "$DOMAIN" "opennms-ui-certificate" "tmp/ca.key" "tmp/ca.crt" -n "$NAMESPACE"
 
   # Generate client CA certificate
-  ./load-or-generate-secret.sh $NAMESPACE "client-ca" "client-root-ca-certificate" "tmp/client-ca.key" "tmp/client-ca.crt"
+  ./load-or-generate-secret.sh "client-ca" "client-root-ca-certificate" "tmp/client-ca.key" "tmp/client-ca.crt" -n "$NAMESPACE"
 }
 
 # WHEN kind fixes the bug, https://github.com/kubernetes-sigs/kind/issues/3063,

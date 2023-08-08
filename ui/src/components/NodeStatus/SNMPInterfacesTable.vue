@@ -8,6 +8,7 @@
     <div class="container">
       <table
         class="data-table tc3"
+        data-test="SNMPInterfacesTable"
         aria-label="SNMP Interfaces Table"
       >
         <thead>

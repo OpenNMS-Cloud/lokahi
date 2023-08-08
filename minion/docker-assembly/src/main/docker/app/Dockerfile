@@ -13,6 +13,7 @@ RUN mkdir -p /opt
 
 ADD --chown=10001:0 work/karaf/ /opt/karaf/
 ADD --chown=10001:0 work/entrypoint/ /
+ADD --chown=10001:0 work/agent/ /opt/karaf/agent/
 
 # Set karaf.clean.cache = true in system.properties
 RUN sed -i 's/^karaf.clean.cache *=.*/karaf.clean.cache = true/' /opt/karaf/etc/system.properties
@@ -85,12 +86,7 @@ CMD [ "daemon" ]
 STOPSIGNAL SIGTERM
 
 ### Runtime information and not relevant at build time
-ENV IGNITE_UPDATE_NOTIFIER="false" \
-    MINION_LOCATION="MINION" \
-    MINION_GATEWAY_HOST="minion-gateway" \
-    MINION_GATEWAY_PORT="8990" \
-    MINION_GATEWAY_TLS="false"
-
+ENV IGNITE_UPDATE_NOTIFIER="false"
 
 ##------------------------------------------------------------------------------
 ## EXPOSED PORTS

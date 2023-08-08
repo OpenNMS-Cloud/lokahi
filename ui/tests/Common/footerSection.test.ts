@@ -1,18 +1,13 @@
 import { mount } from '@vue/test-utils'
 import FooterSection from '@/components/Common/FooterSection.vue'
 
-const mock = {
-  save: { label: 'save', handler: () => ({}) },
-  cancel: { label: 'cancel', handler: () => ({}) }
-}
-
 let wrapper: any
 
-describe.skip('FooterSection', () => {
+describe('FooterSection', () => {
   beforeAll(() => {
     wrapper = mount(FooterSection, {
-      propsData: {
-        ...mock
+      slots: {
+        buttons: '<div data-test="save-button">save btn</div> <div data-test="cancel-button">cancel btn</div>'
       }
     })
   })

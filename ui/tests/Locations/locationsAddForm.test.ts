@@ -1,3 +1,4 @@
+import featherInputFocusDirective from '@/directives/v-focus'
 import mount from '../mountWithPiniaVillus'
 import LocationsAddForm from '@/components/Locations/LocationsAddForm.vue'
 
@@ -7,7 +8,12 @@ describe('LocationsAddForm', () => {
   beforeAll(() => {
     wrapper = mount({
       component: LocationsAddForm,
-      shallow: false
+      shallow: false,
+      global: {
+        directives: {
+          focus: featherInputFocusDirective
+        }
+      }
     })
   })
   afterAll(() => {

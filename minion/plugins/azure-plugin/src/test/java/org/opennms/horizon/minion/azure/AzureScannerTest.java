@@ -144,7 +144,7 @@ public class AzureScannerTest {
         PublicIpAddressProps props = new PublicIpAddressProps();
         props.setIpAddress(TEST_PUBLIC_IP_ADDRESS);
         azurePublicIPAddress.setProperties(props);
-        azurePublicIpAddresses.setValue(Collections.singletonList(azurePublicIPAddress));
+        azurePublicIpAddresses.setValue(List.of(azurePublicIPAddress, new AzurePublicIPAddress()));
         return azurePublicIpAddresses;
     }
 
@@ -176,12 +176,12 @@ public class AzureScannerTest {
         publicIPAddress.setId(TEST_PUBLIC_IP_ID);
         ipConfProps.setPublicIPAddress(publicIPAddress);
         ipConfiguration.setProperties(ipConfProps);
-        props.setIpConfigurations(Collections.singletonList(ipConfiguration));
+        props.setIpConfigurations(List.of(ipConfiguration, new IpConfiguration()));
         VirtualMachine virtualMachine = new VirtualMachine();
         virtualMachine.setId(TEST_RESOURCE_ID);
         props.setVirtualMachine(virtualMachine);
         azureNetworkInterface.setProperties(props);
-        azureNetworkInterfaces.setValue(Collections.singletonList(azureNetworkInterface));
+        azureNetworkInterfaces.setValue(List.of(azureNetworkInterface, new AzureNetworkInterface()));
         return azureNetworkInterfaces;
     }
 
@@ -189,7 +189,7 @@ public class AzureScannerTest {
         AzureResourceGroups azureResourceGroups = new AzureResourceGroups();
         AzureValue azureValue = new AzureValue();
         azureValue.setName(TEST_RESOURCE_GROUP);
-        azureResourceGroups.setValue(Collections.singletonList(azureValue));
+        azureResourceGroups.setValue(List.of(azureValue, new AzureValue()));
         return azureResourceGroups;
     }
 

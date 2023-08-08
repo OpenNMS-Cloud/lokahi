@@ -26,7 +26,6 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-
 package org.opennms.horizon.shared.azure.http.dto.instanceview;
 
 import com.google.gson.annotations.SerializedName;
@@ -40,7 +39,10 @@ import java.util.List;
 @Setter
 public class AzureInstanceView {
     private static final String POWER_STATE_RUNNING = "PowerState/running";
+    private static final String PROVISIONING_STATE_SUCCEEDED = "ProvisioningState/succeeded";
 
+    @SerializedName("vmAgent")
+    private VmAgent vmAgent;
     @SerializedName("computerName")
     private String computerName;
     @SerializedName("osName")
@@ -49,6 +51,18 @@ public class AzureInstanceView {
     private String osVersion;
     @SerializedName("statuses")
     private List<AzureStatus> statuses = new ArrayList<>();
+
+    public boolean isReady() {
+        if (vmAgent != null) {
+            for (AzureStatus status : vmAgent.getStatuses()) {
+                String code = status.getCode();
+                if (code.equalsIgnoreCase(PROVISIONING_STATE_SUCCEEDED)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public boolean isUp() {
         for (AzureStatus status : getStatuses()) {

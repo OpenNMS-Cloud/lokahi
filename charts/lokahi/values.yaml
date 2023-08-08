@@ -21,11 +21,11 @@ OpenNMS:
     Replicas: 1
     Resources:
       Limits:
-        Cpu: "2"
-        Memory: 2Gi
+        Cpu: "1"
+        Memory: 2Gi # MaxRAMPercentage=50,avg-usage=245MB
       Requests:
         Cpu: "1"
-        Memory: 1Gi
+        Memory: 2Gi
     PrivateRepoEnabled: false
     FlowsUrl: SOME-EXTERNAL-FLOW-SERVER:80
     FlowsTlsEnabled: false
@@ -37,11 +37,11 @@ OpenNMS:
     Replicas: 1
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 512Mi
+        Cpu: "2"
+        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=400MB
       Requests:
-        Cpu: 250m
-        Memory: 256Mi
+        Cpu: "1"
+        Memory: 2Gi
     PrivateRepoEnabled: false
     FlowIngestorUrl: SOME-EXTERNAL-FLOW-SERVER:80
     FlowTlsEnabled: false
@@ -57,10 +57,10 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "1"
-        Memory: 500Mi
+        Memory: 512Mi
       Requests:
         Cpu: 100m
-        Memory: 250Mi
+        Memory: 256Mi
     PrivateRepoEnabled: false
     IngressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -86,11 +86,11 @@ OpenNMS:
     NetflowListenerPort: 9999
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 2Gi
     ExtraVolumes: []
     ExtraMounts: []
     ExtraInitContainers: []
@@ -101,7 +101,6 @@ OpenNMS:
     Image: opennms/lokahi-minion-gateway
     ImagePullPolicy: IfNotPresent
     InternalGrpcPort: 8991
-    IgniteClientPort: 10800
     Replicas: 1
     UseKubernetes: "true"
     DbName: "horizon_stream"
@@ -110,11 +109,12 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "2"
-        Memory: 4Gi
+        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=480MB
       Requests:
         Cpu: "1"
         Memory: 2Gi
     IngressAnnotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0" # To avoid HTTP 413 and "client intended to send too large chunked body: X bytes while sending request to upstream"
       nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
       nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
@@ -127,8 +127,6 @@ OpenNMS:
         client_body_timeout "1200s";
     PrivateRepoEnabled: false
     kafkaSecretName: ~
-
-
   Inventory:
     ServiceName: opennms-inventory
     Image: opennms/lokahi-inventory
@@ -139,11 +137,11 @@ OpenNMS:
     DbHost: "postgres"
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=620MB
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 2Gi
     EncryptionKey: ~
     PrivateRepoEnabled: false
     kafkaSecretName: ~
@@ -157,11 +155,11 @@ OpenNMS:
     DbHost: "postgres"
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=480MB
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 2Gi
     PrivateRepoEnabled: false
     kafkaSecretName: ~
   Notification:
@@ -174,11 +172,11 @@ OpenNMS:
     DbHost: "postgres"
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=450MB
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 2Gi
     PrivateRepoEnabled: false
     kafkaSecretName: ~
     retry:
@@ -187,7 +185,6 @@ OpenNMS:
       multiplier: 2
       max: 10
     acsConnectionSecretName: {} # the ACS connection string is expected in the 'connection-string' key
-
   Events:
     ServiceName: opennms-events
     Image: opennms/lokahi-events
@@ -198,11 +195,11 @@ OpenNMS:
     DbHost: "postgres"
     Resources:
       Limits:
-        Cpu: "1"
-        Memory: 500Mi
+        Cpu: "2"
+        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=550MB
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 2Gi
     PrivateRepoEnabled: false
   DataChoices:
     ServiceName: opennms-datachoices
@@ -215,10 +212,10 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "1"
-        Memory: 500Mi
+        Memory: 1Gi
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 1Gi
     PrivateRepoEnabled: false
   MinionCertificateManager:
     Enabled: false
@@ -232,10 +229,10 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "1"
-        Memory: 500Mi
+        Memory: 1Gi
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 1Gi
     PrivateRepoEnabled: false
   MinionCertificateVerifier:
     ServiceName: opennms-minion-certificate-verifier
@@ -245,10 +242,10 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "1"
-        Memory: 500Mi
+        Memory: 1Gi # MaxRAMPercentage=50,avg-usage=245MB
       Requests:
-        Cpu: 100m
-        Memory: 250Mi
+        Cpu: "1"
+        Memory: 1Gi
     PrivateRepoEnabled: false
     CertificateManagerUrl: ""
 Postgres:
@@ -288,10 +285,10 @@ Keycloak:
   Resources:
     Limits:
       Cpu: "1"
-      Memory: 1000Mi
+      Memory: 2Gi
     Requests:
-      Cpu: 100m
-      Memory: 500Mi
+      Cpu: "1"
+      Memory: 1Gi
   AdminUsername: admin
   AdminPassword: notset
   RealmName: opennms

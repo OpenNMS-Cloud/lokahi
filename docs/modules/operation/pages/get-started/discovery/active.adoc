@@ -11,7 +11,7 @@ To create an active discovery, follow these steps:
 . Choose *Discovery* in the left navigation menu.
 . On the Discovery page, click *Add Discovery*.
 . In the Active Discovery area, choose one of the following:
-    * ICMP/SNMP: Performs a ping sweep and scans for SNMP MIBs on nodes that respond.
+    * ICMP/SNMP: Performs a ping sweep and scans for SNMP MIBs on nodes that respond to ping sweep.
     * Azure: Connects to the Azure API, queries the virtual machines list, and creates entities for each VM in the node inventory.
 +
 . Fill in the appropriate information in each field.

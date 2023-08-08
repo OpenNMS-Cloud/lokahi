@@ -1,6 +1,6 @@
 <template>
   <div class="cards">
-    <div v-for="node in tabContent" :key="node.id" class="card">
+    <div v-for="node in tabContent" :key="node.id" class="card" :data-test="state">
       <section class="node-header">
         <h5 data-test="heading" class="node-label">{{ node?.nodeLabel }}</h5>
         <div class="card-chip-list">

@@ -23,7 +23,14 @@ OpenNMS:
   global:
     openTelemetry:
       otlpTracesEndpoint: "http://jaeger-collector:4317"
-
+  Alert:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
   API:
     Resources:
       Limits:
@@ -42,6 +49,14 @@ OpenNMS:
         Memory: '0'
     IngressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: ~
+  MetricsProcessor:
+    Resources:
+      Limits:
+        Cpu: '0'
+        Memory: '0'
+      Requests:
+        Cpu: '0'
+        Memory: '0'
   Minion:
     Enabled: true
     addDefaultLocation: true

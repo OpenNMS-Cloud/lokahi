@@ -88,12 +88,12 @@ public class LocationsPage {
     }
 
     public static boolean selectLocationMenuItem(String menuItemName, String locationName) {
-        String specificLocationSearch = "//div[@class='locations-card' or @class='locations-card selected'][.//div[@class='name']//span/text()='" + locationName + "']//button[@data-test='more-options-btn']";
+        String specificLocationSearch = "//li[@data-test='card'][.//button[@data-test='locationNameButton']/span/text()='" + locationName + "']//button[@data-test='more-options-btn']";
         SelenideElement locationMenu = $(By.xpath(specificLocationSearch));
         if (locationMenu.exists()) {
             // Location exists, time to hit edit
             locationMenu.click();
-            SelenideElement menuItem = $(By.xpath("//div[@data-test='context-menu']/div[@class='feather-menu-dropdown']//a[span/text()='" + menuItemName + "'][1]"));
+            SelenideElement menuItem = $(By.xpath("//a[@data-test='dropdownItem'][span/text()='" + menuItemName + "']"));
             menuItem.should(exist).click();
             return true;
         }
@@ -109,7 +109,7 @@ public class LocationsPage {
     }
 
     public static boolean selectLocation(String locationName) {
-        String specificLocationSearch = "//div[@class='locations-card' or @class='locations-card selected']//div[@class='name']//span[text()='" + locationName + "']";
+        String specificLocationSearch = "//button[@data-test='locationNameButton']/span[text()='" + locationName + "']";
         SelenideElement location = $(By.xpath(specificLocationSearch));
         if (location.exists()) {
             // Location exists, time to hit edit

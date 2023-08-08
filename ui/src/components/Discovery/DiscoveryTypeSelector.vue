@@ -12,13 +12,13 @@
             class="icon"
             :icon="networkIcon"
           />
-          <FeatherRadio :value="DiscoveryType.ICMP">{{ discoveryText.AddDiscoverySection.icmpSnmp }}</FeatherRadio>
+          <FeatherRadio data-test="discoveryICMP" :value="DiscoveryType.ICMP">{{ discoveryText.AddDiscoverySection.icmpSnmp }}</FeatherRadio>
         </div>
         <div class="row">
           <FeatherIcon
             class="icon"
             :icon="cloudIcon"
-          /><FeatherRadio :value="DiscoveryType.Azure">{{ discoveryText.AddDiscoverySection.azure }}</FeatherRadio>
+          /><FeatherRadio data-test="discoveryAzure" :value="DiscoveryType.Azure">{{ discoveryText.AddDiscoverySection.azure }}</FeatherRadio>
         </div>
       </FeatherRadioGroup>
     </div>
@@ -34,7 +34,7 @@
             class="icon"
             :icon="networkIcon"
           />
-          <FeatherRadio :value="DiscoveryType.SyslogSNMPTraps">{{
+          <FeatherRadio data-test="discoverySyslog" :value="DiscoveryType.SyslogSNMPTraps">{{
             discoveryText.AddDiscoverySection.syslog
           }}</FeatherRadio>
         </div>

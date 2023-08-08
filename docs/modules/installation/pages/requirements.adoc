@@ -2,7 +2,9 @@
 :!sectids:
 
 = Requirements
-:description: See the requirements to set up OpenNMS Lōkahi, an open source network monitoring project designed for cloud-native deployments.
+:description: See the requirements to set up OpenNMS Lōkahi, an open source network monitoring project designed for cloud-native deployments and OpenNMS Cloud.
+
+== Lōkahi
 
 OpenNMS Lōkahi uses PostgreSQL as a relational database for its inventory and configuration, and big data systems such as Cortex and Elasticsearch for persistence of historical monitoring data.
 
@@ -15,3 +17,40 @@ Our current goal is that you can develop and run Lōkahi on a development system
 Lōkahi requires a Kubernetes-compatible infrastructure for deploying the application.
 
 For installation instructions, see the https://github.com/OpenNMS-Cloud/lokahi/wiki/Getting-Started---Admin[administrator's getting started guide] in the project's wiki on GitHub.
+
+[[cloud-requirements]]
+== Cloud
+
+To use OpenNMS Cloud you need to install our Minion on your system.
+This lightweight, secure collector monitors and communicates with the devices on your network, shares collected data, and connects your network with OpenNMS Cloud.
+
+You install the Minion as part of your first-time sign in to OpenNMS Cloud.
+The setup takes a few minutes.
+
+Make sure you have the following before you begin:
+
+*Minimum System Requirements*
+
+* *CPU:* 3GHz quad core x86_64 and above
+* *RAM:* 8GB (physical) and above
+* *Storage (disk space):* 100GB with SSD and above
+
+Make sure you have the following:
+
+* Docker environment with Docker Compose
+* Access to a terminal window
+* Network Time Protocol (NTP) installed and configured
+
+=== How to set up Docker
+
+At a minimum, use Docker engine version 23, but we recommend 24.
+For production use, we recommend Docker on Linux; there are issues with the IP address handling of received traps with Docker on Mac and Windows.
+
+* https://docs.docker.com/desktop/install/linux-install/[Linux]
+* https://docs.docker.com/desktop/install/mac-install/[Mac]
+* https://docs.docker.com/desktop/install/windows-install/[Windows]
+
+
+
+
+

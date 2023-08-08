@@ -44,7 +44,7 @@ const tabContent: InventoryNode[] = [
 
 let wrapper: any
 
-describe.skip('InventoryTabContent.vue', () => {
+describe('InventoryTabContent.vue', () => {
   beforeAll(() => {
     wrapper = mount({
       component: InventoryTabContent,

@@ -6,7 +6,7 @@ const onToggle = () => (toggle.value = true)
 
 const wrapper = mount(BasicToggle, {
   props: {
-    toggle,
+    toggle: toggle.value,
     onToggle
   } as any // lets us pass emits fns to the test using onSomeFuntion...
 })

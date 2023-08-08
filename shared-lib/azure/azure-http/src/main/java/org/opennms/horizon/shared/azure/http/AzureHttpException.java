@@ -37,7 +37,7 @@ public class AzureHttpException extends Exception {
     private final transient int httpStatusCode;
 
     public AzureHttpException(AzureHttpError httpError, int httpStatusCode) {
-        super(httpError.getErrorDescription());
+        super(httpError.getErrorDescription() != null ? httpError.getErrorDescription() : httpError.getMessage());
         this.httpError = httpError;
         this.httpStatusCode = httpStatusCode;
     }

@@ -68,7 +68,7 @@ Your Minion will appear in the Locations screen once it is running and OpenNMS d
 
 == View Minion details
 
-You can view details about the Minion including latency and status on both the Locations page (select *Locations* from the left navigation menu) and the Minions page (select *Minions* from the left navigation menu).
+You can view details about the Minion including latency and status on the Inventory page (select *Inventory* from the left navigation menu).
 
 == Delete a location
 

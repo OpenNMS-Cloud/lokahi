@@ -32,21 +32,20 @@ import com.azure.communication.email.EmailClient;
 import com.azure.communication.email.implementation.models.ErrorResponseException;
 import com.azure.communication.email.models.EmailMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.opennms.horizon.notifications.exceptions.NotificationAPIException;
 import org.opennms.horizon.notifications.exceptions.NotificationBadDataException;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
 /**
  * Implements email using Azure Communication Services instead of SMTP
  */
+@Slf4j
 @RequiredArgsConstructor
-@ConditionalOnBean(EmailClient.class)
 public class ACSEmailAPI implements EmailAPI {
-    @Value("${spring.mail.from}")
-    private String fromAddress;
+
+    private final String fromAddress;
 
     private final EmailClient client;
 

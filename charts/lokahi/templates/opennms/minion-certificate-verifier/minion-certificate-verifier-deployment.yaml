@@ -52,7 +52,7 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.MinionCertificateVerifier.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             {{- include "deployment.env" .Values.OpenNMS.MinionCertificateVerifier | nindent 12 }}
             - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
               value: {{ if or (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "") (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "dev")
@@ -88,6 +88,13 @@ spec:
             periodSeconds: 2
             successThreshold: 1
             failureThreshold: 250
+          resources:
+            limits:
+              cpu: "{{ .Values.OpenNMS.MinionCertificateVerifier.Resources.Limits.Cpu }}"
+              memory: "{{ .Values.OpenNMS.MinionCertificateVerifier.Resources.Limits.Memory }}"
+            requests:
+              cpu: "{{ .Values.OpenNMS.MinionCertificateVerifier.Resources.Requests.Cpu }}"
+              memory: "{{ .Values.OpenNMS.MinionCertificateVerifier.Resources.Requests.Memory }}"
       {{- if .Values.OpenNMS.MinionCertificateVerifier.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

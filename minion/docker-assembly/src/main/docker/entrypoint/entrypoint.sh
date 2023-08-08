@@ -6,11 +6,8 @@ trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ### Required: GRPC_CLIENT_KEYSTORE file encrypted with GRPC_CLIENT_KEYSTORE_PASSWORD
 
-if ! [[ -v GRPC_CLIENT_KEYSTORE ]]; then
-	echo "Required keystore file environment variable 'GRPC_CLIENT_KEYSTORE' not set." >&2
-	echo "Example docker argument to pass keystore file: -e GRPC_CLIENT_KEYSTORE=/opt/karaf/minion.p12" >&2
-	exit 1
-fi
+# This needs to match the default in assembly/src/main/resources/etc/org.opennms.core.ipc.grpc.client.cfg
+GRPC_CLIENT_KEYSTORE="${GRPC_CLIENT_KEYSTORE:-/opt/karaf/minion.p12}"
 
 if [ ! -e "${GRPC_CLIENT_KEYSTORE}" ]; then
 	echo "Required keystore file not found inside the container." >&2

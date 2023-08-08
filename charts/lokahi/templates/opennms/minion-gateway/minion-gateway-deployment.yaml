@@ -60,7 +60,7 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.MinionGateway.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -96,7 +96,11 @@ spec:
             - name: internal-grpc
               containerPort: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
             - name: ig-client
-              containerPort: {{ .Values.OpenNMS.MinionGateway.IgniteClientPort }}
+              containerPort: 10800
+            - name: ig-discovery
+              containerPort: 47500
+            - name: ig-spi
+              containerPort: 47100
           volumeMounts:
             - name: minion-gateway-ignite-config-volume
               mountPath: "/app/resources/ignite"

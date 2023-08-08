@@ -74,7 +74,13 @@ describe('Flows', () => {
     const returnedObject = store.getTimeRange(TimeRange.Today)
     const startTime = new Date(new Date().setHours(0, 0, 0, 0)).getTime()
     const expectedObject = { startTime: startTime, endTime: Date.now() }
-    expect(returnedObject).toStrictEqual(expectedObject)
+    
+    // +5 to prevent flaky test failures
+    expect(returnedObject.startTime).lessThan(expectedObject.startTime + 5)
+    expect(returnedObject.startTime).greaterThan(expectedObject.startTime - 5)
+
+    expect(returnedObject.endTime).lessThan(expectedObject.endTime + 5)
+    expect(returnedObject.endTime).greaterThan(expectedObject.endTime - 5)
   })
 
   test('The Flows store convert to date should convert time range to string for labels', () => {

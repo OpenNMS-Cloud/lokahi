@@ -18,6 +18,7 @@
         <FeatherButton
           text
           @click="closeModal"
+          data-test="addAnotherDiscoveryButton"
         >
           <template v-slot:icon>
             <FeatherIcon
@@ -32,6 +33,7 @@
         <FeatherButton
           text
           @click="router.push('Inventory')"
+          data-test="viewDetectedNodesButton"
         >
           <template v-slot:icon>
             <FeatherIcon

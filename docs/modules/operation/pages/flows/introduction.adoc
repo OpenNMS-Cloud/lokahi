@@ -1,0 +1,62 @@
+
+= Flows
+:description: Learn about flows data in OpenNMS Lōkahi/Cloud.
+
+Flows are summaries of network traffic sent by network devices (switches, routers, and so on).
+This information includes, but is not limited to, source and destination addresses, source and destination ports, octet count, and duration of activity.
+Collecting and analyzing flows data provides a picture of network usage and helps to diagnose issues.
+Persisting flows for long-term storage can aid in forensic analysis.
+
+== View flows data
+
+By default, OpenNMS Cloud/Lōkahi displays the following flows data:
+
+* Total network traffic
+* Top 10 applications
+* Top 10 talkers
+
+You can see visualizations of this flows data on the Insights Dashboard and on the Flows page.
+
+.Flows data on insights dashboard
+image::flows/flows-insights.png[Total network traffic line chart showing inbound/outbound traffic for 24-hour period. Top 10 appliances polar chart, 600]
+
+.Flows data on flows page
+image::flows/flows-top-ten.png[Top 10 applications as a line chart for 24-hour period., 600]
+
+For more information on data visualization, see xref:operation:visualizations/introduction.adoc[].
+
+== Configure flows data display
+
+By default, the Flows page displays charts that show the top 10 applications for the network devices that you are monitoring.
+You can filter items like time period and type of traffic to customize the information displayed.
+
+Note that you can also download a PDF file of the data or refresh it by clicking the respective symbols on the page.
+
+To configure your flows data display, follow these steps:
+
+. On the Insights Dashboard page, click *Quick Actions>View Flows* or click the *flows* link on the Top 10 Applications chart.
+. On the Flows page, specify the following information:
+.. Time period (current calendar day, last 24 hours, last 7 days)
+.. Exporters (devices configured to export flow reports)
+.. Applications (monitored protocols)
++
+NOTE: The list of exporters and applications to filter on depends on the flows data you are collecting.
+.. Chart type (table or line)
+.. Traffic type (total, inbound, or outbound)
+. Click the refresh symbol to update the display.
+. Click the download symbol to download a PDF of the flows data.
+
+The following shows a chart filtered to display only bootpc application data:
+
+.Line chart displaying only bootpc data
+image::flows/flows-bootpc.png[Line chart filtered to display flows traffic only for bootpc application., 600]
+
+You can also filter on the data by hovering on any point in a line chart or table chart.
+A pop up appears summarizing the data for the selected time.
+
+.Top 10 applications with hover
+image::flows/flows-top-10-hover.png[Top 10 applications as a line chart for 24-hour period, with data displayed from hovering mouse over the chart., 400]
+
+To filter by protocol on a line chart, click the protocols on the right side.
+They will appear crossed out, and data from the corresponding protocol will no longer appear in the graph.
+Click on the crossed-out protocol to make the data reappear.

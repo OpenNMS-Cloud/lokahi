@@ -20,11 +20,8 @@
       </template>
     </HeadlineSection>
     <div class="locations-list">
-      <div class="header">
-        <div
-          class="name"
-          data-test="name"
-        >
+      <div class="header" data-test="header">
+        <div class="name">
           Name
         </div>
         <!-- Post EAR -->

@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.notifications.service;
 
+import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +63,10 @@ public class NotificationService {
 
     @WithTenant(tenantIdArg = 0, tenantIdArgInternalMethod = "getTenantId", tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
     public void postNotification(Alert alert) {
+        Span span = Span.current();
+        span.setAttribute("tenantId", alert.getTenantId());
+        span.setAttribute("alertId", alert.getDatabaseId());
+
         if (alert.getMonitoringPolicyIdList().isEmpty()) {
             log.info("Alert has no associated monitoring policies, dropping alert[id: {}, tenant: {}]",
                 alert.getDatabaseId(), alert.getTenantId());
@@ -79,8 +84,8 @@ public class NotificationService {
             return;
         }
 
-        boolean notifyPagerDuty = false;
         boolean notifyEmail = false;
+        boolean notifyPagerDuty = false;
 
         for (MonitoringPolicy policy : dbPolicies) {
             if (policy.isNotifyByPagerDuty()) {
@@ -90,6 +95,8 @@ public class NotificationService {
                 notifyEmail = true;
             }
         }
+        log.info("Alert[id: {}] monitoring policy ids: {}, notifyPagerDuty: {}, notifyEmail: {}",
+            alert.getDatabaseId(), alert.getMonitoringPolicyIdList(), notifyPagerDuty, notifyEmail);
 
         if (notifyPagerDuty) {
             postPagerDutyNotification(alert);
@@ -100,6 +107,8 @@ public class NotificationService {
     }
 
     private void postPagerDutyNotification(Alert alert) {
+        log.info("Sending alert[id: {}, tenant: {}] to PagerDuty",
+            alert.getDatabaseId(), alert.getTenantId());
         try {
             pagerDutyAPI.postNotification(alert);
         } catch (NotificationException e) {
@@ -110,7 +119,11 @@ public class NotificationService {
 
     private void postEmailNotification(Alert alert) {
         try {
-            for (String emailAddress : keyCloakAPI.getTenantEmailAddresses(alert.getTenantId())) {
+            List<String> addresses = keyCloakAPI.getTenantEmailAddresses(alert.getTenantId());
+            log.info("Emailing alert[id: {}, tenant: {}] to {} addresses",
+                alert.getDatabaseId(), alert.getTenantId(), addresses.size());
+
+            for (String emailAddress : addresses) {
                 String subject = String.format("%s severity alert",
                     StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName()));
                 String htmlBody = velocity.populateTemplate(emailAddress, alert);

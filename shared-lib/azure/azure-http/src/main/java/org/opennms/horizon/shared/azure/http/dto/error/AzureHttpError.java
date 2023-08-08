@@ -9,7 +9,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class AzureHttpError {
-
     @SerializedName("timestamp")
     private Date timestamp;
 
@@ -27,4 +26,10 @@ public class AzureHttpError {
 
     @SerializedName("correlation_id")
     private String correlationId;
+
+    @SerializedName("code")
+    private String code;
+
+    @SerializedName("message")
+    private String message;
 }

@@ -10,7 +10,7 @@
       <div class="name">
         <ButtonTextIcon
           :item="nameBtn"
-          data-test="name"
+          data-test="locationNameButton"
         />
       </div>
       <!-- Post EAR -->

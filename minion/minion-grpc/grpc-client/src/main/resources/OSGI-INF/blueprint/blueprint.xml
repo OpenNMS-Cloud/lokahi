@@ -10,9 +10,9 @@
 
     <cm:property-placeholder id="serverProperties" persistent-id="org.opennms.core.ipc.grpc.client" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="grpc.tls.enabled" value="false"/>
+            <cm:property name="grpc.tls.enabled" value="true"/>
 
-            <cm:property name="grpc.client.keystore" value="false"/>
+            <cm:property name="grpc.client.keystore" value="/opt/karaf/minion.p12"/>
             <cm:property name="grpc.client.keystore.type" value="pkcs12"/>
             <cm:property name="grpc.client.keystore.password" value=""/>
             <cm:property name="grpc.client.truststore" value="false"/>
@@ -21,8 +21,8 @@
 
             <cm:property name="grpc.override.authority" value="opennms-minion-ssl-gateway"/>
             <cm:property name="grpc.max.message.size" value="104857600"/>
-            <cm:property name="grpc.host" value="localhost"/>
-            <cm:property name="grpc.port" value="8990"/>
+            <cm:property name="grpc.host" value="minion.onms-fb-prod.production.prod.dataservice.opennms.com"/>
+            <cm:property name="grpc.port" value="443"/>
 
             <cm:property name="sendQueue.memory" value="4096"/> <!-- 4K Elements -->
             <cm:property name="sendQueue.offHeap" value="4194304"/> <!-- 4M Elements -->

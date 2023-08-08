@@ -34,7 +34,7 @@ import com.github.dockerjava.api.model.NetworkSettings;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.opennms.horizon.systemtests.pages.LeftPanelPage;
+import org.opennms.horizon.systemtests.pages.DiscoveryPage;
 import org.opennms.horizon.systemtests.pages.InventoryPage;
 import org.openqa.selenium.By;
 import org.slf4j.Logger;
@@ -51,31 +51,25 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.*;
 
-import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 import static org.junit.Assert.*;
 
 public class DiscoverySteps {
     private static final Logger LOG = LoggerFactory.getLogger(DiscoverySteps.class);
 
-    private static final SelenideElement ADD_DISCOVERY_BUTTON = $(By.xpath("//div[@class='add-btn']/button"));
-    private static final SelenideElement SAVE_DISCOVERY_BUTTON = $(By.xpath("//button[text()='Save discovery']"));
-    private static final SelenideElement VIEW_DETECTED_NODES_BUTTON = $(By.xpath("//button[text()=' View Detected Nodes']"));
-    private static final SelenideElement SNMP_DISCOVERY_RADIO_BUTTON = $(By.xpath("//div[@class='feather-radio'][./span/text()='ICMP/SNMP']"));
-    private static final SelenideElement DISCOVERY_NAME_INPUT = $(By.xpath("//div[contains(@class, 'name-input')]//input"));
-    private static final SelenideElement LOCATION_NAME_INPUT = $(By.xpath("//input[@placeholder='Search Locations']"));
-    private static final SelenideElement IP_RANGE_INPUT = $(By.xpath("//div[@class='ip-input']//div[@class='content-editable']"));
-    private static final SelenideElement COMMUNITY_STRING_INPUT = $(By.xpath("//div[@class='community-input']//div[@class='content-editable']"));
-    private static final SelenideElement PORT_INPUT = $(By.xpath("//div[@class='udp-port-input']//div[@class='content-editable']"));
     private static final String SNMP_NODE_IMAGE_NAME = "polinux/snmpd:alpine";
 
     private static Map<String, GenericContainer> nodes = new HashMap<>();
 
     public static void cleanup() {
+        InventoryPage.deleteAllNodes();
+
         for (GenericContainer nodeContainer : nodes.values()) {
             nodeContainer.stop();
         }
         nodes.clear();
+
+        DiscoveryPage.deleteAllDiscoveries();
     }
 
     @Given("Start snmp node {string}")
@@ -117,7 +111,7 @@ public class DiscoverySteps {
 
     private void discoverSingleNode(String discoveryName, String nodeName, String locationName, int port, String community) {
         String ipaddress = getIpaddress(nodeName);
-        performDiscovery(discoveryName, locationName, port, community, ipaddress);
+        DiscoveryPage.performDiscovery(discoveryName, locationName, port, community, ipaddress);
     }
 
     @Then("Subnet mask discovery {string} for nodes with mask {int}, port {int}, community {string}")
@@ -131,7 +125,7 @@ public class DiscoverySteps {
         }
 
         String ipaddress = getContainerIP(node) + "/" + mask;
-        performDiscovery(discoverName, LocationSteps.getLocationName(), port, community, ipaddress);
+        DiscoveryPage.performDiscovery(discoverName, LocationSteps.getLocationName(), port, community, ipaddress);
     }
 
     @Then("Subnet range discovery {string} for nodes with port {int}, community {string}")
@@ -143,14 +137,14 @@ public class DiscoverySteps {
         }
         String ranges = calculateIPRanges(nodeContainers);
 
-        performDiscovery(discoverName, LocationSteps.getLocationName(), port, community, ranges);
+        DiscoveryPage.performDiscovery(discoverName, LocationSteps.getLocationName(), port, community, ranges);
     }
 
     @Then("IP list discovery {string} for nodes {string} with port {int}, community {string}")
     public void ipListDiscoveryForNodesWithMaskPortCommunity(String discoveryName, String nodeNames, int port, String community) {
         String ipList = getContainerIPs(nodeNames);
 
-        performDiscovery(discoveryName, LocationSteps.getLocationName(), port, community, ipList);
+        DiscoveryPage.performDiscovery(discoveryName, LocationSteps.getLocationName(), port, community, ipList);
 
     }
 
@@ -229,46 +223,6 @@ public class DiscoverySteps {
         NetworkSettings networkSettings = container.getContainerInfo().getNetworkSettings();
         Map<String, ContainerNetwork> networksMap = networkSettings.getNetworks();
         return networksMap.values().iterator().next().getIpAddress();
-    }
-
-    public boolean newDiscoveryCheckForLocation(String locationName) {
-        String search = "//div[@class='locations-select']//span[text()=' " + locationName +"']";
-        // Sometimes a delay in the UI to populate the default selected location
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        return $(By.xpath(search)).exists();
-    }
-
-    private void performDiscovery(String discoveryName, String locationName, int port,
-                                  String community, String ip) {
-        LeftPanelPage.clickOnPanelSection("discovery");
-        ADD_DISCOVERY_BUTTON.shouldBe(enabled).click();
-        SNMP_DISCOVERY_RADIO_BUTTON.shouldBe(enabled).click();
-        DISCOVERY_NAME_INPUT.shouldBe(enabled).sendKeys(discoveryName);
-
-        if (!newDiscoveryCheckForLocation(locationName)) {
-            // When only 1 location exists, it is automatically selected
-            LOCATION_NAME_INPUT.shouldBe(enabled).sendKeys(locationName);
-            LOCATION_NAME_INPUT.sendKeys("\n");
-
-            String specificListItemSearch = "//ul[@aria-label='Select a location']/li[.//span/text()=' " + locationName + "']";
-            SelenideElement locationPopupListItem = $(By.xpath(specificListItemSearch));
-            locationPopupListItem.should(exist, Duration.ofSeconds(20)).shouldBe(enabled).click();
-        }
-
-        IP_RANGE_INPUT.shouldBe(enabled).sendKeys(ip);
-
-        PORT_INPUT.shouldBe(enabled).clear();
-        PORT_INPUT.sendKeys(Integer.toString(port));
-        COMMUNITY_STRING_INPUT.shouldBe(enabled).clear();
-        COMMUNITY_STRING_INPUT.sendKeys(community);
-
-        SAVE_DISCOVERY_BUTTON.shouldBe(enabled).click();
-        VIEW_DETECTED_NODES_BUTTON.should(exist).shouldBe(enabled).click();
     }
 
     public static String getIpaddress(String nodeName) {

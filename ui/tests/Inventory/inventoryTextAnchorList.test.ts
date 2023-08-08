@@ -3,8 +3,7 @@ import InventoryTextAnchorList from '@/components/Inventory/InventoryTextAnchorL
 
 let wrapper: any
 
-// TODO: will fix after demo
-describe.skip('inventoryTextAnchorList', () => {
+describe('inventoryTextAnchorList', () => {
   beforeAll(() => {
     wrapper = mount(InventoryTextAnchorList, {
       shallow: true,
@@ -25,7 +24,7 @@ describe.skip('inventoryTextAnchorList', () => {
     wrapper.unmount()
   })
 
-  const anchorList = ['profile', 'location', 'management-ip', 'tag']
+  const anchorList = ['location', 'management-ip']
   it.each(anchorList)('should have "%s" element', (elem) => {
     expect(wrapper.get(`[data-test="${elem}"]`).exists()).toBe(true)
   })

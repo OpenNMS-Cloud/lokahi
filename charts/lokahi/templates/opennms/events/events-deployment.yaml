@@ -52,7 +52,7 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.Events.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://{{ .Values.OpenNMS.Events.DbHost }}:5432/{{ .Values.OpenNMS.Events.DbName }}?currentSchema={{ .Values.OpenNMS.Events.DbSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
@@ -102,6 +102,13 @@ spec:
             periodSeconds: 2
             successThreshold: 1
             failureThreshold: 250
+          resources:
+            limits:
+              cpu: "{{ .Values.OpenNMS.Events.Resources.Limits.Cpu }}"
+              memory: "{{ .Values.OpenNMS.Events.Resources.Limits.Memory }}"
+            requests:
+              cpu: "{{ .Values.OpenNMS.Events.Resources.Requests.Cpu }}"
+              memory: "{{ .Values.OpenNMS.Events.Resources.Requests.Memory }}"
       {{- if .Values.OpenNMS.Events.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

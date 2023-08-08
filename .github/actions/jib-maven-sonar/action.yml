@@ -38,7 +38,7 @@ runs:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
       run: |
-        BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
+        BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq -r .image_tag_java)
 
         mvn -B -Dstyle.color=always \
             -Pcicd,coverage \
@@ -55,7 +55,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       run: |
-        BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq .image_tag_java | sed 's/\"//g')
+        BASE_IMAGE=ghcr.io/opennms-cloud/$(cat ../.github/base-image-tag-ref.json | jq -r .image_tag_java)
 
         mvn -B -Dstyle.color=always \
             -Pcicd,coverage \

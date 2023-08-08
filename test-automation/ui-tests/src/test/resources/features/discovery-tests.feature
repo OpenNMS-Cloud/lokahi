@@ -33,14 +33,12 @@ Feature: User can discover devices
     Given Start snmp node "node1"
     When Discovery "SingleDiscovery" for node "node1" is created to discover by IP
     Then Status of "node1" should be "UP"
-    Then delete node "node1"
 
   Scenario: Discover a single device by IP with non-default SNMP config
     Given Start snmp node "node2" with additional snmpd configuration
     Then Discover "NonDefaultSNMPDiscovery" for node "node2", port 2661, community "myCommunityString"
     Then Status of "node2" should be "UP"
     Then check snmp interfaces exist for node "node2"
-    Then delete node "node2"
 
   Scenario: Discover 3 devices through a subnet scan
     Given Start snmp node "nodeA" with additional snmpd configuration
@@ -53,9 +51,6 @@ Feature: User can discover devices
     Then check snmp interfaces exist for node "nodeB"
     Then Status of "nodeC" should be "UP"
     Then check snmp interfaces exist for node "nodeC"
-    Then delete node "nodeA"
-    Then delete node "nodeB"
-    Then delete node "nodeC"
 
   Scenario: Discover 4 devices through IP ranges
     Given Start snmp node "nodeD1" with additional snmpd configuration
@@ -71,10 +66,6 @@ Feature: User can discover devices
     Then check snmp interfaces exist for node "nodeD3"
     Then Status of "nodeD4" should be "UP"
     Then check snmp interfaces exist for node "nodeD4"
-    Then delete node "nodeD1"
-    Then delete node "nodeD2"
-    Then delete node "nodeD3"
-    Then delete node "nodeD4"
 
   Scenario: Discover 3 of 4 devices with an IP list
     Given Start snmp node "nodeL1" with additional snmpd configuration
@@ -89,8 +80,5 @@ Feature: User can discover devices
     Then Node "nodeL3" should not exist
     Then Status of "nodeL4" should be "UP"
     Then check snmp interfaces exist for node "nodeL4"
-    Then delete node "nodeL1"
-    Then delete node "nodeL2"
-    Then delete node "nodeL4"
 
 

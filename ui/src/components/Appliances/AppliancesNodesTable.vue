@@ -72,6 +72,7 @@ import { useAppliancesStore } from '@/store/Views/appliancesStore'
 import { ExtendedNode } from '@/types/node'
 import { GraphProps } from '@/types/graphs'
 import { TimeRangeUnit } from '@/types/graphql'
+import { AZURE_SCAN, Monitor } from '@/types'
 
 const appliancesStore = useAppliancesStore()
 const appliancesQueries = useAppliancesQueries()
@@ -97,9 +98,9 @@ const openLatencyGraph = (node: ExtendedNode) => {
   graphProps.value = {
     label: 'Device Latency',
     metrics: ['response_time_msec'],
-    monitor: 'ICMP',
+    monitor: node.scanType === AZURE_SCAN ? Monitor.AZURE : Monitor.ICMP,
     nodeId: node.id,
-    instance: node.ipInterfaces?.[0].ipAddress as string, // currently 1 interface per node
+    instance: node.scanType === AZURE_SCAN ? 'azure-node-' + node.id : node.ipInterfaces?.[0].ipAddress as string, // currently 1 interface per node
     timeRange: 10,
     timeRangeUnit: TimeRangeUnit.Minute
   }

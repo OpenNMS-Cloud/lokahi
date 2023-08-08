@@ -30,13 +30,6 @@ package org.opennms.horizon.minion.grpc;
 
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-import io.grpc.Context;
-import io.grpc.ManagedChannel;
-import io.grpc.stub.StreamObserver;
-import io.opentracing.Tracer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import lombok.Setter;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -64,14 +56,25 @@ import org.opennms.horizon.minion.grpc.channel.ManagedChannelFactory;
 import org.opennms.horizon.minion.grpc.rpc.RpcRequestHandler;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.rpc.api.minion.ClientRequestDispatcher;
-import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumerManager;
+import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.common.AbstractMessageDispatcherFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
+
+import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
+import io.opentracing.Tracer;
+import lombok.Setter;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -300,7 +303,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     }
 
     private void initializeSinkStub() {
-        sinkStream = asyncStub.minionToCloudMessages(new EmptyMessageReceiver());
+        sinkStream = asyncStub.minionToCloudMessages(new MinionToCloudHandler());
         LOG.info("Initialized Sink stream");
     }
 
@@ -440,6 +443,24 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         }
     }
 
+    private class MinionToCloudHandler implements StreamObserver<Empty> {
+
+        @Override
+        public void onNext(Empty message) {
+            LOG.warn("Received unexpected message from MinionToCloudMessages: {}", message);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            LOG.error("Error in MinionToCloudMessages streaming", throwable);
+        }
+
+        @Override
+        public void onCompleted() {
+            LOG.error("Closing MinionToCloudMessages message handler");
+        }
+
+    }
     public interface SimpleReconnectStrategyFactory {
         SimpleReconnectStrategy create(ManagedChannel channel, Runnable onConnect, Runnable onDisconnect);
     }

@@ -79,12 +79,14 @@ public class AzureCollector implements ServiceCollector {
     );
 
     // Valid metrics: BytesSentRate,BytesReceivedRate,PacketsSentRate,PacketsReceivedRate
+    // https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-network-networkinterfaces-metrics
     private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = Map.of(
         "BytesReceivedRate", "bytes_received_rate",
         "BytesSentRate", "bytes_sent_rate"
     );
 
     // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
+    // https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-network-publicipaddresses-metrics
     private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = Map.of(
         "ByteCount", "bytes_received"
     );
@@ -115,7 +117,7 @@ public class AzureCollector implements ServiceCollector {
             AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
                 request.getResourceGroup(), request.getResource(), request.getTimeoutMs(), request.getRetries());
 
-            if (instanceView.isUp()) {
+            if (instanceView.isUp() && instanceView.isReady()) {
 
                 // host metrics
                 List<AzureResultMetric> metricResults = collectNodeMetrics(request, token).entrySet().stream()
@@ -123,12 +125,7 @@ public class AzureCollector implements ServiceCollector {
                     .collect(Collectors.toCollection(ArrayList::new));
 
                 // interface metrics
-                for (var resources : request.getCollectorResourcesList()) {
-                    metricResults.addAll(collectInterfaceMetrics(request, resources, token)
-                        .entrySet().stream().map(interfaceMetric ->
-                            mapInterfaceResult(request, resources.getResource(), resources.getType(), interfaceMetric))
-                        .toList());
-                }
+                collectNetworkMetrics(request, token, metricResults);
 
                 log.debug("AZURE COLLECTOR metricResults LIST: {}", metricResults);
 
@@ -155,7 +152,8 @@ public class AzureCollector implements ServiceCollector {
                     .build());
             }
         } catch (Exception e) {
-            log.error("Failed to collect for azure resource", e);
+            log.error("Failed to collect for azure resource nodeId: {}, error: {}", collectionRequest.getNodeId(),
+                e.getMessage(), e);
             future.complete(ServiceCollectorResponseImpl.builder()
                 .nodeId(collectionRequest.getNodeId())
                 .monitorType(MonitorType.AZURE)
@@ -176,9 +174,23 @@ public class AzureCollector implements ServiceCollector {
         return metrics.collect();
     }
 
-    private Map<String, Double> collectInterfaceMetrics(AzureCollectorRequest request,
-                                                        AzureCollectorResourcesRequest resource,
-                                                        AzureOAuthToken token) throws AzureHttpException {
+    private void collectNetworkMetrics(AzureCollectorRequest request, AzureOAuthToken token, List<AzureResultMetric> metricResults) {
+        for (var resource : request.getCollectorResourcesList()) {
+            try {
+                metricResults.addAll(collectNetworkMetric(request, resource, token)
+                    .entrySet().stream().map(interfaceMetric ->
+                        mapInterfaceResult(request, resource.getResource(), resource.getType(), interfaceMetric))
+                    .toList());
+            } catch (AzureHttpException ex) {
+                log.warn("Skip failed network collection. resource: {}, type: {}, error: {}", resource.getResource(),
+                    resource.getType(), ex.getMessage());
+            }
+        }
+    }
+
+    private Map<String, Double> collectNetworkMetric(AzureCollectorRequest request,
+                                                     AzureCollectorResourcesRequest resource,
+                                                     AzureOAuthToken token) throws AzureHttpException {
         try {
             var type = AzureHttpClient.ResourcesType.fromMetricName(resource.getType());
             Map<String, String> params =

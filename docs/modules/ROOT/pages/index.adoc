@@ -19,4 +19,4 @@ Lōkahi aims to provide the following:
 * A resilient distributed monitoring system that can be easily deployed to scale horizontally for any monitoring workload
 * A system that can extend its monitoring capabilities, and integrate into corporate incident management workflows, via streaming and plugin APIs
 
-Lōkahi also forms the basis of our OpenNMS Cloud product.
+Lōkahi also forms the basis of our OpenNMS Cloud product, a cloud-based network monitoring solution.

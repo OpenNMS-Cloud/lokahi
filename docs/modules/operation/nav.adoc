@@ -11,6 +11,7 @@
 ** xref:inventory/nodes.adoc[]
 * xref:alerts/introduction.adoc[]
 ** xref:alerts/manage.adoc[]
+* xref:flows/introduction.adoc[]
 * xref:visualizations/introduction.adoc[]
 * xref:minions/introduction.adoc[]
 * xref:notifications/introduction.adoc[]

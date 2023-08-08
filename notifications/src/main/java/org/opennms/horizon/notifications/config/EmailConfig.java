@@ -5,6 +5,7 @@ import com.azure.communication.email.EmailClientBuilder;
 import com.azure.core.http.policy.ExponentialBackoffOptions;
 import com.azure.core.http.policy.RetryOptions;
 import com.azure.core.http.policy.RetryPolicy;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.notifications.api.email.ACSEmailAPI;
 import org.opennms.horizon.notifications.api.email.EmailAPI;
 import org.opennms.horizon.notifications.api.email.SmtpEmailAPI;
@@ -21,6 +22,7 @@ import org.springframework.retry.support.RetryTemplate;
 
 import java.time.Duration;
 
+@Slf4j
 @Configuration
 public class EmailConfig {
     @Value("${spring.mail.acs-connection-string:}")
@@ -43,6 +45,7 @@ public class EmailConfig {
         value = "spring.mail.acs-connection-string"
     )
     public EmailClient acsEmailClient() {
+        log.info("ACS Connection String found. Building ACS EmailClient");
         ExponentialBackoffOptions retry = new ExponentialBackoffOptions();
         retry.setBaseDelay(Duration.ofMillis(retryDelay));
         retry.setMaxDelay(Duration.ofMillis(maxRetryDelay));
@@ -57,13 +60,18 @@ public class EmailConfig {
     @Bean
     @Primary
     @ConditionalOnBean(EmailClient.class)
-    public EmailAPI acsEmailAPI(EmailClient client) {
-        return new ACSEmailAPI(client);
+    public EmailAPI acsEmailAPI(
+        @Value("${spring.mail.from}") String fromAddress,
+        EmailClient client
+    ) {
+        log.info("Using ACS for email notifications, fromAddress='{}'", fromAddress);
+        return new ACSEmailAPI(fromAddress, client);
     }
 
     @Bean
     @ConditionalOnMissingBean(EmailAPI.class)
     public EmailAPI smtpEmailAPI(JavaMailSender jms) {
+        log.info("Using SMTP client for email notifications");
         return new SmtpEmailAPI(jms, emailRetryTemplate());
     }
 

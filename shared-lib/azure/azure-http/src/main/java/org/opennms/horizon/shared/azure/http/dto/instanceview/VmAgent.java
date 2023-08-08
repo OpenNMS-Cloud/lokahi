@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2020 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,29 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.minion.grpc;
+package org.opennms.horizon.shared.azure.http.dto.instanceview;
 
-import com.google.protobuf.Empty;
-import io.grpc.stub.StreamObserver;
+import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- * This is wrapper to get handle from the asyncStub for the SinkMessage.
- * Would be not used anywhere.
- */
-public class EmptyMessageReceiver implements StreamObserver<Empty> {
+import java.util.ArrayList;
+import java.util.List;
 
-    @Override
-    public void onNext(Empty empty) {
-
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-
-    }
-
-    @Override
-    public void onCompleted() {
-
-    }
+@Getter
+@Setter
+public class VmAgent {
+    @SerializedName("vmAgentVersion")
+    private String vmAgentVersion;
+    @SerializedName("statuses")
+    private List<AzureStatus> statuses = new ArrayList<>();
 }

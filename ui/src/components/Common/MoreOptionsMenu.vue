@@ -24,6 +24,7 @@
     </template>
     <FeatherDropdownItem
       v-for="item in items"
+      data-test="dropdownItem"
       @click="item.handler"
     >
       {{ item.label }}

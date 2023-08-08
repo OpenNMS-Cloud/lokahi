@@ -10,6 +10,7 @@
       v-model="discoveryInfo.name"
       :label="DiscoverySNMPForm.nameInputLabel"
       class="name-input"
+      data-test="discoveryNameInput"
       :schema="nameV"
       :disabled="isDisabled"
     />
@@ -23,7 +24,7 @@
       :label="Common.tagsInput"
       ref="tagsAutocompleteRef"
       class="tags-autocomplete"
-      data-test="tags-autocomplete"
+      data-test="locations-autocomplete"
       :preselectedItems="tags"
       :disabled="isDisabled"
     />
@@ -36,6 +37,7 @@
         :label="discoveryText.ContentEditable.IP.label"
         ref="contentEditableIPRef"
         class="ip-input"
+        data-test="ipAddressInput"
         :tooltipText="Common.tooltipIP"
         :content="props.discovery?.ipAddresses?.join(', ')"
         isRequired
@@ -50,6 +52,7 @@
         :default-content="COMMUNITY_STRING.default"
         ref="contentEditableCommunityStringRef"
         class="community-input"
+        data-test="communityInput"
         :content="props.discovery?.snmpConfig?.readCommunities?.join(', ')"
         :id="2"
         :disabled="isDisabled"
@@ -63,6 +66,7 @@
         :default-content="UDP_PORT.default"
         class="udp-port-input"
         ref="contentEditableUDPPortRef"
+        data-test="portInput"
         :tooltipText="Common.tooltipPort"
         :content="props.discovery?.snmpConfig?.ports?.join(', ')"
         :id="3"
@@ -74,12 +78,14 @@
       <FeatherButton
         @click="cancel"
         secondary
+        data-test="btn-cancel"
         >{{ discoveryText.Discovery.button.cancel }}</FeatherButton
       >
       <ButtonWithSpinner
         v-if="!props.discovery"
         type="submit"
         primary
+        data-test="btn-submit"
         :isFetching="isFetchingActiveDiscovery"
       >
         {{ discoveryText.Discovery.button.submit }}

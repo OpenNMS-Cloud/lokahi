@@ -10,14 +10,14 @@ You can apply a monitoring policy to multiple devices, allowing for easy managem
 [[default-monitoring-policy]]
 == Default monitoring policy
 
-By default, OpenNMS Cloud starts monitoring the system when it discovers nodes.
+By default, OpenNMS Cloud/Lōkahi starts monitoring the system when it discovers nodes.
 The default monitoring policy applies to all discovered nodes, and includes the following parameters:
 
 * Accepts SNMP Traps, Syslogs, and API events.
 * MIB-II enabled.
 * Azure cloud monitoring enabled.
 * Flows, Netflow, and JFlow enabled.
-* Uses PagerDuty to send notifications to all OpenNMS Cloud users in your organization.
+* Uses PagerDuty to send notifications to all OpenNMS Cloud/Lōkahi users in your organization.
 
 == Before you begin
 

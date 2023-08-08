@@ -7,6 +7,7 @@
     <section class="my-discovery">
       <div class="add-btn">
         <FeatherButton
+          data-test="addDiscoveryBtn"
           @click="handleNewDiscovery"
           primary
         >

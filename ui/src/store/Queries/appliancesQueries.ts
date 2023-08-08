@@ -87,13 +87,13 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       })
     }
 
-    const fetchNodeMetrics = (id: number, instance: string) =>
+    const fetchNodeMetrics = (id: number, monitor: string, instance: string) =>
       useQuery({
         query: ListNodeMetricsDocument,
         variables: {
           id,
           instance,
-          monitor: Monitor.ICMP,
+          monitor: monitor,
           timeRange: 1,
           timeRangeUnit: TimeRangeUnit.Minute
         },
@@ -106,7 +106,8 @@ export const useAppliancesQueries = defineStore('appliancesQueries', {
       allNodes.forEach(async (node) => {
         const { ipAddress: snmpPrimaryIpAddress } = node.ipInterfaces?.filter((ii) => ii.snmpPrimary)[0] || {} // not getting ipAddress from snmpPrimary interface can result in missing metrics for ICMP
         const instance = node.scanType === AZURE_SCAN ? `azure-node-${node.id}` : snmpPrimaryIpAddress!
-        const { data, isFetching } = await fetchNodeMetrics(node.id as number, instance)
+        const monitor = node.scanType === AZURE_SCAN ? Monitor.AZURE : Monitor.ICMP
+        const { data, isFetching } = await fetchNodeMetrics(node.id as number, monitor, instance)
         const latencyResult = data.value?.nodeLatency?.data?.result?.[0]?.values?.[0]
         const status = data.value?.nodeStatus?.status
 

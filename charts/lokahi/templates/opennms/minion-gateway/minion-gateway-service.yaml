@@ -17,5 +17,14 @@ spec:
     - port: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
       protocol: TCP
       name: internal-grpc
+    - port: 10800
+      protocol: TCP
+      name: ig-client
+    - port: 47500
+      protocol: TCP
+      name: ig-discovery
+    - port: 47100
+      protocol: TCP
+      name: ig-spi
   selector:
     app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}

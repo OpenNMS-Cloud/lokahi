@@ -56,7 +56,7 @@ spec:
           imagePullPolicy: {{ .Values.OpenNMS.API.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_CACHE_CAFFEINE_SPEC
               value: "maximumSize=10000,expireAfterWrite=60s"
             - name: TSDB_URL
@@ -92,13 +92,6 @@ spec:
               containerPort: 9090
             - name: http
               containerPort: 8080
-          resources:
-            limits:
-              cpu: "{{ .Values.OpenNMS.API.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.OpenNMS.API.Resources.Limits.Memory }}"
-            requests:
-              cpu: "{{ .Values.OpenNMS.API.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.OpenNMS.API.Resources.Requests.Memory }}"
           volumeMounts:
             - name: spring-boot-app-config-volume
               mountPath: "/app/config"
@@ -122,6 +115,13 @@ spec:
             periodSeconds: 2
             successThreshold: 1
             failureThreshold: 250
+          resources:
+            limits:
+              cpu: "{{ .Values.OpenNMS.API.Resources.Limits.Cpu }}"
+              memory: "{{ .Values.OpenNMS.API.Resources.Limits.Memory }}"
+            requests:
+              cpu: "{{ .Values.OpenNMS.API.Resources.Requests.Cpu }}"
+              memory: "{{ .Values.OpenNMS.API.Resources.Requests.Memory }}"
       {{- if .Values.OpenNMS.API.PrivateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials

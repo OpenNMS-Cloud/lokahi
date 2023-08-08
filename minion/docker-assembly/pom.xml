@@ -56,6 +56,25 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-agent</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.opentelemetry.javaagent</groupId>
+                                    <artifactId>opentelemetry-javaagent</artifactId>
+                                    <version>${opentelemetry.version}</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${application.jib.extra.root}/agent</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -87,6 +106,10 @@
                                                 <fileSet>
                                                     <directory>${project.basedir}/src/main/docker/entrypoint</directory>
                                                     <outputDirectory>entrypoint</outputDirectory>
+                                                </fileSet>
+                                                <fileSet>
+                                                    <directory>${application.jib.extra.root}/agent</directory>
+                                                    <outputDirectory>agent</outputDirectory>
                                                 </fileSet>
                                             </fileSets>
                                         </inline>

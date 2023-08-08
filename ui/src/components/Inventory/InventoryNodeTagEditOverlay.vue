@@ -3,7 +3,6 @@
     <FeatherCheckbox id="tagged" :modelValue="isChecked" @update:model-value="inventoryStore.addRemoveNodesSelected(node)"
       class="tag-node-checkbox" data-test="tab-node-checkbox" />
     <section class="overlay-header">
-      <Icon :icon="storage" data-test="icon-storage" />
       <h4 data-test="heading">{{ node?.nodeLabel }}</h4>
     </section>
     <section class="overlay-content">
@@ -57,14 +56,13 @@ const storage: IIcon = {
 @use '@/styles/vars';
 
 .overlay {
-  $color-header-title: white;
 
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--feather-secondary);
+  background-color: var(--feather-surface);
   padding: var(variables.$spacing-s) var(variables.$spacing-l);
   border-radius: vars.$border-radius-xs;
   overflow-y: auto;
@@ -81,7 +79,7 @@ const storage: IIcon = {
 
       .feather-checkbox {
         .box {
-          border-color: $color-header-title;
+          border-color: var(--feather-primary-text-on-surface);
         }
 
         &[aria-checked='true'] {
@@ -100,10 +98,10 @@ const storage: IIcon = {
     flex-direction: row;
     gap: 0.5rem;
     align-items: center;
-    color: $color-header-title;
+          color: var(--feather-primary-text-on-surface);
 
     >h4 {
-      color: $color-header-title;
+          color: var(--feather-primary-text-on-surface);
     }
   }
 
@@ -112,7 +110,7 @@ const storage: IIcon = {
       display: flex;
       flex-direction: row;
       align-items: center;
-      color: $color-header-title;
+      color: var(--feather-primary-text-on-surface);
       margin-bottom: 8px;
     }
 

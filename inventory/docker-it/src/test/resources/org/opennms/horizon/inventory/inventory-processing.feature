@@ -12,8 +12,10 @@ Feature: Inventory Processing
   Scenario: Send an Heartbeat Message to Inventory and verify Minion and location are added
     Given Minion at location named "MINION" with system ID "MINION-TEST-1"
     Then send heartbeat message to Kafka topic "heartbeat"
-    Then verify Monitoring system is created with system id "MINION-TEST-1"
-    Then verify Monitoring location is created with location "MINION"
+    Then verify Monitoring system is created with system id "MINION-TEST-1" with location named "MINION"
+    Given Minion at location named "MINION-2" with system ID "MINION-TEST-1"
+    Then send heartbeat message to Kafka topic "heartbeat"
+    Then verify Monitoring system is created with system id "MINION-TEST-1" with location named "MINION-2"
 
   Scenario: Add a device with existing location and verify Device and Associated Task creation
     Given Label "test-label"

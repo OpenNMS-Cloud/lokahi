@@ -207,10 +207,10 @@ public class InventoryClient {
         return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystemByLocationId(Int64Value.of(locationId)).getSystemsList();
     }
 
-    public MonitoringSystemDTO getSystemBySystemId(String systemId, String accessToken) {
+    public MonitoringSystemDTO getSystemBySystemId(long systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoringSystemById(StringValue.of(systemId));
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoringSystemById(Int64Value.of(systemId));
     }
 
     public List<MonitoringLocationDTO> listLocationsByIds(List<DataLoaderFactory.Key> keys) {
@@ -235,10 +235,11 @@ public class InventoryClient {
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteNode(Int64Value.of(nodeId)).getValue();
     }
 
-    public boolean deleteMonitoringSystem(String systemId, String accessToken) {
+    public boolean deleteMonitoringSystem(long systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteMonitoringSystem(StringValue.of(systemId)).getValue();
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(systemId).build()).getValue();
     }
 
     public boolean startScanByNodeIds(List<Long> ids, String accessToken) {

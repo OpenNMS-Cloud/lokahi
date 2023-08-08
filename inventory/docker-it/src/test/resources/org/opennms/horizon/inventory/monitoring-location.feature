@@ -23,7 +23,7 @@ Feature: Monitoring Location
     #Given [MonitoringLocation] Grpc location "yyy-LOC-yyy"
     Given Minion at location named "yyy-LOC-yyy" with system ID "MINION-TEST"
     Then send heartbeat message to Kafka topic "heartbeat"
-    Then verify Monitoring system is created with system id "MINION-TEST"
+    Then verify Monitoring system is created with system id "MINION-TEST" with location named "yyy-LOC-yyy"
     When [MonitoringLocation] Delete Monitoring Location
     Then [MonitoringLocation] Monitoring Location is deleted
     Then verify Monitoring system is removed with system id "MINION-TEST"

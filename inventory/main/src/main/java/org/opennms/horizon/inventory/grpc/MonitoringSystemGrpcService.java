@@ -28,27 +28,24 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import io.grpc.Context;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemList;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.stereotype.Component;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
-
-import io.grpc.Context;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -75,9 +72,9 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     }
 
     @Override
-    public void getMonitoringSystemById(StringValue systemId, StreamObserver<MonitoringSystemDTO> responseObserver) {
+    public void getMonitoringSystemById(Int64Value systemId, StreamObserver<MonitoringSystemDTO> responseObserver) {
         Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup.lookupTenantId(Context.current())
-            .map(tenantId -> service.findBySystemId(systemId.getValue(), tenantId))
+            .map(tenantId -> service.findById(systemId.getValue(), tenantId))
             .orElseThrow();
         monitoringSystem.ifPresentOrElse(
             systemDTO -> {
@@ -89,10 +86,26 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     }
 
     @Override
-    public void deleteMonitoringSystem(StringValue request, StreamObserver<BoolValue> responseObserver) {
+    public void getMonitoringSystemByQuery(org.opennms.horizon.inventory.dto.MonitoringSystemQuery request,
+                                           StreamObserver<MonitoringSystemDTO> responseObserver)
+    {
+        var optional = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.findByLocationAndSystemId(request.getLocation(), request.getSystemId(), tenantId))
+            .orElseThrow();
+        optional.ifPresentOrElse(systemDTO -> {
+            responseObserver.onNext(systemDTO);
+            responseObserver.onCompleted();
+
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getSystemId()))));
+
+    }
+
+
+    @Override
+    public void deleteMonitoringSystem(Int64Value request, StreamObserver<BoolValue> responseObserver) {
         Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup
             .lookupTenantId(Context.current())
-            .map(tenantId -> service.findBySystemId(request.getValue(), tenantId))
+            .map(tenantId -> service.findById(request.getValue(), tenantId))
             .orElseThrow();
         monitoringSystem.ifPresentOrElse(system -> {
             try {
@@ -110,6 +123,13 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     }
 
     private Status createStatusNotExist (String systemId) {
+        return Status.newBuilder()
+            .setCode(Code.NOT_FOUND_VALUE)
+            .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
+            .build();
+    }
+
+    private Status createStatusNotExist (long systemId) {
         return Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
             .setMessage("Monitor system with system id: " + systemId + " doesn't exist")

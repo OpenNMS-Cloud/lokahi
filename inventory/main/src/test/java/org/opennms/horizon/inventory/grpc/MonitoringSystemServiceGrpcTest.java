@@ -28,22 +28,14 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
 import io.grpc.ManagedChannel;
+import io.grpc.StatusRuntimeException;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,15 +43,20 @@ import org.keycloak.common.VerificationException;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
-
-import com.google.protobuf.StringValue;
-import com.google.rpc.Code;
-
-import io.grpc.StatusRuntimeException;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.protobuf.StatusProto;
-import io.grpc.stub.MetadataUtils;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
@@ -110,19 +107,22 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
         long id = 1L;
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
                 .setSystemId(systemId).setId(id).build();
-        doReturn(Optional.of(systemDTO)).when(mockService).findBySystemId(systemId, tenantId);
-        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).deleteMonitoringSystem(StringValue.of(systemId)).getValue());
-        verify(mockService).findBySystemId(systemId, tenantId);
+        doReturn(Optional.of(systemDTO)).when(mockService).findById(id, tenantId);
+        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()).getValue());
+        verify(mockService).findById(id, tenantId);
         verify(mockService).deleteMonitoringSystem(id);
     }
 
     @Test
     void testDeleteSystemNotFound() {
-        doReturn(Optional.empty()).when(mockService).findBySystemId(systemId, tenantId);
+        long id = 1L;
+        doReturn(Optional.empty()).when(mockService).findById(id, tenantId);
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).deleteMonitoringSystem(StringValue.of(systemId)));
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()));
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
-        verify(mockService).findBySystemId(systemId, tenantId);
+        verify(mockService).findById(id, tenantId);
     }
 
     @Test
@@ -130,12 +130,13 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
         long id = 1L;
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
             .setSystemId(systemId).setId(id).build();
-        doReturn(Optional.of(systemDTO)).when(mockService).findBySystemId(systemId, tenantId);
+        doReturn(Optional.of(systemDTO)).when(mockService).findById(id, tenantId);
         doThrow(new RuntimeException("bad request")).when(mockService).deleteMonitoringSystem(id);
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).deleteMonitoringSystem(StringValue.of(systemId)));
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()));
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.INTERNAL_VALUE);
-        verify(mockService).findBySystemId(systemId, tenantId);
+        verify(mockService).findById(id, tenantId);
         verify(mockService).deleteMonitoringSystem(id);
     }
 

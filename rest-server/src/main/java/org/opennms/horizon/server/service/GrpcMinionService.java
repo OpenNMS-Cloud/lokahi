@@ -68,7 +68,7 @@ public class GrpcMinionService {
     }
 
     @GraphQLQuery
-    public Mono<Minion> findMinionById(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Minion> findMinionById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToMinion(client.getSystemBySystemId(id, headerUtil.getAuthHeader(env))));
     }
 
@@ -80,7 +80,7 @@ public class GrpcMinionService {
     }
 
     @GraphQLMutation
-    public Mono<Boolean> deleteMinion(@GraphQLArgument(name = "id") String id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Boolean> deleteMinion(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteMonitoringSystem(id, headerUtil.getAuthHeader(env)));
     }
 }

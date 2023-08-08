@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
-import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
-import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
@@ -47,25 +45,40 @@ public class MonitoringSystemService {
         return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }
 
-    public void addMonitoringSystemFromHeartbeat(TenantLocationSpecificHeartbeatMessage message) throws LocationNotFoundException {
+    public Optional<MonitoringSystemDTO> findById(long systemId, String tenantId) {
+        return systemRepository.findByIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
+    }
+
+    public Optional<MonitoringSystemDTO> findBySystemId(long systemId) {
+        return systemRepository.findById(systemId).map(mapper::modelToDTO);
+    }
+
+    @Transactional
+    public Optional<MonitoringSystemDTO> findByLocationAndSystemId(String location, String systemId, String tenantId) {
+        return systemRepository.findByMonitoringLocationAndSystemIdAndTenantId(location, systemId, tenantId).map(mapper::modelToDTO);
+    }
+
+
+    public void addMonitoringSystemFromHeartbeat(TenantLocationSpecificHeartbeatMessage message)  {
         Identity identity = message.getIdentity();
         MonitoringSystem monitoringSystem;
-        Optional<MonitoringSystem> msOp = systemRepository.findBySystemIdAndTenantId(identity.getSystemId(), message.getTenantId());
-        if (msOp.isEmpty()) {
-            MonitoringLocation location = locationRepository.findByIdAndTenantId(Long.parseLong(message.getLocationId()), message.getTenantId())
-                .orElseThrow(() -> new LocationNotFoundException("Location not found with ID " + message.getLocationId()));
+        var optionalSystem =
+            systemRepository.findByMonitoringLocationIdAndSystemIdAndTenantId(Long.parseLong(message.getLocationId()),
+                identity.getSystemId(), message.getTenantId());
+        if (optionalSystem.isEmpty()) {
+            var monitoringLocation =
+                locationRepository.findByIdAndTenantId(Long.parseLong(message.getLocationId()), message.getTenantId()).orElseThrow();
             monitoringSystem = new MonitoringSystem();
             monitoringSystem.setSystemId(identity.getSystemId());
-            monitoringSystem.setMonitoringLocation(location);
             monitoringSystem.setTenantId(message.getTenantId());
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             monitoringSystem.setLabel(identity.getSystemId().toUpperCase());
-            monitoringSystem.setMonitoringLocationId(location.getId());
+            monitoringSystem.setMonitoringLocation(monitoringLocation);
             systemRepository.save(monitoringSystem);
             // Asynchronously send config updates to Minion
-            configUpdateService.sendConfigUpdate(message.getTenantId(), monitoringSystem.getMonitoringLocationId());
+            configUpdateService.sendConfigUpdate(message.getTenantId(), monitoringLocation.getId());
         } else {
-            monitoringSystem = msOp.get();
+            monitoringSystem = optionalSystem.get();
             monitoringSystem.setLastCheckedIn(LocalDateTime.now());
             systemRepository.save(monitoringSystem);
         }

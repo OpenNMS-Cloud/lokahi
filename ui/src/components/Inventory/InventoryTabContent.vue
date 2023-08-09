@@ -11,7 +11,7 @@
           </div>
         </div>
       </section>
-      <section class="node-content">
+      <section class="node-content" v-if="state === MonitoredStates.MONITORED">
         <div>
           <InventoryTextTagList :location="node.location.location" :ipAddress="node.ipInterfaces[0].ipAddress" data-test="text-anchor-list" />
         </div>
@@ -29,13 +29,11 @@
 
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { NewInventoryNode, RawMetric, InventoryItem } from '@/types'
+import { NewInventoryNode, RawMetric, InventoryItem, MonitoredStates } from '@/types'
 import { useTagStore } from '@/store/Components/tagStore'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { BadgeTypes } from '../Common/commonTypes'
 import TextBadge from '../Common/TextBadge.vue'
-
-
 defineProps({
   tabContent: {
     type: Object as PropType<InventoryItem[]>,

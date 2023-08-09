@@ -21,11 +21,12 @@ import { useWelcomeStore } from '@/store/Views/welcomeStore'
 const welcomeStore = useWelcomeStore()
 
 onMounted(async () => {
+  console.log('WHAT?')
   const welcomeOverride = sessionStorage.getItem('welcomeOverride')
   if (welcomeOverride !== 'true') {
     await welcomeStore.init()
   } else {
-    welcomeStore.ready = true;
+    welcomeStore.ready = true
   }
 })
 </script>

@@ -22,7 +22,7 @@ defineProps({
 
 .page-headline {
   @include typography.headline2();
-  margin-top: var(variables.$spacing-xl);
-  margin-bottom: var(variables.$spacing-xl);
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 </style>

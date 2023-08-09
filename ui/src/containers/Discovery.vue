@@ -1,112 +1,111 @@
 <template>
-  <HeadlinePage
-    :text="discoveryText.Discovery.pageHeadline"
-    class="page-headline"
-  />
-  <div class="container">
-    <section class="my-discovery">
-      <div class="add-btn">
-        <FeatherButton
-          data-test="addDiscoveryBtn"
-          @click="handleNewDiscovery"
-          primary
-        >
-          {{ discoveryText.Discovery.button.add }}
-          <template #icon>
-            <Icon :icon="addIcon" />
-          </template>
-        </FeatherButton>
-      </div>
+  <div class="full-page-container">
+    <HeadlinePage :text="discoveryText.Discovery.pageHeadline" />
+    <div class="container">
+      <section class="my-discovery">
+        <div class="add-btn">
+          <FeatherButton
+            data-test="addDiscoveryBtn"
+            @click="handleNewDiscovery"
+            primary
+          >
+            {{ discoveryText.Discovery.button.add }}
+            <template #icon>
+              <Icon :icon="addIcon" />
+            </template>
+          </FeatherButton>
+        </div>
 
-      <div class="my-discovery-inner">
-        <FeatherAutocomplete
-          class="search"
-          v-model="discoverySearchValue"
-          :loading="searchLoading"
-          :results="discoveriesResults"
-          @search="search"
-          label="Search Discovery"
-          type="single"
-          @update:model-value="showDiscovery"
-        />
-        <DiscoveryListCard
-          title="My Active Discoveries"
-          :list="discoveryQueries.activeDiscoveries"
-          @select-discovery="showDiscovery"
-          :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
-          @show-instructions="openInstructions(InstructionsType.Active)"
-        />
-        <DiscoveryListCard
-          passive
-          title="My Passive Discoveries"
-          :list="discoveryQueries.passiveDiscoveries"
-          @toggle-discovery="toggleDiscovery"
-          @select-discovery="showDiscovery"
-          :selectedId="discoverySelectedType === DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
-          @show-instructions="openInstructions(InstructionsType.Passive)"
-        />
-      </div>
-    </section>
+        <div class="my-discovery-inner">
+          <FeatherAutocomplete
+            class="search"
+            v-model="discoverySearchValue"
+            :loading="searchLoading"
+            :results="discoveriesResults"
+            @search="search"
+            label="Search Discovery"
+            type="single"
+            @update:model-value="showDiscovery"
+          />
+          <DiscoveryListCard
+            title="My Active Discoveries"
+            :list="discoveryQueries.activeDiscoveries"
+            @select-discovery="showDiscovery"
+            :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
+            @show-instructions="openInstructions(InstructionsType.Active)"
+          />
+          <DiscoveryListCard
+            passive
+            title="My Passive Discoveries"
+            :list="discoveryQueries.passiveDiscoveries"
+            @toggle-discovery="toggleDiscovery"
+            @select-discovery="showDiscovery"
+            :selectedId="discoverySelectedType === DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
+            @show-instructions="openInstructions(InstructionsType.Passive)"
+          />
+        </div>
+      </section>
 
-    <!-- add/edit a discovery  -->
-    <section
-      v-if="isDiscoveryEditingShown"
-      class="discovery"
-    >
-      <div
-        v-if="showNewDiscovery"
-        class="type-selector"
+      <!-- add/edit a discovery  -->
+      <section
+        v-if="isDiscoveryEditingShown"
+        class="discovery"
       >
-        <div class="headline">{{ discoveryText.Discovery.headline1 }}</div>
-        <DiscoveryTypeSelector
-          ref="discoveryTypeSelector"
-          @discovery-option-selected="(type: DiscoveryType) => (discoverySelectedType = type)"
-        />
-      </div>
-      <div>
-        <div v-if="discoverySelectedType === DiscoveryType.ICMP">
-          <DiscoverySnmpForm
-            :successCallback="
-              (name) => {
-                successModal.openSuccessModal(name)
-                handleClose()
-              }
-            "
-            :cancel="handleClose"
-            :discovery="(selectedDiscovery as IcmpActiveDiscovery)"
-          />
-        </div>
-        <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
-          <DiscoveryAzureForm
-            :successCallback="
-              (name) => {
-                successModal.openSuccessModal(name)
-                handleClose()
-              }
-            "
-            :cancel="handleClose"
-            :discovery="(selectedDiscovery as AzureActiveDiscovery)"
-          />
-        </div>
-        <DiscoverySyslogSNMPTrapsForm
-          v-else-if="discoverySelectedType === DiscoveryType.SyslogSNMPTraps"
-          :successCallback="
-            (name) => {
-              successModal.openSuccessModal(name)
-              handleClose()
-            }
-          "
-          :cancel="handleClose"
-          :discovery="(selectedDiscovery as PassiveDiscovery)"
-        />
         <div
-          v-else
-          class="get-started"
+          v-if="showNewDiscovery"
+          class="type-selector"
         >
-          {{ discoveryText.Discovery.noneDiscoverySelectedMsg }}
+          <div class="headline">{{ discoveryText.Discovery.headline1 }}</div>
+          <DiscoveryTypeSelector
+            ref="discoveryTypeSelector"
+            @discovery-option-selected="(type: DiscoveryType) => (discoverySelectedType = type)"
+          />
         </div>
-      </div>
-    </section>
+        <div>
+          <div v-if="discoverySelectedType === DiscoveryType.ICMP">
+            <DiscoverySnmpForm
+              :successCallback="
+                (name) => {
+                  successModal.openSuccessModal(name)
+                  handleClose()
+                }
+              "
+              :cancel="handleClose"
+              :discovery="(selectedDiscovery as IcmpActiveDiscovery)"
+            />
+          </div>
+          <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
+            <DiscoveryAzureForm
+              :successCallback="
+                (name) => {
+                  successModal.openSuccessModal(name)
+                  handleClose()
+                }
+              "
+              :cancel="handleClose"
+              :discovery="(selectedDiscovery as AzureActiveDiscovery)"
+            />
+          </div>
+          <DiscoverySyslogSNMPTrapsForm
+            v-else-if="discoverySelectedType === DiscoveryType.SyslogSNMPTraps"
+            :successCallback="
+              (name) => {
+                successModal.openSuccessModal(name)
+                handleClose()
+              }
+            "
+            :cancel="handleClose"
+            :discovery="(selectedDiscovery as PassiveDiscovery)"
+          />
+          <div
+            v-else
+            class="get-started"
+          >
+            {{ discoveryText.Discovery.noneDiscoverySelectedMsg }}
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
   <DiscoverySuccessModal ref="successModal" />
   <DiscoveryInstructions
@@ -214,17 +213,10 @@ onMounted(() => discoveryQueries.getDiscoveries())
 @use '@/styles/vars.scss';
 @use '@featherds/styles/mixins/typography';
 
-.page-headline {
-  margin-left: var(variables.$spacing-l);
-  margin-right: var(variables.$spacing-l);
-}
-
 .container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  margin-left: var(variables.$spacing-l);
-  margin-right: var(variables.$spacing-l);
   @include mediaQueriesMixins.screen-md {
     flex-direction: row;
   }

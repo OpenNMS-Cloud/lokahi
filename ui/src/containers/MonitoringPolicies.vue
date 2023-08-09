@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="full-page-container">
     <HeadlinePage text="Monitoring Policies" />
     <MonitoringPoliciesPolicyForm />
     <MonitoringPoliciesRuleForm />
@@ -17,9 +17,8 @@ onMounted(() => store.getMonitoringPolicies())
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 
-.container {
+.full-page-container {
   display: flex;
-  margin: 0 2rem;
   flex-direction: column;
   max-width: 2000px;
 }

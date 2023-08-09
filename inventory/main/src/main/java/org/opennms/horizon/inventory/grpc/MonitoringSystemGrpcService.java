@@ -123,14 +123,14 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
         );
     }
 
-    private Status createStatusNotExist (String systemId) {
+    private Status createStatusNotExist(String systemId) {
         return Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
             .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
             .build();
     }
 
-    private Status createStatusNotExist (long id) {
+    private Status createStatusNotExist(long id) {
         return Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
             .setMessage("Monitor system with id: " + id + " doesn't exist")

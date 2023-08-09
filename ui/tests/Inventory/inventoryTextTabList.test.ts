@@ -8,15 +8,8 @@ describe('inventoryTextAnchorList', () => {
     wrapper = mount(InventoryTextTagList, {
       shallow: true,
       props: {
-        anchor: {
-          profileValue: 75,
-          profileLink: '#',
-          locationValue: 'DefaultMinion',
-          locationLink: '#',
-          managementIpValue: '0.0.0.0',
-          managementIpLink: '#',
-          tagValue: []
-        }
+        ipAddress: '',
+        location: ''
       }
     })
   })

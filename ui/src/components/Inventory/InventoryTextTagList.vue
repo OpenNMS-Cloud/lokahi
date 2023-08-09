@@ -34,7 +34,7 @@ const label = {
   flex-direction: column;
   gap: 0.2rem;
   @include caption();
-  font-family: Inter;
+  font-family: var(--feather-header-font-family);
 }
 
 .tag-list {

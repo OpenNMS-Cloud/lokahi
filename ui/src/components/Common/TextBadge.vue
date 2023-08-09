@@ -18,10 +18,6 @@ defineProps({
 @import "@featherds/styles/themes/utils";
 @import "@featherds/styles/mixins/typography";
 
-element.style {
-    --text-badge-alpha: 0.92;
-}
-
 .feather-text-badge {
     height: 1.25rem;
     padding: 0.125rem 0.5rem;
@@ -29,7 +25,6 @@ element.style {
     align-items: center;
     border-radius: 6px;
     @include caption;
-    text-transform: uppercase;
     font-weight: var($font-bold);
     margin-left: 0.5rem;
     text-transform: capitalize;

@@ -45,13 +45,10 @@ public class MonitoringSystemService {
         return systemRepository.findBySystemIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
     }
 
-    public Optional<MonitoringSystemDTO> findById(long systemId, String tenantId) {
-        return systemRepository.findByIdAndTenantId(systemId, tenantId).map(mapper::modelToDTO);
+    public Optional<MonitoringSystemDTO> findById(long id, String tenantId) {
+        return systemRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
-
-    public Optional<MonitoringSystemDTO> findBySystemId(long systemId) {
-        return systemRepository.findById(systemId).map(mapper::modelToDTO);
-    }
+    
 
     @Transactional
     public Optional<MonitoringSystemDTO> findByLocationAndSystemId(String location, String systemId, String tenantId) {

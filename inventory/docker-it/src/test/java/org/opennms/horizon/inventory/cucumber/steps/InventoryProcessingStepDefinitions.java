@@ -181,17 +181,6 @@ public class InventoryProcessingStepDefinitions {
     }
 
 
-    /*@Then("verify Monitoring system is created with system id {string}")
-    public void verifyMonitoringSystemIsCreatedWithSystemId(String systemId) {
-        var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
-*//*        await().pollInterval(5, TimeUnit.SECONDS).atMost(30, TimeUnit.SECONDS).until(() ->
-                monitoringSystemStub.getMonitoringSystemById(StringValue.of(systemId)).getSystemId(),
-            Matchers.equalTo(systemId));*//*
-        var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
-        assertEquals(systemId, systems.get(0).getSystemId());
-        assertEquals(backgroundHelper.getTenantId(), systems.get(0).getTenantId());
-    }*/
-
     @Then("verify Monitoring system is created with system id {string} with location named {string}")
     public void verifyMonitoringSystemIsCreatedWithSystemIdWithLocationNamed(String systemId, String location) {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();

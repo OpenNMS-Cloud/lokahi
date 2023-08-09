@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { InventoryItem, InventoryPage, NewInventoryNode, RawMetrics } from '@/types/inventory'
+import { InventoryItem, NewInventoryNode, RawMetrics } from '@/types/inventory'
 import { Tag } from '@/types/graphql'
 import { useTagStore } from '../Components/tagStore'
 import { useInventoryQueries } from '../Queries/inventoryQueries'

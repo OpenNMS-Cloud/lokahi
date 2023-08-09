@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { Tag } from '@/types/graphql'
-import { InventoryItem, InventoryNode } from '@/types/inventory'
+import { InventoryItem } from '@/types/inventory'
 import { ModalPrimary } from '@/types/modal'
 import { PropType } from 'vue'
 import deleteIcon from '@featherds/icon/navigation/Cancel'

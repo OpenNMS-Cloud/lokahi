@@ -37,9 +37,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     watchEffect(() => {
       if (data.value?.tags) {
         tagsSearched.value = data.value.tags
-      } else {
-        // TODO: what kind of errors and how to manage them
-      }
+      } 
     })
   }
 

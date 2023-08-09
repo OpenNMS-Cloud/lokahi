@@ -26,10 +26,8 @@ export const useTagQueries = defineStore('tagQueries', () => {
 
     if (!tagIsFetching.value) {
       if (!tagError.value) {
-        tagStore.setTags(tagData.value?.tags || [])
-      } else {
-        // TODO: what kind of errors and how to manage them
-      }
+        tagStore.setTags(tagData.value?.tags ?? [])
+      } 
     }
   }
 

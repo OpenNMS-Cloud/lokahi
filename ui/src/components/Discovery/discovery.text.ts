@@ -111,7 +111,7 @@ export const Azure = {
 
 export const SuccessModalOptions = {
   successMsg: 'setup successful.',
-  viewNodes: 'View Detected Nodes',
+  viewNodes: 'View Monitored Nodes',
   addDiscovery: 'Add Another Discovery',
   addTransaction: 'Add Synthetic Transaction',
   addMonitoring: 'Add Monitoring Policy',

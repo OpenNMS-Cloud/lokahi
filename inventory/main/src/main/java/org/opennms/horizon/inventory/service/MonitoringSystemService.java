@@ -48,7 +48,7 @@ public class MonitoringSystemService {
     public Optional<MonitoringSystemDTO> findById(long id, String tenantId) {
         return systemRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
-    
+
 
     @Transactional
     public Optional<MonitoringSystemDTO> findByLocationAndSystemId(String location, String systemId, String tenantId) {

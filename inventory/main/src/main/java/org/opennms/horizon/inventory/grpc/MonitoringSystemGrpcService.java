@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemList;
+import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.stereotype.Component;
@@ -86,7 +87,7 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     }
 
     @Override
-    public void getMonitoringSystemByQuery(org.opennms.horizon.inventory.dto.MonitoringSystemQuery request,
+    public void getMonitoringSystemByQuery(MonitoringSystemQuery request,
                                            StreamObserver<MonitoringSystemDTO> responseObserver)
     {
         var optional = tenantLookup.lookupTenantId(Context.current())
@@ -129,10 +130,10 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
             .build();
     }
 
-    private Status createStatusNotExist (long systemId) {
+    private Status createStatusNotExist (long id) {
         return Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
-            .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
+            .setMessage("Monitor system with id: " + id + " doesn't exist")
             .build();
     }
 }

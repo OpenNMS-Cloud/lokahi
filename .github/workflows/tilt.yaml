@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           # Setup localhost DNS
-          sudo sh -c 'echo "127.0.0.1 onmshs" >> /etc/hosts'
+          sudo sh -c 'echo "127.0.0.1 onmshs.local minion.onmshs.local" >> /etc/hosts'
 
           ctlptl create cluster kind --registry=ctlptl-registry
 

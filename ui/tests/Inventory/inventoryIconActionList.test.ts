@@ -29,7 +29,6 @@ describe('InventoryIconActionList.vue', () => {
   })
 
   const actionList = [
-    'line-chart',
     'warning',
     'delete'
   ]

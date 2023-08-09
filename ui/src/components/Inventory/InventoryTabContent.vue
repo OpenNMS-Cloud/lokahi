@@ -4,16 +4,16 @@
       <section class="node-header">
         <h5 data-test="heading" class="node-label">{{ node?.nodeLabel }}</h5>
         <div class="card-chip-list">
-          <div class="text-badge-row">
+          <div class="text-badge-row" v-if="state === MonitoredStates.MONITORED">
             <div v-for="badge, index in metricsAsTextBadges(node?.metrics)" :key="index">
               <TextBadge v-if="badge.label" :type="badge.type">{{ badge.label }}</TextBadge>
             </div>
           </div>
         </div>
       </section>
-      <section class="node-content" v-if="state === MonitoredStates.MONITORED">
+      <section class="node-content">
         <div>
-          <InventoryTextTagList :location="node.location.location" :ipAddress="node.ipInterfaces[0].ipAddress" data-test="text-anchor-list" />
+          <InventoryTextTagList :location="node?.location?.location" :ipAddress="node.ipInterfaces[0].ipAddress" data-test="text-anchor-list" />
         </div>
       </section>
       <div class="node-footer">
@@ -71,8 +71,8 @@ const openModalForDeletingTags = (node: NewInventoryNode) => {
 
 const metricsAsTextBadges = (metrics?: RawMetric) => {
   const badges = []
-  if (metrics?.value[1]){
-    badges.push({type: BadgeTypes.success,label:metrics.value[1] + 'ms'})
+  if (metrics?.value?.[1]){
+    badges.push({type: BadgeTypes.success,label:metrics.value?.[1] + 'ms'})
     badges.push({type: BadgeTypes.success,label:'Up'})
   }else {
     badges.push({type: BadgeTypes.error,label:'Down'})

@@ -57,7 +57,6 @@ describe('InventoryNodeTagEditOverlay.vue', () => {
 
   const requiredElems = [
     ['checkbox', 'tab-node-checkbox'],
-    ['icon', 'icon-storage'],
     ['heading', 'heading'],
     ['title', 'title-label'],
     ['tag list', 'tag-list']

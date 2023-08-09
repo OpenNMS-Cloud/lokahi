@@ -18,7 +18,7 @@ interface InventoryNode {
   metrics: Chip[]
   anchor: Anchor
   isNodeOverlayChecked: boolean
-  type: MonitoredStates.MONITORED
+  type: MonitoredStates.DETECTED | MonitoredStates.MONITORED | MonitoredStates.UNMONITORED
 }
 
 interface NewInventoryNode {

@@ -29,19 +29,8 @@
 package org.opennms.horizon.timeseries.cortex;
 
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xerial.snappy.Snappy;
-
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import okhttp3.Call;
@@ -54,7 +43,18 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xerial.snappy.Snappy;
+import prometheus.PrometheusRemote;
+import prometheus.PrometheusTypes;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Time Series Storage integration for Cortex.
@@ -108,6 +108,7 @@ public class CortexTSS {
         asyncHttpCallsBulkhead = Bulkhead.of("asyncHttpCalls", bulkheadConfig);
     }
 
+
     public void store(String tenantId, prometheus.PrometheusTypes.TimeSeries.Builder timeSeriesBuilder) throws IOException {
         prometheus.PrometheusRemote.WriteRequest.Builder writeBuilder = prometheus.PrometheusRemote.WriteRequest.newBuilder();
         writeBuilder.addTimeseries(timeSeriesBuilder);
@@ -143,6 +144,43 @@ public class CortexTSS {
             }
         });
     }
+
+    public void store(String tenantId, List<PrometheusTypes.TimeSeries> timeSeriesList) throws IOException {
+        PrometheusRemote.WriteRequest.Builder writeBuilder = PrometheusRemote.WriteRequest.newBuilder();
+        writeBuilder.addAllTimeseries(timeSeriesList);
+
+        prometheus.PrometheusRemote.WriteRequest writeRequest = writeBuilder.build();
+
+        // Compress the write request using Snappy
+        final byte[] writeRequestCompressed;
+        writeRequestCompressed = Snappy.compress(writeRequest.toByteArray());
+
+        // Build the HTTP request
+        final RequestBody body = RequestBody.create(PROTOBUF_MEDIA_TYPE, writeRequestCompressed);
+        final Request.Builder builder = new Request.Builder()
+            .url(config.getWriteUrl())
+            .addHeader("X-Prometheus-Remote-Write-Version", "0.1.0")
+            .addHeader("Content-Encoding", "snappy")
+            .addHeader("User-Agent", CortexTSS.class.getCanonicalName())
+            .post(body);
+        // Add the OrgId header if set
+        if (tenantId != null && tenantId.trim().length() > 0) {
+            builder.addHeader(X_SCOPE_ORG_ID_HEADER, tenantId);
+        }
+        final Request request = builder.build();
+
+        LOG.trace("Writing: {}", writeRequest);
+        asyncHttpCallsBulkhead.executeCompletionStage(() -> executeAsync(request)).whenComplete((r, ex) -> {
+            if (ex == null) {
+                samplesWritten.mark(1);
+            } else {
+                // FIXME: Data loss
+                samplesLost.mark(1);
+                LOG.error("Error occurred while storing result, sample will be lost.", ex);
+            }
+        });
+    }
+
 
     public CompletableFuture<Void> executeAsync(Request request) {
         final CompletableFuture<Void> future = new CompletableFuture<>();

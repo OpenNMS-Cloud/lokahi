@@ -110,39 +110,7 @@ public class CortexTSS {
 
 
     public void store(String tenantId, prometheus.PrometheusTypes.TimeSeries.Builder timeSeriesBuilder) throws IOException {
-        prometheus.PrometheusRemote.WriteRequest.Builder writeBuilder = prometheus.PrometheusRemote.WriteRequest.newBuilder();
-        writeBuilder.addTimeseries(timeSeriesBuilder);
-
-        prometheus.PrometheusRemote.WriteRequest writeRequest = writeBuilder.build();
-
-        // Compress the write request using Snappy
-        final byte[] writeRequestCompressed;
-        writeRequestCompressed = Snappy.compress(writeRequest.toByteArray());
-
-        // Build the HTTP request
-        final RequestBody body = RequestBody.create(PROTOBUF_MEDIA_TYPE, writeRequestCompressed);
-        final Request.Builder builder = new Request.Builder()
-            .url(config.getWriteUrl())
-            .addHeader("X-Prometheus-Remote-Write-Version", "0.1.0")
-            .addHeader("Content-Encoding", "snappy")
-            .addHeader("User-Agent", CortexTSS.class.getCanonicalName())
-            .post(body);
-        // Add the OrgId header if set
-        if (tenantId != null && tenantId.trim().length() > 0) {
-            builder.addHeader(X_SCOPE_ORG_ID_HEADER, tenantId);
-        }
-        final Request request = builder.build();
-
-        LOG.trace("Writing: {}", writeRequest);
-        asyncHttpCallsBulkhead.executeCompletionStage(() -> executeAsync(request)).whenComplete((r, ex) -> {
-            if (ex == null) {
-                samplesWritten.mark(1);
-            } else {
-                // FIXME: Data loss
-                samplesLost.mark(1);
-                LOG.error("Error occurred while storing result, sample will be lost.", ex);
-            }
-        });
+        store(tenantId, List.of(timeSeriesBuilder.build()));
     }
 
     public void store(String tenantId, List<PrometheusTypes.TimeSeries> timeSeriesList) throws IOException {

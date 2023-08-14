@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.mapper.discovery;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
@@ -59,5 +60,14 @@ public interface IcmpActiveDiscoveryMapper {
     @Mapping(target = "snmpPorts", source = "snmpConfig.portsList",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscovery dtoToModel(IcmpActiveDiscoveryDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "tenantId", ignore = true)
+    @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
+    @Mapping(target = "snmpCommunityStrings", source = "snmpConfig.readCommunityList",
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "snmpPorts", source = "snmpConfig.portsList",
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    void updateFromDto(IcmpActiveDiscoveryCreateDTO dto, @MappingTarget IcmpActiveDiscovery discovery);
 
 }

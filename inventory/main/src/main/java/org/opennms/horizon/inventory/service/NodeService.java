@@ -239,24 +239,7 @@ public class NodeService {
         });
         return tasks;
     }
-
-    public void updateNodeMonitoredState(Node node) {
-
-        // See HS-1812, Always match "default" tag.
-        final var monitored = tagRepository.findByTenantIdAndNodeId(node.getTenantId(), node.getId()).stream()
-            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
-
-        final var monitoredState = monitored ? MonitoredState.MONITORED
-            : node.getMonitoredState() == MonitoredState.DETECTED
-                ? MonitoredState.DETECTED
-                : MonitoredState.UNMONITORED;
-
-        if (node.getMonitoredState() != monitoredState) {
-            node.setMonitoredState(monitoredState);
-            this.nodeRepository.save(node);
-        }
-    }
-
+    
     public void updateNodeMonitoredState(long nodeId, String tenantId) {
 
         // See HS-1812, Always match "default" tag.

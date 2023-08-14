@@ -28,13 +28,26 @@
 
 package org.opennms.horizon.inventory.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.stub.MetadataUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.keycloak.common.VerificationException;
+import org.mockito.Mockito;
+import org.opennms.horizon.inventory.dto.IdList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.dto.MonitoringLocationList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
+import org.opennms.horizon.inventory.service.ConfigUpdateService;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,26 +55,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import io.grpc.ManagedChannel;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.keycloak.common.VerificationException;
-import org.opennms.horizon.inventory.dto.IdList;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.dto.MonitoringLocationList;
-import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
-import org.opennms.horizon.inventory.service.MonitoringLocationService;
-
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-
-import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.stub.MetadataUtils;
-import org.springframework.test.annotation.DirtiesContext;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 //This is an example of gRPC integration tests underline mock services.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -74,7 +74,8 @@ public class LocationGrpcTest extends AbstractGrpcUnitTest {
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
         mockLocationService = mock(MonitoringLocationService.class);
-        MonitoringLocationGrpcService grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup);
+        MonitoringLocationGrpcService grpcService = new MonitoringLocationGrpcService(mockLocationService, tenantLookup,
+            Mockito.mock(ConfigUpdateService.class ));
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
         stub = MonitoringLocationServiceGrpc.newBlockingStub(channel);

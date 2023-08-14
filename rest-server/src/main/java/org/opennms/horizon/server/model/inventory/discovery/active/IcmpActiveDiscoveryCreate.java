@@ -43,4 +43,5 @@ public class IcmpActiveDiscoveryCreate {
     private List<TagCreate> tags;
     private List<String> ipAddresses;
     private SNMPConfig snmpConfig;
+    private Long id;
 }

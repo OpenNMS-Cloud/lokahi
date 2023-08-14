@@ -71,6 +71,7 @@ public class PassiveDiscoveryService {
     public PassiveDiscoveryDTO createDiscovery(String tenantId, PassiveDiscoveryUpsertDTO request) {
         validateDiscovery(tenantId, request);
         validateSnmpPorts(request);
+        validateCommunityStrings(request);
 
         PassiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);

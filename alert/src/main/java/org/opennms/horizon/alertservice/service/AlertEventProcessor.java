@@ -190,6 +190,10 @@ public class AlertEventProcessor {
                 alert.setLastEventTime(new Date());
             }
 
+            if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.DESCRIPTION_FIELD_NUMBER))) {
+                alert.setDescription(event.getDescription());
+            }
+
             alert.setType(alertData.type());
             if (AlertType.CLEAR.equals(alert.getType())) {
                 // Set the severity to CLEARED when reducing alerts

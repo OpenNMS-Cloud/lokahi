@@ -79,7 +79,7 @@ public class WelcomePage {
 
     public static void checkMinionConnection() {
         for (int i = 0; i < 5; i++) {
-            Selenide.sleep(60000);
+            Selenide.sleep(80000);
             // This needs to be set high or else it fails in pipelines.
             // Increasing the number of for loop iterations did not work.
             // TODO: Should be moved to properties value.

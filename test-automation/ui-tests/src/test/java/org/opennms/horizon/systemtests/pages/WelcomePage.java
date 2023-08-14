@@ -79,7 +79,11 @@ public class WelcomePage {
 
     public static void checkMinionConnection() {
         for (int i = 0; i < 5; i++) {
-            Selenide.sleep(60000); // TODO: Should be moved to properties value.
+            Selenide.sleep(60000);
+            // This needs to be set high or else it fails in pipelines.
+            // Increasing the number of for loop iterations did not work.
+            // TODO: Should be moved to properties value.
+
             if (!"Please wait while we detect your Minion.".equals(minionStatusField.getText())) {
                 break;
             }

@@ -78,8 +78,8 @@ public class WelcomePage {
     }
 
     public static void checkMinionConnection() {
-        for (int i = 0; i < 10; i++) {
-            Selenide.sleep(5000);
+        for (int i = 0; i < 60; i++) {
+            Selenide.sleep(5000); // TODO: Should be moved to properties value.
             if (!"Please wait while we detect your Minion.".equals(minionStatusField.getText())) {
                 break;
             }

@@ -61,7 +61,7 @@ public class WelcomeSteps {
     @Then("wizard shows that minion connected successfully")
     public static void minionStarted() {
         WelcomePage.checkMinionConnection();
-    }
+    } // Hangs here...
 
     @Then("click on 'Continue' button")
     public static void continueToDiscovery() {

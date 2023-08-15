@@ -132,7 +132,7 @@ public class WelcomePage {
                 if (matcher.find()) {
                     MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName);
                     // Minion startup and connect is slow - need a specific timeout here
-                    minionDetectedCheck.should(exist, Duration.ofSeconds(60));
+                    minionDetectedCheck.should(exist, Duration.ofSeconds(120));
                     return minion;
                 }
                 fail("Unable to parse p12 password from docker string: " + dockerText);

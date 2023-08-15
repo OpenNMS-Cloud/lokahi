@@ -15,7 +15,9 @@ import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
+import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
+import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.events.proto.Event;
 
 import java.util.List;
@@ -33,13 +35,22 @@ class AlertEventProcessorTest {
     AlertEventProcessor processor;
 
     @Mock
+    AlertRepository alertRepository;
+
+    @Mock
     AlertDefinitionRepository alertDefinitionRepository;
+
+    @Mock
+    ReductionKeyService reductionKeyService;
 
     @Mock
     MeterRegistry registry;
 
     @Mock
     TagRepository tagRepository;
+
+    @Mock
+    TenantLookup tenantLookup;
 
     @Mock
     Counter counter;

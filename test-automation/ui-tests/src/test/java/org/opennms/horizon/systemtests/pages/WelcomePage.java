@@ -78,10 +78,8 @@ public class WelcomePage {
     }
 
     public static void checkMinionConnection() {
-        for (int i = 0; i < 5; i++) {
-            Selenide.sleep(80000);
-            // This needs to be set high or else it fails in pipelines.
-            // Increasing the number of for loop iterations did not work.
+        for (int i = 0; i < 120; i++) {
+            Selenide.sleep(5000);
             // TODO: Should be moved to properties value.
 
             if (!"Please wait while we detect your Minion.".equals(minionStatusField.getText())) {

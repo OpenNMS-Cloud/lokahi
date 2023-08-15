@@ -14,45 +14,32 @@ import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
-import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
-import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
-import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.events.proto.Event;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AlertEventProcessorTest {
+class AlertEventProcessorTest {
 
     @InjectMocks
     AlertEventProcessor processor;
 
     @Mock
-    AlertRepository alertRepository;
-
-    @Mock
     AlertDefinitionRepository alertDefinitionRepository;
-
-    @Mock
-    AlertConditionRepository alertConditionRepository;
-
-    @Mock
-    ReductionKeyService reductionKeyService;
 
     @Mock
     MeterRegistry registry;
 
     @Mock
     TagRepository tagRepository;
-
-    @Mock
-    TenantLookup tenantLookup;
 
     @Mock
     Counter counter;
@@ -65,10 +52,11 @@ public class AlertEventProcessorTest {
     }
 
     @Test
-    public void generateAlert() {
+    void generateAlert() {
         Event event = Event.newBuilder()
             .setTenantId("tenantA")
             .setUei("uei")
+            .setDescription("desc")
             .build();
 
         AlertCondition alertCondition = new AlertCondition();
@@ -101,6 +89,7 @@ public class AlertEventProcessorTest {
         assertThat(alerts).hasSize(1);
         assertThat(alerts.get(0))
             .returns("tenantA", Alert::getTenantId)
+            .returns("desc", Alert::getDescription)
             .returns(alertCondition.getSeverity(), Alert::getSeverity)
             .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyId);
     }

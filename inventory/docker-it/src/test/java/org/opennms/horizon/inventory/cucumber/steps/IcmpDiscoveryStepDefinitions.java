@@ -323,4 +323,18 @@ public class IcmpDiscoveryStepDefinitions {
         kafkaConsumerRunner.shutdown();
         await().atMost(3, TimeUnit.SECONDS).until(() -> kafkaConsumerRunner.isShutdown().get(), Matchers.is(true));
     }
+
+    @Then("delete Active Discovery that is created in previous step")
+    public void deleteActiveDiscoveryThatIsCreatedInPreviousStep() {
+        var deleted = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().deleteDiscovery(Int64Value.of(activeDiscoveryId));
+        Assertions.assertTrue(deleted.getValue());
+    }
+
+    @Then("verify the task set update for removal is published for icmp discovery within {int}ms")
+    public void verifyTheTaskSetUpdateForRemovalIsPublishedForIcmpDiscoveryWithinMs(int timeout) {
+        String taskIdPattern = "discovery:\\d+/" + this.taskLocation;
+        await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS)
+            .until(() -> matchesTaskPatternForDelete(taskIdPattern).get(), Matchers.is(true));
+        kafkaConsumerRunner.clearValues();
+    }
 }

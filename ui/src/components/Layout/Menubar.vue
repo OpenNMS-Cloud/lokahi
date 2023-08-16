@@ -4,12 +4,12 @@
       <div class="right-container">
         <!-- All these are hidden for EAR -->
         <!-- <OptInOutCtrl /> -->
-        <FeatherIcon
+        <!-- <FeatherIcon
           :icon="LightDarkMode"
           class="pointer menu-icon"
           @click="toggleDark()"
           data-test="toggle-dark"
-        />
+        /> -->
         <FeatherIcon
           :icon="LogOut"
           class="pointer menu-icon"

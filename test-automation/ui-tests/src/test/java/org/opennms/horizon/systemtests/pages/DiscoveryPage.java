@@ -81,7 +81,7 @@ public class DiscoveryPage {
     public static boolean newDiscoveryCheckForLocation(String locationName) {
         String search = "//div[@class='locations-select']//span[text()=' " + locationName +"']";
         // Sometimes a delay in the UI to populate the default selected location
-        Selenide.sleep(1000);
+        Selenide.sleep(6000);
 
         return $(By.xpath(search)).exists();
     }

@@ -9,12 +9,12 @@
           class="pointer menu-icon"
           @click="toggleDark()"
           data-test="toggle-dark"
-        />
+        /> -->
         <FeatherIcon
           :icon="LogOut"
           class="pointer menu-icon"
           @click="logout()"
-        /> -->
+        />
       </div>
     </template>
   </FeatherAppBar>

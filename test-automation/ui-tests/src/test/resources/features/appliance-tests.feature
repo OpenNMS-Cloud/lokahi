@@ -2,7 +2,7 @@
 Feature: User can see a minion connected to the instance
 
   @ignore
-  Scenario: Verify adding a device manually
+  Scenario Outline: Verify adding a device manually
     Given Navigate to the "minions" through the left panel
     Then check 'Add Device' button is accessible and visible
     Then click on 'Add Device' button to open a pop up window
@@ -10,6 +10,7 @@ Feature: User can see a minion connected to the instance
     Then Add device IP address "127.0.0.1"
     Then Click on save button
     Then check the status of the device with name "Localhost" as status "DOWN"
+    Examples:
 
   @ignore
   Scenario: Verify that user can delete a minion with status DOWN

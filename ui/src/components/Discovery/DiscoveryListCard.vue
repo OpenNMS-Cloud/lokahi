@@ -4,8 +4,8 @@
       {{ title }}&nbsp;
       <FeatherIcon
         class="iconHelp"
-        :icon="Icons.Help"
-        @click="$emit('showInstructions')"
+        :icon="Help"
+        @click="showInstructions"
       />
       <div class="count">({{ list.length }})</div>
     </div>
@@ -20,7 +20,7 @@
         :class="{ selected: selectedId == item.id }"
       >
         <div
-          @click="$emit('selectDiscovery', item)"
+          @click="() => selectDiscovery(item)"
           class="name pointer"
         >
           {{ item.name }}
@@ -34,7 +34,7 @@
             v-on="on"
             v-if="passive"
             :toggle="(item as PassiveDiscovery).toggle"
-            @toggle="(isToggled) => $emit('toggleDiscovery', item.id, isToggled)"
+            @toggle="(isToggled) => toggleDiscovery && toggleDiscovery(item, isToggled)"
           />
         </FeatherTooltip>
       </div>
@@ -53,16 +53,17 @@
 
 <script lang="ts" setup>
 import Warning from '@featherds/icon/notification/Warning'
-import { PassiveDiscovery, AzureActiveDiscovery, IcmpActiveDiscovery } from '@/types/graphql'
+import { PassiveDiscovery } from '@/types/graphql'
 import Help from '@featherds/icon/action/Help'
 import discoveryText from '@/components/Discovery/discovery.text'
+import { NewOrUpdatedDiscovery } from '@/types/discovery'
 
-const Icons = markRaw({
-  Help
-})
 defineProps<{
   title: string
-  list: (IcmpActiveDiscovery | AzureActiveDiscovery | PassiveDiscovery)[]
+  list: NewOrUpdatedDiscovery[]
+  selectDiscovery: (discovery: NewOrUpdatedDiscovery) => void
+  showInstructions: () => void
+  toggleDiscovery?: (discovery: NewOrUpdatedDiscovery, isEnabled: boolean) => void
   passive?: boolean
   selectedId?: number
 }>()

@@ -1,211 +1,212 @@
 <template>
-  <HeadlinePage
-    :text="discoveryText.Discovery.pageHeadline"
-    class="page-headline"
-  />
+  <div class="discovery-wrapper">
+    <HeadlinePage
+      :text="discoveryText.Discovery.pageHeadline"
+      class="page-headline"
+    />
+    <div class="add-btn">
+      <FeatherButton
+        data-test="addDiscoveryBtn"
+        @click="discoveryStore.startNewDiscovery"
+        v-if="!discoveryStore.discoveryFormActive"
+        primary
+      >
+        {{ discoveryText.Discovery.button.add }}
+        <template #icon>
+          <Icon :icon="addIcon" />
+        </template>
+      </FeatherButton>
+    </div>
+  </div>
+
   <div class="container">
     <section class="my-discovery">
-      <div class="add-btn">
-        <FeatherButton
-          data-test="addDiscoveryBtn"
-          @click="handleNewDiscovery"
-          primary
-        >
-          {{ discoveryText.Discovery.button.add }}
-          <template #icon>
-            <Icon :icon="addIcon" />
-          </template>
-        </FeatherButton>
-      </div>
-
       <div class="my-discovery-inner">
-        <FeatherAutocomplete
-          class="search"
-          v-model="discoverySearchValue"
-          :loading="searchLoading"
-          :results="discoveriesResults"
-          @search="search"
-          label="Search Discovery"
-          type="single"
-          @update:model-value="showDiscovery"
-        />
         <DiscoveryListCard
           title="My Active Discoveries"
-          :list="discoveryQueries.activeDiscoveries"
-          @select-discovery="showDiscovery"
-          :selectedId="discoverySelectedType !== DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
-          @show-instructions="openInstructions(InstructionsType.Active)"
+          :list="discoveryStore.loadedDiscoveries.filter((d) => d.type && activeDiscoveryTypes.includes(d.type as DiscoveryType))"
+          :selectDiscovery="discoveryStore.editDiscovery"
+          :selectedId="discoveryStore.selectedDiscovery.id"
+          :showInstructions="() => openInstructions(InstructionsType.Active)"
         />
         <DiscoveryListCard
           passive
           title="My Passive Discoveries"
-          :list="discoveryQueries.passiveDiscoveries"
-          @toggle-discovery="toggleDiscovery"
-          @select-discovery="showDiscovery"
-          :selectedId="discoverySelectedType === DiscoveryType.SyslogSNMPTraps ? selectedDiscovery?.id : null"
-          @show-instructions="openInstructions(InstructionsType.Passive)"
+          :list="discoveryStore.loadedDiscoveries.filter((d) => d.type && [DiscoveryType.SyslogSNMPTraps].includes(d.type as DiscoveryType))"
+          :toggleDiscovery="discoveryStore.toggleDiscovery"
+          :selectDiscovery="discoveryStore.editDiscovery"
+          :selectedId="discoveryStore.selectedDiscovery.id"
+          :showInstructions="() => openInstructions(InstructionsType.Passive)"
         />
       </div>
     </section>
-
-    <!-- add/edit a discovery  -->
     <section
-      v-if="isDiscoveryEditingShown"
+      class="discovery"
+      v-if="!discoveryStore.discoveryFormActive && discoveryStore.soloTypePageActive"
+    >
+      <DiscoveryTypeSelector />
+    </section>
+    <section
+      v-if="discoveryStore.discoveryFormActive && !discoveryStore.soloTypePageActive"
       class="discovery"
     >
-      <div
-        v-if="showNewDiscovery"
-        class="type-selector"
-      >
-        <div class="headline">{{ discoveryText.Discovery.headline1 }}</div>
-        <DiscoveryTypeSelector
-          ref="discoveryTypeSelector"
-          @discovery-option-selected="(type: DiscoveryType) => (discoverySelectedType = type)"
-        />
+      <div class="flex-title">
+        <FeatherBackButton @click="discoveryStore.cancelUpdate">Cancel</FeatherBackButton>
+        <h2 class="title">{{ discoveryCopy.title }}</h2>
       </div>
-      <div>
-        <div v-if="discoverySelectedType === DiscoveryType.ICMP">
-          <DiscoverySnmpForm
-            :successCallback="
-              (name) => {
-                successModal.openSuccessModal(name)
-                handleClose()
-              }
-            "
-            :cancel="handleClose"
-            :discovery="(selectedDiscovery as IcmpActiveDiscovery)"
-          />
-        </div>
-        <div v-else-if="discoverySelectedType === DiscoveryType.Azure">
-          <DiscoveryAzureForm
-            :successCallback="
-              (name) => {
-                successModal.openSuccessModal(name)
-                handleClose()
-              }
-            "
-            :cancel="handleClose"
-            :discovery="(selectedDiscovery as AzureActiveDiscovery)"
-          />
-        </div>
-        <DiscoverySyslogSNMPTrapsForm
-          v-else-if="discoverySelectedType === DiscoveryType.SyslogSNMPTraps"
-          :successCallback="
-            (name) => {
-              successModal.openSuccessModal(name)
-              handleClose()
-            }
-          "
-          :cancel="handleClose"
-          :discovery="(selectedDiscovery as PassiveDiscovery)"
+
+      <FeatherInput
+        label="Discovery Name"
+        :modelValue="discoveryStore.selectedDiscovery.name"
+        @update:model-value="(name) => discoveryStore.setSelectedDiscoveryValue('name', name)"
+      />
+
+      <div class="auto-with-chips">
+        <AtomicAutocomplete
+          inputLabel="Locations"
+          :inputValue="discoveryStore.locationSearch"
+          :itemClicked="discoveryStore.locationSelected"
+          :loading="discoveryStore.loading"
+          :outsideClicked="discoveryStore.clearLocationAuto"
+          :resultsVisible="!!discoveryStore.foundLocations.length"
+          :results="discoveryStore.foundLocations"
+          :textChanged="discoveryStore.searchForLocation"
+          :wrapperClicked="() => discoveryStore.searchForLocation('')"
+          :errMsg="discoveryStore.locationError"
+          :disabled="discoveryStore.loading"
+          :allowNew="false"
         />
-        <div
-          v-else
-          class="get-started"
+
+        <FeatherChipList label="Locations">
+          <FeatherChip
+            v-for="b in discoveryStore.selectedDiscovery.locations"
+            :key="b.id"
+          >
+            <template v-slot:icon>
+              <FeatherIcon
+                @click="() => discoveryStore.removeLocation(b)"
+                class="icon"
+                :icon="CancelIcon"
+              />
+            </template>
+            {{ b.location }}
+          </FeatherChip>
+        </FeatherChipList>
+      </div>
+      <div class="auto-with-chips">
+        <AtomicAutocomplete
+          inputLabel="Tags"
+          :inputValue="discoveryStore.tagSearch"
+          :itemClicked="discoveryStore.tagSelected"
+          :loading="discoveryStore.loading"
+          :resultsVisible="!!discoveryStore.foundTags.length"
+          :outsideClicked="discoveryStore.clearTagAuto"
+          :results="discoveryStore.foundTags"
+          :textChanged="discoveryStore.searchForTags"
+          :wrapperClicked="() => discoveryStore.searchForTags('')"
+          :errMsg="discoveryStore.tagError"
+          :disabled="discoveryStore.loading"
+          :allowNew="true"
+        />
+        <FeatherChipList label="Tags">
+          <FeatherChip
+            v-for="b in discoveryStore.selectedDiscovery.tags"
+            :key="b.id"
+          >
+            <template v-slot:icon>
+              <FeatherIcon
+                @click="() => discoveryStore.removeTag(b)"
+                class="icon"
+                :icon="CancelIcon"
+              />
+            </template>
+            {{ b.name }}
+          </FeatherChip>
+        </FeatherChipList>
+      </div>
+      <hr style="margin-bottom: 24px" />
+      <FeatherSelect
+        label="Type"
+        :options="[
+          { value: DiscoveryType.ICMP, _text: 'ICMP' },
+          { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
+          { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
+          { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' },
+          { value: DiscoveryType.Azure, _text: 'Azure' },
+          { value: DiscoveryType.SyslogSNMPTraps, _text: 'Syslogs' }
+        ]"
+        @update:modelValue="(b) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
+      />
+      <DiscoveryMetaInformation
+        :discovery="discoveryStore.selectedDiscovery"
+        :updateDiscoveryValue="discoveryStore.setSelectedDiscoveryValue"
+      />
+      <div style="display: flex; justify-content: flex-end; width: 100%">
+        <FeatherButton
+          v-if="discoveryStore.selectedDiscovery.id"
+          @click="discoveryStore.deleteDiscovery"
+          >Delete Discovery</FeatherButton
         >
-          {{ discoveryText.Discovery.noneDiscoverySelectedMsg }}
-        </div>
+        <FeatherButton
+          primary
+          @click="discoveryStore.cancelUpdate"
+          >{{ discoveryCopy.button }}</FeatherButton
+        >
       </div>
+    </section>
+    <section
+      v-if="!discoveryStore.soloTypePageActive"
+      class="discovery"
+    >
+      <p>Select a discovery on the left, or click Add Discovery</p>
     </section>
   </div>
   <DiscoverySuccessModal ref="successModal" />
   <DiscoveryInstructions
-    :instructionsType="instructionsType"
-    :isOpen="isInstructionVisible"
-    @drawer-closed="() => (isInstructionVisible = false)"
+    :instructionsType="helpType"
+    :isOpen="isHelpVisible"
+    @drawerClosed="() => (isHelpVisible = false)"
   />
 </template>
 
 <script lang="ts" setup>
 import AddIcon from '@featherds/icon/action/Add'
 import { IIcon } from '@/types'
-import { DiscoveryInput } from '@/types/discovery'
 import { DiscoveryType, InstructionsType } from '@/components/Discovery/discovery.constants'
 import discoveryText from '@/components/Discovery/discovery.text'
-import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
-import { useDiscoveryMutations } from '@/store/Mutations/discoveryMutations'
-import { IAutocompleteItemType } from '@featherds/autocomplete'
-import { AzureActiveDiscovery, IcmpActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
-import DiscoveryTypeSelector from '@/components/Discovery/DiscoveryTypeSelector.vue'
-import { cloneDeep } from 'lodash'
-const discoveryQueries = useDiscoveryQueries()
-const discoveryMutations = useDiscoveryMutations()
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import CancelIcon from '@featherds/icon/navigation/Cancel'
 
-type TDiscoveryAutocomplete = DiscoveryInput & { _text: string }
+const discoveryStore = useDiscoveryStore()
+const discoveryCopy = computed(() =>
+  discoveryStore.selectedDiscovery.id
+    ? { title: 'Edit Discovery', button: 'Update Discovery' }
+    : { title: 'Add Discovery', button: 'Start New Discovery' }
+)
+
+onMounted(() => {
+  discoveryStore.init()
+})
 
 const addIcon: IIcon = {
   image: markRaw(AddIcon)
 }
 
-const successModal = ref()
-const isDiscoveryEditingShown = ref(false)
-const showNewDiscovery = ref(false)
-const selectedDiscovery = ref<PassiveDiscovery | AzureActiveDiscovery | IcmpActiveDiscovery | null>(null)
-const discoverySelectedType = ref(DiscoveryType.None)
-const discoveryTypeSelector = ref<InstanceType<typeof DiscoveryTypeSelector>>()
-const discoveriesResults = ref<TDiscoveryAutocomplete[]>([])
-const searchLoading = ref(false)
-const discoverySearchValue = ref(undefined)
-const isInstructionVisible = ref(false)
-const instructionsType = ref(InstructionsType.Active)
-
-const handleNewDiscovery = () => {
-  isDiscoveryEditingShown.value = true
-  showNewDiscovery.value = true
-  selectedDiscovery.value = null
-  discoverySelectedType.value = DiscoveryType.None
-  discoveryTypeSelector.value?.reset()
-}
-
-const search = (q: string) => {
-  if (!q) return
-  searchLoading.value = true
-  const results = [...discoveryQueries.activeDiscoveries, ...discoveryQueries.passiveDiscoveries]
-    .filter((x: any) => x.name?.toLowerCase().indexOf(q) > -1)
-    .map((x: any) => ({
-      _text: x.name,
-      ...x
-    }))
-  discoveriesResults.value = results as TDiscoveryAutocomplete[]
-  searchLoading.value = false
-}
-
-const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
-  const discovery = selected as IAutocompleteItemType
-  discoverySearchValue.value = undefined
-
-  if (discovery) {
-    isDiscoveryEditingShown.value = true
-    showNewDiscovery.value = false
-    selectedDiscovery.value = cloneDeep(discovery)
-    //replace with type guard
-    if (discovery.discoveryType === DiscoveryType.ICMP) {
-      discoverySelectedType.value = DiscoveryType.ICMP
-    } else if (discovery.discoveryType === DiscoveryType.Azure) {
-      discoverySelectedType.value = DiscoveryType.Azure
-    } else {
-      discoverySelectedType.value = DiscoveryType.SyslogSNMPTraps
-    }
-  }
-}
-
-const toggleDiscovery = (id: string, toggle: boolean) => {
-  discoveryMutations.togglePassiveDiscovery({
-    toggle: { id, toggle }
-  })
-}
-
-const handleClose = () => {
-  isDiscoveryEditingShown.value = false
-  discoverySelectedType.value = DiscoveryType.None
-}
+const isHelpVisible = ref(false)
+const helpType = ref(InstructionsType.Active)
 
 const openInstructions = (type: InstructionsType) => {
-  isInstructionVisible.value = true
-  instructionsType.value = type
+  isHelpVisible.value = true
+  helpType.value = type
 }
 
-onMounted(() => discoveryQueries.getDiscoveries())
+const activeDiscoveryTypes = [
+  DiscoveryType.Azure,
+  DiscoveryType.ICMP,
+  DiscoveryType.ICMPV3Auth,
+  DiscoveryType.ICMPV3AuthPrivacy,
+  DiscoveryType.ICMPV3NoAuth
+]
 </script>
 
 <style lang="scss" scoped>
@@ -214,6 +215,16 @@ onMounted(() => discoveryQueries.getDiscoveries())
 @use '@/styles/vars.scss';
 @use '@featherds/styles/mixins/typography';
 
+.title {
+  margin-bottom: 24px;
+}
+.discovery-wrapper {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 20px;
+}
 .page-headline {
   margin-left: var(variables.$spacing-l);
   margin-right: var(variables.$spacing-l);
@@ -225,6 +236,7 @@ onMounted(() => discoveryQueries.getDiscoveries())
   justify-content: space-between;
   margin-left: var(variables.$spacing-l);
   margin-right: var(variables.$spacing-l);
+
   @include mediaQueriesMixins.screen-md {
     flex-direction: row;
   }
@@ -235,21 +247,21 @@ onMounted(() => discoveryQueries.getDiscoveries())
   min-width: 400px;
   margin-bottom: var(variables.$spacing-m);
   border-bottom: 1px solid var(variables.$border-on-surface);
+
   .add-btn {
     width: 100%;
     margin-bottom: var(variables.$spacing-l);
   }
+
   > .my-discovery-inner {
     width: 100%;
     display: flex;
     flex-direction: column;
     margin-bottom: var(variables.$spacing-l);
-    margin-top: var(variables.$spacing-l);
-    border-top: 1px solid var(variables.$border-on-surface);
-    padding-top: var(variables.$spacing-l);
 
     > * {
       margin-bottom: var(variables.$spacing-m);
+
       &:last-child {
         margin-bottom: 0;
       }
@@ -277,6 +289,7 @@ onMounted(() => discoveryQueries.getDiscoveries())
     flex-direction: column;
     margin-bottom: 0;
     margin-right: var(variables.$spacing-m);
+
     > * {
       width: 100%;
       margin-bottom: var(variables.$spacing-m);
@@ -308,11 +321,30 @@ onMounted(() => discoveryQueries.getDiscoveries())
     margin-bottom: 0;
   }
 }
+
 .get-started {
   width: 100%;
   height: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.auto-with-chips {
+  margin-bottom: 12px;
+}
+.flex-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+
+  h2 {
+    margin-bottom: 0;
+    margin-left: 18px;
+  }
 }
 </style>

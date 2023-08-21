@@ -68,6 +68,6 @@ service IcmpActiveDiscoveryService {
   rpc createDiscovery(IcmpActiveDiscoveryCreateDTO) returns (IcmpActiveDiscoveryDTO);
   rpc listDiscoveries(google.protobuf.Empty) returns(IcmpActiveDiscoveryList);
   rpc getDiscoveryById(google.protobuf.Int64Value) returns (IcmpActiveDiscoveryDTO);
-  rpc upsertDiscovery(IcmpActiveDiscoveryCreateDTO) returns (IcmpActiveDiscoveryDTO);
-  rpc deleteDiscovery(google.protobuf.Int64Value) returns (google.protobuf.BoolValue);
+  rpc upsertActiveDiscovery(IcmpActiveDiscoveryCreateDTO) returns (IcmpActiveDiscoveryDTO);
+  rpc deleteActiveDiscovery(google.protobuf.Int64Value) returns (google.protobuf.BoolValue);
 }

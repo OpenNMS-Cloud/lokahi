@@ -4,7 +4,8 @@ import {
   CreateAzureActiveDiscoveryDocument, 
   CreateIcmpActiveDiscoveryDocument, 
   UpsertPassiveDiscoveryDocument,
-  TogglePassiveDiscoveryDocument
+  TogglePassiveDiscoveryDocument,
+  CreateOrUpdateActiveIcmpDiscoveryDocument
 } from '@/types/graphql'
 
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
@@ -17,6 +18,20 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     error: activeDiscoveryError,
     isFetching: isFetchingActiveDiscovery
   } = useMutation(CreateIcmpActiveDiscoveryDocument)
+
+  // Create or Update ICMP Discoveries
+  const {
+    execute: createOrUpdateDiscovery,
+    error: createOrUpdateDiscoveryError,
+    isFetching: createOrUpdateDiscoveryIsFetching
+  } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
+
+  // Delete ICMP Discoveries
+  const {
+    execute: deleteActiveIcmpDiscovery,
+    error: deleteActiveIcmpDiscoveryError,
+    isFetching: deleteActiveIcmpDiscoveryIsFetching
+  } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
 
   // Create Passive Discoveries
   const {
@@ -33,6 +48,12 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     azureError: computed(() => error),
     isFetching: computed(() => isFetching),
     createDiscoveryConfig,
+    createOrUpdateDiscovery,
+    createOrUpdateDiscoveryError,
+    createOrUpdateDiscoveryIsFetching,
+    deleteActiveIcmpDiscovery,
+    deleteActiveIcmpDiscoveryError,
+    deleteActiveIcmpDiscoveryIsFetching,
     activeDiscoveryError: computed(() => activeDiscoveryError),
     isFetchingActiveDiscovery: computed(() => isFetchingActiveDiscovery),
     upsertPassiveDiscovery,

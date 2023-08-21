@@ -75,7 +75,6 @@ import { fncArgVoid } from '@/types'
 import discoveryText from '@/components/Discovery/discovery.text'
 import Help from '@featherds/icon/action/Help'
 import { isEmpty } from 'lodash'
-
 const emit = defineEmits(['content-formatted'])
 const props = defineProps({
   contentType: {

@@ -9,25 +9,12 @@ export const useTagQueries = defineStore('tagQueries', () => {
     searchTerm: ''
   })
 
-  const tagStore = useTagStore()
-
-  const {
-    data: tagData,
-    execute: tagExecute,
-    isFetching: tagIsFetching,
-    error: tagError
-  } = useQuery({
-    query: ListTagsDocument,
-    fetchOnMount: false,
-    cachePolicy: 'network-only'
-  })
 
 
   const {
     data: tagsSearchData,
     execute: tagsSearchExecute,
-    isFetching: tagsSearchIsFetching,
-    error: tagsSearchError
+    isFetching: tagsSearchIsFetching
   } = useQuery({
     query: ListTagsSearchDocument,
     variables: tagsSearchTerm,

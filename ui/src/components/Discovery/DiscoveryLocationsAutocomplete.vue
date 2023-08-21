@@ -22,9 +22,10 @@
     class="loc-chip-list"
   >
     <FeatherChip class="pointer">
-      <template v-slot:icon>
-        <FeatherIcon
+      <template v-slot:icon
           v-if="!disabled"
+      >
+        <FeatherIcon
           @click="removeLocation"
           :icon="cancelIcon"
         />

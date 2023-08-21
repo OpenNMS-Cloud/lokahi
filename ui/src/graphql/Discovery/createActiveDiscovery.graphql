@@ -10,3 +10,21 @@ mutation CreateIcmpActiveDiscovery($request: IcmpActiveDiscoveryCreateInput!) {
     # tags // not avail yet
   }
 }
+
+mutation CreateOrUpdateActiveIcmpDiscovery($request: IcmpActiveDiscoveryCreateInput!) {
+  upsertIcmpActiveDiscovery(request: $request) {
+    id
+    name
+    ipAddresses
+    locationId
+    snmpConfig {
+      ports
+      readCommunities
+    }
+    # tags // not avail yet
+  }
+}
+
+mutation DeleteActiveIcmpDiscovery($id: Long!) {
+  deleteActiveDiscovery(id: $id)
+}

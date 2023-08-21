@@ -1,6 +1,9 @@
 export enum DiscoveryType {
   None = 'None',
   ICMP = 'ICMP',
+  ICMPV3NoAuth = 'ICMPV3NoAuth',
+  ICMPV3Auth = 'ICMPV3Auth',
+  ICMPV3AuthPrivacy = 'ICMPV3AuthPrivacy',
   Azure = 'AZURE',
   SyslogSNMPTraps = 'SyslogSNMPTraps'
 }

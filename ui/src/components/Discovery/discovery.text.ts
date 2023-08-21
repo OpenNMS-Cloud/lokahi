@@ -1,6 +1,6 @@
 export default {
   Discovery: {
-    pageHeadline: 'Discovery',
+    pageHeadline: 'Discoveries',
     headline1: 'Select a discovery type',
     headline2: 'ICMP/SNMP Discovery Setup',
     nameInputLabel: 'ICMP/SNMP name',
@@ -37,7 +37,7 @@ export default {
   }
 }
 
-export const DiscoverySNMPForm = {
+export const DiscoverySNMPCopy = {
   tag: 'Search/Add tags (optional)',
   nameInputLabel: 'ICMP/SNMP name',
   title: 'ICMP/SNMP Discovery Setup'
@@ -115,7 +115,7 @@ export const SuccessModalOptions = {
   addDiscovery: 'Add Another Discovery',
   addTransaction: 'Add Synthetic Transaction',
   addMonitoring: 'Add Monitoring Policy',
-  checkboxText: "Don't show this again"
+  checkboxText: 'Don\'t show this again'
 }
 
 export const Instructions = {

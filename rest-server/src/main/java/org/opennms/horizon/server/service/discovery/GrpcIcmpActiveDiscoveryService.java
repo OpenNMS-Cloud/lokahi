@@ -74,10 +74,8 @@ public class GrpcIcmpActiveDiscoveryService {
         return Mono.just(mapper.dtoToIcmpActiveDiscovery(client.upsertIcmpActiveDiscovery(requestDto, headerUtil.getAuthHeader(env))));
     }
 
-    @GraphQLQuery
-    public Mono<Boolean> deleteActiveDiscovery(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    @GraphQLMutation
+    public Mono<Boolean> deleteIcmpActiveDiscovery(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteIcmpActiveDiscovery(id, headerUtil.getAuthHeader(env)));
     }
-
-
 }

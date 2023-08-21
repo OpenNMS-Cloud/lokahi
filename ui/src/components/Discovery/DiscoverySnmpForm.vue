@@ -12,10 +12,9 @@
       class="name-input"
       data-test="discoveryNameInput"
       :schema="nameV"
-      :disabled="isDisabled"
     />
     <div class="locations-select">
-      <DiscoveryLocationsAutocomplete :disabled="isDisabled" />
+      <DiscoveryLocationsAutocomplete />
     </div>
     <BasicAutocomplete
       @items-selected="tagsSelectedListener"
@@ -26,7 +25,6 @@
       class="tags-autocomplete"
       data-test="locations-autocomplete"
       :preselectedItems="tags"
-      :disabled="isDisabled"
     />
     <div class="content-editable-container">
       <DiscoveryContentEditable
@@ -42,7 +40,6 @@
         :content="props.discovery?.ipAddresses?.join(', ')"
         isRequired
         :id="1"
-        :disabled="isDisabled"
       />
       <DiscoveryContentEditable
         @content-formatted="(val) => setSnmpConfig('snmpConfig.readCommunities', val)"
@@ -55,7 +52,6 @@
         data-test="communityInput"
         :content="props.discovery?.snmpConfig?.readCommunities?.join(', ')"
         :id="2"
-        :disabled="isDisabled"
       />
       <DiscoveryContentEditable
         @content-formatted="(val) => setSnmpConfig('snmpConfig.ports', val)"
@@ -70,7 +66,6 @@
         :tooltipText="Common.tooltipPort"
         :content="props.discovery?.snmpConfig?.ports?.join(', ')"
         :id="3"
-        :disabled="isDisabled"
       />
     </div>
 
@@ -82,7 +77,6 @@
         >{{ discoveryText.Discovery.button.cancel }}</FeatherButton
       >
       <ButtonWithSpinner
-        v-if="!props.discovery"
         type="submit"
         primary
         data-test="btn-submit"
@@ -114,7 +108,7 @@ import { useForm } from '@featherds/input-helper'
 import { string } from 'yup'
 
 const form = useForm()
-const { createDiscoveryConfig, activeDiscoveryError, isFetchingActiveDiscovery } = useDiscoveryMutations()
+const { createOrUpdateDiscovery, activeDiscoveryError, isFetchingActiveDiscovery } = useDiscoveryMutations()
 const tagQueries = useTagQueries()
 const discoveryQueries = useDiscoveryQueries()
 const discoveryStore = useDiscoveryStore()
@@ -173,7 +167,11 @@ const saveHandler = async () => {
   const isPortInvalid = contentEditableUDPPortRef.value?.validateContent()
   if (form.validate().length || isIpInvalid || isPortInvalid) return
   discoveryInfo.value.locationId = discoveryStore.selectedLocation?.id
-  await createDiscoveryConfig({ request: discoveryInfo.value })
+  let discoveryValue = { ...discoveryInfo.value }
+
+  delete (discoveryValue as { discoveryType?: string }).discoveryType
+
+  await createOrUpdateDiscovery({ request: discoveryValue })
   if (!activeDiscoveryError.value && discoveryInfo.value.name) {
     discoveryQueries.getDiscoveries()
     resetContentEditable()
@@ -181,8 +179,6 @@ const saveHandler = async () => {
     discoveryInfo.value = {} as IcmpActiveDiscoveryCreateInput
   }
 }
-
-const isDisabled = computed(() => Boolean(props.discovery))
 </script>
 
 <style scoped lang="scss">

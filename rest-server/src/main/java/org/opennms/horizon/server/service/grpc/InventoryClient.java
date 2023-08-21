@@ -135,14 +135,14 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .upsertDiscovery(request);
+            .upsertActiveDiscovery(request);
     }
 
     public Boolean deleteIcmpActiveDiscovery(long discoveryId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         var result = icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deleteDiscovery(Int64Value.of(discoveryId));
+            .deleteActiveDiscovery(Int64Value.of(discoveryId));
         return result.getValue();
     }
 

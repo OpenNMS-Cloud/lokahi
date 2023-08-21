@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { cloneDeep } from 'lodash'
-import { MonitoringLocation, TagCreateInput } from '@/types/graphql'
+import { AzureActiveDiscovery, IcmpActiveDiscovery, MonitoringLocation, PassiveDiscovery, TagCreateInput } from '@/types/graphql'
+import { DiscoveryInput } from '@/types/discovery'
 
 const defaultAzureForm = {
   name: '',
@@ -16,6 +17,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     selectedLocation: undefined as undefined | MonitoringLocation,
     selectedTags: [] as TagCreateInput[],
     ipAddresses: <string[]>[],
+    deleteModalOpen: false,
     ipRange: {
       cidr: '',
       fromIp: '',
@@ -45,6 +47,25 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     clearAzureForm() {
       this.azure = cloneDeep(defaultAzureForm)
+    },
+    upsertActiveDiscovery(discovery: PassiveDiscovery | AzureActiveDiscovery | IcmpActiveDiscovery | null){
+      if (discovery){
+        const discoveryMutations = useDiscoveryMutations()
+        discoveryMutations.createOrUpdateDiscovery({request:discovery})
+      }
+    },
+    openDeleteModal(){
+      this.deleteModalOpen = true
+    },
+    deleteDiscovery(id?: number) {
+      if (id){
+        const discoveryMutations = useDiscoveryMutations()
+        discoveryMutations.deleteActiveIcmpDiscovery({id})
+        this.deleteModalOpen = false
+      }
+    },
+    closeDeleteModal(){
+      this.deleteModalOpen = false
     }
   }
 })

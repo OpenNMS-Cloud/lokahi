@@ -97,7 +97,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     }
 
     @Override
-    public void upsertDiscovery(IcmpActiveDiscoveryCreateDTO request,
+    public void upsertActiveDiscovery(IcmpActiveDiscoveryCreateDTO request,
                                 StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
         var tenant = tenantLookup.lookupTenantId(Context.current());
         if (tenant.isPresent()) {
@@ -112,7 +112,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     }
 
     @Override
-    public void deleteDiscovery(com.google.protobuf.Int64Value request,
+    public void deleteActiveDiscovery(com.google.protobuf.Int64Value request,
                                 io.grpc.stub.StreamObserver<com.google.protobuf.BoolValue> responseObserver) {
 
         var tenant = tenantLookup.lookupTenantId(Context.current());

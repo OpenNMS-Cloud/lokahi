@@ -102,13 +102,15 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         var tenant = tenantLookup.lookupTenantId(Context.current());
         if (tenant.isPresent()) {
             var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
+            IcmpActiveDiscoveryDTO activeDiscoveryConfig;
             if (activeDiscovery.isEmpty()) {
-                throw new IllegalArgumentException("Discovery with Id " + request.getId() + " doesn't exist");
+                activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
+            } else {
+                var icmpDiscovery = activeDiscovery.get();
+                // Discovery task need to be run always whenever there is an update, so first we need to remove current task
+                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
+                activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
             }
-            var icmpDiscovery = activeDiscovery.get();
-            // Discovery task need to be run always whenever there is an update, so first we need to remove current task
-            scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
-            var activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
             scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
                 Long.valueOf(request.getLocationId()), tenant.get(), activeDiscoveryConfig.getId());
             responseObserver.onNext(activeDiscoveryConfig);

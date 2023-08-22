@@ -94,7 +94,7 @@ public class TaskSetResultsConsumer {
                     });
                 } else if(taskResult.hasMonitorResponse()) {
                     var monitorResponse = taskResult.getMonitorResponse();
-                    monitorResponseService.updateMonitoredState(tenantId, monitorResponse);
+                    monitorResponseService.updateMonitoredState(tenantId, locationId, monitorResponse);
                 }
 
             }

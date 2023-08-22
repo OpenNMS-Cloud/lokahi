@@ -34,6 +34,8 @@ grpc:
   server:
     port: 6565
     deadline: 60000
+  inventory:
+    url: opennms-inventory:6565
 
 kafka:
   topics:

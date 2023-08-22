@@ -129,6 +129,8 @@ message Alert {
   repeated uint64 monitoring_policy_id = 19;
   string node_name = 20;
   string label = 21;
+  repeated string rule_name = 22;
+  repeated string policy_name = 23;
 }
 
 message EventMatch {

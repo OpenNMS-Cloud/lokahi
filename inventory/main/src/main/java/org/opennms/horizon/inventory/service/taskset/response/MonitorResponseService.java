@@ -41,6 +41,7 @@ import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -55,9 +56,8 @@ public class MonitorResponseService {
 
     private final InternalEventProducer eventProducer;
 
-
-    public void updateMonitoredState(String tenantId, MonitorResponse monitorResponse) {
-
+    @Transactional
+    public void updateMonitoredState(String tenantId, String locationId, MonitorResponse monitorResponse) {
         if (monitorResponse.getMonitorType().equals(MonitorType.ECHO)) {
             // No need to handle Echo monitor response
             return;
@@ -85,11 +85,11 @@ public class MonitorResponseService {
         }
         if (!Objects.equals(statusFromMonitor, previousState)) {
             // State changed, send event
-            triggerEvent(tenantId, monitorResponse, statusFromMonitor);
+            triggerEvent(tenantId, locationId, monitorResponse, statusFromMonitor);
         }
     }
 
-    private void triggerEvent(String tenantId, MonitorResponse monitorResponse, Boolean statusFromMonitor) {
+    private void triggerEvent(String tenantId, String locationId, MonitorResponse monitorResponse, boolean statusFromMonitor) {
         var eventBuilder = Event.newBuilder();
         if (statusFromMonitor) {
             eventBuilder.setUei(EventConstants.SERVICE_RESTORED_EVENT_UEI);
@@ -101,6 +101,7 @@ public class MonitorResponseService {
         eventBuilder.setNodeId(monitorResponse.getNodeId());
         eventBuilder.setProducedTimeMs(monitorResponse.getTimestamp());
         eventBuilder.setDescription(monitorResponse.getReason());
+        eventBuilder.setLocationId(locationId);
         var serviceNameParam = EventParameter.newBuilder().setName("serviceName")
             .setValue(monitorResponse.getMonitorType().name()).build();
         var serviceIdParam = EventParameter.newBuilder().setName("serviceId")

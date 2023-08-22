@@ -29,6 +29,8 @@
 package org.opennms.horizon.alertservice.config;
 
 import com.google.common.base.Strings;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -38,6 +40,8 @@ import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.common.util.Base64;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.opennms.horizon.alertservice.grpc.*;
+import org.opennms.horizon.alertservice.grpc.client.InventoryClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,6 +62,10 @@ public class GrpcConfig {
     private String keycloakRealm;
     @Value("${keycloak.public-key}")
     private String keycloakPublicKey;
+    @Value("${grpc.server.deadline:60000}")
+    private long deadline;
+    @Value("${grpc.inventory.url}")
+    private String inventoryGrpcAddress;
 
     @Bean
     public KeycloakDeployment createKeycloak() {
@@ -105,5 +113,17 @@ public class GrpcConfig {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
         manager.startServer(alertGrpc, policyGrpc, tagGrpc, alertEventDefinitionGrpc);
         return manager;
+    }
+
+    @Bean(name = "inventoryChannel")
+    public ManagedChannel createInventoryChannel() {
+        return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public InventoryClient createInventoryClient(@Qualifier("inventoryChannel") ManagedChannel channel) {
+        return new InventoryClient(channel, deadline);
     }
 }

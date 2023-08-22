@@ -45,6 +45,7 @@ import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
+import org.opennms.horizon.alertservice.grpc.client.InventoryClient;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.events.proto.Event;
 import org.slf4j.Logger;
@@ -84,6 +85,8 @@ public class AlertEventProcessor {
     private final MeterRegistry registry;
 
     private final TenantLookup tenantLookup;
+
+    private final InventoryClient inventoryClient;
     private Counter eventsWithoutAlertDataCounter;
 
 
@@ -100,7 +103,15 @@ public class AlertEventProcessor {
             LOG.debug("No alert returned from processing event with UEI: {} for tenant id: {}", e.getUei(), e.getTenantId());
             return Collections.emptyList();
         }
-        return dbAlerts.stream().map(alertMapper::toProto).toList();
+        return dbAlerts.stream().map(dbAlert -> {
+            var alert = Alert.newBuilder(alertMapper.toProto(dbAlert));
+            inventoryClient.getLocationById(e.getLocationId(), e.getTenantId()).ifPresent(location -> {
+                alert.setLocation(location.getLocation());
+            });
+            alert.addRuleName(dbAlert.getAlertCondition().getRule().getName());
+            alert.addPolicyName(dbAlert.getAlertCondition().getRule().getPolicy().getName());
+            return alert.build();
+        }).toList();
     }
 
 
@@ -191,7 +202,12 @@ public class AlertEventProcessor {
             }
 
             if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.DESCRIPTION_FIELD_NUMBER))) {
-                alert.setDescription(event.getDescription());
+                String desc = event.getDescription().toLowerCase().contains("exception") ?
+                    event.getDescription() : "Monitoring error.";
+                event.getParametersList().stream().filter(p -> "serviceName".equals(p.getName())).findFirst()
+                    .ifPresentOrElse(
+                        p -> alert.setDescription(p.getValue() + " " + desc),
+                        () -> alert.setDescription(desc));
             }
 
             alert.setType(alertData.type());

@@ -17,7 +17,7 @@
       <div class="column">
         <FeatherButton
           text
-          @click="closeModal"
+          @click="closeModalAndStartNew"
           data-test="addAnotherDiscoveryButton"
         >
           <template v-slot:icon>
@@ -58,6 +58,7 @@ import Nodes from '@featherds/icon/hardware/Appliances'
 import Synthetic from '@featherds/icon/action/Cycle'
 import Monitoring from '@featherds/icon/hardware/MinionProfiles'
 import { SuccessModalOptions } from './discovery.text'
+import { PropType } from 'vue'
 
 const Icons = markRaw({
   CheckCircle,
@@ -68,6 +69,15 @@ const Icons = markRaw({
 })
 
 const router = useRouter()
+
+const props = defineProps({
+  startNewDiscovery: { type: Function as PropType<() => void>, default: () => ({}) }
+})
+
+const closeModalAndStartNew = () => {
+  props.startNewDiscovery()
+  closeModal()
+}
 const { openModal, closeModal, isVisible } = useModal()
 
 const successName = ref()

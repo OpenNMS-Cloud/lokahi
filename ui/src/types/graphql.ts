@@ -350,6 +350,7 @@ export type Mutation = {
   deleteLocation?: Maybe<Scalars['Boolean']>;
   deleteMinion?: Maybe<Scalars['Boolean']>;
   deleteNode?: Maybe<Scalars['Boolean']>;
+  deletePassiveDiscovery?: Maybe<Scalars['Boolean']>;
   discoveryByNodeIds?: Maybe<Scalars['Boolean']>;
   escalateAlert?: Maybe<AlertResponse>;
   removeTagsFromNodes?: Maybe<Scalars['Boolean']>;
@@ -437,6 +438,12 @@ export type MutationDeleteMinionArgs = {
 
 /** Mutation root */
 export type MutationDeleteNodeArgs = {
+  id?: InputMaybe<Scalars['Long']>;
+};
+
+
+/** Mutation root */
+export type MutationDeletePassiveDiscoveryArgs = {
   id?: InputMaybe<Scalars['Long']>;
 };
 
@@ -1031,6 +1038,13 @@ export type UpsertPassiveDiscoveryMutationVariables = Exact<{
 
 export type UpsertPassiveDiscoveryMutation = { __typename?: 'Mutation', upsertPassiveDiscovery?: { __typename?: 'PassiveDiscovery', id?: any, locationId?: string, name?: string, snmpCommunities?: Array<string>, snmpPorts?: Array<number>, toggle: boolean } };
 
+export type DeletePassiveDiscoveryMutationVariables = Exact<{
+  id: Scalars['Long'];
+}>;
+
+
+export type DeletePassiveDiscoveryMutation = { __typename?: 'Mutation', deletePassiveDiscovery?: boolean };
+
 export type FindApplicationSeriesQueryVariables = Exact<{
   requestCriteria: RequestCriteriaInput;
 }>;
@@ -1442,6 +1456,7 @@ export const CreateOrUpdateActiveIcmpDiscoveryDocument = {"kind":"Document","def
 export const DeleteActiveIcmpDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteActiveIcmpDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteActiveIcmpDiscoveryMutation, DeleteActiveIcmpDiscoveryMutationVariables>;
 export const TogglePassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TogglePassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryToggleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"togglePassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"toggle"},"value":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<TogglePassiveDiscoveryMutation, TogglePassiveDiscoveryMutationVariables>;
 export const UpsertPassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertPassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryUpsertInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"upsertPassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"discovery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"locationId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<UpsertPassiveDiscoveryMutation, UpsertPassiveDiscoveryMutationVariables>;
+export const DeletePassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeletePassiveDiscoveryMutation, DeletePassiveDiscoveryMutationVariables>;
 export const FindApplicationSeriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplicationSeries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplicationSeries"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"direction"}}]}}]}}]} as unknown as DocumentNode<FindApplicationSeriesQuery, FindApplicationSeriesQueryVariables>;
 export const FindApplicationSummariesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplicationSummaries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplicationSummaries"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"bytesIn"}},{"kind":"Field","name":{"kind":"Name","value":"bytesOut"}}]}}]}}]} as unknown as DocumentNode<FindApplicationSummariesQuery, FindApplicationSummariesQueryVariables>;
 export const FindApplicationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}]}]}}]} as unknown as DocumentNode<FindApplicationsQuery, FindApplicationsQueryVariables>;

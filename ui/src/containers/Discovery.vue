@@ -75,16 +75,20 @@
           <template v-slot:footer>
             <FeatherButton @click="discoveryStore.closeDeleteModal">Cancel</FeatherButton>
             <FeatherButton
-              @click="() => discoveryStore.deleteDiscovery(selectedDiscovery?.id)"
+              @click="() => deleteDiscoveryAndClose()"
               primary
               >Yes</FeatherButton
             >
           </template>
         </FeatherDialog>
-        <div class="delete-button">
+        <div
+          class="delete-button"
+          v-if="selectedDiscovery?.id"
+        >
           <div>
             <FeatherIcon
               :icon="DeleteIcon"
+              class="pointer"
               @click="() => discoveryStore.openDeleteModal()"
             />
           </div>
@@ -133,7 +137,10 @@
       </div>
     </section>
   </div>
-  <DiscoverySuccessModal ref="successModal" />
+  <DiscoverySuccessModal
+    ref="successModal"
+    :startNewDiscovery="handleNewDiscovery"
+  />
   <DiscoveryInstructions
     :instructionsType="instructionsType"
     :isOpen="isInstructionVisible"
@@ -196,6 +203,12 @@ const search = (q: string) => {
     }))
   discoveriesResults.value = results as TDiscoveryAutocomplete[]
   searchLoading.value = false
+}
+
+const deleteDiscoveryAndClose = () => {
+  discoveryStore.deleteDiscovery(selectedDiscovery?.value?.id, discoverySelectedType.value)
+  selectedDiscovery.value = null
+  isDiscoveryEditingShown.value = false
 }
 
 const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
@@ -355,5 +368,8 @@ onMounted(() => discoveryQueries.getDiscoveries())
 }
 .discovery-dialog {
   min-width: 400px;
+}
+.pointer {
+  cursor: pointer;
 }
 </style>

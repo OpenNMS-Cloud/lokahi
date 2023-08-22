@@ -32,6 +32,7 @@ package org.opennms.horizon.server.service.grpc;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.BoolValue;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
@@ -273,6 +274,13 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).upsertDiscovery(passiveDiscovery);
+    }
+
+    public Boolean deletePassiveDiscovery(long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        var result = passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteDiscovery(Int64Value.of(id));
+        return result.getValue();
     }
 
     public PassiveDiscoveryListDTO listPassiveDiscoveries(String accessToken) {

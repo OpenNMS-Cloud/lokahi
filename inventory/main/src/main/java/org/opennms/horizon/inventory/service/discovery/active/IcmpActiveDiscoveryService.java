@@ -103,13 +103,13 @@ public class IcmpActiveDiscoveryService {
                 return false;
             }
             var icmpActiveDiscovery = discovery.get();
-            repository.deleteById(icmpActiveDiscovery.getId());
             tagService.removeTags(tenantId, TagRemoveListDTO.newBuilder()
                     .addEntityIds(TagEntityIdDTO.newBuilder()
                         .setActiveDiscoveryId(icmpActiveDiscovery.getId())
                         .build())
                     .addAllTagIds(icmpActiveDiscovery.getTags().stream().map(Tag::getId).map(Int64Value::of).toList())
                 .build());
+            repository.deleteById(icmpActiveDiscovery.getId());
             return true;
         } catch (Exception e) {
             log.error("Exception while deleting active discovery with id {}", id, e);

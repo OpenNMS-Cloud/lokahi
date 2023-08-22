@@ -6,7 +6,8 @@ import {
   UpsertPassiveDiscoveryDocument,
   TogglePassiveDiscoveryDocument,
   CreateOrUpdateActiveIcmpDiscoveryDocument,
-  DeleteActiveIcmpDiscoveryDocument
+  DeleteActiveIcmpDiscoveryDocument,
+  DeletePassiveDiscoveryDocument
 } from '@/types/graphql'
 
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
@@ -38,6 +39,12 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     error: deleteActiveIcmpDiscoveryError,
     isFetching: deleteActiveIcmpDiscoveryIsFetching
   } = useMutation(DeleteActiveIcmpDiscoveryDocument)
+ 
+  const {
+    execute: deletePassiveDiscovery,
+    error: deletePassiveDiscoveryError,
+    isFetching: deletePassiveDiscoveryIsFetching
+  } = useMutation(DeletePassiveDiscoveryDocument)
 
   // Toggle Passive Discoveries
   const { execute: togglePassiveDiscovery } = useMutation(TogglePassiveDiscoveryDocument)
@@ -51,6 +58,9 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     deleteActiveIcmpDiscovery,
     deleteActiveIcmpDiscoveryError,
     deleteActiveIcmpDiscoveryIsFetching,
+    deletePassiveDiscovery,
+    deletePassiveDiscoveryError,
+    deletePassiveDiscoveryIsFetching,
     isFetching: computed(() => isFetching),
     createDiscoveryConfig,
     activeDiscoveryError: computed(() => activeDiscoveryError),

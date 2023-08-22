@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { cloneDeep } from 'lodash'
 import { AzureActiveDiscovery, IcmpActiveDiscovery, MonitoringLocation, PassiveDiscovery, TagCreateInput } from '@/types/graphql'
-import { DiscoveryInput } from '@/types/discovery'
+import { useDiscoveryQueries } from '../Queries/discoveryQueries'
+import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 
 const defaultAzureForm = {
   name: '',
@@ -57,10 +58,16 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     openDeleteModal(){
       this.deleteModalOpen = true
     },
-    deleteDiscovery(id?: number) {
+    async deleteDiscovery(id?: number, type?: string) {
       if (id){
         const discoveryMutations = useDiscoveryMutations()
-        discoveryMutations.deleteActiveIcmpDiscovery({id})
+        if (type === DiscoveryType.ICMP){
+          await discoveryMutations.deleteActiveIcmpDiscovery({id})
+        } else if (type === DiscoveryType.SyslogSNMPTraps){
+          await discoveryMutations.deletePassiveDiscovery({id})
+        }
+        const discoveryQueries = useDiscoveryQueries()
+        await discoveryQueries.getDiscoveries()
         this.deleteModalOpen = false
       }
     },

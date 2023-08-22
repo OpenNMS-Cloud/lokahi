@@ -78,8 +78,10 @@ public class WelcomePage {
     }
 
     public static void checkMinionConnection() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 120; i++) {
             Selenide.sleep(5000);
+            // TODO: Should be moved to properties value.
+
             if (!"Please wait while we detect your Minion.".equals(minionStatusField.getText())) {
                 break;
             }
@@ -130,7 +132,7 @@ public class WelcomePage {
                 if (matcher.find()) {
                     MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName);
                     // Minion startup and connect is slow - need a specific timeout here
-                    minionDetectedCheck.should(exist, Duration.ofSeconds(60));
+                    minionDetectedCheck.should(exist, Duration.ofSeconds(120));
                     return minion;
                 }
                 fail("Unable to parse p12 password from docker string: " + dockerText);

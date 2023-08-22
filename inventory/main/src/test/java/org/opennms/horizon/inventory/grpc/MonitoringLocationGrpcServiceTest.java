@@ -17,6 +17,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
+import org.opennms.horizon.inventory.service.ConfigUpdateService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 
 import java.util.ArrayList;
@@ -43,6 +44,9 @@ class MonitoringLocationGrpcServiceTest {
 
     @Mock
     private TenantLookup tenantLookup;
+
+    @Mock
+    private ConfigUpdateService configUpdateService;
 
     @Mock
     private StreamObserver<MonitoringLocationList> listResponseObserver;
@@ -218,6 +222,7 @@ class MonitoringLocationGrpcServiceTest {
 
         grpcService.deleteLocation(request, deleteResponseObserver);
 
+        verify(configUpdateService).removeConfigsFromTaskSet(TENANT_ID, 1L);
         verify(deleteResponseObserver).onNext(deleteResponseCaptor.capture());
         verify(deleteResponseObserver).onCompleted();
         BoolValue response = deleteResponseCaptor.getValue();

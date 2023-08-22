@@ -1,5 +1,6 @@
 <template>
   <PrimaryModal
+    @close="closeModal()"
     :visible="isVisible"
     hideTitle
   >

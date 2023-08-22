@@ -97,6 +97,10 @@ public class KafkaConsumerRunner implements Runnable {
         return new LinkedList<>(this.values);
     }
 
+    public void clearValues() {
+        this.values.clear();
+    }
+
     public AtomicBoolean isShutdown() {
         return this.shutdown;
     }

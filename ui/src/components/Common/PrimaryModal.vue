@@ -3,8 +3,7 @@
     :hide-title="hideTitle"
     :modelValue="isVisible"
     :labels="labels"
-    @update:modelValue="$emit('close')"
-    @hidden="closeModal()"
+    @update:modelValue="(b) => updateModal(b)"
     class="primary-modal"
   >
     <div
@@ -53,8 +52,10 @@ watchEffect(() => {
     labels.title = props.title
   }
 })
-const closeModal = () => {
-  console.log('IN HERE!')
+const updateModal = (isVisible: boolean) => {
+  if (!isVisible) {
+    emit('close')
+  }
 }
 </script>
 

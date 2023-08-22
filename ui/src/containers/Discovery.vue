@@ -83,7 +83,7 @@
         </FeatherDialog>
         <div
           class="delete-button"
-          v-if="selectedDiscovery?.id"
+          v-if="selectedDiscovery?.id && discoverySelectedType !== DiscoveryType.Azure"
         >
           <div>
             <FeatherIcon
@@ -139,6 +139,12 @@
   </div>
   <DiscoverySuccessModal
     ref="successModal"
+    @close="
+      () => {
+        console.log('HIHHH')
+        selectedDiscovery = null
+      }
+    "
     :startNewDiscovery="handleNewDiscovery"
   />
   <DiscoveryInstructions

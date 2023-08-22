@@ -25,5 +25,5 @@ mutation CreateOrUpdateActiveIcmpDiscovery($request: IcmpActiveDiscoveryCreateIn
 }
 
 mutation DeleteActiveIcmpDiscovery($id: Long!) {
-  deleteActiveDiscovery(id: $id)
+  deleteIcmpActiveDiscovery(id: $id)
 }

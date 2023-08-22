@@ -1,6 +1,6 @@
 <template>
   <PrimaryModal
-    @close="closeModal()"
+    @close="closeModalAndEmit()"
     :visible="isVisible"
     hideTitle
   >
@@ -74,15 +74,21 @@ const router = useRouter()
 const props = defineProps({
   startNewDiscovery: { type: Function as PropType<() => void>, default: () => ({}) }
 })
+const emit = defineEmits(['close'])
 
 const closeModalAndStartNew = () => {
   props.startNewDiscovery()
+  emit('close')
   closeModal()
 }
 const { openModal, closeModal, isVisible } = useModal()
 
 const successName = ref()
 
+const closeModalAndEmit = () => {
+  closeModal()
+  emit('close')
+}
 const openSuccessModal = (name: string) => {
   successName.value = name
   openModal()

@@ -165,7 +165,7 @@ public class IcmpDiscoveryStepDefinitions {
 
     @Then("update Active Discovery and validate it's created active discovery with above details.")
     public void UpdateActiveDiscoveryAndValidateItUpdatedActiveDiscoveryWithAboveDetails() {
-        var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().upsertDiscovery(icmpDiscovery);
+        var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().upsertActiveDiscovery(icmpDiscovery);
         activeDiscoveryId = icmpDiscoveryDto.getId();
         Assertions.assertEquals(icmpDiscovery.getLocationId(), icmpDiscoveryDto.getLocationId());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
@@ -326,7 +326,7 @@ public class IcmpDiscoveryStepDefinitions {
 
     @Then("delete Active Discovery that is created in previous step")
     public void deleteActiveDiscoveryThatIsCreatedInPreviousStep() {
-        var deleted = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().deleteDiscovery(Int64Value.of(activeDiscoveryId));
+        var deleted = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().deleteActiveDiscovery(Int64Value.of(activeDiscoveryId));
         Assertions.assertTrue(deleted.getValue());
     }
 

@@ -141,7 +141,6 @@
     ref="successModal"
     @close="
       () => {
-        console.log('HIHHH')
         selectedDiscovery = null
       }
     "

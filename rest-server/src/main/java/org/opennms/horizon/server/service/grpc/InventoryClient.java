@@ -32,7 +32,6 @@ package org.opennms.horizon.server.service.grpc;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.BoolValue;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;

@@ -225,6 +225,7 @@ export type IcmpActiveDiscovery = {
 };
 
 export type IcmpActiveDiscoveryCreateInput = {
+  id?: InputMaybe<Scalars['Long']>;
   ipAddresses?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   locationId?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
@@ -345,9 +346,11 @@ export type Mutation = {
   createLocation?: Maybe<MonitoringLocation>;
   createMonitorPolicy?: Maybe<MonitorPolicy>;
   deleteAlert?: Maybe<DeleteAlertResponse>;
+  deleteIcmpActiveDiscovery?: Maybe<Scalars['Boolean']>;
   deleteLocation?: Maybe<Scalars['Boolean']>;
   deleteMinion?: Maybe<Scalars['Boolean']>;
   deleteNode?: Maybe<Scalars['Boolean']>;
+  deletePassiveDiscovery?: Maybe<Scalars['Boolean']>;
   discoveryByNodeIds?: Maybe<Scalars['Boolean']>;
   escalateAlert?: Maybe<AlertResponse>;
   removeTagsFromNodes?: Maybe<Scalars['Boolean']>;
@@ -356,6 +359,7 @@ export type Mutation = {
   togglePassiveDiscovery?: Maybe<PassiveDiscoveryToggle>;
   unacknowledgeAlert?: Maybe<AlertResponse>;
   updateLocation?: Maybe<MonitoringLocation>;
+  upsertIcmpActiveDiscovery?: Maybe<IcmpActiveDiscovery>;
   upsertPassiveDiscovery?: Maybe<PassiveDiscovery>;
 };
 
@@ -415,6 +419,12 @@ export type MutationDeleteAlertArgs = {
 
 
 /** Mutation root */
+export type MutationDeleteIcmpActiveDiscoveryArgs = {
+  id?: InputMaybe<Scalars['Long']>;
+};
+
+
+/** Mutation root */
 export type MutationDeleteLocationArgs = {
   id: Scalars['Long'];
 };
@@ -428,6 +438,12 @@ export type MutationDeleteMinionArgs = {
 
 /** Mutation root */
 export type MutationDeleteNodeArgs = {
+  id?: InputMaybe<Scalars['Long']>;
+};
+
+
+/** Mutation root */
+export type MutationDeletePassiveDiscoveryArgs = {
   id?: InputMaybe<Scalars['Long']>;
 };
 
@@ -477,6 +493,12 @@ export type MutationUnacknowledgeAlertArgs = {
 /** Mutation root */
 export type MutationUpdateLocationArgs = {
   location?: InputMaybe<MonitoringLocationUpdateInput>;
+};
+
+
+/** Mutation root */
+export type MutationUpsertIcmpActiveDiscoveryArgs = {
+  request?: InputMaybe<IcmpActiveDiscoveryCreateInput>;
 };
 
 
@@ -988,6 +1010,20 @@ export type CreateIcmpActiveDiscoveryMutationVariables = Exact<{
 
 export type CreateIcmpActiveDiscoveryMutation = { __typename?: 'Mutation', createIcmpActiveDiscovery?: { __typename?: 'IcmpActiveDiscovery', name?: string, ipAddresses?: Array<string>, locationId?: string, snmpConfig?: { __typename?: 'SNMPConfig', ports?: Array<number>, readCommunities?: Array<string> } } };
 
+export type CreateOrUpdateActiveIcmpDiscoveryMutationVariables = Exact<{
+  request: IcmpActiveDiscoveryCreateInput;
+}>;
+
+
+export type CreateOrUpdateActiveIcmpDiscoveryMutation = { __typename?: 'Mutation', upsertIcmpActiveDiscovery?: { __typename?: 'IcmpActiveDiscovery', id: any, name?: string, ipAddresses?: Array<string>, locationId?: string, snmpConfig?: { __typename?: 'SNMPConfig', ports?: Array<number>, readCommunities?: Array<string> } } };
+
+export type DeleteActiveIcmpDiscoveryMutationVariables = Exact<{
+  id: Scalars['Long'];
+}>;
+
+
+export type DeleteActiveIcmpDiscoveryMutation = { __typename?: 'Mutation', deleteIcmpActiveDiscovery?: boolean };
+
 export type TogglePassiveDiscoveryMutationVariables = Exact<{
   toggle: PassiveDiscoveryToggleInput;
 }>;
@@ -1001,6 +1037,13 @@ export type UpsertPassiveDiscoveryMutationVariables = Exact<{
 
 
 export type UpsertPassiveDiscoveryMutation = { __typename?: 'Mutation', upsertPassiveDiscovery?: { __typename?: 'PassiveDiscovery', id?: any, locationId?: string, name?: string, snmpCommunities?: Array<string>, snmpPorts?: Array<number>, toggle: boolean } };
+
+export type DeletePassiveDiscoveryMutationVariables = Exact<{
+  id: Scalars['Long'];
+}>;
+
+
+export type DeletePassiveDiscoveryMutation = { __typename?: 'Mutation', deletePassiveDiscovery?: boolean };
 
 export type FindApplicationSeriesQueryVariables = Exact<{
   requestCriteria: RequestCriteriaInput;
@@ -1409,8 +1452,11 @@ export const AlertsListDocument = {"kind":"Document", "definitions":[{"kind":"Op
 export const CountAlertsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CountAlerts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"severityFilters"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TimeRange"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"countAlerts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"severityFilters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"severityFilters"}}},{"kind":"Argument","name":{"kind":"Name","value":"timeRange"},"value":{"kind":"Variable","name":{"kind":"Name","value":"timeRange"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"error"}}]}}]}}]} as unknown as DocumentNode<CountAlertsQuery, CountAlertsQueryVariables>;
 export const CreateAzureActiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateAzureActiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"discovery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AzureActiveDiscoveryCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAzureActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"discovery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"discovery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTimeMsec"}},{"kind":"Field","name":{"kind":"Name","value":"locationId"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]}}]} as unknown as DocumentNode<CreateAzureActiveDiscoveryMutation, CreateAzureActiveDiscoveryMutationVariables>;
 export const CreateIcmpActiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIcmpActiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IcmpActiveDiscoveryCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIcmpActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddresses"}},{"kind":"Field","name":{"kind":"Name","value":"locationId"}},{"kind":"Field","name":{"kind":"Name","value":"snmpConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ports"}},{"kind":"Field","name":{"kind":"Name","value":"readCommunities"}}]}}]}}]}}]} as unknown as DocumentNode<CreateIcmpActiveDiscoveryMutation, CreateIcmpActiveDiscoveryMutationVariables>;
+export const CreateOrUpdateActiveIcmpDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOrUpdateActiveIcmpDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IcmpActiveDiscoveryCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"upsertIcmpActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddresses"}},{"kind":"Field","name":{"kind":"Name","value":"locationId"}},{"kind":"Field","name":{"kind":"Name","value":"snmpConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ports"}},{"kind":"Field","name":{"kind":"Name","value":"readCommunities"}}]}}]}}]}}]} as unknown as DocumentNode<CreateOrUpdateActiveIcmpDiscoveryMutation, CreateOrUpdateActiveIcmpDiscoveryMutationVariables>;
+export const DeleteActiveIcmpDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteActiveIcmpDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteIcmpActiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteActiveIcmpDiscoveryMutation, DeleteActiveIcmpDiscoveryMutationVariables>;
 export const TogglePassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TogglePassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryToggleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"togglePassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"toggle"},"value":{"kind":"Variable","name":{"kind":"Name","value":"toggle"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<TogglePassiveDiscoveryMutation, TogglePassiveDiscoveryMutationVariables>;
 export const UpsertPassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpsertPassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PassiveDiscoveryUpsertInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"upsertPassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"discovery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"passiveDiscovery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"locationId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"snmpCommunities"}},{"kind":"Field","name":{"kind":"Name","value":"snmpPorts"}},{"kind":"Field","name":{"kind":"Name","value":"toggle"}}]}}]}}]} as unknown as DocumentNode<UpsertPassiveDiscoveryMutation, UpsertPassiveDiscoveryMutationVariables>;
+export const DeletePassiveDiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePassiveDiscovery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Long"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePassiveDiscovery"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeletePassiveDiscoveryMutation, DeletePassiveDiscoveryMutationVariables>;
 export const FindApplicationSeriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplicationSeries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplicationSeries"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"direction"}}]}}]}}]} as unknown as DocumentNode<FindApplicationSeriesQuery, FindApplicationSeriesQueryVariables>;
 export const FindApplicationSummariesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplicationSummaries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplicationSummaries"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"bytesIn"}},{"kind":"Field","name":{"kind":"Name","value":"bytesOut"}}]}}]}}]} as unknown as DocumentNode<FindApplicationSummariesQuery, FindApplicationSummariesQueryVariables>;
 export const FindApplicationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"findApplications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RequestCriteriaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findApplications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"requestCriteria"},"value":{"kind":"Variable","name":{"kind":"Name","value":"requestCriteria"}}}]}]}}]} as unknown as DocumentNode<FindApplicationsQuery, FindApplicationsQueryVariables>;

@@ -64,6 +64,35 @@
         />
       </div>
       <div>
+        <FeatherDialog
+          :labels="{ title: 'Delete Discovery', close: 'Close' }"
+          :modelValue="discoveryStore.deleteModalOpen"
+        >
+          <div class="discovery-dialog">
+            Are you sure you want to delete the discovery named {{ selectedDiscovery?.name }}?
+          </div>
+
+          <template v-slot:footer>
+            <FeatherButton @click="discoveryStore.closeDeleteModal">Cancel</FeatherButton>
+            <FeatherButton
+              @click="() => deleteDiscoveryAndClose()"
+              primary
+              >Yes</FeatherButton
+            >
+          </template>
+        </FeatherDialog>
+        <div
+          class="delete-button"
+          v-if="selectedDiscovery?.id && discoverySelectedType !== DiscoveryType.Azure"
+        >
+          <div>
+            <FeatherIcon
+              :icon="DeleteIcon"
+              class="pointer"
+              @click="() => discoveryStore.openDeleteModal()"
+            />
+          </div>
+        </div>
         <div v-if="discoverySelectedType === DiscoveryType.ICMP">
           <DiscoverySnmpForm
             :successCallback="
@@ -108,7 +137,15 @@
       </div>
     </section>
   </div>
-  <DiscoverySuccessModal ref="successModal" />
+  <DiscoverySuccessModal
+    ref="successModal"
+    @close="
+      () => {
+        selectedDiscovery = null
+      }
+    "
+    :startNewDiscovery="handleNewDiscovery"
+  />
   <DiscoveryInstructions
     :instructionsType="instructionsType"
     :isOpen="isInstructionVisible"
@@ -128,6 +165,8 @@ import { IAutocompleteItemType } from '@featherds/autocomplete'
 import { AzureActiveDiscovery, IcmpActiveDiscovery, PassiveDiscovery } from '@/types/graphql'
 import DiscoveryTypeSelector from '@/components/Discovery/DiscoveryTypeSelector.vue'
 import { cloneDeep } from 'lodash'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import DeleteIcon from '@featherds/icon/action/Delete'
 const discoveryQueries = useDiscoveryQueries()
 const discoveryMutations = useDiscoveryMutations()
 
@@ -148,6 +187,7 @@ const searchLoading = ref(false)
 const discoverySearchValue = ref(undefined)
 const isInstructionVisible = ref(false)
 const instructionsType = ref(InstructionsType.Active)
+const discoveryStore = useDiscoveryStore()
 
 const handleNewDiscovery = () => {
   isDiscoveryEditingShown.value = true
@@ -168,6 +208,12 @@ const search = (q: string) => {
     }))
   discoveriesResults.value = results as TDiscoveryAutocomplete[]
   searchLoading.value = false
+}
+
+const deleteDiscoveryAndClose = () => {
+  discoveryStore.deleteDiscovery(selectedDiscovery?.value?.id, discoverySelectedType.value)
+  selectedDiscovery.value = null
+  isDiscoveryEditingShown.value = false
 }
 
 const showDiscovery = (selected: IAutocompleteItemType | IAutocompleteItemType[] | undefined) => {
@@ -314,5 +360,21 @@ onMounted(() => discoveryQueries.getDiscoveries())
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.delete-button {
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  font-size: 24px;
+  > div {
+    position: absolute;
+  }
+}
+.discovery-dialog {
+  min-width: 400px;
+}
+.pointer {
+  cursor: pointer;
 }
 </style>

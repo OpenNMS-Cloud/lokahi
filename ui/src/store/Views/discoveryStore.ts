@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { cloneDeep } from 'lodash'
-import { MonitoringLocation, TagCreateInput } from '@/types/graphql'
+import { AzureActiveDiscovery, IcmpActiveDiscovery, MonitoringLocation, PassiveDiscovery, TagCreateInput } from '@/types/graphql'
+import { useDiscoveryQueries } from '../Queries/discoveryQueries'
+import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 
 const defaultAzureForm = {
   name: '',
@@ -16,6 +18,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     selectedLocation: undefined as undefined | MonitoringLocation,
     selectedTags: [] as TagCreateInput[],
     ipAddresses: <string[]>[],
+    deleteModalOpen: false,
     ipRange: {
       cidr: '',
       fromIp: '',
@@ -45,6 +48,31 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     clearAzureForm() {
       this.azure = cloneDeep(defaultAzureForm)
+    },
+    upsertActiveDiscovery(discovery: PassiveDiscovery | AzureActiveDiscovery | IcmpActiveDiscovery | null){
+      if (discovery){
+        const discoveryMutations = useDiscoveryMutations()
+        discoveryMutations.createOrUpdateDiscovery({request:discovery})
+      }
+    },
+    openDeleteModal(){
+      this.deleteModalOpen = true
+    },
+    async deleteDiscovery(id?: number, type?: string) {
+      if (id){
+        const discoveryMutations = useDiscoveryMutations()
+        if (type === DiscoveryType.ICMP){
+          await discoveryMutations.deleteActiveIcmpDiscovery({id})
+        } else if (type === DiscoveryType.SyslogSNMPTraps){
+          await discoveryMutations.deletePassiveDiscovery({id})
+        }
+        const discoveryQueries = useDiscoveryQueries()
+        await discoveryQueries.getDiscoveries()
+        this.deleteModalOpen = false
+      }
+    },
+    closeDeleteModal(){
+      this.deleteModalOpen = false
     }
   }
 })

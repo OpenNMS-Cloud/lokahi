@@ -16,13 +16,11 @@
       <div
         v-for="item in list"
         :key="item.id"
-        class="discovery-name"
+        class="discovery-name pointer"
         :class="{ selected: selectedId == item.id }"
+        @click="$emit('selectDiscovery', item)"
       >
-        <div
-          @click="$emit('selectDiscovery', item)"
-          class="name pointer"
-        >
+        <div class="name">
           {{ item.name }}
         </div>
         <FeatherTooltip

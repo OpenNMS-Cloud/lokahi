@@ -1,6 +1,6 @@
 <template>
-    <div class="wrapper" ref="wrapper">
-        <div @click="wrapperClicked" tabIndex="0" for="atomic-input" class="atomic-input-wrapper">
+    <div :class="['wrapper',disabledClass]" ref="wrapper">
+        <div @click="wrapperClickCheck()" tabIndex="0" for="atomic-input" class="atomic-input-wrapper">
             <div class="pre">
                 <FeatherIcon :icon="Search" />
             </div>
@@ -35,7 +35,6 @@
 import Search from "@featherds/icon/action/Search"
 import KeyboardArrowDown from "@featherds/icon/navigation/ExpandMore"
 import { PropType } from 'vue'
-
 const wrapper = ref()
 const listRef = ref()
 const props = defineProps({
@@ -53,6 +52,7 @@ const props = defineProps({
     wrapperClicked: { type: Function as PropType<() => void>, default: () => { } },
 })
 
+const disabledClass = computed(() => props.disabled ? "disabled" :"")
 const keyDownCheck = (key: KeyboardEvent) => {
     if (key.key === 'ArrowDown') {
         listRef.value.querySelector('.list-item').focus()
@@ -70,7 +70,11 @@ const itemKey = (keypress: KeyboardEvent, listItem: unknown, index: number) => {
         ((keypress.target as HTMLInputElement)?.previousElementSibling as HTMLElement)?.focus();
     }
 }
-
+const wrapperClickCheck = () => {
+    if (!props.disabled){
+        props.wrapperClicked()
+    }
+}
 const shortenedList = computed(() => props.results?.length > 10 ? props.results?.slice(0, 10) : props.results)
 
 </script>
@@ -121,7 +125,6 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
 }
 
 .list-item:focus {
-
     outline: 2px solid var(--feather-primary);
 }
 
@@ -168,7 +171,18 @@ const shortenedList = computed(() => props.results?.length > 10 ? props.results?
     }
 }
 
+.wrapper.disabled {
+    .atomic-input-wrapper {
+        border-color:var(--feather-border-on-surface);
+    }
+    :focus-within {
+        outline:none;
+    }
+    .feather-icon {
 
+        color:var(--feather-disabled-text-on-surface);
+    }
+}
 
 .atomic-input-wrapper {
     display: flex;

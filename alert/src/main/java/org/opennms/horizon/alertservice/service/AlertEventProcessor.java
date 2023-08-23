@@ -105,9 +105,12 @@ public class AlertEventProcessor {
         }
         return dbAlerts.stream().map(dbAlert -> {
             var alert = Alert.newBuilder(alertMapper.toProto(dbAlert));
-            inventoryClient.getLocationById(e.getLocationId(), e.getTenantId()).ifPresent(location -> {
-                alert.setLocation(location.getLocation());
-            });
+            inventoryClient.getLocationById(e.getLocationId(), e.getTenantId()).ifPresent(location ->
+                alert.setLocation(location.getLocation())
+            );
+            inventoryClient.getNodeById(e.getNodeId(), e.getTenantId()).ifPresent(node ->
+                alert.setNodeName(node.getNodeLabel())
+            );
             alert.addRuleName(dbAlert.getAlertCondition().getRule().getName());
             alert.addPolicyName(dbAlert.getAlertCondition().getRule().getPolicy().getName());
             return alert.build();

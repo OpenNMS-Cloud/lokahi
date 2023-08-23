@@ -49,13 +49,16 @@ class PagerDutyEventFactoryTest {
     @Mock
     PagerDutyDao pagerDutyDao;
 
+
+    @Mock
+    LokahiUrlUtil lokahiUrlUtil;
+
     @InjectMocks
     PagerDutyEventFactory eventFactory;
 
     @BeforeEach
     void setUp() throws Exception {
         eventFactory.client = "OpenNMS";
-        eventFactory.clientURL = "https://opennms.com";
 
         PagerDutyConfigDTO configDTO = PagerDutyConfigDTO.newBuilder()
             .setIntegrationKey("api-key")
@@ -91,7 +94,7 @@ class PagerDutyEventFactoryTest {
 
         assertThat(eventFactory.createEvent(alert))
             .returns(
-                "Event: uei.opennms.org/generic/traps/SNMP_Cold_Start",
+                "Node Name: , Description: , Started: 1970-01-01T00:00:00Z, Policy Name: [], Rule Name: []",
                 from(pagerDutyEventDTO -> pagerDutyEventDTO.getPayload().getSummary())
             );
     }

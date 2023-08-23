@@ -27,11 +27,15 @@
             <h2 style="margin:0;font-family:'Inter', Helvetica, Arial, sans-serif;">
                 ${alert.getLogMessage()}
             </h2>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Node name: ${alert.getNodeName()}</a></p>
             <p style="font-family: 'Open Sans', Georgia, sans-serif;">Location: ${alert.getLocation()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Description: ${alert.getDescription()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Severity: ${alert.getSeverity()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Started: ${firstEventTime}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">last Update: ${lastUpdateTime}</p>
             <p style="font-family: 'Open Sans', Georgia, sans-serif;">PolicyName: ${alert.getPolicyNameList()}</p>
             <p style="font-family: 'Open Sans', Georgia, sans-serif;">RuleName: ${alert.getRuleNameList()}</p>
-            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Severity: ${alert.getSeverity()}</p>
-            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Description: ${alert.getDescription()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Sign in <a href="${url}">${url}</a> to view more details about the alert.</p>
         </td>
     </tr>
 </table>

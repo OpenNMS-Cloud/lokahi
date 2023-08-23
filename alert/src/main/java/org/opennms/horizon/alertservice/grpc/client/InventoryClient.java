@@ -35,6 +35,8 @@ import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.util.Optional;
@@ -46,8 +48,11 @@ public class InventoryClient {
     private final long deadline;
     private MonitoringLocationServiceGrpc.MonitoringLocationServiceBlockingStub locationStub;
 
+    private NodeServiceGrpc.NodeServiceBlockingStub nodeStub;
+
     protected void initialStubs() {
         locationStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
+        nodeStub = NodeServiceGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() {
@@ -78,5 +83,13 @@ public class InventoryClient {
         return Optional.ofNullable(locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .getLocationById(Int64Value.of(locationId)));
+    }
+
+    public Optional<NodeDTO> getNodeById(long nodeId, String tenantId) {
+        Metadata metadata = getMetadata(true, tenantId);
+
+        return Optional.ofNullable(nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .getNodeById(Int64Value.of(nodeId)));
     }
 }

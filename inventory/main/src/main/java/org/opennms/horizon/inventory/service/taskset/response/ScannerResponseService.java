@@ -139,7 +139,7 @@ public class ScannerResponseService {
         return ScanType.UNRECOGNIZED;
     }
 
-    private void processDiscoveryScanResponse(String tenantId, Long locationId, DiscoveryScanResult discoveryScanResult) {
+    public void processDiscoveryScanResponse(String tenantId, Long locationId, DiscoveryScanResult discoveryScanResult) {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
             // Don't need to create new node if this ip address is already part of inventory.
             var discoveryOptional =
@@ -159,15 +159,27 @@ public class ScannerResponseService {
                     .addAllTags(tags)
                     .build();
                 try {
-                    Node node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
-                    nodeService.sendNewNodeTaskSetAsync(node, locationId, icmpDiscovery);
-                } catch (EntityExistException e) {
-                    log.error("Error while adding new device for tenantId={}; locationId={} with IP {}", tenantId, locationId, pingResponse.getIpAddress());
-                } catch (LocationNotFoundException e) {
-                    log.error("Location not found while adding new device for tenantId={}; locationId={} with IP {}", tenantId, locationId, pingResponse.getIpAddress());
+                    Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
+                        .findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(createDTO.getManagementIp()),
+                            Long.parseLong(createDTO.getLocationId()), tenantId, ScanType.DISCOVERY_SCAN);
+                    if (ipInterfaceOpt.isPresent()) {
+                        var ipInterface = ipInterfaceOpt.get();
+                        var nodeDTO = nodeService.getByIdAndTenantId(ipInterface.getNodeId(), ipInterface.getTenantId()).orElseThrow();
+                        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
+                            .addEntityIds(TagEntityIdDTO.newBuilder()
+                                .setNodeId(nodeDTO.getId()))
+                            .addAllTags(createDTO.getTagsList())
+                            .build());
+                        nodeService.sendNewNodeTaskSetAsync(nodeDTO, locationId, icmpDiscovery);
+                    } else {
+                        var node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+                        nodeService.sendNewNodeTaskSetAsync(node, locationId, icmpDiscovery);
+                    }
+                } catch (LocationNotFoundException | EntityExistException e) {
+                    log.error("Exception while adding new device for tenantId={}; locationId={} with IP {}",
+                        tenantId, locationId, pingResponse.getIpAddress(), e);
                 }
             }
-
         }
     }
 

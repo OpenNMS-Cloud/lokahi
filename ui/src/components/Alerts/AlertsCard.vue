@@ -75,8 +75,8 @@
           <div>Location: {{ alert.location }}</div>
           <div>Description: {{ alert.description }}</div>
           <div>Started: {{ fnsFormat(alert.firstEventTimeMs, 'HH:mm:ssxxx') }}</div>
-          <div>RuleName: {{ alert.ruleNameList.join(', ') }}</div>
-          <div>PolicyName: {{ alert.policyNameList.join(', ') }}</div>
+          <div>RuleName: {{ alert.ruleNameList?.join(', ') }}</div>
+          <div>PolicyName: {{ alert.policyNameList?.join(', ') }}</div>
         </div>
       </slot>
     </FeatherExpansionPanel>

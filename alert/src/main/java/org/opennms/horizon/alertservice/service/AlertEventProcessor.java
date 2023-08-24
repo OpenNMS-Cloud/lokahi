@@ -42,6 +42,7 @@ import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
@@ -87,6 +88,8 @@ public class AlertEventProcessor {
     private final TenantLookup tenantLookup;
 
     private final InventoryClient inventoryClient;
+
+    private final NodeRepository nodeRepository;
     private Counter eventsWithoutAlertDataCounter;
 
 
@@ -108,7 +111,7 @@ public class AlertEventProcessor {
             inventoryClient.getLocationById(e.getLocationId(), e.getTenantId()).ifPresent(location ->
                 alert.setLocation(location.getLocation())
             );
-            inventoryClient.getNodeById(e.getNodeId(), e.getTenantId()).ifPresent(node ->
+            nodeRepository.findByIdAndTenantId(e.getNodeId(), e.getTenantId()).ifPresent(node ->
                 alert.setNodeName(node.getNodeLabel())
             );
             alert.addRuleName(dbAlert.getAlertCondition().getRule().getName());

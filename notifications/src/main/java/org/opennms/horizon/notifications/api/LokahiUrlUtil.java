@@ -34,10 +34,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LokahiUrlUtil {
-    @Value("${lokahi.base.url}")
+    @Value("${lokahi.baseUrl.url}")
     private String baseUrl;
 
-    @Value("${lokahi.base.url.appendTenantId}")
+    @Value("${lokahi.baseUrl.appendTenantId}")
     private boolean urlAppendTenantId;
 
     public String getAlertstUrl(Alert alert){

@@ -45,11 +45,15 @@ import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Alert;
+import org.opennms.horizon.alertservice.db.entity.AlertCondition;
+import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Node;
+import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.GrpcTenantLookupImpl;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
+import org.opennms.horizon.alertservice.grpc.client.InventoryClient;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,7 +66,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
+class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private AlertServiceGrpc.AlertServiceBlockingStub stub;
     private AlertService mockAlertService;
     private Alert alert1, alert2;
@@ -73,20 +77,37 @@ public class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private NodeRepository mockNodeRepository;
     protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
 
+    private InventoryClient mockInventoryClient;
+
+
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
         mockAlertService = mock(AlertService.class);
         mockAlertRepository = mock(AlertRepository.class);
         mockNodeRepository = mock(NodeRepository.class);
         mockAlertMapper = mock(AlertMapper.class);
-        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockNodeRepository, mockAlertService, tenantLookup);
+        mockInventoryClient = mock(InventoryClient.class);
+        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockNodeRepository, mockAlertService, tenantLookup, mockInventoryClient);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
         stub = AlertServiceGrpc.newBlockingStub(channel);
-        alert1 = new Alert();
-        alert2 = new Alert();
+        alert1 = generateAlert("rule1", "policy1");
+        alert2 = generateAlert("rule2", "policy2");
         alertProto1 = org.opennms.horizon.alerts.proto.Alert.newBuilder().build();
         alertProto2 = org.opennms.horizon.alerts.proto.Alert.newBuilder().build();
+    }
+
+    private Alert generateAlert(String ruleName, String policyName){
+        var alert = new Alert();
+        var alertCondition = new AlertCondition();
+        var rule = new PolicyRule();
+        var policy = new MonitorPolicy();
+        alert.setAlertCondition(alertCondition);
+        alertCondition.setRule(rule);
+        rule.setName(ruleName);
+        policy.setName(policyName);
+        rule.setPolicy(policy);
+        return alert;
     }
 
     @AfterEach

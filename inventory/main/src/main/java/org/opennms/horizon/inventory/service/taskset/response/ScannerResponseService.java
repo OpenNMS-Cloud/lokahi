@@ -76,7 +76,6 @@ import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -103,7 +102,6 @@ public class ScannerResponseService {
     private final MonitoredServiceTypeService monitoredServiceTypeService;
     private final MonitoredServiceService monitoredServiceService;
 
-    @Transactional
     public void accept(String tenantId, Long locationId, ScannerResponse response) throws InvalidProtocolBufferException {
         Any result = response.getResult();
 
@@ -141,7 +139,6 @@ public class ScannerResponseService {
 
     public void processDiscoveryScanResponse(String tenantId, Long locationId, DiscoveryScanResult discoveryScanResult) {
         for (PingResponse pingResponse : discoveryScanResult.getPingResponseList()) {
-            // Don't need to create new node if this ip address is already part of inventory.
             var discoveryOptional =
                 icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
             if (discoveryOptional.isPresent()) {
@@ -159,23 +156,22 @@ public class ScannerResponseService {
                     .addAllTags(tags)
                     .build();
                 try {
-                    Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-                        .findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(createDTO.getManagementIp()),
-                            Long.parseLong(createDTO.getLocationId()), tenantId, ScanType.DISCOVERY_SCAN);
-                    if (ipInterfaceOpt.isPresent()) {
-                        var ipInterface = ipInterfaceOpt.get();
-                        var nodeDTO = nodeService.getByIdAndTenantId(ipInterface.getNodeId(), ipInterface.getTenantId()).orElseThrow();
+                    var optionalNode = nodeService.getNode(pingResponse.getIpAddress(), locationId, tenantId);
+                    if (optionalNode.isPresent()) {
+                        var nodeDTO = optionalNode.get();
                         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
                             .addEntityIds(TagEntityIdDTO.newBuilder()
                                 .setNodeId(nodeDTO.getId()))
                             .addAllTags(createDTO.getTagsList())
                             .build());
+                        nodeService.updateNodeMonitoredState(nodeDTO.getId(), nodeDTO.getTenantId());
                         nodeService.sendNewNodeTaskSetAsync(nodeDTO, locationId, icmpDiscovery);
                     } else {
                         var node = nodeService.createNode(createDTO, ScanType.DISCOVERY_SCAN, tenantId);
+                        nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
                         nodeService.sendNewNodeTaskSetAsync(node, locationId, icmpDiscovery);
                     }
-                } catch (LocationNotFoundException | EntityExistException e) {
+                } catch (Exception e) {
                     log.error("Exception while adding new device for tenantId={}; locationId={} with IP {}",
                         tenantId, locationId, pingResponse.getIpAddress(), e);
                 }

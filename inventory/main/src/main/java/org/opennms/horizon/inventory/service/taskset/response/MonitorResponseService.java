@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.inventory.service.taskset.response;
 
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.proto.Event;
@@ -42,7 +41,8 @@ import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -56,7 +56,6 @@ public class MonitorResponseService {
     private final InternalEventProducer eventProducer;
 
 
-    @Transactional
     public void updateMonitoredState(String tenantId, MonitorResponse monitorResponse) {
 
         if (monitorResponse.getMonitorType().equals(MonitorType.ECHO)) {

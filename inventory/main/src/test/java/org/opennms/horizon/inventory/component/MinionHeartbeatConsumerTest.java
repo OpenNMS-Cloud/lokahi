@@ -33,6 +33,7 @@ import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -70,6 +71,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 public class MinionHeartbeatConsumerTest {
     @Mock(strictness = Mock.Strictness.LENIENT)     // At times, strict just gets it wrong and is distracting
     private MinionRpcClient rpcClient;

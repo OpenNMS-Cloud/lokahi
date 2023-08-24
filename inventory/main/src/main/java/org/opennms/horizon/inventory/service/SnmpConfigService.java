@@ -36,7 +36,6 @@ import org.opennms.horizon.inventory.repository.SnmpConfigRepository;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.util.Optional;
@@ -50,7 +49,6 @@ public class SnmpConfigService {
 
     private final SnmpConfigMapper snmpConfigMapper;
 
-    @Transactional
     public void saveOrUpdateSnmpConfig(String tenantId, Long locationId, String ipAddress, SnmpConfiguration snmpConfiguration) {
         var snmpConfig = new SnmpConfig();
         var inetAddress = InetAddressUtils.getInetAddress(ipAddress);

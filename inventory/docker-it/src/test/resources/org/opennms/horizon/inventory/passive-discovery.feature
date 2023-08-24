@@ -1,3 +1,4 @@
+@passive-discovery
 Feature: Passive Discovery
 
   Background: Common Test Setup

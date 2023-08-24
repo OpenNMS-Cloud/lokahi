@@ -28,16 +28,14 @@
 
 package org.opennms.horizon.inventory.component;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-
-import javax.annotation.PreDestroy;
-
+import com.google.common.base.Strings;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
@@ -46,7 +44,6 @@ import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.opennms.horizon.inventory.util.Clock;
@@ -61,14 +58,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PreDestroy;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Component
@@ -123,9 +119,7 @@ public class MinionHeartbeatConsumer {
 
             Long lastRun = rpcMaps.get(key);
 
-            // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
-            // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
-            long currentTimeMs = clock.getCurrentTimeMs();
+            long currentTimeMs = System.currentTimeMillis();
             if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
                 rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
                 rpcMaps.put(key, currentTimeMs);

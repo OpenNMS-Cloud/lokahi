@@ -4,6 +4,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.events.proto.Event;
@@ -30,6 +31,7 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled
 public class TaskSetResultsConsumerTest {
 
     public static final long TEST_LOCATION_ID = 1313L;

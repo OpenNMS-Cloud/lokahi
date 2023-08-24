@@ -124,6 +124,10 @@ public class PassiveDiscoveryService {
         return discoveries.stream().map(mapper::modelToDtoCustom).toList();
     }
 
+    public PassiveDiscoveryDTO getPassiveDiscovery(long locationId, String tenantId) {
+       return repository.findByTenantIdAndLocationId(tenantId, locationId).map(mapper::modelToDto).orElse(null);
+    }
+
     @Transactional
     public PassiveDiscoveryDTO toggleDiscovery(String tenantId, PassiveDiscoveryToggleDTO request) {
         Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndId(tenantId, request.getId());
@@ -192,7 +196,7 @@ public class PassiveDiscoveryService {
 
             if (!CollectionUtils.isEmpty(detectedNodes)) {
                 for (Node node : detectedNodes) {
-                    sendTaskSetsToMinion(node, discovery);
+                    sendTaskSetsToMinion(node, mapper.modelToDto(discovery));
                 }
             }
         } else {
@@ -200,7 +204,7 @@ public class PassiveDiscoveryService {
         }
     }
 
-    public void sendNodeScan(Node node, PassiveDiscovery passiveDiscovery) {
+    public void sendNodeScan(Node node, PassiveDiscoveryDTO passiveDiscovery) {
         if (node.getMonitoredState() != MonitoredState.DETECTED) {
             log.info("Node is not in monitored state DETECTED, so not sending node scan for node {}", node.getNodeLabel());
             return;
@@ -209,7 +213,7 @@ public class PassiveDiscoveryService {
         String location = monitoringLocation.getLocation();
 
         if (passiveDiscovery != null) {
-            if (passiveDiscovery.isToggle()) {
+            if (passiveDiscovery.getToggle()) {
                 sendTaskSetsToMinion(node, passiveDiscovery);
             } else {
                 log.info("Passive discovery is toggled off for location {}", location);
@@ -219,20 +223,20 @@ public class PassiveDiscoveryService {
         }
     }
 
-    private void sendTaskSetsToMinion(Node node, PassiveDiscovery discovery) {
+    private void sendTaskSetsToMinion(Node node, PassiveDiscoveryDTO discovery) {
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
 
-        discovery.getSnmpCommunities().forEach(readCommunity -> {
+        discovery.getCommunitiesList().forEach(readCommunity -> {
             var builder = SnmpConfiguration.newBuilder()
                 .setReadCommunity(readCommunity);
             snmpConfigs.add(builder.build());
         });
-        discovery.getSnmpPorts().forEach(port -> {
+        discovery.getPortsList().forEach(port -> {
             var builder = SnmpConfiguration.newBuilder()
                 .setPort(port);
             snmpConfigs.add(builder.build());
         });
-        scannerTaskSetService.sendNodeScannerTask(node, discovery.getLocationId(), snmpConfigs);
+        scannerTaskSetService.sendNodeScannerTask(node, Long.parseLong(discovery.getLocationId()), snmpConfigs);
     }
 
     @Transactional

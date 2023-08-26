@@ -32,6 +32,7 @@ import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.opennms.horizon.systemtests.steps.LocationSteps;
 import org.opennms.horizon.systemtests.steps.MinionSteps;
+import org.opennms.horizon.systemtests.utils.FileDownloadManager;
 import org.opennms.horizon.systemtests.utils.MinionStarter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -117,13 +118,13 @@ public class WelcomePage {
     }
 
     public static void waitOnWalkthroughOrMain() {
-        $(By.xpath("//button[@data-test='welcome-slide-one-setup-button']|//div[@class='app-aside']")).should(exist);
+        $(By.xpath("//button[@data-test='welcome-slide-one-setup-button']|//div[@class='app-aside']")).should(exist, Duration.ofSeconds(3));
     }
 
     public static MinionContainer addMinionUsingWalkthrough(String minionName) {
         try {
-            File bundle = downloadBundleBtn.shouldBe(enabled).download(60000);
-            if (bundle.exists()) {
+            File bundle = FileDownloadManager.downloadCertificate(downloadBundleBtn);
+            if (bundle != null) {
                 // Parse out the pwd for the bundle
                 String dockerText = dockerCmd.shouldBe(visible).getAttribute("value"); // getText doesn't work for textarea
                 assertNotNull("Should have docker start text with key", dockerText);

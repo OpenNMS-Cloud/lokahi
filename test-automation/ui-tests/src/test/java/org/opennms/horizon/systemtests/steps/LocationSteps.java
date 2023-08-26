@@ -34,6 +34,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.LeftPanelPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
+import org.opennms.horizon.systemtests.utils.FileDownloadManager;
 import org.openqa.selenium.By;
 import testcontainers.MinionContainer;
 
@@ -76,9 +77,8 @@ public class LocationSteps {
     public static MinionContainer addMinionFromLocationPane(String minionName) {
         File bundle = null;
         try {
-
-            bundle = downloadCertButton.should(exist).shouldBe(enabled).download(60000);
-            if (bundle.exists() && bundle.canRead() && bundle.length() > 0) {
+            bundle = FileDownloadManager.downloadCertificate(downloadCertButton);
+            if (bundle != null) {
                 // Parse out the pwd for the bundle
                 String dockerText = dockerCmd.shouldBe(visible).getText();
                 Pattern pattern = Pattern.compile("GRPC_CLIENT_KEYSTORE_PASSWORD='([a-z,0-9,-]*)'");

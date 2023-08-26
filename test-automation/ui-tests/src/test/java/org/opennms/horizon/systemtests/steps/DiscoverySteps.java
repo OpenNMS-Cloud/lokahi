@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.systemtests.steps;
 
-import com.codeborne.selenide.SelenideElement;
 import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.dockerjava.api.model.NetworkSettings;
 import io.cucumber.java.en.Given;
@@ -36,7 +35,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.opennms.horizon.systemtests.pages.DiscoveryPage;
 import org.opennms.horizon.systemtests.pages.InventoryPage;
-import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -57,7 +55,7 @@ import static org.junit.Assert.*;
 public class DiscoverySteps {
     private static final Logger LOG = LoggerFactory.getLogger(DiscoverySteps.class);
 
-    private static final String SNMP_NODE_IMAGE_NAME = "polinux/snmpd:alpine";
+    private static final String SNMP_NODE_IMAGE_NAME = "opennms/lokahi-snmpd-udpgen:latest";
 
     private static Map<String, GenericContainer> nodes = new HashMap<>();
 
@@ -89,7 +87,7 @@ public class DiscoverySteps {
             node.withCopyFileToContainer(MountableFile.forClasspathResource(snmpConfigFile), "/etc/snmp/snmpd.conf");
         }
 
-        node.waitingFor(Wait.forLogMessage(".*SNMPD Daemon started.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
+        node.waitingFor(Wait.forLogMessage(".*NET-SNMP version.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
         node.start();
         nodes.put(nodeName, node);
     }

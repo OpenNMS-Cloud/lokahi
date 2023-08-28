@@ -98,7 +98,8 @@ const icons = markRaw({
 .locations-list-wrapper {
   padding: var(variables.$spacing-m) var(variables.$spacing-s);
   background: var(variables.$surface);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
+  border: 1px solid var(variables.$border-on-surface);
 
   .header {
     display: flex;

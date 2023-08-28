@@ -174,7 +174,6 @@ const selectDetectionMethod = async (method: DetectionMethod) => {
 </script>
 
 <style scoped lang="scss">
-@use '@featherds/styles/mixins/elevation';
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
@@ -187,13 +186,13 @@ const selectDetectionMethod = async (method: DetectionMethod) => {
   gap: var(variables.$spacing-l);
 
   .rule-form {
-    @include elevation.elevation(2);
     display: flex;
     flex: 1;
     flex-direction: column;
     background: var(variables.$surface);
     padding: var(variables.$spacing-l);
-    border-radius: vars.$border-radius-s;
+    border-radius: vars.$border-radius-surface;
+    border: 1px solid var(variables.$border-on-surface);
     overflow: hidden;
 
     .form-title {

@@ -75,7 +75,7 @@ defineProps<{
 .card-my-discoveries {
   background-color: var(variables.$surface);
   border: 1px solid var(variables.$border-on-surface);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
   min-height: 100px;
 }
 

@@ -334,7 +334,7 @@ onMounted(() => discoveryQueries.getDiscoveries())
   width: 100%;
   min-width: 400px;
   border: 1px solid var(variables.$border-on-surface);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
   padding: var(variables.$spacing-m);
   background-color: var(variables.$surface);
 

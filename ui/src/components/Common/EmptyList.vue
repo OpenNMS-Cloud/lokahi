@@ -55,6 +55,8 @@ const msg = computed(() => props.content.msg || '')
 }
 
 .bg {
-  background-color: var(--feather-surface);
+  background-color: var(variables.$surface);
+  border-radius: vars.$border-radius-surface;
+  border: 1px solid var(variables.$border-on-surface);
 }
 </style>

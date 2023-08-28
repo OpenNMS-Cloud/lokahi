@@ -93,7 +93,7 @@ const isTypeAdded = computed(() => alertsStore.alertsFilter.severities?.includes
   flex-direction: column;
   background-color: var(variables.$surface);
   padding: var(variables.$spacing-s);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
   &.selected {
     background-color: var(variables.$shade-4);
     border-color: var(variables.$secondary-variant);

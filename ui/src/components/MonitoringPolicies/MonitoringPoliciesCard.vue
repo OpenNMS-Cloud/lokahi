@@ -102,13 +102,13 @@ onMounted(() => (ruleStates[props.policy.rules?.[0].id] = true))
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
-@use '@featherds/styles/mixins/elevation';
 @use '@/styles/mediaQueriesMixins.scss';
 @use '@/styles/vars.scss';
 
 .mp-card {
-  @include elevation.elevation(1);
-  border-radius: vars.$border-radius-xs;
+  background: var(variables.$surface);
+  border-radius: vars.$border-radius-surface;
+  border: 1px solid var(variables.$border-on-surface);
   display: flex;
   gap: var(variables.$spacing-xl);
   flex-direction: column;

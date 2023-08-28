@@ -264,7 +264,7 @@ onUnmounted(() => flowsStore.$reset)
   width: 100%;
   min-width: 400px;
   border: 1px solid var(variables.$border-on-surface);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
   padding: var(variables.$spacing-m) 40px;
   background-color: var(variables.$surface);
   display: flex;

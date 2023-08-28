@@ -231,6 +231,12 @@
                 <version>${jayway-awaitility.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.swrve</groupId>
                 <artifactId>rate-limited-logger</artifactId>
                 <version>${rate.limitted.logger.version}</version>

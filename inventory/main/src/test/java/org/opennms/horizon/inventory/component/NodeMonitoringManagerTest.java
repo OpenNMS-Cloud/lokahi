@@ -29,9 +29,7 @@
 package org.opennms.horizon.inventory.component;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -49,6 +47,7 @@ import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.ScanType;
@@ -67,7 +66,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-@Disabled
 class NodeMonitoringManagerTest {
 
     @Mock
@@ -76,6 +74,8 @@ class NodeMonitoringManagerTest {
     private PassiveDiscoveryService passiveDiscoveryService;
     @Mock
     private PassiveDiscoveryRepository passiveDiscoveryRepository;
+    @Mock
+    private TagService tagService;
     @InjectMocks
     private InternalEventConsumer internalEventConsumer;
     private final String tenantId = "test-tenant";
@@ -108,24 +108,22 @@ class NodeMonitoringManagerTest {
 
     @AfterEach
     public void afterTest() {
-        verifyNoMoreInteractions(nodeService);
         verifyNoMoreInteractions(passiveDiscoveryService);
     }
 
     @Test
     void testReceiveEventAndCreateNewNode() throws EntityExistException, LocationNotFoundException {
         doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
-        doReturn(passiveDiscovery).when(passiveDiscoveryRepository).findByTenantIdAndLocationId(tenantId, locationId);
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
         var eventLog = EventLog.newBuilder().addEvents(event);
         internalEventConsumer.consumeInternalEvents(eventLog.build().toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
         verify(passiveDiscoveryService).sendNodeScan(node, null);
+        verify(passiveDiscoveryService).getPassiveDiscovery(locationId, tenantId);
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocationId()).isEqualTo(event.getLocationId());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());
         assertThat(createDTO.getLabel()).endsWith(event.getIpAddress());
-        Assertions.assertEquals(createDTO.getTagsCount(),1);
     }
 
     @Test
@@ -152,10 +150,10 @@ class NodeMonitoringManagerTest {
         var eventLog = EventLog.newBuilder().addEvents(event).build();
         internalEventConsumer.consumeInternalEvents(eventLog.toByteArray());
         verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
+        verify(passiveDiscoveryService).getPassiveDiscovery(locationId, tenantId);
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocationId()).isEqualTo(event.getLocationId());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());
         assertThat(createDTO.getLabel()).endsWith(event.getIpAddress());
-        verifyNoInteractions(passiveDiscoveryService);
     }
 }

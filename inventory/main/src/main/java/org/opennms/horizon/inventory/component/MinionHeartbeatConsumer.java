@@ -119,7 +119,9 @@ public class MinionHeartbeatConsumer {
 
             Long lastRun = rpcMaps.get(key);
 
-            long currentTimeMs = System.currentTimeMillis();
+            // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
+            // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
+            long currentTimeMs = clock.getCurrentTimeMs();
             if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
                 rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
                 rpcMaps.put(key, currentTimeMs);

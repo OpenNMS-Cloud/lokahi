@@ -27,9 +27,12 @@ import org.opennms.taskset.contract.TenantLocationSpecificTaskSetResults;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 @Disabled
 public class TaskSetResultsConsumerTest {
@@ -74,7 +77,7 @@ public class TaskSetResultsConsumerTest {
         var testTenantLocationSpecificTaskSetResults =
             TenantLocationSpecificTaskSetResults.newBuilder()
                 .setTenantId("x-tenant-id-x")
-                .setLocationId("x-location-x")
+                .setLocationId(TEST_LOCATION_ID_TEXT)
                 .build();
 
         //
@@ -86,7 +89,10 @@ public class TaskSetResultsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verifyNoInteractions(mockScannerResponseService);
+        await().during(3, TimeUnit.SECONDS).until(() -> {
+                Mockito.verify(mockScannerResponseService, Mockito.never()).accept(Mockito.anyString(), Mockito.anyLong(), Mockito.any());
+                return true;
+        });
     }
 
     @Test
@@ -118,7 +124,7 @@ public class TaskSetResultsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockScannerResponseService).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse);
+        Mockito.verify(mockScannerResponseService, Mockito.timeout(3000)).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse);
     }
 
     @Test
@@ -156,7 +162,10 @@ public class TaskSetResultsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verifyNoInteractions(mockScannerResponseService);
+        await().during(3, TimeUnit.SECONDS).until(() -> {
+            Mockito.verify(mockScannerResponseService, Mockito.never()).accept(Mockito.anyString(), Mockito.anyLong(), Mockito.any());
+            return true;
+        });
     }
 
     @Test
@@ -190,9 +199,9 @@ public class TaskSetResultsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockScannerResponseService).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse1);
-        Mockito.verify(mockScannerResponseService).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse2);
-        Mockito.verify(mockScannerResponseService).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse3);
+        Mockito.verify(mockScannerResponseService, Mockito.timeout(3000)).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse1);
+        Mockito.verify(mockScannerResponseService, Mockito.timeout(3000)).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse2);
+        Mockito.verify(mockScannerResponseService, Mockito.timeout(3000)).accept("x-tenant-id-x", TEST_LOCATION_ID, testScannerResponse3);
         Mockito.verifyNoMoreInteractions(mockScannerResponseService);
     }
 
@@ -237,9 +246,9 @@ public class TaskSetResultsConsumerTest {
         //
         // Verify the Results
         //
-        Mockito.verify(monitorResponseService).updateMonitoredState("x-tenant-id-x", monitorResponse1);
-        Mockito.verify(monitorResponseService).updateMonitoredState("x-tenant-id-x", monitorResponse2);
-        Mockito.verify(monitorResponseService).updateMonitoredState("x-tenant-id-x", monitorResponse3);
+        Mockito.verify(monitorResponseService, Mockito.timeout(3000)).updateMonitoredState("x-tenant-id-x", monitorResponse1);
+        Mockito.verify(monitorResponseService, Mockito.timeout(3000)).updateMonitoredState("x-tenant-id-x", monitorResponse2);
+        Mockito.verify(monitorResponseService, Mockito.timeout(3000)).updateMonitoredState("x-tenant-id-x", monitorResponse3);
 
         var serviceName = EventParameter.newBuilder().setName("serviceName").setValue(MonitorType.ICMP.toString());
         var serviceId = EventParameter.newBuilder().setName("serviceId").setValue("1");
@@ -295,7 +304,10 @@ public class TaskSetResultsConsumerTest {
                     );
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
-            Mockito.verifyNoInteractions(mockScannerResponseService);
+            await().during(3, TimeUnit.SECONDS).until(() -> {
+                Mockito.verify(mockScannerResponseService, Mockito.never()).accept(Mockito.anyString(), Mockito.anyLong(), Mockito.any());
+                return true;
+            });
         }
     }
 

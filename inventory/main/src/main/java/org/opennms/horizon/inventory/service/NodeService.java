@@ -195,7 +195,7 @@ public class NodeService {
         return node;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<Long, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
         List<Node> nodeList = nodeRepository.findByIdInAndTenantId(ids, tenantId);
         if (nodeList.isEmpty()) {
@@ -259,10 +259,11 @@ public class NodeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Optional<NodeDTO> getNode(String  ipAddress, long locationId, String tenantId) {
         var optionalIpAddress = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(ipAddress),
             locationId, tenantId, ScanType.DISCOVERY_SCAN);
-        return optionalIpAddress.flatMap(ipInterface -> getByIdAndTenantId(ipInterface.getNodeId(), ipInterface.getTenantId()));
+        return optionalIpAddress.map(IpInterface::getNode).map(mapper::modelToDTO);
     }
 
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {

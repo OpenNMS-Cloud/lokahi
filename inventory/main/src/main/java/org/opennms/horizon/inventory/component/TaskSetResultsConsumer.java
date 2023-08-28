@@ -61,9 +61,11 @@ public class TaskSetResultsConsumer {
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("handle-taskset-%d")
         .build();
-    private final ExecutorService executorService = Executors.newCachedThreadPool(threadFactory);
+    // This fixed thread pool allows us to process tasksets in parallel apart from Kafka concurrency which is
+    // still tunable at the application level.
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
 
-    @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "${kafka.topics.concurrency-task-set-results}")
     public void receiveMessage(@Payload byte[] data) {
         LOG.debug("Have message from Task Set Results kafka topic");
 

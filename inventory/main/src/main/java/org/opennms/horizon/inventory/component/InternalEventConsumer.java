@@ -43,7 +43,6 @@ import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.model.Node;
-import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
@@ -65,7 +64,6 @@ public class InternalEventConsumer {
     private final NodeService nodeService;
     private final PassiveDiscoveryService passiveDiscoveryService;
     private final TagService tagService;
-    private final PassiveDiscoveryRepository passiveDiscoveryRepository;
 
     @KafkaListener(topics = "${kafka.topics.internal-events}", concurrency = "1")
     public void consumeInternalEvents(@Payload byte[] data) {
@@ -85,26 +83,30 @@ public class InternalEventConsumer {
                 }
                 var tenantId = event.getTenantId();
                 var locationId = event.getLocationId();
-                log.debug("Create new node from event with tenantId={}; locationId={}; interface={}", event.getIpAddress(), locationId, tenantId);
-
+                var optionalNode = nodeService.getNode(event.getIpAddress(), Long.parseLong(locationId), tenantId);
+                if (optionalNode.isPresent()) {
+                    log.warn("Node already exists with the Ip Address {} at location {} for tenant {}",
+                        event.getIpAddress(), event.getLocationId(), event.getTenantId());
+                    return;
+                }
                 NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
                     .setLocationId(locationId)
                     .setManagementIp(event.getIpAddress())
                     .setLabel(event.getIpAddress())
                     .setMonitoredState(MonitoredState.DETECTED);
-
                 var passiveDiscovery = passiveDiscoveryService.getPassiveDiscovery(Long.parseLong(locationId), tenantId);
                 if (passiveDiscovery != null) {
                     var list = ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
-                        .setActiveDiscoveryId(passiveDiscovery.getId()).build()).build();
+                        .setPassiveDiscoveryId(passiveDiscovery.getId()).build()).build();
                     var tagList = tagService.getTagsByEntityId(tenantId, list);
                     List<TagCreateDTO> tags = tagList.stream()
                         .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
                         .toList();
                     nodeCreateBuilder.addAllTags(tags);
                 }
-
+                log.debug("Create new node from event with tenantId={}; locationId={}; interface={}", event.getIpAddress(), locationId, tenantId);
                 Node node = nodeService.createNode(nodeCreateBuilder.build(), ScanType.DISCOVERY_SCAN, tenantId);
+                nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
                 passiveDiscoveryService.sendNodeScan(node, passiveDiscovery);
             }
         } catch (EntityExistException e) {

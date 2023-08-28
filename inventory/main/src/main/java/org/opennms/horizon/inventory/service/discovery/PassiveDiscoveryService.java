@@ -87,7 +87,7 @@ public class PassiveDiscoveryService {
 
         sendNodeScan(discovery);
 
-        return mapper.modelToDtoCustom(discovery);
+        return mapper.modelToDto(discovery);
     }
 
     @Transactional
@@ -115,13 +115,13 @@ public class PassiveDiscoveryService {
 
         sendNodeScan(discovery);
 
-        return mapper.modelToDtoCustom(discovery);
+        return mapper.modelToDto(discovery);
     }
 
     @Transactional(readOnly = true)
     public List<PassiveDiscoveryDTO> getPassiveDiscoveries(String tenantId) {
         List<PassiveDiscovery> discoveries = repository.findByTenantId(tenantId);
-        return discoveries.stream().map(mapper::modelToDtoCustom).toList();
+        return discoveries.stream().map(mapper::modelToDto).toList();
     }
 
     public PassiveDiscoveryDTO getPassiveDiscovery(long locationId, String tenantId) {
@@ -140,7 +140,7 @@ public class PassiveDiscoveryService {
                 sendNodeScan(discovery);
             }
 
-            return mapper.modelToDtoCustom(discovery);
+            return mapper.modelToDto(discovery);
         }
         throw new InventoryRuntimeException("Passive discovery not found, cannot update toggle");
     }

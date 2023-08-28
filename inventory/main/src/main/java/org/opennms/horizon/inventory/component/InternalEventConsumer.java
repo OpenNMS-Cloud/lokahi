@@ -65,7 +65,7 @@ public class InternalEventConsumer {
     private final PassiveDiscoveryService passiveDiscoveryService;
     private final TagService tagService;
 
-    @KafkaListener(topics = "${kafka.topics.internal-events}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.internal-events}", concurrency = "${kafka.concurrency.internal-events}")
     public void consumeInternalEvents(@Payload byte[] data) {
         try {
             var eventLog = EventLog.parseFrom(data);

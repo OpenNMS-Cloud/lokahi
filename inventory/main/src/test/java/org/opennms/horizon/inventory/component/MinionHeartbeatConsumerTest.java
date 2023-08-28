@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.component;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -65,7 +66,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -135,7 +135,7 @@ public class MinionHeartbeatConsumerTest {
         doReturn(CompletableFuture.completedFuture(testRpcResponse)).when(rpcClient).sendRpcRequest(eq(TEST_TENANT_ID), any(GatewayRpcRequestProto.class));
 
         target.receiveMessage(heartbeat.toByteArray());
-        verify(monitoringSystemService, times(1)).addMonitoringSystemFromHeartbeat(any(TenantLocationSpecificHeartbeatMessage.class));
+        verify(monitoringSystemService, timeout(5000).times(1)).addMonitoringSystemFromHeartbeat(any(TenantLocationSpecificHeartbeatMessage.class));
         verify(rpcClient, timeout(5000).atLeast(1)).sendRpcRequest(eq(TEST_TENANT_ID), any(GatewayRpcRequestProto.class));
         verify(kafkaTemplate, timeout(5000).atLeast(1)).send(any(ProducerRecord.class));
     }
@@ -148,7 +148,7 @@ public class MinionHeartbeatConsumerTest {
 
         target.receiveMessage(heartbeat.toByteArray());
         target.receiveMessage(heartbeat.toByteArray());
-        verify(monitoringSystemService, times(2)).addMonitoringSystemFromHeartbeat(any(TenantLocationSpecificHeartbeatMessage.class));
+        verify(monitoringSystemService, timeout(5000).times(2)).addMonitoringSystemFromHeartbeat(any(TenantLocationSpecificHeartbeatMessage.class));
         verify(rpcClient, timeout(5000).times(2)).sendRpcRequest(eq(TEST_TENANT_ID), any(GatewayRpcRequestProto.class));
         verify(kafkaTemplate, timeout(5000).times(2)).send(any(ProducerRecord.class));
     }
@@ -166,7 +166,8 @@ public class MinionHeartbeatConsumerTest {
         // Execute
         //
         try (LogCaptor logCaptor = LogCaptor.forClass(MinionHeartbeatConsumer.class)) {
-            target.receiveMessage(heartbeat.toByteArray());
+            TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(heartbeat.toByteArray());
+            target.processHeartbeat(message);
 
             //
             // Verify the Results
@@ -195,7 +196,8 @@ public class MinionHeartbeatConsumerTest {
         // Execute
         //
         try (LogCaptor logCaptor = LogCaptor.forClass(MinionHeartbeatConsumer.class)) {
-            target.receiveMessage(heartbeat.toByteArray());
+            TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(heartbeat.toByteArray());
+            target.processHeartbeat(message);
 
             //
             // Verify the Results
@@ -211,6 +213,8 @@ public class MinionHeartbeatConsumerTest {
                 );
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
+        } catch (InvalidProtocolBufferException e) {
+
         }
     }
 

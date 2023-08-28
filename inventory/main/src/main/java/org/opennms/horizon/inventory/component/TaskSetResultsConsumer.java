@@ -65,7 +65,7 @@ public class TaskSetResultsConsumer {
     // still tunable at the application level.
     private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
 
-    @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "${kafka.topics.concurrency-task-set-results}")
+    @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "${kafka.concurrency.task-set-results}")
     public void receiveMessage(@Payload byte[] data) {
         LOG.debug("Have message from Task Set Results kafka topic");
 

@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.component;
 
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.opentelemetry.api.trace.Span;
@@ -64,6 +65,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 @RequiredArgsConstructor
@@ -79,6 +83,10 @@ public class MinionHeartbeatConsumer {
     // we should still process heartbeats received closer to 30secs interval, so 2secs prior arrival should still be processed.
     private final MinionRpcClient rpcClient;
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("handle-minion-heartbeat-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
 
     @Value("${kafka.topics.task-set-results:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
@@ -92,47 +100,54 @@ public class MinionHeartbeatConsumer {
     private final Clock clock;
     private final Map<String, Long> rpcMaps = new ConcurrentHashMap<>();
 
-    @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "${kafka.concurrency.minion-heartbeat}")
     public void receiveMessage(@Payload byte[] data) {
+
         try {
             TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(data);
-
-            String tenantId = message.getTenantId();
-            String locationId = message.getLocationId();
-
-            Span.current().setAttribute("user", tenantId);
-            Span.current().setAttribute("location-id", locationId);
-            Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
-
-            Optional<MonitoringLocationDTO> location = locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
-            if (location.isEmpty()) {
-                log.info("Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
-                    tenantId, locationId, message.getIdentity().getSystemId());
-                return;
-            }
-            log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
-                tenantId, locationId, message.getIdentity().getSystemId());
-            monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
-
-            String systemId = message.getIdentity().getSystemId();
-            String key = tenantId + "_" + locationId + "-" + systemId;
-
-            Long lastRun = rpcMaps.get(key);
-
-            // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
-            // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
-            long currentTimeMs = clock.getCurrentTimeMs();
-            if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
-                rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
-                rpcMaps.put(key, currentTimeMs);
-            }
-
-            Span.current().setStatus(StatusCode.OK);
-        } catch (Exception e) {
+            executorService.execute(() -> processHeartbeat(message));
+        } catch (InvalidProtocolBufferException e) {
             log.error("Error while processing heartbeat message: ", e);
-            Span.current().recordException(e);
+        }
+    }
+
+    public void processHeartbeat(TenantLocationSpecificHeartbeatMessage message) {
+        try {
+        String tenantId = message.getTenantId();
+        String locationId = message.getLocationId();
+
+        Span.current().setAttribute("user", tenantId);
+        Span.current().setAttribute("location-id", locationId);
+        Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
+
+        Optional<MonitoringLocationDTO> location = locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
+        if (location.isEmpty()) {
+            log.info("Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
+                tenantId, locationId, message.getIdentity().getSystemId());
+            return;
+        }
+        log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
+            tenantId, locationId, message.getIdentity().getSystemId());
+        monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
+
+        String systemId = message.getIdentity().getSystemId();
+        String key = tenantId + "_" + locationId + "-" + systemId;
+
+        Long lastRun = rpcMaps.get(key);
+
+        // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
+        // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
+        long currentTimeMs = clock.getCurrentTimeMs();
+        if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
+            rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
+            rpcMaps.put(key, currentTimeMs);
         }
 
+        Span.current().setStatus(StatusCode.OK);
+    } catch (Exception e) {
+        log.error("Error while processing heartbeat message: ", e);
+        Span.current().recordException(e);
+    }
     }
 
     @PreDestroy

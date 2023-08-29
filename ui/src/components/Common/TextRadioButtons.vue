@@ -3,7 +3,7 @@
     v-model="radioModel"
     :label="''"
     class="text-radio"
-    @update:modelValue="(e) => onChecked && onChecked(e)"
+    @update:modelValue="(e: any) => onChecked && onChecked(e)"
     :data-test="`text-radio-group-${id}`"
   >
     <FeatherRadio

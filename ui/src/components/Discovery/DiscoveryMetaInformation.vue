@@ -35,6 +35,19 @@
         />
       </div>
     </div>
+
+    <div v-if="isICMPV3">
+      <FeatherTabContainer
+        :modelValue="selectedTab"
+        @update:modelValue="changeSecurityType"
+      >
+        <template v-slot:tabs>
+          <FeatherTab>No Auth</FeatherTab>
+          <FeatherTab>Auth</FeatherTab>
+          <FeatherTab>Auth + Privacy</FeatherTab>
+        </template>
+      </FeatherTabContainer>
+    </div>
     <div v-if="isICMPV3WithPass">
       <div class="flex">
         <AtomicAutocomplete inputLabel="Auth" />
@@ -108,12 +121,23 @@ import {
   DiscoverySNMPV3AuthPrivacy,
   DiscoveryAzureMeta
 } from '@/types/discovery'
+import { FeatherTabContainer } from '@featherds/tabs'
 
 const props = defineProps({
   discovery: { type: Object as PropType<NewOrUpdatedDiscovery>, default: () => ({}) },
   updateDiscoveryValue: { type: Function as PropType<(key: string, value: string) => void>, default: () => ({}) }
 })
-
+const selectedTab = ref()
+const changeSecurityType = (type?: number) => {
+  let setType = DiscoveryType.ICMPV3NoAuth
+  if (type === 1) {
+    setType = DiscoveryType.ICMPV3Auth
+  } else if (type === 2) {
+    setType = DiscoveryType.ICMPV3AuthPrivacy
+  }
+  selectedTab.value = type
+  props.updateDiscoveryValue('type', setType)
+}
 const isSnmpTrapOrICMPV1 = computed(() =>
   [DiscoveryType.ICMP, DiscoveryType.SyslogSNMPTraps].includes(props.discovery.type as DiscoveryType)
 )

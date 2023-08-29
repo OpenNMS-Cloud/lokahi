@@ -44,15 +44,23 @@
       class="discovery"
       v-if="!discoveryStore.discoveryFormActive && discoveryStore.soloTypePageActive"
     >
-      <DiscoveryTypeSelector />
+      <DiscoveryTypeSelector
+        :updateSelectedDiscovery="discoveryStore.activateForm"
+        title="New Discovery"
+        :backButtonClick="discoveryStore.cancelUpdate"
+      />
     </section>
     <section
       v-if="discoveryStore.discoveryFormActive && !discoveryStore.soloTypePageActive"
       class="discovery"
     >
       <div class="flex-title">
-        <FeatherBackButton @click="discoveryStore.cancelUpdate">Cancel</FeatherBackButton>
-        <h2 class="title">{{ discoveryCopy.title }}</h2>
+        <FeatherBackButton
+          @click="discoveryStore.backToTypePage"
+          v-if="discoveryStore.discoveryFormActive"
+          >Cancel</FeatherBackButton
+        >
+        <h2 class="title">{{ discoveryCopy.title }} | {{ selectedTypeOption?._text }}</h2>
       </div>
 
       <FeatherInput
@@ -124,19 +132,22 @@
           </FeatherChip>
         </FeatherChipList>
       </div>
-      <hr style="margin-bottom: 24px" />
       <FeatherSelect
+        v-if="typeVisible"
         label="Type"
-        :options="[
-          { value: DiscoveryType.ICMP, _text: 'ICMP' },
-          { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
-          { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
-          { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' },
-          { value: DiscoveryType.Azure, _text: 'Azure' },
-          { value: DiscoveryType.SyslogSNMPTraps, _text: 'Syslogs' }
-        ]"
+        :options="typeOptions"
+        :modelValue="selectedTypeOption"
         @update:modelValue="(b) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
       />
+      <FeatherTabContainer
+        :modelValue="selectedTab"
+        @update:modelValue="changeSnmpType"
+      >
+        <template v-slot:tabs>
+          <FeatherTab>SNMP V1 or V1</FeatherTab>
+          <FeatherTab>SNMP V3</FeatherTab>
+        </template>
+      </FeatherTabContainer>
       <DiscoveryMetaInformation
         :discovery="discoveryStore.selectedDiscovery"
         :updateDiscoveryValue="discoveryStore.setSelectedDiscoveryValue"
@@ -155,7 +166,7 @@
       </div>
     </section>
     <section
-      v-if="!discoveryStore.soloTypePageActive"
+      v-if="!discoveryStore.soloTypePageActive && !discoveryStore.discoveryFormActive"
       class="discovery"
     >
       <p>Select a discovery on the left, or click Add Discovery</p>
@@ -176,7 +187,15 @@ import { DiscoveryType, InstructionsType } from '@/components/Discovery/discover
 import discoveryText from '@/components/Discovery/discovery.text'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import CancelIcon from '@featherds/icon/navigation/Cancel'
-
+import { FeatherTabContainer } from '@featherds/tabs'
+const selectedTab = ref()
+const changeSnmpType = (type: any) => {
+  if (type === 0) {
+    discoveryStore.setSelectedDiscoveryValue('type', DiscoveryType.ICMP)
+  } else if (type === 1) {
+    discoveryStore.setSelectedDiscoveryValue('type', DiscoveryType.ICMPV3NoAuth)
+  }
+}
 const discoveryStore = useDiscoveryStore()
 const discoveryCopy = computed(() =>
   discoveryStore.selectedDiscovery.id
@@ -184,10 +203,21 @@ const discoveryCopy = computed(() =>
     : { title: 'Add Discovery', button: 'Start New Discovery' }
 )
 
+const typeVisible = false
 onMounted(() => {
   discoveryStore.init()
 })
-
+const typeOptions = [
+  { value: DiscoveryType.ICMP, _text: 'ICMP' },
+  { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
+  { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
+  { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' },
+  { value: DiscoveryType.Azure, _text: 'Azure' },
+  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Syslogs' }
+]
+const selectedTypeOption = computed(() => {
+  return typeOptions.find((d) => d.value === discoveryStore.selectedDiscovery.type)
+})
 const addIcon: IIcon = {
   image: markRaw(AddIcon)
 }

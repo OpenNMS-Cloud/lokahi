@@ -48,6 +48,10 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.foundTags = []
       this.tagSearch = ''
     },
+    backToTypePage(){
+      this.discoveryFormActive = false
+      this.soloTypePageActive = true
+    },
     startNewDiscovery(){
       if (this.soloTypeEditor){
         this.soloTypePageActive = true
@@ -85,6 +89,11 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     setSelectedDiscoveryValue(key:string,value:any){
       (this.selectedDiscovery as Record<string,any>)[key] = value
     },
+    activateForm(key: string, value: any){
+      this.setSelectedDiscoveryValue(key,value)
+      this.soloTypePageActive = false
+      this.discoveryFormActive = true
+    },
     async searchForTags(searchVal: string){
       this.tagSearch = searchVal
       await discoveryQueries.getTagsSearch(searchVal)
@@ -97,6 +106,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     async cancelUpdate(){
       this.selectedDiscovery = {}
       this.discoveryFormActive = false
+      this.soloTypePageActive = false
     },
     async deleteDiscovery(){
       const discoveryMutations = useDiscoveryMutations()

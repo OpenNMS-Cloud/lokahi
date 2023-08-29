@@ -302,11 +302,16 @@ public class NodeService {
         tagPublisher.publishTagUpdate(tagOpList);
     }
 
-    public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
-        executorService.execute(() -> sendTaskSetsToMinion(node, locationId, icmpDiscoveryDTO));
+    public void sendNewNodeTaskSetAsync(NodeDTO nodeDTO, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+        executorService.execute(() -> sendTaskSetsToMinion(nodeDTO, locationId, icmpDiscoveryDTO));
     }
 
-    private void sendTaskSetsToMinion(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+    public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+        var nodeDTO = mapper.modelToDTO(node);
+        executorService.execute(() -> sendTaskSetsToMinion(nodeDTO, locationId, icmpDiscoveryDTO));
+    }
+
+    private void sendTaskSetsToMinion(NodeDTO nodeDTO, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
 
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
         try {
@@ -321,9 +326,9 @@ public class NodeService {
                     .setPort(port);
                 snmpConfigs.add(builder.build());
             });
-            scannerTaskSetService.sendNodeScannerTask(mapper.modelToDTO(node), locationId, snmpConfigs);
+            scannerTaskSetService.sendNodeScannerTask(nodeDTO, locationId, snmpConfigs);
         } catch (Exception e) {
-            log.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
+            log.error("Error while sending nodescan task for node with label {}", nodeDTO.getNodeLabel(), e);
         }
     }
 

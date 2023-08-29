@@ -1,13 +1,12 @@
-FROM opennms/udpgen:latest AS udpgen-build
+FROM opennms/udpgen:latest
 
 WORKDIR /
 
-FROM ehazlett/snmpd 
-RUN apt install -y tmux
-
-# Copy udpgen from udpgen-build above to current image stage.
-COPY --from=udpgen-build /udpgen /udpgen 
+# Add a basic SNMP Daemon to the image
+RUN apt update && apt install -y snmpd
+RUN sed -i '/^agentaddress.*/c\agentaddress  udp:161' /etc/snmp/snmpd.conf
 
 ADD bootstrap.sh /bootstrap.sh
 CMD []
 ENTRYPOINT ["/bootstrap.sh"]
+

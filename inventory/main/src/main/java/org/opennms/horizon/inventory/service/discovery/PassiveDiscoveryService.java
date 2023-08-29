@@ -232,7 +232,6 @@ public class PassiveDiscoveryService {
                 .setPort(port);
             snmpConfigs.add(builder.build());
         });
-
         scannerTaskSetService.sendNodeScannerTask(node, discovery.getLocationId(), snmpConfigs);
     }
 

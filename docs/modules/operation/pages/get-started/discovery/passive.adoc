@@ -16,3 +16,6 @@ You can create only one passive discovery:
 NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], click the drop-down arrow in the *Search/Add tags* field, type a name for the tag, and click *New*.
 
 . Click *Save Discovery*.
+
+The name of the passive discovery you created appears in the My Passive Discoveries list.
+Click the *toggle on* button to perform discovery on the selected node.

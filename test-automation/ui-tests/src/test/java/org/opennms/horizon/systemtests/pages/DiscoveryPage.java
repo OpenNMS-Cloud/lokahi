@@ -55,7 +55,7 @@ public class DiscoveryPage {
     private static final SelenideElement SAVE_DISCOVERY_BUTTON = $(By.xpath("//button[@data-test='btn-submit']"));
     private static final SelenideElement SNMP_DISCOVERY_RADIO_BUTTON = $(By.xpath("//div[@data-test='discoveryICMP']"));
     private static final SelenideElement DISCOVERY_NAME_INPUT = $(By.xpath("//div[@data-test='discoveryNameInput']//input"));
-    private static final SelenideElement LOCATION_NAME_INPUT = $(By.xpath("//input[@data-test='locationsInput']"));
+    private static final SelenideElement LOCATION_NAME_INPUT = $(By.xpath("//input[@placeholder='Search Locations']"));
     private static final SelenideElement IP_RANGE_INPUT = $(By.xpath("//div[@data-test='ipAddressInput']//div[@class='content-editable']"));
     private static final SelenideElement COMMUNITY_STRING_INPUT = $(By.xpath("//div[@data-test='communityInput']//div[@class='content-editable']"));
     private static final SelenideElement PORT_INPUT = $(By.xpath("//div[@data-test='portInput']//div[@class='content-editable']"));
@@ -81,7 +81,7 @@ public class DiscoveryPage {
     public static boolean newDiscoveryCheckForLocation(String locationName) {
         String search = "//div[@class='locations-select']//span[text()=' " + locationName +"']";
         // Sometimes a delay in the UI to populate the default selected location
-        Selenide.sleep(1000);
+        Selenide.sleep(6000);
 
         return $(By.xpath(search)).exists();
     }
@@ -98,7 +98,7 @@ public class DiscoveryPage {
             LOCATION_NAME_INPUT.shouldBe(enabled).sendKeys(locationName);
             LOCATION_NAME_INPUT.sendKeys("\n");
 
-            String specificListItemSearch = "//ul[@aria-label='Select a location']/li[.//span/text()=' " + locationName + "']";
+            String specificListItemSearch = "//div[@label='" + locationName + "']";
             SelenideElement locationPopupListItem = $(By.xpath(specificListItemSearch));
             locationPopupListItem.should(exist, Duration.ofSeconds(20)).shouldBe(enabled).click();
         }

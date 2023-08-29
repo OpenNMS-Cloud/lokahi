@@ -157,6 +157,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                     .status(Status.Unknown)
                     .nodeId(nodeId)
                     .monitoredServiceId(monitoredServiceId)
+                    .reason("timeout")
                     .ipAddress(inetAddress.getHostAddress())
                     .build()
             );
@@ -169,6 +170,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Down)
                     .nodeId(nodeId)
+                    .reason(throwable.getMessage())
                     .monitoredServiceId(monitoredServiceId)
                     .ipAddress(inetAddress.getHostAddress())
                     .build()

@@ -133,9 +133,39 @@ public class IcmpDiscoveryStepDefinitions {
             .setLocationId(backgroundHelper.findLocationId(location)).build();
     }
 
+    @Given("Update existing Active Discovery with IpAddresses {string} and SNMP community as {string} at location named {string} with tags {string}")
+    public void updateExistingActiveDiscoveryWithIpAddressesAndSNMPCommunityAsAtLocationWithTags(String ipAddressStrings, String snmpReadCommunity,
+                                                                                      String location, String tags) {
+        var tagsList = tags.split(",");
+        icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .addIpAddresses(ipAddressStrings).setSnmpConfig(SNMPConfigDTO.newBuilder()
+                .addReadCommunity(snmpReadCommunity).build())
+            .setId(activeDiscoveryId)
+            .addAllTags(Stream.of(tagsList).map(tag -> TagCreateDTO.newBuilder().setName(tag).build()).toList())
+            .setLocationId(backgroundHelper.findLocationId(location)).build();
+    }
+
     @Then("create Active Discovery and validate it's created active discovery with above details.")
     public void createActiveDiscoveryAndValidateItSCreatedActiveDiscoveryWithAboveDetails() {
         var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
+        activeDiscoveryId = icmpDiscoveryDto.getId();
+        Assertions.assertEquals(icmpDiscovery.getLocationId(), icmpDiscoveryDto.getLocationId());
+        Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
+        Assertions.assertEquals(icmpDiscovery.getSnmpConfig().getReadCommunity(0), icmpDiscoveryDto.getSnmpConfig().getReadCommunity(0));
+        var tagListQuery = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(icmpDiscoveryDto.getId()).build())
+            .build();
+        var tagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(tagListQuery);
+        Assertions.assertEquals(icmpDiscovery.getTagsCount(), tagList.getTagsCount());
+        var tagsCreated = icmpDiscovery.getTagsList().stream().map(TagCreateDTO::getName).toList();
+        // Take one tag and validate if it exists on the discovery.
+        var tag = tagsCreated.get(0);
+        Assertions.assertTrue(tagList.getTagsList().stream().map(TagDTO::getName).toList().contains(tag));
+    }
+
+    @Then("update Active Discovery and validate it's created active discovery with above details.")
+    public void UpdateActiveDiscoveryAndValidateItUpdatedActiveDiscoveryWithAboveDetails() {
+        var icmpDiscoveryDto = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().upsertActiveDiscovery(icmpDiscovery);
         activeDiscoveryId = icmpDiscoveryDto.getId();
         Assertions.assertEquals(icmpDiscovery.getLocationId(), icmpDiscoveryDto.getLocationId());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
@@ -173,6 +203,7 @@ public class IcmpDiscoveryStepDefinitions {
         String taskIdPattern = "discovery:\\d+/" + this.taskLocation;
         await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS)
             .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
+        kafkaConsumerRunner.clearValues();
     }
 
     @Then("send discovery ping results for {string} to Kafka topic {string}")
@@ -291,5 +322,19 @@ public class IcmpDiscoveryStepDefinitions {
     public void discoveryShutdownKafkaConsumer() {
         kafkaConsumerRunner.shutdown();
         await().atMost(3, TimeUnit.SECONDS).until(() -> kafkaConsumerRunner.isShutdown().get(), Matchers.is(true));
+    }
+
+    @Then("delete Active Discovery that is created in previous step")
+    public void deleteActiveDiscoveryThatIsCreatedInPreviousStep() {
+        var deleted = backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().deleteActiveDiscovery(Int64Value.of(activeDiscoveryId));
+        Assertions.assertTrue(deleted.getValue());
+    }
+
+    @Then("verify the task set update for removal is published for icmp discovery within {int}ms")
+    public void verifyTheTaskSetUpdateForRemovalIsPublishedForIcmpDiscoveryWithinMs(int timeout) {
+        String taskIdPattern = "discovery:\\d+/" + this.taskLocation;
+        await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS)
+            .until(() -> matchesTaskPatternForDelete(taskIdPattern).get(), Matchers.is(true));
+        kafkaConsumerRunner.clearValues();
     }
 }

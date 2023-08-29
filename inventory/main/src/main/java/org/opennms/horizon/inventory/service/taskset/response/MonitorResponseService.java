@@ -101,6 +101,7 @@ public class MonitorResponseService {
         eventBuilder.setTenantId(tenantId);
         eventBuilder.setNodeId(monitorResponse.getNodeId());
         eventBuilder.setProducedTimeMs(monitorResponse.getTimestamp());
+        eventBuilder.setDescription(monitorResponse.getReason());
         var serviceNameParam = EventParameter.newBuilder().setName("serviceName")
             .setValue(monitorResponse.getMonitorType().name()).build();
         var serviceIdParam = EventParameter.newBuilder().setName("serviceId")

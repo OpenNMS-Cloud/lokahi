@@ -1,10 +1,11 @@
 # snmpd-udpgen
-It is an image for generate flow data while still receiving snmp data. However, it is for testing purpose. 
-It is base on ehazlett/snmpd and https://github.com/OpenNMS/udpgen
+This is an image that supports SNMP discover and contains the tooling to generate flow data.
+It is for testing purposes and is based on https://github.com/OpenNMS/udpgen
+Workflow published the image as opennms/lokahi-snmpd-udpgen:latest.
 
 # parameters
--s "all options will pass to snmpd"
--u "all options will pass to udpgen"
+All parameters are passed to snmpd. udpgen must be run by separately executing into the container
+as needed.
 
 # Example docker-compose.yaml
 ```
@@ -15,7 +16,7 @@ version: '3.5'
 services:
   snmpd-udpgen:
     image: snmpd-udpgen
-    command: -s "-c /etc/snmp/snmpd.conf" -u "-h <SERVER_IP> -p 9996 -x netflow9 -r 1"
+    command: -c /etc/snmp/snmpd.conf
 ```
 # docker command
-docker run --rm snmpd-udpgen -s "-c /etc/snmp/snmpd.conf" -u "-h <SERVER_IP> -p 9996 -x netflow9 -r 1"
+docker run --rm snmpd-udpgen

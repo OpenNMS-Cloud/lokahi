@@ -172,7 +172,15 @@
       <p>Select a discovery on the left, or click Add Discovery</p>
     </section>
   </div>
-  <DiscoverySuccessModal ref="successModal" />
+  <DiscoverySuccessModal
+    ref="successModal"
+    @close="
+      () => {
+        selectedDiscovery = null
+      }
+    "
+    :startNewDiscovery="handleNewDiscovery"
+  />
   <DiscoveryInstructions
     :instructionsType="helpType"
     :isOpen="isHelpVisible"

@@ -5,7 +5,9 @@ import {
   CreateIcmpActiveDiscoveryDocument, 
   UpsertPassiveDiscoveryDocument,
   TogglePassiveDiscoveryDocument,
-  CreateOrUpdateActiveIcmpDiscoveryDocument
+  CreateOrUpdateActiveIcmpDiscoveryDocument,
+  DeleteActiveIcmpDiscoveryDocument,
+  DeletePassiveDiscoveryDocument
 } from '@/types/graphql'
 
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
@@ -18,13 +20,6 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     error: activeDiscoveryError,
     isFetching: isFetchingActiveDiscovery
   } = useMutation(CreateIcmpActiveDiscoveryDocument)
-
-  // Create or Update ICMP Discoveries
-  const {
-    execute: createOrUpdateDiscovery,
-    error: createOrUpdateDiscoveryError,
-    isFetching: createOrUpdateDiscoveryIsFetching
-  } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
 
   // Delete ICMP Discoveries
   const {
@@ -40,20 +35,36 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: isFetchingPassiveDiscovery
   } = useMutation(UpsertPassiveDiscoveryDocument)
 
+  const {
+    execute: createOrUpdateDiscovery,
+    error: createOrUpdateDiscoveryError,
+    isFetching: createOrUpdateDiscoveryIsFetching
+  } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
+ 
+ 
+  const {
+    execute: deletePassiveDiscovery,
+    error: deletePassiveDiscoveryError,
+    isFetching: deletePassiveDiscoveryIsFetching
+  } = useMutation(DeletePassiveDiscoveryDocument)
+
   // Toggle Passive Discoveries
   const { execute: togglePassiveDiscovery } = useMutation(TogglePassiveDiscoveryDocument)
 
   return {
     addAzureCreds,
     azureError: computed(() => error),
-    isFetching: computed(() => isFetching),
-    createDiscoveryConfig,
     createOrUpdateDiscovery,
     createOrUpdateDiscoveryError,
     createOrUpdateDiscoveryIsFetching,
     deleteActiveIcmpDiscovery,
     deleteActiveIcmpDiscoveryError,
     deleteActiveIcmpDiscoveryIsFetching,
+    deletePassiveDiscovery,
+    deletePassiveDiscoveryError,
+    deletePassiveDiscoveryIsFetching,
+    isFetching: computed(() => isFetching),
+    createDiscoveryConfig,
     activeDiscoveryError: computed(() => activeDiscoveryError),
     isFetchingActiveDiscovery: computed(() => isFetchingActiveDiscovery),
     upsertPassiveDiscovery,

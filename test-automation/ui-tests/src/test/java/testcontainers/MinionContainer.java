@@ -31,8 +31,10 @@ package testcontainers;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.InternetProtocol;
 import org.opennms.horizon.systemtests.CucumberHooks;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
 
@@ -45,6 +47,7 @@ import static org.testcontainers.containers.Network.SHARED;
 
 public class MinionContainer extends GenericContainer<MinionContainer> {
     public String minionId;
+    public boolean isMinionIsStopped = false;
 
     /*
     ## -- Karaf SSH            8101/TCP
@@ -74,6 +77,10 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", bundlePwd)
             .withCopyFileToContainer(MountableFile.forHostPath(certBundle.getPath()), "/opt/karaf/minion.p12")
             .withLabel("label", minionId)
+
+            .withLogConsumer(
+                new Slf4jLogConsumer(LoggerFactory.getLogger(MinionContainer.class))
+            )
 
             .waitingFor(
                 Wait.forLogMessage(".* Udp Flow Listener started at .*", 3)
@@ -128,4 +135,7 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
             .get(new ExposedPort(portNumber, InternetProtocol.UDP))[0].getHostPortSpec();
     }
 
+    protected void containerIsStopped(com.github.dockerjava.api.command.InspectContainerResponse containerInfo){
+        isMinionIsStopped = true;
+    }
 }

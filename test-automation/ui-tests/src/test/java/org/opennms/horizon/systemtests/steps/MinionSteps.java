@@ -29,7 +29,9 @@
 package org.opennms.horizon.systemtests.steps;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.LeftPanelPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
 import org.openqa.selenium.By;
@@ -72,12 +74,33 @@ public class MinionSteps {
         waitForMinionUp(minionName);
     }
 
-    public static MinionContainer startMinion(File bundle, String pwd, String minionId) {
+    public static MinionContainer startMinion(File bundle, String pwd, String minionId, String locationName) {
         Network network = SetupSteps.getCommonNetwork();
         MinionContainer minion = new MinionContainer(minionId, "minion-" + minionId.toLowerCase(), network,
             bundle, pwd);
 
         minion.start();
+        minions.put(locationName, minion);
         return minion;
+    }
+
+    @Then("stop minion for location {string}")
+    public void stopMinionForLocation(String locationName) {
+        minions.get(locationName).stop();
+        for (int i = 0; i < 30; i++) {
+            if (minions.get(locationName).isMinionIsStopped) {
+                break;
+            }
+            Selenide.sleep(2000);
+        }
+    }
+
+    public static boolean isMinionRunning(String locationName) {
+        MinionContainer minionContainer = minions.get(locationName);
+        boolean result = false;
+        if (minionContainer != null) {
+            result = minionContainer.isRunning();
+        }
+        return result;
     }
 }

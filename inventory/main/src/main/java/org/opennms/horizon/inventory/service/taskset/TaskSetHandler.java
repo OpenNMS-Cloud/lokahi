@@ -54,11 +54,14 @@ public class TaskSetHandler {
 
     public void sendMonitorTask(Long locationId, MonitorType monitorType, IpInterface ipInterface, long nodeId, long monitoredServiceId) {
         String tenantId = ipInterface.getTenantId();
-        var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, locationId, ipInterface.getIpAddress());
-
-        var task = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, nodeId, monitoredServiceId, snmpConfig.orElse(null));
-        if (task != null) {
-            taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
+        // Currently, we only monitor interfaces that are discovered with ICMP ping
+        // which are considered as primary interfaces for Snmp scan.
+        if (ipInterface.getSnmpPrimary()) {
+            var snmpConfig = snmpConfigService.getSnmpConfig(tenantId, locationId, ipInterface.getIpAddress());
+            var task = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, nodeId, monitoredServiceId, snmpConfig.orElse(null));
+            if (task != null) {
+                taskSetPublisher.publishNewTasks(tenantId, locationId, Arrays.asList(task));
+            }
         }
     }
 

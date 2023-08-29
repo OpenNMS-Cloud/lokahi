@@ -21,10 +21,9 @@ mutation CreateOrUpdateActiveIcmpDiscovery($request: IcmpActiveDiscoveryCreateIn
       ports
       readCommunities
     }
-    # tags // not avail yet
   }
 }
 
 mutation DeleteActiveIcmpDiscovery($id: Long!) {
-  deleteActiveDiscovery(id: $id)
+  deleteIcmpActiveDiscovery(id: $id)
 }

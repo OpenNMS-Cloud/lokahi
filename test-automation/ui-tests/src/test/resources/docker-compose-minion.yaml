@@ -27,7 +27,7 @@ services:
         ipv4_address: 172.31.1.1
 
   snmpd-temp2:
-    image: snmp-udpgen2
+    image: docker.io/opennms/lokahi-snmpd-udpgen:latest
     volumes:
       - "./snmpd.conf:/etc/snmp/snmpd.conf"
     command: -s "-c /etc/snmp/snmpd.conf" -u "-h 172.31.1.1 -p 4729 -x netflow9 -r 1"

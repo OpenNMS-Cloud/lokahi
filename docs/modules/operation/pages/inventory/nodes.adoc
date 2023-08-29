@@ -5,7 +5,7 @@
 Node management involves assessing the nodes that OpenNMS Cloud has identified on your network and determining whether you want to monitor them.
 See xref:inventory/introduction.adoc[inventory management] for a detailed description of node categories (monitored, unmonitored, and detected).
 
-In cases where OpenNMS has not identified any nodes, the screen displays a message with a button that takes you do the discovery page where you can xref:get-started/discovery/introduction.adoc[create a discovery] to identify nodes and add them to your network monitoring inventory.
+In cases where OpenNMS has not identified any nodes, the screen displays a message with a button that takes you to the discovery page where you can xref:get-started/discovery/introduction.adoc[create a discovery] to identify nodes and add them to your network monitoring inventory.
 
 NOTE: Remember that node discovery and management are iterative processes.
 You may identify nodes that OpenNMS is currently monitoring that you don't want to monitor or think would fit better in a different monitoring policy.

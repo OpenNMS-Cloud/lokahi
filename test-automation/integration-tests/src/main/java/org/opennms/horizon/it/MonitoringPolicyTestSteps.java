@@ -60,7 +60,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 @CucumberOptions(monochrome = true,
-    features = "src/main/resources/org/opennms/horizon/it/monitoring-policy.feature")
+        features = "src/main/resources/org/opennms/horizon/it/monitoring-policy.feature")
 public class MonitoringPolicyTestSteps {
     private static final Logger LOG = LoggerFactory.getLogger(MonitoringPolicyTestSteps.class);
     private final TestsExecutionHelper helper;
@@ -180,7 +180,7 @@ public class MonitoringPolicyTestSteps {
 
         JsonObject policy = jsonObject.getAsJsonObject("data").getAsJsonObject("findMonitorPolicyById");
 
-        if(null != policy && name.equals(policy.get("name").getAsString())) {
+        if (null != policy && name.equals(policy.get("name").getAsString())) {
             JsonArray tags = policy.get("tags").getAsJsonArray();
             for (JsonElement element : tags) {
                 if (tag.equals(element.getAsString())) {
@@ -189,7 +189,7 @@ public class MonitoringPolicyTestSteps {
                 }
             }
         }
-        assertTrue("Monitoring policy with name " + name + " and tag " + tag + " does not exist.", false);
+        fail("Monitoring policy with name " + name + " and tag " + tag + " does not exist.");
     }
 
     @Given("Location {string} is created.")
@@ -207,8 +207,8 @@ public class MonitoringPolicyTestSteps {
     @Given("Location {string} is removed.")
     public void deleteLocation(String location) {
         LocationData locationData = commonQueryLocations().getData().getFindAllLocations().stream()
-            .filter(loc -> loc.getLocation().equals(location))
-            .findFirst().orElse(null);
+                .filter(loc -> loc.getLocation().equals(location))
+                .findFirst().orElse(null);
 
         if (locationData == null) {
             fail("Location " + location + " not found");
@@ -225,8 +225,8 @@ public class MonitoringPolicyTestSteps {
     @Then("Location {string} should exist")
     public void queryLocationDoExist(String location) {
         Optional<LocationData> locationData = commonQueryLocations().getData().getFindAllLocations().stream()
-            .filter(data -> data.getLocation().equals(location))
-            .findFirst();
+                .filter(data -> data.getLocation().equals(location))
+                .findFirst();
         assertTrue(locationData.isPresent());
     }
 
@@ -245,24 +245,24 @@ public class MonitoringPolicyTestSteps {
     public void waitForAtLeastOneMinionForTheGivenLocationReportedByInventoryWithTimeoutMs(int timeout) {
         try {
             Awaitility
-                .await()
-                .atMost(timeout, TimeUnit.MILLISECONDS)
-                .ignoreExceptions()
-                .until(this::checkAtLeastOneMinionAtGivenLocation);
+                    .await()
+                    .atMost(timeout, TimeUnit.MILLISECONDS)
+                    .ignoreExceptions()
+                    .until(this::checkAtLeastOneMinionAtGivenLocation);
         } finally {
             LOG.info("LAST CHECK MINION RESPONSE BODY: {}", lastMinionQueryResultBody);
         }
     }
 
     @Then("User can retrieve a certificate for location {string}")
-    public void requestCertificateForLocation(String location) throws MalformedURLException {
+    public void requestCertificateForLocation(String location) {
         LOG.info("Requesting certificate for location {}.", location);
 
         Long locationId = commonQueryLocations().getData().getFindAllLocations().stream()
-            .filter(loc -> location.equals(loc.getLocation()))
-            .findFirst()
-            .map(LocationData::getId)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
+                .filter(loc -> location.equals(loc.getLocation()))
+                .findFirst()
+                .map(LocationData::getId)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
 
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(String.format(GQLQueryConstants.CREATE_MINION_CERTIFICATE, locationId));
@@ -289,18 +289,18 @@ public class MonitoringPolicyTestSteps {
                 existing.stop();
             }
             GenericContainer<?> minion = new GenericContainer<>(DockerImageName.parse(helper.getMinionImageNameSupplier().get()))
-                .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
-                .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
-                .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
-                .withEnv("MINION_ID", systemId)
-                .withEnv("USE_KUBERNETES", "false")
-                .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
-                .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
-                .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
-                .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
-                .withNetworkAliases("minion")
-                .withNetwork(Network.SHARED)
-                .withLabel("label", key);
+                    .withEnv("MINION_GATEWAY_HOST", helper.getMinionIngressSupplier().get())
+                    .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
+                    .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
+                    .withEnv("MINION_ID", systemId)
+                    .withEnv("USE_KUBERNETES", "false")
+                    .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
+                    .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
+                    .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
+                    .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
+                    .withNetworkAliases("minion")
+                    .withNetwork(Network.SHARED)
+                    .withLabel("label", key);
 
             File ca = helper.getMinionIngressCaCertificateSupplier().get();
             if (ca != null) {
@@ -313,7 +313,7 @@ public class MonitoringPolicyTestSteps {
             }
 
             minion.withCopyToContainer(Transferable.of(certificate.getValue()), "/opt/karaf/minion.p12");
-            minion.waitingFor(Wait.forLogMessage(".*Ignite node started OK.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
+            minion.waitingFor(Wait.forLogMessage(".* Listening on \\[all interfaces\\]:1162.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
             minion.start();
 
             return minion;
@@ -328,10 +328,10 @@ public class MonitoringPolicyTestSteps {
         GenericContainer<?> minion = minions.get(systemId);
 
         snmpContainer = new GenericContainer<>(DockerImageName.parse(helper.getNodeImageNameSupplier().get()))
-            .withNetworkAliases("nodes")
-            .withNetwork(minion.getNetwork())
-            .withCopyFileToContainer(MountableFile.forClasspathResource("BOOT-INF/classes/snmpd/snmpd.conf"), "/etc/snmp/snmpd.conf")
-            .withLabel("label", nodeLabel);
+                .withNetworkAliases("nodes")
+                .withNetwork(minion.getNetwork())
+                .withCopyFileToContainer(MountableFile.forClasspathResource("BOOT-INF/classes/snmpd/snmpd.conf"), "/etc/snmp/snmpd.conf")
+                .withLabel("label", nodeLabel);
 
         snmpContainer.waitingFor(Wait.forLogMessage(".*SNMPD Daemon started.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
         snmpContainer.start();
@@ -362,14 +362,14 @@ public class MonitoringPolicyTestSteps {
         LOG.info("SNMP node ip={}", snmpNodeIp);
 
         Long locationId = helper.commonQueryLocations().getData().getFindAllLocations().stream()
-            .filter(loc -> location.equals(loc.getLocation()))
-            .findFirst()
-            .map(LocationData::getId)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
+                .filter(loc -> location.equals(loc.getLocation()))
+                .findFirst()
+                .map(LocationData::getId)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
 
         String ADD_DISCOVERY_QUERY_WITH_TAG =
-            "mutation { createIcmpActiveDiscovery( request: { name: \"%s\", locationId: \"%s\", ipAddresses: [\"%s\"], snmpConfig: { readCommunities: [\"%s\"], ports: [%d]\n" +
-                " }, tags: [ { name: \"%s\" } ] } ) {id, name, ipAddresses, locationId, snmpConfig { readCommunities, ports } } }";
+                "mutation { createIcmpActiveDiscovery( request: { name: \"%s\", locationId: \"%s\", ipAddresses: [\"%s\"], snmpConfig: { readCommunities: [\"%s\"], ports: [%d]\n" +
+                        " }, tags: [ { name: \"%s\" } ] } ) {id, name, ipAddresses, locationId, snmpConfig { readCommunities, ports } } }";
 
         String query = String.format(ADD_DISCOVERY_QUERY_WITH_TAG, discoveryName, locationId, snmpNodeIp, community, port, policyTag);
 
@@ -379,7 +379,7 @@ public class MonitoringPolicyTestSteps {
         Response response = helper.executePostQuery(gqlQuery);
 
         assertEquals("add-discovery query failed: status=" + response.getStatusCode() + "; body=" + response.getBody().asString(),
-            200, response.getStatusCode());
+                200, response.getStatusCode());
 
         AddDiscoveryResult discoveryResult = response.getBody().as(AddDiscoveryResult.class);
 
@@ -387,28 +387,33 @@ public class MonitoringPolicyTestSteps {
         LOG.info("SNMP node id={}", snmpNodeId);
 
         assertTrue("create-node errors: " + discoveryResult.getErrors(),
-            (discoveryResult.getErrors() == null) || (discoveryResult.getErrors().isEmpty()));
+                (discoveryResult.getErrors() == null) || (discoveryResult.getErrors().isEmpty()));
     }
 
-    @When("The snmp node sends a coldStart SNMP trap to Minion")
-    public void sendColdStartTrap() throws  Exception{
-        sendTrap("1.3.6.1.6.3.1.1.5.1");
-    }
-    @And("The snmp node sends a warmStart SNMP trap to Minion")
-    public void sendWarmStartTrap() throws  Exception{
-        sendTrap("1.3.6.1.6.3.1.1.5.2");
+    @When("The snmp node sends a {string} to Minion")
+    public void sendTrap(String triggerEventType) throws Exception {
+
+        switch (triggerEventType) {
+            case "SNMP Cold Start" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.1");
+            case "SNMP Warm Start" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.2");
+            case "SNMP Authen Failure" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.5");
+            case "SNMP Link Down" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.3");
+            case "SNMP Link Up" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.4");
+            case "SNMP EGP Down" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.6");
+            default -> LOG.error("trigger event type not supported: " + triggerEventType);
+        }
     }
 
-    public void sendTrap(String oid) throws Exception {
+    private void sendTrapToMinion(String oid) throws Exception {
         String community = "public";
         String trapReceiver = minionIpaddress + ":1162";
         String[] command = {
-            "snmptrap",
-            "-v", "2c",
-            "-c", community,
-            trapReceiver,
-            "", // empty string for the trap specific arguments
-            oid
+                "snmptrap",
+                "-v", "2c",
+                "-c", community,
+                trapReceiver,
+                "", // empty string for the trap specific arguments
+                oid
         };
 
         Container.ExecResult sendTrapResult = snmpContainer.execInContainer(command);
@@ -416,14 +421,17 @@ public class MonitoringPolicyTestSteps {
         int exitCode = sendTrapResult.getExitCode();
         LOG.info("Docker sendTrapResult stdout={}, exitCode={}, sendTrapResult={}", stdout, exitCode, sendTrapResult.getStderr());
 
-        LOG.info("sleeping for 2sec ...");
-        Thread.sleep((2000));
     }
 
-    @Then("An alert should be triggered with severity {string}")
-    public void verifyAlertSeverity(String severity) throws Exception {
-        LOG.info("Waiting 2 seconds for the new alert...");
-        Thread.sleep(2000);
+    @Then("An alert with {string} should be triggered with severity {string}")
+    public void verifyAlertSeverity(String triggerEventName, String severity) {
+        Awaitility
+                .await()
+                .atMost(20, TimeUnit.SECONDS)
+                .pollDelay(5, TimeUnit.SECONDS)
+                .ignoreExceptions()
+                .until(() -> waitForAlerts(triggerEventName));
+
         String nodeLabel = getNodeLabel();
         JsonArray alerts = getAlerts(nodeLabel);
 
@@ -432,7 +440,8 @@ public class MonitoringPolicyTestSteps {
             JsonObject alert = (JsonObject) element;
             String nodeName = alert.get("nodeName").getAsString();
             LOG.info(nodeName + " : " + nodeLabel);
-            if (nodeName.equals(nodeLabel)) {
+            String eventUei = alert.get("uei").getAsString();
+            if (nodeName.equals(nodeLabel) && eventUei.endsWith(triggerEventName.replaceAll(" ", "_"))) {
                 alertSeverity = alert.get("severity").getAsString();
                 break;
             }
@@ -440,15 +449,31 @@ public class MonitoringPolicyTestSteps {
         assertEquals("Severity: " + severity + " was expected but got " + alertSeverity + " instead.", severity, alertSeverity);
     }
 
+    private boolean waitForAlerts(String triggerEventName) {
+        String nodeLabel = getNodeLabel();
+        JsonArray alerts = getAlerts(nodeLabel);
+
+        for (JsonElement element : alerts) {
+            JsonObject alert = (JsonObject) element;
+            String nodeName = alert.get("nodeName").getAsString();
+            LOG.info(nodeName + " : " + nodeLabel);
+            String eventUei = alert.get("uei").getAsString();
+            if (nodeName.equals(nodeLabel) && eventUei.endsWith(triggerEventName.replaceAll(" ", "_"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String getNodeLabel() {
 
         String request = """
-            query NodesTableParts { findAllNodes { id nodeLabel
-                  ipInterfaces {
-                    id
-                    ipAddress
-                  }
-                  }}""";
+                query NodesTableParts { findAllNodes { id nodeLabel
+                      ipInterfaces {
+                        id
+                        ipAddress
+                      }
+                      }}""";
 
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(request);
@@ -480,17 +505,18 @@ public class MonitoringPolicyTestSteps {
     public JsonArray getAlerts(String nodeLabel) {
 
         String request = """
-            query {
-              findAllAlerts(pageSize: 20, page: 0, timeRange: ALL, sortBy: "tenantId", sortAscending: true, nodeLabel:""" + " \"" + nodeLabel + "\"\n" + """
-                ) {
-                nextPage
-                alerts {
-                    severity
-                    label
-                    nodeName
-                }
-              }
-            }""";
+                query {
+                  findAllAlerts(pageSize: 20, page: 0, timeRange: ALL, sortBy: "tenantId", sortAscending: true, nodeLabel:""" + " \"" + nodeLabel + "\"\n" + """
+                    ) {
+                    nextPage
+                    alerts {
+                        severity
+                        label
+                        nodeName
+                        uei
+                    }
+                  }
+                }""";
 
         GQLQuery gqlQuery = new GQLQuery();
         gqlQuery.setQuery(request);
@@ -548,9 +574,9 @@ public class MonitoringPolicyTestSteps {
         List<MinionData> minionData = findAllMinionsQueryResult.getData().getFindAllMinions();
 
         List<MinionData> minionsAtLocation =
-            minionData.stream()
-                .filter((md) -> Objects.equals(md.getLocation().getLocation(), minionLocation))
-                .collect(Collectors.toList());
+                minionData.stream()
+                        .filter((md) -> Objects.equals(md.getLocation().getLocation(), minionLocation))
+                        .collect(Collectors.toList());
 
         LOG.debug("MINIONS for location: count={}; location={}", minionsAtLocation.size(), minionLocation);
 

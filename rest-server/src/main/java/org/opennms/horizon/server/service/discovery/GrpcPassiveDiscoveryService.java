@@ -79,4 +79,9 @@ public class GrpcPassiveDiscoveryService {
         List<PassiveDiscoveryDTO> list = client.listPassiveDiscoveries(headerUtil.getAuthHeader(env)).getDiscoveriesList();
         return Mono.just(list.stream().map(mapper::protoToDiscovery).toList());
     }
+
+    @GraphQLMutation
+    public Mono<Boolean> deletePassiveDiscovery(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.deletePassiveDiscovery(id, headerUtil.getAuthHeader(env)));
+    }
 }

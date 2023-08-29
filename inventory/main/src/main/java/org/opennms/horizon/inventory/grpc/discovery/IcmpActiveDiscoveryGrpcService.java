@@ -101,7 +101,16 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                                 StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
         var tenant = tenantLookup.lookupTenantId(Context.current());
         if (tenant.isPresent()) {
-            var activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
+            var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
+            IcmpActiveDiscoveryDTO activeDiscoveryConfig;
+            if (activeDiscovery.isEmpty()) {
+                activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
+            } else {
+                var icmpDiscovery = activeDiscovery.get();
+                // Discovery task need to be run always whenever there is an update, so first we need to remove current task
+                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
+                activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
+            }
             scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
                 Long.valueOf(request.getLocationId()), tenant.get(), activeDiscoveryConfig.getId());
             responseObserver.onNext(activeDiscoveryConfig);
@@ -121,7 +130,11 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
             if (activeDiscovery.isPresent()) {
                 var icmpDiscovery = activeDiscovery.get();
                 var result = discoveryService.deleteActiveDiscovery(request.getValue(), tenant.get());
+<<<<<<< HEAD
                 scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId());
+=======
+                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
+>>>>>>> develop
                 responseObserver.onNext(BoolValue.of(result));
                 responseObserver.onCompleted();
             } else  {

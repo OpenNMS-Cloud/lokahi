@@ -275,6 +275,13 @@ public class InventoryClient {
         return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).upsertDiscovery(passiveDiscovery);
     }
 
+    public Boolean deletePassiveDiscovery(long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        var result = passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteDiscovery(Int64Value.of(id));
+        return result.getValue();
+    }
+
     public PassiveDiscoveryListDTO listPassiveDiscoveries(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);

@@ -113,41 +113,41 @@ public class MinionHeartbeatConsumer {
 
     public void processHeartbeat(TenantLocationSpecificHeartbeatMessage message) {
         try {
-        String tenantId = message.getTenantId();
-        String locationId = message.getLocationId();
+            String tenantId = message.getTenantId();
+            String locationId = message.getLocationId();
 
-        Span.current().setAttribute("user", tenantId);
-        Span.current().setAttribute("location-id", locationId);
-        Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
+            Span.current().setAttribute("user", tenantId);
+            Span.current().setAttribute("location-id", locationId);
+            Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
 
-        Optional<MonitoringLocationDTO> location = locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
-        if (location.isEmpty()) {
-            log.info("Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
+            Optional<MonitoringLocationDTO> location = locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
+            if (location.isEmpty()) {
+                log.info("Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
+                    tenantId, locationId, message.getIdentity().getSystemId());
+                return;
+            }
+            log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
                 tenantId, locationId, message.getIdentity().getSystemId());
-            return;
+            monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
+
+            String systemId = message.getIdentity().getSystemId();
+            String key = tenantId + "_" + locationId + "-" + systemId;
+
+            Long lastRun = rpcMaps.get(key);
+
+            // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
+            // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
+            long currentTimeMs = clock.getCurrentTimeMs();
+            if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
+                rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
+                rpcMaps.put(key, currentTimeMs);
+            }
+
+            Span.current().setStatus(StatusCode.OK);
+        } catch (Exception e) {
+            log.error("Error while processing heartbeat message: ", e);
+            Span.current().recordException(e);
         }
-        log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
-            tenantId, locationId, message.getIdentity().getSystemId());
-        monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
-
-        String systemId = message.getIdentity().getSystemId();
-        String key = tenantId + "_" + locationId + "-" + systemId;
-
-        Long lastRun = rpcMaps.get(key);
-
-        // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
-        // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
-        long currentTimeMs = clock.getCurrentTimeMs();
-        if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
-            rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
-            rpcMaps.put(key, currentTimeMs);
-        }
-
-        Span.current().setStatus(StatusCode.OK);
-    } catch (Exception e) {
-        log.error("Error while processing heartbeat message: ", e);
-        Span.current().recordException(e);
-    }
     }
 
     @PreDestroy

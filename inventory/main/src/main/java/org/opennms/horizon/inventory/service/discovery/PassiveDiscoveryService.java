@@ -118,7 +118,6 @@ public class PassiveDiscoveryService {
         return mapper.modelToDto(discovery);
     }
 
-    @Transactional(readOnly = true)
     public List<PassiveDiscoveryDTO> getPassiveDiscoveries(String tenantId) {
         List<PassiveDiscovery> discoveries = repository.findByTenantId(tenantId);
         return discoveries.stream().map(mapper::modelToDto).toList();
@@ -128,7 +127,6 @@ public class PassiveDiscoveryService {
        return repository.findByTenantIdAndLocationId(tenantId, locationId).map(mapper::modelToDto).orElse(null);
     }
 
-    @Transactional
     public PassiveDiscoveryDTO toggleDiscovery(String tenantId, PassiveDiscoveryToggleDTO request) {
         Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndId(tenantId, request.getId());
         if (discoveryOpt.isPresent()) {
@@ -192,7 +190,7 @@ public class PassiveDiscoveryService {
             Long locationId = discovery.getLocationId();
 
             List<Node> detectedNodes = nodeRepository
-                .findByTenantIdLocationsAndMonitoredStateEquals(tenantId, locationId, MonitoredState.DETECTED);
+                .findByTenantIdAndLocationId(tenantId, locationId);
 
             if (!CollectionUtils.isEmpty(detectedNodes)) {
                 for (Node node : detectedNodes) {

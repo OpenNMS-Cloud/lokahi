@@ -252,7 +252,7 @@ const setMaxDataPointsAndUpdateCharts = (width: number) => {
   }
 }
 
-onUnmounted(() => flowsStore.$reset)
+onUnmounted(() => flowsStore.$reset())
 </script>
 
 <style scoped lang="scss">

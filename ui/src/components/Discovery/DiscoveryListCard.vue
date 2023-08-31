@@ -18,12 +18,9 @@
         :key="item.id"
         class="discovery-name pointer"
         :class="{ selected: selectedId == item.id }"
-        @click="$emit('selectDiscovery', item)"
+        @click="() => selectDiscovery(item)"
       >
-        <div
-          @click="() => selectDiscovery(item)"
-          class="name pointer"
-        >
+        <div class="name pointer">
           {{ item.name }}
         </div>
         <FeatherTooltip

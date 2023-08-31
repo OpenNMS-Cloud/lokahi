@@ -18,6 +18,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   })
   const { data: locations, execute: getLocations } = useQuery({
     query: ListLocationsForDiscoveryDocument,
+    cachePolicy: 'network-only',
     fetchOnMount: false
   })
 
@@ -29,6 +30,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
 
   const { data:tagsSearched, isFetching:isTagsSearchFetching } = useQuery({
     query: ListTagsSearchDocument,
+    cachePolicy: 'network-only',
     variables: {
       searchTerm:searchTerm.value
     }
@@ -50,6 +52,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   // active discoveries
   const { data: tagsByDiscoveryIdData, execute: tagsByDiscoveryIdExecute } = useQuery({
     query: TagsByActiveDiscoveryIdDocument,
+    cachePolicy: 'network-only',
     variables: discoveryId
   })
 
@@ -62,6 +65,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   // passive discoveries
   const { data: tagsByPassiveDiscoveryIdData, execute: tagsByPassiveDiscoveryIdExecute } = useQuery({
     query: TagsByPassiveDiscoveryIdDocument,
+    cachePolicy: 'network-only',
     variables: discoveryId
   })
 

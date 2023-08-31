@@ -41,6 +41,7 @@ declare module '@vue/runtime-core' {
     DeleteConfirmationModal: typeof import('./src/components/Common/DeleteConfirmationModal.vue')['default']
     DiscoveryAzureForm: typeof import('./src/components/Discovery/DiscoveryAzureForm.vue')['default']
     DiscoveryContentEditable: typeof import('./src/components/Discovery/DiscoveryContentEditable.vue')['default']
+    DiscoveryDeleteModal: typeof import('./src/components/Discovery/DiscoveryDeleteModal.vue')['default']
     DiscoveryHelpConfiguring: typeof import('./src/components/Discovery/DiscoveryHelpConfiguring.vue')['default']
     DiscoveryInstructions: typeof import('./src/components/Discovery/DiscoveryInstructions.vue')['default']
     DiscoveryListCard: typeof import('./src/components/Discovery/DiscoveryListCard.vue')['default']

@@ -62,6 +62,7 @@ export interface NewOrUpdatedDiscovery {
 
 export interface DiscoveryStore {
   discoveryFormActive: boolean;
+  deleteModalOpen: boolean;
   foundLocations: Array<any>;
   foundTags: Array<string>;
   loadedDiscoveries: Array<NewOrUpdatedDiscovery>;
@@ -69,15 +70,28 @@ export interface DiscoveryStore {
   locationSearch: string;
   locationError: string;
   selectedDiscovery: NewOrUpdatedDiscovery;
+  snmpV3Enabled: boolean;
   soloTypeEditor: boolean;
   soloTypePageActive: boolean;
   tagSearch: string;
   tagError: string;
+  validationErrors: {name?:string,tags?:string,locations?:string,meta?:{ipAddress?:string,communityString?:string,updPort?:string,clientId?:string,clientSubscription?:string,subscriptionId?:string,directoryId?:string}};
 }
 
 export interface ServerDiscovery {
   discoveryType?: string;
-  details?: {id?: number, tags?:Array<Tag>, ipAddresses?: Array<string>,locations?:Array<Location>,locationId:string,name:string,snmpConfig?: {ports: Array<string>,readCommunities:Array<string>}}
+  details?: {
+    id?: number, tags?:Array<Tag>, 
+    ipAddresses?: Array<string>,locations?:Array<Location>,
+    locationId:string,name:string,
+    clientId?:string,
+    directoryId?:string,
+    subscriptionId?:string,
+    clientSecret?:string,
+    snmpConfig?: {
+      ports: Array<string>,
+      readCommunities:Array<string>,
+    }}
 }
 export interface PassiveServerDiscovery {
 

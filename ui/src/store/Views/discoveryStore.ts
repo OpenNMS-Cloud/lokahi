@@ -2,14 +2,16 @@ import { defineStore } from 'pinia'
 import { useDiscoveryQueries } from '../Queries/discoveryQueries'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 import { DiscoveryStore } from '@/types/discovery'
-import { activeDiscoveryFromClientToServer, discoveryFromServerToClient } from '@/dtos/discovery.dto'
+import { clientToServerValidation, discoveryFromClientToServer, discoveryFromServerToClient } from '@/dtos/discovery.dto'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 
 const discoveryQueries = useDiscoveryQueries()
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
+   
     discoveryFormActive:false,
+    deleteModalOpen:false,
     foundLocations: [],
     foundTags: [],
     loading: false,
@@ -17,10 +19,12 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     locationError: '',
     locationSearch: '',
     selectedDiscovery: {},
+    snmpV3Enabled: false,
     soloTypeEditor: true,
     soloTypePageActive: false,
     tagError:'',
-    tagSearch: ''
+    tagSearch: '',
+    validationErrors:{}
   } as DiscoveryStore),
   actions: {
     async init(){
@@ -32,6 +36,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       for (const b of this.loadedDiscoveries){
         if ([DiscoveryType.ICMP,DiscoveryType.Azure].includes(b.type as DiscoveryType) && b.id){
           await discoveryQueries.getTagsByActiveDiscoveryId(b.id)
+          console.log('TAGS BY ACTIVE:',discoveryQueries.tagsByActiveDiscoveryId)
           b.tags = discoveryQueries.tagsByActiveDiscoveryId
         }
         if ([DiscoveryType.SyslogSNMPTraps].includes(b.type as DiscoveryType) && b.id){
@@ -55,10 +60,20 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     startNewDiscovery(){
       if (this.soloTypeEditor){
         this.soloTypePageActive = true
-      }else {
+        this.discoveryFormActive = false
+      } else {
         this.discoveryFormActive = true
       }
       this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{}}
+    },
+    createOrUpdateDiscovery(){
+      console.log('create!')
+    },
+    closeDeleteModal(){
+      this.deleteModalOpen = false
+    },
+    openDeleteModal(){
+      this.deleteModalOpen = true
     },
     editDiscovery(item: any){
       this.discoveryFormActive = true
@@ -80,7 +95,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     removeTag(tag: any){
       this.selectedDiscovery.tags = this.selectedDiscovery.tags?.filter((d) => d.id !== tag.id)
     },
-
     tagSelected(tag: any) {
       this.selectedDiscovery.tags?.push(discoveryQueries.tagsSearched.find((d) => d.name === tag) as any)
       this.foundTags = []
@@ -98,7 +112,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.tagSearch = searchVal
       await discoveryQueries.getTagsSearch(searchVal)
       this.foundTags = discoveryQueries.tagsSearched.map((b) => b.name || '')
-
     },
     toggleDiscovery(){
       this.discoveryFormActive = !this.discoveryFormActive
@@ -113,12 +126,17 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.loading = true
       await discoveryMutations.deleteActiveIcmpDiscovery({request:{id:this.selectedDiscovery.id}})
       this.loading = false
+      this.closeDeleteModal()
     },
     async saveSelectedDiscovery() {
       const discoveryMutations = useDiscoveryMutations()
       this.loading = true
-      await discoveryMutations.createOrUpdateDiscovery(activeDiscoveryFromClientToServer(this.selectedDiscovery))
-      await this.init()
+      const {isValid,validationErrors} = await clientToServerValidation(this.selectedDiscovery)
+      this.validationErrors = validationErrors
+      if (isValid){
+        await discoveryMutations.createOrUpdateDiscovery(discoveryFromClientToServer(this.selectedDiscovery))
+        await this.init()
+      }
       this.loading = false
     }
   }

@@ -55,14 +55,16 @@
       class="discovery"
     >
       <div class="flex-title">
-        <FeatherBackButton
+        <!--<FeatherBackButton
           @click="discoveryStore.backToTypePage"
           v-if="discoveryStore.discoveryFormActive"
           >Cancel</FeatherBackButton
-        >
+        >-->
         <h2 class="title">{{ discoveryCopy.title }} | {{ selectedTypeOption?._text }}</h2>
       </div>
 
+      <h3>Basic Information</h3>
+      <p class="margin-bottom">Optional supporting text.</p>
       <FeatherInput
         label="Discovery Name"
         :modelValue="discoveryStore.selectedDiscovery.name"
@@ -101,6 +103,36 @@
           </FeatherChip>
         </FeatherChipList>
       </div>
+
+      <FeatherSelect
+        v-if="typeVisible"
+        label="Type"
+        :options="typeOptions"
+        :modelValue="selectedTypeOption"
+        @update:modelValue="(b) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
+      />
+      <h3>Connection Information</h3>
+      <p class="margin-bottom">Set connection information like IP address ranges, port, and community strings.</p>
+      <FeatherTabContainer
+        :modelValue="selectedTab"
+        @update:modelValue="changeSnmpType"
+        v-if="discoveryStore.snmpV3Enabled"
+      >
+        <template v-slot:tabs>
+          <FeatherTab>SNMP V1 or V1</FeatherTab>
+          <FeatherTab>SNMP V3</FeatherTab>
+        </template>
+      </FeatherTabContainer>
+      <DiscoveryMetaInformation
+        :discovery="discoveryStore.selectedDiscovery"
+        :updateDiscoveryValue="discoveryStore.setSelectedDiscoveryValue"
+      />
+
+      <h3>Tag Discovered Nodes (optional)</h3>
+      <p class="margin-bottom">
+        A tag is an optional, arbitrary label that you can associate with a discovered node or device and its components
+        for easy and flexible filtering.
+      </p>
       <div class="auto-with-chips">
         <AtomicAutocomplete
           inputLabel="Tags"
@@ -132,37 +164,26 @@
           </FeatherChip>
         </FeatherChipList>
       </div>
-      <FeatherSelect
-        v-if="typeVisible"
-        label="Type"
-        :options="typeOptions"
-        :modelValue="selectedTypeOption"
-        @update:modelValue="(b) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
-      />
-      <FeatherTabContainer
-        :modelValue="selectedTab"
-        @update:modelValue="changeSnmpType"
-      >
-        <template v-slot:tabs>
-          <FeatherTab>SNMP V1 or V1</FeatherTab>
-          <FeatherTab>SNMP V3</FeatherTab>
-        </template>
-      </FeatherTabContainer>
-      <DiscoveryMetaInformation
-        :discovery="discoveryStore.selectedDiscovery"
-        :updateDiscoveryValue="discoveryStore.setSelectedDiscoveryValue"
-      />
       <div style="display: flex; justify-content: flex-end; width: 100%">
         <FeatherButton
           v-if="discoveryStore.selectedDiscovery.id"
-          @click="discoveryStore.deleteDiscovery"
+          @click="discoveryStore.openDeleteModal"
+          secondary
           >Delete Discovery</FeatherButton
         >
-        <FeatherButton
-          primary
-          @click="discoveryStore.cancelUpdate"
-          >{{ discoveryCopy.button }}</FeatherButton
-        >
+        <div style="margin-left: auto">
+          <FeatherButton
+            text
+            @click="discoveryStore.backToTypePage"
+            >Back</FeatherButton
+          >
+
+          <FeatherButton
+            primary
+            @click="discoveryStore.saveSelectedDiscovery"
+            >{{ discoveryCopy.button }}</FeatherButton
+          >
+        </div>
       </div>
     </section>
     <section
@@ -172,14 +193,15 @@
       <p>Select a discovery on the left, or click Add Discovery</p>
     </section>
   </div>
+  <DiscoveryDeleteModal />
   <DiscoverySuccessModal
     ref="successModal"
     @close="
       () => {
-        selectedDiscovery = null
+        discoveryStore.cancelUpdate()
       }
     "
-    :startNewDiscovery="handleNewDiscovery"
+    :startNewDiscovery="discoveryStore.startNewDiscovery"
   />
   <DiscoveryInstructions
     :instructionsType="helpType"
@@ -215,16 +237,20 @@ const typeVisible = false
 onMounted(() => {
   discoveryStore.init()
 })
-const typeOptions = [
-  { value: DiscoveryType.ICMP, _text: 'ICMP' },
-  { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
-  { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
-  { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' },
+const typeOptions = ref([
+  { value: DiscoveryType.ICMP, _text: 'ICMP/SNMP' },
   { value: DiscoveryType.Azure, _text: 'Azure' },
-  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Syslogs' }
-]
+  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Syslog Traps' }
+])
+if (discoveryStore.snmpV3Enabled) {
+  typeOptions.value = typeOptions.value.concat([
+    { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
+    { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
+    { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' }
+  ])
+}
 const selectedTypeOption = computed(() => {
-  return typeOptions.find((d) => d.value === discoveryStore.selectedDiscovery.type)
+  return typeOptions.value.find((d) => d.value === discoveryStore.selectedDiscovery.type)
 })
 const addIcon: IIcon = {
   image: markRaw(AddIcon)
@@ -382,7 +408,9 @@ const activeDiscoveryTypes = [
 
   h2 {
     margin-bottom: 0;
-    margin-left: 18px;
   }
+}
+.margin-bottom {
+  margin-bottom: 18px;
 }
 </style>

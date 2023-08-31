@@ -37,6 +37,7 @@ import org.opennms.horizon.inventory.component.InternalEventProducer;
 import org.opennms.horizon.inventory.model.MonitoredServiceState;
 import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceStateRepository;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
@@ -53,6 +54,8 @@ public class MonitorResponseService {
     private final MonitoredServiceStateRepository serviceStateRepository;
 
     private final MonitoredServiceRepository monitoredServiceRepository;
+
+    private final MonitoringLocationRepository monitoringLocationRepository;
 
     private final InternalEventProducer eventProducer;
 
@@ -102,6 +105,8 @@ public class MonitorResponseService {
         eventBuilder.setProducedTimeMs(monitorResponse.getTimestamp());
         eventBuilder.setDescription(monitorResponse.getReason());
         eventBuilder.setLocationId(locationId);
+        monitoringLocationRepository.findByIdAndTenantId(Long.parseLong(locationId), tenantId)
+            .ifPresent(l ->eventBuilder.setLocationName(l.getLocation()));
         var serviceNameParam = EventParameter.newBuilder().setName("serviceName")
             .setValue(monitorResponse.getMonitorType().name()).build();
         var serviceIdParam = EventParameter.newBuilder().setName("serviceId")

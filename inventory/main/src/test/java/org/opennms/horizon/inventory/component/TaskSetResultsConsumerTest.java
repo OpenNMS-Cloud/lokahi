@@ -14,6 +14,7 @@ import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceState;
 import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceStateRepository;
+import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.service.taskset.response.MonitorResponseService;
 import org.opennms.horizon.inventory.service.taskset.response.ScannerResponseService;
 import org.opennms.horizon.shared.events.EventConstants;
@@ -48,6 +49,8 @@ public class TaskSetResultsConsumerTest {
 
     private MonitoredServiceStateRepository mockMonitoredServiceStateRepository;
 
+    private MonitoringLocationRepository mockMonitoringLocationRepository;
+
     private InternalEventProducer mockEventProducer;
 
     @BeforeEach
@@ -57,11 +60,13 @@ public class TaskSetResultsConsumerTest {
 
         mockMonitoredServiceStateRepository = Mockito.mock(MonitoredServiceStateRepository.class);
         mockMonitoredServiceRepository = Mockito.mock(MonitoredServiceRepository.class);
+        mockMonitoringLocationRepository = Mockito.mock(MonitoringLocationRepository.class);
         mockEventProducer = Mockito.mock(InternalEventProducer.class);
 
         monitorResponseService = Mockito.spy(new MonitorResponseService(
             mockMonitoredServiceStateRepository,
             mockMonitoredServiceRepository,
+            mockMonitoringLocationRepository,
             mockEventProducer));
 
         target = new TaskSetResultsConsumer(mockScannerResponseService, monitorResponseService);

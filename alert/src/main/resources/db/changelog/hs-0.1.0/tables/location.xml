@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="fchu" id="0.1.0-location">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="location"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="location">
+            <column name="id" type="BIGINT"/>
+
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="location_name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="location" columnNames="id" constraintName="pk_location_id"/>
+    </changeSet>
+</databaseChangeLog>

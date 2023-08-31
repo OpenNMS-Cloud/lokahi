@@ -46,9 +46,9 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.LocationRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.alertservice.grpc.client.InventoryClient;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -80,9 +80,9 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     private final AlertMapper alertMapper;
     private final AlertRepository alertRepository;
     private final NodeRepository nodeRepository;
+    private final LocationRepository locationRepository;
     private final AlertService alertService;
     private final TenantLookup tenantLookup;
-    private final InventoryClient inventoryClient;
 
     @Override
     @Transactional
@@ -160,8 +160,8 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
                     Node node = nodes.get(nodeId);
                     alertBuilder.setNodeName(node.getNodeLabel());
                     if (node.getMonitoringLocationId() != 0) {
-                        inventoryClient.getLocationById(node.getMonitoringLocationId(), node.getTenantId())
-                            .ifPresent(locationDTO -> alertBuilder.setLocation(locationDTO.getLocation()));
+                        locationRepository.findByIdAndTenantId(node.getMonitoringLocationId(), node.getTenantId())
+                            .ifPresent(l -> alertBuilder.setLocation(l.getLocationName()));
                     }
                 }
             } catch (NumberFormatException ex) {

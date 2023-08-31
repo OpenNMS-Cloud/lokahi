@@ -50,10 +50,10 @@ import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.LocationRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.GrpcTenantLookupImpl;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.alertservice.grpc.client.InventoryClient;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,7 +64,12 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private AlertServiceGrpc.AlertServiceBlockingStub stub;
@@ -75,9 +80,10 @@ class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private AlertMapper mockAlertMapper;
     private AlertRepository mockAlertRepository;
     private NodeRepository mockNodeRepository;
-    protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
 
-    private InventoryClient mockInventoryClient;
+    private LocationRepository mockLocationRepository;
+
+    protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
 
 
     @BeforeEach
@@ -86,8 +92,8 @@ class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
         mockAlertRepository = mock(AlertRepository.class);
         mockNodeRepository = mock(NodeRepository.class);
         mockAlertMapper = mock(AlertMapper.class);
-        mockInventoryClient = mock(InventoryClient.class);
-        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockNodeRepository, mockAlertService, tenantLookup, mockInventoryClient);
+        mockLocationRepository = mock(LocationRepository.class);
+        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockNodeRepository, mockLocationRepository, mockAlertService, tenantLookup);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
         stub = AlertServiceGrpc.newBlockingStub(channel);

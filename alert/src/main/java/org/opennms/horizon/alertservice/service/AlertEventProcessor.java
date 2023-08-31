@@ -38,15 +38,16 @@ import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
+import org.opennms.horizon.alertservice.db.entity.Location;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.LocationRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.alertservice.grpc.client.InventoryClient;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.events.proto.Event;
 import org.slf4j.Logger;
@@ -87,9 +88,10 @@ public class AlertEventProcessor {
 
     private final TenantLookup tenantLookup;
 
-    private final InventoryClient inventoryClient;
-
     private final NodeRepository nodeRepository;
+
+    private final LocationRepository locationRepository;
+
     private Counter eventsWithoutAlertDataCounter;
 
 
@@ -108,9 +110,9 @@ public class AlertEventProcessor {
         }
         return dbAlerts.stream().map(dbAlert -> {
             var alert = Alert.newBuilder(alertMapper.toProto(dbAlert));
-            inventoryClient.getLocationById(e.getLocationId(), e.getTenantId()).ifPresent(location ->
-                alert.setLocation(location.getLocation())
-            );
+
+            saveLocation(e);
+            alert.setLocation(e.getLocationName());
             nodeRepository.findByIdAndTenantId(e.getNodeId(), e.getTenantId()).ifPresent(node ->
                 alert.setNodeName(node.getNodeLabel())
             );
@@ -119,7 +121,6 @@ public class AlertEventProcessor {
             return alert.build();
         }).toList();
     }
-
 
     protected List<org.opennms.horizon.alertservice.db.entity.Alert> addOrReduceEventAsAlert(Event event) {
         List<AlertDefinition> alertDefinitions = alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei());
@@ -319,5 +320,16 @@ public class AlertEventProcessor {
         List<Long> monitoringPolicyId,
         AlertCondition alertCondition
     ) {
+    }
+
+    /**
+     * Save for location id > name looking during query
+     */
+    private void saveLocation(final Event e){
+        Location location = new Location();
+        location.setId(Long.parseLong(e.getLocationId()));
+        location.setLocationName(e.getLocationName());
+        location.setTenantId(e.getTenantId());
+        locationRepository.save(location);
     }
 }

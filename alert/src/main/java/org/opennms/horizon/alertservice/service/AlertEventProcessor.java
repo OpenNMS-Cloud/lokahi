@@ -326,10 +326,17 @@ public class AlertEventProcessor {
      * Save for location id > name looking during query
      */
     private void saveLocation(final Event e){
-        Location location = new Location();
-        location.setId(Long.parseLong(e.getLocationId()));
-        location.setLocationName(e.getLocationName());
-        location.setTenantId(e.getTenantId());
-        locationRepository.save(location);
+        if (!e.hasField(Event.getDescriptor().findFieldByNumber(Event.LOCATION_ID_FIELD_NUMBER))) {
+            return;
+        }
+        try {
+            Location location = new Location();
+            location.setId(Long.parseLong(e.getLocationId()));
+            location.setLocationName(e.getLocationName());
+            location.setTenantId(e.getTenantId());
+            locationRepository.save(location);
+        } catch (Exception ex) {
+            LOG.warn("Fail to store location cache: {}, tenantId: {} error: {}", e.getLocationId(), e.getTenantId(), ex.getMessage());
+        }
     }
 }

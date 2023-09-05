@@ -178,49 +178,5 @@ export const useFlowsStore = defineStore('flowsStore', {
         this.filters.isExportersLoading = false
       }, 500)
     },
-    // This method is needed as currently on update of chart data, new data values are not being assigned a colour.
-    randomColours(index: number, opacity = false) {
-      const defaultColors = [
-        '#3366CC',
-        '#DC3912',
-        '#FF9900',
-        '#109618',
-        '#990099',
-        '#3B3EAC',
-        '#0099C6',
-        '#DD4477',
-        '#66AA00',
-        '#B82E2E',
-        '#316395',
-        '#994499',
-        '#22AA99',
-        '#AAAA11',
-        '#6633CC',
-        '#E67300',
-        '#8B0707',
-        '#329262',
-        '#5574A6',
-        '#651067'
-      ]
-      const addOpacity = function (hex: string, opacity: number) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-        return result
-          ? 'rgba(' +
-              parseInt(result[1], 16) +
-              ', ' +
-              parseInt(result[2], 16) +
-              ', ' +
-              parseInt(result[3], 16) +
-              ', ' +
-              opacity +
-              ')'
-          : hex
-      }
-      if (opacity) {
-        return addOpacity(defaultColors[index], 0.3)
-      } else {
-        return defaultColors[index]
-      }
-    }
   }
 })

@@ -38,29 +38,6 @@ describe('Flows', () => {
     expect(wrapper).toBeTruthy()
   })
 
-  test('The Flows Store randomColours() should return a Hex', () => {
-    const store = useFlowsStore()
-    //Get random colour user store method
-    const randomHex = store.randomColours(0)
-    function isHex(num: string) {
-      return Boolean(num.match(/^#[0-9A-F]{6}$/i))
-    }
-    //Check colour is a Hex
-    const isValueHex = isHex(randomHex)
-    expect(isValueHex).toBeTruthy()
-
-    function isRGBA(num: string) {
-      return Boolean(
-        num.match(
-          /^rgba[(](?:\s*0*(?:\d\d?(?:\.\d+)?(?:\s*%)?|\.\d+\s*%|100(?:\.0*)?\s*%|(?:1\d\d|2[0-4]\d|25[0-5])(?:\.\d+)?)\s*,){3}\s*0*(?:\.\d+|1(?:\.0*)?)\s*[)]$/gm
-        )
-      )
-    }
-    const randomRGBA = store.randomColours(0, true)
-    const isValueRGBA = isRGBA(randomRGBA)
-    expect(isValueRGBA).toBeTruthy()
-  })
-
   // test('The Flows store should populate datasets on Mount', () => {
   //   const store = useFlowsStore()
   //   expect(store.populateData).toHaveBeenCalledOnce()

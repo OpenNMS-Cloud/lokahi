@@ -25,7 +25,7 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js'
-import { humanFileSize } from '../utils'
+import { humanFileSize, getColorFromFeatherVar } from '../utils'
 const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -88,7 +88,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           useBorderRadius: true,
           padding: 16,
           borderRadius: 1,
-          color: isDark ? 'rgba(10, 12, 27, .9)' : '#000000',
+          color: colorFromFeatherVar.value,
           font: {
             weight: 400
           }
@@ -126,7 +126,8 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
         },
         ticks: {
-          callback: (val: number) => props.format(new Date(val).toISOString())
+          callback: (val: number) => props.format(new Date(val).toISOString()),
+          color: colorFromFeatherVar.value
         }
       },
       y: {
@@ -136,7 +137,8 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         ticks: {
           callback: function (value: any) {
             return humanFileSize(value)
-          }
+          },
+          color: colorFromFeatherVar.value
         },
         title: {
           display: true,
@@ -147,9 +149,10 @@ const chartOptions = computed<ChartOptions<any>>(() => {
   }
 })
 
+const colorFromFeatherVar = computed(() => isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface'))
+
 onThemeChange(() => {
   chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-  chartOptions.value.plugins.legend.labels.color = isDark.value ? 'rgba(10, 12, 27, .9)' : '#000000'
 })
 
 const getChartAreaWidth = () => {

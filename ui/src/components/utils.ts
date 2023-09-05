@@ -105,3 +105,47 @@ export const humanFileSize = (bytes: number, si = true, dp = 1) => {
 
   return bytes.toFixed(dp) + ' ' + units[u];
 }
+
+export const getColorFromFeatherVar = (indexOrString: number | string, opacity = false) => {
+
+  let color = '#FFF'
+  
+  const defaultColors = [
+    '--feather-categorical1',
+    '--feather-categorical2',
+    '--feather-categorical3',
+    '--feather-categorical4',
+    '--feather-categorical5',
+    '--feather-categorical6',
+    '--feather-categorical7',
+    '--feather-categorical8',
+    '--feather-categorical9',
+    '--feather-categorical0',
+  ]
+  
+  if (typeof indexOrString === 'string') {
+    color = getComputedStyle(document.documentElement).getPropertyValue(`--feather-${indexOrString}`)
+  } else {
+    color =  getComputedStyle(document.documentElement).getPropertyValue(defaultColors[indexOrString])
+  }
+
+  const addOpacity = function (hex: string, opacity: number) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result
+      ? 'rgba(' +
+          parseInt(result[1], 16) +
+          ', ' +
+          parseInt(result[2], 16) +
+          ', ' +
+          parseInt(result[3], 16) +
+          ', ' +
+          opacity +
+          ')'
+      : hex
+  }
+  if (opacity) {
+    return addOpacity(color, 0.3)
+  } else {
+    return color
+  }
+}

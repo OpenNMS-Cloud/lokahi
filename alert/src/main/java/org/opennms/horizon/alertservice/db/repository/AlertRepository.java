@@ -62,14 +62,14 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
         "WHERE a.severity in (:severityList) " +
         "AND a.lastEventTime between :start and :end " +
         "AND a.managedObjectType = :managedObjectType " +
-        "AND a.managedObjectInstance = :managedObjectInstance " +
+        "AND a.managedObjectInstance in (:managedObjectInstance) " +
         "AND a.tenantId = :tenantId ",
         countQuery = "SELECT count(a) " +
             "FROM Alert a " +
             "WHERE a.severity in (:severityList) " +
             "AND a.lastEventTime between :start and :end " +
             "AND a.managedObjectType = :managedObjectType " +
-            "AND a.managedObjectInstance = :managedObjectInstance " +
+            "AND a.managedObjectInstance in (:managedObjectInstance) " +
             "AND a.tenantId = :tenantId ")
     Page<Alert> findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(@Param("severityList") List<Severity> severityList, @Param("start") Date start, @Param("end") Date end, @Param("managedObjectType") ManagedObjectType managedObjectType, @Param("managedObjectInstance") List<String> managedObjectInstance, Pageable pageable, @Param("tenantId") String tenantId);
 

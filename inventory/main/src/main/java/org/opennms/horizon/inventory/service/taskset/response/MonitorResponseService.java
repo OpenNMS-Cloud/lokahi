@@ -42,7 +42,6 @@ import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -59,7 +58,6 @@ public class MonitorResponseService {
 
     private final InternalEventProducer eventProducer;
 
-    @Transactional
     public void updateMonitoredState(String tenantId, String locationId, MonitorResponse monitorResponse) {
         if (monitorResponse.getMonitorType().equals(MonitorType.ECHO)) {
             // No need to handle Echo monitor response

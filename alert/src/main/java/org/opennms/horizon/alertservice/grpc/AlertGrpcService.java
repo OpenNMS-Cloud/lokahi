@@ -85,7 +85,6 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     private final TenantLookup tenantLookup;
 
     @Override
-    @Transactional
     public void listAlerts(ListAlertsRequest request, StreamObserver<ListAlertsResponse> responseObserver) {
         // Extract the page size, page and sort values from the request
         int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;

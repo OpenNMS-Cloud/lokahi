@@ -22,6 +22,7 @@
   <div class="container">
     <section class="my-discovery">
       <div class="my-discovery-inner">
+        {{ console.log('HIH!', discoveryStore.loadedDiscoveries) }}
         <DiscoveryListCard
           title="My Active Discoveries"
           :list="discoveryStore.loadedDiscoveries.filter((d) => d.type && activeDiscoveryTypes.includes(d.type as DiscoveryType))"
@@ -68,6 +69,7 @@
       <FeatherInput
         label="Discovery Name"
         :modelValue="discoveryStore.selectedDiscovery.name"
+        :error="discoveryStore.validationErrors.name"
         @update:model-value="(name) => discoveryStore.setSelectedDiscoveryValue('name', name)"
       />
 
@@ -82,7 +84,7 @@
           :results="discoveryStore.foundLocations"
           :textChanged="discoveryStore.searchForLocation"
           :wrapperClicked="() => discoveryStore.searchForLocation('')"
-          :errMsg="discoveryStore.locationError"
+          :errMsg="discoveryStore.validationErrors.locations"
           :disabled="discoveryStore.loading"
           :allowNew="false"
         />
@@ -125,7 +127,8 @@
       </FeatherTabContainer>
       <DiscoveryMetaInformation
         :discovery="discoveryStore.selectedDiscovery"
-        :updateDiscoveryValue="discoveryStore.setSelectedDiscoveryValue"
+        :discoveryErrors="discoveryStore.validationErrors"
+        :updateDiscoveryValue="discoveryStore.setMetaSelectedDiscoveryValue"
       />
 
       <h3>Tag Discovered Nodes (optional)</h3>
@@ -139,6 +142,7 @@
           :inputValue="discoveryStore.tagSearch"
           :itemClicked="discoveryStore.tagSelected"
           :loading="discoveryStore.loading"
+          :error="discoveryStore.validationErrors.tags"
           :resultsVisible="!!discoveryStore.foundTags.length"
           :outsideClicked="discoveryStore.clearTagAuto"
           :results="discoveryStore.foundTags"
@@ -185,12 +189,6 @@
           >
         </div>
       </div>
-    </section>
-    <section
-      v-if="!discoveryStore.soloTypePageActive && !discoveryStore.discoveryFormActive"
-      class="discovery"
-    >
-      <p>Select a discovery on the left, or click Add Discovery</p>
     </section>
   </div>
   <DiscoveryDeleteModal />

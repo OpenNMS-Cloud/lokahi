@@ -3,20 +3,23 @@
     <div :class="['flex-boxes', isICMP ? 'threefer' : 'twofer']">
       <FeatherTextarea
         v-if="isICMP"
-        :modelValue="(discovery?.meta as DiscoverySNMPMeta)?.ipRanges?.join(';')"
-        @updateModelValue="(e: string) => updateDiscoveryValue('ipRanges',e)"
+        :modelValue="(discovery?.meta as DiscoverySNMPMeta)?.ipRanges"
+        @update:modelValue="(e: string) => updateDiscoveryValue('ipRanges',e)"
+        :error="discoveryErrors?.['meta.ipRanges']"
         label="ip addresses"
       />
       <FeatherTextarea
         v-if="isSnmpTrapOrICMPV1"
-        :modelValue="(discovery?.meta as DiscoveryTrapMeta)?.communityStrings?.join(',')"
-        @updateModelValue="(e: string) => updateDiscoveryValue('communityStrings',e)"
+        :modelValue="(discovery?.meta as DiscoveryTrapMeta)?.communityStrings"
+        @update:modelValue="(e: string) => updateDiscoveryValue('communityStrings',e)"
+        :error="discoveryErrors?.['meta.communityStrings']"
         label="community string"
       />
       <FeatherTextarea
         v-if="isSnmpTrapOrICMPV1"
-        :modelValue="(discovery?.meta as DiscoveryTrapMeta)?.udpPorts?.join(',')"
-        @updateModelValue="(e: string) => updateDiscoveryValue('udpPorts',e)"
+        :modelValue="(discovery?.meta as DiscoveryTrapMeta)?.udpPorts"
+        @update:modelValue="(e: string) => updateDiscoveryValue('udpPorts',e)"
+        :error="discoveryErrors?.['meta.']"
         label="udp port"
       />
     </div>
@@ -26,16 +29,19 @@
         <FeatherInput
           label="Username"
           :modelValue="(discovery?.meta as DiscoverySNMPV3Auth).username"
-          @updateModelValue="(e: string) => updateDiscoveryValue('username',e)"
+          :error="discoveryErrors?.username"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('username',String(e))"
         />
         <FeatherInput
           label="Context"
+          :error="discoveryErrors?.context"
           :modelValue="(discovery?.meta as DiscoverySNMPV3Auth).context"
-          @updateModelValue="(e: string) => updateDiscoveryValue('context',e)"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('context',String(e))"
         />
       </div>
     </div>
 
+    {{ log('DSDFSdf', discoveryErrors) }}
     <div v-if="isICMPV3">
       <FeatherTabContainer
         :modelValue="selectedTab"
@@ -55,12 +61,13 @@
           class="password"
           type="password"
           label="Password"
+          :error="discoveryErrors?.password"
           :modelValue="(discovery?.meta as DiscoverySNMPV3Auth).password"
-          @updateModelValue="(e: string) => updateDiscoveryValue('password',e)"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('password',String(e))"
         />
         <FeatherCheckbox
           :modelValue="(discovery?.meta as DiscoverySNMPV3Auth).usePasswordAsKey"
-          @updateModelValue="(e: string) => updateDiscoveryValue('usePasswordAsKey',e)"
+          @update:modelValue="(e?: boolean) => updateDiscoveryValue('usePasswordAsKey',String(e))"
           >Use password as key</FeatherCheckbox
         >
       </div>
@@ -72,12 +79,13 @@
           class="password"
           type="password"
           label="Password"
+          :error="discoveryErrors?.privacy"
           :modelValue="(discovery?.meta as DiscoverySNMPV3AuthPrivacy).privacy"
-          @updateModelValue="(e: string) => updateDiscoveryValue('privacy',e)"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('privacy',String(e))"
         />
         <FeatherCheckbox
           :modelValue="(discovery?.meta as DiscoverySNMPV3AuthPrivacy).usePrivacyAsKey"
-          @updateModelValue="(e: string) => updateDiscoveryValue('usePrivacyAsKey',e)"
+          @update:modelValue="(e?: boolean) => updateDiscoveryValue('usePrivacyAsKey',String(e))"
           >Use password as key</FeatherCheckbox
         >
       </div>
@@ -87,24 +95,28 @@
         <FeatherInput
           label="Client ID"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientId"
-          @updateModelValue="(e: string) => updateDiscoveryValue('clientId',e)"
+          :error="discoveryErrors?.clientId"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientId',String(e))"
         />
         <FeatherInput
           label="Client Secret"
+          :error="discoveryErrors?.clientSecret"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientSecret"
-          @updateModelValue="(e: string) => updateDiscoveryValue('clientSecret',e)"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientSecret',String(e))"
         />
       </div>
       <div class="azure-row">
         <FeatherInput
           label="Client Subscription ID"
+          :error="discoveryErrors?.subscriptionId"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientSubscriptionId"
-          @updateModelValue="(e: string) => updateDiscoveryValue('clientSubscriptionId',e)"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientSubscriptionId',String(e))"
         />
         <FeatherInput
           label="Directory ID"
+          :error="discoveryErrors?.directoryId"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).directoryId"
-          @updateModelValue="(e: string) => updateDiscoveryValue('directoryId',e)"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('directoryId',String(e))"
         />
       </div>
     </div>
@@ -122,11 +134,12 @@ import {
   DiscoveryAzureMeta
 } from '@/types/discovery'
 import { FeatherTabContainer } from '@featherds/tabs'
-
 const props = defineProps({
   discovery: { type: Object as PropType<NewOrUpdatedDiscovery>, default: () => ({}) },
+  discoveryErrors: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   updateDiscoveryValue: { type: Function as PropType<(key: string, value: string) => void>, default: () => ({}) }
 })
+const log = console.log
 const selectedTab = ref()
 const changeSecurityType = (type?: number) => {
   let setType = DiscoveryType.ICMPV3NoAuth

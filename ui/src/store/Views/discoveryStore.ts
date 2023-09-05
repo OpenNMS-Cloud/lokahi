@@ -24,7 +24,8 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     soloTypePageActive: false,
     tagError:'',
     tagSearch: '',
-    validationErrors:{}
+    validationErrors:{},
+    validateOnKeyUp: false
   } as DiscoveryStore),
   actions: {
     async init(){
@@ -88,6 +89,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.locations?.push(discoveryQueries.locations.find((d) => d.location === location))
       this.foundLocations = []
       this.locationSearch = ''
+      if (this.validateOnKeyUp){
+        this.validateDiscovery()
+      }
     },
     removeLocation(location: any){
       this.selectedDiscovery.locations = this.selectedDiscovery.locations?.filter((d) => d.id !== location.id)
@@ -99,9 +103,23 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.tags?.push(discoveryQueries.tagsSearched.find((d) => d.name === tag) as any)
       this.foundTags = []
       this.tagSearch = ''
+      if (this.validateOnKeyUp){
+        this.validateDiscovery()
+      }
+    },
+    setMetaSelectedDiscoveryValue(key:string,value:any){
+      console.log('SELECTED',this.selectedDiscovery);
+      (this.selectedDiscovery as Record<string,any>).meta[key] = value
+      console.log('SELECTED',this.selectedDiscovery)
+      if (this.validateOnKeyUp){
+        this.validateDiscovery()
+      }
     },
     setSelectedDiscoveryValue(key:string,value:any){
       (this.selectedDiscovery as Record<string,any>)[key] = value
+      if (this.validateOnKeyUp){
+        this.validateDiscovery()
+      }
     },
     activateForm(key: string, value: any){
       this.setSelectedDiscoveryValue(key,value)
@@ -128,14 +146,22 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.loading = false
       this.closeDeleteModal()
     },
+    async validateDiscovery(){
+      console.log('validating:',this.selectedDiscovery)
+      const {isValid,validationErrors} = await clientToServerValidation(this.selectedDiscovery)
+      this.validationErrors = validationErrors
+      return isValid
+    },
     async saveSelectedDiscovery() {
       const discoveryMutations = useDiscoveryMutations()
       this.loading = true
-      const {isValid,validationErrors} = await clientToServerValidation(this.selectedDiscovery)
-      this.validationErrors = validationErrors
+      const isValid = await this.validateDiscovery()
       if (isValid){
         await discoveryMutations.createOrUpdateDiscovery(discoveryFromClientToServer(this.selectedDiscovery))
         await this.init()
+        this.validateOnKeyUp = false
+      }else {
+        this.validateOnKeyUp = true
       }
       this.loading = false
     }

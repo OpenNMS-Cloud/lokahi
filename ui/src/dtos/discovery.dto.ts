@@ -1,4 +1,4 @@
-import { REGEX_EXPRESSIONS } from '@/components/Discovery/discovery.constants'
+import { DiscoveryType, REGEX_EXPRESSIONS } from '@/components/Discovery/discovery.constants'
 import { validationErrorsToStringRecord } from '@/services/validationService'
 import { DiscoverySNMPMeta, IcmpActiveDiscoveryPlusTags, NewOrUpdatedDiscovery, ServerDiscoveries } from '@/types/discovery'
 import * as yup from 'yup'
@@ -56,25 +56,48 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
   })
   return combined
 }
+const activeDiscoveryValidation = yup.object().shape({
+  name: yup.string().required('Please enter a name.'),
+  locations:yup.array().of(yup.object().shape({id: yup.number(), location: yup.string().required('Location required')}).required('sdfsdf')).min(1,'Must have at least one location.'),
+  meta: yup.object({
+    ipRanges: yup.string().required('Please enter an ip address.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
+    communityStrings: yup.string(),
+    udpPorts: yup.number()
+  }).required('required')
+}).required()
 
+const passiveDiscoveryValidation = yup.object().shape({
+  name: yup.string().required('Please enter a name.'),
+  ip: yup.string().required('Please enter an IP.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
+  communityString: yup.string(),
+  port: yup.number()
+}).required()
+
+const azureDiscoveryValidation = yup.object().shape({
+  name: yup.string().required('Please enter a name.'),
+  ip: yup.string().required('Please enter an IP.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
+  communityString: yup.string(),
+  port: yup.number()
+}).required()
+
+const validatorMap: Record<string,yup.Schema> = {
+  [DiscoveryType.Azure]: azureDiscoveryValidation,
+  [DiscoveryType.ICMP]: activeDiscoveryValidation,
+  [DiscoveryType.SyslogSNMPTraps]: passiveDiscoveryValidation
+}
 export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDiscovery) => {
 
-  const discoveryValidation = yup.object().shape({
-    name: yup.string().required('Please enter a name.'),
-    ip: yup.string().required('Please enter an IP.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
-    communityString: yup.string(),
-    port: yup.number()
-  }).required()
+  const type = selectedDiscovery.type || ''
+  const validatorToUse = validatorMap[type] || {validate: () => ({})}
 
   let isValid = true
   let validationErrors = {}
+
   try {
-    await discoveryValidation.validate(selectedDiscovery)
+    await validatorToUse.validate(selectedDiscovery, { abortEarly: false })
   }catch(e){
     validationErrors = validationErrorsToStringRecord(e as yup.ValidationError)
-    console.log('ERRS AFTER',validationErrors)
     isValid = false
   }
-  console.log('CLIEWNT TO SZXEDVD',isValid,validationErrors)
   return {isValid,validationErrors}
 }

@@ -16,12 +16,12 @@ export interface DiscoveryInput extends IKey {
 }
 
 export interface DiscoveryTrapMeta {
-  communityStrings?: Array<string>;
-  udpPorts?: Array<string>;
+  communityStrings?: string;
+  udpPorts?: string;
 }
 
 export interface DiscoverySNMPMeta extends DiscoveryTrapMeta{
-  ipRanges?: string[];
+  ipRanges?: string;
 }
 
 export interface DiscoverySNMPV3Meta extends DiscoverySNMPMeta {
@@ -59,6 +59,11 @@ export interface NewOrUpdatedDiscovery {
   meta?: DiscoveryMeta;
 }
 
+export interface DiscoveryStoreErrors {
+  name?:string,tags?:string,locations?:string,
+    ip?:string,communityString?:string,updPort?:string,clientId?:string,clientSubscription?:string,subscriptionId?:string,directoryId?:string, clientSecret?: string, password?: string, username?: string,context?: string, privacy?: string
+  
+}
 
 export interface DiscoveryStore {
   discoveryFormActive: boolean;
@@ -75,7 +80,8 @@ export interface DiscoveryStore {
   soloTypePageActive: boolean;
   tagSearch: string;
   tagError: string;
-  validationErrors: {name?:string,tags?:string,locations?:string,meta?:{ipAddress?:string,communityString?:string,updPort?:string,clientId?:string,clientSubscription?:string,subscriptionId?:string,directoryId?:string}};
+  validationErrors: DiscoveryStoreErrors;
+  validateOnKeyUp: boolean;
 }
 
 export interface ServerDiscovery {

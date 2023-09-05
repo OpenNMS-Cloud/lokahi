@@ -7,7 +7,6 @@ import { ValidationError } from 'yup'
 *          ready to be used in the FE as a basic dictionary instead of being Yup specific.
 */
 export const validationErrorsToStringRecord = <T>(err: ValidationError): T => {
-  console.log('STRING REC',err)
   const messages: Record<string, string | undefined> = {}
   const validationErrors = err.inner || [{ message: err.message, path: err.path }] || []
   for (const e of validationErrors) {

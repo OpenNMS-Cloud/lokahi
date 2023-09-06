@@ -1,4 +1,4 @@
-import { getHumanReadableDuration } from '@/components/utils'
+import { getHumanReadableDuration, addOpacity } from '@/components/utils'
 import { TimeUnit } from '@/types'
 
 test('The getHumanReadableDuration function', () => {
@@ -20,4 +20,9 @@ test('The getHumanReadableDuration function', () => {
   expect(getHumanReadableDuration(3661, TimeUnit.Secs)).toBe('1h1m1s')
   expect(getHumanReadableDuration(86461, TimeUnit.Secs)).toBe('1d1m1s')
   expect(getHumanReadableDuration(90061, TimeUnit.Secs)).toBe('1d1h1m1s')
+})
+
+test('The addOpacity function', () => {
+  const rgba = addOpacity('#FFFFFF', 0.5)
+  expect(rgba).toBe('rgba(255, 255, 255, 0.5)')
 })

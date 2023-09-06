@@ -105,8 +105,23 @@ export const humanFileSize = (bytes: number, si = true, dp = 1) => {
   return bytes.toFixed(dp) + ' ' + units[u];
 }
 
+export const addOpacity = (hex: string, opacity: number) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result
+    ? 'rgba(' +
+        parseInt(result[1], 16) +
+        ', ' +
+        parseInt(result[2], 16) +
+        ', ' +
+        parseInt(result[3], 16) +
+        ', ' +
+        opacity +
+        ')'
+    : hex
+}
+
 export const getColorFromFeatherVar = (indexOrString?: number | string, opacity = false) => {
-  let color = '#FFF'
+  let color
 
   const defaultColors = [
     '--feather-categorical1',
@@ -120,21 +135,6 @@ export const getColorFromFeatherVar = (indexOrString?: number | string, opacity 
     '--feather-categorical9',
     '--feather-categorical0'
   ]
-
-  const addOpacity = function (hex: string, opacity: number) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result
-      ? 'rgba(' +
-          parseInt(result[1], 16) +
-          ', ' +
-          parseInt(result[2], 16) +
-          ', ' +
-          parseInt(result[3], 16) +
-          ', ' +
-          opacity +
-          ')'
-      : hex
-  }
 
   // return list of colors
   if (!indexOrString) {

@@ -130,11 +130,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
             if (activeDiscovery.isPresent()) {
                 var icmpDiscovery = activeDiscovery.get();
                 var result = discoveryService.deleteActiveDiscovery(request.getValue(), tenant.get());
-<<<<<<< HEAD
-                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId());
-=======
                 scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
->>>>>>> develop
                 responseObserver.onNext(BoolValue.of(result));
                 responseObserver.onCompleted();
             } else  {

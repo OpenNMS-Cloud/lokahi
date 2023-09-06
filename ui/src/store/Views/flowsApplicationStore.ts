@@ -121,8 +121,6 @@ export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
               label: element.label,
               data: mappedData,
               fill: true,
-              borderColor: getColorFromFeatherVar(index),
-              backgroundColor: getColorFromFeatherVar(index, true),
               // hide the last point, which tracks the gap between the previous point and now
               pointRadius: Array.from(Array(mappedData.length).keys()).map((_, index) => element.data.length === index ? 0 : 1),
               spanGaps: flowsStore.getSpanGap()

@@ -18,6 +18,7 @@ export interface DiscoveryInput extends IKey {
 export interface DiscoveryTrapMeta {
   communityStrings?: string;
   udpPorts?: string;
+  toggle?: {toggle:boolean,id: number};
 }
 
 export interface DiscoverySNMPMeta extends DiscoveryTrapMeta{
@@ -106,6 +107,7 @@ export interface PassiveServerDiscovery {
    name?: string | undefined; 
    snmpCommunities?: string[] | undefined; 
    snmpPorts?: number[] | undefined; toggle: boolean; 
+   tags?: Array<Tag>;
 }
 export interface ServerDiscoveries {
   listActiveDiscovery?:Array<ServerDiscovery>;

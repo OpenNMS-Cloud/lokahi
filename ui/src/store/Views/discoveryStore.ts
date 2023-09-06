@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useDiscoveryQueries } from '../Queries/discoveryQueries'
 import { DiscoveryType } from '@/components/Discovery/discovery.constants'
-import { DiscoveryStore } from '@/types/discovery'
+import { DiscoveryStore, DiscoveryTrapMeta } from '@/types/discovery'
 import { clientToServerValidation, discoveryFromClientToServer, discoveryFromServerToClient } from '@/dtos/discovery.dto'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 
@@ -37,7 +37,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       for (const b of this.loadedDiscoveries){
         if ([DiscoveryType.ICMP,DiscoveryType.Azure].includes(b.type as DiscoveryType) && b.id){
           await discoveryQueries.getTagsByActiveDiscoveryId(b.id)
-          console.log('TAGS BY ACTIVE:',discoveryQueries.tagsByActiveDiscoveryId)
           b.tags = discoveryQueries.tagsByActiveDiscoveryId
         }
         if ([DiscoveryType.SyslogSNMPTraps].includes(b.type as DiscoveryType) && b.id){
@@ -131,8 +130,14 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       await discoveryQueries.getTagsSearch(searchVal)
       this.foundTags = discoveryQueries.tagsSearched.map((b) => b.name || '')
     },
-    toggleDiscovery(){
-      this.discoveryFormActive = !this.discoveryFormActive
+    async toggleDiscovery(){
+      const discoveryMutations = useDiscoveryMutations()
+      const meta = this.selectedDiscovery?.meta as DiscoveryTrapMeta
+      const toggleObject = {toggle:!meta.toggle?.toggle || false,id:meta.toggle?.id || this.selectedDiscovery.id}
+      this.loading = true
+      await discoveryMutations.togglePassiveDiscovery({toggle:toggleObject})
+      await this.init()
+      this.loading = false
     },
     async cancelUpdate(){
       this.selectedDiscovery = {}
@@ -142,7 +147,11 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     async deleteDiscovery(){
       const discoveryMutations = useDiscoveryMutations()
       this.loading = true
-      await discoveryMutations.deleteActiveIcmpDiscovery({request:{id:this.selectedDiscovery.id}})
+      if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
+        await discoveryMutations.deletePassiveDiscovery({id:this.selectedDiscovery.id})
+      }else if(this.selectedDiscovery.type === DiscoveryType.ICMP){
+        await discoveryMutations.deleteActiveIcmpDiscovery({id:this.selectedDiscovery.id})
+      }
       this.loading = false
       this.closeDeleteModal()
     },
@@ -157,7 +166,11 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.loading = true
       const isValid = await this.validateDiscovery()
       if (isValid){
-        await discoveryMutations.createOrUpdateDiscovery(discoveryFromClientToServer(this.selectedDiscovery))
+        if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
+          await discoveryMutations.upsertPassiveDiscovery({passiveDiscovery:discoveryFromClientToServer(this.selectedDiscovery)})
+        } else {
+          await discoveryMutations.createOrUpdateDiscovery({request:discoveryFromClientToServer(this.selectedDiscovery)})
+        }
         await this.init()
         this.validateOnKeyUp = false
       }else {

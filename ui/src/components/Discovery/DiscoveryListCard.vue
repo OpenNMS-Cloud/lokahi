@@ -18,9 +18,11 @@
         :key="item.id"
         class="discovery-name pointer"
         :class="{ selected: selectedId == item.id }"
-        @click="() => selectDiscovery(item)"
       >
-        <div class="name pointer">
+        <div
+          class="name pointer"
+          @click="() => selectDiscovery(item)"
+        >
           {{ item.name }}
         </div>
         <FeatherTooltip
@@ -31,8 +33,12 @@
             v-bind="attrs"
             v-on="on"
             v-if="passive"
-            :toggle="(item as PassiveDiscovery).toggle"
-            @toggle="(isToggled) => toggleDiscovery && toggleDiscovery(item, isToggled)"
+            :toggle="(item?.meta as DiscoveryTrapMeta).toggle?.toggle"
+            @toggle="
+              (isToggled) => {
+                toggleDiscovery && toggleDiscovery(item, isToggled)
+              }
+            "
           />
         </FeatherTooltip>
       </div>
@@ -54,7 +60,7 @@ import Warning from '@featherds/icon/notification/Warning'
 import { PassiveDiscovery } from '@/types/graphql'
 import Help from '@featherds/icon/action/Help'
 import discoveryText from '@/components/Discovery/discovery.text'
-import { NewOrUpdatedDiscovery } from '@/types/discovery'
+import { DiscoveryTrapMeta, NewOrUpdatedDiscovery } from '@/types/discovery'
 
 defineProps<{
   title: string
@@ -114,7 +120,6 @@ defineProps<{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: var(variables.$spacing-m) var(variables.$spacing-l);
   align-items: center;
   max-height: 55px;
   &.selected {
@@ -125,6 +130,7 @@ defineProps<{
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: var(variables.$spacing-m) var(variables.$spacing-l);
     text-transform: capitalize;
   }
 }

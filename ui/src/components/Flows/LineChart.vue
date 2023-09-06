@@ -1,7 +1,11 @@
 <template>
   <div class="line-chart-container">
     <div class="chart-container">
-      <Line :data="chartData" :options="chartOptions" ref="lineChart" />
+      <Line
+        :data="chartData"
+        :options="chartOptions"
+        ref="lineChart"
+      />
     </div>
   </div>
 </template>
@@ -94,7 +98,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           }
         },
         onHover: (event: any, activeElements: any) => {
-          ; (event?.native?.target as HTMLElement).style.cursor = activeElements?.length > 0 ? 'pointer' : 'auto'
+          ;(event?.native?.target as HTMLElement).style.cursor = activeElements?.length > 0 ? 'pointer' : 'auto'
         }
       },
 
@@ -149,7 +153,9 @@ const chartOptions = computed<ChartOptions<any>>(() => {
   }
 })
 
-const colorFromFeatherVar = computed(() => isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface'))
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
 
 onThemeChange(() => {
   chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'

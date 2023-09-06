@@ -102,14 +102,12 @@ export const humanFileSize = (bytes: number, si = true, dp = 1) => {
     ++u;
   } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
 
-
   return bytes.toFixed(dp) + ' ' + units[u];
 }
 
-export const getColorFromFeatherVar = (indexOrString: number | string, opacity = false) => {
-
+export const getColorFromFeatherVar = (indexOrString?: number | string, opacity = false) => {
   let color = '#FFF'
-  
+
   const defaultColors = [
     '--feather-categorical1',
     '--feather-categorical2',
@@ -120,14 +118,8 @@ export const getColorFromFeatherVar = (indexOrString: number | string, opacity =
     '--feather-categorical7',
     '--feather-categorical8',
     '--feather-categorical9',
-    '--feather-categorical0',
+    '--feather-categorical0'
   ]
-  
-  if (typeof indexOrString === 'string') {
-    color = getComputedStyle(document.documentElement).getPropertyValue(`--feather-${indexOrString}`)
-  } else {
-    color =  getComputedStyle(document.documentElement).getPropertyValue(defaultColors[indexOrString])
-  }
 
   const addOpacity = function (hex: string, opacity: number) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
@@ -143,6 +135,28 @@ export const getColorFromFeatherVar = (indexOrString: number | string, opacity =
           ')'
       : hex
   }
+
+  // return list of colors
+  if (!indexOrString) {
+    const colors = []
+    for (const c of defaultColors) {
+      const hex = getComputedStyle(document.documentElement).getPropertyValue(c)
+      if (opacity) {
+        colors.push(addOpacity(hex, 0.5))
+      } else {
+        colors.push(hex)
+      }
+    }
+    return colors
+  }
+
+  // return specified feather var or index
+  if (typeof indexOrString === 'string') {
+    color = getComputedStyle(document.documentElement).getPropertyValue(`--feather-${indexOrString}`)
+  } else {
+    color = getComputedStyle(document.documentElement).getPropertyValue(defaultColors[indexOrString])
+  }
+
   if (opacity) {
     return addOpacity(color, 0.3)
   } else {

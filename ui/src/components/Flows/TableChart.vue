@@ -1,7 +1,11 @@
 <template>
   <div class="table-chart-container">
     <div class="chart-container">
-      <Bar :data="chartData" :options="chartOptions" ref="barChart" />
+      <Bar
+        :data="chartData"
+        :options="chartOptions"
+        ref="barChart"
+      />
     </div>
 
     <div class="table-container">
@@ -14,7 +18,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(data, index) in tableData" :key="index">
+          <tr
+            v-for="(data, index) in tableData"
+            :key="index"
+          >
             <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) }}</td>
             <td>{{ humanFileSize(data.bytesIn) }}</td>
             <td>{{ humanFileSize(data.bytesOut) }}</td>
@@ -141,7 +148,9 @@ const chartOptions = computed<ChartOptions<any>>(() => {
   }
 })
 
-const colorFromFeatherVar = computed(() => isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface'))
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
 
 onThemeChange(() => {
   chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
@@ -151,7 +160,6 @@ const addValues = (a: number, b: number) => {
   const total = (a + b).toString()
   return parseFloat(total).toPrecision(3)
 }
-
 
 defineExpose({
   downloadChart

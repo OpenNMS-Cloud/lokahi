@@ -192,6 +192,10 @@
             <version>1.12.19</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>

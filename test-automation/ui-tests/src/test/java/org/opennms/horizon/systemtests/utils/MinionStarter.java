@@ -57,7 +57,7 @@ public class MinionStarter {
         }
 
         int start = dockerCL.indexOf("GRPC_CLIENT_KEYSTORE_PASSWORD='") + "GRPC_CLIENT_KEYSTORE_PASSWORD='".length();
-        int end = dockerCL.indexOf("' -e MINION_ID=");
+        int end = dockerCL.indexOf("' --mount");
         Assert.assertTrue (end > start && start > 0);
 
         String password = dockerCL.substring(start, end);

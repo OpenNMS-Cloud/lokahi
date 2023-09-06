@@ -53,8 +53,8 @@ by adding them as key/value pairs under <ServiceName>.env.
 - name: OTEL_RESOURCE_ATTRIBUTES
   value: {{ printf "service.version=%s" (regexReplaceAllLiteral ".*:" (include "lokahi.image" .) "") | quote }}
   {{- /* Other environment variables */ -}}
-  {{- if .env }}
-    {{- range $key, $val := .env }}
+  {{- if .thisService.env }}
+    {{- range $key, $val := .thisService.env }}
 - name: {{ $key }}
   value: {{ $val | quote }}
     {{- end }}

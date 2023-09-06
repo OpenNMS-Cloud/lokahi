@@ -42,6 +42,7 @@ import graphql.GraphQLContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.autoconfigure.DefaultGlobalContext;
 import io.leangen.graphql.util.ContextUtils;
+import io.opentelemetry.api.trace.Span;
 
 public class ServerHeaderUtil {
     private final JWTValidator validator;
@@ -56,6 +57,17 @@ public class ServerHeaderUtil {
             if (authHeader != null) {
                 // return token only if its valid
                 validator.validate(authHeader.substring(7));
+                try {
+                    String tenantId = parseHeader(authHeader);
+                    if (tenantId != null) {
+                        var span = Span.current();
+                        if (span.isRecording()) {
+                            span.setAttribute("user", tenantId);
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
                 return authHeader;
             }
             return null;

@@ -32,6 +32,8 @@ import org.opennms.horizon.alerts.proto.Severity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class Alert {
@@ -54,4 +56,6 @@ public class Alert {
     private long ackTimeMs;
     private String nodeName;
     private String label;
+    private List<String> ruleNameList;
+    private List<String> policyNameList;
 }

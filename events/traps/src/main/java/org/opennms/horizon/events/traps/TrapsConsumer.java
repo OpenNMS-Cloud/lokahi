@@ -31,10 +31,10 @@ package org.opennms.horizon.events.traps;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Setter;
-import org.opennms.horizon.events.EventConstants;
 import org.opennms.horizon.events.xml.Log;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
+import org.opennms.horizon.shared.events.EventConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

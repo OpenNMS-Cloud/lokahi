@@ -36,19 +36,15 @@ Feature: NetFlows basic function
     Then click on 'Flows' link
     And sees 'No Data' in the flows table
 
-  @ignore
   Scenario: User sees flows data sent to the instance
-    # Missing discoverable image needs to be merged into repo, then the rest
-    # of these tests can be merged with the other test code using TestContainers
-
     Given Start snmp node "flowNode"
-#    When Discovery "SingleDiscovery" for node "flowNode" is created to discover by IP
-#    Then Status of "flowNode" should be "UP"
-
-#    Then Navigate to the "" through the left panel
-#    And wait until the 'Top 10 Applications' chart will reflect the received data
-#    Then click on 'Flows' link
-#    And sees chart for netflow data
-#    Then click on 'Exporter' filter
-#    And check if exporter "flowNode" visible in the dropdown
+    When Discovery "SingleDiscovery" for node "flowNode" is created to discover by IP
+    Then Status of "flowNode" should be "UP"
+    When Send flow data for node "flowNode"
+    Then Navigate to the "" through the left panel
+    And wait until the 'Top 10 Applications' chart will reflect the received data
+    Then click on 'Flows' link
+    And sees chart with new netflow data
+    Then click on 'Exporter' filter
+    And check if exporter "flowNode" visible in the dropdown
 

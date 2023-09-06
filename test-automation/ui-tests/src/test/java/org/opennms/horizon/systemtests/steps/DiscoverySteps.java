@@ -49,7 +49,6 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.*;
 
-import static com.codeborne.selenide.Selenide.$;
 import static org.junit.Assert.*;
 
 public class DiscoverySteps {
@@ -146,7 +145,7 @@ public class DiscoverySteps {
 
     }
 
-    private String getContainerIPs(String nodeNames) {
+    public static String getContainerIPs(String nodeNames) {
         StringBuilder ips = new StringBuilder();
         String[] nodeNameArray = nodeNames.split(",");
         for (String nodeNameFromArray : nodeNameArray) {
@@ -161,7 +160,7 @@ public class DiscoverySteps {
         return ips.toString();
     }
 
-    private String calculateIPRanges(Collection<GenericContainer> nodes) {
+    public static String calculateIPRanges(Collection<GenericContainer> nodes) {
         int firstAddr = 0;
         String firstAddrString = "";
         int secondAddr = 0;
@@ -208,7 +207,7 @@ public class DiscoverySteps {
         return firstAddrString + "-" + secondAddrString;
     }
 
-    private int convertStringIPToInt(String stringAddr) {
+    private static int convertStringIPToInt(String stringAddr) {
         try {
             InetAddress i = InetAddress.getByName(stringAddr);
             return ByteBuffer.wrap(i.getAddress()).getInt();
@@ -217,7 +216,7 @@ public class DiscoverySteps {
         }
     }
 
-    private static String getContainerIP(GenericContainer<?> container) {
+    public static String getContainerIP(GenericContainer<?> container) {
         NetworkSettings networkSettings = container.getContainerInfo().getNetworkSettings();
         Map<String, ContainerNetwork> networksMap = networkSettings.getNetworks();
         return networksMap.values().iterator().next().getIpAddress();
@@ -229,6 +228,10 @@ public class DiscoverySteps {
         assertNotNull("Cannot find node with name " + nodeName, node);
 
         return getContainerIP(node);
+    }
+
+    public static GenericContainer getNode(String nodeName) {
+        return nodes.get(nodeName);
     }
 
     @Then("Status of {string} should be {string}")

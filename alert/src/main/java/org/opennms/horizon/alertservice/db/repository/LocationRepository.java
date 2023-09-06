@@ -26,36 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.component;
+package org.opennms.horizon.alertservice.db.repository;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.service.TagService;
-import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Component;
+import org.opennms.horizon.alertservice.db.entity.Location;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
+import java.util.Optional;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class TagPublishConsumer {
-
-    private final TagService tagService;
-
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "${kafka.concurrency.tag-operation}")
-    public void receiveMessage(@Payload byte[] data) {
-
-        try {
-            TagOperationList operationList = TagOperationList.parseFrom(data);
-            tagService.insertOrUpdateTags(operationList);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
-        }
-
-    }
-
+@Repository
+public interface LocationRepository extends JpaRepository<Location, Long> {
+    Optional<Location> findByIdAndTenantId(long id, String tenantId);
 }

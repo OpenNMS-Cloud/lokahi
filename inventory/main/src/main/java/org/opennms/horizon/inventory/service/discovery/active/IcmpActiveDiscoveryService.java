@@ -118,13 +118,13 @@ public class IcmpActiveDiscoveryService {
         }
     }
 
-    @Transactional(readOnly = true)
+
     public List<IcmpActiveDiscoveryDTO> getActiveDiscoveries(String tenantId) {
         var entities = repository.findByTenantId(tenantId);
         return entities.stream().map(mapper::modelToDto).toList();
     }
 
-    @Transactional(readOnly = true)
+
     public Optional<IcmpActiveDiscoveryDTO> getDiscoveryById(long id, String tenantId) {
         var optional = repository.findByIdAndTenantId(id, tenantId);
         return optional.map(mapper::modelToDto);

@@ -187,7 +187,6 @@ public class NodeService {
         MonitoringLocation monitoringLocation = findMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
-
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
             .addEntityIds(TagEntityIdDTO.newBuilder()
                 .setNodeId(node.getId()))
@@ -196,7 +195,7 @@ public class NodeService {
         return node;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<Long, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
         List<Node> nodeList = nodeRepository.findByIdInAndTenantId(ids, tenantId);
         if (nodeList.isEmpty()) {
@@ -260,6 +259,13 @@ public class NodeService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public Optional<NodeDTO> getNode(String  ipAddress, long locationId, String tenantId) {
+        var optionalIpAddress = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(ipAddress),
+            locationId, tenantId, ScanType.DISCOVERY_SCAN);
+        return optionalIpAddress.map(IpInterface::getNode).map(mapper::modelToDTO);
+    }
+
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
@@ -273,8 +279,6 @@ public class NodeService {
                     node.getNodeLabel(), nodeInfo.getSystemName());
             }
         }
-
-        this.updateNodeMonitoredState(node.getId(), node.getTenantId());
 
         nodeRepository.save(node);
     }

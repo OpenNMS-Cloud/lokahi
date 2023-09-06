@@ -30,8 +30,6 @@ package org.opennms.horizon.alertservice.db.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -50,4 +48,7 @@ public class Node {
 
     @Column(name = "node_label")
     private String nodeLabel;
+
+    @Column(name = "monitoring_location_id")
+    private long monitoringLocationId;
 }

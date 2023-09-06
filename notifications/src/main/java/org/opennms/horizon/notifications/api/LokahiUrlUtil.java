@@ -26,36 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.component;
+package org.opennms.horizon.notifications.api;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.service.TagService;
-import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.opennms.horizon.alerts.proto.Alert;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-
-@Slf4j
 @Component
-@RequiredArgsConstructor
-public class TagPublishConsumer {
+public class LokahiUrlUtil {
+    @Value("${lokahi.baseUrl.url}")
+    private String baseUrl;
 
-    private final TagService tagService;
+    @Value("${lokahi.baseUrl.appendTenantId}")
+    private boolean urlAppendTenantId;
 
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "${kafka.concurrency.tag-operation}")
-    public void receiveMessage(@Payload byte[] data) {
-
-        try {
-            TagOperationList operationList = TagOperationList.parseFrom(data);
-            tagService.insertOrUpdateTags(operationList);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
+    public String getAlertstUrl(Alert alert){
+        StringBuilder sb = new StringBuilder();
+        sb.append("https://");
+        if (urlAppendTenantId) {
+            sb.append(alert.getTenantId());
+            sb.append(".");
         }
-
+        sb.append(baseUrl);
+        sb.append("/alerts");
+        return sb.toString();
     }
-
 }

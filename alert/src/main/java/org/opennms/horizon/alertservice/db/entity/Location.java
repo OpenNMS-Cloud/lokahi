@@ -26,36 +26,26 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.component;
+package org.opennms.horizon.alertservice.db.entity;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.inventory.service.TagService;
-import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Component;
+import lombok.Setter;
 
-import java.util.Arrays;
-
-@Slf4j
-@Component
+@Getter
+@Setter
 @RequiredArgsConstructor
-public class TagPublishConsumer {
+@Entity
+public class Location {
+    @Id
+    private long id;
 
-    private final TagService tagService;
+    @Column(name = "tenant_id")
+    private String tenantId;
 
-    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "${kafka.concurrency.tag-operation}")
-    public void receiveMessage(@Payload byte[] data) {
-
-        try {
-            TagOperationList operationList = TagOperationList.parseFrom(data);
-            tagService.insertOrUpdateTags(operationList);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error while parsing TagOperationList, payload data {}", Arrays.toString(data), e);
-        }
-
-    }
-
+    @Column(name = "location_name")
+    private String locationName;
 }

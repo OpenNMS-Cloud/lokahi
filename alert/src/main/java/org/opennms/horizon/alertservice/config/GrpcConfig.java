@@ -37,7 +37,12 @@ import org.keycloak.adapters.rotation.HardcodedPublicKeyLocator;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.common.util.Base64;
 import org.keycloak.representations.adapters.config.AdapterConfig;
-import org.opennms.horizon.alertservice.grpc.*;
+import org.opennms.horizon.alertservice.grpc.AlertEventDefinitionGrpcService;
+import org.opennms.horizon.alertservice.grpc.AlertGrpcService;
+import org.opennms.horizon.alertservice.grpc.AlertServerInterceptor;
+import org.opennms.horizon.alertservice.grpc.GrpcServerManager;
+import org.opennms.horizon.alertservice.grpc.GrpcTagServiceImpl;
+import org.opennms.horizon.alertservice.grpc.MonitorPolicyGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,6 +63,8 @@ public class GrpcConfig {
     private String keycloakRealm;
     @Value("${keycloak.public-key}")
     private String keycloakPublicKey;
+    @Value("${grpc.server.deadline:60000}")
+    private long deadline;
 
     @Bean
     public KeycloakDeployment createKeycloak() {

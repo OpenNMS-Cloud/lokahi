@@ -124,8 +124,9 @@ public class NotificationService {
                 alert.getDatabaseId(), alert.getTenantId(), addresses.size());
 
             for (String emailAddress : addresses) {
-                String subject = String.format("%s severity alert",
-                    StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName()));
+                String subject = String.format("%s alert: %s",
+                    StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName()),
+                    alert.getNodeName());
                 String htmlBody = velocity.populateTemplate(emailAddress, alert);
 
                 emailAPI.sendEmail(emailAddress, subject, htmlBody);

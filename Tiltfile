@@ -49,10 +49,8 @@ load('ext://uibutton', 'cmd_button', 'location')
 load('ext://helm_remote', 'helm_remote') # for simple charts like jaeger and cert-manager
 load('ext://helm_resource', 'helm_resource', 'helm_repo') # for charts that we want to have resources for
 
-context = k8s_context()
-
 cmd_button(name='reload-certificates',
-           argv=['sh', '-c', 'find target/tmp/ -type f -exec rm {} \\; ; kubectl --context ' + context + ' -n ' + k8s_namespace() + ' delete secret root-ca-certificate opennms-minion-gateway-certificate opennms-ui-certificate client-root-ca-certificate ; kubectl --context ' + context + ' -n ' + k8s_namespace() + ' rollout restart deployment opennms-minion'],
+           argv=['sh', '-c', 'find target/tmp/ -type f -exec rm {} \\; ; kubectl --context ' + k8s_context() + ' -n ' + k8s_namespace() + ' delete secret root-ca-certificate opennms-minion-gateway-certificate opennms-ui-certificate client-root-ca-certificate ; kubectl --context ' + k8s_context() + ' -n ' + k8s_namespace() + ' rollout restart deployment opennms-minion'],
            text='Remove & reissue certificates',
            location=location.NAV,
            icon_name='sync')
@@ -519,6 +517,18 @@ k8s_resource(
     labels=['minion'],
     trigger_mode=TRIGGER_MODE_MANUAL,
     resource_deps=['shared-lib'],
+)
+cmd_button(
+    name='button-opennms-minion',
+    text='Rollout restart minion',
+    resource='minion',
+    argv=[
+        'kubectl',
+        '--context', k8s_context(),
+        '-n', k8s_namespace(),
+        'rollout', 'restart', 'deployment', 'opennms-minion',
+    ],
+    icon_name='sync',
 )
 
 ### Minion Certificate Manager ###

@@ -42,6 +42,11 @@ kafka:
     node: "node"
     tag-operation: "tag-operation"
     task-set-publisher: "task-set-publisher"
+  concurrency:
+    minion-heartbeat: 1
+    task-set-results: 1
+    internal-events: 1
+    tag-operation: 1
 
 
 keycloak:
@@ -64,3 +69,4 @@ management:
     health:
       probes:
         enabled: true
+      show-details: always

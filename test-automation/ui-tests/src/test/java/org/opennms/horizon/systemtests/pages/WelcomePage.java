@@ -118,7 +118,7 @@ public class WelcomePage {
     }
 
     public static void waitOnWalkthroughOrMain() {
-        $(By.xpath("//button[@data-test='welcome-slide-one-setup-button']|//div[@class='app-aside']")).should(exist, Duration.ofSeconds(3));
+        $(By.xpath("//button[@data-test='welcome-slide-one-setup-button']|//div[@class='app-aside']")).should(exist);
     }
 
     public static MinionContainer addMinionUsingWalkthrough(String minionName) {

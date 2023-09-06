@@ -34,6 +34,8 @@ import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -43,15 +45,50 @@ import java.util.Optional;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, Long> {
 
-    Optional<Alert> findByReductionKeyAndTenantId(String reductionKey, String tenantId);
+    @Query("SELECT a " +
+        "FROM Alert a " +
+        "LEFT JOIN FETCH a.alertCondition "+
+        "WHERE a.tenantId = :tenantId " +
+        "AND a.reductionKey = :reductionKey ")
+    Optional<Alert> findByReductionKeyAndTenantId(@Param("reductionKey") String reductionKey, @Param("tenantId") String tenantId);
 
     List<Alert> findByReductionKeyStartingWithAndTenantId(String reductionKey, String tenantId);
 
-    Page<Alert> findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(List<Severity> severityList, Date start, Date end, ManagedObjectType managedObjectType, List<String> managedObjectInstance, Pageable pageable, String tenantId);
+    @Query(value = "SELECT a " +
+        "FROM Alert a " +
+        "LEFT JOIN FETCH a.alertCondition " +
+        "LEFT JOIN FETCH a.alertCondition.rule " +
+        "LEFT JOIN FETCH a.alertCondition.rule.policy " +
+        "WHERE a.severity in (:severityList) " +
+        "AND a.lastEventTime between :start and :end " +
+        "AND a.managedObjectType = :managedObjectType " +
+        "AND a.managedObjectInstance in (:managedObjectInstance) " +
+        "AND a.tenantId = :tenantId ",
+        countQuery = "SELECT count(a) " +
+            "FROM Alert a " +
+            "WHERE a.severity in (:severityList) " +
+            "AND a.lastEventTime between :start and :end " +
+            "AND a.managedObjectType = :managedObjectType " +
+            "AND a.managedObjectInstance in (:managedObjectInstance) " +
+            "AND a.tenantId = :tenantId ")
+    Page<Alert> findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(@Param("severityList") List<Severity> severityList, @Param("start") Date start, @Param("end") Date end, @Param("managedObjectType") ManagedObjectType managedObjectType, @Param("managedObjectInstance") List<String> managedObjectInstance, Pageable pageable, @Param("tenantId") String tenantId);
 
     int countBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(List<Severity> severityList, Date start, Date end, ManagedObjectType managedObjectType, List<String> managedObjectInstance, String tenantId);
 
-    Page<Alert> findBySeverityInAndLastEventTimeBetweenAndTenantId(List<Severity> severityList, Date start, Date end, Pageable pageable, String tenantId);
+    @Query(value = "SELECT a " +
+        "FROM Alert a " +
+        "LEFT JOIN FETCH a.alertCondition " +
+        "LEFT JOIN FETCH a.alertCondition.rule " +
+        "LEFT JOIN FETCH a.alertCondition.rule.policy " +
+        "WHERE a.severity in (:severityList) " +
+        "AND a.lastEventTime between :start and :end " +
+        "AND a.tenantId = :tenantId ",
+        countQuery = "SELECT count(a) " +
+            "FROM Alert a " +
+            "WHERE a.severity in (:severityList) " +
+            "AND a.lastEventTime between :start and :end " +
+            "AND a.tenantId = :tenantId ")
+    Page<Alert> findBySeverityInAndLastEventTimeBetweenAndTenantId(@Param("severityList") List<Severity> severityList, @Param("start") Date start, @Param("end") Date end, Pageable pageable, @Param("tenantId") String tenantId);
 
     int countBySeverityInAndLastEventTimeBetweenAndTenantId(List<Severity> severityList, Date start, Date end, String tenantId);
 

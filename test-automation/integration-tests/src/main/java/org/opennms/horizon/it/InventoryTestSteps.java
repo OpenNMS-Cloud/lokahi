@@ -328,8 +328,6 @@ public class InventoryTestSteps {
             .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
             .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
             .withEnv("MINION_ID", systemId)
-            .withEnv("USE_KUBERNETES", "false")
-            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
             .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
             .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")

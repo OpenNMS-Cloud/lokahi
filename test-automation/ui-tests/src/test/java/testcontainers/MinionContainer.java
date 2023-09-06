@@ -67,13 +67,10 @@ public class MinionContainer extends GenericContainer<MinionContainer> {
             .withNetwork(network)
 //            .withEnv("TZ", "America/New_York")
             .withEnv("MINION_ID", minionId)
-            .withEnv("USE_KUBERNETES", "false")
             .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")
             .withEnv("MINION_GATEWAY_HOST", CucumberHooks.gatewayHost)
             .withEnv("MINION_GATEWAY_PORT", CucumberHooks.gatewayPort)
-            .withEnv("MINION_GATEWAY_TLS", "true")
 
-            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", bundlePwd)
             .withCopyFileToContainer(MountableFile.forHostPath(certBundle.getPath()), "/opt/karaf/minion.p12")
             .withLabel("label", minionId)

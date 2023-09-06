@@ -10,7 +10,6 @@ import org.opennms.horizon.inventory.model.MonitoringSystem;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,12 +48,9 @@ public class MonitoringSystemService {
         return systemRepository.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
 
-
-    @Transactional
     public Optional<MonitoringSystemDTO> findByLocationAndSystemId(String location, String systemId, String tenantId) {
         return systemRepository.findByMonitoringLocationAndSystemIdAndTenantId(location, systemId, tenantId).map(mapper::modelToDTO);
     }
-
 
     public void addMonitoringSystemFromHeartbeat(TenantLocationSpecificHeartbeatMessage message)  {
         Identity identity = message.getIdentity();
@@ -82,7 +78,6 @@ public class MonitoringSystemService {
 
     }
 
-    @Transactional
     public void deleteMonitoringSystem(long id) {
 
         var optionalMS = systemRepository.findById(id);

@@ -23,7 +23,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     selectedDiscovery: {},
     snmpV3Enabled: false,
     soloTypeEditor: true,
-    soloTypePageActive: false,
+    discoveryTypePageActive: false,
     tagError:'',
     tagSearch: '',
     validationErrors:{},
@@ -45,6 +45,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
           await discoveryQueries.getTagsByPassiveDiscoveryId(loadedDiscovery.id)
           loadedDiscovery.tags = discoveryQueries.tagsByPassiveDiscoveryId
         }
+      }
+      if (this.loadedDiscoveries.length === 0){
+        this.discoveryTypePageActive = true
       }
     },
     activateHelp(type: string){
@@ -69,11 +72,11 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.discoveryFormActive = false
       this.validateOnKeyUp = false
       this.validationErrors = {}
-      this.soloTypePageActive = true
+      this.discoveryTypePageActive = true
     },
     startNewDiscovery(){
       if (this.soloTypeEditor){
-        this.soloTypePageActive = true
+        this.discoveryTypePageActive = true
         this.discoveryFormActive = false
       } else {
         this.discoveryFormActive = true
@@ -91,6 +94,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     editDiscovery(item: any){
       this.discoveryFormActive = true
+      this.discoveryTypePageActive = false
       this.selectedDiscovery = {...item}
     },
     async searchForLocation(searchVal: string){
@@ -136,7 +140,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     activateForm(key: string, value: any){
       this.setSelectedDiscoveryValue(key,value)
-      this.soloTypePageActive = false
+      this.discoveryTypePageActive = false
       this.discoveryFormActive = true
     },
     async searchForTags(searchVal: string){
@@ -156,7 +160,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     async cancelUpdate(){
       this.selectedDiscovery = {}
       this.discoveryFormActive = false
-      this.soloTypePageActive = false
+      this.discoveryTypePageActive = false
     },
     async deleteDiscovery(){
       const discoveryMutations = useDiscoveryMutations()

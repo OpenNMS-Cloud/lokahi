@@ -81,7 +81,7 @@ export interface DiscoveryStore {
   selectedDiscovery: NewOrUpdatedDiscovery;
   snmpV3Enabled: boolean;
   soloTypeEditor: boolean;
-  soloTypePageActive: boolean;
+  discoveryTypePageActive: boolean;
   tagSearch: string;
   tagError: string;
   validationErrors: DiscoveryStoreErrors;

@@ -39,7 +39,7 @@
       </section>
       <section
         class="discovery"
-        v-if="!discoveryStore.discoveryFormActive && discoveryStore.soloTypePageActive"
+        v-if="!discoveryStore.discoveryFormActive && discoveryStore.discoveryTypePageActive"
       >
         <DiscoveryTypeSelector
           :updateSelectedDiscovery="discoveryStore.activateForm"
@@ -48,7 +48,7 @@
         />
       </section>
       <section
-        v-if="discoveryStore.discoveryFormActive && !discoveryStore.soloTypePageActive"
+        v-if="discoveryStore.discoveryFormActive && !discoveryStore.discoveryTypePageActive"
         class="discovery"
       >
         <div class="flex-title">
@@ -66,6 +66,7 @@
           label="Discovery Name"
           :modelValue="discoveryStore.selectedDiscovery.name"
           :error="discoveryStore.validationErrors.name"
+          :disabled="isOverallDisabled"
           @update:model-value="(name) => discoveryStore.setSelectedDiscoveryValue('name', name)"
         />
 
@@ -81,7 +82,7 @@
             :textChanged="discoveryStore.searchForLocation"
             :wrapperClicked="() => discoveryStore.searchForLocation('')"
             :errMsg="discoveryStore.validationErrors.locations || discoveryStore.validationErrors.locationId"
-            :disabled="discoveryStore.loading"
+            :disabled="isOverallDisabled"
             :allowNew="false"
           />
 
@@ -90,7 +91,10 @@
               v-for="b in discoveryStore.selectedDiscovery.locations"
               :key="b.id"
             >
-              <template v-slot:icon>
+              <template
+                v-if="!isOverallDisabled"
+                v-slot:icon
+              >
                 <FeatherIcon
                   @click="() => discoveryStore.removeLocation(b)"
                   class="icon"
@@ -145,7 +149,7 @@
             :textChanged="discoveryStore.searchForTags"
             :wrapperClicked="() => discoveryStore.searchForTags('')"
             :errMsg="discoveryStore.tagError"
-            :disabled="discoveryStore.loading"
+            :disabled="isOverallDisabled"
             :allowNew="true"
           />
           <FeatherChipList label="Tags">
@@ -153,7 +157,10 @@
               v-for="b in discoveryStore.selectedDiscovery.tags"
               :key="b.id"
             >
-              <template v-slot:icon>
+              <template
+                v-slot:icon
+                v-if="!isOverallDisabled"
+              >
                 <FeatherIcon
                   @click="() => discoveryStore.removeTag(b)"
                   class="icon"
@@ -168,6 +175,7 @@
           <FeatherButton
             v-if="discoveryStore.selectedDiscovery.id"
             @click="discoveryStore.openDeleteModal"
+            :disabled="isOverallDisabled"
             secondary
             >Delete Discovery</FeatherButton
           >
@@ -180,6 +188,7 @@
 
             <FeatherButton
               primary
+              :disabled="isOverallDisabled"
               @click="discoveryStore.saveSelectedDiscovery"
               >{{ discoveryCopy.button }}</FeatherButton
             >
@@ -213,15 +222,37 @@ const changeSnmpType = (type: any) => {
   }
 }
 const discoveryStore = useDiscoveryStore()
-const discoveryCopy = computed(() =>
-  discoveryStore.selectedDiscovery.id
-    ? { title: 'Edit Discovery', button: 'Update Discovery' }
-    : { title: 'Add Discovery', button: 'Start New Discovery' }
+const isOverallDisabled = computed(
+  () =>
+    !!(
+      (discoveryStore.selectedDiscovery.type === DiscoveryType.Azure && discoveryStore.selectedDiscovery.id) ||
+      discoveryStore.loading
+    )
 )
+const discoveryCopy = computed(() => {
+  const copy = { title: '', button: 'Save Discovery' }
+  let title = discoveryStore.selectedDiscovery.id ? 'Edit' : 'New'
+
+  if (discoveryStore.selectedDiscovery.type === DiscoveryType.Azure) {
+    title += ' Azure'
+    if (discoveryStore.selectedDiscovery.id) {
+      title = 'View Azure'
+    }
+  } else if (discoveryStore.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps) {
+    title += ' Passive'
+  } else if (discoveryStore.selectedDiscovery.type === DiscoveryType.ICMP) {
+    title += ' Active'
+  }
+  copy.title = title + ' Discovery'
+  return copy
+})
 
 const typeVisible = false
 onMounted(() => {
   discoveryStore.init()
+})
+onUnmounted(() => {
+  discoveryStore.$reset()
 })
 const typeOptions = ref([
   { value: DiscoveryType.ICMP, _text: 'ICMP/SNMP' },
@@ -255,7 +286,11 @@ const activeDiscoveryTypes = [
   DiscoveryType.ICMPV3NoAuth
 ]
 </script>
-
+<style lang="scss">
+.app-layout {
+  overflow-y: scroll;
+}
+</style>
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
 @use '@/styles/mediaQueriesMixins.scss';
@@ -351,7 +386,7 @@ const activeDiscoveryTypes = [
   border-radius: vars.$border-radius-s;
   padding: var(variables.$spacing-m);
   background-color: var(variables.$surface);
-
+  max-width: 900px;
   .headline {
     @include typography.header();
   }

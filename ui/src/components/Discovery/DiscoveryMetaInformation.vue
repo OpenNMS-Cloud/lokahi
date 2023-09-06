@@ -95,12 +95,15 @@
           label="Client ID"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientId"
           :error="discoveryErrors?.clientId"
+          :disabled="isOverallDisabled"
           @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientId',String(e))"
         />
         <FeatherInput
+          v-if="!discovery?.id"
           label="Client Secret"
           :error="discoveryErrors?.clientSecret"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientSecret"
+          :disabled="isOverallDisabled"
           @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientSecret',String(e))"
         />
       </div>
@@ -109,12 +112,14 @@
           label="Client Subscription ID"
           :error="discoveryErrors?.clientSubscriptionId"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientSubscriptionId"
+          :disabled="isOverallDisabled"
           @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientSubscriptionId',String(e))"
         />
         <FeatherInput
           label="Directory ID"
           :error="discoveryErrors?.directoryId"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).directoryId"
+          :disabled="isOverallDisabled"
           @update:modelValue="(e?: string | number) => updateDiscoveryValue('directoryId',String(e))"
         />
       </div>
@@ -138,6 +143,8 @@ const props = defineProps({
   discoveryErrors: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   updateDiscoveryValue: { type: Function as PropType<(key: string, value: string) => void>, default: () => ({}) }
 })
+const isOverallDisabled = computed(() => !!(props.discovery.type === DiscoveryType.Azure && props.discovery.id))
+
 const selectedTab = ref()
 const changeSecurityType = (type?: number) => {
   let setType = DiscoveryType.ICMPV3NoAuth

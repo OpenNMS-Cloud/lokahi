@@ -39,6 +39,7 @@ export const discoveryFromAzureClientToServer = (discovery: NewOrUpdatedDiscover
     tags: discovery.tags?.map((t) => ({name:t.name})),
     clientId: meta.clientId,
     clientSubscriptionId: meta.clientSubscriptionId,
+    clientSecret: meta.clientSecret,
     directoryId: meta.directoryId
   }
 }
@@ -77,7 +78,7 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
         ipRanges: d?.details?.ipAddresses?.join(';') || '',
         udpPorts: d?.details?.snmpConfig?.ports.join(';') || '',
         clientId: d?.details?.clientId,
-        clientSecret: d?.details?.clientSecret,
+        clientSecret: d?.details?.clientSecret || '',
         clientSubscriptionId: d?.details?.subscriptionId,
         directoryId: d?.details?.directoryId
       }

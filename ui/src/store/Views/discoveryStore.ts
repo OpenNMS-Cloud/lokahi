@@ -83,9 +83,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       }
       this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{clientId:'',clientSecret:'',clientSubscriptionId:'',directoryId:''}}
     },
-    createOrUpdateDiscovery(){
-      console.log('create!')
-    },
     closeDeleteModal(){
       this.deleteModalOpen = false
     },
@@ -125,9 +122,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       }
     },
     setMetaSelectedDiscoveryValue(key:string,value:any){
-      console.log('SELECTED',this.selectedDiscovery);
       (this.selectedDiscovery as Record<string,any>).meta[key] = value
-      console.log('SELECTED',this.selectedDiscovery)
       if (this.validateOnKeyUp){
         this.validateDiscovery()
       }

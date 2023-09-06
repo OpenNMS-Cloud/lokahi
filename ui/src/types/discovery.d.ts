@@ -61,7 +61,7 @@ export interface NewOrUpdatedDiscovery {
 }
 
 export interface DiscoveryStoreErrors {
-  name?:string,tags?:string,locations?:string,
+  name?:string,tags?:string,locations?:string,locationId?:string,
     ip?:string,communityString?:string,updPort?:string,clientId?:string,clientSubscription?:string,subscriptionId?:string,directoryId?:string, clientSecret?: string, password?: string, username?: string,context?: string, privacy?: string
   
 }
@@ -69,12 +69,15 @@ export interface DiscoveryStoreErrors {
 export interface DiscoveryStore {
   discoveryFormActive: boolean;
   deleteModalOpen: boolean;
+  helpActive: boolean;
   foundLocations: Array<any>;
   foundTags: Array<string>;
+  instructionsType: string;
   loadedDiscoveries: Array<NewOrUpdatedDiscovery>;
   loading: boolean;
   locationSearch: string;
   locationError: string;
+  newDiscoveryModalActive: boolean;
   selectedDiscovery: NewOrUpdatedDiscovery;
   snmpV3Enabled: boolean;
   soloTypeEditor: boolean;

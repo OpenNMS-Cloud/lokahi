@@ -50,14 +50,21 @@ export const discoveryFromTrapClientToServer = (discovery: NewOrUpdatedDiscovery
     locationId: discovery.locations?.[0]?.id,
     name: discovery.name,
     snmpPorts: splitStringOnSemiCommaOrDot(meta.udpPorts), 
-    toggle: meta.toggle,
     snmpCommunities: splitStringOnSemiCommaOrDot(meta.communityStrings),
     tags: discovery.tags?.map((t) => ({name:t.name}))
   }
 }
+export const sortDiscoveriesByName = (a: {name?:string}, b: {name?:string}) => {
+  let ret = 0
+  if (!a.name) a.name = ''
+  if (!b.name) b.name = ''
 
+  if (a.name < b.name) ret = -1
+  if (a.name > b.name) ret = 1
+  return ret
+}
 export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations: Array<{id: number}>) => {
-  const combined: Array<NewOrUpdatedDiscovery> = []
+  let combined: Array<NewOrUpdatedDiscovery> = []
   dataIn.listActiveDiscovery?.forEach((d) => {
     combined.push({
       id:d.details?.id,
@@ -91,32 +98,35 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
       }
     })
   })
+  combined = combined.sort(sortDiscoveriesByName) 
   return combined
 }
 const activeDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
-  locations:yup.array().of(yup.object().shape({id: yup.number(), location: yup.string().required('Location required')}).required('sdfsdf')).min(1,'Must have at least one location.'),
-  ipAddresses: yup.array().of(yup.string().required('Please enter an ip address.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.')),
+  locationId:yup.string().required('Location required.'),
+  ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an ip address.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.')),
   snmpConfig: yup.object({
-    communityStrings: yup.string(),
-    udpPorts: yup.number()
+    communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
+    udpPorts: yup.array().of(yup.number())
   }).required('required')
 }).required()
 
 const passiveDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
-  locations:yup.array().of(yup.object().shape({id: yup.number(), location: yup.string().required('Location required')}).required('sdfsdf')).min(1,'Must have at least one location.'),
+  locationId:yup.string().required('Location required.'),
   snmpConfig: yup.object({
-    communityStrings: yup.string(),
-    udpPorts: yup.number()
+    communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
+    udpPorts: yup.array().of(yup.number())
   }).required('required')
 }).required()
 
 const azureDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
-  ip: yup.string().required('Please enter an IP.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.'),
-  communityString: yup.string(),
-  port: yup.number()
+  locationId:yup.string().required('Location required.'),
+  clientId: yup.string().required('Client ID is required.'),
+  clientSubscriptionId: yup.string().required('Client Subscription ID is required.'),
+  directoryId: yup.string().required('Directory ID is required.'),
+  clientSecret: yup.string().required('Client Secret is required.')
 }).required()
 
 const validatorMap: Record<string,yup.Schema> = {
@@ -132,13 +142,10 @@ export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDi
   let isValid = true
   let validationErrors = {}
   const convertedDiscovery = discoveryFromClientToServer(selectedDiscovery)
-  console.log('CONVERTED!',convertedDiscovery)
   try {
     await validatorToUse.validate(convertedDiscovery, { abortEarly: false })
-    console.log('CLEAN!')
   }catch(e){
     validationErrors = validationErrorsToStringRecord(e as yup.ValidationError)
-    console.log('VALIDATION ERRORS!',validationErrors)
     isValid = false
   }
   return {isValid,validationErrors}

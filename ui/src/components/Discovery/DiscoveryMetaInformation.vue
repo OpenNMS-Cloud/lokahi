@@ -5,22 +5,22 @@
         v-if="isICMP"
         :modelValue="(discovery?.meta as DiscoverySNMPMeta)?.ipRanges"
         @update:modelValue="(e: string) => updateDiscoveryValue('ipRanges',e)"
-        :error="discoveryErrors?.['meta.ipRanges']"
-        label="ip addresses"
+        :error="discoveryErrors?.ipAddresses"
+        label="Enter IP Ranges and/or Subnets"
       />
       <FeatherTextarea
         v-if="isSnmpTrapOrICMPV1"
         :modelValue="(discovery?.meta as DiscoveryTrapMeta)?.communityStrings"
         @update:modelValue="(e: string) => updateDiscoveryValue('communityStrings',e)"
         :error="discoveryErrors?.['meta.communityStrings']"
-        label="community string"
+        label="Enter Community String (optional)"
       />
       <FeatherTextarea
         v-if="isSnmpTrapOrICMPV1"
         :modelValue="(discovery?.meta as DiscoveryTrapMeta)?.udpPorts"
         @update:modelValue="(e: string) => updateDiscoveryValue('udpPorts',e)"
         :error="discoveryErrors?.['meta.']"
-        label="udp port"
+        label="Enter UDP Port (optional)  "
       />
     </div>
     <div v-if="isICMPV3">
@@ -41,7 +41,6 @@
       </div>
     </div>
 
-    {{ log('DSDFSdf', discoveryErrors) }}
     <div v-if="isICMPV3">
       <FeatherTabContainer
         :modelValue="selectedTab"
@@ -108,7 +107,7 @@
       <div class="azure-row">
         <FeatherInput
           label="Client Subscription ID"
-          :error="discoveryErrors?.subscriptionId"
+          :error="discoveryErrors?.clientSubscriptionId"
           :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientSubscriptionId"
           @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientSubscriptionId',String(e))"
         />
@@ -139,7 +138,6 @@ const props = defineProps({
   discoveryErrors: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   updateDiscoveryValue: { type: Function as PropType<(key: string, value: string) => void>, default: () => ({}) }
 })
-const log = console.log
 const selectedTab = ref()
 const changeSecurityType = (type?: number) => {
   let setType = DiscoveryType.ICMPV3NoAuth

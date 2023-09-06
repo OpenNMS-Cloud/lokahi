@@ -119,12 +119,9 @@ export const SuccessModalOptions = {
 }
 
 export const Instructions = {
-  title: 'Discovery',
-  subtitle:
-    'The discovery process identifies devices and entities on your monitored network through either active or passive discovery.',
   activeDiscoveryTitle: 'What is Active Discovery?',
   activeDiscoverySubtitle:
-    'Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor. You can choose from two active discovery methods:',
+    'Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor.',
   activeListTool: {
     tool1: 'ICMP/SNMP:',
     toolDescription1:
@@ -152,7 +149,7 @@ export const Instructions = {
       'May miss devices if they are not active. All devices must be enabled and configured to send Syslogs.'
   },
   learnMoreLink: {
-    label: 'LEARN MORE',
+    label: 'Visit our product documentation',
     link: 'https://docs.opennms.com/'
   }
 }

@@ -47,6 +47,7 @@ declare module '@vue/runtime-core' {
     DiscoveryListCard: typeof import('./src/components/Discovery/DiscoveryListCard.vue')['default']
     DiscoveryLocationsAutocomplete: typeof import('./src/components/Discovery/DiscoveryLocationsAutocomplete.vue')['default']
     DiscoveryMetaInformation: typeof import('./src/components/Discovery/DiscoveryMetaInformation.vue')['default']
+    DiscoveryNewModal: typeof import('./src/components/Discovery/DiscoveryNewModal.vue')['default']
     DiscoverySnmp: typeof import('./src/components/Discovery/DiscoverySnmp.vue')['default']
     DiscoverySnmpForm: typeof import('./src/components/Discovery/DiscoverySnmpForm.vue')['default']
     DiscoverySuccessModal: typeof import('./src/components/Discovery/DiscoverySuccessModal.vue')['default']

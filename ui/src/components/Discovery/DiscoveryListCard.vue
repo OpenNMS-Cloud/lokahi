@@ -1,21 +1,13 @@
 <template>
   <div class="card-my-discoveries">
-    <div class="title">
-      {{ title }}&nbsp;
-      <FeatherIcon
-        class="iconHelp"
-        :icon="Help"
-        @click="showInstructions"
-      />
-      <div class="count">({{ list.length }})</div>
-    </div>
+    <div class="title">{{ title }}&nbsp;</div>
     <div
       class="list"
       v-if="list.length > 0"
     >
       <div
-        v-for="item in list"
-        :key="item.id"
+        v-for="(item, index) in list"
+        :key="index"
         class="discovery-name pointer"
         :class="{ selected: selectedId == item.id }"
       >
@@ -35,8 +27,8 @@
             v-if="passive"
             :toggle="(item?.meta as DiscoveryTrapMeta).toggle?.toggle"
             @toggle="
-              (isToggled) => {
-                toggleDiscovery && toggleDiscovery(item, isToggled)
+              () => {
+                toggleDiscovery && toggleDiscovery(item)
               }
             "
           />
@@ -67,7 +59,7 @@ defineProps<{
   list: NewOrUpdatedDiscovery[]
   selectDiscovery: (discovery: NewOrUpdatedDiscovery) => void
   showInstructions: () => void
-  toggleDiscovery?: (discovery: NewOrUpdatedDiscovery, isEnabled: boolean) => void
+  toggleDiscovery?: (discovery: NewOrUpdatedDiscovery) => void
   passive?: boolean
   selectedId?: number
 }>()

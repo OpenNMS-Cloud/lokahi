@@ -1,12 +1,69 @@
 <template>
   <div class="discovery-type-selector">
     <div class="flex-title">
-      <FeatherBackButton @click="backButtonClick">Cancel</FeatherBackButton>
       <h2 class="title">{{ title }}</h2>
     </div>
     <p class="subtitle">
-      Identify devices and entities to monitor through active or passive discovery. Choose a discovery type to get
-      started.
+      Identify devices and entities to monitor through
+      <FeatherPopover
+        :pointer-alignment="PointerAlignment.center"
+        :placement="PopoverPlacement.top"
+      >
+        <template #default>
+          <div>
+            <h4>Active Discovery</h4>
+            <p>Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor.</p>
+            <a
+              @click="
+                () => {
+                  discoveryStore.activateHelp(InstructionsType.Active)
+                }
+              "
+              class="full"
+              >Read full article</a
+            >
+          </div>
+        </template>
+        <template #trigger="{ attrs, on }">
+          <span
+            class="pop"
+            v-bind="attrs"
+            v-on="on"
+            >active</span
+          >
+        </template>
+      </FeatherPopover>
+      or
+      <FeatherPopover
+        :pointer-alignment="PointerAlignment.center"
+        :placement="PopoverPlacement.top"
+      >
+        <template #default>
+          <div>
+            <h4>Passive Discovery</h4>
+            <p>Passive discovery...</p>
+            <a
+              @click="
+                () => {
+                  discoveryStore.activateHelp(InstructionsType.Passive)
+                }
+              "
+              class="full"
+              >Read full article</a
+            >
+          </div>
+        </template>
+        <template #trigger="{ attrs, on }">
+          <span
+            class="pop"
+            v-bind="attrs"
+            v-on="on"
+            >passive</span
+          >
+        </template>
+      </FeatherPopover>
+      discovery. <br />
+      Choose a discovery type to get started.
     </p>
     <div
       class="type-selectors"
@@ -37,11 +94,14 @@
 </template>
 
 <script setup lang="ts">
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
+import { DiscoveryType, InstructionsType } from '@/components/Discovery/discovery.constants'
 
 import { PropType } from 'vue'
-import AddNote from '@featherds/icon/action/AddNote'
+const discoveryStore = useDiscoveryStore()
+import AddNote from '@featherds/icon/hardware/Network'
 import ChevronRight from '@featherds/icon/navigation/ChevronRight'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { PointerAlignment, PopoverPlacement } from '@featherds/tooltip'
 
 const discoveryTypeList = [
   {
@@ -105,6 +165,21 @@ defineProps({
     line-height: 1em;
   }
 }
+.subtitle .pop {
+  text-decoration: underline;
+  color: var(--feather-text-on-surface);
+  cursor: pointer;
+}
+.subtitle .full {
+  color: var(--feather-clickable-normal);
+  margin-top: 12px;
+  display: block;
+}
+.subtitle {
+  :deep(.feather-popover-container) {
+    z-index: 2;
+  }
+}
 .type-selector-chevron {
   margin-left: auto;
   font-size: 22px;
@@ -127,8 +202,5 @@ defineProps({
 .flex-title {
   display: flex;
   margin-bottom: 12px;
-  h2 {
-    margin-left: 25px;
-  }
 }
 </style>

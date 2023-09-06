@@ -123,7 +123,6 @@ exec docker run \
                 -e MINION_ID="${MINION_ID}" \
                 -e MINION_LOCATION="${MINION_LOCATION}" \
                 -e MINION_GATEWAY_TLS="${MINION_GATEWAY_TLS}" \
-                -e USE_KUBERNETES="false" \
                 -e GRPC_CLIENT_KEYSTORE="${CLIENT_KEYSTORE}" \
                 -e GRPC_CLIENT_KEYSTORE_TYPE="${CLIENT_KEYSTORE_TYPE}" \
                 -e GRPC_CLIENT_KEYSTORE_PASSWORD="${CLIENT_KEYSTORE_PASSWORD}" \

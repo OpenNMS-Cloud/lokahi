@@ -39,7 +39,7 @@ interface WelcomeStoreState {
   minionCmd: {
     minionDockerCmd: ComputedRef<string>;
     setPassword: (pass: string) => string;
-    setMinionId: (minionIdString: string) => string;
+    setLocationName: (locationNameString: string) => string;
     clearMinionCmdVals: () => void;
   }
   minionErrorTimeout: number,
@@ -167,7 +167,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       let dcmd = this.minionCmd.minionDockerCmd
 
       if (location.origin === 'https://onmshs.local:1443' || location.origin.startsWith('http://localhost:')) {
-        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 1162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -p 162:162/udp -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' -e MINION_ID='default' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
+        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
       }
 
       //If the user made edits, thats the one we want.
@@ -186,7 +186,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       this.downloaded = true
       this.downloadCopy = 'Downloaded'
       this.minionCmd.setPassword(this.minionCert.password ?? '');
-      this.minionCmd.setMinionId(this.defaultLocationName);
+      this.minionCmd.setLocationName(this.defaultLocationName);
       createAndDownloadBlobFile(this.minionCert.certificate, `${this.defaultLocationName}-certificate.p12`)
 
       this.refreshing = true

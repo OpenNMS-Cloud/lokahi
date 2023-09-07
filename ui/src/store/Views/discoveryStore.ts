@@ -5,7 +5,6 @@ import { DiscoveryStore, DiscoveryTrapMeta, NewOrUpdatedDiscovery } from '@/type
 import { clientToServerValidation, discoveryFromClientToServer, discoveryFromServerToClient } from '@/dtos/discovery.dto'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 
-const discoveryQueries = useDiscoveryQueries()
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
@@ -31,6 +30,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
   } as DiscoveryStore),
   actions: {
     async init(){
+      const discoveryQueries = useDiscoveryQueries()
       const latestDiscoveries = await discoveryQueries.getDiscoveries()
       await discoveryQueries.getLocations()
       if (latestDiscoveries.data && !latestDiscoveries.error){
@@ -93,6 +93,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.setupDefaultDiscovery()
     },
     setupDefaultDiscovery(){
+      const discoveryQueries = useDiscoveryQueries()
       this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{clientId:'',clientSecret:'',clientSubscriptionId:'',directoryId:'',communityStrings:'public',udpPorts:'161'}}
       const defaultLocation = discoveryQueries.locations.find((d) => d.location === 'default')
       if (defaultLocation){
@@ -112,11 +113,13 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery = {...item}
     },
     async searchForLocation(searchVal: string){
+      const discoveryQueries = useDiscoveryQueries()
       this.locationSearch = searchVal
       await discoveryQueries.getLocations()
       this.foundLocations = discoveryQueries.locations.filter((b) => b.location?.includes(searchVal)).map((d) => d.location)
     },
     locationSelected(location: any) {
+      const discoveryQueries = useDiscoveryQueries()
       this.selectedDiscovery.locations?.push(discoveryQueries.locations.find((d) => d.location === location))
       this.foundLocations = []
       this.locationSearch = ''
@@ -131,6 +134,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.tags = this.selectedDiscovery.tags?.filter((d) => d.id !== tag.id)
     },
     tagSelected(tag: any) {
+      const discoveryQueries = useDiscoveryQueries()
       let foundTag = discoveryQueries.tagsSearched.find((d) => d.name === tag) as any
       if (!foundTag){
         foundTag = {name: tag}
@@ -163,6 +167,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.discoveryFormActive = true
     },
     async searchForTags(searchVal: string){
+      const discoveryQueries = useDiscoveryQueries()
       this.tagSearch = searchVal
       await discoveryQueries.getTagsSearch(searchVal)
       this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name || '')

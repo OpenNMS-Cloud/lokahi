@@ -90,7 +90,15 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       } else {
         this.discoveryFormActive = true
       }
+      this.setupDefaultDiscovery()
+    },
+    setupDefaultDiscovery(){
       this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{clientId:'',clientSecret:'',clientSubscriptionId:'',directoryId:'',communityStrings:'public',udpPorts:'161'}}
+      const defaultLocation = discoveryQueries.locations.find((d) => d.location === 'default')
+      if (defaultLocation){
+        this.selectedDiscovery.locations = [defaultLocation]
+      }
+      this.selectedDiscovery.tags = [{name:'default'}]
     },
     closeDeleteModal(){
       this.deleteModalOpen = false
@@ -123,7 +131,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.tags = this.selectedDiscovery.tags?.filter((d) => d.id !== tag.id)
     },
     tagSelected(tag: any) {
-      console.log('TAG!',tag)
       let foundTag = discoveryQueries.tagsSearched.find((d) => d.name === tag) as any
       if (!foundTag){
         foundTag = {name: tag}
@@ -157,7 +164,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     async searchForTags(searchVal: string){
       this.tagSearch = searchVal
-      console.log('searchingf?',this.tagSearch)
       await discoveryQueries.getTagsSearch(searchVal)
       this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name || '')
     },

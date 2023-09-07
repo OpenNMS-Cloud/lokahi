@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.horizon.minion.grpc.Constant;
 import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
 
 import java.io.File;
@@ -75,7 +76,7 @@ class SSLChannelFactoryTest {
         int statusCode = catchSystemExit(() -> {
             channelFactory.create("baz", 443, null);
         });
-        assertEquals(SSLChannelFactory.FAIL_LOADING_CLIENT_KEYSTORE, statusCode);
+        assertEquals(Constant.FAIL_LOADING_CLIENT_KEYSTORE, statusCode);
     }
 
     @Test
@@ -109,7 +110,7 @@ class SSLChannelFactoryTest {
         int statusCode = catchSystemExit(() -> {
             channelFactory.create("baz", 443, null);
         });
-        assertEquals(SSLChannelFactory.FAIL_LOADING_TRUST_KEYSTORE, statusCode);
+        assertEquals(Constant.FAIL_LOADING_TRUST_KEYSTORE, statusCode);
     }
 
     @Test
@@ -143,7 +144,7 @@ class SSLChannelFactoryTest {
         int statusCode = catchSystemExit(() -> {
             channelFactory.create("baz", 443, null);
         });
-        assertEquals(SSLChannelFactory.FAIL_LOADING_CLIENT_KEYSTORE, statusCode);
+        assertEquals(Constant.FAIL_LOADING_CLIENT_KEYSTORE, statusCode);
     }
 
     private Entry<File, KeyStore> getCreateKeyStore(String filename, String password) throws IOException, GeneralSecurityException {

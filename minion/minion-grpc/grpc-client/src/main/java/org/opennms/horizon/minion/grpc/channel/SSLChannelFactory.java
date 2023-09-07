@@ -33,6 +33,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.TlsChannelCredentials.Builder;
 import lombok.Setter;
+import org.opennms.horizon.minion.grpc.Constant;
 import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +46,6 @@ import java.security.KeyStore;
 
 public class SSLChannelFactory implements ManagedChannelFactory {
     private static final Logger LOG = LoggerFactory.getLogger(SSLChannelFactory.class);
-
-    public static final int INVALID_CLIENT_STORE = 201;
-    public static final int FAIL_LOADING_CLIENT_KEYSTORE = 203;
-
-    public static final int INVALID_TRUST_STORE = 211;
-    public static final int FAIL_LOADING_TRUST_KEYSTORE = 212;
 
     private final ChannelBuilderFactory channelBuilderFactory;
 
@@ -86,10 +81,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
             } catch (GeneralSecurityException e) {
                 LOG.error("FAIL_LOADING_CLIENT_KEYSTORE");
                 e.printStackTrace();
-                System.exit(FAIL_LOADING_CLIENT_KEYSTORE);
+                System.exit(Constant.FAIL_LOADING_CLIENT_KEYSTORE);
             } catch (IllegalArgumentException e) {
                 LOG.error("MISSING_CLIENT_STORE_CONFIG");
-                System.exit(INVALID_CLIENT_STORE);
+                System.exit(Constant.INVALID_CLIENT_STORE);
             }
         }
 
@@ -101,10 +96,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
             } catch (GeneralSecurityException e) {
                 LOG.error("FAIL_LOADING_TRUST_KEYSTORE");
                 e.printStackTrace();
-                System.exit(FAIL_LOADING_TRUST_KEYSTORE);
+                System.exit(Constant.FAIL_LOADING_TRUST_KEYSTORE);
             } catch (IllegalArgumentException e) {
                 LOG.error("INVALID_TRUST_STORE");
-                System.exit(INVALID_TRUST_STORE);
+                System.exit(Constant.INVALID_TRUST_STORE);
             }
         }
 

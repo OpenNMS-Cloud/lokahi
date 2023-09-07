@@ -32,7 +32,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.grpc.ConnectivityState;
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -248,15 +247,15 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 if ("unable to find valid certification path to requested target".equals(rootCause.getMessage())) {
                     LOG.error(rootCause.getMessage());
                     handleDisconnect();
-                    System.exit(CA_PATH_ERROR);
+                    System.exit(Constant.CA_PATH_ERROR);
                 } else if (rootCause instanceof CertificateExpiredException) {
                     LOG.error(rootCause.getMessage());
                     handleDisconnect();
-                    System.exit(CERT_EXPIRED);
+                    System.exit(Constant.CERT_EXPIRED);
                 } else if (rootCause instanceof CertificateNotYetValidException) {
                     LOG.error(rootCause.getMessage());
                     handleDisconnect();
-                    System.exit(CERT_NOTYET);
+                    System.exit(Constant.CERT_NOTYET);
                 }
 
                 future.completeExceptionally(throwable);
@@ -271,12 +270,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         });
         return future;
     }
-
-    public static final  int CA_PATH_ERROR = 300;
-    public static final  int CERT_EXPIRED = 301;
-    public static final  int CERT_NOTYET = 302;
-
-    public static final  int UNAUTHENTICATED = 401;
 
 
 //========================================
@@ -442,7 +435,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 && (statusRuntimeException.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
                 LOG.error("Certificate is rejected by server.");
                 handleDisconnect();
-                System.exit(UNAUTHENTICATED);
+                System.exit(Constant.UNAUTHENTICATED);
             }
             LOG.error("Error in RPC streaming", throwable);
             reconnectStrategy.activate();

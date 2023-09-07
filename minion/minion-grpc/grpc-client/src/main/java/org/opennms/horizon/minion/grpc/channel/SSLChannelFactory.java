@@ -79,11 +79,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 keyManagerFactory.init(loadKeyStore(keyStoreType, keyStore, keyStorePassword), keyStorePassword.toCharArray());
                 credentials.keyManager(keyManagerFactory.getKeyManagers());
             } catch (GeneralSecurityException e) {
-                LOG.error("FAIL_LOADING_CLIENT_KEYSTORE");
-                e.printStackTrace();
+                LOG.error("Client keystore file failed to load. Please check keystore and password. Going to shut down now.");
                 System.exit(Constant.FAIL_LOADING_CLIENT_KEYSTORE);
             } catch (IllegalArgumentException e) {
-                LOG.error("MISSING_CLIENT_STORE_CONFIG");
+                LOG.error("Client keystore file is invalid. Please make sure it exists and is a file. Going to shut down now.");
                 System.exit(Constant.INVALID_CLIENT_STORE);
             }
         }
@@ -94,11 +93,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 trustManagerFactory.init(loadKeyStore(trustStoreType, trustStore, trustStorePassword));
                 credentials.trustManager(trustManagerFactory.getTrustManagers());
             } catch (GeneralSecurityException e) {
-                LOG.error("FAIL_LOADING_TRUST_KEYSTORE");
-                e.printStackTrace();
+                LOG.error("Trust keystore file failed to load. Please check keystore and password. Going to shut down now.");
                 System.exit(Constant.FAIL_LOADING_TRUST_KEYSTORE);
             } catch (IllegalArgumentException e) {
-                LOG.error("INVALID_TRUST_STORE");
+                LOG.error("Trust keystore file is invalid. Please make sure it exists and is a file. Going to shut down now.");
                 System.exit(Constant.INVALID_TRUST_STORE);
             }
         }

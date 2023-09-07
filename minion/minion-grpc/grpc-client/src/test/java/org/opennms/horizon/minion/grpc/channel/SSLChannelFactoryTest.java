@@ -80,7 +80,7 @@ class SSLChannelFactoryTest {
     }
 
     @Test
-    void testEmptyKeyStore() throws Exception {
+    void testMissingKeyStore() throws Exception {
         Entry<File, KeyStore> trustStore = getCreateKeyStore("truststore.p12", "changeit");
 
         SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
@@ -114,7 +114,7 @@ class SSLChannelFactoryTest {
     }
 
     @Test
-    void testEmptyTrustStore() throws Exception {
+    void testMissingTrustStore() throws Exception {
         Entry<File, KeyStore> keyStore = getCreateKeyStore("minion.p12", "changeit");
 
         SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
@@ -132,14 +132,14 @@ class SSLChannelFactoryTest {
 
     @Test
     void testEmptyKeyStoreWithException() throws Exception {
-        File trustStore = new File(tempDir.toFile(), "minion2.p12");
-        assertTrue(trustStore.createNewFile(), "Failed to create temporary file");
+        File keyStore = new File(tempDir.toFile(), "minion2.p12");
+        assertTrue(keyStore.createNewFile(), "Failed to create temporary file");
 
         SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
-        channelFactory.setKeyStore(trustStore.getAbsolutePath());
+        channelFactory.setKeyStore(keyStore.getAbsolutePath());
         channelFactory.setKeyStoreType("pkcs12");
         channelFactory.setKeyStorePassword("changeit");
-        when(keyStoreFactory.createKeyStore("pkcs12", trustStore, "changeit")).thenThrow(new GeneralSecurityException(""));
+        when(keyStoreFactory.createKeyStore("pkcs12", keyStore, "changeit")).thenThrow(new GeneralSecurityException(""));
 
         int statusCode = catchSystemExit(() -> {
             channelFactory.create("baz", 443, null);

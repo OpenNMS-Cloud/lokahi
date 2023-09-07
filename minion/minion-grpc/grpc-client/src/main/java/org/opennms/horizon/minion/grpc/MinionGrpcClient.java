@@ -243,19 +243,19 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             @Override
             public void onError(Throwable throwable) {
                 var rootCause = findRootCause(throwable);
+                Integer code = null;
                 // sun.security.provider.certpath.SunCertPathBuilderException is not visible by default
-                if ("unable to find valid certification path to requested target".equals(rootCause.getMessage())) {
-                    LOG.error(rootCause.getMessage());
-                    handleDisconnect();
-                    System.exit(Constant.CA_PATH_ERROR);
+                if (rootCause.getClass().getName().contains("SunCertPathBuilderException")) {
+                    code = Constant.CA_PATH_ERROR;
                 } else if (rootCause instanceof CertificateExpiredException) {
-                    LOG.error(rootCause.getMessage());
-                    handleDisconnect();
-                    System.exit(Constant.CERT_EXPIRED);
+                    code = Constant.CERT_EXPIRED;
                 } else if (rootCause instanceof CertificateNotYetValidException) {
-                    LOG.error(rootCause.getMessage());
+                    code = Constant.CERT_NOTYET;
+                }
+                if (code != null) {
+                    LOG.error("{}. Going to shut down now.", rootCause.getMessage());
                     handleDisconnect();
-                    System.exit(Constant.CERT_NOTYET);
+                    System.exit(code);
                 }
 
                 future.completeExceptionally(throwable);
@@ -433,7 +433,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         public void onError(Throwable throwable) {
             if (throwable instanceof StatusRuntimeException statusRuntimeException
                 && (statusRuntimeException.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
-                LOG.error("Certificate is rejected by server.");
+                LOG.error("Certificate is not accepted by the server. Please download the client certificate again. Going to shut down now.");
                 handleDisconnect();
                 System.exit(Constant.UNAUTHENTICATED);
             }

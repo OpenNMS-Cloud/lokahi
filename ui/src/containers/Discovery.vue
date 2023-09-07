@@ -371,7 +371,7 @@ const activeDiscoveryTypes = [
     }
 
     @include mediaQueriesMixins.screen-md {
-      max-width: 350px;
+      max-width: 266px;
       margin-bottom: 0;
     }
 
@@ -392,6 +392,7 @@ const activeDiscoveryTypes = [
     flex-direction: column;
     margin-bottom: 0;
     margin-right: var(variables.$spacing-m);
+    max-width: 266px;
 
     > * {
       width: 100%;

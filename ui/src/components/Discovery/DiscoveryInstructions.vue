@@ -72,7 +72,7 @@ import { FeatherDrawer } from '@featherds/drawer'
 import { Instructions } from './discovery.text'
 import { InstructionsType } from './discovery.constants'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
-import ExternalIcons from '../common/ExternalIcon.vue'
+import ExternalIcons from '@/components/Common/ExternalIcon.vue'
 const discoveryStore = useDiscoveryStore()
 const props = defineProps<{
   isOpen: boolean

@@ -7,7 +7,7 @@
       Identify devices and entities to monitor through
       <FeatherPopover
         :pointer-alignment="PointerAlignment.center"
-        :placement="PopoverPlacement.top"
+        :placement="PopoverPlacement.bottom"
       >
         <template #default>
           <div>
@@ -20,8 +20,9 @@
                 }
               "
               class="full"
-              >Read full article</a
-            >
+              >Read full article
+              <FeatherIcon :icon="ChevronRight" />
+            </a>
           </div>
         </template>
         <template #trigger="{ attrs, on }">
@@ -36,12 +37,12 @@
       or
       <FeatherPopover
         :pointer-alignment="PointerAlignment.center"
-        :placement="PopoverPlacement.top"
+        :placement="PopoverPlacement.bottom"
       >
         <template #default>
           <div>
             <h4>Passive Discovery</h4>
-            <p>Passive discovery...</p>
+            <p>Passive discovery uses Syslog and SNMP traps to identify network devices.</p>
             <a
               @click="
                 () => {
@@ -49,8 +50,9 @@
                 }
               "
               class="full"
-              >Read full article</a
-            >
+              >Read full article
+              <FeatherIcon :icon="ChevronRight" />
+            </a>
           </div>
         </template>
         <template #trigger="{ attrs, on }">
@@ -83,8 +85,8 @@
         <div class="type-selector-row">
           <div class="type-selector-icon"><FeatherIcon :icon="discoveryType.icon" /></div>
           <div>
-            <h4>{{ discoveryType.title }}</h4>
-            <p>{{ discoveryType.subtitle }}</p>
+            <h5>{{ discoveryType.title }}</h5>
+            <p class="t-subtitle">{{ discoveryType.subtitle }}</p>
           </div>
           <div class="type-selector-chevron"><FeatherIcon :icon="ChevronRight" /></div>
         </div>
@@ -96,17 +98,17 @@
 <script setup lang="ts">
 import { DiscoveryType, InstructionsType } from '@/components/Discovery/discovery.constants'
 
-import { PropType } from 'vue'
-const discoveryStore = useDiscoveryStore()
-import AddNote from '@featherds/icon/hardware/Network'
 import ChevronRight from '@featherds/icon/navigation/ChevronRight'
+import { PropType } from 'vue'
+import AddNote from '@featherds/icon/hardware/Network'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { PointerAlignment, PopoverPlacement } from '@featherds/tooltip'
+const discoveryStore = useDiscoveryStore()
 
 const discoveryTypeList = [
   {
     title: 'Active Discovery',
-    subtitle: 'Query nodes and cloud APIs to detect the entities to monitor',
+    subtitle: 'Query nodes and cloud APIs to detect the entities to monitor.',
     discoveryTypes: [
       {
         title: 'ICMP/SNMP',
@@ -189,7 +191,7 @@ defineProps({
 }
 .type-selectors {
   border: 1px solid var(--feather-border-on-surface);
-  border-radius: var(--feather-border-radius-sm);
+  border-radius: vars.$border-radius-xs;
   margin-top: 20px;
   h1 {
     margin-top: 0;
@@ -202,5 +204,14 @@ defineProps({
 .flex-title {
   display: flex;
   margin-bottom: 12px;
+}
+h5 {
+  margin-bottom: 0;
+  line-height: 1rem;
+}
+.t-subtitle {
+  font-size: 12px;
+  font-family: var(--feather-header-font-family);
+  margin-top: 0;
 }
 </style>

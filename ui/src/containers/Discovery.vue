@@ -20,7 +20,7 @@
       <section class="my-discovery">
         <div class="my-discovery-inner">
           <DiscoveryListCard
-            title="My Active Discoveries"
+            title="Active Discoveries"
             :list="discoveryStore.loadedDiscoveries.filter((d) => d.type && activeDiscoveryTypes.includes(d.type as DiscoveryType)).sort(sortDiscoveriesByName)"
             :selectDiscovery="discoveryStore.editDiscovery"
             :selectedId="discoveryStore.selectedDiscovery.id"
@@ -28,7 +28,7 @@
           />
           <DiscoveryListCard
             passive
-            title="My Passive Discoveries"
+            title="Passive Discoveries"
             :list="discoveryStore.loadedDiscoveries.filter((d) => d.type && [DiscoveryType.SyslogSNMPTraps].includes(d.type as DiscoveryType)).sort(sortDiscoveriesByName)"
             :toggleDiscovery="discoveryStore.toggleDiscovery"
             :selectDiscovery="discoveryStore.editDiscovery"
@@ -58,6 +58,24 @@
           >Cancel</FeatherBackButton
         >-->
           <h2 class="title">{{ discoveryCopy.title }} | {{ selectedTypeOption?._text }}</h2>
+          <div
+            style="display: flex; justify-content: flex-end"
+            v-if="discoveryStore.selectedDiscovery.id"
+          >
+            <FeatherButton
+              v-if="discoveryStore.selectedDiscovery.id"
+              @click="discoveryStore.openDeleteModal"
+              :disabled="isOverallDisabled"
+              secondary
+              >Delete</FeatherButton
+            >
+            <FeatherButton
+              text
+              :disabled="isOverallDisabled"
+              @click="discoveryStore.saveSelectedDiscovery"
+              >Save</FeatherButton
+            >
+          </div>
         </div>
 
         <h3>Basic Information</h3>
@@ -143,7 +161,7 @@
             :itemClicked="discoveryStore.tagSelected"
             :loading="discoveryStore.loading"
             :error="discoveryStore.validationErrors.tags"
-            :resultsVisible="!!discoveryStore.foundTags.length"
+            :resultsVisible="!!discoveryStore.foundTags.length || !!discoveryStore.tagSearch"
             :outsideClicked="discoveryStore.clearTagAuto"
             :results="discoveryStore.foundTags"
             :textChanged="discoveryStore.searchForTags"
@@ -167,11 +185,14 @@
                   :icon="CancelIcon"
                 />
               </template>
-              {{ b.name }}
+              {{ b?.name }}
             </FeatherChip>
           </FeatherChipList>
         </div>
-        <div style="display: flex; justify-content: flex-end; width: 100%">
+        <div
+          style="display: flex; justify-content: flex-end; width: 100%"
+          v-if="!discoveryStore.selectedDiscovery.id"
+        >
           <FeatherButton
             v-if="discoveryStore.selectedDiscovery.id"
             @click="discoveryStore.openDeleteModal"
@@ -424,6 +445,9 @@ const activeDiscoveryTypes = [
   align-items: center;
   margin-bottom: 32px;
 
+  .title {
+    width: 100%;
+  }
   h2 {
     margin-bottom: 0;
   }

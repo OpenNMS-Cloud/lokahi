@@ -58,6 +58,7 @@ declare module '@vue/runtime-core' {
     EmptyList: typeof import('./src/components/Common/EmptyList.vue')['default']
     EventsTable: typeof import('./src/components/NodeStatus/EventsTable.vue')['default']
     ExpandingChartWrapper: typeof import('./src/components/Flows/ExpandingChartWrapper.vue')['default']
+    ExternalIcon: typeof import('./src/components/Common/ExternalIcon.vue')['default']
     FeatherAppBar: typeof import('@featherds/app-bar')['FeatherAppBar']
     FeatherAppLayout: typeof import('@featherds/app-layout')['FeatherAppLayout']
     FeatherAutocomplete: typeof import('@featherds/autocomplete')['FeatherAutocomplete']

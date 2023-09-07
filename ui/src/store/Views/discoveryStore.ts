@@ -47,8 +47,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         }
       }
       if (this.loadedDiscoveries.length === 0){
-        this.discoveryTypePageActive = true
+        this.startNewDiscovery()
       }
+      this.loading = false
     },
     activateHelp(type: string){
       this.instructionsType = type
@@ -64,6 +65,14 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     clearTagAuto(){
       this.foundTags = []
       this.tagSearch = ''
+    },
+    backToDiscovery(){
+      this.newDiscoveryModalActive = false
+      this.discoveryFormActive = false
+      this.validateOnKeyUp = false
+      this.discoveryTypePageActive = false
+      this.validationErrors = {}
+      this.selectedDiscovery = {}
     },
     closeNewModal(){
       this.newDiscoveryModalActive = false
@@ -81,7 +90,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       } else {
         this.discoveryFormActive = true
       }
-      this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{clientId:'',clientSecret:'',clientSubscriptionId:'',directoryId:''}}
+      this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{clientId:'',clientSecret:'',clientSubscriptionId:'',directoryId:'',communityStrings:'public',udpPorts:'161'}}
     },
     closeDeleteModal(){
       this.deleteModalOpen = false
@@ -114,7 +123,12 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.tags = this.selectedDiscovery.tags?.filter((d) => d.id !== tag.id)
     },
     tagSelected(tag: any) {
-      this.selectedDiscovery.tags?.push(discoveryQueries.tagsSearched.find((d) => d.name === tag) as any)
+      console.log('TAG!',tag)
+      let foundTag = discoveryQueries.tagsSearched.find((d) => d.name === tag) as any
+      if (!foundTag){
+        foundTag = {name: tag}
+      }
+      this.selectedDiscovery.tags?.push(foundTag)
       this.foundTags = []
       this.tagSearch = ''
       if (this.validateOnKeyUp){
@@ -122,6 +136,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       }
     },
     setMetaSelectedDiscoveryValue(key:string,value:any){
+      if (!this.selectedDiscovery.meta){
+        this.selectedDiscovery.meta = {}
+      }
       (this.selectedDiscovery as Record<string,any>).meta[key] = value
       if (this.validateOnKeyUp){
         this.validateDiscovery()
@@ -140,8 +157,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     async searchForTags(searchVal: string){
       this.tagSearch = searchVal
+      console.log('searchingf?',this.tagSearch)
       await discoveryQueries.getTagsSearch(searchVal)
-      this.foundTags = discoveryQueries.tagsSearched.map((b) => b.name || '')
+      this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name || '')
     },
     async toggleDiscovery(clickedToggle: NewOrUpdatedDiscovery){
       const discoveryMutations = useDiscoveryMutations()
@@ -165,9 +183,10 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       }else if(this.selectedDiscovery.type === DiscoveryType.ICMP){
         await discoveryMutations.deleteActiveIcmpDiscovery({id:this.selectedDiscovery.id})
       }
+      this.backToDiscovery()
+      this.closeDeleteModal()
       await this.init()
       this.loading = false
-      this.closeDeleteModal()
     },
     async validateDiscovery(){
       const {isValid,validationErrors} = await clientToServerValidation(this.selectedDiscovery)

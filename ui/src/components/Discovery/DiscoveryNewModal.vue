@@ -20,7 +20,7 @@
         <div class="buttons-inner">
           <FeatherButton
             text
-            @click="discoveryStore.closeNewModal"
+            @click="discoveryStore.backToDiscovery"
             >Back to Discovery</FeatherButton
           >
           <FeatherButton

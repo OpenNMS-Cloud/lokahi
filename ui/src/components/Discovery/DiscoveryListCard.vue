@@ -39,10 +39,7 @@
       v-else
       class="empty"
     >
-      <FeatherIcon
-        :icon="Warning"
-        class="icon"
-      />{{ discoveryText.Discovery.empty }}
+      {{ discoveryText.Discovery.empty }}
     </div>
   </div>
 </template>
@@ -76,6 +73,7 @@ defineProps<{
   border: 1px solid var(variables.$border-on-surface);
   border-radius: vars.$border-radius-s;
   min-height: 100px;
+  max-width: 288px;
 }
 
 .title {
@@ -117,13 +115,13 @@ defineProps<{
   &.selected {
     color: var(variables.$secondary-variant);
     border-right: 3px var(variables.$secondary-variant) solid;
+    background-color: #e7e9f8;
   }
 
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
     padding: var(variables.$spacing-m) var(variables.$spacing-l);
-    text-transform: capitalize;
   }
 }
 
@@ -131,7 +129,11 @@ defineProps<{
   display: flex;
   gap: 8px;
   padding: var(variables.$spacing-m);
-
+  font-weight: 700;
+  font-family: var(--feather-header-font-family);
+  color: #0a0c1b;
+  opacity: 0.4;
+  font-size: 13px;
   .icon {
     width: 24px;
     height: 24px;

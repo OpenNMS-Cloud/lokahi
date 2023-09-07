@@ -60,7 +60,7 @@
           target="_blank"
           class="link"
           >{{ Instructions.learnMoreLink.label }}
-          <FeatherIcon :icon="ExternalIcon" />
+          <FeatherIcon :icon="ExternalIcons" />
         </a>
       </div>
     </div>
@@ -72,7 +72,7 @@ import { FeatherDrawer } from '@featherds/drawer'
 import { Instructions } from './discovery.text'
 import { InstructionsType } from './discovery.constants'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
-import ExternalIcon from '@featherds/icon/action/LogOut'
+import ExternalIcons from '../common/ExternalIcon.vue'
 const discoveryStore = useDiscoveryStore()
 const props = defineProps<{
   isOpen: boolean
@@ -115,7 +115,7 @@ const isOpen = computed<boolean>(() => props.isOpen)
     .link {
       display: flex;
       cursor: pointer;
-      color: var(variables.$primary);
+      color: var(--feather-clickable-normal);
       text-decoration: none;
       font-size: 14px;
       align-items: center;

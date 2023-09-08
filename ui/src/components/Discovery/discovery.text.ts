@@ -13,7 +13,7 @@ export default {
     error: {
       errorCreate: 'Error on creating discovery :('
     },
-    empty: 'No discoveries performed'
+    empty: 'No discoveries performed.'
   },
   AddDiscoverySection: {
     activeDiscoveryTitle: 'Active Discovery',

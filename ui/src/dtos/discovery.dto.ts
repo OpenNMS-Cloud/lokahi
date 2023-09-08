@@ -105,7 +105,7 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
 const activeDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
   locationId:yup.string().required('Location required.'),
-  ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an ip address.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.')),
+  ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an IP address.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.')),
   snmpConfig: yup.object({
     communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
     udpPorts: yup.array().of(yup.number())
@@ -125,9 +125,9 @@ const azureDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
   locationId:yup.string().required('Location required.'),
   clientId: yup.string().required('Client ID is required.'),
-  clientSubscriptionId: yup.string().required('Client Subscription ID is required.'),
+  clientSubscriptionId: yup.string().required('Client subscription ID is required.'),
   directoryId: yup.string().required('Directory ID is required.'),
-  clientSecret: yup.string().required('Client Secret is required.')
+  clientSecret: yup.string().required('Client secret is required.')
 }).required()
 
 const validatorMap: Record<string,yup.Schema> = {

@@ -28,21 +28,38 @@
 
 package org.opennms.horizon.minion.grpc;
 
-public class Constant {
-    private Constant() {
-        throw new IllegalStateException("Constant class");
+import org.apache.karaf.system.SystemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class GrpcShutdownHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcShutdownHandler.class);
+
+    private final SystemService systemService;
+
+    public GrpcShutdownHandler(SystemService systemService) {
+        this.systemService = systemService;
     }
 
-    //Exit codes
-    public static final int CA_PATH_ERROR = 300;
-    public static final int CERT_EXPIRED = 301;
-    public static final int CERT_NOTYET = 302;
-    public static final int UNAUTHENTICATED = 401;
+    public void shutdown(Throwable throwable) {
+        shutdown(String.format("%s. Going to shut down now.", throwable.getMessage()));
+    }
 
-    public static final int INVALID_CLIENT_STORE = 201;
-    public static final int FAIL_LOADING_CLIENT_KEYSTORE = 203;
+    public void shutdown(String message) {
+        try {
+            LOG.error(message);
+            systemService.halt();
+        } catch (Exception e) {
+            LOG.error("Fail to shutdown properly. Calling system.exit now. Error: {}", e.getMessage());
+            System.exit(-1);
+        }
+    }
 
-    public static final int INVALID_TRUST_STORE = 211;
-    public static final int FAIL_LOADING_TRUST_KEYSTORE = 212;
-
+    private Throwable findRootCause(Throwable t) {
+        Throwable rootCause = t;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
+    }
 }

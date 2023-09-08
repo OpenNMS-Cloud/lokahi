@@ -33,7 +33,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.TlsChannelCredentials.Builder;
 import lombok.Setter;
-import org.opennms.horizon.minion.grpc.Constant;
+import org.opennms.horizon.minion.grpc.GrpcErrorMessages;
+import org.opennms.horizon.minion.grpc.GrpcShutdownHandler;
 import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,8 @@ public class SSLChannelFactory implements ManagedChannelFactory {
 
     private final KeyStoreFactory keyStoreFactory;
 
+    private final GrpcShutdownHandler grpcShutdownHandler;
+
     @Setter
     private String keyStore;
     @Setter
@@ -64,9 +67,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
     @Setter
     private String trustStorePassword;
 
-    public SSLChannelFactory(ChannelBuilderFactory channelBuilderFactory, KeyStoreFactory keyStoreFactory) {
+    public SSLChannelFactory(ChannelBuilderFactory channelBuilderFactory, KeyStoreFactory keyStoreFactory, GrpcShutdownHandler grpcShutdownHandler) {
         this.channelBuilderFactory = channelBuilderFactory;
         this.keyStoreFactory = keyStoreFactory;
+        this.grpcShutdownHandler = grpcShutdownHandler;
     }
 
     @Override
@@ -79,11 +83,9 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 keyManagerFactory.init(loadKeyStore(keyStoreType, keyStore, keyStorePassword), keyStorePassword.toCharArray());
                 credentials.keyManager(keyManagerFactory.getKeyManagers());
             } catch (GeneralSecurityException e) {
-                LOG.error("Client keystore file failed to load. Please check keystore and password. Going to shut down now.");
-                System.exit(Constant.FAIL_LOADING_CLIENT_KEYSTORE);
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
             } catch (IllegalArgumentException e) {
-                LOG.error("Client keystore file is invalid. Please make sure it exists and is a file. Going to shut down now.");
-                System.exit(Constant.INVALID_CLIENT_STORE);
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.INVALID_CLIENT_STORE);
             }
         }
 
@@ -93,11 +95,9 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 trustManagerFactory.init(loadKeyStore(trustStoreType, trustStore, trustStorePassword));
                 credentials.trustManager(trustManagerFactory.getTrustManagers());
             } catch (GeneralSecurityException e) {
-                LOG.error("Trust keystore file failed to load. Please check keystore and password. Going to shut down now.");
-                System.exit(Constant.FAIL_LOADING_TRUST_KEYSTORE);
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.FAIL_LOADING_TRUST_KEYSTORE);
             } catch (IllegalArgumentException e) {
-                LOG.error("Trust keystore file is invalid. Please make sure it exists and is a file. Going to shut down now.");
-                System.exit(Constant.INVALID_TRUST_STORE);
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.INVALID_TRUST_STORE);
             }
         }
 

@@ -7,7 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.horizon.minion.grpc.Constant;
+import org.opennms.horizon.minion.grpc.GrpcErrorMessages;
+import org.opennms.horizon.minion.grpc.GrpcShutdownHandler;
 import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
 
 import java.io.File;
@@ -19,8 +20,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 
-import static com.github.stefanbirkner.systemlambda.SystemLambda.catchSystemExit;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +40,9 @@ class SSLChannelFactoryTest {
     protected ManagedChannelBuilder managedChannelBuilder;
 
     @Mock
+    protected GrpcShutdownHandler grpcShutdownHandler;
+
+    @Mock
     private KeyStoreFactory keyStoreFactory;
 
     @Test
@@ -49,7 +51,7 @@ class SSLChannelFactoryTest {
         Entry<File, KeyStore> trustStore = getCreateKeyStore("truststore.p12", "changeit");
 
 
-        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
+        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setKeyStore(keyStore.getKey().getAbsolutePath());
         channelFactory.setKeyStoreType("pkcs12");
         channelFactory.setKeyStorePassword("changeit");
@@ -69,21 +71,22 @@ class SSLChannelFactoryTest {
     void testNoCredentials() throws Exception {
         Entry<File, KeyStore> keyStore = getCreateKeyStore("keystore.p12", null);
 
-        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
+        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setKeyStore(keyStore.getKey().getAbsolutePath());
         channelFactory.setKeyStoreType("pkcs12");
 
-        int statusCode = catchSystemExit(() -> {
-            channelFactory.create("baz", 443, null);
-        });
-        assertEquals(Constant.FAIL_LOADING_CLIENT_KEYSTORE, statusCode);
+        when(channelBuilderFactory.create(eq("baz"), eq(443), isNull(), any(TlsChannelCredentials.class))).thenReturn(managedChannelBuilder);
+
+        channelFactory.create("baz", 443, null);
+
+        verify(grpcShutdownHandler).shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
     }
 
     @Test
     void testMissingKeyStore() throws Exception {
         Entry<File, KeyStore> trustStore = getCreateKeyStore("truststore.p12", "changeit");
 
-        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
+        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setTrustStore(trustStore.getKey().getAbsolutePath());
         channelFactory.setTrustStoreType("pkcs12");
         channelFactory.setTrustStorePassword("changeit");
@@ -101,23 +104,23 @@ class SSLChannelFactoryTest {
         File trustStore = new File(tempDir.toFile(), "truststore2.p12");
         assertTrue(trustStore.createNewFile(), "Failed to create temporary file");
 
-        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
+        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setTrustStore(trustStore.getAbsolutePath());
         channelFactory.setTrustStoreType("pkcs12");
         channelFactory.setTrustStorePassword("changeit");
         when(keyStoreFactory.createKeyStore("pkcs12", trustStore, "changeit")).thenThrow(new GeneralSecurityException(""));
+        when(channelBuilderFactory.create(eq("baz"), eq(443), isNull(), any(TlsChannelCredentials.class))).thenReturn(managedChannelBuilder);
 
-        int statusCode = catchSystemExit(() -> {
-            channelFactory.create("baz", 443, null);
-        });
-        assertEquals(Constant.FAIL_LOADING_TRUST_KEYSTORE, statusCode);
+        channelFactory.create("baz", 443, null);
+
+        verify(grpcShutdownHandler).shutdown(GrpcErrorMessages.FAIL_LOADING_TRUST_KEYSTORE);
     }
 
     @Test
     void testMissingTrustStore() throws Exception {
         Entry<File, KeyStore> keyStore = getCreateKeyStore("minion.p12", "changeit");
 
-        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
+        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setKeyStore(keyStore.getKey().getAbsolutePath());
         channelFactory.setKeyStoreType("pkcs12");
         channelFactory.setKeyStorePassword("changeit");
@@ -135,16 +138,16 @@ class SSLChannelFactoryTest {
         File keyStore = new File(tempDir.toFile(), "minion2.p12");
         assertTrue(keyStore.createNewFile(), "Failed to create temporary file");
 
-        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory);
+        SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setKeyStore(keyStore.getAbsolutePath());
         channelFactory.setKeyStoreType("pkcs12");
         channelFactory.setKeyStorePassword("changeit");
         when(keyStoreFactory.createKeyStore("pkcs12", keyStore, "changeit")).thenThrow(new GeneralSecurityException(""));
+        when(channelBuilderFactory.create(eq("baz"), eq(443), isNull(), any(TlsChannelCredentials.class))).thenReturn(managedChannelBuilder);
 
-        int statusCode = catchSystemExit(() -> {
-            channelFactory.create("baz", 443, null);
-        });
-        assertEquals(Constant.FAIL_LOADING_CLIENT_KEYSTORE, statusCode);
+        channelFactory.create("baz", 443, null);
+
+        verify(grpcShutdownHandler).shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
     }
 
     private Entry<File, KeyStore> getCreateKeyStore(String filename, String password) throws IOException, GeneralSecurityException {

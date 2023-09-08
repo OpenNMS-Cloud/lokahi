@@ -204,7 +204,7 @@ public class MinionGrpcClientTest {
 
         CertificateExpiredException expiredException = new CertificateExpiredException("expired");
         responseObserverCaptor.getValue().onError(expiredException);
-        verify(mockGrpcShutdownHandler).shutdown("expired. Going to shut down now.");
+        verify(mockGrpcShutdownHandler).shutdown(eq(expiredException));
         target.shutdown();
     }
 

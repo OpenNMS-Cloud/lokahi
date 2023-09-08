@@ -29,29 +29,38 @@
 package org.opennms.horizon.minion.grpc;
 
 import org.apache.karaf.system.SystemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
 
-public class GrpcShutdownHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(GrpcShutdownHandler.class);
+import static com.github.stefanbirkner.systemlambda.SystemLambda.catchSystemExit;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-    private final SystemService systemService;
+public class GrpcShutdownHandlerTest {
 
-    public GrpcShutdownHandler(SystemService systemService) {
-        this.systemService = systemService;
+    private final SystemService mockSystemService = mock(SystemService.class);
+    private final GrpcShutdownHandler target = new GrpcShutdownHandler(mockSystemService);
+
+    @Test
+    void testShutdownWithMessage() throws Exception {
+        target.shutdown("message");
+        verify(mockSystemService).halt();
     }
 
-    public void shutdown(Throwable throwable) {
-        shutdown(String.format("%s. Going to shut down now.", throwable.getMessage()));
+    @Test
+    void testShutdownWithThrowable() throws Exception {
+        RuntimeException ex = new RuntimeException("exception");
+        target.shutdown(ex);
+        verify(mockSystemService).halt();
     }
 
-    public void shutdown(String message) {
-        try {
-            LOG.error(message);
-            systemService.halt();
-        } catch (Exception e) {
-            LOG.error("Fail to shutdown properly. Calling system.exit now. Error: {}", e.getMessage());
-            System.exit(-1);
-        }
+    @Test
+    void testShutdownException() throws Exception {
+        doThrow(new RuntimeException()).when(mockSystemService).halt();
+        int statusCode = catchSystemExit(() -> target.shutdown("message"));
+        assertEquals(-1, statusCode);
     }
 }

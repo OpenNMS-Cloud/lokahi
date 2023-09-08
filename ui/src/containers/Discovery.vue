@@ -132,7 +132,18 @@
           @update:modelValue="(b) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
         />
         <h3>Connection Information</h3>
-        <p class="margin-bottom">Set connection information like IP address ranges, port, and community strings.</p>
+        <p
+          class="margin-bottom"
+          v-if="isICMPOrPassive"
+        >
+          Set connection information like IP address ranges, port, and community strings.
+        </p>
+        <p
+          class="margin-bottom"
+          v-if="!isICMPOrPassive"
+        >
+          Set connection information like Azure client and subscription IDs.
+        </p>
         <FeatherTabContainer
           :modelValue="selectedTab"
           @update:modelValue="changeSnmpType"
@@ -267,7 +278,11 @@ const discoveryCopy = computed(() => {
   copy.title = title + ' Discovery'
   return copy
 })
-
+const isICMPOrPassive = computed(
+  () =>
+    discoveryStore.selectedDiscovery.type === DiscoveryType.ICMP ||
+    discoveryStore.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps
+)
 const typeVisible = false
 onMounted(() => {
   discoveryStore.init()

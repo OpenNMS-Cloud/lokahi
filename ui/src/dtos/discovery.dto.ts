@@ -127,7 +127,7 @@ const azureDiscoveryValidation = yup.object().shape({
   clientId: yup.string().required('Client ID is required.'),
   clientSubscriptionId: yup.string().required('Client Subscription ID is required.'),
   directoryId: yup.string().required('Directory ID is required.'),
-  clientSecret: yup.string().required('Client Secret is required.')
+  clientSecret: yup.string().required('Client secret is required.')
 }).required()
 
 const validatorMap: Record<string,yup.Schema> = {

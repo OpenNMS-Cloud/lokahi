@@ -156,7 +156,7 @@ class SSLChannelFactoryTest {
 
         KeyStore keyStore = mock(KeyStore.class);
         if(password != null) {
-            when(keyStoreFactory.createKeyStore(eq("pkcs12"), eq(keyStoreFile), eq(password))).thenReturn(keyStore);
+            when(keyStoreFactory.createKeyStore("pkcs12", keyStoreFile, password)).thenReturn(keyStore);
             when(keyStore.aliases()).thenReturn(new Hashtable<String, String>().keys());
         } else {
             when(keyStoreFactory.createKeyStore(eq("pkcs12"), eq(keyStoreFile), any())).thenThrow(new GeneralSecurityException());

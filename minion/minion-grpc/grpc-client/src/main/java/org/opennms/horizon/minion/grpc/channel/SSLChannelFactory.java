@@ -36,8 +36,6 @@ import lombok.Setter;
 import org.opennms.horizon.minion.grpc.GrpcErrorMessages;
 import org.opennms.horizon.minion.grpc.GrpcShutdownHandler;
 import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
@@ -46,8 +44,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
 public class SSLChannelFactory implements ManagedChannelFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(SSLChannelFactory.class);
-
     private final ChannelBuilderFactory channelBuilderFactory;
 
     private final KeyStoreFactory keyStoreFactory;

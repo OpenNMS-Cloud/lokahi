@@ -203,8 +203,9 @@ public class MinionGrpcClientTest {
         verify(mockAsyncStub).minionToCloudRPC(eq(request), responseObserverCaptor.capture());
 
         CertificateExpiredException expiredException = new CertificateExpiredException("expired");
-        responseObserverCaptor.getValue().onError(expiredException);
-        verify(mockGrpcShutdownHandler).shutdown(eq(expiredException));
+        RuntimeException runtimeException = new RuntimeException("runtime", expiredException);
+        responseObserverCaptor.getValue().onError(runtimeException);
+        verify(mockGrpcShutdownHandler, times(1)).shutdown(expiredException);
         target.shutdown();
     }
 

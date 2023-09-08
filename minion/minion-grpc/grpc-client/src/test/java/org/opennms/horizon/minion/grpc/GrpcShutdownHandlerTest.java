@@ -33,13 +33,12 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.catchSystemExit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-public class GrpcShutdownHandlerTest {
+class GrpcShutdownHandlerTest {
 
     private final SystemService mockSystemService = mock(SystemService.class);
     private final GrpcShutdownHandler target = new GrpcShutdownHandler(mockSystemService);
@@ -47,20 +46,21 @@ public class GrpcShutdownHandlerTest {
     @Test
     void testShutdownWithMessage() throws Exception {
         target.shutdown("message");
-        verify(mockSystemService).halt();
+        verify(mockSystemService, times(1)).halt();
     }
 
     @Test
     void testShutdownWithThrowable() throws Exception {
         RuntimeException ex = new RuntimeException("exception");
         target.shutdown(ex);
-        verify(mockSystemService).halt();
+        verify(mockSystemService, times(1)).halt();
     }
 
     @Test
     void testShutdownException() throws Exception {
         doThrow(new RuntimeException()).when(mockSystemService).halt();
         int statusCode = catchSystemExit(() -> target.shutdown("message"));
+        verify(mockSystemService, times(1)).halt();
         assertEquals(-1, statusCode);
     }
 }

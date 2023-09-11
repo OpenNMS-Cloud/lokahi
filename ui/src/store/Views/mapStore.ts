@@ -1,18 +1,16 @@
 import { defineStore } from 'pinia'
 import { FeatherSortObject } from '@/types'
-import { Node, MonitoringLocation } from '@/types/graphql'
+import { Node } from '@/types/graphql'
 // import { LatLngLiteral } from 'leaflet'
 import { SORT } from '@featherds/table'
 import { numericSeverityLevel } from '@/components/Map/utils'
 import { useMapQueries } from '@/store/Queries/mapQueries'
-import { AlarmModificationQueryVariable } from '@/types/map'
 
 export const useMapStore = defineStore('mapStore', () => {
   const mapQueries = useMapQueries()
 
   const areDevicesFetching = computed(() => mapQueries.isFetching)
-  // TODO: Uncomment when nodes have locations
-  // const nodesWithCoordinates = computed(() => mapQueries.nodes.filter((node: Node) => node.location?.latitude && node.location.longitude))
+  const nodesWithCoordinates = computed(() => mapQueries.nodes.filter((node: Node) => node.location?.latitude && node.location.longitude))
 
   const devicesInbounds = computed(() =>
     mapQueries.nodes.filter((node: Node) => {
@@ -50,15 +48,9 @@ export const useMapStore = defineStore('mapStore', () => {
     return map
   }
 
-  const modifyAlarm = async (alarmQueryVariable: AlarmModificationQueryVariable) => {
-    // todo: add graphQL query
-    const resp = {}
-    return resp
-  }
-
   return {
     areDevicesFetching,
-    nodesWithCoordinates: [] as any[], // TODO: fix when nodes have locations
+    nodesWithCoordinates,
     devicesInbounds,
     alarms,
     interestedDevicesID,
@@ -70,6 +62,5 @@ export const useMapStore = defineStore('mapStore', () => {
     alarmSortObject,
     fetchAlarms,
     getDeviceAlarmSeverityMap,
-    modifyAlarm
   }
 })

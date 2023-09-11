@@ -28,13 +28,6 @@
         :icon="Icons.Home"
       />
 
-      <!-- Hidden until after EAR -->
-      <!-- <NavigationRailNavItem
-        title="Map"
-        href="/map"
-        :icon="Icons.Location"
-      /> -->
-
       <NavigationRailNavItem
         title="Inventory"
         href="/inventory"
@@ -62,6 +55,12 @@
       <NavigationRailNavItem
         title="Locations"
         href="/locations"
+        :icon="Icons.Location"
+      />
+
+      <NavigationRailNavItem
+        title="Map"
+        href="/map"
         :icon="Icons.Location"
       />
 

@@ -18,6 +18,11 @@
 
 $opacity: 0.2;
 
+.critical {
+  background-color: utils.alpha(variables.$error, 1);
+  color: var(variables.$error) !important;
+}
+
 .critical-color {
   background-color: utils.alpha(variables.$error, $opacity);
   color: var(variables.$error) !important;

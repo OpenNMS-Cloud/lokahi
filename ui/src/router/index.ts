@@ -20,24 +20,11 @@ const router = createRouter({
       name: 'Graphs',
       component: () => import('@/containers/Graphs.vue')
     },
-    // hidden until after EAR
-    // {
-    //   path: '/map',
-    //   name: 'Map',
-    //   component: () => import('@/containers/Map.vue'),
-    //   children: [
-    //     {
-    //       path: '',
-    //       name: 'MapAlarms',
-    //       component: () => import('@/components/Map/MapAlarmsGrid.vue')
-    //     },
-    //     {
-    //       path: 'nodes',
-    //       name: 'MapNodes',
-    //       component: () => import('@/components/Map/MapNodesGrid.vue')
-    //     }
-    //   ]
-    // },
+    {
+      path: '/map',
+      name: 'Map',
+      component: () => import('@/containers/Map.vue')
+    },
     {
       path: '/inventory',
       name: 'Inventory',

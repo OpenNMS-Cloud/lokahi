@@ -4,8 +4,8 @@
     id="mapPin"
   >
     <div
-      class="status-circle"
-      :class="`${status.toLowerCase()}`"
+      class="severity-circle"
+      :class="`${severity.toLowerCase()}`"
     ></div>
     <div class="nodes">{{ numberOfNodes }}</div>
   </div>
@@ -13,14 +13,14 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  status: { type: String, default: 'critical', required: true },
+  severity: { type: String, default: 'indeterminate', required: true },
   numberOfNodes: { type: String, default: '000' }
 })
 
 // icon point positions
 const pinLeft = ref()
 const pinTop = computed(() => (props.numberOfNodes ? '19px' : '18px'))
-// margin between status color and text
+// margin between severity color and text
 const textMargin = computed(() => (props.numberOfNodes ? '5px' : '0px'))
 
 onMounted(() => {
@@ -49,7 +49,7 @@ onMounted(() => {
   border-radius: 16px;
   border: 1px solid lightgray;
 
-  .status-circle {
+  .severity-circle {
     width: 20px;
     height: 20px;
     border-radius: vars.$border-radius-round;

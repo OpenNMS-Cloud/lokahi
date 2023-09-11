@@ -42,11 +42,11 @@
               >{{ node?.nodeLabel }}</router-link
             >
             <br />
-            Severity: {{ nodeLabelAlarmServerityMap[node?.nodeLabel as string] || 'NORMAL' }}
+            Severity: {{ nodeLabelAlarmServerityMap[node?.nodeLabel as string] || 'Indeterminate' }}
             <br />
           </LPopup>
           <LIcon>
-            <MapPin />
+            <MapPin :severity="nodeLabelAlarmServerityMap[node?.nodeLabel as string]" />
           </LIcon>
         </LMarker>
         <!-- </MarkerCluster> -->

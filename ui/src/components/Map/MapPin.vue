@@ -1,32 +1,78 @@
 <template>
-  <LIcon>
-    <div class="pin">
-      <div
-        class="status-circle"
-        :class="`${status.toLowerCase()}`"
-      ></div>
-    </div>
-  </LIcon>
+  <div
+    class="pin"
+    id="mapPin"
+  >
+    <div
+      class="status-circle"
+      :class="`${status.toLowerCase()}`"
+    ></div>
+    <div class="nodes">{{ numberOfNodes }}</div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { LIcon } from '@vue-leaflet/vue-leaflet'
+const props = defineProps({
+  status: { type: String, default: 'critical', required: true },
+  numberOfNodes: { type: String, default: '000' }
+})
 
-defineProps({
-  status: { type: String, default: 'critical' }
+// icon point positions
+const pinLeft = ref()
+const pinTop = computed(() => (props.numberOfNodes ? '19px' : '18px'))
+// margin between status color and text
+const textMargin = computed(() => (props.numberOfNodes ? '5px' : '0px'))
+
+onMounted(() => {
+  // timeout needed for leaflet icon to render before running this
+  setTimeout(() => {
+    const width = document.getElementById('mapPin')?.offsetWidth
+    const posOfPoint = props.numberOfNodes ? 9 : 10
+    if (width) {
+      pinLeft.value = width / 2 - posOfPoint + 'px'
+    }
+  })
 })
 </script>
 
 <style lang="scss" scoped>
 @use '@/styles/vars.scss';
 @use '@/styles/_severities.scss';
+@use '@featherds/styles/mixins/elevation';
+@use '@featherds/styles/themes/variables';
 .pin {
+  filter: drop-shadow(0px 3px 3px var(variables.$shade-2));
+  display: flex;
   background: #fff;
+  width: fit-content;
+  padding: 4px;
+  border-radius: 16px;
+  border: 1px solid lightgray;
 
   .status-circle {
     width: 20px;
     height: 20px;
     border-radius: vars.$border-radius-round;
+    padding: 8px;
+    z-index: 1;
   }
+  .nodes {
+    align-self: center;
+    margin-left: v-bind(textMargin);
+    margin-right: v-bind(textMargin);
+  }
+}
+
+.pin:after {
+  content: '';
+  position: absolute;
+  transform: rotate(-45deg);
+  margin-top: v-bind(pinTop);
+  margin-left: v-bind(pinLeft);
+  background: white;
+  border: 1px solid;
+  border-color: transparent transparent lightgray lightgray;
+  width: 10px;
+  height: 10px;
 }
 </style>

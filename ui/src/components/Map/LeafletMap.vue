@@ -5,6 +5,7 @@
       :center="center"
       :max-zoom="19"
       :min-zoom="2"
+      :zoom="2"
       :zoomAnimation="true"
       @ready="onLeafletReady"
       @moveend="onMoveEnd"
@@ -44,7 +45,9 @@
             Severity: {{ nodeLabelAlarmServerityMap[node?.nodeLabel as string] || 'NORMAL' }}
             <br />
           </LPopup>
-          <MapPin />
+          <LIcon>
+            <MapPin />
+          </LIcon>
         </LMarker>
         <!-- </MarkerCluster> -->
       </template>
@@ -54,7 +57,7 @@
 
 <script setup lang="ts">
 import 'leaflet/dist/leaflet.css'
-import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
+import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet'
 import MarkerCluster from './MarkerCluster.vue'
 import NormalIcon from '@/assets/Normal-icon.png'
 import WarninglIcon from '@/assets/Warning-icon.png'
@@ -292,5 +295,10 @@ defineExpose({ invalidateSizeFn, setBoundingBox, flyToNode })
 
 .leaflet-control-attribution {
   display: none;
+}
+
+.leaflet-div-icon {
+  border: none;
+  background: transparent;
 }
 </style>

@@ -69,11 +69,12 @@
               secondary
               >Delete</FeatherButton
             >
-            <FeatherButton
+            <ButtonWithSpinner
               text
               :disabled="isOverallDisabled"
-              @click="discoveryStore.saveSelectedDiscovery"
-              >Save</FeatherButton
+              :click="discoveryStore.saveSelectedDiscovery"
+              :isFetching="discoveryStore.loading"
+              >Save</ButtonWithSpinner
             >
           </div>
         </div>
@@ -218,11 +219,12 @@
               >Back</FeatherButton
             >
 
-            <FeatherButton
+            <ButtonWithSpinner
               primary
               :disabled="isOverallDisabled"
-              @click="discoveryStore.saveSelectedDiscovery"
-              >{{ discoveryCopy.button }}</FeatherButton
+              :click="discoveryStore.saveSelectedDiscovery"
+              :isFetching="discoveryStore.loading"
+              >{{ discoveryCopy.button }}</ButtonWithSpinner
             >
           </div>
         </div>

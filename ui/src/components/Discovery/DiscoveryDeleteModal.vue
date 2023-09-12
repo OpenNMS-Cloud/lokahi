@@ -9,10 +9,11 @@
 
     <template v-slot:footer>
       <FeatherButton @click="discoveryStore.closeDeleteModal">Cancel</FeatherButton>
-      <FeatherButton
-        @click="() => discoveryStore.deleteDiscovery()"
+      <ButtonWithSpinner
+        :click="discoveryStore.deleteDiscovery"
+        :isFetching="discoveryStore.loading"
         primary
-        >Yes</FeatherButton
+        >Yes</ButtonWithSpinner
       >
     </template>
   </FeatherDialog>

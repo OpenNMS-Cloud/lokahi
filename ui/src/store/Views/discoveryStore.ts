@@ -175,7 +175,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     async toggleDiscovery(clickedToggle: NewOrUpdatedDiscovery){
       const discoveryMutations = useDiscoveryMutations()
       const meta = clickedToggle?.meta as DiscoveryTrapMeta
-      const toggleObject = {toggle: !meta.toggle?.toggle ?? false, id: meta.toggle?.id ?? clickedToggle.id}
+      const toggleObject = {toggle: !meta.toggle?.toggle || false, id: meta.toggle?.id || clickedToggle.id}
       this.loading = true
       await discoveryMutations.togglePassiveDiscovery({toggle:toggleObject})
       await this.init()

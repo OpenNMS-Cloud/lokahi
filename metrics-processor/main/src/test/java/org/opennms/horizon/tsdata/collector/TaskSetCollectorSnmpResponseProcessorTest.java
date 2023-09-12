@@ -31,8 +31,6 @@ package org.opennms.horizon.tsdata.collector;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-import nl.altindag.log.LogCaptor;
-import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -54,11 +52,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TaskSetCollectorSnmpResponseProcessorTest {
 
@@ -118,34 +114,6 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         Mockito.verifyNoMoreInteractions(mockCortexTSS);
     }
 
-    @Test
-    void testProcessException() throws IOException {
-        //
-        // Setup Test Data and Interactions
-        //
-        RuntimeException testException = new RuntimeException("x-test-exc-x");
-        Mockito.doThrow(testException).when(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.any(prometheus.PrometheusTypes.TimeSeries.Builder.class));
-
-        try (LogCaptor logCaptor = LogCaptor.forClass(TaskSetCollectorSnmpResponseProcessor.class)) {
-            //
-            // Execute
-            //
-            target.processSnmpCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult);
-
-            //
-            // Verify the Results
-            //
-            Predicate<LogEvent> matcher =
-                (logEvent) ->
-                    (
-                        Objects.equals("Exception parsing metrics", logEvent.getMessage() ) &&
-                        (logEvent.getArguments().size() == 0) &&
-                        (logEvent.getThrowable().orElse(null) == testException)
-                    );
-
-            assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
-        }
-    }
 
     @Test
     void testCollectorTimestamps() throws IOException {
@@ -164,7 +132,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
                 .setMonitorType(MonitorType.SNMP).build();
         TaskResult taskResult = TaskResult.newBuilder().setCollectorResponse(collectorResponse).build();
         target.processSnmpCollectorResponse("x-tenant-id-x", "x-location-x", taskResult);
-        var timeSeriesTimeStampMatcher = new PrometheusTimeSeriesTimeStampMatcher(timestamp.toEpochMilli());
+        var timeSeriesTimeStampMatcher = new PrometheusTimeStampMatcher(timestamp.toEpochMilli());
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesTimeStampMatcher));
     }
 
@@ -264,7 +232,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
                 .setResult(Any.pack(snmpResponseMetric1Type))
                 .build();
     }
-    private class PrometheusTimeSeriersBuilderArgumentMatcher implements ArgumentMatcher<PrometheusTypes.TimeSeries.Builder> {
+    private static class PrometheusTimeSeriersBuilderArgumentMatcher implements ArgumentMatcher<List<PrometheusTypes.TimeSeries>> {
 
         private final double metricValue;
         private final MonitorType monitorType;
@@ -277,17 +245,16 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         }
 
         @Override
-        public boolean matches(PrometheusTypes.TimeSeries.Builder timeseriesBuilder) {
-            if (
-                (labelMatches(timeseriesBuilder)) &&
-                (sampleMatches(timeseriesBuilder))
-            ) {
-                return true;
-            }
-            return false;
+        public boolean matches(List<PrometheusTypes.TimeSeries> timeseriesList) {
+            var optional = timeseriesList.stream().filter(ts ->
+                ts.getLabelsList().stream().anyMatch(label ->
+                    label.getName().equals(MetricNameConstants.METRIC_NAME_LABEL) && label.getValue().equals(metricName))).findAny();
+            var timeSeries = optional.orElseThrow();
+            return (labelMatches(timeSeries)) &&
+                (sampleMatches(timeSeries));
         }
 
-        private boolean labelMatches(PrometheusTypes.TimeSeries.Builder timeseriesBuilder) {
+        private boolean labelMatches(PrometheusTypes.TimeSeries timeseriesBuilder) {
             if (timeseriesBuilder.getLabelsCount() == 6) {
                 Map<String, String> labelMap = new HashMap<>();
                 for (var label : timeseriesBuilder.getLabelsList()) {
@@ -306,7 +273,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
             return false;
         }
 
-        private boolean sampleMatches(PrometheusTypes.TimeSeries.Builder timeseriesBuilder) {
+        private boolean sampleMatches(PrometheusTypes.TimeSeries timeseriesBuilder) {
             if (timeseriesBuilder.getSamplesCount() == 1) {
                 PrometheusTypes.Sample sample = timeseriesBuilder.getSamples(0);
 
@@ -329,6 +296,19 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         @Override
         public boolean matches(PrometheusTypes.TimeSeries.Builder argument) {
             return argument.getSamples(0).getTimestamp() == timeStamp;
+        }
+    }
+
+    private class PrometheusTimeStampMatcher implements ArgumentMatcher<List<PrometheusTypes.TimeSeries>> {
+
+        private long timeStamp;
+        public PrometheusTimeStampMatcher(long timeStamp) {
+            this.timeStamp = timeStamp;
+        }
+
+        @Override
+        public boolean matches(List<PrometheusTypes.TimeSeries> argument) {
+            return argument.get(0).getSamples(0).getTimestamp() == timeStamp;
         }
     }
 }

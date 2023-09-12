@@ -40,7 +40,6 @@ import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
-import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
@@ -188,7 +187,6 @@ public class NodeServiceTest {
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).findByIdAndTenantId(5678L, tenant);
-        verify(tagService).addTags(eq(tenant), any(TagCreateListDTO.class));
         verify(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(5678L), eq(tenant), eq(ScanType.NODE_SCAN));
         // Check the default state
         assertEquals(MonitoredState.DETECTED, nodeCreateDTO.getMonitoredState());
@@ -480,27 +478,27 @@ public class NodeServiceTest {
         tagMonitoredWithDefaultTag.setName("default");
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of());
-        nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
+        nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.DETECTED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
-        nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
+        nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagUnmonitored));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
-        nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
+        nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.UNMONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored, tagUnmonitored));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
-        nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
+        nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitoredWithDefaultTag));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
-        nodeService.updateNodeInfo(testNode, NodeInfoResult.newBuilder().build());
+        nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         Mockito.verify(mockNodeRepository, atLeastOnce()).save(testNode);

@@ -52,7 +52,7 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.API.ServiceName }}
-          image: {{ .Values.OpenNMS.API.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.API) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.API.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -82,8 +82,9 @@ spec:
               value: "{{ .Values.OpenNMS.API.FlowsUrl }}"
             - name: GRPC_URL_FLOWS_TLS_ENABLED
               value: "{{ .Values.OpenNMS.API.FlowsTlsEnabled }}"
-
-            {{- include "deployment.env" .Values.OpenNMS.API | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.API) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

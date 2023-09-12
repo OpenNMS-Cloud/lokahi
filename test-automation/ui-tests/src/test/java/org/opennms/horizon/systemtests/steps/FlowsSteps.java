@@ -27,15 +27,16 @@
  *******************************************************************************/
 package org.opennms.horizon.systemtests.steps;
 
-import com.codeborne.selenide.Selenide;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import org.junit.Assert;
+import io.cucumber.java.en.When;
 import org.opennms.horizon.systemtests.pages.FlowsPage;
 import org.opennms.horizon.systemtests.pages.DiscoveryPage;
-import org.opennms.horizon.systemtests.pages.InventoryPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
+import org.testcontainers.containers.GenericContainer;
+
+import java.io.IOException;
 
 
 public class FlowsSteps {
@@ -44,9 +45,9 @@ public class FlowsSteps {
         FlowsPage.verifyNoDataTitle();
     }
 
-    @Then("sees chart for netflow data")
-    public void verifyChartVisibility() {
-        FlowsPage.verifyChartVisibility();
+    @Then("sees chart with new netflow data")
+    public void verifyChartDataUpdates() {
+        FlowsPage.verifyTopApplicationFlowTotalsIncreases();
     }
 
     @Then("click on 'Exporter' filter")
@@ -80,21 +81,25 @@ public class FlowsSteps {
         DiscoveryPage.createNewSnmpDiscovery(discoveryName, locationName, DiscoverySteps.getIpaddress(nodeName));
     }
 
-//    @Then("check node {string} discovered successfully")
-//    public void checkNodeWithSystemNameDiscoveredSuccessfully(String nodeName) {
-//        InventoryPage.clickOnMonitoredNodesTab();
-//        for (int i = 0; i < 20; i++) {
-//            Selenide.sleep(3_000);
-//            Selenide.refresh();
-//            if (InventoryPage.checkIfMonitoredNodeExist(nodeSysName)) {
-//                break;
-//            }
-//        }
-//        Assert.assertTrue(InventoryPage.checkIfMonitoredNodeExist(nodeSysName));
-//    }
-
     @And("check if exporter {string} visible in the dropdown")
     public void checkIfExporterVisibleInTheDropdown(String exporterName) {
-        FlowsPage.checkDropdown(exporterName);
+        FlowsPage.checkExporterDropdown(exporterName);
+    }
+
+    @When("Send flow data for node {string}")
+    public void sendFlowDataForNode(String node) throws IOException, InterruptedException {
+        GenericContainer nodeContainer = DiscoverySteps.getNode(node);
+        String minionIP = MinionSteps.getMinionIp();
+
+        Thread thread = new Thread() {
+            public void run() {
+                try {
+                    nodeContainer.execInContainer("/udpgen", "-x", "netflow9", "-i", "-h", minionIP, "-p", "4729", "-r", "1");
+                } catch (Exception e) {
+                    throw new RuntimeException("Connector error");
+                }
+            }
+        };
+        thread.start();
     }
 }

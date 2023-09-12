@@ -48,7 +48,7 @@ describe('Welcome Store', () => {
     it('can get the docker command', async () => {
         const welcomeStore = useWelcomeStore()
         const theDockerCmd = welcomeStore.dockerCmd()
-        expect(theDockerCmd).toBe(`docker run --rm -p 162:1162/udp -p 9999:9999/udp -e USE_KUBERNETES="false" -e MINION_GATEWAY_HOST="minion.onms-fb-prod.production.prod.dataservice.opennms.com" -e MINION_GATEWAY_PORT=443 -e MINION_GATEWAY_TLS="true" -e GRPC_CLIENT_KEYSTORE='/opt/karaf/minion.p12' -e GRPC_CLIENT_KEYSTORE_PASSWORD='' -e MINION_ID='default' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/default-certificate.p12",target="/opt/karaf/minion.p12",readonly opennms/lokahi-minion:latest`)
+        expect(theDockerCmd).toBe(`docker run --rm -p 162:1162/udp -p 9999:9999/udp -e MINION_GATEWAY_HOST="minion.onms-fb-prod.production.prod.dataservice.opennms.com" -e GRPC_CLIENT_KEYSTORE_PASSWORD='' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/default-certificate.p12",target="/opt/karaf/minion.p12",readonly opennms/lokahi-minion:latest`)
     })
 
     it('can click on the download button', async () => {

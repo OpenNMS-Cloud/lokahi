@@ -33,15 +33,6 @@ public class IcmpMonitorTest {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        TestPinger testPinger = new TestPinger();
-        testPinger.setHandleResponse(true);
-
-        PingerFactory pingerFactory = Mockito.mock(PingerFactory.class);
-        when(pingerFactory.getInstance(anyInt(), anyBoolean()))
-            .thenReturn(testPinger);
-
-        icmpMonitor = new IcmpMonitor(pingerFactory);
-
         testEchoRequest =
             IcmpMonitorRequest.newBuilder()
                 .setHost(TEST_LOCALHOST_IP_VALUE)
@@ -50,13 +41,53 @@ public class IcmpMonitorTest {
         testConfig = Any.pack(testEchoRequest);
     }
 
+    private IcmpMonitor getIcmpMonitor(boolean isError, boolean isTimeout) {
+        TestPinger testPinger = new TestPinger();
+        testPinger.setHandleResponse(!isTimeout);
+        testPinger.setHandleTimeout(isTimeout);
+        testPinger.setHandleError(isError);
+
+        PingerFactory pingerFactory = Mockito.mock(PingerFactory.class);
+        when(pingerFactory.getInstance(anyInt(), anyBoolean()))
+            .thenReturn(testPinger);
+
+        return new IcmpMonitor(pingerFactory);
+    }
+
     @Test
     public void poll() throws Exception {
+        icmpMonitor = getIcmpMonitor(false, false);
         CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
 
         ServiceMonitorResponse serviceMonitorResponse = response.get();
 
         assertEquals(Status.Up, serviceMonitorResponse.getStatus());
         assertTrue(serviceMonitorResponse.getResponseTime() > 0.0);
+    }
+
+    @Test
+    public void testTimeout() throws Exception {
+        icmpMonitor = getIcmpMonitor(false, true);
+
+        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
+
+        ServiceMonitorResponse serviceMonitorResponse = response.get();
+
+        assertEquals(Status.Unknown, serviceMonitorResponse.getStatus());
+        assertEquals("timeout", serviceMonitorResponse.getReason());
+        assertEquals(0.0d, serviceMonitorResponse.getResponseTime(), 0);
+    }
+
+    @Test
+    public void testError() throws Exception {
+        icmpMonitor = getIcmpMonitor(true, false);
+
+        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
+
+        ServiceMonitorResponse serviceMonitorResponse = response.get();
+
+        assertEquals(Status.Down, serviceMonitorResponse.getStatus());
+        assertEquals("Failed to ping", serviceMonitorResponse.getReason());
+        assertEquals(0.0d, serviceMonitorResponse.getResponseTime(), 0);
     }
 }

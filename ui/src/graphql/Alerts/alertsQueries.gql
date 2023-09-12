@@ -14,11 +14,15 @@ fragment AlertsParts on Query {
     alerts {
       acknowledged
       description
+      firstEventTimeMs
       lastUpdateTimeMs
       severity
       label
       nodeName
       databaseId
+      location
+      ruleNameList
+      policyNameList
     }
   }
 }

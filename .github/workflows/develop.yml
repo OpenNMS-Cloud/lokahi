@@ -200,7 +200,7 @@ jobs:
         working-directory: test-automation
         run: |
           # Cucumber test
-          mvn install
+          mvn -B -Dstyle.color=always install
           INGRESS_BASE_URL=https://onmshs
           KEYCLOAK_BASE_URL=https://onmshs/auth
           KEYCLOAK_REALM=opennms
@@ -324,7 +324,7 @@ jobs:
 
           ls -1
 
-          mvn clean install
+          mvn -B -Dstyle.color=always clean install
 
           ls -1R docker-assembly/
 

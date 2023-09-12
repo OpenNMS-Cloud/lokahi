@@ -29,7 +29,9 @@
 package org.opennms.horizon.systemtests.steps;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.LeftPanelPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
 import org.openqa.selenium.By;
@@ -53,7 +55,7 @@ public class MinionSteps {
 
 
     public static void waitForMinionUp(String minionName) {
-        SelenideElement minionStatus = $(By.xpath("//ul[@class='minions-list']/li[.//div[@data-test='header-name']/text()='" + minionName.toUpperCase() + "']//div[@class='status']//span[text()='UP']"));
+        SelenideElement minionStatus = $(By.xpath("//ul[@class='minions-list']/li[.//div[@data-test='header-name']/text()='" + minionName.toUpperCase() + "']//div[@class='status']//span[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='up']"));
 
         // Make sure we're on the locations page with the right location selected
         LeftPanelPage.clickOnPanelSection("locations");
@@ -72,12 +74,38 @@ public class MinionSteps {
         waitForMinionUp(minionName);
     }
 
-    public static MinionContainer startMinion(File bundle, String pwd, String minionId) {
+    public static MinionContainer startMinion(File bundle, String pwd, String minionId, String locationName) {
         Network network = SetupSteps.getCommonNetwork();
         MinionContainer minion = new MinionContainer(minionId, "minion-" + minionId.toLowerCase(), network,
             bundle, pwd);
 
         minion.start();
+        minions.put(locationName, minion);
         return minion;
+    }
+
+    @Then("stop minion for location {string}")
+    public void stopMinionForLocation(String locationName) {
+        minions.get(locationName).stop();
+        for (int i = 0; i < 30; i++) {
+            if (minions.get(locationName).isMinionIsStopped) {
+                break;
+            }
+            Selenide.sleep(2000);
+        }
+    }
+
+    public static boolean isMinionRunning(String locationName) {
+        MinionContainer minionContainer = minions.get(locationName);
+        boolean result = false;
+        if (minionContainer != null) {
+            result = minionContainer.isRunning();
+        }
+        return result;
+    }
+
+    public static String getMinionIp() {
+        MinionContainer minionContainer = minions.get(LocationSteps.getLocationName());
+        return DiscoverySteps.getContainerIP(minionContainer);
     }
 }

@@ -27,16 +27,24 @@
             <h2 style="margin:0;font-family:'Inter', Helvetica, Arial, sans-serif;">
                 ${alert.getLogMessage()}
             </h2>
-            <p style="font-family: 'Open Sans', Georgia, sans-serif;">${alert.getDescription()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Node name: ${alert.getNodeName()}</a></p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Location: ${alert.getLocation()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Description: ${alert.getDescription()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Severity: ${alert.getSeverity()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Started: ${firstEventTime}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">last Update: ${lastUpdateTime}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">PolicyName: ${alert.getPolicyNameList()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">RuleName: ${alert.getRuleNameList()}</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;">Sign in <a href="${url}">${url}</a> to view more details about the alert.</p>
         </td>
     </tr>
 </table>
 <table border="0" cellpadding="36" cellspacing="0" style="margin: 0; padding: 0;" style="max-width:740px;width:100%;">
     <tr style="background-color:#f4f7fc;">
         <td align="left" valign="top">
-            <p style="font-family: 'Open Sans', Georgia, sans-serif;font-size:14px;">This email was sent to $recipient.</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;font-size:14px;">This email was sent to ${recipient}.</p>
             <p style="font-family: 'Open Sans', Georgia, sans-serif;font-size:14px;">OpenNMS, 3000 RDU Center Dr, Suite 200 Morrisville, NC 27560</p>
-            <p style="font-family: 'Open Sans', Georgia, sans-serif;font-size:14px;">&copy;$currentYear OpenNMS Group</p>
+            <p style="font-family: 'Open Sans', Georgia, sans-serif;font-size:14px;">&copy;${currentYear} OpenNMS Group</p>
             <p style="height:10px;">&nbsp;</p>
             <img src="https://www.opennms.com/wp-content/uploads/2023/03/OpenNMS_Horizontal-Logo_Grey.png" width="148" alt="OpenNMS Logo" />
         </td>

@@ -79,7 +79,7 @@ spec:
         # into minion. Please do not use this in production.
         # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
         # into minion container itself under /opt/karaf/certs/.
-        - image: {{ .Values.OpenNMS.Minion.Image }}
+        - image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Minion) | quote }}
           imagePullPolicy: "IfNotPresent"
           name: get-cert
           command:
@@ -105,36 +105,24 @@ spec:
         {{- end }}
       containers:
         - name: {{ .Values.OpenNMS.Minion.ServiceName }}
-          image: {{ .Values.OpenNMS.Minion.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Minion) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.Minion.ImagePullPolicy }}
           env:
-            - name: USE_KUBERNETES
-              value: "true"
-            - name: KUBERNETES_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.Minion.ServiceName }}"
-            - name: KUBERNETES_NAMESPACE
-              value: "{{ .Release.Namespace }}"
             - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
-            - name: MINION_LOCATION
-              value: "Default"
-            - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
-              value: "false"
+              value: "-Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
+            {{- if .Values.OpenNMS.Minion.logLevel }}
+            - name: KARAF_OPTS
+              value: -Dkaraf.log.console={{ .Values.OpenNMS.Minion.logLevel }}
+            {{- end }}
             {{- if .Values.OpenNMS.Minion.addDefaultLocation }}
-            - name: GRPC_CLIENT_KEYSTORE
-              value: "/opt/karaf/certs/minion.p12"
             - name: GRPC_CLIENT_KEYSTORE_PASSWORD
               value: "changeme"
             - name: MINION_GATEWAY_HOST
-              value: "ingress-nginx-controller"
-            - name: MINION_GATEWAY_PORT
-              value: "443"
-            - name: MINION_GATEWAY_TLS
-              value: "true"
+              value: "ingress-nginx-controller" # we're inside the cluster, so we need to talk to the internal service name
+            - name: GRPC_CLIENT_OVERRIDE_AUTHORITY
+              value: "minion.{{ .Values.Host }}" # but the TLS certificate will have the external name, so expect that
             - name: GRPC_CLIENT_TRUSTSTORE
               value: "/run/secrets/certificates/tls.crt"
-            - name: GRPC_CLIENT_OVERRIDE_AUTHORITY
-              value: "minion.{{ .Values.Host }}"
             {{- end }}
             {{- if .Values.OpenNMS.global.openTelemetry.otlpTracesEndpoint }}
             - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
@@ -151,7 +139,9 @@ spec:
               value: {{ $val | quote }}
               {{- end }}
             {{- end }}
-            {{- include "deployment.env" .Values.OpenNMS.Minion | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.Minion) | nindent 12 }}
           ports:
             - name: http
               containerPort: {{ .Values.OpenNMS.Minion.Port }}
@@ -167,9 +157,6 @@ spec:
               protocol: UDP
               containerPort: {{ .Values.OpenNMS.Minion.Netflow9ListenerPort }}
           volumeMounts:
-            - name: minion-config-volume
-              mountPath: "/opt/karaf/etc/org.opennms.identity.cfg"
-              subPath: "opennms-minion-identity"
             - name: maven-volume
               mountPath: /.m2
             {{- if .Values.OpenNMS.Minion.addDefaultLocation }}
@@ -180,7 +167,9 @@ spec:
               mountPath: "/run/secrets/mtls"
               readOnly: true
             - name: certificate
-              mountPath: "/opt/karaf/certs/"
+              subPath: "minion.p12"
+              mountPath: "/opt/karaf/minion.p12"
+              readOnly: true
             {{- end }}
             {{- if .Values.OpenNMS.Minion.ExtraMounts }}
               {{ toYaml .Values.OpenNMS.Minion.ExtraMounts | nindent 12 }}
@@ -200,4 +189,5 @@ spec:
               - unset JAVA_TOOL_OPTIONS; echo "opennms:task-set-print" | bin/client -b | grep -q taskDefinition
             initialDelaySeconds: 25
             periodSeconds: 5
+            failureThreshold: 10
 {{- end }}

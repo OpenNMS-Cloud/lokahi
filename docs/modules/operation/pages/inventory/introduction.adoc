@@ -15,5 +15,5 @@ Inventory management involves the following:
 
 * Examining unmonitored and detected nodes to determine if you want to monitor them.
 * xref:inventory/nodes.adoc#tag-create[Tagging] nodes so that they are monitored.
-* https://github.com/OpenNMS-Cloud/lokahi/wiki/Manage-Monitoring-Policies#edit-a-monitoring-policy[Updating] or https://github.com/OpenNMS-Cloud/lokahi/wiki/Create-a-Monitoring-Policy[creating] monitoring policies to discover additional network nodes.
+* xref:get-started/policies/manage.adoc[Updating] or xref:get-started/policies/create.adoc[creating] monitoring policies to discover additional network nodes.
 * https://github.com/OpenNMS-Cloud/lokahi/wiki/Manage-nodes#remove-nodes-you-do-not-want-to-monitor[Removing nodes] you do not want to monitor from the monitored nodes list.

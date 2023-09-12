@@ -31,10 +31,13 @@ package org.opennms.horizon.minion.grpc;
 
 import com.codahale.metrics.MetricRegistry;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.opentracing.Tracer;
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.cert.CertificateExpiredException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,6 +104,9 @@ public class MinionGrpcClientTest {
     @Mock
     private StreamObserver mockSinkStream;
 
+    @Mock
+    private GrpcShutdownHandler mockGrpcShutdownHandler;
+
     private IpcIdentity testIpcIdentity;
 
     @BeforeEach
@@ -120,7 +126,9 @@ public class MinionGrpcClientTest {
 
         testIpcIdentity = new MinionIpcIdentity("x-system-id-x");
 
-        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockSendQueueFactory, managedChannelFactory);
+        mockGrpcShutdownHandler = Mockito.mock(GrpcShutdownHandler.class);
+
+        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockSendQueueFactory, managedChannelFactory, mockGrpcShutdownHandler);
         target.setSimpleReconnectStrategyFactory(mockSimpleReconnectStrategyFactory);
     }
 
@@ -170,6 +178,35 @@ public class MinionGrpcClientTest {
             target.shutdown();
             verifyNoInteractions(mockManagedChannel, mockSimpleReconnectStrategyFactory, mockNewStubOperation);
         }
+    }
+
+    @Test
+    void testCertificateException() throws IOException {
+        //
+        // Setup Test Data and Interactions
+        //
+        try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null))
+            .with(reconnectStrategyFactoryCall())
+            .with(stubFactoryCall())) {
+            //
+            // Execute
+            //
+            target.setGrpcHost("x-grpc-host-x");
+            target.setGrpcPort(1313);
+            target.start();
+        }
+
+        var request = RpcRequestProto.getDefaultInstance();
+        target.call(RpcRequestProto.getDefaultInstance());
+
+        var responseObserverCaptor = ArgumentCaptor.forClass(StreamObserver.class);
+        verify(mockAsyncStub).minionToCloudRPC(eq(request), responseObserverCaptor.capture());
+
+        CertificateExpiredException expiredException = new CertificateExpiredException("expired");
+        RuntimeException runtimeException = new RuntimeException("runtime", expiredException);
+        responseObserverCaptor.getValue().onError(runtimeException);
+        verify(mockGrpcShutdownHandler, times(1)).shutdown(expiredException);
+        target.shutdown();
     }
 
     @Test
@@ -369,6 +406,10 @@ public class MinionGrpcClientTest {
         Exception testException = new Exception("x-test-exception-x");
         streamObserver.onError(testException);
         verify(mockSimpleReconnectStrategy).activate();
+
+        StatusRuntimeException statusRuntimeException = new StatusRuntimeException(Status.fromCode(Status.Code.UNAUTHENTICATED));
+        streamObserver.onError(statusRuntimeException);
+        verify(mockGrpcShutdownHandler).shutdown(GrpcErrorMessages.UNAUTHENTICATED);
     }
 
     private void verifyRpcRequestCompletion(BiConsumer<RpcResponseProto, Throwable> completionOp) {

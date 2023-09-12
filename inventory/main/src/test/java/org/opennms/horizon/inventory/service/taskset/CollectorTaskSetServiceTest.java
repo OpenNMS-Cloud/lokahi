@@ -8,7 +8,9 @@ import org.opennms.azure.contract.AzureCollectorResourcesRequest;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 
 import static org.mockito.Mockito.mock;
@@ -16,7 +18,8 @@ import static org.mockito.Mockito.mock;
 public class CollectorTaskSetServiceTest {
 
     private final NodeRepository nodeRepository = mock(NodeRepository.class);
-    private CollectorTaskSetService taskSetService = new CollectorTaskSetService(nodeRepository);
+    private CollectorTaskSetService taskSetService = new CollectorTaskSetService(nodeRepository,
+        mock(IpInterfaceRepository.class), mock(SnmpInterfaceRepository.class));
 
     public static final long NODE_ID = 1;
     public static final String TENANT_ID = "tenantId";

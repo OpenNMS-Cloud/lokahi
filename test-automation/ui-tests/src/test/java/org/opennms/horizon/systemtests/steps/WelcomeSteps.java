@@ -53,8 +53,8 @@ public class WelcomeSteps {
         WelcomePage.startWelcomeWizardSetup();
     }
 
-    @Then("click on 'Download' button to get certificate and password for minion {string} and start minion using {string}")
-    public static void downloadCertificate(String minionID, String dockerComposeFile) {
+    @Then("click on 'Download' button to get certificate and password for minion {string}")
+    public static void downloadCertificate(String minionID) {
         WelcomePage.addMinionUsingWalkthrough(minionID);
     }
 

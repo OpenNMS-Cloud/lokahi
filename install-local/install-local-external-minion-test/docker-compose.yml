@@ -13,11 +13,8 @@ services:
       TZ: 'America/New_York'
       MINION_ID: 'minion-b'
       MINION_LOCATION: 'minion-b-loc'
-      USE_KUBERNETES: false
       IGNITE_SERVER_ADDRESSES: localhost
       MINION_GATEWAY_HOST: minion.onmshs
-      MINION_GATEWAY_PORT: 443
-      MINION_GATEWAY_TLS: 'true'
         #MINION_GATEWAY_HOST: host.docker.internal
         #      MINION_GATEWAY_PORT: 8990
      # MINION_GATEWAY_TLS: false

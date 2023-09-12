@@ -69,8 +69,11 @@ public class LocationsPage {
     }
 
     public static void checkMinionDoesntExist(String minionId) {
-        Selenide.refresh();
-        Assert.assertFalse("Expected to see no minion with ID: " + minionId, minionsList.find(text(minionId)).isDisplayed());
+        //Selenide.refresh();
+        if (minionsList.find(text(minionId)).isDisplayed()) {
+            Assert.fail("Expected to see no minion with ID: " + minionId);
+        }
+
     }
 
     public static void addNewLocation(String locationName) {

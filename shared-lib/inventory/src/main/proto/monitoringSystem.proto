@@ -50,9 +50,15 @@ message MonitoringSystemList {
   repeated MonitoringSystemDTO systems = 1;
 }
 
+message MonitoringSystemQuery {
+  string system_id = 1;
+  string location = 2;
+}
+
 service MonitoringSystemService {
   rpc listMonitoringSystem(google.protobuf.Empty) returns (MonitoringSystemList) {};
-  rpc getMonitoringSystemById(google.protobuf.StringValue) returns (MonitoringSystemDTO) {};
-  rpc deleteMonitoringSystem(google.protobuf.StringValue) returns (google.protobuf.BoolValue);
+  rpc getMonitoringSystemById(google.protobuf.Int64Value) returns (MonitoringSystemDTO) {};
+  rpc deleteMonitoringSystem(google.protobuf.Int64Value) returns (google.protobuf.BoolValue);
   rpc listMonitoringSystemByLocationId(google.protobuf.Int64Value) returns (MonitoringSystemList) {};
+  rpc getMonitoringSystemByQuery(MonitoringSystemQuery) returns (MonitoringSystemDTO) {};
 }

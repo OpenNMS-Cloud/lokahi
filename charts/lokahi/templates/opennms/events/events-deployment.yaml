@@ -48,7 +48,7 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.Events.ServiceName }}
-          image: {{ .Values.OpenNMS.Events.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Events) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.Events.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -69,11 +69,13 @@ spec:
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: GRPC_URL_INVENTORY
               value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:6565"
-            {{- include "deployment.env" .Values.OpenNMS.Events | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.Events) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "kafkaSecretFrom" .Values.OpenNMS.Events | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.Events | indent 10 }}
           ports:
             - name: http
               containerPort: 8080

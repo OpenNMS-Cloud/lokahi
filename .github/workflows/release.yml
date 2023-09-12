@@ -115,7 +115,7 @@ jobs:
 
           ls -1
 
-          mvn clean install
+          mvn -B -Dstyle.color=always clean install
 
           ls -1R docker-assembly/
 

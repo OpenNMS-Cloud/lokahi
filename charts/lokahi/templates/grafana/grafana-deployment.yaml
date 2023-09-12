@@ -44,7 +44,7 @@ spec:
             defaultMode: 420
       containers:
         - name: {{ .Values.Grafana.ServiceName }}
-          image: {{ .Values.Grafana.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.Grafana) | quote }}
           imagePullPolicy: {{ .Values.Grafana.ImagePullPolicy }}
           ports:
             - containerPort: {{ .Values.Grafana.Port }}

@@ -28,20 +28,10 @@
 
 package org.opennms.horizon.alertservice.grpc;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.protobuf.Timestamp;
+import io.grpc.Context;
+import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertError;
 import org.opennms.horizon.alerts.proto.AlertRequest;
@@ -56,6 +46,7 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.LocationRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
@@ -63,12 +54,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.google.protobuf.Timestamp;
-
-import io.grpc.Context;
-import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -80,6 +80,7 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     private final AlertMapper alertMapper;
     private final AlertRepository alertRepository;
     private final NodeRepository nodeRepository;
+    private final LocationRepository locationRepository;
     private final AlertService alertService;
     private final TenantLookup tenantLookup;
 
@@ -115,11 +116,10 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             }
 
             Set<String> nodeIds = getNodeIds(alertPage);
-            Map<Long, String> nodeLabels = getNodeLabels(nodeIds, lookupTenantId.get());
-            insertNodeLabelsIntoAlerts(nodeLabels, alertPage);
+            var nodes = getNodeLabels(nodeIds, lookupTenantId.get());
 
             List<Alert> alerts = alertPage.getContent().stream()
-                .map(alertMapper::toProto)
+                .map(dbAlert -> getEnrichAlertProto(nodes, dbAlert))
                 .toList();
 
             ListAlertsResponse.Builder responseBuilder = ListAlertsResponse.newBuilder()
@@ -146,35 +146,42 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         }
     }
 
-    private void insertNodeLabelsIntoAlerts(Map<Long, String> nodeLabels, Page<org.opennms.horizon.alertservice.db.entity.Alert> alerts) {
-        for (org.opennms.horizon.alertservice.db.entity.Alert alert:alerts.getContent()) {
-            if (ManagedObjectType.NODE.equals(alert.getManagedObjectType())) {
-                String strNodeId = alert.getManagedObjectInstance();
-                try {
-                    Long nodeId = Long.parseLong(strNodeId);
-                    if (nodeLabels.containsKey(nodeId)) {
-                        String label = nodeLabels.get(nodeId);
-                        alert.setNodeLabel(label);
+    private Alert getEnrichAlertProto(Map<Long, Node> nodes, org.opennms.horizon.alertservice.db.entity.Alert dbAlert) {
+        var alertBuilder = Alert.newBuilder(alertMapper.toProto(dbAlert));
+        alertBuilder.addRuleName(dbAlert.getAlertCondition().getRule().getName());
+        alertBuilder.addPolicyName(dbAlert.getAlertCondition().getRule().getPolicy().getName());
+
+        if (ManagedObjectType.NODE.equals(dbAlert.getManagedObjectType())) {
+            String strNodeId = dbAlert.getManagedObjectInstance();
+            try {
+                Long nodeId = Long.parseLong(strNodeId);
+                if (nodes.containsKey(nodeId)) {
+                    Node node = nodes.get(nodeId);
+                    alertBuilder.setNodeName(node.getNodeLabel());
+                    if (node.getMonitoringLocationId() != 0) {
+                        locationRepository.findByIdAndTenantId(node.getMonitoringLocationId(), node.getTenantId())
+                            .ifPresent(l -> alertBuilder.setLocation(l.getLocationName()));
                     }
-                } catch (NumberFormatException ex) {
-                    // Just swallow
                 }
+            } catch (NumberFormatException ex) {
+                // Just swallow
             }
         }
+        return alertBuilder.build();
     }
 
-    private Map<Long, String> getNodeLabels(Set<String> nodeIds, String tenantId) {
-        Map<Long, String> nodeLabels = new HashMap<>();
+    private Map<Long, Node> getNodeLabels(Set<String> nodeIds, String tenantId) {
+        Map<Long, Node> nodes = new HashMap<>();
         for (String strNodeId:nodeIds) {
             try {
                 long nodeId = Long.parseLong(strNodeId);
                 Optional<Node> node = nodeRepository.findByIdAndTenantId(nodeId, tenantId);
-                node.ifPresent(value -> nodeLabels.put(nodeId, value.getNodeLabel()));
+                node.ifPresent(value -> nodes.put(nodeId, value));
             } catch (NumberFormatException ex) {
                 // Just swallow this.
             }
         }
-        return nodeLabels;
+        return nodes;
     }
 
     private Set<String> getNodeIds(Page<org.opennms.horizon.alertservice.db.entity.Alert> alerts) {

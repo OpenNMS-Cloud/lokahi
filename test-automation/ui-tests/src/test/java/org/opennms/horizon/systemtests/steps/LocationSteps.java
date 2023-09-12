@@ -34,6 +34,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.LeftPanelPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
+import org.opennms.horizon.systemtests.utils.FileDownloadManager;
 import org.openqa.selenium.By;
 import testcontainers.MinionContainer;
 
@@ -49,7 +50,7 @@ import static com.codeborne.selenide.Selenide.$$;
 import static org.junit.Assert.fail;
 
 public class LocationSteps {
-    private static final String DEFAULT_LOCATION_NAME = "default";
+    public static final String DEFAULT_LOCATION_NAME = "default";
     private static final ElementsCollection locationMenus = $$(By.xpath("//div[@class='locations-card']//button[@data-test='more-options-btn']"));
     private static final SelenideElement firstMenu = $(By.xpath("//div[@class='locations-card']//button[@data-test='more-options-btn'][1]"));
     private static final SelenideElement addLocationButton = $(By.xpath("//button[@data-test='add-location-btn']"));
@@ -58,7 +59,7 @@ public class LocationSteps {
     private static final SelenideElement downloadCertButton = $(By.xpath("//button[@data-test='download-btn']"));
     private static final SelenideElement dockerCmd = $(By.xpath("//div[@class='instructions']/pre"));
 
-    private static String locationName = "default";
+    private static String locationName = "not_default";
 
 
 
@@ -76,16 +77,15 @@ public class LocationSteps {
     public static MinionContainer addMinionFromLocationPane(String minionName) {
         File bundle = null;
         try {
-
-            bundle = downloadCertButton.should(exist).shouldBe(enabled).download();
-            if (bundle.exists() && bundle.canRead() && bundle.length() > 0) {
+            bundle = FileDownloadManager.downloadCertificate(downloadCertButton);
+            if (bundle != null) {
                 // Parse out the pwd for the bundle
                 String dockerText = dockerCmd.shouldBe(visible).getText();
                 Pattern pattern = Pattern.compile("GRPC_CLIENT_KEYSTORE_PASSWORD='([a-z,0-9,-]*)'");
                 Matcher matcher = pattern.matcher(dockerText);
 
                 if (matcher.find()) {
-                    MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName);
+                    MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName, LocationSteps.getLocationName());
                     // Minion startup and connect is slow - need a specific timeout here
                     return minion;
                 }

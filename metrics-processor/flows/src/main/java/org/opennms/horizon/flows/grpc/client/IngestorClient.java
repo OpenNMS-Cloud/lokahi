@@ -79,12 +79,12 @@ public class IngestorClient {
         Metadata metadata = getMetadata(true, tenantId);
         try {
             retryTemplate.execute(context -> {
-                LOG.debug("Attempt number {} to persist StoreFlowDocumentRequest for tenantId {}. ", tenantId, context.getRetryCount() + 1);
+                LOG.debug("Attempt number {} to persist StoreFlowDocumentRequest for tenantId {}. ", context.getRetryCount() + 1, tenantId);
                 ingesterBlockingStub
                     .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                     .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                     .storeFlowDocuments(storeFlowDocumentsRequest);
-                LOG.info("FlowDocuments successfully persisted. ");
+                LOG.debug("FlowDocuments successfully persisted.");
                 return true;
             });
         } catch (RuntimeException e) {

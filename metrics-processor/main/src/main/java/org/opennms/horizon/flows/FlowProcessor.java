@@ -64,14 +64,17 @@ public class FlowProcessor {
         try {
             var flowDocumentLog = TenantLocationSpecificFlowDocumentLog.parseFrom(data);
             String tenantId = flowDocumentLog.getTenantId();
-            metricsTracker.addTenantFlowReceviedCount(tenantId, flowDocumentLog.getMessageCount());
             CompletableFuture.supplyAsync(() -> {
                 try {
                     log.trace("Processing flow: tenant-id={}; flow={}", tenantId, flowDocumentLog);
                     pipeline.process(flowDocumentLog);
                     metricsTracker.addTenantFlowCompletedCount(tenantId, flowDocumentLog.getMessageCount());
                 } catch (Exception exc) {
-                    log.warn("Error processing flow: {} error: {}", flowDocumentLog, exc.getMessage());
+                    log.warn("Error processing flow: tenant-id={}; error: {}", tenantId, exc.getMessage(), exc);
+                } finally {
+                    // record as close as possible to the addTenantFlowCompletedCount (i.e.: after processing)
+                    // so both hopefully end up together in results so we can compute a reasonable success rate
+                    metricsTracker.addTenantFlowReceviedCount(tenantId, flowDocumentLog.getMessageCount());
                 }
                 return null;
             });

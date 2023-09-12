@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.grpc.discovery;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
@@ -53,7 +54,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceImplBase {
     private final TenantLookup tenantLookup;
-    private final IcmpActiveDiscoveryService configService;
+    private final IcmpActiveDiscoveryService discoveryService;
     private final ScannerTaskSetService scannerTaskSetService;
 
     @Override
@@ -61,7 +62,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
                 try {
-                    var activeDiscoveryConfig = configService.createActiveDiscovery(request, tenantId);
+                    var activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenantId);
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(), Long.valueOf(request.getLocationId()), tenantId, activeDiscoveryConfig.getId());
@@ -76,7 +77,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     public void listDiscoveries(Empty request, StreamObserver<IcmpActiveDiscoveryList> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
-                List<IcmpActiveDiscoveryDTO> list = configService.getActiveDiscoveries(tenantId);
+                List<IcmpActiveDiscoveryDTO> list = discoveryService.getActiveDiscoveries(tenantId);
                 responseObserver.onNext(IcmpActiveDiscoveryList.newBuilder().addAllDiscoveries(list).build());
                 responseObserver.onCompleted();
             }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
@@ -86,7 +87,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     public void getDiscoveryById(Int64Value request, StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId ->
-                    configService.getDiscoveryById(request.getValue(), tenantId)
+                    discoveryService.getDiscoveryById(request.getValue(), tenantId)
                         .ifPresentOrElse(config -> {
                             responseObserver.onNext(config);
                             responseObserver.onCompleted();
@@ -95,8 +96,57 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                 () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
     }
 
+    @Override
+    public void upsertActiveDiscovery(IcmpActiveDiscoveryCreateDTO request,
+                                StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
+        var tenant = tenantLookup.lookupTenantId(Context.current());
+        if (tenant.isPresent()) {
+            var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
+            IcmpActiveDiscoveryDTO activeDiscoveryConfig;
+            if (activeDiscovery.isEmpty()) {
+                activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
+            } else {
+                var icmpDiscovery = activeDiscovery.get();
+                // Discovery task need to be run always whenever there is an update, so first we need to remove current task
+                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
+                activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
+            }
+            scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
+                Long.valueOf(request.getLocationId()), tenant.get(), activeDiscoveryConfig.getId());
+            responseObserver.onNext(activeDiscoveryConfig);
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant()));
+        }
+    }
+
+    @Override
+    public void deleteActiveDiscovery(com.google.protobuf.Int64Value request,
+                                io.grpc.stub.StreamObserver<com.google.protobuf.BoolValue> responseObserver) {
+
+        var tenant = tenantLookup.lookupTenantId(Context.current());
+        if (tenant.isPresent()) {
+            var activeDiscovery = discoveryService.getDiscoveryById(request.getValue(), tenant.get());
+            if (activeDiscovery.isPresent()) {
+                var icmpDiscovery = activeDiscovery.get();
+                var result = discoveryService.deleteActiveDiscovery(request.getValue(), tenant.get());
+                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
+                responseObserver.onNext(BoolValue.of(result));
+                responseObserver.onCompleted();
+            } else  {
+                responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscovery()));
+            }
+        } else {
+            responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant()));
+        }
+    }
+
     private Status createMissingTenant() {
         return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("Missing tenantId").build();
+    }
+
+    private Status createInvalidDiscovery() {
+        return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("Invalid discovery Id").build();
     }
 
     private Status createStatus(int code, String message) {

@@ -131,6 +131,21 @@ public class InventoryClient {
             .listDiscoveries(Empty.getDefaultInstance()).getDiscoveriesList();
     }
 
+    public IcmpActiveDiscoveryDTO upsertIcmpActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .upsertActiveDiscovery(request);
+    }
+
+    public Boolean deleteIcmpActiveDiscovery(long discoveryId, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        var result = icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .deleteActiveDiscovery(Int64Value.of(discoveryId));
+        return result.getValue();
+    }
+
     public IcmpActiveDiscoveryDTO getIcmpDiscoveryById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
@@ -207,10 +222,10 @@ public class InventoryClient {
         return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystemByLocationId(Int64Value.of(locationId)).getSystemsList();
     }
 
-    public MonitoringSystemDTO getSystemBySystemId(String systemId, String accessToken) {
+    public MonitoringSystemDTO getSystemBySystemId(long systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoringSystemById(StringValue.of(systemId));
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoringSystemById(Int64Value.of(systemId));
     }
 
     public List<MonitoringLocationDTO> listLocationsByIds(List<DataLoaderFactory.Key> keys) {
@@ -235,10 +250,11 @@ public class InventoryClient {
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteNode(Int64Value.of(nodeId)).getValue();
     }
 
-    public boolean deleteMonitoringSystem(String systemId, String accessToken) {
+    public boolean deleteMonitoringSystem(long systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteMonitoringSystem(StringValue.of(systemId)).getValue();
+        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(systemId).build()).getValue();
     }
 
     public boolean startScanByNodeIds(List<Long> ids, String accessToken) {
@@ -257,6 +273,13 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).upsertDiscovery(passiveDiscovery);
+    }
+
+    public Boolean deletePassiveDiscovery(long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        var result = passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteDiscovery(Int64Value.of(id));
+        return result.getValue();
     }
 
     public PassiveDiscoveryListDTO listPassiveDiscoveries(String accessToken) {

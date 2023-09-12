@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 @RequiredArgsConstructor
@@ -54,20 +55,18 @@ public class PagerDutyEventFactory {
 
     private final PagerDutyDao pagerDutyDao;
 
+    private final LokahiUrlUtil lokahiUrlUtil;
+
     @Value("${horizon.pagerduty.client}")
     String client;
 
-    @Value("${horizon.pagerduty.clientURL}")
-    String clientURL;
 
     public PagerDutyEventDTO createEvent(Alert alert) throws NotificationConfigUninitializedException, JsonProcessingException, InvalidProtocolBufferException {
-        Instant now = Instant.now();
-
         PagerDutyEventDTO event = new PagerDutyEventDTO();
         PagerDutyPayloadDTO payload = new PagerDutyPayloadDTO();
 
         payload.setSummary(getEventSummary(alert));
-        payload.setTimestamp(now.toString());
+        payload.setTimestamp(DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli((alert.getLastUpdateTimeMs()))));
         payload.setSeverity(PagerDutySeverity.fromAlertSeverity(alert.getSeverity()));
 
         // Source: unique location of affected system
@@ -95,7 +94,7 @@ public class PagerDutyEventFactory {
 
         // TODO: We need to determine what the external facing URL is for the client
         event.setClient(client);
-        event.setClientUrl(clientURL);
+        event.setClientUrl(lokahiUrlUtil.getAlertstUrl(alert));
 
         payload.setCustomDetails(new HashMap<>());
         // Put the whole alert in the payload
@@ -112,7 +111,7 @@ public class PagerDutyEventFactory {
 
     /**
      * Derives an event summary from an alert. Defaults to the alert's log
-     * message, but if blank, returns a summary based on UEI.
+     * message, but if blank, returns a summary align with email template (skipped pagerduty mandatory fields)
      *
      * @return A non-null, non-blank string, because PagerDuty will reject the
      * alert otherwise.
@@ -120,7 +119,8 @@ public class PagerDutyEventFactory {
     private String getEventSummary(Alert alert) {
         String logMessage = alert.getLogMessage().trim();
         return Strings.isBlank(logMessage)
-            ? String.format("Event: %s", alert.getUei())
-            : logMessage;
+            ? String.format("Node Name: %s, Description: %s, Started: %s, Policy Name: %s, Rule Name: %s",
+            alert.getNodeName(), alert.getDescription(), DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli((alert.getFirstEventTimeMs()))),
+            alert.getPolicyNameList(), alert.getRuleNameList()) : logMessage;
     }
 }

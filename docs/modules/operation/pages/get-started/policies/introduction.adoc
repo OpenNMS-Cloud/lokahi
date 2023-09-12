@@ -24,4 +24,4 @@ The default monitoring policy applies to all discovered nodes, and includes the 
 Make sure you have done the following before you create a monitoring policy:
 
 * Performed at least one xref:get-started/discovery/active.adoc[discovery].
-* Created xref:get-started/policies/introduction.adoc#tag-create[tags] for the nodes you are monitoring.
+* Created xref:inventory/nodes.adoc#tag-create[tags] for the nodes you are monitoring.

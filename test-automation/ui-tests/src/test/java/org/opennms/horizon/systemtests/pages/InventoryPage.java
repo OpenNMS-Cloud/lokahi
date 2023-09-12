@@ -56,21 +56,10 @@ public class InventoryPage {
     public static void verifyNodeStatus(Status status, String nodeManagementIp) {
         LeftPanelPage.clickOnPanelSection("inventory");
 
-        // The inventory page doesn't refresh on its own. Need to periodically check and force a refresh
         String itemStatusSearch = "//li[@data-test='MONITORED' and .//li[@data-test='management-ip']/span/text()='" + nodeManagementIp + "']//span[text()='" + status + "']";
         SelenideElement statusCheck = $(By.xpath(itemStatusSearch));
-        int iterations = 20;
-        boolean exists = false;
 
-        while (!exists && iterations > 0) {
-            try {
-                statusCheck.should(exist, Duration.ofSeconds(4));
-                iterations = 0;
-            } catch (com.codeborne.selenide.ex.ElementNotFound e) {
-                --iterations;
-                Selenide.refresh();
-            }
-        }
+        RefreshMonitor.waitForElement(statusCheck, exist, 80, true);
 
         statusCheck.should(exist);
     }

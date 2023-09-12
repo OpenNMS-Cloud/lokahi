@@ -91,6 +91,8 @@ OpenNMS:
         add_header x-location "$authHeader1" always;
         set $dummy_val "$opentelemetry_context_traceparent"; # workaround for https://github.com/kubernetes/ingress-nginx/issues/9811
         grpc_set_header 'traceparent' $opentelemetry_context_traceparent; # This doesn't get sent downstream normally. :(
+        opentelemetry_attribute "user" "$authHeader0";
+        opentelemetry_attribute "location" "$authHeader1";
   MinionCertificateManager:
     Enabled: true
     CaSecretName: root-ca-certificate

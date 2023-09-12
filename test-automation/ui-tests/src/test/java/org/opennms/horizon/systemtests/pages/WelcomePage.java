@@ -30,7 +30,9 @@ package org.opennms.horizon.systemtests.pages;
 import com.codeborne.selenide.*;
 import lombok.SneakyThrows;
 import org.junit.Assert;
+import org.opennms.horizon.systemtests.steps.LocationSteps;
 import org.opennms.horizon.systemtests.steps.MinionSteps;
+import org.opennms.horizon.systemtests.utils.FileDownloadManager;
 import org.opennms.horizon.systemtests.utils.MinionStarter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -78,8 +80,10 @@ public class WelcomePage {
     }
 
     public static void checkMinionConnection() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 120; i++) {
             Selenide.sleep(5000);
+            // TODO: Should be moved to properties value.
+
             if (!"Please wait while we detect your Minion.".equals(minionStatusField.getText())) {
                 break;
             }
@@ -101,7 +105,7 @@ public class WelcomePage {
     }
 
     public static void nodeDiscovered(String sysName) {
-        nodeDetectedCheck.should(exist, Duration.ofMinutes(2));
+        nodeDetectedCheck.should(exist, Duration.ofMinutes(3));
         discoveryResultLatencyCheck.should(exist);
     }
 
@@ -119,8 +123,8 @@ public class WelcomePage {
 
     public static MinionContainer addMinionUsingWalkthrough(String minionName) {
         try {
-            File bundle = downloadBundleBtn.shouldBe(enabled).download();
-            if (bundle.exists()) {
+            File bundle = FileDownloadManager.downloadCertificate(downloadBundleBtn);
+            if (bundle != null) {
                 // Parse out the pwd for the bundle
                 String dockerText = dockerCmd.shouldBe(visible).getAttribute("value"); // getText doesn't work for textarea
                 assertNotNull("Should have docker start text with key", dockerText);
@@ -128,9 +132,9 @@ public class WelcomePage {
                 Matcher matcher = pattern.matcher(dockerText);
 
                 if (matcher.find()) {
-                    MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName);
+                    MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName, LocationSteps.DEFAULT_LOCATION_NAME);
                     // Minion startup and connect is slow - need a specific timeout here
-                    minionDetectedCheck.should(exist, Duration.ofSeconds(60));
+                    minionDetectedCheck.should(exist, Duration.ofSeconds(120));
                     return minion;
                 }
                 fail("Unable to parse p12 password from docker string: " + dockerText);

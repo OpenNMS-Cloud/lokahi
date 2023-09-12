@@ -43,7 +43,9 @@ import prometheus.PrometheusTypes;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -67,7 +69,10 @@ public class TaskSetCollectorSnmpResponseProcessor {
         labels.put("system_id", taskResult.getIdentity().getSystemId());
         labels.put("monitor", response.getMonitorType().name());
         labels.put("node_id", String.valueOf(response.getNodeId()));
+
+        List<PrometheusTypes.TimeSeries> timeSeriesList = new ArrayList<>();
         var snmpResponse = collectorMetric.unpack(SnmpResponseMetric.class);
+
         for (SnmpResultMetric snmpResult : snmpResponse.getResultsList()) {
             try {
                 PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
@@ -111,12 +116,12 @@ public class TaskSetCollectorSnmpResponseProcessor {
                             .setValue(metric));
                         break;
                 }
-
-                cortexTSS.store(tenantId, builder);
                 tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
+                timeSeriesList.add(builder.build());
             } catch (Exception e) {
                 LOG.warn("Exception parsing metrics", e);
             }
         }
+        cortexTSS.store(tenantId, timeSeriesList);
     }
 }

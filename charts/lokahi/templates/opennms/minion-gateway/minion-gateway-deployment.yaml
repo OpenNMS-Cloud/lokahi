@@ -56,11 +56,11 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
-          image: {{ .Values.OpenNMS.MinionGateway.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionGateway) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.MinionGateway.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
+              value: "-Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=40 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -81,13 +81,13 @@ spec:
               value: "{{ .Release.Namespace }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
-            - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
-              value: "false"
-            {{- include "deployment.env" .Values.OpenNMS.MinionGateway | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionGateway) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "kafkaSecretFrom" .Values.OpenNMS.MinionGateway | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.MinionGateway | indent 10 }}
           ports:
             - name: http
               containerPort: 8080

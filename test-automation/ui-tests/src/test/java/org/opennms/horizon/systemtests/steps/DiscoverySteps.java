@@ -28,7 +28,6 @@
 
 package org.opennms.horizon.systemtests.steps;
 
-import com.codeborne.selenide.SelenideElement;
 import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.dockerjava.api.model.NetworkSettings;
 import io.cucumber.java.en.Given;
@@ -36,7 +35,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.opennms.horizon.systemtests.pages.DiscoveryPage;
 import org.opennms.horizon.systemtests.pages.InventoryPage;
-import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -51,13 +49,12 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.*;
 
-import static com.codeborne.selenide.Selenide.$;
 import static org.junit.Assert.*;
 
 public class DiscoverySteps {
     private static final Logger LOG = LoggerFactory.getLogger(DiscoverySteps.class);
 
-    private static final String SNMP_NODE_IMAGE_NAME = "polinux/snmpd:alpine";
+    private static final String SNMP_NODE_IMAGE_NAME = "opennms/lokahi-snmpd-udpgen:latest";
 
     private static Map<String, GenericContainer> nodes = new HashMap<>();
 
@@ -89,7 +86,7 @@ public class DiscoverySteps {
             node.withCopyFileToContainer(MountableFile.forClasspathResource(snmpConfigFile), "/etc/snmp/snmpd.conf");
         }
 
-        node.waitingFor(Wait.forLogMessage(".*SNMPD Daemon started.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
+        node.waitingFor(Wait.forLogMessage(".*NET-SNMP version.*", 1).withStartupTimeout(Duration.ofMinutes(3)));
         node.start();
         nodes.put(nodeName, node);
     }
@@ -148,7 +145,7 @@ public class DiscoverySteps {
 
     }
 
-    private String getContainerIPs(String nodeNames) {
+    public static String getContainerIPs(String nodeNames) {
         StringBuilder ips = new StringBuilder();
         String[] nodeNameArray = nodeNames.split(",");
         for (String nodeNameFromArray : nodeNameArray) {
@@ -163,7 +160,7 @@ public class DiscoverySteps {
         return ips.toString();
     }
 
-    private String calculateIPRanges(Collection<GenericContainer> nodes) {
+    public static String calculateIPRanges(Collection<GenericContainer> nodes) {
         int firstAddr = 0;
         String firstAddrString = "";
         int secondAddr = 0;
@@ -210,7 +207,7 @@ public class DiscoverySteps {
         return firstAddrString + "-" + secondAddrString;
     }
 
-    private int convertStringIPToInt(String stringAddr) {
+    private static int convertStringIPToInt(String stringAddr) {
         try {
             InetAddress i = InetAddress.getByName(stringAddr);
             return ByteBuffer.wrap(i.getAddress()).getInt();
@@ -219,7 +216,7 @@ public class DiscoverySteps {
         }
     }
 
-    private static String getContainerIP(GenericContainer<?> container) {
+    public static String getContainerIP(GenericContainer<?> container) {
         NetworkSettings networkSettings = container.getContainerInfo().getNetworkSettings();
         Map<String, ContainerNetwork> networksMap = networkSettings.getNetworks();
         return networksMap.values().iterator().next().getIpAddress();
@@ -231,6 +228,10 @@ public class DiscoverySteps {
         assertNotNull("Cannot find node with name " + nodeName, node);
 
         return getContainerIP(node);
+    }
+
+    public static GenericContainer getNode(String nodeName) {
+        return nodes.get(nodeName);
     }
 
     @Then("Status of {string} should be {string}")

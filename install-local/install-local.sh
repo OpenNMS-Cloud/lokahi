@@ -183,20 +183,8 @@ install_helm_chart_custom_images () {
   if ! time helm upgrade -i lokahi ./../charts/lokahi \
   -f ./tmp/install-local-opennms-lokahi-custom-images-values.yaml \
   --namespace $NAMESPACE \
-  --set OpenNMS.Alert.Image=${IMAGE_PREFIX}/lokahi-alert:${IMAGE_TAG} \
-  --set OpenNMS.DataChoices.Image=${IMAGE_PREFIX}/lokahi-datachoices:${IMAGE_TAG} \
-  --set OpenNMS.Events.Image=${IMAGE_PREFIX}/lokahi-events:${IMAGE_TAG} \
-  --set Grafana.Image=${IMAGE_PREFIX}/lokahi-grafana:${IMAGE_TAG} \
-  --set OpenNMS.Inventory.Image=${IMAGE_PREFIX}/lokahi-inventory:${IMAGE_TAG} \
-  --set Keycloak.Image=${IMAGE_PREFIX}/lokahi-keycloak:${IMAGE_TAG} \
-  --set OpenNMS.MetricsProcessor.Image=${IMAGE_PREFIX}/lokahi-metrics-processor:${IMAGE_TAG} \
-  --set OpenNMS.Minion.Image=${IMAGE_PREFIX}/lokahi-minion:${IMAGE_TAG} \
-  --set OpenNMS.MinionGateway.Image=${IMAGE_PREFIX}/lokahi-minion-gateway:${IMAGE_TAG} \
-  --set OpenNMS.MinionCertificateManager.Image=${IMAGE_PREFIX}/lokahi-minion-certificate-manager:${IMAGE_TAG} \
-  --set OpenNMS.MinionCertificateVerifier.Image=${IMAGE_PREFIX}/lokahi-minion-certificate-verifier:${IMAGE_TAG} \
-  --set OpenNMS.Notification.Image=${IMAGE_PREFIX}/lokahi-notification:${IMAGE_TAG} \
-  --set OpenNMS.API.Image=${IMAGE_PREFIX}/lokahi-rest-server:${IMAGE_TAG} \
-  --set OpenNMS.UI.Image=${IMAGE_PREFIX}/lokahi-ui:${IMAGE_TAG} \
+  --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+  --set OpenNMS.global.image.tag=${IMAGE_TAG} \
   --wait --timeout "${TIMEOUT}"; then
     helm_debug
   fi

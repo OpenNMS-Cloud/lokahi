@@ -43,12 +43,12 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
@@ -80,6 +80,7 @@ import java.util.stream.Collectors;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -103,6 +104,9 @@ public class InventoryProcessingStepDefinitions {
     private MonitorType monitorType;
     private KafkaConsumerRunner kafkaConsumerRunner;
     private final String tagTopic = "tag-operation";
+
+
+
     public enum PublishType {
         UPDATE,
         REMOVE
@@ -177,14 +181,34 @@ public class InventoryProcessingStepDefinitions {
     }
 
 
-    @Then("verify Monitoring system is created with system id {string}")
-    public void verifyMonitoringSystemIsCreatedWithSystemId(String systemId) {
+    @Then("verify Monitoring system is created with system id {string} with location named {string}")
+    public void verifyMonitoringSystemIsCreatedWithSystemIdWithLocationNamed(String systemId, String location) {
+        var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
+        var monitoringLocation = monitoringLocationStub.getLocationByName(StringValue.of(location));
+        assertEquals(location, monitoringLocation.getLocation());
         var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
-        await().pollInterval(5, TimeUnit.SECONDS).atMost(30, TimeUnit.SECONDS).until(() -> monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList().size(),
-            Matchers.equalTo(1));
+        await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS)
+            .until(() -> {
+                try {
+                    return monitoringSystemStub.getMonitoringSystemByQuery(
+                            MonitoringSystemQuery
+                                .newBuilder()
+                                .setLocation(location)
+                                .setSystemId(systemId)
+                                .build())
+                        .getSystemId();
+                } catch (Exception e) {
+                   return "";
+                }
+            }, Matchers.equalTo(systemId));
+
         var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
-        assertEquals(systemId, systems.get(0).getSystemId());
-        assertEquals(backgroundHelper.getTenantId(), systems.get(0).getTenantId());
+        var monitoringSystems = systems.stream().filter( msId -> msId.getSystemId().equals(systemId) &&
+            msId.getMonitoringLocationId() == monitoringLocation.getId()).toList();
+        assertFalse(monitoringSystems.isEmpty());
+        var monitoringSystem = monitoringSystems.get(0);
+        assertEquals(backgroundHelper.getTenantId(), monitoringSystem.getTenantId());
+        assertEquals(location, monitoringLocation.getLocation());
     }
 
     @Then("verify Monitoring system is removed with system id {string}")
@@ -275,7 +299,7 @@ public class InventoryProcessingStepDefinitions {
 
     @Then("verify that the new node is in the list returned from inventory")
     public void verifyThatTheNewNodeIsInTheListReturnedFromInventory() {
-        Assertions.assertFalse(nodeList.getNodesList().isEmpty());
+        assertFalse(nodeList.getNodesList().isEmpty());
 
         var nodeOptional = nodeList.getNodesList().stream().filter(
                 nodeDTO ->

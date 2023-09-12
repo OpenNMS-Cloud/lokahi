@@ -28,22 +28,17 @@
 
 package org.opennms.horizon.minion.grpc;
 
-import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-
+import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import io.grpc.Context;
+import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import io.opentracing.Tracer;
+import lombok.Setter;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -65,16 +60,23 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
+import java.io.IOException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
-import io.grpc.Context;
-import io.grpc.ManagedChannel;
-import io.grpc.stub.StreamObserver;
-import io.opentracing.Tracer;
-import lombok.Setter;
+import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -113,6 +115,8 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     private final Tracer tracer;
     private final ManagedChannelFactory managedChannelFactory;
 
+    private final GrpcShutdownHandler grpcShutdownHandler;
+
     private ReconnectStrategy reconnectStrategy;
     @Setter
     private RpcRequestHandler rpcRequestHandler;
@@ -142,13 +146,15 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         MetricRegistry metricRegistry,
         Tracer tracer,
         SendQueueFactory sendQueueFactory,
-        ManagedChannelFactory managedChannelFactory) {
+        ManagedChannelFactory managedChannelFactory,
+        GrpcShutdownHandler grpcShutdownHandler) {
 
         this.ipcIdentity = ipcIdentity;
         this.metricRegistry = metricRegistry;
         this.tracer = tracer;
         this.sendQueueFactory = Objects.requireNonNull(sendQueueFactory);
         this.managedChannelFactory = managedChannelFactory;
+        this.grpcShutdownHandler = grpcShutdownHandler;
     }
 
 //========================================
@@ -240,7 +246,15 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 
             @Override
             public void onError(Throwable throwable) {
-                future.completeExceptionally(throwable);
+                var rootCause = findRootCause(throwable);
+                // sun.security.provider.certpath.SunCertPathBuilderException is not visible by default
+                if (rootCause.getClass().getName().contains("SunCertPathBuilderException")
+                    || rootCause instanceof CertificateExpiredException
+                    || rootCause instanceof CertificateNotYetValidException) {
+                    grpcShutdownHandler.shutdown(rootCause);
+                } else {
+                    future.completeExceptionally(throwable);
+                }
             }
 
             @Override
@@ -253,10 +267,17 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         return future;
     }
 
+
 //========================================
 // Internals
 //----------------------------------------
-
+    private Throwable findRootCause(Throwable t) {
+        Throwable rootCause = t;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
+    }
     private void handleReconnect() {
         initializeRpcStub();
         initializeSinkStub();
@@ -405,8 +426,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
 
         @Override
         public void onError(Throwable throwable) {
-            LOG.error("Error in RPC streaming", throwable);
-            reconnectStrategy.activate();
+            if (throwable instanceof StatusRuntimeException statusRuntimeException
+                && (statusRuntimeException.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.UNAUTHENTICATED);
+            } else {
+                LOG.error("Error in RPC streaming", throwable);
+                reconnectStrategy.activate();
+            }
         }
 
         @Override

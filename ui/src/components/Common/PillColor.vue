@@ -19,12 +19,12 @@
     }
  -->
 <template>
-  <div class="pill-color-wrapper">
+  <div>
     <span
-      :class="['pill-style', `${item.style?.toLowerCase()}-color`]"
+      :class="['pill-style', `${item.style.toLowerCase()}-color`]"
       data-test="pill-style"
     >
-      {{ item.label || item.style }}
+      {{ item.label?.toLowerCase() || item.style.toLowerCase() }}
     </span>
   </div>
 </template>
@@ -48,14 +48,15 @@ defineProps({
 <style lang="scss" scoped>
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/vars.scss';
-@use '@/styles/pillColor.scss';
+@use '@/styles/_severities.scss';
 
 .pill-style {
-  @include typography.title();
+  @include typography.caption;
+  text-transform: capitalize;
   display: inline-block;
   font-size: 0.8rem;
   line-height: normal;
   padding: 2px 8px;
-  border-radius: vars.$border-radius-sm;
+  border-radius: 4px;
 }
 </style>

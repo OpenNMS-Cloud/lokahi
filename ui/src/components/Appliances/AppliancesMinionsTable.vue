@@ -170,7 +170,7 @@ const modal = ref<ModalPrimary>({
 })
 
 const deleteHandler = async () => {
-  const deleteMinion = await minionMutations.deleteMinion({ id: modal.value.id as string })
+  const deleteMinion = await minionMutations.deleteMinion({ id: modal.value.id })
 
   if (!deleteMinion.error) {
     closeModal()

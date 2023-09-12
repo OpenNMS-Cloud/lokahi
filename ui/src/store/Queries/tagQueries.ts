@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { ListTagsDocument, Tag, ListTagsSearchDocument } from '@/types/graphql'
-import { useTagStore } from '@/store/Components/tagStore'
+import { Tag, ListTagsSearchDocument } from '@/types/graphql'
 
 export const useTagQueries = defineStore('tagQueries', () => {
   const tagsSearched = ref([] as Tag[])
@@ -9,25 +8,12 @@ export const useTagQueries = defineStore('tagQueries', () => {
     searchTerm: ''
   })
 
-  const tagStore = useTagStore()
-
-  const {
-    data: tagData,
-    execute: tagExecute,
-    isFetching: tagIsFetching,
-    error: tagError
-  } = useQuery({
-    query: ListTagsDocument,
-    fetchOnMount: false,
-    cachePolicy: 'network-only'
-  })
 
 
   const {
     data: tagsSearchData,
     execute: tagsSearchExecute,
-    isFetching: tagsSearchIsFetching,
-    error: tagsSearchError
+    isFetching: tagsSearchIsFetching
   } = useQuery({
     query: ListTagsSearchDocument,
     variables: tagsSearchTerm,

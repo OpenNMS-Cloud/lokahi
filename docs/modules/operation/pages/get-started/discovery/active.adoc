@@ -11,16 +11,16 @@ To create an active discovery, follow these steps:
 . Choose *Discovery* in the left navigation menu.
 . On the Discovery page, click *Add Discovery*.
 . In the Active Discovery area, choose one of the following:
-    * ICMP/SNMP: Performs a ping sweep and scans for SNMP MIBs on nodes that respond to ping sweep.
-    * Azure: Connects to the Azure API, queries the virtual machines list, and creates entities for each VM in the node inventory.
+    * ICMP/SNMP: Performs a ping sweep and scans for SNMP MIBs on nodes that respond to the ping sweep.
+    * Azure: Connects to the Azure API, queries the virtual machines list, and creates entities for each virtual machine (VM) in the node inventory.
 +
 . Fill in the appropriate information in each field.
 +
 NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], click the drop-down arrow in the *Search/Add tags* field, type a name for the tag, and click *New*.
 
-. With ICMP/SNMP discovery, click *Validate* to verify that you have at least one IP address, range, or subnet in your inventory.
+. With ICMP/SNMP discovery, click the *Validate* check to verify that you have a valid IP address.
 . Correct any errors and click *Save Discovery*.
 
 A dialog appears from which you can opt to add another discovery or view the nodes detected from the discovery.
 
-The name of the active discovery you created appears in the Active Discovery list. You can click on it to run the discovery again.
+The name of the active discovery you created appears in the My Active Discoveries list.

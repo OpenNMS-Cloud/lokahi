@@ -1,7 +1,7 @@
 <template>
   <div class="geo-map">
-    <HeadlinePage text="Geo Map"/>
-    <LeafletMap style="height: calc(100vh - 145px)" />
+    <HeadlinePage text="Geo Map" class="title"/>
+    <LeafletMap style="height: calc(100vh - 173px)" />
   </div>
 </template>
 
@@ -10,5 +10,7 @@ import LeafletMap from '../components/Map/LeafletMap.vue'
 </script>
 
 <style setup lang="scss">
-@use '@featherds/styles/themes/variables';
+.title {
+  margin-left: 40px;
+}
 </style>

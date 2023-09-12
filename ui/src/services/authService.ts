@@ -21,22 +21,3 @@ auth.interceptors.request.use(
     return Promise.reject(error)
   }
 )
-
-const logout = async (): Promise<void> => {
-  const params = new URLSearchParams()
-  params.append('client_id', keycloakConfig.clientId as string)
-  const realm = import.meta.env.VITE_KEYCLOAK_REALM || 'opennms'
-  const baseUrl = import.meta.env.VITE_KEYCLOAK_URL || '/auth'
-  params.append('post_logout_redirect_uri',  `${baseUrl}/realms/${realm}/protocol/openid-connect/logout`)
-
-  startSpinner()
-
-  try {
-    await auth.post('/logout', params)
-  } finally {
-    stopSpinner()
-    location.reload()
-  }
-}
-
-export { logout }

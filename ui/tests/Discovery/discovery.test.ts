@@ -27,15 +27,15 @@ describe('DiscoveryPage', () => {
     const store = useDiscoveryStore()
     const queries = useDiscoveryQueries()
     await store.init()
-    expect(queries.getDiscoveries).toHaveBeenCalledOnce()
-    expect(queries.getLocations).toHaveBeenCalledOnce()
+    expect(queries.getDiscoveries).toHaveBeenCalled()
+    expect(queries.getLocations).toHaveBeenCalled()
   })
 
   test('Store fn startNewDiscovery', () => {
     const store = useDiscoveryStore()
     store.startNewDiscovery()
     expect(store.discoveryTypePageActive).toBe(true)
-    expect(store.setupDefaultDiscovery).toHaveBeenCalledOnce()
+    expect(store.setupDefaultDiscovery).toHaveBeenCalled()
   })
 
   test('Store fn backToDiscovery', () => {

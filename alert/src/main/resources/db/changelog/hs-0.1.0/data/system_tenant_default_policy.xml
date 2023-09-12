@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-delete-existing-system-tenant-data" author="cgorantla">
+        <delete tableName="alert_definition">
+            <where>tenant_id='system-tenant'</where>
+        </delete>
+        <delete tableName="alert_condition">
+            <where>tenant_id='system-tenant'</where>
+        </delete>
+        <delete tableName="policy_rule">
+            <where>tenant_id='system-tenant'</where>
+        </delete>
+        <delete tableName="policy_tag">
+            <where>policy_id IN (SELECT policy_id FROM monitoring_policy WHERE tenant_id = 'system-tenant')</where>
+        </delete>
+        <delete tableName="monitoring_policy">
+            <where>tenant_id='system-tenant'</where>
+        </delete>
+        <delete tableName="tag">
+            <where>tenant_id='system-tenant'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-add-default-monitoring-policy-for-system-tenant" author="cgorantla">
+        <insert tableName="monitoring_policy">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="policy_name" value="default_policy"/>
+            <column name="memo" value="Default monitoring policy"/>
+            <column name="notify_email" valueBoolean="true"/>
+            <column name="notify_pagerduty" valueBoolean="true"/>
+            <column name="notify_webhooks" valueBoolean="true"/>
+            <column name="notify_instruction" value="This is default policy notification"/>
+        </insert>
+    </changeSet>
+    <changeSet id="hs-0.1.0-add-default-policy-rule-for-system-tenant" author="cgorantla">
+        <insert tableName="policy_rule">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="rule_name" value="default_rule"/>
+            <column name="component_type" value="NODE"/>
+            <column name="policy_id" valueComputed="(select id from monitoring_policy where tenant_id = 'system-tenant'
+            and policy_name = 'default_policy')"/>
+            <column name="detection_method" value="EVENT"/>
+            <column name="event_type" value="INTERNAL"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-add-default-alert-conditions-for-system-tenant" author="cgorantla">
+        <insert tableName="alert_condition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="event_count" valueNumeric="1"/>
+            <column name="severity" value="CRITICAL"/>
+            <column name="rule_id" valueComputed="(select id from policy_rule where tenant_id = 'system-tenant'
+            and rule_name = 'default_rule')"/>
+            <column name="trigger_event_definition_id" valueComputed="(select id from event_definition where
+            event_uei = 'uei.opennms.org/generic/traps/SNMP_Cold_Start')"/>
+        </insert>
+        <insert tableName="alert_condition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="event_count" valueNumeric="1"/>
+            <column name="severity" value="MAJOR"/>
+            <column name="rule_id" valueComputed="(select id from policy_rule where tenant_id = 'system-tenant'
+            and rule_name = 'default_rule')"/>
+            <column name="trigger_event_definition_id" valueComputed="(select id from event_definition where
+            event_uei = 'uei.opennms.org/generic/traps/SNMP_Warm_Start')"/>
+        </insert>
+        <insert tableName="alert_condition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="event_count" valueNumeric="1"/>
+            <column name="severity" value="CRITICAL"/>
+            <column name="rule_id" valueComputed="(select id from policy_rule where tenant_id = 'system-tenant'
+            and rule_name = 'default_rule')"/>
+            <column name="trigger_event_definition_id" valueComputed="(select id from event_definition where
+            event_uei = 'uei.opennms.org/internal/node/serviceUnreachable')"/>
+            <column name="clear_event_definition_id" valueComputed="(select id from event_definition where
+            event_uei = 'uei.opennms.org/internal/node/serviceRestored')"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-add-default-alert-definitions-for-system-tenant" author="cgorantla">
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/generic/traps/SNMP_Cold_Start"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="type" value="PROBLEM_WITHOUT_CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id WHERE ed.event_uei = 'uei.opennms.org/generic/traps/SNMP_Cold_Start')"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/generic/traps/SNMP_Warm_Start"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="type" value="PROBLEM_WITHOUT_CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id WHERE ed.event_uei = 'uei.opennms.org/generic/traps/SNMP_Warm_Start')"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/internal/node/serviceUnreachable"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="type" value="PROBLEM_WITH_CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id WHERE ed.event_uei = 'uei.opennms.org/internal/node/serviceUnreachable')"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-add-default-tags-for-system-tenant" author="cgorantla">
+        <insert tableName="tag">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="name" value="default"/>
+            <column name="node_ids" value="{}"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-add-default-tags-for-monitoring-policy-for-system-tenant" author="cgorantla">
+        <insert tableName="policy_tag">
+            <column name="policy_id" valueComputed="(select id from monitoring_policy where tenant_id = 'system-tenant'
+            and policy_name = 'default_policy')"/>
+            <column name="tag_id" valueComputed="(select id from tag where tenant_id = 'system-tenant' and name = 'default')"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

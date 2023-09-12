@@ -23,4 +23,12 @@
         <addUniqueConstraint tableName="alert_definition" columnNames="alert_condition_id" constraintName="uk_alert_definition_alert_condition_id"/>
     </changeSet>
 
+    <changeSet id="hs-0.1.0-remove-default-value-for-over-time-unit" author="cgorantla">
+        <dropDefaultValue tableName="alert_condition" columnName="over_time_unit"/>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-remove-not-null-constraint-for-over-time-unit" author="cgorantla">
+        <dropNotNullConstraint tableName="alert_condition" columnName="over_time_unit"/>
+    </changeSet>
+
 </databaseChangeLog>

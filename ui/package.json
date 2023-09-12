@@ -17,7 +17,7 @@
     "generate": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@dsb-norge/vue-keycloak-js": "^2.2.0",
+    "@dsb-norge/vue-keycloak-js": "2.4.0",
     "@featherds/app-bar": "0.12.16",
     "@featherds/app-layout": "0.12.16",
     "@featherds/app-rail": "0.12.16",

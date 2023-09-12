@@ -1,26 +1,20 @@
 <template>
   <div class="card-my-discoveries">
-    <div class="title">
-      {{ title }}&nbsp;
-      <FeatherIcon
-        class="iconHelp"
-        :icon="Icons.Help"
-        @click="$emit('showInstructions')"
-      />
-      <div class="count">({{ list.length }})</div>
-    </div>
+    <div class="title">{{ title }}&nbsp;</div>
     <div
       class="list"
       v-if="list.length > 0"
     >
       <div
-        v-for="item in list"
-        :key="item.id"
+        v-for="(item, index) in list"
+        :key="index"
         class="discovery-name pointer"
         :class="{ selected: selectedId == item.id }"
-        @click="$emit('selectDiscovery', item)"
       >
-        <div class="name">
+        <div
+          class="name pointer"
+          @click="() => selectDiscovery(item)"
+        >
           {{ item.name }}
         </div>
         <FeatherTooltip
@@ -31,8 +25,12 @@
             v-bind="attrs"
             v-on="on"
             v-if="passive"
-            :toggle="(item as PassiveDiscovery).toggle"
-            @toggle="(isToggled) => $emit('toggleDiscovery', item.id, isToggled)"
+            :toggle="(item?.meta as DiscoveryTrapMeta).toggle?.toggle"
+            @toggle="
+              () => {
+                toggleDiscovery && toggleDiscovery(item)
+              }
+            "
           />
         </FeatherTooltip>
       </div>
@@ -41,26 +39,21 @@
       v-else
       class="empty"
     >
-      <FeatherIcon
-        :icon="Warning"
-        class="icon"
-      />{{ discoveryText.Discovery.empty }}
+      {{ discoveryText.Discovery.empty }}
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Warning from '@featherds/icon/notification/Warning'
-import { PassiveDiscovery, AzureActiveDiscovery, IcmpActiveDiscovery } from '@/types/graphql'
-import Help from '@featherds/icon/action/Help'
 import discoveryText from '@/components/Discovery/discovery.text'
+import { DiscoveryTrapMeta, NewOrUpdatedDiscovery } from '@/types/discovery'
 
-const Icons = markRaw({
-  Help
-})
 defineProps<{
   title: string
-  list: (IcmpActiveDiscovery | AzureActiveDiscovery | PassiveDiscovery)[]
+  list: NewOrUpdatedDiscovery[]
+  selectDiscovery: (discovery: NewOrUpdatedDiscovery) => void
+  showInstructions: () => void
+  toggleDiscovery?: (discovery: NewOrUpdatedDiscovery) => void
   passive?: boolean
   selectedId?: number
 }>()
@@ -75,8 +68,9 @@ defineProps<{
 .card-my-discoveries {
   background-color: var(variables.$surface);
   border: 1px solid var(variables.$border-on-surface);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
   min-height: 100px;
+  max-width: 288px;
 }
 
 .title {
@@ -113,18 +107,18 @@ defineProps<{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: var(variables.$spacing-m) var(variables.$spacing-l);
   align-items: center;
   max-height: 55px;
   &.selected {
     color: var(variables.$secondary-variant);
     border-right: 3px var(variables.$secondary-variant) solid;
+    background-color: #e7e9f8;
   }
 
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
-    text-transform: capitalize;
+    padding: var(variables.$spacing-m) var(variables.$spacing-l);
   }
 }
 
@@ -132,7 +126,11 @@ defineProps<{
   display: flex;
   gap: 8px;
   padding: var(variables.$spacing-m);
-
+  font-weight: 700;
+  font-family: var(--feather-header-font-family);
+  color: #0a0c1b;
+  opacity: 0.4;
+  font-size: 13px;
   .icon {
     width: 24px;
     height: 24px;

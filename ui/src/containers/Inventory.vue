@@ -1,56 +1,58 @@
 <template>
-  <div class="flex">
-    <HeadlinePage text="Network Inventory" class="header" data-test="page-header" />
+  <div class="full-page-container">
+    <div class="flex">
+      <HeadlinePage text="Network Inventory" class="header" data-test="page-header" />
+    </div>
+
+    <FeatherTabContainer class="tab-container" data-test="tab-container">
+      <template v-slot:tabs>
+        <FeatherTab @click="inventoryQueries.getMonitoredNodes">Monitored Nodes
+          <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.nodes.length > 0">{{
+            inventoryQueries.nodes.length }}</FeatherTextBadge>
+        </FeatherTab>
+        <FeatherTab @click="inventoryQueries.getUnmonitoredNodes">Unmonitored Nodes
+          <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.unmonitoredNodes.length > 0">{{
+            inventoryQueries.unmonitoredNodes.length }}</FeatherTextBadge>
+        </FeatherTab>
+        <FeatherTab @click="inventoryQueries.getDetectedNodes">Detected Nodes
+          <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.detectedNodes.length > 0">{{
+            inventoryQueries.detectedNodes.length }}</FeatherTextBadge>
+        </FeatherTab>
+      </template>
+      <!-- Monitored Nodes -->
+      <FeatherTabPanel>
+        <InventoryFilter v-if="inventoryStore.monitoredFilterActive" :state="MonitoredStates.MONITORED"
+          :nodes="tabMonitoredContent" />
+        <InventoryTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent"
+          :state="MonitoredStates.MONITORED" />
+        <EmptyList data-test="monitored-empty" v-if="!tabMonitoredContent.length" bg
+          :content="{ msg: 'No monitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
+        <FeatherSpinner v-if="inventoryQueries.isFetching" />
+      </FeatherTabPanel>
+
+      <!-- Unmonitored Nodes -->
+      <FeatherTabPanel>
+        <InventoryFilter v-if="inventoryStore.unmonitoredFilterActive" :state="MonitoredStates.UNMONITORED" onlyTags
+          :nodes="tabUnmonitoredContent" />
+        <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
+          :state="MonitoredStates.UNMONITORED" />
+        <EmptyList data-test="unmonitored-empty" v-if="!tabUnmonitoredContent.length" bg
+          :content="{ msg: 'No unmonitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
+        <FeatherSpinner v-if="inventoryQueries.isFetching" />
+      </FeatherTabPanel>
+
+      <!-- Detected Nodes -->
+      <FeatherTabPanel>
+        <InventoryFilter v-if="inventoryStore.detectedFilterActive" :state="MonitoredStates.DETECTED" onlyTags
+          :nodes="tabDetectedContent" />
+        <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
+          :state="MonitoredStates.DETECTED" />
+        <EmptyList data-test="discovery-empty" v-if="!tabDetectedContent.length" bg
+          :content="{ msg: 'No detected nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
+        <FeatherSpinner v-if="inventoryQueries.isFetching" />
+      </FeatherTabPanel>
+    </FeatherTabContainer>
   </div>
-
-  <FeatherTabContainer class="tab-container" data-test="tab-container">
-    <template v-slot:tabs>
-      <FeatherTab @click="inventoryQueries.getMonitoredNodes">Monitored Nodes
-        <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.nodes.length > 0">{{
-          inventoryQueries.nodes.length }}</FeatherTextBadge>
-      </FeatherTab>
-      <FeatherTab @click="inventoryQueries.getUnmonitoredNodes">Unmonitored Nodes
-        <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.unmonitoredNodes.length > 0">{{
-          inventoryQueries.unmonitoredNodes.length }}</FeatherTextBadge>
-      </FeatherTab>
-      <FeatherTab @click="inventoryQueries.getDetectedNodes">Detected Nodes
-        <FeatherTextBadge :type="BadgeTypes.info" v-if="inventoryQueries.detectedNodes.length > 0">{{
-          inventoryQueries.detectedNodes.length }}</FeatherTextBadge>
-      </FeatherTab>
-    </template>
-    <!-- Monitored Nodes -->
-    <FeatherTabPanel>
-      <InventoryFilter v-if="inventoryStore.monitoredFilterActive" :state="MonitoredStates.MONITORED"
-        :nodes="tabMonitoredContent" />
-      <InventoryTabContent v-if="tabMonitoredContent.length" :tabContent="tabMonitoredContent"
-        :state="MonitoredStates.MONITORED" />
-      <EmptyList data-test="monitored-empty" v-if="!tabMonitoredContent.length" bg
-        :content="{ msg: 'No monitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
-      <FeatherSpinner v-if="inventoryQueries.isFetching" />
-    </FeatherTabPanel>
-
-    <!-- Unmonitored Nodes -->
-    <FeatherTabPanel>
-      <InventoryFilter v-if="inventoryStore.unmonitoredFilterActive" :state="MonitoredStates.UNMONITORED" onlyTags
-        :nodes="tabUnmonitoredContent" />
-      <InventoryTabContent v-if="tabUnmonitoredContent.length" :tabContent="tabUnmonitoredContent"
-        :state="MonitoredStates.UNMONITORED" />
-      <EmptyList data-test="unmonitored-empty" v-if="!tabUnmonitoredContent.length" bg
-        :content="{ msg: 'No unmonitored nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
-      <FeatherSpinner v-if="inventoryQueries.isFetching" />
-    </FeatherTabPanel>
-
-    <!-- Detected Nodes -->
-    <FeatherTabPanel>
-      <InventoryFilter v-if="inventoryStore.detectedFilterActive" :state="MonitoredStates.DETECTED" onlyTags
-        :nodes="tabDetectedContent" />
-      <InventoryTabContent v-if="tabDetectedContent.length" :tabContent="tabDetectedContent"
-        :state="MonitoredStates.DETECTED" />
-      <EmptyList data-test="discovery-empty" v-if="!tabDetectedContent.length" bg
-        :content="{ msg: 'No detected nodes. Add some on the Discovery page.', btn: { label: 'Visit Discovery Page', action: () => { $router.push('/discovery') } } }" />
-      <FeatherSpinner v-if="inventoryQueries.isFetching" />
-    </FeatherTabPanel>
-  </FeatherTabContainer>
 </template>
 
 <script lang="ts" setup>
@@ -97,14 +99,7 @@ watchEffect(() => {
 @use '@featherds/styles/themes/variables';
 @use '@/styles/vars';
 
-.header {
-  margin-right: var(variables.$spacing-l);
-  margin-left: var(variables.$spacing-l);
-}
-
 .tab-container {
-  margin: 0 var(variables.$spacing-l);
-
   :deep(> ul) {
     display: flex;
     border-bottom: 1px solid var(variables.$secondary-text-on-surface);

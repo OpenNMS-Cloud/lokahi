@@ -49,6 +49,7 @@
         <feature>grpc-ratelimitter</feature>
         <feature>grpc-contract</feature>
         <feature>grpc-protobuf</feature>
+        <feature>system</feature>
 
         <bundle>mvn:org.opennms.lokahi.shared/lokahi-common-logging/${project.version}</bundle>
         <bundle>mvn:org.opennms.lokahi.shared/ipc-api/${project.version}</bundle>

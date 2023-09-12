@@ -9,7 +9,7 @@
         @click="store.displayRuleForm()"
         data-test="new-rule-btn"
       >
-        <FeatherIcon :icon="addIcon" />
+        <FeatherIcon :icon="icons.addIcon" />
         New Rule
       </FeatherButton>
       <MonitoringPoliciesExistingItems
@@ -24,7 +24,16 @@
         class="rule-form"
         v-if="store.selectedRule"
       >
-        <div class="form-title">Create New Rule</div>
+        <div class="rule-form-title-container">
+          <div class="form-title">Create New Rule</div>
+          <FeatherButton
+            v-if="!store.selectedPolicy.isDefault"
+            icon="Delete Rule"
+            @click="store.removeRule"
+          >
+            <FeatherIcon :icon="icons.deleteIcon" />
+          </FeatherButton>
+        </div>
 
         <div class="row">
           <div class="col">
@@ -61,9 +70,7 @@
           </div>
           <div class="col">
             <template v-if="store.selectedRule?.detectionMethod === DetectionMethod.Threshold">
-              <div class="subtitle">
-                Metric
-              </div>
+              <div class="subtitle">Metric</div>
               <BasicSelect
                 :list="thresholdMetricsOptions"
                 @item-selected="selectThresholdMetric"
@@ -72,9 +79,7 @@
               />
             </template>
             <template v-else-if="store.selectedRule?.detectionMethod === DetectionMethod.Event">
-              <div class="subtitle">
-                Event Type
-              </div>
+              <div class="subtitle">Event Type</div>
               <BasicSelect
                 :list="eventTypeOptions"
                 @item-selected="selectEventType"
@@ -100,8 +105,10 @@
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
               />
             </template>
-            <template v-else-if="store.selectedRule!.detectionMethod === DetectionMethod.Event
-                                 && store.selectedRule?.eventType">
+            <template
+              v-else-if="store.selectedRule!.detectionMethod === DetectionMethod.Event
+                                 && store.selectedRule?.eventType"
+            >
               <MonitoringPoliciesEventCondition
                 v-for="(cond, index) in store.selectedRule!.alertConditions"
                 :key="cond.id"
@@ -123,6 +130,15 @@
             </FeatherButton>
           </div>
         </div>
+        <FeatherButton
+          class="save-btn"
+          primary
+          @click="store.saveRule"
+          :disabled="disableSaveRuleBtn"
+          data-test="save-rule-btn"
+        >
+          Save Rule
+        </FeatherButton>
       </div>
     </transition>
   </div>
@@ -132,16 +148,20 @@
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
 import { ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
+import Delete from '@featherds/icon/action/Delete'
 import { ThresholdMetrics } from './monitoringPolicies.constants'
 import { AlertCondition, DetectionMethod, EventType, ManagedObjectType, PolicyRule } from '@/types/graphql'
 
 const store = useMonitoringPoliciesStore()
-const addIcon = markRaw(Add)
+const icons = markRaw({
+  addIcon: Add,
+  deleteIcon: Delete
+})
 
 const componentTypeOptions = [
   { id: ManagedObjectType.Any, name: 'Any' },
   { id: ManagedObjectType.SnmpInterface, name: 'SNMP Interface' },
-  { id: ManagedObjectType.SnmpInterfaceLink, name: 'SNMP Interface Link'},
+  { id: ManagedObjectType.SnmpInterfaceLink, name: 'SNMP Interface Link' },
   { id: ManagedObjectType.Node, name: 'Node' }
 ]
 
@@ -171,10 +191,12 @@ const selectDetectionMethod = async (method: DetectionMethod) => {
   store.selectedRule!.detectionMethod = method
   await store.resetDefaultConditions()
 }
+const disableSaveRuleBtn = computed(
+  () => store.selectedPolicy?.isDefault || !store.selectedRule?.name || !store.selectedRule?.alertConditions?.length
+)
 </script>
 
 <style scoped lang="scss">
-@use '@featherds/styles/mixins/elevation';
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
@@ -185,21 +207,27 @@ const selectDetectionMethod = async (method: DetectionMethod) => {
   display: flex;
   flex-direction: column;
   gap: var(variables.$spacing-l);
+  margin-bottom: var(variables.$spacing-xl);
 
   .rule-form {
-    @include elevation.elevation(2);
     display: flex;
     flex: 1;
     flex-direction: column;
     background: var(variables.$surface);
     padding: var(variables.$spacing-l);
-    border-radius: vars.$border-radius-s;
+    border-radius: vars.$border-radius-surface;
+    border: 1px solid var(variables.$border-on-surface);
     overflow: hidden;
 
-    .form-title {
-      @include typography.headline3;
-      margin-bottom: var(variables.$spacing-m);
+    .rule-form-title-container {
+      display: flex;
+      justify-content: space-between;
+      .form-title {
+        @include typography.headline3;
+        margin-bottom: var(variables.$spacing-m);
+      }
     }
+
     .subtitle {
       @include typography.subtitle1;
     }
@@ -220,6 +248,11 @@ const selectDetectionMethod = async (method: DetectionMethod) => {
         flex: 1;
       }
     }
+  }
+
+  .save-btn {
+    width: 150px;
+    align-self: flex-end;
   }
 
   // for event / threshold child conditions

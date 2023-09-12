@@ -32,19 +32,23 @@ package org.opennms.horizon.minion.grpc.channel;
 import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.TlsChannelCredentials.Builder;
+import lombok.Setter;
+import org.opennms.horizon.minion.grpc.GrpcErrorMessages;
+import org.opennms.horizon.minion.grpc.GrpcShutdownHandler;
+import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
-import lombok.Setter;
-import org.opennms.horizon.minion.grpc.ssl.KeyStoreFactory;
 
 public class SSLChannelFactory implements ManagedChannelFactory {
-
     private final ChannelBuilderFactory channelBuilderFactory;
 
     private final KeyStoreFactory keyStoreFactory;
+
+    private final GrpcShutdownHandler grpcShutdownHandler;
 
     @Setter
     private String keyStore;
@@ -59,9 +63,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
     @Setter
     private String trustStorePassword;
 
-    public SSLChannelFactory(ChannelBuilderFactory channelBuilderFactory, KeyStoreFactory keyStoreFactory) {
+    public SSLChannelFactory(ChannelBuilderFactory channelBuilderFactory, KeyStoreFactory keyStoreFactory, GrpcShutdownHandler grpcShutdownHandler) {
         this.channelBuilderFactory = channelBuilderFactory;
         this.keyStoreFactory = keyStoreFactory;
+        this.grpcShutdownHandler = grpcShutdownHandler;
     }
 
     @Override
@@ -74,7 +79,9 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 keyManagerFactory.init(loadKeyStore(keyStoreType, keyStore, keyStorePassword), keyStorePassword.toCharArray());
                 credentials.keyManager(keyManagerFactory.getKeyManagers());
             } catch (GeneralSecurityException e) {
-                throw new RuntimeException(e);
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
+            } catch (IllegalArgumentException e) {
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.INVALID_CLIENT_STORE);
             }
         }
 
@@ -84,7 +91,9 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 trustManagerFactory.init(loadKeyStore(trustStoreType, trustStore, trustStorePassword));
                 credentials.trustManager(trustManagerFactory.getTrustManagers());
             } catch (GeneralSecurityException e) {
-                throw new RuntimeException(e);
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.FAIL_LOADING_TRUST_KEYSTORE);
+            } catch (IllegalArgumentException e) {
+                grpcShutdownHandler.shutdown(GrpcErrorMessages.INVALID_TRUST_STORE);
             }
         }
 
@@ -93,16 +102,12 @@ public class SSLChannelFactory implements ManagedChannelFactory {
             .build();
     }
 
-    private KeyStore loadKeyStore(String type, String location, String password) {
+    private KeyStore loadKeyStore(String type, String location, String password) throws GeneralSecurityException, IllegalArgumentException {
         File keyStoreFile = new File(location);
         if (!keyStoreFile.exists() || !keyStoreFile.isFile() || !keyStoreFile.canRead()) {
             throw new IllegalArgumentException("File " + location + " does not exist, is not a file or can not be read");
         }
 
-        try {
-            return keyStoreFactory.createKeyStore(type, keyStoreFile, password);
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        }
+        return keyStoreFactory.createKeyStore(type, keyStoreFile, password);
     }
 }

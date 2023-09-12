@@ -123,7 +123,7 @@ onMounted(async () => {
   flowsStore.filters.selectedExporterTopApplication = undefined
 })
 
-onUnmounted(() => flowsStore.$reset)
+onUnmounted(() => flowsStore.$reset())
 </script>
 
 <style scoped lang="scss">

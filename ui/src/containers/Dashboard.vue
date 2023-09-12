@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="full-page-container">
     <div class="header">
       <HeadlinePage text="Insights Dashboard" />
       <DashboardHeaderLinks />
@@ -59,18 +59,10 @@ onMounted(async () => {
 @use '@/styles/mediaQueriesMixins.scss';
 @use '@/styles/vars.scss';
 
-.container {
+.full-page-container {
   display: flex;
-  margin: 0 1rem;
   flex-direction: column;
-  width: 100%;
-  padding: var(variables.$spacing-l) var(variables.$spacing-m);
-  margin: auto;
-  @include mediaQueriesMixins.screen-md {
-    padding: var(variables.$spacing-xl);
-  }
   > .header {
-    @include typography.headline2();
     display: flex;
     align-items: center;
     justify-content: space-between;

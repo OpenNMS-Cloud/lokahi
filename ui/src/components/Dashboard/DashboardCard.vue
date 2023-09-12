@@ -30,6 +30,7 @@ defineProps<{
 @use '@featherds/styles/mixins/typography';
 @use '@featherds/styles/themes/variables';
 @use '@/styles/mediaQueriesMixins.scss';
+@use '@/styles/vars.scss';
 
 .card {
   display: flex;
@@ -38,6 +39,7 @@ defineProps<{
   background-color: var(variables.$surface);
   padding: var(variables.$spacing-l);
   border: 1px solid var(variables.$border-on-surface);
+  border-radius: vars.$border-radius-surface;
   @include mediaQueriesMixins.screen-lg {
     width: 49.5%;
   }

@@ -524,7 +524,7 @@
   resolved "https://registry.yarnpkg.com/@dash14/svg-pan-zoom/-/svg-pan-zoom-3.6.9.tgz#e73b5a71f73ce00f20ab3484260f45e6c6512ed7"
   integrity sha512-6u+KTQec+9+3bRdk2mReix8AGsp2mB40cw0iYfQQzo22QBkeCNpXl2amnfwQzK7xB9oH/62Wvf2z7l6l2w+csA==
 
-"@dsb-norge/vue-keycloak-js@^2.2.0":
+"@dsb-norge/vue-keycloak-js@2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@dsb-norge/vue-keycloak-js/-/vue-keycloak-js-2.4.0.tgz#46e81a57a07a0ef720b73c3cb1df1b53d23d90e2"
   integrity sha512-hpzFJkBzCk8ttFBLUAUH0CQpuTBIDU8b4N1xWJYAjF9Em9apGHeXI3IqJXwqVOfaPwki3KiXQTBW8kdHA06v1w==
@@ -728,6 +728,17 @@
     "@featherds/input-helper" "^0.12.16"
     "@featherds/list" "^0.12.16"
     "@featherds/menu" "^0.12.16"
+    "@featherds/styles" "^0.12.16"
+    "@featherds/utils" "^0.12.16"
+    vue "^3.1.0-0"
+
+"@featherds/back-button@0.12.16":
+  version "0.12.16"
+  resolved "https://registry.yarnpkg.com/@featherds/back-button/-/back-button-0.12.16.tgz#f0bdd40619b7c37770b2ec99625f33ae189b0eb8"
+  integrity sha512-Z9IAJYkJ3I6/F1t40tORjrPWxJvuS1kBGHlEfxfzhq9hl0sF7x8hp8i4eRBJCVqRRkJ4qePPEzfIsM3q3pUf+A==
+  dependencies:
+    "@featherds/icon" "^0.12.16"
+    "@featherds/ripple" "^0.12.16"
     "@featherds/styles" "^0.12.16"
     "@featherds/utils" "^0.12.16"
     vue "^3.1.0-0"

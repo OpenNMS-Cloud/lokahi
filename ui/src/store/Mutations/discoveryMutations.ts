@@ -21,6 +21,13 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: isFetchingActiveDiscovery
   } = useMutation(CreateIcmpActiveDiscoveryDocument)
 
+  // Delete ICMP Discoveries
+  const {
+    execute: deleteActiveIcmpDiscovery,
+    error: deleteActiveIcmpDiscoveryError,
+    isFetching: deleteActiveIcmpDiscoveryIsFetching
+  } = useMutation(DeleteActiveIcmpDiscoveryDocument)
+
   // Create Passive Discoveries
   const {
     execute: upsertPassiveDiscovery,
@@ -34,11 +41,6 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: createOrUpdateDiscoveryIsFetching
   } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
  
-  const {
-    execute: deleteActiveIcmpDiscovery,
-    error: deleteActiveIcmpDiscoveryError,
-    isFetching: deleteActiveIcmpDiscoveryIsFetching
-  } = useMutation(DeleteActiveIcmpDiscoveryDocument)
  
   const {
     execute: deletePassiveDiscovery,

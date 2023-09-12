@@ -13,3 +13,7 @@ grpc:
     alerts: localhost:32065
     flows: flows:443
     minion-certificate-manager: minion-certificate-manager:8990
+server:
+  error:
+    include-message: ALWAYS
+    include-stacktrace: NEVER

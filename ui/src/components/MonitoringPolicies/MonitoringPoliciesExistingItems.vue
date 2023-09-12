@@ -31,18 +31,17 @@ defineProps<{
 <style lang="scss" scoped>
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
-@use '@featherds/styles/mixins/elevation';
 @use '@/styles/vars.scss';
 
 .existing-items-container {
-  @include elevation.elevation(2);
   display: flex;
   flex-direction: column;
   background: var(variables.$surface);
   margin: var(variables.$spacing-l) 0;
   padding: var(variables.$spacing-l);
   width: 350px;
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
+  border: 1px solid var(variables.$border-on-surface);
   border-left: 5px solid var(variables.$success);
 
   .title {

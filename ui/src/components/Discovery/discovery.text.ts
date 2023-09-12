@@ -1,6 +1,6 @@
 export default {
   Discovery: {
-    pageHeadline: 'Discovery',
+    pageHeadline: 'Discoveries',
     headline1: 'Select a discovery type',
     headline2: 'ICMP/SNMP Discovery Setup',
     nameInputLabel: 'ICMP/SNMP name',
@@ -13,7 +13,7 @@ export default {
     error: {
       errorCreate: 'Error on creating discovery :('
     },
-    empty: 'No discovery performed'
+    empty: 'No discoveries performed.'
   },
   AddDiscoverySection: {
     activeDiscoveryTitle: 'Active Discovery',
@@ -37,7 +37,7 @@ export default {
   }
 }
 
-export const DiscoverySNMPForm = {
+export const DiscoverySNMPCopy = {
   tag: 'Search/Add tags (optional)',
   nameInputLabel: 'ICMP/SNMP name',
   title: 'ICMP/SNMP Discovery Setup'
@@ -115,16 +115,13 @@ export const SuccessModalOptions = {
   addDiscovery: 'Add Another Discovery',
   addTransaction: 'Add Synthetic Transaction',
   addMonitoring: 'Add Monitoring Policy',
-  checkboxText: "Don't show this again"
+  checkboxText: 'Don\'t show this again'
 }
 
 export const Instructions = {
-  title: 'Discovery',
-  subtitle:
-    'The discovery process identifies devices and entities on your monitored network through either active or passive discovery.',
   activeDiscoveryTitle: 'What is Active Discovery?',
   activeDiscoverySubtitle:
-    'Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor. You can choose from two active discovery methods:',
+    'Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor.',
   activeListTool: {
     tool1: 'ICMP/SNMP:',
     toolDescription1:
@@ -152,7 +149,7 @@ export const Instructions = {
       'May miss devices if they are not active. All devices must be enabled and configured to send Syslogs.'
   },
   learnMoreLink: {
-    label: 'LEARN MORE',
+    label: 'Visit our product documentation',
     link: 'https://docs.opennms.com/'
   }
 }

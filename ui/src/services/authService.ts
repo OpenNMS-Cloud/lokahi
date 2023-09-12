@@ -27,7 +27,7 @@ const logout = async (): Promise<void> => {
   params.append('client_id', keycloakConfig.clientId as string)
   const realm = import.meta.env.VITE_KEYCLOAK_REALM || 'opennms'
   const baseUrl = import.meta.env.VITE_KEYCLOAK_URL || '/auth'
-  params.append('redirect_uri',  `${baseUrl}/realms/${realm}/protocol/openid-connect/logout`)
+  params.append('post_logout_redirect_uri',  `${baseUrl}/realms/${realm}/protocol/openid-connect/logout`)
 
   startSpinner()
 

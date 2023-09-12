@@ -145,11 +145,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withStartupTimeout(Duration.ofMinutes(5))
             .withEnv("JAVA_TOOL_OPTIONS", "-Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("MINION_LOCATION", "Default")
-            .withEnv("USE_KUBERNETES", "false")
             .withEnv("MINION_GATEWAY_HOST", "opennms-minion-ssl-gateway")
-            .withEnv("MINION_GATEWAY_PORT", "443")
-            .withEnv("MINION_GATEWAY_TLS", "true")
-            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", "passw0rd")
             .withEnv("GRPC_CLIENT_TRUSTSTORE", "/opt/karaf/CA.cert")
             .withCopyFileToContainer(

@@ -249,6 +249,8 @@ const searchAlertsListener: fncArgVoid = (val: string | null) => {
 .alerts-content {
   background: var(variables.$surface);
   padding: var(variables.$spacing-l);
+  border-radius: vars.$border-radius-surface;
+  border: 1px solid var(variables.$border-on-surface);
 }
 
 .alerts-list {

@@ -5,14 +5,14 @@
     @update:modelValue="$emit('drawer-closed')"
   >
     <div class="drawerContent">
-      <div class="section">
-        <div class="title">{{ Instructions.title }}</div>
-        {{ Instructions.subtitle }}
-      </div>
-      <br />
-      <div class="section" v-if="instructionsType === InstructionsType.Active">
+      <div
+        class="section"
+        v-if="discoveryStore.instructionsType === InstructionsType.Active"
+      >
         <div class="title">{{ Instructions.activeDiscoveryTitle }}</div>
-        {{ Instructions.activeDiscoverySubtitle }}
+        <div class="subtitle">
+          {{ Instructions.activeDiscoverySubtitle }}
+        </div>
         <ul class="list">
           <li>
             <strong>{{ Instructions.activeListTool.tool1 }}</strong> {{ Instructions.activeListTool.toolDescription1 }}
@@ -33,10 +33,13 @@
           </li>
         </ul>
       </div>
-      <div class="section" v-if="instructionsType === InstructionsType.Passive">
+      <div
+        class="section"
+        v-if="discoveryStore.instructionsType === InstructionsType.Passive"
+      >
         <div class="title">{{ Instructions.passiveDiscoveryTitle }}</div>
 
-        {{ Instructions.passiveDiscoverySubtitle }}
+        <div class="subtitle">{{ Instructions.passiveDiscoverySubtitle }}</div>
 
         <p>{{ Instructions.passiveNote }}</p>
 
@@ -56,8 +59,9 @@
           :href="Instructions.learnMoreLink.link"
           target="_blank"
           class="link"
-          >{{ Instructions.learnMoreLink.label }}</a
-        >
+          >{{ Instructions.learnMoreLink.label }}
+          <FeatherIcon :icon="ExternalIcons" />
+        </a>
       </div>
     </div>
   </FeatherDrawer>
@@ -66,10 +70,12 @@
 <script setup lang="ts">
 import { FeatherDrawer } from '@featherds/drawer'
 import { Instructions } from './discovery.text'
-import { InstructionsType } from './discovery.constants';
+import { InstructionsType } from './discovery.constants'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import ExternalIcons from '@/components/Common/ExternalIcon.vue'
+const discoveryStore = useDiscoveryStore()
 const props = defineProps<{
   isOpen: boolean
-  instructionsType: string
 }>()
 
 const isOpen = computed<boolean>(() => props.isOpen)
@@ -83,16 +89,16 @@ const isOpen = computed<boolean>(() => props.isOpen)
 .drawerContent {
   padding: var(variables.$spacing-m);
   width: 100%;
-  @include typography.caption;
 
   @include mediaQueriesMixins.screen-md {
-    width: 600px;
+    max-width: 500px;
     padding: var(variables.$spacing-xl);
   }
   > .section {
     padding-bottom: var(variables.$spacing-m);
     > .title {
-      @include typography.headline4;
+      @include typography.headline3;
+      margin-bottom: 14px;
     }
     > .list {
       padding-top: var(variables.$spacing-xl);
@@ -107,12 +113,16 @@ const isOpen = computed<boolean>(() => props.isOpen)
       list-style: disc;
     }
     .link {
-      @include typography.button;
       display: flex;
-      justify-content: flex-end;
       cursor: pointer;
-      color: var(variables.$primary);
+      color: var(--feather-clickable-normal);
       text-decoration: none;
+      font-size: 14px;
+      align-items: center;
+      .feather-icon {
+        font-size: 18px;
+        margin-left: 8px;
+      }
     }
     p {
       @include typography.caption;

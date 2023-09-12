@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.server.service;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -37,7 +35,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.server.exception.GraphQLException;
 import org.opennms.horizon.server.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.MonitoringLocationCreate;
@@ -93,24 +90,14 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
     public Mono<Boolean> deleteLocation(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         var accessToken = headerUtil.getAuthHeader(env);
         var tenantId = headerUtil.extractTenant(env);
-        try {
-            var status = inventoryClient.deleteLocation(id, accessToken);
-            // we may want to revoke even delete location is fail. E.g. location is already deleted before or it is partially deleted.
-            // It will not be able to use anyway.
-            certificateManagerClient.revokeCertificate(tenantId, id, accessToken);
-            return Mono.just(status);
-        } catch (StatusRuntimeException e) {
-            return handleException(e, "Error while fetching Minion certificate for location id " + id);
-        }
+
+        var status = inventoryClient.deleteLocation(id, accessToken);
+
+        // we may want to revoke even delete location is fail. E.g. location is
+        // already deleted before or it is partially deleted. It will not be
+        // able to use anyway.
+        certificateManagerClient.revokeCertificate(tenantId, id, accessToken);
+        return Mono.just(status);
     }
 
-    private <T> Mono<T> handleException(Exception e, String message) {
-        if (e instanceof StatusRuntimeException statusRuntimeException
-            && statusRuntimeException.getStatus().getCode().equals(Status.Code.NOT_FOUND)) {
-            return Mono.error(new GraphQLException(e.getMessage()));
-        }
-
-        // fallback to generic exception
-        return Mono.error(new GraphQLException(message));
-    }
 }

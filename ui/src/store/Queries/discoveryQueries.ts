@@ -11,36 +11,35 @@ import {
 } from '@/types/graphql'
 
 export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
-  const tagsSearched = ref([] as Tag[])
-  const tagsByDiscovery = ref([] as Tag[] | undefined)
+  const tagsByDiscovery = ref([] as Tag[])
+  const searchTerm = ref('')
   const discoveryId = ref({
     discoveryId: 0
   })
   const { data: locations, execute: getLocations } = useQuery({
     query: ListLocationsForDiscoveryDocument,
+    cachePolicy: 'network-only',
     fetchOnMount: false
   })
 
   const { data: listedDiscoveries, execute: getDiscoveries } = useQuery({
     query: ListDiscoveriesDocument,
+    cachePolicy: 'network-only',
     fetchOnMount: false
   })
 
-  const getTagsSearch = (searchTerm: string) => {
-    const { data, error } = useQuery({
-      query: ListTagsSearchDocument,
-      variables: {
-        searchTerm
-      }
-    })
+  const { data:tagsSearched, isFetching:isTagsSearchFetching } = useQuery({
+    query: ListTagsSearchDocument,
+    cachePolicy: 'network-only',
+    variables: {
+      searchTerm:searchTerm.value
+    }
+  })
 
-    watchEffect(() => {
-      if (data.value?.tags) {
-        tagsSearched.value = data.value.tags
-      } else {
-        // TODO: what kind of errors and how to manage them
-      }
-    })
+  const getTagsSearch = async (searchTermIn: string) => {
+   
+    searchTerm.value = searchTermIn
+    
   }
 
   const formatActiveDiscoveries = (activeDiscoveries: ActiveDiscovery[] = []) => {
@@ -53,6 +52,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   // active discoveries
   const { data: tagsByDiscoveryIdData, execute: tagsByDiscoveryIdExecute } = useQuery({
     query: TagsByActiveDiscoveryIdDocument,
+    cachePolicy: 'network-only',
     variables: discoveryId
   })
 
@@ -65,6 +65,7 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   // passive discoveries
   const { data: tagsByPassiveDiscoveryIdData, execute: tagsByPassiveDiscoveryIdExecute } = useQuery({
     query: TagsByPassiveDiscoveryIdDocument,
+    cachePolicy: 'network-only',
     variables: discoveryId
   })
 
@@ -77,8 +78,9 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   return {
     locations: computed(() => locations.value?.findAllLocations ?? []),
     getLocations,
-    tagsSearched: computed(() => tagsSearched.value || []),
+    tagsSearched: computed(() => tagsSearched.value?.tags || []),
     getTagsSearch,
+    isTagsSearchFetching,
     activeDiscoveries: computed(() => formatActiveDiscoveries(listedDiscoveries.value?.listActiveDiscovery) || []),
     passiveDiscoveries: computed(() => listedDiscoveries.value?.passiveDiscoveries || []),
     getDiscoveries,

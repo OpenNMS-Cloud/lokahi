@@ -45,8 +45,8 @@
       >
         <span>{{ item.name }}</span>
         <template v-slot:icon
-          ><FeatherIcon
             v-if="!disabled"
+          ><FeatherIcon
             @click="unselectItem(item.name as string)"
             :icon="CancelIcon"
         /></template>

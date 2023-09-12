@@ -21,7 +21,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   const locationQueries = useLocationQueries()
   const minionsQueries = useMinionsQueries()
   const locationMutations = useLocationMutations()
-  const { minionDockerCmd, setPassword, setMinionId, clearMinionCmdVals } = useMinionCmd()
+  const { minionDockerCmd, setPassword, setLocationName, clearMinionCmdVals } = useMinionCmd()
 
   const fetchLocations = async () => {
     try {
@@ -136,7 +136,7 @@ export const useLocationStore = defineStore('locationStore', () => {
   const setCertificatePassword = (password: string) => {
     certificatePassword.value = password
     setPassword(certificatePassword.value)
-    setMinionId(selectedLocation.value.location)
+    setLocationName(selectedLocation.value.location)
   }
 
   const selectedLocation = computed(

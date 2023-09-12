@@ -170,12 +170,12 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       const discoveryQueries = useDiscoveryQueries()
       this.tagSearch = searchVal
       await discoveryQueries.getTagsSearch(searchVal)
-      this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name || '')
+      this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name ?? '')
     },
     async toggleDiscovery(clickedToggle: NewOrUpdatedDiscovery){
       const discoveryMutations = useDiscoveryMutations()
       const meta = clickedToggle?.meta as DiscoveryTrapMeta
-      const toggleObject = {toggle:!meta.toggle?.toggle || false,id:meta.toggle?.id || clickedToggle.id}
+      const toggleObject = {toggle: !meta.toggle?.toggle ?? false, id: meta.toggle?.id ?? clickedToggle.id}
       this.loading = true
       await discoveryMutations.togglePassiveDiscovery({toggle:toggleObject})
       await this.init()

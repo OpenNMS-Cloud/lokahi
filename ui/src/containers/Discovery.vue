@@ -52,11 +52,6 @@
         class="discovery"
       >
         <div class="flex-title">
-          <!--<FeatherBackButton
-          @click="discoveryStore.backToTypePage"
-          v-if="discoveryStore.discoveryFormActive"
-          >Cancel</FeatherBackButton
-        >-->
           <h2 class="title">{{ discoveryCopy.title }} | {{ selectedTypeOption?._text }}</h2>
           <div
             style="display: flex; justify-content: flex-end"

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { ListTagsDocument, Tag, ListTagsSearchDocument } from '@/types/graphql'
-import { useTagStore } from '@/store/Components/tagStore'
+import { Tag, ListTagsSearchDocument } from '@/types/graphql'
 
 export const useTagQueries = defineStore('tagQueries', () => {
   const tagsSearched = ref([] as Tag[])

@@ -5,13 +5,11 @@ import * as yup from 'yup'
 
 
 export const splitStringOnSemiCommaOrDot = (inString?: string) => {
-  return inString?.split(/[;,]+/) || []
+  return inString?.split(/[;,]+/) ?? []
 }
 
   
 export const discoveryFromClientToServer = (discovery: NewOrUpdatedDiscovery) => {
-
-
   if (discovery.type === DiscoveryType.Azure) return discoveryFromAzureClientToServer(discovery)
   if (discovery.type === DiscoveryType.ICMP) return discoveryFromActiveClientToServer(discovery)
   if (discovery.type === DiscoveryType.SyslogSNMPTraps) return discoveryFromTrapClientToServer(discovery)
@@ -74,11 +72,11 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
       type: d.discoveryType,
       locations: locations.filter((b) => {return b.id === Number(d.details?.locationId)}),
       meta: {
-        communityStrings: d?.details?.snmpConfig?.readCommunities.join(';') || '',
-        ipRanges: d?.details?.ipAddresses?.join(';') || '',
-        udpPorts: d?.details?.snmpConfig?.ports.join(';') || '',
+        communityStrings: d?.details?.snmpConfig?.readCommunities.join(';') ?? '',
+        ipRanges: d?.details?.ipAddresses?.join(';') ?? '',
+        udpPorts: d?.details?.snmpConfig?.ports.join(';') ?? '',
         clientId: d?.details?.clientId,
-        clientSecret: d?.details?.clientSecret || '',
+        clientSecret: d?.details?.clientSecret ?? '',
         clientSubscriptionId: d?.details?.subscriptionId,
         directoryId: d?.details?.directoryId
       }
@@ -137,8 +135,8 @@ const validatorMap: Record<string,yup.Schema> = {
 }
 export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDiscovery) => {
 
-  const type = selectedDiscovery.type || ''
-  const validatorToUse = validatorMap[type] || {validate: () => ({})}
+  const type = selectedDiscovery.type ?? ''
+  const validatorToUse = validatorMap[type] ?? {validate: () => ({})}
 
   let isValid = true
   let validationErrors = {}

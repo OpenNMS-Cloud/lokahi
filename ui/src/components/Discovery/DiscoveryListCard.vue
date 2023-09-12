@@ -45,9 +45,6 @@
 </template>
 
 <script lang="ts" setup>
-import Warning from '@featherds/icon/notification/Warning'
-import { PassiveDiscovery } from '@/types/graphql'
-import Help from '@featherds/icon/action/Help'
 import discoveryText from '@/components/Discovery/discovery.text'
 import { DiscoveryTrapMeta, NewOrUpdatedDiscovery } from '@/types/discovery'
 

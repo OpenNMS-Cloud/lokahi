@@ -52,11 +52,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+
 
 @Slf4j
 @GraphQLApi
@@ -108,31 +108,11 @@ public class GrpcFlowService {
         String tenantId = headerUtil.extractTenant(env);
         String authHeader = headerUtil.getAuthHeader(env);
         var series = flowClient.getApplicationSeries(requestCriteria, tenantId, authHeader);
-        Map<String, List<FlowingPoint>> map = series.getPointList().stream()
-            .map(flowingPointMapper::map)
-            .collect(Collectors.groupingBy(FlowingPoint::getLabel));
-        List<FlowingPoint> output = new ArrayList<>(series.getPointCount());
-        map.forEach((k, v) ->{
-            convertToRate(v);
-            output.addAll(v);
-        });
+        long start = System.currentTimeMillis();
+        var output = UnitConverter.convert(
+            series.getPointList().stream().map(flowingPointMapper::map).toList());
+        LOG.info("Processing time : {}", System.currentTimeMillis() - start);
         return Flux.fromIterable(output);
-    }
-
-    public static void convertToRate(List<FlowingPoint> points) {
-        if (points == null || points.size() < 2) {
-            return;
-        }
-        long lastTimestampMs = 0;
-        for (final var point : points) {
-            if (lastTimestampMs == 0) {
-                long firstStepSize = points.get(1).getTimestamp().toEpochMilli() - points.get(0).getTimestamp().toEpochMilli();
-                point.setValue(point.getValue() / firstStepSize  * 1000);
-            } else {
-                point.setValue(point.getValue() / (point.getTimestamp().toEpochMilli() - lastTimestampMs) * 1000);
-            }
-            lastTimestampMs = point.getTimestamp().toEpochMilli();
-        }
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {

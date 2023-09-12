@@ -108,11 +108,8 @@ public class GrpcFlowService {
         String tenantId = headerUtil.extractTenant(env);
         String authHeader = headerUtil.getAuthHeader(env);
         var series = flowClient.getApplicationSeries(requestCriteria, tenantId, authHeader);
-        long start = System.currentTimeMillis();
-        var output = UnitConverter.convert(
-            series.getPointList().stream().map(flowingPointMapper::map).toList());
-        LOG.info("Processing time : {}", System.currentTimeMillis() - start);
-        return Flux.fromIterable(output);
+        return Flux.fromIterable(UnitConverter.convert(
+            series.getPointList().stream().map(flowingPointMapper::map).toList()));
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {

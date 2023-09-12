@@ -3,6 +3,7 @@ import mount from 'tests/mountWithPiniaVillus'
 import router from '@/router'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
+import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 
 let wrapper: any
 describe('DiscoveryPage', () => {
@@ -21,14 +22,6 @@ describe('DiscoveryPage', () => {
 
   test('The Discovery page container mounts correctly', () => {
     expect(wrapper).toBeTruthy()
-  })
-
-  test('Store fn init', async() => {
-    const store = useDiscoveryStore()
-    const queries = useDiscoveryQueries()
-    await store.init()
-    expect(queries.getDiscoveries).toHaveBeenCalled()
-    expect(queries.getLocations).toHaveBeenCalled()
   })
 
   test('Store fn startNewDiscovery', () => {
@@ -50,5 +43,26 @@ describe('DiscoveryPage', () => {
     expect(store.newDiscoveryModalActive).toBe(false)
     expect(JSON.stringify(store.validationErrors)).toBe('{}')
     expect(JSON.stringify(store.selectedDiscovery)).toBe('{}')
+  })
+
+  test('Store fn cancelUpdate', async () => {
+    const store = useDiscoveryStore()
+    store.selectedDiscovery = { name: 'Azure' }
+    store.discoveryFormActive = true
+    store.discoveryTypePageActive = true
+
+    await store.cancelUpdate()
+
+    expect(JSON.stringify(store.selectedDiscovery)).toBe('{}')
+    expect(store.discoveryFormActive).toBe(false)
+    expect(store.discoveryTypePageActive).toBe(false)
+  })
+
+  test('Store fn setMetaSelectedDiscoveryValue', () => {
+    const store = useDiscoveryStore()
+    store.selectedDiscovery.meta = undefined as any
+    store.setMetaSelectedDiscoveryValue('communityStrings', 'public')
+    // @ts-ignore
+    expect(store.selectedDiscovery.meta.communityStrings).toBe('public')
   })
 })

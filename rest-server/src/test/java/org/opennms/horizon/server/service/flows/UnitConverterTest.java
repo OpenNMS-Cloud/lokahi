@@ -28,10 +28,8 @@
 
 package org.opennms.horizon.server.service.flows;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.control.DeepClone;
 import org.opennms.horizon.server.model.flows.FlowingPoint;
 
 import java.time.Instant;
@@ -53,13 +51,13 @@ class UnitConverterTest {
         pointList.add(getFlowingPoint(startTime + 100, 200, LABEL, INGRESS));
         pointList.add(getFlowingPoint(startTime + 200, 300, LABEL, INGRESS));
         pointList.add(getFlowingPoint(startTime + 300, 400, LABEL, INGRESS));
-        UnitConverter.convertToRate(pointList);
-        pointList.forEach(p -> System.out.println(p.getValue()));
-        Assertions.assertEquals(4, pointList.size());
-        Assertions.assertEquals(8000, pointList.get(0).getValue());
-        Assertions.assertEquals(16_000, pointList.get(1).getValue());
-        Assertions.assertEquals(24_000, pointList.get(2).getValue());
-        Assertions.assertEquals(32_000, pointList.get(3).getValue());
+        var output = UnitConverter.convertToRate(pointList);
+
+        Assertions.assertEquals(4, output.size());
+        Assertions.assertEquals(8000, output.get(0).getValue());
+        Assertions.assertEquals(16_000, output.get(1).getValue());
+        Assertions.assertEquals(24_000, output.get(2).getValue());
+        Assertions.assertEquals(32_000, output.get(3).getValue());
         for (int i = 0; i < pointList.size(); i++) {
             Assertions.assertEquals(startTime + 100L * i, pointList.get(i).getTimestamp().toEpochMilli());
             Assertions.assertEquals(INGRESS, pointList.get(i).getDirection());
@@ -99,7 +97,6 @@ class UnitConverterTest {
         Collections.shuffle(pointList);
 
         var output = UnitConverter.convert(pointList);
-        output.forEach(p -> System.out.println(p.getLabel() + " " + p.getDirection() + " " + p.getValue()));
         var labelIngressList = output.stream().filter(p -> LABEL.equals(p.getLabel()) && INGRESS.equals(p.getDirection())).toList();
         Assertions.assertEquals(4, labelIngressList.size());
         Assertions.assertEquals(8000, labelIngressList.get(0).getValue());

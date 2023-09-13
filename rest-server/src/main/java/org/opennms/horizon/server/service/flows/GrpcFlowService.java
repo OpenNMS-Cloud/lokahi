@@ -104,8 +104,9 @@ public class GrpcFlowService {
         String tenantId = headerUtil.extractTenant(env);
         String authHeader = headerUtil.getAuthHeader(env);
         var series = flowClient.getApplicationSeries(requestCriteria, tenantId, authHeader);
-        return Flux.fromIterable(UnitConverter.convert(
-            series.getPointList().stream().map(flowingPointMapper::map).toList()));
+        var points = series.getPointList().stream().map(flowingPointMapper::map).toList();
+        UnitConverter.convert(points);
+        return Flux.fromIterable(points);
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {

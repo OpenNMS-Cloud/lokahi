@@ -44,21 +44,19 @@ public final class UnitConverter {
      * It will split data by label & direction and convert byte > bps, beware it will directly modify value of flowingPoint
      *
      * @param input
-     * @return points
      */
-    public static List<FlowingPoint> convert(List<FlowingPoint> input) {
-        var test = input.stream()
+    public static void convert(List<FlowingPoint> input) {
+        input.stream()
             .collect(Collectors.groupingBy(p -> p.getLabel() + p.getDirection()))
-            .values().stream().map(UnitConverter::convertToRate);
-        return test.flatMap(List::stream).toList();
+            .values().forEach(UnitConverter::convertToRate);
     }
 
     /**
      * convert a grouped points value from byte > bps, beware it will directly modify value of flowingPoint
      */
-    public static List<FlowingPoint> convertToRate(final List<FlowingPoint> points) {
+    public static void convertToRate(final List<FlowingPoint> points) {
         if (points == null || points.size() < 2) {
-            return new ArrayList<>();
+            return;
         }
         var sorted = points.stream().sorted(Comparator.comparing(FlowingPoint::getTimestamp)).toList();
         long lastTimestampMs = -1;
@@ -72,6 +70,5 @@ public final class UnitConverter {
             }
             lastTimestampMs = point.getTimestamp().toEpochMilli();
         }
-        return sorted;
     }
 }

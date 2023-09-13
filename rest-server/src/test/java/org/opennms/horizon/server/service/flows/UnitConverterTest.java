@@ -51,13 +51,13 @@ class UnitConverterTest {
         pointList.add(getFlowingPoint(startTime + 100, 200, LABEL, INGRESS));
         pointList.add(getFlowingPoint(startTime + 200, 300, LABEL, INGRESS));
         pointList.add(getFlowingPoint(startTime + 300, 400, LABEL, INGRESS));
-        var output = UnitConverter.convertToRate(pointList);
+        UnitConverter.convertToRate(pointList);
 
-        Assertions.assertEquals(4, output.size());
-        Assertions.assertEquals(8000, output.get(0).getValue());
-        Assertions.assertEquals(16_000, output.get(1).getValue());
-        Assertions.assertEquals(24_000, output.get(2).getValue());
-        Assertions.assertEquals(32_000, output.get(3).getValue());
+        Assertions.assertEquals(4, pointList.size());
+        Assertions.assertEquals(8000, pointList.get(0).getValue());
+        Assertions.assertEquals(16_000, pointList.get(1).getValue());
+        Assertions.assertEquals(24_000, pointList.get(2).getValue());
+        Assertions.assertEquals(32_000, pointList.get(3).getValue());
         for (int i = 0; i < pointList.size(); i++) {
             Assertions.assertEquals(startTime + 100L * i, pointList.get(i).getTimestamp().toEpochMilli());
             Assertions.assertEquals(INGRESS, pointList.get(i).getDirection());
@@ -68,16 +68,18 @@ class UnitConverterTest {
     @Test
     void testInvalidList() {
         List<FlowingPoint> pointList = new ArrayList<>();
-        pointList = UnitConverter.convertToRate(pointList);
+        UnitConverter.convertToRate(pointList);
         Assertions.assertEquals(0, pointList.size());
 
         // single data
         pointList.add(getFlowingPoint(System.currentTimeMillis(), 100, LABEL, INGRESS));
-        pointList = UnitConverter.convertToRate(pointList);
-        Assertions.assertEquals(0, pointList.size());
+        UnitConverter.convertToRate(pointList);
+        Assertions.assertEquals(1, pointList.size());
 
+        pointList = null;
+        UnitConverter.convertToRate(pointList);
         // null
-        Assertions.assertEquals(0,  UnitConverter.convertToRate(null).size());
+        Assertions.assertNull(pointList);
     }
 
     @Test
@@ -90,24 +92,22 @@ class UnitConverterTest {
         pointList.add(getFlowingPoint(startTime + 200, 300, LABEL, INGRESS));
         pointList.add(getFlowingPoint(startTime + 300, 400, LABEL, INGRESS));
 
-        pointList.add(getFlowingPoint(startTime, 100, LABEL + "1", INGRESS));
-        pointList.add(getFlowingPoint(startTime, 100, LABEL, EGRESS));
-        pointList.add(getFlowingPoint(startTime + 100, 200, LABEL, EGRESS));
+        pointList.add(3, getFlowingPoint(startTime, 100, LABEL + "1", INGRESS));
+        pointList.add(2, getFlowingPoint(startTime, 100, LABEL, EGRESS));
+        pointList.add(1, getFlowingPoint(startTime + 100, 200, LABEL, EGRESS));
 
-        Collections.shuffle(pointList);
-
-        var output = UnitConverter.convert(pointList);
-        var labelIngressList = output.stream().filter(p -> LABEL.equals(p.getLabel()) && INGRESS.equals(p.getDirection())).toList();
+        UnitConverter.convert(pointList);
+        var labelIngressList = pointList.stream().filter(p -> LABEL.equals(p.getLabel()) && INGRESS.equals(p.getDirection())).toList();
         Assertions.assertEquals(4, labelIngressList.size());
         Assertions.assertEquals(8000, labelIngressList.get(0).getValue());
         Assertions.assertEquals(16_000, labelIngressList.get(1).getValue());
         Assertions.assertEquals(24_000, labelIngressList.get(2).getValue());
         Assertions.assertEquals(32_000, labelIngressList.get(3).getValue());
 
-        var label1IngressList = output.stream().filter(p -> (LABEL + "1").equals(p.getLabel()) && INGRESS.equals(p.getDirection())).toList();
-        Assertions.assertEquals(0, label1IngressList.size());
+        var label1IngressList = pointList.stream().filter(p -> (LABEL + "1").equals(p.getLabel()) && INGRESS.equals(p.getDirection())).toList();
+        Assertions.assertEquals(1, label1IngressList.size());
 
-        var labelEgressList = output.stream().filter(p -> LABEL.equals(p.getLabel()) && EGRESS.equals(p.getDirection())).toList();
+        var labelEgressList = pointList.stream().filter(p -> LABEL.equals(p.getLabel()) && EGRESS.equals(p.getDirection())).toList();
         Assertions.assertEquals(2, labelEgressList.size());
     }
 

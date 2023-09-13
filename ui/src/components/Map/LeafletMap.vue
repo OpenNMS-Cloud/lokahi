@@ -34,18 +34,7 @@
           :name="node?.nodeLabel"
           :options="{ id: node?.id }"
         >
-          <LPopup>
-            Node:
-            <router-link
-              :to="`/node/${node?.id}`"
-              target="_blank"
-              >{{ node?.nodeLabel }}</router-link
-            >
-            <br />
-            Severity: {{ nodeLabelAlarmServerityMap[node?.nodeLabel as string] || 'Indeterminate' }}
-            <br />
-          </LPopup>
-          <LIcon>
+          <LIcon :icon-size="iconSize">
             <MapPin :severity="nodeLabelAlarmServerityMap[node?.nodeLabel as string]" />
           </LIcon>
         </LMarker>
@@ -57,13 +46,8 @@
 
 <script setup lang="ts">
 import 'leaflet/dist/leaflet.css'
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet'
+import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet'
 import MarkerCluster from './MarkerCluster.vue'
-import NormalIcon from '@/assets/Normal-icon.png'
-import WarninglIcon from '@/assets/Warning-icon.png'
-import MinorIcon from '@/assets/Minor-icon.png'
-import MajorIcon from '@/assets/Major-icon.png'
-import CriticalIcon from '@/assets/Critical-icon.png'
 import { numericSeverityLevel } from './utils'
 import { useMapStore } from '@/store/Views/mapStore'
 import useSpinner from '@/composables/useSpinner'
@@ -79,8 +63,8 @@ const route = useRoute()
 const leafletReady = ref<boolean>(false)
 const leafletObject = ref({} as LeafletMap)
 const zoom = ref<number>(2)
-const iconWidth = 25
-const iconHeight = 42
+const iconWidth = 30
+const iconHeight = 80
 const iconSize = [iconWidth, iconHeight]
 const nodeClusterCoords = ref<Record<string, number[]>>({})
 
@@ -141,28 +125,6 @@ const iconCreateFunction = (cluster: Cluster) => {
   }
   const highestSeverity = getHighestSeverity(severitites)
   return divIcon({ html: `<span class=${highestSeverity}>` + cluster.getChildCount() + '</span>' })
-}
-
-const setIcon = (node?: Partial<Node>) => setMarkerColor(node?.nodeLabel)
-
-const setMarkerColor = (severity: string | undefined | null) => {
-  if (severity) {
-    switch (severity.toUpperCase()) {
-      case 'NORMAL':
-        return NormalIcon
-      case 'WARNING':
-        return WarninglIcon
-      case 'MINOR':
-        return MinorIcon
-      case 'MAJOR':
-        return MajorIcon
-      case 'CRITICAL':
-        return CriticalIcon
-      default:
-        return NormalIcon
-    }
-  }
-  return NormalIcon
 }
 
 const getNodeCoordinateMap = computed(() => {

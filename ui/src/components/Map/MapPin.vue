@@ -7,27 +7,33 @@
       class="severity-circle"
       :class="`${severity.toLowerCase()}`"
     ></div>
-    <div class="nodes">{{ numberOfNodes }}</div>
+    <div
+      class="nodes"
+      v-if="showNumber"
+    >
+      {{ numberOfNodes }}
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const props = defineProps({
   severity: { type: String, default: 'indeterminate', required: true },
-  numberOfNodes: { type: String, default: '000' }
+  numberOfNodes: { type: String, default: '' }
 })
 
 // icon point positions
 const pinLeft = ref()
-const pinTop = computed(() => (props.numberOfNodes ? '19px' : '18px'))
+const showNumber = computed(() => Number(props.numberOfNodes) > 1)
+const pinTop = computed(() => (showNumber.value ? '19px' : '18px'))
 // margin between severity color and text
-const textMargin = computed(() => (props.numberOfNodes ? '5px' : '0px'))
+const textMargin = computed(() => (showNumber.value ? '5px' : '0px'))
 
 onMounted(() => {
   // timeout needed for leaflet icon to render before running this
   setTimeout(() => {
     const width = document.getElementById('mapPin')?.offsetWidth
-    const posOfPoint = props.numberOfNodes ? 9 : 10
+    const posOfPoint = showNumber.value ? 9 : 10
     if (width) {
       pinLeft.value = width / 2 - posOfPoint + 'px'
     }

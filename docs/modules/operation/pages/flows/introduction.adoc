@@ -16,7 +16,7 @@ By default, OpenNMS Cloud/Lōkahi displays the following flows data:
 * Top 10 talkers
 
 You can see visualizations of this flows data on the Insights Dashboard and on the Flows page.
-change this information.
+Change this information.
 
 .Flows data on insights dashboard
 image::flows/flows-insights.png[Total network traffic line chart showing inbound/outbound traffic for 24-hour period. Top 10 appliances polar chart, 600]

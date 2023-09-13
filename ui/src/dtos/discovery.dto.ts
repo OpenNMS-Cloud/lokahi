@@ -103,7 +103,24 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
 const activeDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
   locationId:yup.string().required('Location required.'),
-  ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an IP address.').matches(new RegExp(REGEX_EXPRESSIONS.IP[0]), 'Single IP address only. You cannot enter a range.')),
+  ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an IP address.')
+    .test('validate-ip',
+      (ip, ctx) => {
+        const matches = []
+        const testIp = ip.trim()
+
+        matches.push(REGEX_EXPRESSIONS.IP[0].test(testIp))
+        matches.push(REGEX_EXPRESSIONS.IP[1].test(testIp))
+        matches.push(REGEX_EXPRESSIONS.IP[2].test(testIp))
+
+        // ip must pass one of the reg exprs
+        if (!matches.some((val) => val === true)) {
+          return ctx.createError({ message: 'Contains input that is not supported.', path: 'ipAddresses' })
+        }
+
+        return true
+      })
+    ),
   snmpConfig: yup.object({
     communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
     udpPorts: yup.array().of(yup.number())

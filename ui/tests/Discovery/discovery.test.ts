@@ -65,4 +65,19 @@ describe('DiscoveryPage', () => {
     // @ts-ignore
     expect(store.selectedDiscovery.meta.communityStrings).toBe('public')
   })
+
+  test('Store fn applyDefaultLocation', () => {
+    const store = useDiscoveryStore()
+
+    expect(store.selectedDiscovery.locations).toBeFalsy()
+    const defaultLocation = { id: 1, location: 'Default' }
+    const locationsSingle = [defaultLocation]
+    const locationsMultiple = [defaultLocation, { id: 2, location: 'Test' }]
+
+    store.applyDefaultLocation(locationsMultiple, defaultLocation)
+    expect(store.selectedDiscovery.locations).toBeFalsy()
+
+    store.applyDefaultLocation(locationsSingle, defaultLocation)
+    expect(store.selectedDiscovery.locations![0].location).toBe('Default')
+  })
 })

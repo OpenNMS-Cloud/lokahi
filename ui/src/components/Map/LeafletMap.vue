@@ -5,14 +5,14 @@
       :center="center"
       :max-zoom="19"
       :min-zoom="2"
-      :zoom="2"
+      :zoom="3"
       :zoomAnimation="true"
       @ready="onLeafletReady"
       @moveend="onMoveEnd"
       @zoom="invalidateSizeFn"
+      :useGlobalLeaflet="true"
     >
       <template v-if="leafletReady">
-        <!-- <LControlLayers /> -->
         <LTileLayer
           v-for="tileProvider in tileProviders"
           :key="tileProvider.name"
@@ -22,32 +22,32 @@
           :attribution="tileProvider.attribution"
           layer-type="base"
         />
-        <!-- <MarkerCluster
-          ref="markerCluster"
-          :onClusterUncluster="onClusterUncluster"
-          :options="{ showCoverageOnHover: false, chunkedLoading: true, iconCreateFunction }"
-        > -->
-        <LMarker
-          v-for="node of nodes"
-          :key="node?.nodeLabel"
-          :lat-lng="[node?.location?.latitude, node?.location?.longitude]"
-          :name="node?.nodeLabel"
-          :options="{ id: node?.id }"
+        <l-marker-cluster-group
+          :chunkedLoading="true"
+          :options="{ iconCreateFunction }"
+          :showCoverageOnHover="false"
         >
-          <LIcon :icon-size="iconSize">
-            <MapPin :severity="nodeLabelAlarmServerityMap[node?.nodeLabel as string]" />
-          </LIcon>
-        </LMarker>
-        <!-- </MarkerCluster> -->
+          <LMarker
+            v-for="node of nodes"
+            :key="node?.nodeLabel"
+            :lat-lng="[node?.location?.latitude, node?.location?.longitude]"
+            :name="node?.nodeLabel"
+            :options="{ id: node?.id }"
+          >
+            <LIcon :icon-size="iconSize">
+              <MapPin />
+            </LIcon>
+          </LMarker>
+        </l-marker-cluster-group>
       </template>
     </LMap>
   </div>
 </template>
 
 <script setup lang="ts">
-import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet'
-import MarkerCluster from './MarkerCluster.vue'
+import { LMarkerClusterGroup } from 'vue-leaflet-markercluster'
 import { numericSeverityLevel } from './utils'
 import { useMapStore } from '@/store/Views/mapStore'
 import useSpinner from '@/composables/useSpinner'
@@ -55,8 +55,12 @@ import { Node } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
 // @ts-ignore
 import { Map as LeafletMap, divIcon, MarkerCluster as Cluster } from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import 'vue-leaflet-markercluster/dist/style.css'
+import { render, createVNode } from 'vue'
+import MapPin from './MapPin.vue'
 
-const markerCluster = ref()
+globalThis.L = L
 const { onThemeChange, isDark } = useTheme()
 const map = ref()
 const route = useRoute()
@@ -105,26 +109,11 @@ const onClusterUncluster = (t: any) => {
 
 // for custom marker cluster icon
 const iconCreateFunction = (cluster: Cluster) => {
-  const clusterLatLng = cluster.getLatLng()
-  const clusterLatLngArr = [clusterLatLng.lat, clusterLatLng.lng]
-  const childMarkers = cluster.getAllChildMarkers()
-
-  // find highest level of severity
-  const severitites = []
-  for (const marker of childMarkers) {
-    // set cluster latlng to each node id
-    if (clusterLatLngArr.length) {
-      const nodeId = (marker as any).options.id
-      nodeClusterCoords.value[nodeId] = clusterLatLngArr
-    }
-
-    const markerSeverity = nodeLabelAlarmServerityMap.value[(marker as any).options.name]
-    if (markerSeverity) {
-      severitites.push(markerSeverity)
-    }
-  }
-  const highestSeverity = getHighestSeverity(severitites)
-  return divIcon({ html: `<span class=${highestSeverity}>` + cluster.getChildCount() + '</span>' })
+  const childCount = cluster.getChildCount()
+  const el = document.createElement('div')
+  const vNode = createVNode(MapPin, { numberOfNodes: childCount })
+  render(vNode, el)
+  return divIcon({ html: el })
 }
 
 const getNodeCoordinateMap = computed(() => {

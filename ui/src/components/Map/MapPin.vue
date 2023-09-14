@@ -18,13 +18,13 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  severity: { type: String, default: 'indeterminate', required: true },
-  numberOfNodes: { type: String, default: '' }
+  severity: { type: String, default: 'indeterminate' },
+  numberOfNodes: { type: Number, default: 0 }
 })
 
 // icon point positions
 const pinLeft = ref()
-const showNumber = computed(() => Number(props.numberOfNodes) > 1)
+const showNumber = computed(() => props.numberOfNodes > 1)
 const pinTop = computed(() => (showNumber.value ? '19px' : '18px'))
 // margin between severity color and text
 const textMargin = computed(() => (showNumber.value ? '5px' : '0px'))

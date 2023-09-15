@@ -23,22 +23,10 @@ const props = defineProps({
 })
 
 // icon point positions
-const pinLeft = ref()
 const showNumber = computed(() => props.numberOfNodes > 1)
 const pinTop = computed(() => (showNumber.value ? '19px' : '18px'))
 // margin between severity color and text
 const textMargin = computed(() => (showNumber.value ? '5px' : '0px'))
-
-onMounted(() => {
-  // timeout needed for leaflet icon to render before running this
-  setTimeout(() => {
-    const width = document.getElementById('mapPin')?.offsetWidth
-    const posOfPoint = showNumber.value ? 9 : 10
-    if (width) {
-      pinLeft.value = width / 2 - posOfPoint + 'px'
-    }
-  })
-})
 </script>
 
 <style lang="scss" scoped>
@@ -74,7 +62,7 @@ onMounted(() => {
   position: absolute;
   transform: rotate(-45deg);
   margin-top: v-bind(pinTop);
-  margin-left: v-bind(pinLeft);
+  margin-left: calc(50% - 9px);
   background: white;
   border: 1px solid;
   border-color: transparent transparent lightgray lightgray;

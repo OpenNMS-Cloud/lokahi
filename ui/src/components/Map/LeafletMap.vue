@@ -26,6 +26,9 @@
           :chunkedLoading="true"
           :options="{ iconCreateFunction }"
           :showCoverageOnHover="false"
+          :spiderfyOnEveryZoom="false"
+          :spiderfyOnMaxZoom="false"
+          :zoomToBoundsOnClick="false"
         >
           <LMarker
             v-for="node of nodes"
@@ -112,8 +115,19 @@ const iconCreateFunction = (cluster: Cluster) => {
   const childCount = cluster.getChildCount()
   const el = document.createElement('div')
   const vNode = createVNode(MapPin, { numberOfNodes: childCount })
+
+  let iconAnchorX = 24
+  const iconAnchorY = 41
+
+  if (childCount > 9) {
+    iconAnchorX = 27
+  }
+  if (childCount > 99) {
+    iconAnchorX = 30
+  }
+
   render(vNode, el)
-  return divIcon({ html: el })
+  return divIcon({ html: el, iconAnchor: [iconAnchorX, iconAnchorY] })
 }
 
 const getNodeCoordinateMap = computed(() => {

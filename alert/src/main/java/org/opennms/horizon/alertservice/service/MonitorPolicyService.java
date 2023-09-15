@@ -46,8 +46,10 @@ import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
+import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.EventDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
+import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.mapper.EventDefinitionMapper;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
@@ -78,10 +80,13 @@ public class MonitorPolicyService {
 
     private final MonitorPolicyMapper policyMapper;
     private final MonitorPolicyRepository repository;
+    private final PolicyRuleRepository policyRuleRepository;
     private final AlertDefinitionRepository definitionRepo;
     private final EventDefinitionRepository eventDefinitionRepository;
     private final EventDefinitionMapper eventDefinitionMapper;
     private final AlertConditionRepository alertConditionRepository;
+    private final AlertRepository alertRepository;
+
     private final TagRepository tagRepository;
     private final TagOperationProducer tagOperationProducer;
 
@@ -211,6 +216,20 @@ public class MonitorPolicyService {
     public Optional<MonitorPolicyProto> getDefaultPolicy() {
         return repository.findByName(DEFAULT_POLICY)
             .map(policyMapper::map);
+    }
+
+    @Transactional
+    public void deletePolicy(long id, String tenantId) {
+        var alerts = alertRepository.findByPolicyIdAndTenantId(id, tenantId);
+        if(alerts != null && !alerts.isEmpty()) {
+            alertRepository.deleteAll(alerts);
+        }
+        repository.deleteByIdAndTenantId(id, tenantId);
+    }
+
+    @Transactional
+    public void deleteRule(long id, String tenantId) {
+        policyRuleRepository.deleteByIdAndTenantId(id, tenantId);
     }
     private void updateData(MonitorPolicy policy, String tenantId) {
         policy.setTenantId(tenantId);

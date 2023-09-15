@@ -40,7 +40,7 @@ RUN apt-get update && \
         --no-install-recommends \
         -yq \
         install \
-            jq
+            jq unzip
 
 RUN groupadd --gid 10001 minion && \
     useradd --system --uid 10001 --gid minion minion --home-dir /opt/karaf

@@ -48,6 +48,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -146,10 +148,17 @@ public class MinionCertificateManagerTestSteps {
     }
 
     private String readSerialNumber(GetMinionCertificateResponse response) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        var p12Stream = new ByteArrayInputStream(response.getCertificate().toByteArray());
-        KeyStore store = KeyStore.getInstance("PKCS12");
-        store.load(p12Stream, response.getPassword().toCharArray());
-        X509Certificate certificate = (X509Certificate)store.getCertificate("1");
-        return certificate.getSerialNumber().toString(16).toUpperCase();
+        var zipStream = new ZipInputStream(new ByteArrayInputStream(response.getCertificate().toByteArray()));
+        ZipEntry entry;
+        while ((entry = zipStream.getNextEntry()) != null) {
+            if (entry.getName().contains(".p12")) {
+                KeyStore store = KeyStore.getInstance("PKCS12");
+                store.load(zipStream, response.getPassword().toCharArray());
+                X509Certificate certificate = (X509Certificate)store.getCertificate("1");
+                return certificate.getSerialNumber().toString(16).toUpperCase();
+            }
+        }
+
+        throw new IOException("Unable to parse certificate from zip");
     }
 }

@@ -247,6 +247,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 if (rootCause.getClass().getName().contains("SunCertPathBuilderException")
                     || rootCause instanceof CertificateExpiredException
                     || rootCause instanceof CertificateNotYetValidException) {
+                    LOG.error("Client received error {}", rootCause.getMessage());
+                    shutdown();
+                    reconnectStrategy.shutdown();
                     grpcShutdownHandler.shutdown(rootCause);
                 } else {
                     future.completeExceptionally(throwable);
@@ -438,6 +441,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         public void onError(Throwable throwable) {
             if (throwable instanceof StatusRuntimeException statusRuntimeException
                 && (statusRuntimeException.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
+                LOG.error("Client received error {}", Status.Code.UNAUTHENTICATED);
+                shutdown();
+                reconnectStrategy.shutdown();
                 grpcShutdownHandler.shutdown(GrpcErrorMessages.UNAUTHENTICATED);
             } else {
                 if (LOG.isDebugEnabled()) {

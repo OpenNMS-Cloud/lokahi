@@ -35,6 +35,12 @@ public class SimpleReconnectStrategy implements Runnable, ReconnectStrategy {
     }
 
     @Override
+    public void shutdown() {
+        reconnectTask.cancel(true);
+        executor.shutdownNow();
+    }
+
+    @Override
     public void run() {
         ConnectivityState state = channel.getState(true);
 

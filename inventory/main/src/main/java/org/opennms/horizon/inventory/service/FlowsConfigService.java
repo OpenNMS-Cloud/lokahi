@@ -27,7 +27,6 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +39,6 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -58,7 +55,6 @@ public class FlowsConfigService {
     private final MonitoringLocationService monitoringLocationService;
     private final TaskSetPublisher taskSetPublisher;
 
-    @EventListener(ApplicationReadyEvent.class)
     public void sendFlowConfigToMinionAfterStartup() {
         List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
 

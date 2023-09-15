@@ -39,6 +39,7 @@ class GraphQLMinionCertificateManagerTest {
     private static final String GRAPHQL_PATH = "/graphql";
     public static final String TENANT_ID = "tenantId";
     public static final Long LOCATION_ID = 444L;
+    public static final String LOCATION_NAME = "default";
     public static final Long INVALID_LOCATION_ID = 404L;
 
     @MockBean
@@ -72,7 +73,7 @@ class GraphQLMinionCertificateManagerTest {
 
     @Test
     void testGetMinionCert() throws JSONException {
-        when(mockClient.getMinionCert(TENANT_ID, LOCATION_ID, accessToken)).thenReturn(
+        when(mockClient.getMinionCert(TENANT_ID, LOCATION_ID, LOCATION_NAME, accessToken)).thenReturn(
             GetMinionCertificateResponse.newBuilder().setCertificate(ByteString.copyFromUtf8("pkcs12-here")).setPassword("passw0rd").build()
         );
         String request = """
@@ -92,14 +93,14 @@ class GraphQLMinionCertificateManagerTest {
             .expectBody()
             .jsonPath("$.data.getMinionCertificate.password").isEqualTo("passw0rd")
             .jsonPath("$.data.getMinionCertificate.certificate").isEqualTo(Base64.getEncoder().encodeToString("pkcs12-here".getBytes()));
-        verify(mockClient).getMinionCert(TENANT_ID, LOCATION_ID, accessToken);
+        verify(mockClient).getMinionCert(TENANT_ID, LOCATION_ID, LOCATION_NAME, accessToken);
         verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @Test
     void testGetMinionCertForInvalidLocation() throws JSONException {
-        when(mockClient.getMinionCert(TENANT_ID, INVALID_LOCATION_ID, accessToken)).thenReturn(
+        when(mockClient.getMinionCert(TENANT_ID, INVALID_LOCATION_ID, LOCATION_NAME, accessToken)).thenReturn(
             GetMinionCertificateResponse.newBuilder().setCertificate(ByteString.copyFromUtf8("pkcs12-here")).setPassword("passw0rd").build()
         );
         String request = """

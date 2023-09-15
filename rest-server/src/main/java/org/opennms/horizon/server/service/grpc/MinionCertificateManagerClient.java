@@ -33,10 +33,11 @@ public class MinionCertificateManagerClient {
         }
     }
 
-    public GetMinionCertificateResponse getMinionCert(String tenantId, Long locationId, String accessToken) {
+    public GetMinionCertificateResponse getMinionCert(String tenantId, Long locationId, String locationName, String accessToken) {
         MinionCertificateRequest request = MinionCertificateRequest.newBuilder()
             .setTenantId(tenantId)
             .setLocationId(locationId)
+            .setLocationName(locationName)
             .build();
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);

@@ -17,7 +17,6 @@ services:
       # The password for the certificate file
       GRPC_CLIENT_KEYSTORE_PASSWORD: "[KEYSTORE_PASSWORD]"
       # This will show up as the minion name in the UI
-      MINION_ID: "Minion1-not_default"
       MINION_ID: "[MINION_NAME]"
 
       # Common settings for local Lokahi testing

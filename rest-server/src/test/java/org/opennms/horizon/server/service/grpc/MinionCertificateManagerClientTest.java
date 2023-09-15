@@ -111,7 +111,7 @@ public class MinionCertificateManagerClientTest {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
-        GetMinionCertificateResponse result = client.getMinionCert("tenantId", 333L, accessToken + methodName);
+        GetMinionCertificateResponse result = client.getMinionCert("tenantId", 333L, "default", accessToken + methodName);
         Assertions.assertFalse(result.getPassword().isEmpty());
         verify(mockMCMService).getMinionCert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();

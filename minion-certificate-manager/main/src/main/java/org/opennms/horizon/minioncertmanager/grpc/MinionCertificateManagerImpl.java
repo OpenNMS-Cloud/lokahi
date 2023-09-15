@@ -111,6 +111,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
         try {
             Long locationId = request.getLocationId();
+            String locationName = request.getLocationName();
             String tenantId = INPUT_PATTERN.matcher(request.getTenantId()).replaceAll("");
 
             if (locationId == 0L) {
@@ -139,7 +140,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
                 return;
             }
 
-            File zip = ZipPackager.createZipPackage(locationId, password, archive, tempDirectory);
+            File zip = ZipPackager.createZipPackage(locationName, password, archive, tempDirectory);
 
             responseObserver.onNext(createResponse(Files.readAllBytes(zip.toPath()), password));
             responseObserver.onCompleted();

@@ -45,6 +45,7 @@ service MinionCertificateManager {
 message MinionCertificateRequest {
   string tenant_id = 1;
   uint64 location_id = 2;
+  string location_name = 3;
 }
 
 message GetMinionCertificateResponse {

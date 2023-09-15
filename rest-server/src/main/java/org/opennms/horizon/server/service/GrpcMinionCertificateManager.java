@@ -31,7 +31,7 @@ public class GrpcMinionCertificateManager {
         var monitoringLocation = inventoryClient.getLocationById(locationId, authHeader);
         var location = monitoringLocation.getId();
         CertificateResponse minionCert = mapper.protoToCertificateResponse(
-            client.getMinionCert(tenantId, location, authHeader)
+            client.getMinionCert(tenantId, location, monitoringLocation.getLocation(), authHeader)
         );
         return Mono.just(minionCert);
     }

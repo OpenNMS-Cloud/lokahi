@@ -39,7 +39,7 @@ class GraphQLMinionCertificateManagerTest {
     private static final String GRAPHQL_PATH = "/graphql";
     public static final String TENANT_ID = "tenantId";
     public static final Long LOCATION_ID = 444L;
-    public static final String LOCATION_NAME = "default";
+    public static final String LOCATION_NAME = "test";
     public static final Long INVALID_LOCATION_ID = 404L;
 
     @MockBean

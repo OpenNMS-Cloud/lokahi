@@ -95,4 +95,8 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Optional<Alert> findByIdAndTenantId(long id, String tenantId);
 
     void deleteByIdAndTenantId(long databaseId, String tenantId);
+
+    @Query(value = "SELECT a FROM Alert a LEFT JOIN AlertCondition ac LEFT JOIN PolicyRule r LEFT JOIN MonitorPolicy p "
+    + "WHERE a.tenantId = :tenantId AND p.id = :policyId")
+    List<Alert> findByPolicyIdAndTenantId(@Param("policyId") long policyId, @Param("tenantId") String tenantId);
 }

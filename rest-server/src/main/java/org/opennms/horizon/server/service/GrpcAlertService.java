@@ -144,4 +144,13 @@ public class GrpcAlertService {
         return Flux.fromIterable(alertsClient.listAlertEventDefinitions(eventType, headerUtil.getAuthHeader(env)));
     }
 
+    @GraphQLQuery
+    public Mono<Boolean> deletePolicyById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.deletePolicyById(id, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery
+    public Mono<Boolean> deletePolicyRuleById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.deletePolicyRuleById(id, headerUtil.getAuthHeader(env)));
+    }
 }

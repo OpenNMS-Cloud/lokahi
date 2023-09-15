@@ -28,25 +28,24 @@
 
 package org.opennms.horizon.alertservice.grpc;
 
-import java.util.List;
-
-import org.opennms.horizon.alerts.proto.MonitorPolicyList;
-import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
-import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.alertservice.service.MonitorPolicyService;
-import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
-import org.springframework.stereotype.Component;
-
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.alerts.proto.MonitorPolicyList;
+import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
+import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
+import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
+import org.opennms.horizon.alertservice.service.MonitorPolicyService;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -98,6 +97,43 @@ public class MonitorPolicyGrpc extends MonitorPolicyServiceGrpc.MonitorPolicySer
                         () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.NOT_FOUND_VALUE,
                             "Default monitoring policy doesn't exist")))),
                 () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+    }
+
+    @Override
+    public void deletePolicy(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+        tenantLookup.lookupTenantId(Context.current())
+            .ifPresentOrElse(tenantId -> {
+                try {
+                    service.deletePolicy(request.getValue(), tenantId);
+                    responseObserver.onNext(BoolValue.of(true));
+                    responseObserver.onCompleted();
+                } catch (Exception e) {
+                    Status status = Status.newBuilder()
+                        .setCode(Code.INTERNAL_VALUE)
+                        .setMessage(e.getMessage())
+                        .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                }
+            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+    }
+
+    @Override
+    public void deleteRule(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+        tenantLookup.lookupTenantId(Context.current())
+            .ifPresentOrElse(tenantId ->
+            {
+                try {
+                    service.deleteRule(request.getValue(), tenantId);
+                    responseObserver.onNext(BoolValue.of(true));
+                    responseObserver.onCompleted();
+                } catch (Exception e) {
+                    Status status = Status.newBuilder()
+                        .setCode(Code.INTERNAL_VALUE)
+                        .setMessage(e.getMessage())
+                        .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                }
+            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
     }
 
     private Status badTenant() {

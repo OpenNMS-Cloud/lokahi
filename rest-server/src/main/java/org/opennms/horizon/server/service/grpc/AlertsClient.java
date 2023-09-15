@@ -248,4 +248,21 @@ public class AlertsClient {
             .getDefaultPolicy(Empty.getDefaultInstance()));
     }
 
+    public boolean deletePolicyById(Long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return policyStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .deletePolicy(Int64Value.of(id)).getValue();
+    }
+
+    public boolean deletePolicyRuleById(Long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return policyStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .deleteRule(Int64Value.of(id)).getValue();
+    }
 }

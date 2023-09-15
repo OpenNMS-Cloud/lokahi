@@ -28,20 +28,11 @@
 
 package org.opennms.horizon.alertservice.db.repository;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
-public interface MonitorPolicyRepository extends JpaRepository<MonitorPolicy, Long> {
-    List<MonitorPolicy> findAllByTenantId(String tenantId);
-    Optional<MonitorPolicy> findByIdAndTenantId(Long id, String tenantId);
-    Optional<MonitorPolicy> findByName(String name);
+import java.util.List;
 
+public interface PolicyRuleRepository extends JpaRepository<PolicyRule, Long> {
     void deleteByIdAndTenantId(Long id, String tenantId);
-
-    @Query("SELECT policy FROM AlertCondition ac INNER JOIN ac.rule as pr INNER JOIN pr.policy as policy WHERE ac.id = ?1")
-    Optional<MonitorPolicy> findMonitoringPolicyByAlertConditionId(Long alertConditionId);
 }

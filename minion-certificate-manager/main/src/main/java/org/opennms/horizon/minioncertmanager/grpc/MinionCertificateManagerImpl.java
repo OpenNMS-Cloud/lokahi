@@ -32,11 +32,13 @@ import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
+import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.util.regex.Pattern;
 import org.opennms.horizon.minioncertmanager.certificate.CommandExecutor;
 import org.opennms.horizon.minioncertmanager.certificate.PKCS12Generator;
 import org.opennms.horizon.minioncertmanager.certificate.SerialNumberRepository;
+import org.opennms.horizon.minioncertmanager.certificate.ZipPackager;
 import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateMetadataResponse;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
@@ -123,7 +125,6 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
             String password = UUID.randomUUID().toString();
             tempDirectory = Files.createTempDirectory(Files.createTempDirectory(Files.createTempDirectory("minioncert"), tenantId), String.valueOf(locationId));
-
             LOG.info("=== TEMP DIRECTORY: {}", tempDirectory.toAbsolutePath());
             LOG.info("exists: {}, isDirectory: {}, canRead: {}", tempDirectory.toFile().exists(), tempDirectory.toFile().isDirectory(), tempDirectory.toFile().canRead());
             File archive = new File(tempDirectory.toFile(), "minion.p12");
@@ -138,7 +139,9 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
                 return;
             }
 
-            responseObserver.onNext(createResponse(Files.readAllBytes(archive.toPath()), password));
+            File zip = ZipPackager.createZipPackage(locationId, password, archive, tempDirectory);
+
+            responseObserver.onNext(createResponse(Files.readAllBytes(zip.toPath()), password));
             responseObserver.onCompleted();
         } catch (IOException | InterruptedException | RocksDBException | CertificateException e) {
             LOG.error("Error while fetching certificate", e);

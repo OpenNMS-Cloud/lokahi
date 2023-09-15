@@ -153,7 +153,7 @@ const downloadCert = async () => {
 
   if (minionCertificate) {
     locationStore.setCertificatePassword(minionCertificate.password as string)
-    createAndDownloadBlobFile(minionCertificate.certificate, `${formInputs.location}-certificate.p12`)
+    createAndDownloadBlobFile(minionCertificate.certificate, `${formInputs.location}-minion-package.zip`)
     form.clearErrors()
   }
 }

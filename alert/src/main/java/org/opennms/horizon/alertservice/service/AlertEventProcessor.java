@@ -274,7 +274,9 @@ public class AlertEventProcessor {
     }
 
     private boolean isThresholding(AlertData alertData) {
-        return (alertData.alertCondition().getCount() > 1 || alertData.alertCondition().getOvertime() != null && alertData.alertCondition.getOvertime() > 0);
+        return (alertData.alertCondition().getCount() > 1 ||
+            alertData.alertCondition().getOvertime() != null
+            && alertData.alertCondition().getOvertime() > 0);
     }
 
     private org.opennms.horizon.alertservice.db.entity.Alert createNewAlert(Event event, AlertData alertData) {

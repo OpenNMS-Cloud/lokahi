@@ -74,7 +74,7 @@
     "vue": "^3.3.4",
     "vue-chartjs": "^5.2.0",
     "vue-router": "4.1.6",
-    "yup": "^1.0.2"
+    "yup": "1.2.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.16.3",

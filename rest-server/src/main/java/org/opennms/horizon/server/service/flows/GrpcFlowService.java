@@ -103,8 +103,10 @@ public class GrpcFlowService {
                                                     @GraphQLEnvironment ResolutionEnvironment env) {
         String tenantId = headerUtil.extractTenant(env);
         String authHeader = headerUtil.getAuthHeader(env);
-        return Flux.fromIterable(flowClient.getApplicationSeries(requestCriteria, tenantId, authHeader).getPointList().stream()
-            .map(flowingPointMapper::map).toList());
+        var series = flowClient.getApplicationSeries(requestCriteria, tenantId, authHeader);
+        var points = series.getPointList().stream().map(flowingPointMapper::map).toList();
+        UnitConverter.convert(points);
+        return Flux.fromIterable(points);
     }
 
     private Exporter getExporter(long interfaceId, ResolutionEnvironment env) {

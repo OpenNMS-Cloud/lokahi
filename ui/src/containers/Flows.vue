@@ -1,5 +1,5 @@
 <template>
-  <div class="flows-container">
+  <div class="full-page-container">
     <HeadlinePage
       text="Flows"
       data-test="flows-page-header"
@@ -271,12 +271,6 @@ onUnmounted(() => flowsStore.$reset())
   flex-direction: column;
   gap: var(variables.$spacing-m);
 
-  &-container {
-    margin: var(variables.$spacing-m);
-    @include mediaQueriesMixins.screen-md {
-      margin: 40px 80px;
-    }
-  }
 }
 .filters {
   margin-bottom: var(variables.$spacing-m);

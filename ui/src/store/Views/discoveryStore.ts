@@ -4,7 +4,7 @@ import { DiscoveryType, InstructionsType } from '@/components/Discovery/discover
 import { DiscoveryStore, DiscoveryTrapMeta, NewOrUpdatedDiscovery } from '@/types/discovery'
 import { clientToServerValidation, discoveryFromClientToServer, discoveryFromServerToClient } from '@/dtos/discovery.dto'
 import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
-
+import { MonitoringLocation } from '@/types/graphql'
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
@@ -94,12 +94,29 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     setupDefaultDiscovery(){
       const discoveryQueries = useDiscoveryQueries()
-      this.selectedDiscovery = {name:undefined,id:undefined,tags:[],locations:[],type:undefined,meta:{clientId:'',clientSecret:'',clientSubscriptionId:'',directoryId:'',communityStrings:'public',udpPorts:'161'}}
-      const defaultLocation = discoveryQueries.locations.find((d) => d.location === 'default')
-      if (defaultLocation){
-        this.selectedDiscovery.locations = [defaultLocation]
+      this.selectedDiscovery = {
+        name: undefined,
+        id: undefined,
+        tags: [],
+        locations: [],
+        type: undefined,
+        meta:{
+          clientId: '',
+          clientSecret: '',
+          clientSubscriptionId: '',
+          directoryId: '',
+          communityStrings: 'public',
+          udpPorts: '161'
+        }
       }
+      const defaultLocation = discoveryQueries.locations.find((d) => d.location === 'default')
+      this.applyDefaultLocation(discoveryQueries.locations, defaultLocation)
       this.selectedDiscovery.tags = [{name:'default'}]
+    },
+    applyDefaultLocation(locations: MonitoringLocation[], locationToApply: MonitoringLocation | undefined) {
+      if (locationToApply && locations.length === 1) {
+        this.selectedDiscovery.locations = [locationToApply]
+      }
     },
     closeDeleteModal(){
       this.deleteModalOpen = false

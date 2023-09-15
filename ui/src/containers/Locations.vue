@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="full-page-container">
     <div class="header">
       <HeadlinePage
         text="Locations"
@@ -119,7 +119,7 @@ const openInstructions = (type: InstructionsType) => {
 @use '@/styles/mediaQueriesMixins.scss';
 @use '@/styles/vars.scss';
 
-.wrapper {
+.full-page-container {
   .content-left {
     .search-location-input {
       width: 100%;

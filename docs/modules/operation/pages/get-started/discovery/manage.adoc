@@ -1,10 +1,36 @@
 
 = Manage Discoveries
-:description: Learn how to manage network inventory with OpenNMS Lōkahi/Cloud.
+:description: Learn how to manage the discovery of network inventory with OpenNMS Lōkahi/Cloud.
 
-You can edit passive discoveries.
+This section describes how to edit and delete discoveries.
 
-// <TBD - any caveats for deleting/editing discoveries? - if they delete a name and try to recreate does it work?>
+== Edit a discovery
 
-. Click the passive discovery you want to edit or delete.
-. Change the information and click *Save Discovery*.
+You can edit information, including discovery name, location, and tags, for active and passive discoveries.
+Discovery behavior varies depending on the information you edit:
+
+* New location: discovery runs on Minions on the new location.
+This will create new nodes (same IP Address, but different location).
+* Updated tags: new tags are added to previously discovered nodes.
+Old tags are not removed.
+* Updated SNMP information: Node Scan runs again for all the nodes (existing/new) with new SNMP credentials.
+
+When you save an edited active discovery, it runs again immediately, and then every 24 hours thereafter.
+
+To edit a discovery, follow these steps:
+
+. In the list of discoveries, click the one you want to edit.
+. Change the information you want to update and click *Save Discovery*.
+
+== Delete a discovery
+
+Deleting a discovery does not delete the nodes that the discovery identified.
+They will still appear in the inventory Lōkahi/Cloud is monitoring.
+However, that discovery will no longer run, and you will no longer discover new nodes on the IP address ranges or subnets you configured with that discovery.
+
+Note that if you delete a discovery that is running, it will stop running on the Minion.
+
+To delete a discovery, follow these steps:
+
+. In the list of discoveries, click the one you want to delete.
+. Click the *delete* icon and confirm deletion.

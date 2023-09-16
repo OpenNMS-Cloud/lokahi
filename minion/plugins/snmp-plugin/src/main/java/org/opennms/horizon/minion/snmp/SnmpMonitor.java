@@ -159,21 +159,27 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 
             return future;
         } catch (NumberFormatException e) {
-            LOG.debug("Number operator used in a non-number evaluation", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Number operator used in a non-number evaluation", e);
+            }
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                 .reason(e.getMessage())
                 .nodeId(svc.getNodeId())
                 .monitoredServiceId(svc.getMonitorServiceId())
                 .status(Status.Unknown).build());
         } catch (IllegalArgumentException e) {
-            LOG.debug("Invalid SNMP Criteria", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid SNMP Criteria", e);
+            }
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                 .reason(e.getMessage())
                 .nodeId(svc.getNodeId())
                 .monitoredServiceId(svc.getMonitorServiceId())
                 .status(Status.Unknown).build());
         } catch (Throwable t) {
-            LOG.debug("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
+            }
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                 .reason(t.getMessage())
                 .nodeId(svc.getNodeId())

@@ -142,7 +142,7 @@
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="appStore.lineChartData"
         :table-data="appStore.tableData"
-        labelSuffix=" /sec"
+        labelSuffix="/sec"
         :format="flowsStore.convertToDate"
         :get-chart-area-width-for-data-points="setMaxDataPointsAndUpdateCharts"
       />

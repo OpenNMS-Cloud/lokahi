@@ -23,15 +23,14 @@
             <template #pre> <FeatherIcon :icon="icons.Location" /> </template
           ></FeatherInput>
         </div>
-        <!-- Hidden until the map is ready, post-EAR. Tracked with HS-1801 -->
-        <!-- <div class="row">
+        <div class="row">
           <AddressAutocomplete
             :address-model="formInputs"
             class="input-address"
             @onAddressChange="onAddressChange"
           ></AddressAutocomplete>
         </div>
-        <div class="row">
+        <!-- <div class="row">
           <FeatherInput
             label="Latitude (optional)"
             v-model="formInputs.latitude"

@@ -22,7 +22,7 @@ import { optionsGraph } from './dashboardNetworkTraffic.config'
 import { ChartData } from '@/types'
 import { ChartOptions } from 'chart.js'
 import 'chartjs-adapter-date-fns'
-import { humanFileSize, getColorFromFeatherVar } from '../utils'
+import { humanFileSize, getColorFromFeatherVar, getChartGridColor } from '../utils'
 
 const { onThemeChange, isDark } = useTheme()
 
@@ -60,7 +60,7 @@ const createConfigGraph = (list: number[]) => {
       color: colorFromFeatherVar.value
     },
     grid: {
-      color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+      color: getChartGridColor(isDark.value)
     },
     position: 'right'
   }

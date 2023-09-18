@@ -29,7 +29,7 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js'
-import { humanFileSizeFromBits, getColorFromFeatherVar } from '../utils'
+import { humanFileSizeFromBits, getColorFromFeatherVar, getChartGridColor } from '../utils'
 const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -132,7 +132,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         stacked: true,
         grid: {
           display: true,
-          color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+          color: getChartGridColor(isDark.value)
         },
         ticks: {
           callback: (val: number) => props.format(new Date(val).toISOString()),
@@ -163,7 +163,7 @@ const colorFromFeatherVar = computed(() =>
 )
 
 onThemeChange(() => {
-  chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  chartOptions.value.scales.x.grid.color = getChartGridColor(isDark.value)
 })
 
 const getChartAreaWidth = () => {

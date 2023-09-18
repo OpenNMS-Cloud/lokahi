@@ -43,7 +43,7 @@ import dashboardText from '@/components/Dashboard/dashboard.text'
 import PolarChart from '@/assets/PolarChart.svg'
 import PolarChartDark from '@/assets/PolarChart-dark.svg'
 import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
-import { getColorFromFeatherVar } from '../utils'
+import { getColorFromFeatherVar, getChartGridColor } from '../utils'
 
 const { onThemeChange, isDark } = useTheme()
 const flowsStore = useFlowsStore()
@@ -95,7 +95,7 @@ const config = {
     },
     r: {
       grid: {
-        color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+        color: getChartGridColor(isDark.value)
       },
       ticks: {
         color: colorFromFeatherVar.value,
@@ -132,7 +132,7 @@ watchEffect(() => {
 onThemeChange(() => {
   config.plugins.legend.labels.color = colorFromFeatherVar.value
   config.scales.r.ticks.color = colorFromFeatherVar.value
-  config.scales.r.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  config.scales.r.grid.color = getChartGridColor(isDark.value)
   constGraph.value = { ...config }
 })
 

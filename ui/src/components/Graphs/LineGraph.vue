@@ -24,7 +24,7 @@ import useTheme from '@/composables/useTheme'
 import 'chartjs-adapter-date-fns'
 import { format, add } from 'date-fns'
 
-import { humanFileSize } from '../utils'
+import { getColorFromFeatherVar, humanFileSize, getChartGridColor } from '../utils'
 const emits = defineEmits(['has-data'])
 // Chart.register(zoomPlugin) disable zoom until phase 2
 const graphs = useGraphs()
@@ -36,6 +36,10 @@ const props = defineProps({
   type: { type: String, default: 'latency' }
 })
 const { onThemeChange, isDark } = useTheme()
+
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
 
 let chart: any = {}
 const formatAxisBasedOnType = (context: number) => {
@@ -87,7 +91,8 @@ const options = computed<ChartOptions<any>>(() => ({
       } as TitleOptions,
       ticks: {
         callback: (value: any, index: any) => (formatAxisBasedOnType(value)),
-        maxTicksLimit: 8
+        maxTicksLimit: 8,
+        color: colorFromFeatherVar.value
       },
       stacked: false
     },
@@ -99,11 +104,12 @@ const options = computed<ChartOptions<any>>(() => ({
       },
       ticks: {
         callback: (val: number) => format(new Date(val), 'kk:mm'),
-        maxTicksLimit: 12
+        maxTicksLimit: 12,
+        color: colorFromFeatherVar.value
       },
       grid: {
         display: true,
-        color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+        color: getChartGridColor(isDark.value)
       }
     }
   }
@@ -168,7 +174,7 @@ onMounted(async () => {
   render()
 })
 onThemeChange(() => {
-  options.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  options.value.scales.x.grid.color = getChartGridColor(isDark.value)
 })
 </script>
 

@@ -39,7 +39,7 @@ import { Bar } from 'vue-chartjs'
 import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartOptions } from 'chart.js'
 import { downloadCanvas } from '../Graphs/utils'
 import useTheme from '@/composables/useTheme'
-import { getColorFromFeatherVar, humanFileSize } from '../utils'
+import { getColorFromFeatherVar, humanFileSize, getChartGridColor } from '../utils'
 const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -120,7 +120,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         stacked: true,
         grid: {
           display: true,
-          color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+          color: getChartGridColor(isDark.value)
         },
         ticks: {
           callback: function (value: any) {
@@ -153,7 +153,7 @@ const colorFromFeatherVar = computed(() =>
 )
 
 onThemeChange(() => {
-  chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  chartOptions.value.scales.x.grid.color = getChartGridColor(isDark.value)
 })
 
 const addValues = (a: number, b: number) => {

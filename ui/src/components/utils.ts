@@ -120,6 +120,10 @@ export const addOpacity = (hex: string, opacity: number) => {
     : hex
 }
 
+export const getChartGridColor = (isDark: boolean) => {
+  return isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+}
+
 export const getColorFromFeatherVar = (indexOrString?: number | string, opacity = false) => {
   let color
 

@@ -57,7 +57,7 @@ import useSpinner from '@/composables/useSpinner'
 import { Node } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
 // @ts-ignore
-import { Map as LeafletMap, divIcon, MarkerCluster as Cluster } from 'leaflet'
+import { Map, divIcon, MarkerCluster as Cluster } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'vue-leaflet-markercluster/dist/style.css'
 import { render, createVNode } from 'vue'
@@ -68,7 +68,7 @@ const { onThemeChange, isDark } = useTheme()
 const map = ref()
 const route = useRoute()
 const leafletReady = ref<boolean>(false)
-const leafletObject = ref({} as LeafletMap)
+const leafletObject = ref({} as Map)
 const zoom = ref<number>(2)
 const iconWidth = 30
 const iconHeight = 80
@@ -79,7 +79,7 @@ const { startSpinner, stopSpinner } = useSpinner()
 const mapStore = useMapStore()
 const nodesReady = ref()
 const nodes = computed(() => mapStore.nodesWithCoordinates)
-const center = computed<number[]>(() => ['latitude', 'longitude'].map((k) => (mapStore.mapCenter as any)[k]))
+const center = computed<number[]>(() => ['latitude', 'longitude'].map((k) => (mapStore.mapCenter)[k]))
 const bounds = computed(() => {
   const coordinatedMap = getNodeCoordinateMap.value
   return mapStore.nodesWithCoordinates.map((node: Node) => coordinatedMap.get(node?.id))

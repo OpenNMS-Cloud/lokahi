@@ -9,18 +9,18 @@
             <div class="welcome-slide-three-form">
                 <FeatherInput label="Name" data-test="welcome-slide-three-name-input"
                     :modelValue="welcomeStore.firstDiscovery.name" :error="welcomeStore.firstDiscoveryErrors.name"
-                    @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('name', e)" />
+                    @update:modelValue="(e: any) => welcomeStore.updateFirstDiscovery('name', e)" />
                 <FeatherInput label="Management IPV4" data-test="welcome-slide-three-ip-input"
                     :modelValue="welcomeStore.firstDiscovery.ip" :error="welcomeStore.firstDiscoveryErrors.ip"
-                    @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('ip', e)" />
+                    @update:modelValue="(e: any) => welcomeStore.updateFirstDiscovery('ip', e)" />
                 <FeatherInput label="Community String (optional)" data-test="welcome-slide-three-community-string-input"
                     :modelValue="welcomeStore.firstDiscovery.communityString"
                     :error="welcomeStore.firstDiscoveryErrors.communityString"
-                    @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('communityString', e)" />
+                    @update:modelValue="(e: any) => welcomeStore.updateFirstDiscovery('communityString', e)" />
                 <FeatherInput label="Port (optional)" data-test="welcome-slide-three-port-input"
                     :modelValue="welcomeStore.firstDiscovery.port"
                     :error="welcomeStore.firstDiscoveryErrors.communityString"
-                    @update:modelValue="(e) => welcomeStore.updateFirstDiscovery('port', e)" />
+                    @update:modelValue="(e: any) => welcomeStore.updateFirstDiscovery('port', e)" />
             </div>
 
             <ItemPreview v-if="welcomeStore.discoverySubmitted" :loading="welcomeStore.devicePreview.loading"

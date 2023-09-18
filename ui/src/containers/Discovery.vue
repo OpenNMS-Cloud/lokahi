@@ -81,7 +81,7 @@
           :modelValue="discoveryStore.selectedDiscovery.name"
           :error="discoveryStore.validationErrors.name"
           :disabled="isOverallDisabled"
-          @update:model-value="(name) => discoveryStore.setSelectedDiscoveryValue('name', name)"
+          @update:model-value="(name: any) => discoveryStore.setSelectedDiscoveryValue('name', name)"
         />
 
         <div class="auto-with-chips">
@@ -125,7 +125,7 @@
           label="Type"
           :options="typeOptions"
           :modelValue="selectedTypeOption"
-          @update:modelValue="(b) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
+          @update:modelValue="(b: any) => discoveryStore.setSelectedDiscoveryValue('type', b?.value)"
         />
         <h3>Connection Information</h3>
         <p

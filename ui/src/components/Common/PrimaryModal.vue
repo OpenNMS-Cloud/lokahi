@@ -3,7 +3,7 @@
     :hide-title="hideTitle"
     :modelValue="isVisible"
     :labels="labels"
-    @update:modelValue="(b) => updateModal(b)"
+    @update:modelValue="(b: any) => updateModal(b)"
     class="primary-modal"
   >
     <div

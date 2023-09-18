@@ -25,7 +25,7 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js'
-import { humanFileSize } from '../utils'
+import { humanFileSizeFromBits } from '../utils'
 const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -117,7 +117,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           title: (context: any) => context.label,
           label: (context: any) => {
             const appName = context.dataset.label
-            return `${appName} : ` + humanFileSize(context.parsed.y) + props.labelSuffix
+            return `${appName} : ` + humanFileSizeFromBits(context.parsed.y) + props.labelSuffix
           }
         }
       }
@@ -140,7 +140,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         },
         ticks: {
           callback: function (value: any) {
-            return humanFileSize(value) + props.labelSuffix
+            return humanFileSizeFromBits(value) + props.labelSuffix
           }
         },
         title: {

@@ -105,3 +105,12 @@ export const humanFileSize = (bytes: number, si = true, dp = 1) => {
 
   return bytes.toFixed(dp) + ' ' + units[u];
 }
+
+/**
+ * @param bits Bits as a number
+ * @returns a nicely formatted string
+ */
+export const humanFileSizeFromBits = (bits: number) => {
+  const bytes = bits / 8
+  return humanFileSize(bytes)
+}

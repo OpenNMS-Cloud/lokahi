@@ -22,5 +22,5 @@
         <dropUniqueConstraint tableName="alert_definition" constraintName="uk_alert_def_trigger_id" />
         <addUniqueConstraint tableName="alert_definition" columnNames="alert_condition_id" constraintName="uk_alert_definition_alert_condition_id"/>
     </changeSet>
-    
+
 </databaseChangeLog>

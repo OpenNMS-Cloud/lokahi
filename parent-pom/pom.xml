@@ -1187,6 +1187,7 @@
             <properties>
                 <!-- Build AND push the built image -->
                 <application.jib.defaultGoal>build</application.jib.defaultGoal>
+                <jib.container.creationTime>USE_CURRENT_TIMESTAMP</jib.container.creationTime>
             </properties>
         </profile>
     </profiles>

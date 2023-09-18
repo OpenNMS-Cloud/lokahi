@@ -1,7 +1,10 @@
 server:
-  port: 9090
   # Tried using default 8080, get 404 error.
   # Also, tried adding this setting to grpc section below, also did not work.
+  port: 9090
+  error:
+    include-message: ALWAYS
+    include-stacktrace: NEVER
 
 spring:
   jackson:

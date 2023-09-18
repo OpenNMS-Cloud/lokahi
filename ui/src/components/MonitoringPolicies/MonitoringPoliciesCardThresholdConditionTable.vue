@@ -29,7 +29,6 @@ defineProps<{
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
-@use '@featherds/styles/mixins/elevation';
 @use '@/styles/vars.scss';
 @use '@/styles/_severities.scss';
 

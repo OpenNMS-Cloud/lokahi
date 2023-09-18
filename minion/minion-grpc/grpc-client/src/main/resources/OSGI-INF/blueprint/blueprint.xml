@@ -66,6 +66,7 @@
                 <argument>
                     <bean class="org.opennms.horizon.minion.grpc.ssl.DefaultKeyStoreFactory" />
                 </argument>
+                <argument ref="grpcShutdownHandler"/>
                 <property name="keyStore" value="${grpc.client.keystore}"/>
                 <property name="keyStoreType" value="${grpc.client.keystore.type}"/>
                 <property name="keyStorePassword" value="${grpc.client.keystore.password}"/>
@@ -76,6 +77,12 @@
         </argument>
         <property name="tlsEnabled" value="${grpc.tls.enabled}"/>
     </bean>
+
+    <bean id="grpcShutdownHandler" class="org.opennms.horizon.minion.grpc.GrpcShutdownHandler">
+        <argument ref="systemService"/>
+    </bean>
+
+    <reference id="systemService" interface="org.apache.karaf.system.SystemService" availability="mandatory"/>
 
      <bean id="sendQueue" class="org.opennms.horizon.minion.grpc.queue.SwappingSendQueueFactory" destroy-method="close">
          <argument>
@@ -98,6 +105,7 @@
         <argument ref="tracer"/>
         <argument ref="sendQueue"/>
         <argument ref="managedChannelFactory"/>
+        <argument ref="grpcShutdownHandler"/>
 
         <property name="cloudMessageHandler" ref="cloudMessageHandler" />
         <property name="rpcRequestHandler" ref="thinRpcRequestHandler" />

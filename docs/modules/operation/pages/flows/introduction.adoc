@@ -1,6 +1,6 @@
 
 = Flows
-:description: Learn about flows data in OpenNMS Lōkahi/Cloud.
+:description: Learn about flows data in OpenNMS Lōkahi/Cloud, including troubleshooting.
 
 Flows are summaries of network traffic sent by network devices (switches, routers, and so on).
 This information includes, but is not limited to, source and destination addresses, source and destination ports, octet count, and duration of activity.
@@ -60,3 +60,19 @@ image::flows/flows-top-10-hover.png[Top 10 applications as a line chart for 24-h
 To filter by protocol on a line chart, click the protocols on the right side.
 They will appear crossed out, and data from the corresponding protocol will no longer appear in the graph.
 Click on the crossed-out protocol to make the data reappear.
+
+== Troubleshooting flows
+
+By default, the OpenNMS secure collector (Minion) collects flows data from any device that sends flows and is monitored with SNMP.
+This includes support for NetFlow v5, NetFlow v9, and IPFIX.
+
+If you do not see any flows data (for example on the insights dashboard or flows page), make sure you have the following:
+
+. OpenNMS collector installed and running (see xref:operation:minions/introduction.adoc#[Minion Management]).
+. One or more network devices (router, firewall) that sends flows and is monitored with SNMP.
++
+Refer to the device's manufacturer documentation to learn more about configuring a device to send flows.
+. Although not required, you may want to check that the device from which you want to collect flows data exists in your OpenNMS network inventory (see xref:operation:get-started/discovery/active.adoc[] and xref:operation:inventory/nodes.adoc[]).
+
+NOTE: You will need the IP address of your collector to enable flows on your network devices.
+To determine the IP address of your collector, go to the Inventory page and locate the host that is running Docker with your collector.

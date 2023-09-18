@@ -6,6 +6,9 @@ You may also choose to xref:get-started/discovery/passive.adoc[create a passive 
 
 You can create a number of active discoveries to cover different areas of your network.
 
+The discovery runs as soon as you save it, and every 24 hours thereafter.
+There is continuous polling and data collection every minute.
+
 To create an active discovery, follow these steps:
 
 . Choose *Discovery* in the left navigation menu.
@@ -18,8 +21,7 @@ To create an active discovery, follow these steps:
 +
 NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], click the drop-down arrow in the *Search/Add tags* field, type a name for the tag, and click *New*.
 
-. With ICMP/SNMP discovery, click the *Validate* check to verify that you have a valid IP address.
-. Correct any errors and click *Save Discovery*.
+. Click *Save Discovery*.
 
 A dialog appears from which you can opt to add another discovery or view the nodes detected from the discovery.
 

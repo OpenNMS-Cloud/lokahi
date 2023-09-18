@@ -81,8 +81,6 @@ spec:
               value: "{{ .Release.Namespace }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
-            - name: IGNITE_UPDATE_NOTIFIER # Disable Ignite version lookups
-              value: "false"
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
             {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionGateway) | nindent 12 }}

@@ -38,10 +38,13 @@ import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
+import org.opennms.horizon.alertservice.db.entity.Location;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.ThresholdedEvent;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.LocationRepository;
+import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.repository.ThresholdedEventRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
@@ -84,6 +87,11 @@ public class AlertEventProcessor {
     private final MeterRegistry registry;
 
     private final TenantLookup tenantLookup;
+
+    private final NodeRepository nodeRepository;
+
+    private final LocationRepository locationRepository;
+
     private Counter eventsWithoutAlertDataCounter;
 
 
@@ -100,9 +108,19 @@ public class AlertEventProcessor {
             LOG.debug("No alert returned from processing event with UEI: {} for tenant id: {}", e.getUei(), e.getTenantId());
             return Collections.emptyList();
         }
-        return dbAlerts.stream().map(alertMapper::toProto).toList();
-    }
+        return dbAlerts.stream().map(dbAlert -> {
+            var alert = Alert.newBuilder(alertMapper.toProto(dbAlert));
 
+            saveLocation(e);
+            alert.setLocation(e.getLocationName());
+            nodeRepository.findByIdAndTenantId(e.getNodeId(), e.getTenantId()).ifPresent(node ->
+                alert.setNodeName(node.getNodeLabel())
+            );
+            alert.addRuleName(dbAlert.getAlertCondition().getRule().getName());
+            alert.addPolicyName(dbAlert.getAlertCondition().getRule().getPolicy().getName());
+            return alert.build();
+        }).toList();
+    }
 
     protected List<org.opennms.horizon.alertservice.db.entity.Alert> addOrReduceEventAsAlert(Event event) {
         List<AlertDefinition> alertDefinitions = alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei());
@@ -191,7 +209,12 @@ public class AlertEventProcessor {
             }
 
             if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.DESCRIPTION_FIELD_NUMBER))) {
-                alert.setDescription(event.getDescription());
+                String desc = event.getDescription().toLowerCase().contains("exception") ?
+                    event.getDescription() : "Monitoring error.";
+                event.getParametersList().stream().filter(p -> "serviceName".equals(p.getName())).findFirst()
+                    .ifPresentOrElse(
+                        p -> alert.setDescription(p.getValue() + " " + desc),
+                        () -> alert.setDescription(desc));
             }
 
             alert.setType(alertData.type());
@@ -297,5 +320,23 @@ public class AlertEventProcessor {
         List<Long> monitoringPolicyId,
         AlertCondition alertCondition
     ) {
+    }
+
+    /**
+     * Save for location id > name looking during query
+     */
+    private void saveLocation(final Event e){
+        if (!e.hasField(Event.getDescriptor().findFieldByNumber(Event.LOCATION_ID_FIELD_NUMBER))) {
+            return;
+        }
+        try {
+            Location location = new Location();
+            location.setId(Long.parseLong(e.getLocationId()));
+            location.setLocationName(e.getLocationName());
+            location.setTenantId(e.getTenantId());
+            locationRepository.save(location);
+        } catch (Exception ex) {
+            LOG.warn("Fail to store location cache: {}, tenantId: {} error: {}", e.getLocationId(), e.getTenantId(), ex.getMessage());
+        }
     }
 }

@@ -52,6 +52,7 @@ message Event {
   optional EventInfo info = 9;
   string description = 10;
   string log_message = 11;
+  string location_name = 12; // prevent need for inter service id lookup
 }
 
 message EventInfo {

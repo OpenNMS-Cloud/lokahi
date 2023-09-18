@@ -188,6 +188,9 @@ OpenNMS:
       multiplier: 2
       max: 10
     acsConnectionSecretName: {} # the ACS connection string is expected in the 'connection-string' key
+    baseUrl:
+      url: "onmshs.local:1443"
+      appendTenantId: false
   Events:
     ServiceName: opennms-events
     ImageShortName: lokahi-events

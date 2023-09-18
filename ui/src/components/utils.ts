@@ -163,3 +163,28 @@ export const getColorFromFeatherVar = (indexOrString?: number | string, opacity 
     return color
   }
 }
+
+/**
+ * @param bits Bits as a number
+ * @param dp Number of decimal places to show
+ * @returns a nicely formatted string
+ */
+export const humanFileSizeFromBits = (bits: number, dp = 1) => {
+  const thresh = 1000
+
+  if (Math.abs(bits) < thresh) {
+    return bits + ' b'
+  }
+
+  const units = ['kb', 'Mb', 'Gb', 'Tb', 'Pb']
+
+  let u = -1
+  const r = 10 ** dp
+
+  do {
+    bits /= thresh
+    ++u
+  } while (Math.round(Math.abs(bits) * r) / r >= thresh && u < units.length - 1)
+
+   return bits.toFixed(dp) + ' ' + units[u]
+}

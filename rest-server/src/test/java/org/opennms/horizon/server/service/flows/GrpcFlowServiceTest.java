@@ -212,8 +212,11 @@ class GrpcFlowServiceTest {
     void testFindApplicationSeries() throws JSONException {
         ArgumentCaptor<String> tenantIdArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> accessTokenArg = ArgumentCaptor.forClass(String.class);
-        Series flowingPoints = Series.newBuilder().addPoint(FlowingPoint.newBuilder()
-            .setApplication("http").setDirection(Direction.INGRESS).setValue(10).setTimestamp(Timestamp.newBuilder()))
+        Series flowingPoints = Series.newBuilder()
+            .addPoint(FlowingPoint.newBuilder().setApplication("http").setDirection(Direction.INGRESS).setValue(100L)
+                .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis())))
+            .addPoint(FlowingPoint.newBuilder().setApplication("http").setDirection(Direction.INGRESS).setValue(100L)
+                .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis() + 1)))
             .build();
         doReturn(flowingPoints).when(mockFlowClient)
             .getApplicationSeries(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());

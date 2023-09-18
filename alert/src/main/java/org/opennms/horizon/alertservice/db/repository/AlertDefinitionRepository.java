@@ -30,6 +30,8 @@ package org.opennms.horizon.alertservice.db.repository;
 
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,5 +43,12 @@ public interface AlertDefinitionRepository extends JpaRepository<AlertDefinition
 
     Optional<AlertDefinition> findFirstByAlertConditionId(Long id);
 
-    List<AlertDefinition> findByTenantIdAndUei(String tenantId, String uei);
+    @Query("SELECT d " +
+        "FROM AlertDefinition d " +
+        "LEFT JOIN FETCH d.alertCondition " +
+        "LEFT JOIN FETCH d.alertCondition.rule " +
+        "LEFT JOIN FETCH d.alertCondition.rule.policy " +
+        "WHERE d.tenantId = :tenantId " +
+        "AND d.uei = :uei ")
+    List<AlertDefinition> findByTenantIdAndUei(@Param("tenantId") String tenantId, @Param("uei") String uei);
 }

@@ -12,7 +12,7 @@
       </FeatherButton>
 
       <FeatherButton
-        @click="logout()"
+        @click="keycloak.logout()"
         icon="Logout"
       >
         <FeatherIcon :icon="LogOut" />
@@ -26,7 +26,6 @@ import LightDarkMode from '@featherds/icon/action/LightDarkMode'
 import LogOut from '@featherds/icon/action/LogOut'
 import useKeycloak from '@/composables/useKeycloak'
 import useTheme from '@/composables/useTheme'
-import { logout } from '@/services/authService'
 
 const { keycloak } = useKeycloak()
 const { toggleDark } = useTheme()

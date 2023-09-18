@@ -45,6 +45,7 @@ public class NodeKafkaProducerTest {
         testNode.setId(131313L);
         testNode.setTenantId("x-tenant-id-x");
         testNode.setNodeLabel("x-node-label-x");
+        testNode.setMonitoringLocationId(10L);
 
         //
         // Execute
@@ -70,6 +71,7 @@ public class NodeKafkaProducerTest {
                     (TEST_TOPIC.equals(producerRecord.topic())) &&
                     (Objects.equals(expectedNode.getId(), nodeDTO.getId())) &&
                     (Objects.equals(expectedNode.getTenantId(), nodeDTO.getTenantId())) &&
+                    (Objects.equals(expectedNode.getMonitoringLocationId(), nodeDTO.getMonitoringLocationId())) &&
                     (Objects.equals(expectedNode.getNodeLabel(), nodeDTO.getNodeLabel()))
                 );
         } catch (InvalidProtocolBufferException e) {

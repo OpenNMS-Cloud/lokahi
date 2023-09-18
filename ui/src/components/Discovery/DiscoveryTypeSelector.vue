@@ -1,69 +1,149 @@
 <template>
-  <div class="discoveries">
-    <div class="discovery-card">
-      <FeatherRadioGroup
-        vertical
-        :label="discoveryText.AddDiscoverySection.activeDiscoveryTitle"
-        v-model="menuOption"
-        @update:modelValue="setDiscoveryOption"
-      >
-        <div class="row">
-          <FeatherIcon
-            class="icon"
-            :icon="networkIcon"
-          />
-          <FeatherRadio data-test="discoveryICMP" :value="DiscoveryType.ICMP">{{ discoveryText.AddDiscoverySection.icmpSnmp }}</FeatherRadio>
-        </div>
-        <div class="row">
-          <FeatherIcon
-            class="icon"
-            :icon="cloudIcon"
-          /><FeatherRadio data-test="discoveryAzure" :value="DiscoveryType.Azure">{{ discoveryText.AddDiscoverySection.azure }}</FeatherRadio>
-        </div>
-      </FeatherRadioGroup>
+  <div class="discovery-type-selector">
+    <div class="flex-title">
+      <h2 class="title">{{ title }}</h2>
     </div>
-    <div class="discovery-card passive">
-      <FeatherRadioGroup
-        horizontal
-        :label="discoveryText.AddDiscoverySection.passiveDiscoveryTitle"
-        v-model="menuOption"
-        @update:modelValue="setDiscoveryOption"
+    <p class="subtitle">
+      Identify devices and entities to monitor through
+      <FeatherPopover
+        :pointer-alignment="PointerAlignment.center"
+        :placement="PopoverPlacement.bottom"
       >
-        <div class="row">
-          <FeatherIcon
-            class="icon"
-            :icon="networkIcon"
-          />
-          <FeatherRadio data-test="discoverySyslog" :value="DiscoveryType.SyslogSNMPTraps">{{
-            discoveryText.AddDiscoverySection.syslog
-          }}</FeatherRadio>
+        <template #default>
+          <div>
+            <h4>Active Discovery</h4>
+            <p>Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor.</p>
+            <a
+              @click="
+                () => {
+                  discoveryStore.activateHelp(InstructionsType.Active)
+                }
+              "
+              class="full"
+              >Read full article
+              <FeatherIcon :icon="ChevronRight" />
+            </a>
+          </div>
+        </template>
+        <template #trigger="{ attrs, on }">
+          <span
+            class="pop"
+            v-bind="attrs"
+            v-on="on"
+            >active</span
+          >
+        </template>
+      </FeatherPopover>
+      or
+      <FeatherPopover
+        :pointer-alignment="PointerAlignment.center"
+        :placement="PopoverPlacement.bottom"
+      >
+        <template #default>
+          <div>
+            <h4>Passive Discovery</h4>
+            <p>Passive discovery uses Syslog and SNMP traps to identify network devices.</p>
+            <a
+              @click="
+                () => {
+                  discoveryStore.activateHelp(InstructionsType.Passive)
+                }
+              "
+              class="full"
+              >Read full article
+              <FeatherIcon :icon="ChevronRight" />
+            </a>
+          </div>
+        </template>
+        <template #trigger="{ attrs, on }">
+          <span
+            class="pop"
+            v-bind="attrs"
+            v-on="on"
+            >passive</span
+          >
+        </template>
+      </FeatherPopover>
+      discovery. <br />
+      Choose a discovery type to get started.
+    </p>
+    <div
+      class="type-selectors"
+      v-for="discoveryTypeItem in discoveryTypeList"
+      :key="discoveryTypeItem.title"
+    >
+      <div class="type-selector-header">
+        <h3 class="type-selector-title">{{ discoveryTypeItem.title }}</h3>
+        <p class="type-selector-subtitle">{{ discoveryTypeItem.subtitle }}</p>
+      </div>
+      <div
+        v-for="discoveryType in discoveryTypeItem.discoveryTypes"
+        class="type-selector"
+        @click="() => updateSelectedDiscovery('type', discoveryType.value)"
+        :key="discoveryType.value"
+      >
+        <div class="type-selector-row">
+          <div class="type-selector-icon"><FeatherIcon :icon="discoveryType.icon" /></div>
+          <div>
+            <h5>{{ discoveryType.title }}</h5>
+            <p class="t-subtitle">{{ discoveryType.subtitle }}</p>
+          </div>
+          <div class="type-selector-chevron"><FeatherIcon :icon="ChevronRight" /></div>
         </div>
-      </FeatherRadioGroup>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import discoveryText from '@/components/Discovery/discovery.text'
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
+import { DiscoveryType, InstructionsType } from '@/components/Discovery/discovery.constants'
 
-import Cloud from '@featherds/icon/action/Cloud'
-import Network from '@featherds/icon/hardware/Network'
-const cloudIcon = markRaw(Cloud)
-const networkIcon = markRaw(Network)
-const menuOption = ref(DiscoveryType.None)
-const emit = defineEmits(['discovery-option-selected'])
+import ChevronRight from '@featherds/icon/navigation/ChevronRight'
+import { PropType } from 'vue'
+import AddNote from '@featherds/icon/hardware/Network'
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { PointerAlignment, PopoverPlacement } from '@featherds/tooltip'
+const discoveryStore = useDiscoveryStore()
 
-const setDiscoveryOption = () => {
-  emit('discovery-option-selected', menuOption.value)
-}
+const discoveryTypeList = [
+  {
+    title: 'Active Discovery',
+    subtitle: 'Query nodes and cloud APIs to detect the entities to monitor.',
+    discoveryTypes: [
+      {
+        title: 'ICMP/SNMP',
+        subtitle: 'Perform a ping sweep and scan for SNMP MIBs on nodes that respond.',
+        icon: AddNote,
+        value: DiscoveryType.ICMP
+      },
+      {
+        title: 'Azure',
+        icon: AddNote,
+        subtitle:
+          'Connect to the Azure API, query the virtual machines list, and create entities for each VM in the node inventory.',
+        value: DiscoveryType.Azure
+      }
+    ]
+  },
+  {
+    title: 'Passive Discovery',
+    subtitle: 'Use Syslog and SNMP traps to identify network devices. You can configure only one passive discovery.',
+    discoveryTypes: [
+      {
+        title: 'Syslog and SNMP Traps',
+        icon: AddNote,
+        subtitle:
+          "Identify devices through events, flows, and indirectly by evaluating other devices' configuration settings.",
+        value: DiscoveryType.SyslogSNMPTraps
+      }
+    ]
+  }
+]
 
-const reset = () => {
-  menuOption.value = DiscoveryType.None
-}
-
-defineExpose({
-  reset
+defineProps({
+  backButtonClick: { type: Function as PropType<() => void>, default: () => ({}) },
+  updateSelectedDiscovery: { type: Function as PropType<(key: string, value: string) => void>, default: () => ({}) },
+  title: { type: String, default: '' }
 })
 </script>
 
@@ -72,67 +152,66 @@ defineExpose({
 @use '@/styles/vars.scss';
 @use '@/styles/mediaQueriesMixins';
 
-.discoveries {
-  padding: var(variables.$spacing-s);
-  background: var(variables.$shade-4);
+.type-selector-row {
   display: flex;
-  flex-direction: column;
-  margin-top: var(variables.$spacing-xs);
-
-  @include mediaQueriesMixins.screen-md {
-    padding: var(variables.$spacing-l);
-    display: flex;
-    flex-direction: row;
+  align-items: center;
+  padding: 20px;
+  border-top: 1px solid var(--feather-border-on-surface);
+  &:hover {
+    background-color: var(--feather-background);
+    cursor: pointer;
   }
-  .discovery-card {
-    width: 100%;
 
-    &.passive {
-      border-left: none;
-      padding-left: 0;
-      border-top: 1px solid var(variables.$shade-4);
-      padding-top: var(variables.$spacing-s);
-      margin-top: var(variables.$spacing-s);
-      .icon {
-        display: none;
-      }
-
-      @include mediaQueriesMixins.screen-md {
-        border-top: none;
-        border-left: 1px solid var(variables.$shade-4);
-        padding-left: var(variables.$spacing-l);
-        padding-top: 0;
-        margin-top: 0;
-        .icon {
-          display: flex;
-        }
-      }
-    }
-
-    @include mediaQueriesMixins.screen-md {
-      width: 50%;
-    }
-  }
-  .row {
-    display: flex;
-    align-items: center;
-  }
-  .icon {
-    width: 28px;
-    height: 28px;
-    color: var(variables.$shade-2);
-    margin-right: var(variables.$spacing-l);
+  h4 {
+    margin: 0;
+    line-height: 1em;
   }
 }
-
-.layout-container {
-  margin: 0 !important;
+.subtitle .pop {
+  text-decoration: underline;
+  color: var(--feather-text-on-surface);
+  cursor: pointer;
 }
-:deep(.feather-radio-group-container label) {
-  margin-bottom: var(variables.$spacing-xs) !important;
+.subtitle .full {
+  color: var(--feather-clickable-normal);
+  margin-top: 12px;
+  display: block;
 }
-
-:deep(.feather-input-sub-text) {
-  display: none;
+.subtitle {
+  :deep(.feather-popover-container) {
+    z-index: 2;
+  }
+}
+.type-selector-chevron {
+  margin-left: auto;
+  font-size: 22px;
+}
+.type-selector-header {
+  padding: 20px;
+}
+.type-selectors {
+  border: 1px solid var(--feather-border-on-surface);
+  border-radius: vars.$border-radius-xs;
+  margin-top: 20px;
+  h1 {
+    margin-top: 0;
+  }
+}
+.type-selector-icon {
+  margin-right: 18px;
+  font-size: 22px;
+}
+.flex-title {
+  display: flex;
+  margin-bottom: 12px;
+}
+h5 {
+  margin-bottom: 0;
+  line-height: 1rem;
+}
+.t-subtitle {
+  font-size: 12px;
+  font-family: var(--feather-header-font-family);
+  margin-top: 0;
 }
 </style>

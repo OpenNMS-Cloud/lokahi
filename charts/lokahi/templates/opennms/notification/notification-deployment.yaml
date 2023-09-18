@@ -77,6 +77,10 @@ spec:
               value: "{{ .Values.OpenNMS.Notification.retry.multiplier }}"
             - name: HORIZON_EMAIL_RETRY_MAX
               value: "{{ .Values.OpenNMS.Notification.retry.max }}"
+            - name: LOKAHI_BASEURL_URL
+              value: "{{ .Values.OpenNMS.Notification.baseUrl.url }}"
+            - name: LOKAHI_BASEURL_APPENDTENANTID
+              value: "{{ .Values.OpenNMS.Notification.baseUrl.appendTenantId }}"
             {{- if .Values.OpenNMS.Notification.acsConnectionSecretName }}
             - name: SPRING_MAIL_ACS_CONNECTION_STRING # spring.mail.acs-connection-string
               valueFrom:

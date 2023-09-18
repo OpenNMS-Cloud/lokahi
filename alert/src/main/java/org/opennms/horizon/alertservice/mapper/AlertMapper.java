@@ -35,6 +35,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.factory.Mappers;
+import org.opennms.horizon.alerts.proto.ManagedObject;
+import org.opennms.horizon.alerts.proto.ManagedObjectInstance;
+import org.opennms.horizon.alerts.proto.ManagedObjectType;
+import org.opennms.horizon.alerts.proto.NodeRef;
+import org.opennms.horizon.alerts.proto.SnmpInterfaceRef;
 import org.opennms.horizon.alertservice.db.entity.Alert;
 
 @Mapper(componentModel = "spring",
@@ -47,6 +52,7 @@ public interface AlertMapper {
 
     @Mapping(target = "databaseId", source = "id")
     @Mapping(target = "uei", source = "eventUei")
+    @Mapping(target = "firstEventTimeMs", source = "firstEventTime")
     @Mapping(target = "lastUpdateTimeMs", source = "lastEventTime")
     @Mapping(target = "isAcknowledged", expression = "java(alert.getAcknowledgedByUser() != null ? true : false)")
     @Mapping(target = "ackUser", source = "acknowledgedByUser")
@@ -54,9 +60,23 @@ public interface AlertMapper {
     @Mapping(target = "monitoringPolicyIdList", source = "monitoringPolicyId")
     @Mapping(target = "label", source = "alertCondition.triggerEvent.name")
     @Mapping(target = "nodeName", source = "nodeLabel")
+    @Mapping(target = "managedObject", expression = "java(mapAlertToMangedObject(alert))")
     org.opennms.horizon.alerts.proto.Alert toProto(Alert alert);
 
     default long mapDateToLongMs(Date value) {
         return value == null ? 0L : value.getTime();
+    }
+
+    default ManagedObject mapAlertToMangedObject(Alert alert) {
+        var managedObject = ManagedObject.newBuilder().setType(alert.getManagedObjectType());
+        if (alert.getManagedObjectType() == ManagedObjectType.NODE) {
+            managedObject.setInstance(ManagedObjectInstance.newBuilder()
+                .setNodeVal(NodeRef.newBuilder().setNodeId(Long.parseLong(alert.getManagedObjectInstance()))));
+        } else if (alert.getManagedObjectType() == ManagedObjectType.SNMP_INTERFACE) {
+            managedObject.setInstance(ManagedObjectInstance.newBuilder().setSnmpInterfaceVal(
+                SnmpInterfaceRef.newBuilder()
+                    .setIfIndex(Long.parseLong(alert.getManagedObjectInstance()))));
+        }
+        return managedObject.build();
     }
 }

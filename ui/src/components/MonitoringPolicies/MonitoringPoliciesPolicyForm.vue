@@ -115,7 +115,6 @@ const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: strin
 </script>
 
 <style scoped lang="scss">
-@use '@featherds/styles/mixins/elevation';
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
 @use '@/styles/mediaQueriesMixins';
@@ -128,13 +127,13 @@ const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: strin
   gap: var(variables.$spacing-l);
 
   .policy-form {
-    @include elevation.elevation(2);
     display: flex;
     flex: 1;
     flex-direction: column;
     background: var(variables.$surface);
     padding: var(variables.$spacing-l);
-    border-radius: vars.$border-radius-s;
+    border-radius: vars.$border-radius-surface;
+    border: 1px solid var(variables.$border-on-surface);
 
     .policy-form-title-container {
       display: flex;

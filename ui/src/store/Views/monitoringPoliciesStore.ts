@@ -4,16 +4,14 @@ import { Condition, Policy, ThresholdCondition } from '@/types/policies'
 import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPoliciesMutations'
 import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
 import useSnackbar from '@/composables/useSnackbar'
-import {
-  ThresholdLevels,
-  Unknowns
-} from '@/components/MonitoringPolicies/monitoringPolicies.constants'
+import { ThresholdLevels, Unknowns } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
 import {
   AlertCondition,
   DetectionMethod,
   EventType,
   ManagedObjectType,
-  MonitorPolicy, PolicyRule,
+  MonitorPolicy,
+  PolicyRule,
   Severity,
   TimeRangeUnit
 } from '@/types/graphql'
@@ -52,8 +50,7 @@ function getDefaultThresholdCondition(): ThresholdCondition {
 
 async function getDefaultEventCondition(): Promise<AlertCondition> {
   const alertEventDefinitionQueries = useAlertEventDefinitionQueries()
-  const alertEventDefinitions =
-    await alertEventDefinitionQueries.listAlertEventDefinitions(EventType.SnmpTrap)
+  const alertEventDefinitions = await alertEventDefinitionQueries.listAlertEventDefinitions(EventType.SnmpTrap)
   if (alertEventDefinitions.value?.listAlertEventDefinitions?.length) {
     return {
       id: new Date().getTime(),
@@ -63,7 +60,7 @@ async function getDefaultEventCondition(): Promise<AlertCondition> {
       triggerEvent: alertEventDefinitions.value.listAlertEventDefinitions[0]
     }
   } else {
-    throw Error('Can\'t load alertEventDefinitions')
+    throw Error("Can't load alertEventDefinitions")
   }
 }
 
@@ -129,12 +126,14 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       })
     },
     deleteCondition(id: string) {
-      this.selectedRule!.alertConditions = this.selectedRule!.alertConditions?.filter((c: AlertCondition) => c.id !== id)
+      this.selectedRule!.alertConditions = this.selectedRule!.alertConditions?.filter(
+        (c: AlertCondition) => c.id !== id
+      )
     },
     async saveRule() {
       const existingItemIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
 
-      if (existingItemIndex!== -1) {
+      if (existingItemIndex !== -1) {
         // replace existing rule
         this.selectedPolicy!.rules?.splice(existingItemIndex, 1, this.selectedRule!)
       } else {
@@ -176,6 +175,15 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       delete copiedPolicy.id
       delete copiedPolicy.name
       this.displayPolicyForm(copiedPolicy)
+    },
+    removeRule() {
+      const ruleIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
+
+      if (ruleIndex !== -1) {
+        this.selectedPolicy!.rules?.splice(ruleIndex, 1)
+      }
+
+      this.selectedRule = undefined
     }
   }
 })

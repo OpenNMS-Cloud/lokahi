@@ -7,6 +7,10 @@ casual.define('alert', function () {
     acknowledged: casual.coin_flip,
     description: casual.description,
     lastUpdateTimeMs: casual.unix_time,
+    firstEventTimeMs: casual.unix_time,
+    location: casual.word,
+    ruleNameList: [casual.word],
+    policyNameList: [casual.word],
     severity: rndSeverity()
   }
 })

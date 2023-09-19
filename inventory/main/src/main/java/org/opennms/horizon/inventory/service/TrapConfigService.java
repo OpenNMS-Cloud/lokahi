@@ -74,6 +74,7 @@ public class TrapConfigService {
     public void scheduleConfigUpdate() {
         // This is work around for Minion not to have timeout for CloudToMinion Stream.
         // Keep sending Trap config every 15 mins.
+        // https://opennms.atlassian.net/browse/LOK-2059 
         executorService.scheduleAtFixedRate(this::sendTrapConfigToMinionAfterStartup, 900, 900, TimeUnit.SECONDS);
     }
     public void sendTrapConfigToMinionAfterStartup() {

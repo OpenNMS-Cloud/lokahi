@@ -219,18 +219,31 @@ public class MonitorPolicyService {
     }
 
     @Transactional
-    public void deletePolicy(long id, String tenantId) {
+    public void deletePolicyById(long id, String tenantId) {
         var alerts = alertRepository.findByPolicyIdAndTenantId(id, tenantId);
-        if(alerts != null && !alerts.isEmpty()) {
+        if (alerts != null && !alerts.isEmpty()) {
             alertRepository.deleteAll(alerts);
         }
         repository.deleteByIdAndTenantId(id, tenantId);
     }
 
     @Transactional
-    public void deleteRule(long id, String tenantId) {
+    public void deleteRuleById(long id, String tenantId) {
+        var alerts = alertRepository.findByRuleIdAndTenantId(id, tenantId);
+        if (alerts != null && !alerts.isEmpty()) {
+            alertRepository.deleteAll(alerts);
+        }
         policyRuleRepository.deleteByIdAndTenantId(id, tenantId);
     }
+
+    public long countAlertByPolicyId(long id, String tenantId) {
+        return alertRepository.countByPolicyIdAndTenantId(id, tenantId);
+    }
+
+    public long countAlertByRuleId(long id, String tenantId) {
+        return alertRepository.countByRuleIdAndTenantId(id, tenantId);
+    }
+
     private void updateData(MonitorPolicy policy, String tenantId) {
         policy.setTenantId(tenantId);
         policy.getRules().forEach(r -> {

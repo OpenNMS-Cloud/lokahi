@@ -254,7 +254,7 @@ public class AlertsClient {
         return policyStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deletePolicy(Int64Value.of(id)).getValue();
+            .deletePolicyById(Int64Value.of(id)).getValue();
     }
 
     public boolean deletePolicyRuleById(Long id, String accessToken) {
@@ -263,6 +263,24 @@ public class AlertsClient {
         return policyStub
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deleteRule(Int64Value.of(id)).getValue();
+            .deleteRuleById(Int64Value.of(id)).getValue();
+    }
+
+    public long countAlertByPolicyId(Long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return policyStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .countAlertByPolicyId(Int64Value.of(id)).getValue();
+    }
+
+    public long countAlertByRuleId(Long id, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return policyStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .countAlertByRuleId(Int64Value.of(id)).getValue();
     }
 }

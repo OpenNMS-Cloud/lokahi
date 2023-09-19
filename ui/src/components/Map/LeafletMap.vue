@@ -48,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet'
 import { LMarkerClusterGroup } from 'vue-leaflet-markercluster'
 import { numericSeverityLevel } from './utils'
@@ -57,7 +56,7 @@ import useSpinner from '@/composables/useSpinner'
 import { Node } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
 // @ts-ignore
-import { Map, divIcon, MarkerCluster as Cluster } from 'leaflet'
+import L, { Map as LeafletMap, divIcon, MarkerCluster as Cluster } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'vue-leaflet-markercluster/dist/style.css'
 import { render, createVNode } from 'vue'
@@ -68,7 +67,7 @@ const { onThemeChange, isDark } = useTheme()
 const map = ref()
 const route = useRoute()
 const leafletReady = ref<boolean>(false)
-const leafletObject = ref({} as Map)
+const leafletObject = ref({} as LeafletMap)
 const zoom = ref<number>(2)
 const iconWidth = 30
 const iconHeight = 80

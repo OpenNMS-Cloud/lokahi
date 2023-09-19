@@ -37,3 +37,35 @@ Feature: Monitor policy gRPC Functionality
     Then Verify the new policy has been created
     Then List policy should contain 1
     Then Verify monitoring policy for tenant "test-tenant" is sent to Kafka
+
+  Scenario: Delete a monitor policy
+    Given Tenant id "test-tenant1"
+    Given A monitoring policy named "test-policy1" with tag "tag1", notifying by email
+    Given The policy has a rule named "snmp-rule1" with component type "NODE" and trap definitions
+      | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
+      | SNMP Cold Start    | 1     | 3        | MINUTE        | MAJOR    |                  |
+    And The policy is created in the tenant
+    When An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10
+    Then Verify the new policy has been created
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1     |
+    Then Delete policy named "test-policy1"
+    Then List policy should contain 0
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 0     |
+
+  Scenario: Delete a monitor rule
+    Given Tenant id "test-tenant2"
+    Given A monitoring policy named "test-policy2" with tag "tag1", notifying by email
+    Given The policy has a rule named "snmp-rule2" with component type "NODE" and trap definitions
+      | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
+      | SNMP Cold Start    | 1     | 3        | MINUTE        | MAJOR    |                  |
+    And The policy is created in the tenant
+    When An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Cold_Start" on node 10
+    Then Verify the new policy has been created
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 1     |
+    Then Delete policy rule named "snmp-rule2" under policy named "test-policy2"
+    Then List policy should contain 1
+    Then List alerts for the tenant, until JSON response matches the following JSON path expressions
+      | alerts.size() == 0     |

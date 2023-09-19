@@ -280,8 +280,10 @@ service MonitorPolicyService {
   rpc listPolicies(google.protobuf.Empty) returns(MonitorPolicyList);
   rpc getPolicyById(google.protobuf.Int64Value) returns(MonitorPolicyProto);
   rpc getDefaultPolicy(google.protobuf.Empty) returns(MonitorPolicyProto);
-  rpc deletePolicy(google.protobuf.Int64Value) returns(google.protobuf.BoolValue);
-  rpc deleteRule(google.protobuf.Int64Value) returns(google.protobuf.BoolValue);
+  rpc deletePolicyById(google.protobuf.Int64Value) returns(google.protobuf.BoolValue);
+  rpc deleteRuleById(google.protobuf.Int64Value) returns(google.protobuf.BoolValue);
+  rpc countAlertByPolicyId(google.protobuf.Int64Value) returns(google.protobuf.Int64Value);
+  rpc countAlertByRuleId(google.protobuf.Int64Value) returns(google.protobuf.Int64Value);
 }
 
 message AlertEventDefinitionProto {

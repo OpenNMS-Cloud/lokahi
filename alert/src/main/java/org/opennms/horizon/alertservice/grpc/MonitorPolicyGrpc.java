@@ -100,11 +100,11 @@ public class MonitorPolicyGrpc extends MonitorPolicyServiceGrpc.MonitorPolicySer
     }
 
     @Override
-    public void deletePolicy(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+    public void deletePolicyById(Int64Value request, StreamObserver<BoolValue> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
                 try {
-                    service.deletePolicy(request.getValue(), tenantId);
+                    service.deletePolicyById(request.getValue(), tenantId);
                     responseObserver.onNext(BoolValue.of(true));
                     responseObserver.onCompleted();
                 } catch (Exception e) {
@@ -118,13 +118,51 @@ public class MonitorPolicyGrpc extends MonitorPolicyServiceGrpc.MonitorPolicySer
     }
 
     @Override
-    public void deleteRule(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+    public void deleteRuleById(Int64Value request, StreamObserver<BoolValue> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId ->
             {
                 try {
-                    service.deleteRule(request.getValue(), tenantId);
+                    service.deleteRuleById(request.getValue(), tenantId);
                     responseObserver.onNext(BoolValue.of(true));
+                    responseObserver.onCompleted();
+                } catch (Exception e) {
+                    Status status = Status.newBuilder()
+                        .setCode(Code.INTERNAL_VALUE)
+                        .setMessage(e.getMessage())
+                        .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                }
+            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+    }
+
+    @Override
+    public void countAlertByPolicyId(Int64Value request, StreamObserver<Int64Value> responseObserver) {
+        tenantLookup.lookupTenantId(Context.current())
+            .ifPresentOrElse(tenantId ->
+            {
+                try {
+                    var count = service.countAlertByPolicyId(request.getValue(), tenantId);
+                    responseObserver.onNext(Int64Value.of(count));
+                    responseObserver.onCompleted();
+                } catch (Exception e) {
+                    Status status = Status.newBuilder()
+                        .setCode(Code.INTERNAL_VALUE)
+                        .setMessage(e.getMessage())
+                        .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                }
+            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+    }
+
+    @Override
+    public void countAlertByRuleId(Int64Value request, StreamObserver<Int64Value> responseObserver) {
+        tenantLookup.lookupTenantId(Context.current())
+            .ifPresentOrElse(tenantId ->
+            {
+                try {
+                    var count = service.countAlertByRuleId(request.getValue(), tenantId);
+                    responseObserver.onNext(Int64Value.of(count));
                     responseObserver.onCompleted();
                 } catch (Exception e) {
                     Status status = Status.newBuilder()

@@ -31,8 +31,6 @@ package org.opennms.horizon.alertservice.db.repository;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface PolicyRuleRepository extends JpaRepository<PolicyRule, Long> {
     void deleteByIdAndTenantId(Long id, String tenantId);
 }

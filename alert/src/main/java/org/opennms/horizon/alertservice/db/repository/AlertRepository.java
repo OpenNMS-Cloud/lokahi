@@ -97,6 +97,18 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     void deleteByIdAndTenantId(long databaseId, String tenantId);
 
     @Query(value = "SELECT a FROM Alert a LEFT JOIN AlertCondition ac LEFT JOIN PolicyRule r LEFT JOIN MonitorPolicy p "
-    + "WHERE a.tenantId = :tenantId AND p.id = :policyId")
+        + "WHERE a.tenantId = :tenantId AND p.id = :policyId")
     List<Alert> findByPolicyIdAndTenantId(@Param("policyId") long policyId, @Param("tenantId") String tenantId);
+
+    @Query(value = "SELECT a FROM Alert a LEFT JOIN AlertCondition ac LEFT JOIN PolicyRule r "
+        + "WHERE a.tenantId = :tenantId AND r.id = :ruleId")
+    List<Alert> findByRuleIdAndTenantId(@Param("ruleId") long policyId, @Param("tenantId") String tenantId);
+
+    @Query(value = "SELECT count(distinct a) FROM Alert a LEFT JOIN AlertCondition ac LEFT JOIN PolicyRule r LEFT JOIN MonitorPolicy p "
+        + "WHERE a.tenantId = :tenantId AND p.id = :policyId")
+    long countByPolicyIdAndTenantId(@Param("policyId") long policyId, @Param("tenantId") String tenantId);
+
+    @Query(value = "SELECT count(distinct a) FROM Alert a LEFT JOIN AlertCondition ac LEFT JOIN PolicyRule r "
+        + "WHERE a.tenantId = :tenantId AND r.id = :ruleId")
+    long countByRuleIdAndTenantId(@Param("ruleId") long policyId, @Param("tenantId") String tenantId);
 }

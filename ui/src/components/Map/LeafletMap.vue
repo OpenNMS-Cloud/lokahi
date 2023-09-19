@@ -3,9 +3,9 @@
     <LMap
       ref="map"
       :center="center"
-      :max-zoom="15"
-      :min-zoom="5"
-      :zoom="15"
+      :max-zoom="19"
+      :min-zoom="2"
+      :zoom="3"
       :zoomAnimation="true"
       @ready="onLeafletReady"
       @moveend="onMoveEnd"

@@ -25,7 +25,7 @@ onMounted(async () => {
   if (welcomeOverride !== 'true') {
     await welcomeStore.init()
   } else {
-    welcomeStore.ready = true;
+    welcomeStore.ready = true
   }
 })
 </script>

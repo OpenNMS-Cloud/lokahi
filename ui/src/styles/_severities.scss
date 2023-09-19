@@ -17,7 +17,44 @@
 @use '@featherds/styles/themes/variables';
 
 $opacity: 0.2;
+$solid: 1;
 
+.critical {
+  background-color: utils.alpha(variables.$error, $solid);
+  color: var(variables.$error) !important;
+}
+
+.major {
+  background-color: utils.alpha(variables.$major, $solid);
+  color: var(variables.$major) !important;
+}
+
+.minor {
+  background-color: utils.alpha(variables.$minor, $solid);
+  color: var(variables.$minor) !important;
+}
+
+.warning {
+  background-color: utils.alpha(variables.$warning, $solid);
+  color: var(variables.$warning) !important;
+}
+
+.indeterminate {
+  background-color: utils.alpha(variables.$indeterminate, $solid);
+  color: var(variables.$indeterminate) !important;
+}
+
+.normal {
+  background-color: utils.alpha(variables.$success, $solid);
+  color: var(variables.$success) !important;
+}
+
+.cleared {
+  background-color: utils.alpha(variables.$cleared, $solid);
+  color: var(variables.$cleared) !important;
+}
+
+// with opacity
 .critical-color {
   background-color: utils.alpha(variables.$error, $opacity);
   color: var(variables.$error) !important;

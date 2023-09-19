@@ -160,7 +160,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             return future;
         } catch (NumberFormatException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Number operator used in a non-number evaluation", e);
+                LOG.error("Number operator used in a non-number evaluation", e);
             }
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                 .reason(e.getMessage())
@@ -169,7 +169,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                 .status(Status.Unknown).build());
         } catch (IllegalArgumentException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid SNMP Criteria", e);
+                LOG.error("Invalid SNMP Criteria", e);
             }
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                 .reason(e.getMessage())
@@ -178,7 +178,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                 .status(Status.Unknown).build());
         } catch (Throwable t) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
+                LOG.error("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
             }
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                 .reason(t.getMessage())

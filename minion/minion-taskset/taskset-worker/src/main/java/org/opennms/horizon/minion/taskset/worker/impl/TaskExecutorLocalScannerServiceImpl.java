@@ -72,7 +72,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
             }
         } catch (Exception exc) {
             if (log.isDebugEnabled()) {
-                log.warn("error executing workflow = " + taskDefinition.getId(), exc);
+                log.debug("error executing workflow = " + taskDefinition.getId(), exc);
             } else {
                 log.warn("error executing workflow id = {}, message = {}" + taskDefinition.getId(), exc.getMessage());
             }

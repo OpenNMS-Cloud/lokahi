@@ -134,21 +134,15 @@ public class SnmpCollector implements ServiceCollector {
             }
             result = future.thenApplyAsync(snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId));
         } catch (InvalidProtocolBufferException pbe) {
-            if (LOG.isDebugEnabled()) {
-                LOG.error("Error while mapping Snmp results to proto ", pbe);
-            }
+            LOG.debug("Error while mapping Snmp results to proto ", pbe);
             var response = generateFailureResponse(request);
             result.complete(response);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            if (LOG.isDebugEnabled()) {
-                LOG.error("Interrupted while collecting metrics ", ie);
-            }
+            LOG.debug("Interrupted while collecting metrics ", ie);
             var response = generateFailureResponse(request);
         } catch (Exception e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.error("Error while collecting metrics ", e);
-            }
+            LOG.debug("Error while collecting metrics ", e);
             var response = generateFailureResponse(request);
             result.complete(response);
         }

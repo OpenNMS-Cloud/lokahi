@@ -66,7 +66,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
             if (log.isDebugEnabled()) {
-                log.warn("error starting workflow {}", taskDefinition.getId(), exc);
+                log.debug("error starting workflow {}", taskDefinition.getId(), exc);
             } else {
                 log.warn("error starting workflow {}, message {}", taskDefinition.getId(), exc.getMessage());
             }
@@ -113,7 +113,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
             if (log.isDebugEnabled()) {
-                log.warn("error executing workflow {}", taskDefinition.getId(), exc);
+                log.debug("error executing workflow {}", taskDefinition.getId(), exc);
             } else {
                 log.warn("error executing workflow {} , message = {}" ,taskDefinition.getId(), exc.getMessage());
             }
@@ -128,7 +128,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse);
         } else {
             if(log.isDebugEnabled()) {
-                log.warn("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
+                log.debug("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
             } else {
                 log.warn("error executing workflow; workflow-uuid= {}, message = {}", taskDefinition.getId(), exc.getMessage());
             }

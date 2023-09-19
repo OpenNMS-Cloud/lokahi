@@ -159,13 +159,13 @@ public class NodeScanner implements Scanner {
         } catch (Exception e) {
             if (scanRequest != null) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.error("Error while performing node scan for nodeId = {}", scanRequest.getNodeId(), e);
+                    LOG.debug("Error while performing node scan for nodeId = {}", scanRequest.getNodeId(), e);
                 } else {
                     LOG.error("Error while performing node scan for nodeId = {}, message = {}", scanRequest.getNodeId(), e.getMessage());
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.error("Error while parsing request ", e);
+                    LOG.debug("Error while parsing request ", e);
                 } else {
                     LOG.error("Error while parsing request {}", e.getMessage());
                 }

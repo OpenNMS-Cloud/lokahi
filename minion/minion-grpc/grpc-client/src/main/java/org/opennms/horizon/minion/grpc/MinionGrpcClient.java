@@ -288,9 +288,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             try {
                 rpcStream.onCompleted();
             } catch (Exception exc) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.error("Error on cleanup of existing rpc stream", exc);
-                }
+                LOG.debug("Error on cleanup of existing rpc stream", exc);
             }
 
             rpcStream = null;
@@ -300,9 +298,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             try {
                 sinkStream.onCompleted();
             } catch (Exception exc) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.error("Error on cleanup of existing sink stream", exc);
-                }
+                LOG.debug("Error on cleanup of existing sink stream", exc);
             }
 
             sinkStream = null;
@@ -312,9 +308,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             try {
                 cloudToMinionStreamCancellableContext.cancel(new Exception("cleanup on handleDisconnect"));
             } catch (Exception exc) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.error("Error on cleanup of existing cloud-to-minion stream", exc);
-                }
+                LOG.debug("Error on cleanup of existing cloud-to-minion stream", exc);
             }
 
             cloudToMinionStreamCancellableContext = null;
@@ -378,7 +372,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 return true;
             } catch (Throwable e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.error("Exception while sending sinkMessage to gRPC IPC server", e);
+                    LOG.debug("Exception while sending sinkMessage to gRPC IPC server", e);
                 } else {
                     LOG.error("Exception while sending sinkMessage to gRPC IPC server {}", e.getMessage());
                 }
@@ -418,15 +412,11 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             try {
                 rpcStream.onNext(rpcResponseProto);
             } catch (Exception e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.error("Exception while sending RPC response : response = {}, message = {}",
-                        rpcResponseProto, e.getMessage());
-                }
+                LOG.debug("Exception while sending RPC response : response = {}, message = {}",
+                    rpcResponseProto, e.getMessage());
             }
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.warn("gRPC IPC server is not in ready state");
-            }
+            LOG.warn("gRPC IPC server is not in ready state");
         }
     }
 
@@ -447,7 +437,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 grpcShutdownHandler.shutdown(GrpcErrorMessages.UNAUTHENTICATED);
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.error("Error in RPC streaming", throwable);
+                    LOG.debug("Error in RPC streaming", throwable);
                 } else {
                     LOG.error("Error in RPC streaming {}", throwable.getMessage());
                 }
@@ -481,7 +471,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         @Override
         public void onError(Throwable throwable) {
             if (LOG.isDebugEnabled()) {
-                LOG.error("Error in cloud message receiver", throwable);
+                LOG.debug("Error in cloud message receiver", throwable);
             } else {
                 LOG.error("Error in cloud message receiver {} ", throwable.getMessage());
             }
@@ -507,9 +497,10 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         @Override
         public void onError(Throwable throwable) {
             if (LOG.isDebugEnabled()) {
-                LOG.error("Error in MinionToCloudMessages streaming", throwable);
+                LOG.debug("Error in MinionToCloudMessages streaming", throwable);
+            } else {
+                LOG.error("Error in MinionToCloudMessages streaming {}", throwable.getMessage());
             }
-            LOG.error("Error in MinionToCloudMessages streaming {}", throwable.getMessage());
             reconnectStrategy.activate();
             LOG.info("Client closed the connection, will reconnect");
         }

@@ -66,7 +66,7 @@ public class SnmpConfigDiscovery {
             detectedConfigs.addAll(validConfigs.stream().flatMap(Optional::stream).toList());
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.error("Exception while executing config discovery", e);
+                LOG.debug("Exception while executing config discovery", e);
             } else {
                 LOG.error("Exception while executing config discovery {}", e.getMessage());
             }
@@ -102,7 +102,7 @@ public class SnmpConfigDiscovery {
             }));
         } catch (Exception e) {
             if (LOG.isDebugEnabled()) {
-                LOG.error("Exception while doing snmp get with agentConfig {}", agentConfig);
+                LOG.debug("Exception while doing snmp get with agentConfig {}", agentConfig);
             }
             future.complete(Optional.empty());
         }

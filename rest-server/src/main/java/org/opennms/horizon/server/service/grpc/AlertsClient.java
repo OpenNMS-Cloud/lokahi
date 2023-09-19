@@ -257,7 +257,7 @@ public class AlertsClient {
             .deletePolicyById(Int64Value.of(id)).getValue();
     }
 
-    public boolean deletePolicyRuleById(Long id, String accessToken) {
+    public boolean deleteRuleById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyStub

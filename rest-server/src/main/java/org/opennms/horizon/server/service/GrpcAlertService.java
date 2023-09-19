@@ -151,7 +151,7 @@ public class GrpcAlertService {
 
     @GraphQLMutation
     public Mono<Boolean> deleteRuleById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(alertsClient.deletePolicyRuleById(id, headerUtil.getAuthHeader(env)));
+        return Mono.just(alertsClient.deleteRuleById(id, headerUtil.getAuthHeader(env)));
     }
 
     @GraphQLQuery

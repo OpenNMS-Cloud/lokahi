@@ -37,11 +37,11 @@ const textMargin = computed(() => (showNumber.value ? '5px' : '0px'))
 .pin {
   filter: drop-shadow(0px 3px 3px var(variables.$shade-2));
   display: flex;
-  background: #fff;
+  background: var(variables.$surface);
   width: fit-content;
   padding: 4px;
   border-radius: 16px;
-  border: 1px solid lightgray;
+  border: 1px solid var(variables.$border-on-surface);
 
   .severity-circle {
     width: 20px;
@@ -63,9 +63,9 @@ const textMargin = computed(() => (showNumber.value ? '5px' : '0px'))
   transform: rotate(-45deg);
   margin-top: v-bind(pinTop);
   margin-left: calc(50% - 9px);
-  background: white;
+  background: var(variables.$surface);
   border: 1px solid;
-  border-color: transparent transparent lightgray lightgray;
+  border-color: transparent transparent var(variables.$border-on-surface) var(variables.$border-on-surface);
   width: 10px;
   height: 10px;
 }

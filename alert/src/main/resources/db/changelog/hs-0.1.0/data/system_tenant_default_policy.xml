@@ -79,34 +79,7 @@
             event_uei = 'uei.opennms.org/internal/node/serviceRestored')"/>
         </insert>
     </changeSet>
-
-    <changeSet id="hs-0.1.0-add-default-alert-definitions-for-system-tenant" author="cgorantla">
-        <insert tableName="alert_definition">
-            <column name="tenant_id" value="system-tenant"/>
-            <column name="uei" value="uei.opennms.org/generic/traps/SNMP_Cold_Start"/>
-            <column name="reduction_key" value="%s:%s:%d:%d"/>
-            <column name="type" value="PROBLEM_WITHOUT_CLEAR"/>
-            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
-            ON ed.id = ac.trigger_event_definition_id WHERE ed.event_uei = 'uei.opennms.org/generic/traps/SNMP_Cold_Start')"/>
-        </insert>
-        <insert tableName="alert_definition">
-            <column name="tenant_id" value="system-tenant"/>
-            <column name="uei" value="uei.opennms.org/generic/traps/SNMP_Warm_Start"/>
-            <column name="reduction_key" value="%s:%s:%d:%d"/>
-            <column name="type" value="PROBLEM_WITHOUT_CLEAR"/>
-            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
-            ON ed.id = ac.trigger_event_definition_id WHERE ed.event_uei = 'uei.opennms.org/generic/traps/SNMP_Warm_Start')"/>
-        </insert>
-        <insert tableName="alert_definition">
-            <column name="tenant_id" value="system-tenant"/>
-            <column name="uei" value="uei.opennms.org/internal/node/serviceUnreachable"/>
-            <column name="reduction_key" value="%s:%s:%d:%d"/>
-            <column name="type" value="PROBLEM_WITH_CLEAR"/>
-            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
-            ON ed.id = ac.trigger_event_definition_id WHERE ed.event_uei = 'uei.opennms.org/internal/node/serviceUnreachable')"/>
-        </insert>
-    </changeSet>
-
+    
     <changeSet id="hs-0.1.0-add-default-tags-for-system-tenant" author="cgorantla">
         <insert tableName="tag">
             <column name="tenant_id" value="system-tenant"/>
@@ -120,6 +93,36 @@
             <column name="policy_id" valueComputed="(select id from monitoring_policy where tenant_id = 'system-tenant'
             and policy_name = 'default_policy')"/>
             <column name="tag_id" valueComputed="(select id from tag where tenant_id = 'system-tenant' and name = 'default')"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-add-default-alert-definitions-for-system-tenant-update" author="cgorantla">
+        <delete tableName="alert_definition">
+            <where>tenant_id='system-tenant'</where>
+        </delete>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/generic/traps/SNMP_Cold_Start"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="type" value="PROBLEM_WITHOUT_CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id WHERE tenant_id = 'system-tenant' AND ed.event_uei = 'uei.opennms.org/generic/traps/SNMP_Cold_Start')"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/generic/traps/SNMP_Warm_Start"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="type" value="PROBLEM_WITHOUT_CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id  WHERE tenant_id = 'system-tenant' AND ed.event_uei = 'uei.opennms.org/generic/traps/SNMP_Warm_Start')"/>
+        </insert>
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/internal/node/serviceUnreachable"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="type" value="PROBLEM_WITH_CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id  WHERE tenant_id = 'system-tenant' AND ed.event_uei = 'uei.opennms.org/internal/node/serviceUnreachable')"/>
         </insert>
     </changeSet>
 

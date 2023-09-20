@@ -45,6 +45,7 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -103,6 +104,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         if (tenant.isPresent()) {
             var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
             IcmpActiveDiscoveryDTO activeDiscoveryConfig;
+            validateActiveDiscovery(request);
             if (activeDiscovery.isEmpty()) {
                 activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
             } else {
@@ -111,12 +113,45 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                 scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
                 activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
             }
+
             scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
                 Long.valueOf(request.getLocationId()), tenant.get(), activeDiscoveryConfig.getId());
             responseObserver.onNext(activeDiscoveryConfig);
             responseObserver.onCompleted();
         } else {
             responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant()));
+        }
+    }
+
+    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request) {
+        var ipList = request.getIpAddressesList();
+        for (var ipAddressEntry : ipList) {
+            if (!ipAddressEntry.contains("-") && !ipAddressEntry.contains("/")) {
+                try {
+                    var inetAddress = InetAddressUtils.getInetAddress(ipAddressEntry);
+                } catch (Exception e) {
+                    log.error("Invalid Ip Address entry {}", ipAddressEntry);
+                    throw new IllegalArgumentException("Invalid Ip Address entry " + ipAddressEntry);
+                }
+            } else if (ipAddressEntry.contains("-")) {
+                try {
+                    var ipEntry = ipAddressEntry.split("-", 2);
+                    if (ipEntry.length >= 2) {
+                        var beginAddress = ipEntry[0];
+                        var endAddress = ipEntry[1];
+                        var numberOfIpAddresses = InetAddressUtils.difference(beginAddress, endAddress);
+                        if (numberOfIpAddresses.longValueExact() > 4096) {
+                            log.error("Ip Address range is too large {}", ipAddressEntry);
+                            throw new IllegalArgumentException("Ip Address range is too large " + ipAddressEntry);
+                        }
+                    } else {
+                        log.error("Invalid Ip Address range {}", ipAddressEntry);
+                        throw new IllegalArgumentException("Invalid Ip Address range " + ipAddressEntry);
+                    }
+                } catch (Exception e) {
+                    log.error("Invalid ip address entry {}", ipAddressEntry);
+                }
+            }
         }
     }
 

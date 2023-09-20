@@ -79,9 +79,6 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     private MonitorPolicyRepository mockMonitorPolicyRepository;
     private PolicyRuleRepository mockPolicyRuleRepository;
     private AlertDefinitionRepository mockAlertDefinitionRepo;
-    private EventDefinitionRepository mockEventDefinitionRepository;
-    private EventDefinitionMapper mockEventDefinitionMapper;
-    private AlertConditionRepository mockAlertConditionRepository;
     private AlertRepository mockAlertRepository;
     private TagRepository mockTagRepository;
     private TagOperationProducer mockTagOperationProducer;
@@ -98,16 +95,12 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         mockMonitorPolicyRepository = mock(MonitorPolicyRepository.class);
         mockPolicyRuleRepository = mock(PolicyRuleRepository.class);
         mockAlertDefinitionRepo = mock(AlertDefinitionRepository.class);
-        mockEventDefinitionRepository = mock(EventDefinitionRepository.class);
-        mockEventDefinitionMapper = mock(EventDefinitionMapper.class);
-        mockAlertConditionRepository = mock(AlertConditionRepository.class);
         mockAlertRepository = mock(AlertRepository.class);
         mockTagRepository = mock(TagRepository.class);
         mockTagOperationProducer = mock(TagOperationProducer.class);
 
         spyMonitorPolicyService = spy(new MonitorPolicyService(mockPolicyMapper, mockMonitorPolicyRepository,
-            mockPolicyRuleRepository, mockAlertDefinitionRepo, mockEventDefinitionRepository, mockEventDefinitionMapper,
-            mockAlertConditionRepository, mockAlertRepository, mockTagRepository, mockTagOperationProducer));
+            mockPolicyRuleRepository, mockAlertDefinitionRepo, mockAlertRepository, mockTagRepository, mockTagOperationProducer));
         MonitorPolicyGrpc grpcService = new MonitorPolicyGrpc(spyMonitorPolicyService, tenantLookup);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();

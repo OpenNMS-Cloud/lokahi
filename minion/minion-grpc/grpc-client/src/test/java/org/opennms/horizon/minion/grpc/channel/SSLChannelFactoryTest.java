@@ -20,6 +20,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -74,11 +75,7 @@ class SSLChannelFactoryTest {
         SSLChannelFactory channelFactory = new SSLChannelFactory(channelBuilderFactory, keyStoreFactory, grpcShutdownHandler);
         channelFactory.setKeyStore(keyStore.getKey().getAbsolutePath());
         channelFactory.setKeyStoreType("pkcs12");
-
-        when(channelBuilderFactory.create(eq("baz"), eq(443), isNull(), any(TlsChannelCredentials.class))).thenReturn(managedChannelBuilder);
-
-        channelFactory.create("baz", 443, null);
-
+        assertThrows(RuntimeException.class, () -> channelFactory.create("baz", 443, null));
         verify(grpcShutdownHandler).shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
     }
 
@@ -109,10 +106,7 @@ class SSLChannelFactoryTest {
         channelFactory.setTrustStoreType("pkcs12");
         channelFactory.setTrustStorePassword("changeit");
         when(keyStoreFactory.createKeyStore("pkcs12", trustStore, "changeit")).thenThrow(new GeneralSecurityException(""));
-        when(channelBuilderFactory.create(eq("baz"), eq(443), isNull(), any(TlsChannelCredentials.class))).thenReturn(managedChannelBuilder);
-
-        channelFactory.create("baz", 443, null);
-
+        assertThrows(RuntimeException.class, () -> channelFactory.create("baz", 443, null));
         verify(grpcShutdownHandler).shutdown(GrpcErrorMessages.FAIL_LOADING_TRUST_KEYSTORE);
     }
 
@@ -143,10 +137,7 @@ class SSLChannelFactoryTest {
         channelFactory.setKeyStoreType("pkcs12");
         channelFactory.setKeyStorePassword("changeit");
         when(keyStoreFactory.createKeyStore("pkcs12", keyStore, "changeit")).thenThrow(new GeneralSecurityException(""));
-        when(channelBuilderFactory.create(eq("baz"), eq(443), isNull(), any(TlsChannelCredentials.class))).thenReturn(managedChannelBuilder);
-
-        channelFactory.create("baz", 443, null);
-
+        assertThrows(RuntimeException.class, () -> channelFactory.create("baz", 443, null));
         verify(grpcShutdownHandler).shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
     }
 

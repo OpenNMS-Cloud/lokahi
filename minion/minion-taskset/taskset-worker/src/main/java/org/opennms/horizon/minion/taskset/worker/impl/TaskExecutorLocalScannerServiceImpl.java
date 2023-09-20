@@ -65,14 +65,17 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
     public void start() throws Exception {
         try {
             Scanner scanner = lookupScanner(taskDefinition);
-            //TODO: add node scanner
             log.info("Create Scanner for {}", taskDefinition.getPluginName());
             if(scanner != null) {
                 future = scanner.scan(taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             }
         } catch (Exception exc) {
-            log.warn("error executing workflow = " + taskDefinition.getId(), exc);
+            if (log.isDebugEnabled()) {
+                log.debug("error executing workflow = " + taskDefinition.getId(), exc);
+            } else {
+                log.warn("error executing workflow id = {}, message = {}" + taskDefinition.getId(), exc.getMessage());
+            }
         }
     }
 

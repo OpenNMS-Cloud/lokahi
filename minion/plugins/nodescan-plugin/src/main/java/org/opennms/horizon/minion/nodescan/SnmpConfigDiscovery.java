@@ -65,7 +65,11 @@ public class SnmpConfigDiscovery {
             var validConfigs = results.get(timeout, TimeUnit.MILLISECONDS);
             detectedConfigs.addAll(validConfigs.stream().flatMap(Optional::stream).toList());
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.error("Exception while executing config discovery", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Exception while executing config discovery", e);
+            } else {
+                LOG.error("Exception while executing config discovery {}", e.getMessage());
+            }
         }
 
         return detectedConfigs;
@@ -97,7 +101,9 @@ public class SnmpConfigDiscovery {
                 future.complete(Optional.empty());
             }));
         } catch (Exception e) {
-            LOG.error("Exception while doing snmp get with agentConfig {}", agentConfig);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Exception while doing snmp get with agentConfig {}", agentConfig);
+            }
             future.complete(Optional.empty());
         }
         return future;

@@ -158,9 +158,17 @@ public class NodeScanner implements Scanner {
                     .build());
         } catch (Exception e) {
             if (scanRequest != null) {
-                LOG.error("Error while performing node scan for nodeId = {}", scanRequest.getNodeId(), e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error while performing node scan for nodeId = {}", scanRequest.getNodeId(), e);
+                } else {
+                    LOG.error("Error while performing node scan for nodeId = {}, message = {}", scanRequest.getNodeId(), e.getMessage());
+                }
             } else {
-                LOG.error("Error while parsing request ", e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error while parsing request ", e);
+                } else {
+                    LOG.error("Error while parsing request {}", e.getMessage());
+                }
             }
             return CompletableFuture.failedFuture(e);
         }

@@ -80,8 +80,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 credentials.keyManager(keyManagerFactory.getKeyManagers());
             } catch (GeneralSecurityException e) {
                 grpcShutdownHandler.shutdown(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
+                throw new RuntimeException(GrpcErrorMessages.FAIL_LOADING_CLIENT_KEYSTORE);
             } catch (IllegalArgumentException e) {
                 grpcShutdownHandler.shutdown(GrpcErrorMessages.INVALID_CLIENT_STORE);
+                throw new RuntimeException(GrpcErrorMessages.INVALID_CLIENT_STORE);
             }
         }
 
@@ -92,8 +94,10 @@ public class SSLChannelFactory implements ManagedChannelFactory {
                 credentials.trustManager(trustManagerFactory.getTrustManagers());
             } catch (GeneralSecurityException e) {
                 grpcShutdownHandler.shutdown(GrpcErrorMessages.FAIL_LOADING_TRUST_KEYSTORE);
+                throw new RuntimeException(GrpcErrorMessages.FAIL_LOADING_TRUST_KEYSTORE);
             } catch (IllegalArgumentException e) {
                 grpcShutdownHandler.shutdown(GrpcErrorMessages.INVALID_TRUST_STORE);
+                throw new RuntimeException(GrpcErrorMessages.INVALID_TRUST_STORE);
             }
         }
 

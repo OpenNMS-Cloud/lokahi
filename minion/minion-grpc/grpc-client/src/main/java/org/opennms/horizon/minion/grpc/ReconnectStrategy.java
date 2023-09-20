@@ -4,4 +4,6 @@ public interface ReconnectStrategy {
 
     void activate();
 
+    void shutdown();
+
 }

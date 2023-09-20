@@ -35,9 +35,15 @@ public class SimpleReconnectStrategy implements Runnable, ReconnectStrategy {
     }
 
     @Override
+    public void shutdown() {
+        reconnectTask.cancel(true);
+        executor.shutdownNow();
+    }
+
+    @Override
     public void run() {
         ConnectivityState state = channel.getState(true);
-        LOG.info("Channel is in currently in state: {}. Waiting for it to be READY.", state);
+
         if (state == ConnectivityState.READY) {
             // The onConnect callback may block, so we leave this out of any critical section
             onConnect.run();
@@ -48,6 +54,8 @@ public class SimpleReconnectStrategy implements Runnable, ReconnectStrategy {
                     reconnectTask = null;
                 }
             }
+        } else {
+            LOG.info("Channel is in currently in state: {}. Waiting for it to be READY.", state);
         }
     }
 }

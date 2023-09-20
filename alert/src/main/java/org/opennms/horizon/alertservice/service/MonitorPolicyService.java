@@ -60,7 +60,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class MonitorPolicyService {
-    protected static final String SYSTEM_TENANT = "system-tenant";
+    public static final String SYSTEM_TENANT = "system-tenant";
     private static final String DEFAULT_POLICY = "default_policy";
 
     private final MonitorPolicyMapper policyMapper;
@@ -162,6 +162,10 @@ public class MonitorPolicyService {
 
     @Transactional
     public void deletePolicyById(long id, String tenantId) {
+        if (SYSTEM_TENANT.equals(tenantId)) {
+            throw new IllegalArgumentException(String.format("Policy with tenantId %s is not allowed to delete.",
+                SYSTEM_TENANT));
+        }
         var alerts = alertRepository.findByPolicyIdAndTenantId(id, tenantId);
         if (alerts != null && !alerts.isEmpty()) {
             alertRepository.deleteAll(alerts);
@@ -171,6 +175,10 @@ public class MonitorPolicyService {
 
     @Transactional
     public void deleteRuleById(long id, String tenantId) {
+        if (SYSTEM_TENANT.equals(tenantId)) {
+            throw new IllegalArgumentException(String.format("Rule with tenantId %s is not allowed to delete.",
+                SYSTEM_TENANT));
+        }
         var alerts = alertRepository.findByRuleIdAndTenantId(id, tenantId);
         if (alerts != null && !alerts.isEmpty()) {
             alertRepository.deleteAll(alerts);

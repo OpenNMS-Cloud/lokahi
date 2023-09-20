@@ -34,9 +34,11 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
+import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
@@ -45,19 +47,17 @@ import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
-import org.opennms.horizon.alertservice.db.repository.AlertConditionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.EventDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.tenant.GrpcTenantLookupImpl;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
-import org.opennms.horizon.alertservice.mapper.EventDefinitionMapper;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
 import org.opennms.horizon.alertservice.service.MonitorPolicyService;
 import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
+import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.io.IOException;
 import java.util.List;
@@ -71,6 +71,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opennms.horizon.alertservice.service.MonitorPolicyService.SYSTEM_TENANT;
 
 class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub stub;
@@ -151,6 +152,21 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     }
 
     @Test
+    void testDeleteDefaultPolicy() throws VerificationException {
+        var stubWithInterceptors = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders(authHeaderSystem)));
+        var policyId = Int64Value.of(10);
+        StatusRuntimeException thrown = Assertions.assertThrows(StatusRuntimeException.class, () -> {
+            stubWithInterceptors.deletePolicyById(policyId);
+        });
+
+        Assertions.assertEquals(String.format("INTERNAL: Policy with tenantId %s is not allowed to delete.",
+            SYSTEM_TENANT), thrown.getMessage());
+        verify(spyMonitorPolicyService).deletePolicyById(10L, SYSTEM_TENANT);
+        verify(spyInterceptor).verifyAccessToken(authHeaderSystem);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
     void testDeleteAlertByRule() throws VerificationException {
         alert1 = generateAlert("rule1", "policy1");
         alert2 = generateAlert("rule2", "policy1");
@@ -167,6 +183,21 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         verify(mockPolicyRuleRepository).deleteByIdAndTenantId(10L, tenantId);
 
         verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testDeleteDefaultPolicyRule() throws VerificationException {
+        var stubWithInterceptors = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders(authHeaderSystem)));
+        var policyId = Int64Value.of(10);
+        StatusRuntimeException thrown = Assertions.assertThrows(StatusRuntimeException.class, () -> {
+            stubWithInterceptors.deleteRuleById(policyId);
+        });
+
+        Assertions.assertEquals(String.format("INTERNAL: Rule with tenantId %s is not allowed to delete.",
+            SYSTEM_TENANT), thrown.getMessage());
+        verify(spyMonitorPolicyService).deleteRuleById(10L, GrpcConstants.SYSTEM_TENANT_ID);
+        verify(spyInterceptor).verifyAccessToken(authHeaderSystem);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 

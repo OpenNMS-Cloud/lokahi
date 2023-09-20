@@ -57,6 +57,7 @@ public abstract class AbstractGrpcUnitTest {
 
     protected final String tenantId = "test-tenant";
     protected final String authHeader = "Bearer esgs12345";
+    protected final String authHeaderSystem = "Bearer system";
 
     protected void startServer(BindableService service) throws IOException, VerificationException {
         spyInterceptor = spy(new AlertServerInterceptor(mock(KeycloakDeployment.class)));
@@ -65,6 +66,7 @@ public abstract class AbstractGrpcUnitTest {
             .addService(ServerInterceptors.intercept(service, spyInterceptor)).directExecutor().build();
         server.start();
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
+        doReturn(Optional.of(GrpcConstants.SYSTEM_TENANT_ID)).when(spyInterceptor).verifyAccessToken(authHeaderSystem);
     }
 
     protected void stopServer() throws InterruptedException {
@@ -73,8 +75,12 @@ public abstract class AbstractGrpcUnitTest {
     }
 
     protected Metadata createHeaders() {
+        return createHeaders(authHeader);
+    }
+
+    protected Metadata createHeaders(String authorization) {
         Metadata headers = new Metadata();
-        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, authHeader);
+        headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, authorization);
         return headers;
     }
 }

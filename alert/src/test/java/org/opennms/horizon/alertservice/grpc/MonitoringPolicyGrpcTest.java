@@ -57,7 +57,6 @@ import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
 import org.opennms.horizon.alertservice.service.MonitorPolicyService;
 import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
-import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.io.IOException;
 import java.util.List;
@@ -196,7 +195,7 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
 
         Assertions.assertEquals(String.format("INTERNAL: Rule with tenantId %s is not allowed to delete.",
             SYSTEM_TENANT), thrown.getMessage());
-        verify(spyMonitorPolicyService).deleteRuleById(10L, GrpcConstants.SYSTEM_TENANT_ID);
+        verify(spyMonitorPolicyService).deleteRuleById(10L, SYSTEM_TENANT);
         verify(spyInterceptor).verifyAccessToken(authHeaderSystem);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }

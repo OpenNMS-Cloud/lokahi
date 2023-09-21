@@ -1,5 +1,6 @@
 <template>
   <FeatherDialog
+    :hide-close="true"
     :labels="{ title: ' ', close: '' }"
     :modelValue="discoveryStore.newDiscoveryModalActive"
     @update:modelValue="discoveryStore.closeNewModal"

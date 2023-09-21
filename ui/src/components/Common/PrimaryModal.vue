@@ -1,5 +1,6 @@
 <template>
   <FeatherDialog
+    :hide-close="true"
     :hide-title="hideTitle"
     :modelValue="isVisible"
     :labels="labels"

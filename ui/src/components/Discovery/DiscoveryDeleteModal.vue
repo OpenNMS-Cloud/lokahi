@@ -1,5 +1,6 @@
 <template>
   <FeatherDialog
+    :hide-close="true"
     :labels="{ title: 'Delete Discovery', close: 'Close' }"
     :modelValue="discoveryStore.deleteModalOpen"
   >

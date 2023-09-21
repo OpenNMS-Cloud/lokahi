@@ -161,8 +161,6 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
         return rule
       })
 
-      console.log('Updating:', policy)
-
       await addMonitoringPolicy({ policy })
 
       if (!error.value) {

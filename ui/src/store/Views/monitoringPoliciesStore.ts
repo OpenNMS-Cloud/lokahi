@@ -22,7 +22,8 @@ const { showSnackbar } = useSnackbar()
 type TState = {
   selectedPolicy?: Policy
   selectedRule?: PolicyRule
-  monitoringPolicies: MonitorPolicy[]
+  monitoringPolicies: MonitorPolicy[],
+  numOfAlertsForPolicy: number
 }
 
 const defaultPolicy: Policy = {
@@ -79,7 +80,8 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
   state: (): TState => ({
     selectedPolicy: undefined,
     selectedRule: undefined,
-    monitoringPolicies: []
+    monitoringPolicies: [],
+    numOfAlertsForPolicy: 0
   }),
   actions: {
     // used for initial population of policies
@@ -155,10 +157,13 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
           return condition
         })
         if (!policy.id) delete rule.id // don't send generated ids
+        if (policy.isDefault) delete policy.isDefault // for updating default (tags only)
         return rule
       })
 
-      await addMonitoringPolicy({ policy: policy })
+      console.log('Updating:', policy)
+
+      await addMonitoringPolicy({ policy })
 
       if (!error.value) {
         this.selectedPolicy = undefined
@@ -184,6 +189,19 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       }
 
       this.selectedRule = undefined
+    },
+    async removePolicy() {
+      const { deleteMonitoringPolicy } = useMonitoringPoliciesMutations()
+      await deleteMonitoringPolicy({ id: this.selectedPolicy?.id })
+      this.getMonitoringPolicies()
+
+      this.selectedRule = undefined
+      this.selectedPolicy = undefined
+    },
+    async countAlerts() {
+      const { getAlertCountByPolicyId } = useMonitoringPoliciesQueries()
+      const count = await getAlertCountByPolicyId(this.selectedPolicy?.id)
+      this.numOfAlertsForPolicy = count
     }
   }
 })

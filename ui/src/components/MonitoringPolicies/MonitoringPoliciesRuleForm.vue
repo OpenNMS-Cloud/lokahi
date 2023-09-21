@@ -29,7 +29,7 @@
           <FeatherButton
             v-if="!store.selectedPolicy.isDefault"
             icon="Delete Rule"
-            @click="store.removeRule"
+            @click="openModal"
           >
             <FeatherIcon :icon="icons.deleteIcon" />
           </FeatherButton>
@@ -142,6 +142,12 @@
       </div>
     </transition>
   </div>
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :name="store.selectedRule?.name"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => store.removeRule()"
+  />
 </template>
 
 <script setup lang="ts">
@@ -151,7 +157,9 @@ import Add from '@featherds/icon/action/Add'
 import Delete from '@featherds/icon/action/Delete'
 import { ThresholdMetrics } from './monitoringPolicies.constants'
 import { AlertCondition, DetectionMethod, EventType, ManagedObjectType, PolicyRule } from '@/types/graphql'
+import useModal from '@/composables/useModal'
 
+const { openModal, closeModal, isVisible } = useModal()
 const store = useMonitoringPoliciesStore()
 const icons = markRaw({
   addIcon: Add,

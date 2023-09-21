@@ -23,12 +23,21 @@
       >
         <div class="policy-form-title-container">
           <div class="form-title">Policy Name</div>
-          <FeatherButton
-            icon="Copy"
-            @click="store.copyPolicy(store.selectedPolicy!)"
-          >
-            <FeatherIcon :icon="ContentCopy" />
-          </FeatherButton>
+          <div>
+            <FeatherButton
+              icon="Copy"
+              @click="store.copyPolicy(store.selectedPolicy!)"
+            >
+              <FeatherIcon :icon="ContentCopy" />
+            </FeatherButton>
+            <FeatherButton
+              v-if="!store.selectedPolicy.isDefault && store.selectedPolicy.id"
+              icon="Delete Policy"
+              @click="countAlertsAndOpenDeleteModal"
+            >
+              <FeatherIcon :icon="icons.Delete" />
+            </FeatherButton>
+          </div>
         </div>
 
         <FeatherInput
@@ -86,32 +95,58 @@
           :policy="(policy as Policy)"
           :index="index"
           @selectPolicy="(policy: Policy) => store.displayPolicyForm(policy)"
+          @deletePolicy="(policy: Policy) => countAlertsAndOpenDeleteModal(policy)"
           @copyPolicy="(policy: Policy) => store.copyPolicy(policy)"
         />
       </div>
     </transition>
   </div>
   <hr v-if="store.selectedPolicy" />
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :customMsg="deleteMsg"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => store.removePolicy()"
+    :isDeleting="mutations.deleteIsFetching"
+  />
 </template>
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import Add from '@featherds/icon/action/Add'
 import { Policy } from '@/types/policies'
 import { TagSelectItem } from '@/types'
 import ContentCopy from '@featherds/icon/action/ContentCopy'
+import Delete from '@featherds/icon/action/Delete'
+import useModal from '@/composables/useModal'
 
+const { openModal, closeModal, isVisible } = useModal()
 const store = useMonitoringPoliciesStore()
+const mutations = useMonitoringPoliciesMutations()
 const tagQueries = useTagQueries()
 const icons = markRaw({
   Add,
-  ContentCopy
+  ContentCopy,
+  Delete
 })
 
 const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => tag.name))
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
 const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: string) => ({ name: tag, id: tag })))
+
+const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
+  if (policy?.id) {
+    store.selectedPolicy = policy
+  }
+  await store.countAlerts()
+  openModal()
+}
+
+const deleteMsg = computed(() => 
+`Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
+)
 </script>
 
 <style scoped lang="scss">

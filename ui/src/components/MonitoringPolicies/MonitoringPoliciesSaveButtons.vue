@@ -24,7 +24,7 @@ import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoli
 const store = useMonitoringPoliciesStore()
 const mutations = useMonitoringPoliciesMutations()
 const disableSavePolicyBtn = computed(
-  () => store.selectedPolicy?.isDefault || !store.selectedPolicy?.rules?.length || !store.selectedPolicy.name
+  () => !store.selectedPolicy?.rules?.length || !store.selectedPolicy.name
 )
 </script>
 

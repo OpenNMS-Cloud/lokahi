@@ -29,7 +29,7 @@
           <FeatherButton
             v-if="!store.selectedPolicy.isDefault"
             icon="Delete Rule"
-            @click="openModal"
+            @click="countAlertsAndOpenDeleteModal"
           >
             <FeatherIcon :icon="icons.deleteIcon" />
           </FeatherButton>
@@ -144,14 +144,16 @@
   </div>
   <DeleteConfirmationModal
     :isVisible="isVisible"
-    :name="store.selectedRule?.name"
+    :customMsg="deleteMsg"
     :closeModal="() => closeModal()"
     :deleteHandler="() => store.removeRule()"
+    :isDeleting="mutations.deleteRuleIsFetching"
   />
 </template>
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
 import { ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
 import Delete from '@featherds/icon/action/Delete'
@@ -161,6 +163,7 @@ import useModal from '@/composables/useModal'
 
 const { openModal, closeModal, isVisible } = useModal()
 const store = useMonitoringPoliciesStore()
+const mutations = useMonitoringPoliciesMutations()
 const icons = markRaw({
   addIcon: Add,
   deleteIcon: Delete
@@ -201,6 +204,15 @@ const selectDetectionMethod = async (method: DetectionMethod) => {
 }
 const disableSaveRuleBtn = computed(
   () => store.selectedPolicy?.isDefault || !store.selectedRule?.name || !store.selectedRule?.alertConditions?.length
+)
+
+const countAlertsAndOpenDeleteModal = async () => {
+  await store.countAlertsForRule()
+  openModal()
+}
+
+const deleteMsg = computed(() => 
+`Deleting rule ${store.selectedRule?.name} removes ${store.numOfAlertsForRule} associated alerts. Do you wish to proceed?`
 )
 </script>
 

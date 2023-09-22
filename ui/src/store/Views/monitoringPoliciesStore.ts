@@ -24,6 +24,7 @@ type TState = {
   selectedRule?: PolicyRule
   monitoringPolicies: MonitorPolicy[],
   numOfAlertsForPolicy: number
+  numOfAlertsForRule: number
 }
 
 const defaultPolicy: Policy = {
@@ -81,7 +82,8 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     selectedPolicy: undefined,
     selectedRule: undefined,
     monitoringPolicies: [],
-    numOfAlertsForPolicy: 0
+    numOfAlertsForPolicy: 0,
+    numOfAlertsForRule: 0
   }),
   actions: {
     // used for initial population of policies
@@ -179,20 +181,28 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       delete copiedPolicy.name
       this.displayPolicyForm(copiedPolicy)
     },
-    removeRule() {
+    async removeRule() {
+      const { deleteRule } = useMonitoringPoliciesMutations()
+      await deleteRule({ id: this.selectedRule?.id })
+
       const ruleIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
 
       if (ruleIndex !== -1) {
         this.selectedPolicy!.rules?.splice(ruleIndex, 1)
       }
 
+      this.getMonitoringPolicies()
       this.selectedRule = undefined
+    },
+    async countAlertsForRule() {
+      const { getAlertCountByRuleId } = useMonitoringPoliciesQueries()
+      const count = await getAlertCountByRuleId(this.selectedRule?.id)
+      this.numOfAlertsForRule = count
     },
     async removePolicy() {
       const { deleteMonitoringPolicy } = useMonitoringPoliciesMutations()
       await deleteMonitoringPolicy({ id: this.selectedPolicy?.id })
       this.getMonitoringPolicies()
-
       this.selectedRule = undefined
       this.selectedPolicy = undefined
     },

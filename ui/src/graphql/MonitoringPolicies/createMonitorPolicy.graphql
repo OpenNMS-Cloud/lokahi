@@ -1,5 +1,0 @@
-mutation CreateMonitorPolicy($policy: MonitorPolicyInput!) {
-  createMonitorPolicy(policy: $policy) {
-    id
-  }
-}

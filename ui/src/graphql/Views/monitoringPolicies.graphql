@@ -45,3 +45,7 @@ query ListMonitoryPolicies {
 query CountAlertByPolicyId($id: Long!) {
   countAlertByPolicyId(id: $id)
 }
+
+query CountAlertByRuleId($id: Long!) {
+  countAlertByRuleId(id: $id)
+}

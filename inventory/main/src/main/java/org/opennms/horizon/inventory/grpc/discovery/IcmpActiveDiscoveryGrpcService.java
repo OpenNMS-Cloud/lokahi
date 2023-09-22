@@ -48,6 +48,8 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 @Slf4j
@@ -57,6 +59,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     private final TenantLookup tenantLookup;
     private final IcmpActiveDiscoveryService discoveryService;
     private final ScannerTaskSetService scannerTaskSetService;
+    private static final Integer MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY = 65536;
 
     @Override
     public void createDiscovery(IcmpActiveDiscoveryCreateDTO request, StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
@@ -129,7 +132,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         }
     }
 
-    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request) {
+    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request) throws UnknownHostException {
         var ipList = request.getIpAddressesList();
         for (var ipAddressEntry : ipList) {
             if (!ipAddressEntry.contains("-") && !ipAddressEntry.contains("/")) {
@@ -144,8 +147,10 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                     if (ipEntry.length >= 2) {
                         var beginAddress = ipEntry[0];
                         var endAddress = ipEntry[1];
-                        var numberOfIpAddresses = InetAddressUtils.difference(beginAddress, endAddress);
-                        if (numberOfIpAddresses.abs().longValueExact() > 65536) {
+                        var beginIp = InetAddress.getByName(beginAddress);
+                        var endIp = InetAddress.getByName(endAddress);
+                        var numberOfIpAddresses = InetAddressUtils.difference(beginIp, endIp);
+                        if (numberOfIpAddresses.abs().longValueExact() > MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY) {
                             log.error("Ip Address range is too large {}", ipAddressEntry);
                             throw new IllegalArgumentException("Ip Address range is too large " + ipAddressEntry);
                         }

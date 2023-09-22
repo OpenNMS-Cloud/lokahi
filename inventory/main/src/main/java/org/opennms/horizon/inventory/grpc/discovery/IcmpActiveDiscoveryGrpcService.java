@@ -104,7 +104,13 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         if (tenant.isPresent()) {
             var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
             IcmpActiveDiscoveryDTO activeDiscoveryConfig;
-            validateActiveDiscovery(request);
+            try {
+                validateActiveDiscovery(request);
+            } catch (Exception e) {
+                log.error("Exception while validating active discovery", e);
+                responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
+                return;
+            }
             if (activeDiscovery.isEmpty()) {
                 activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
             } else {
@@ -134,13 +140,12 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                     throw new IllegalArgumentException("Invalid Ip Address entry " + ipAddressEntry);
                 }
             } else if (ipAddressEntry.contains("-")) {
-                try {
                     var ipEntry = ipAddressEntry.split("-", 2);
                     if (ipEntry.length >= 2) {
                         var beginAddress = ipEntry[0];
                         var endAddress = ipEntry[1];
                         var numberOfIpAddresses = InetAddressUtils.difference(beginAddress, endAddress);
-                        if (numberOfIpAddresses.longValueExact() > 4096) {
+                        if (numberOfIpAddresses.abs().longValueExact() > 65536) {
                             log.error("Ip Address range is too large {}", ipAddressEntry);
                             throw new IllegalArgumentException("Ip Address range is too large " + ipAddressEntry);
                         }
@@ -148,9 +153,6 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                         log.error("Invalid Ip Address range {}", ipAddressEntry);
                         throw new IllegalArgumentException("Invalid Ip Address range " + ipAddressEntry);
                     }
-                } catch (Exception e) {
-                    log.error("Invalid ip address entry {}", ipAddressEntry);
-                }
             }
         }
     }
@@ -174,6 +176,10 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         } else {
             responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant()));
         }
+    }
+
+    private Status createInvalidDiscoveryInput(String message) {
+        return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage(message).build();
     }
 
     private Status createMissingTenant() {

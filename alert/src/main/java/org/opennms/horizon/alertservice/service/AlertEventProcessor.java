@@ -210,7 +210,7 @@ public class AlertEventProcessor {
 
             if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.DESCRIPTION_FIELD_NUMBER))) {
                 String desc = event.getDescription().toLowerCase().contains("exception") ?
-                    event.getDescription() : "Monitoring error.";
+                    "Monitoring error." : event.getDescription();
                 event.getParametersList().stream().filter(p -> "serviceName".equals(p.getName())).findFirst()
                     .ifPresentOrElse(
                         p -> alert.setDescription(p.getValue() + " " + desc),

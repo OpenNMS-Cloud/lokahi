@@ -38,7 +38,7 @@ public interface PingConstants {
     int DEFAULT_RETRIES = 2;
     int DEFAULT_TIMEOUT = 800;
     int DEFAULT_PACKET_SIZE = 64;
-    double DEFAULT_PACKETS_PER_SECOND = 1.0;
+    double DEFAULT_PACKETS_PER_SECOND = 100.0;
     boolean DEFAULT_ALLOW_FRAGMENTATION = true;
     int DEFAULT_DSCP = 0;
 }

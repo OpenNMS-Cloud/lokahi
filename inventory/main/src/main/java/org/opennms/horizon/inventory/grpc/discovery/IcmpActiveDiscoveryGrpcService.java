@@ -67,6 +67,13 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
             .ifPresentOrElse(tenantId -> {
                 try {
                     var activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenantId);
+                    try {
+                        validateActiveDiscovery(request);
+                    } catch (Exception e) {
+                        log.error("Exception while validating active discovery", e);
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
+                        return;
+                    }
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(), Long.valueOf(request.getLocationId()), tenantId, activeDiscoveryConfig.getId());
@@ -150,7 +157,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                         var beginIp = InetAddress.getByName(beginAddress);
                         var endIp = InetAddress.getByName(endAddress);
                         var numberOfIpAddresses = InetAddressUtils.difference(beginIp, endIp);
-                        if (numberOfIpAddresses.abs().longValueExact() > MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY) {
+                        if (numberOfIpAddresses.abs().longValueExact() >= MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY) {
                             log.error("Ip Address range is too large {}", ipAddressEntry);
                             throw new IllegalArgumentException("Ip Address range is too large " + ipAddressEntry);
                         }

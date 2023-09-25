@@ -239,6 +239,23 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
+
+    @Test
+    void testUpsertDiscoveryForOutOfRangeIpAddresses() {
+
+        prepareCommonTenantLookup();
+        String ipRange = "192.168.1.0-192.169.1.0";
+        var discoveryCreateDTO =
+            IcmpActiveDiscoveryCreateDTO.newBuilder()
+                .setName("test-out-of-range")
+                .addIpAddresses(ipRange)
+                .build();
+        StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        target.upsertActiveDiscovery(discoveryCreateDTO, mockStreamObserver);
+        var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "Ip Address range is too large " + ipRange);
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
 //========================================
 // Internals
 //----------------------------------------

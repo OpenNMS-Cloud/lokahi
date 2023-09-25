@@ -56,7 +56,7 @@ public class PingSweepCommand implements Action {
     int packetsize = PingConstants.DEFAULT_PACKET_SIZE;
 
     @Option(name = "--pps", description = "packets per second")
-    double packetsPerSecond = 100;
+    double packetsPerSecond = PingConstants.DEFAULT_PACKETS_PER_SECOND;
 
     @Argument(index = 0, name = "begin", description = "First address of the IP range to be pinged", required = true, multiValued = false)
     String m_begin;

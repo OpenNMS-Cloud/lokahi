@@ -6,7 +6,6 @@
       type="single"
       :modelValue="addressModelValue"
       :minChar="1"
-      noResults=""
       :loading="loading"
       :results="results"
       @search="(e: any) => search(e)"
@@ -43,30 +42,17 @@ watch(
 
 const search = debounce(async (q: string) => {
   loading.value = true
-  q = q.trim()
   if (q.length == 0) {
     return
   }
   const addresses = await provider.search({ query: q })
   results.value = addresses
-    .filter((x) => matchQuery(q, x.label))
     .map((x) => ({
       _text: x.label,
       value: x
     }))
-
-  if (results.value.length == 0 || results.value[0]._text != q) {
-    results.value.unshift({ _text: q, value: { label: q, x: null, y: null } } as IAutocompleteItemType)
-  }
   loading.value = false
 }, 1000)
-
-const matchQuery = function (q: string, label: string) {
-  const words = q.split(/[\s.,;]/)
-  const lowerCase = label.toLowerCase()
-  const results = words.filter((w) => lowerCase.indexOf(w) == -1)
-  return results.length == 0
-}
 </script>
 
 <style lang="scss" scoped>

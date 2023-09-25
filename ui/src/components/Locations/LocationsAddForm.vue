@@ -85,7 +85,7 @@ const formInputs = reactive({
 })
 
 const onAddressChange = (newAddress: any) => {
-  if (newAddress != undefined) {
+  if (newAddress?.value.label && newAddress?.value.x && newAddress?.value.y) {
     formInputs.address = newAddress.value.label
     formInputs.longitude = newAddress.value.x
     formInputs.latitude = newAddress.value.y

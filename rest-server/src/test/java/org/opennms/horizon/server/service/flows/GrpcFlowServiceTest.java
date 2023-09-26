@@ -87,8 +87,11 @@ class GrpcFlowServiceTest {
         .setId(1L).setNodeId(1L).setIpAddress("127.0.0.1").setHostname("localhost").setSnmpPrimary(true)
         .setSnmpInterfaceId(2).build();
     private NodeDTO nodeDTO = NodeDTO.newBuilder().setId(1L).setNodeLabel("label")
-        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(1).setIfIndex(1).setIfName("eth0"))
-        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(2).setIfIndex(2).setIfName("eth1")).build();
+        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(1).setIfIndex(1).setIfName("eth0").setIfAdminStatus(1)
+            .setIfOperatorStatus(1))
+        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(2).setIfIndex(2).setIfName("eth1").setIfAdminStatus(1)
+            .setIfOperatorStatus(1))
+        .build();
 
     @BeforeEach
     public void setUp() {

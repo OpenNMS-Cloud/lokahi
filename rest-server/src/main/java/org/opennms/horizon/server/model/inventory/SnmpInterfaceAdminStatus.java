@@ -26,29 +26,35 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.mapper;
+package org.opennms.horizon.server.model.inventory;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.opennms.horizon.server.model.inventory.SnmpInterface;
-import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
-import org.opennms.horizon.server.model.inventory.SnmpInterfaceAdminStatus;
-import org.opennms.horizon.server.model.inventory.SnmpInterfaceOperatorStatus;
+import java.util.HashMap;
+import java.util.Map;
 
-@Mapper(componentModel = "spring")
-public interface SnmpInterfaceMapper {
-    @Mapping(source = "ifAdminStatus", target = "ifAdminStatus", qualifiedByName = "mapAdminStatus")
-    @Mapping(source = "ifOperatorStatus", target = "ifOperatorStatus", qualifiedByName = "mapOperatorStatus")
-    SnmpInterface protobufToSnmpInterface(SnmpInterfaceDTO protoBuf);
+public enum SnmpInterfaceAdminStatus {
+    UP(1),
+    DOWN(2),
+    TESTING(3);
 
-    @Named("mapAdminStatus")
-    default String mapAdminStatus(int ifAdminStatus) {
-        return SnmpInterfaceAdminStatus.valueOf(ifAdminStatus).name();
+    public final int value;
+    private static final Map<Integer, SnmpInterfaceAdminStatus> MAP = new HashMap<>();
+
+    SnmpInterfaceAdminStatus(int value) {
+        this.value = value;
     }
 
-    @Named("mapOperatorStatus")
-    default String mapOperatorStatus(int ifOperatorStatus) {
-        return SnmpInterfaceOperatorStatus.valueOf(ifOperatorStatus).name();
+    static {
+        for (SnmpInterfaceAdminStatus status : SnmpInterfaceAdminStatus.values()) {
+            MAP.put(status.getValue(), status);
+        }
+    }
+
+    public static SnmpInterfaceAdminStatus valueOf(int value) {
+        return MAP.get(value);
+    }
+
+    public int getValue() {
+        return value;
     }
 }
+

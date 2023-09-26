@@ -42,8 +42,8 @@ public class SnmpInterface {
     private int ifType;
     private String ifName;
     private long ifSpeed;
-    private int ifAdminStatus;
-    private int ifOperatorStatus;
+    private String ifAdminStatus;
+    private String ifOperatorStatus;
     private String ifAlias;
     private String physicalAddr;
 }

@@ -48,17 +48,19 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.MinionCertificateVerifier.ServiceName }}
-          image: {{ .Values.OpenNMS.MinionCertificateVerifier.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionCertificateVerifier) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.MinionCertificateVerifier.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
-            {{- include "deployment.env" .Values.OpenNMS.MinionCertificateVerifier | nindent 12 }}
             - name: GRPC_URL_MINION_CERTIFICATE_MANAGER
               value: {{ if or (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "") (eq .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl "dev")
                 }}"{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}:8990"{{
               else
                 }}"{{ .Values.OpenNMS.MinionCertificateVerifier.CertificateManagerUrl }}"{{ end }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionCertificateVerifier) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

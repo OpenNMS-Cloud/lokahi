@@ -1,0 +1,14 @@
+mutation CreateMonitorPolicy($policy: MonitorPolicyInput!) {
+  createMonitorPolicy(policy: $policy) {
+    id
+  }
+}
+
+mutation DeletePolicyById($id: Long!) {
+  deletePolicyById(id: $id)
+}
+
+
+mutation DeleteRuleById($id: Long!) {
+  deleteRuleById(id: $id)
+}

@@ -36,7 +36,9 @@ import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
@@ -63,6 +65,8 @@ import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityFo
 public class CollectorTaskSetService {
 
     private final NodeRepository nodeRepository;
+    private final IpInterfaceRepository ipInterfaceRepository;
+    private final SnmpInterfaceRepository snmpInterfaceRepository;
 
     public TaskDefinition getCollectorTask(MonitorType monitorType, IpInterface ipInterface, long nodeId,
                                            SnmpConfiguration snmpConfiguration) {
@@ -171,20 +175,10 @@ public class CollectorTaskSetService {
     }
 
     List<SnmpInterface> getSnmpInterfaces(long nodeId) {
-        var optional = nodeRepository.findById(nodeId);
-        if (optional.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return optional.get().getSnmpInterfaces();
-        }
+        return snmpInterfaceRepository.findByNodeId(nodeId);
     }
 
     List<IpInterface> getIpInterfaces(long nodeId) {
-        var optional = nodeRepository.findById(nodeId);
-        if (optional.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return optional.get().getIpInterfaces();
-        }
+         return ipInterfaceRepository.findByNodeId(nodeId);
     }
 }

@@ -63,7 +63,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -235,6 +237,35 @@ public class MonitorPolicySteps {
     @Then("Verify valid monitoring policy ID is set in alert for the tenant")
     public void checkMonitoringPolicyIdSet() {
         checkMonitoringPolicyIdSet(tenantSteps.getTenantId());
+    }
+
+    @Then("Delete policy named {string}")
+    public void deletePolicyNamed(String policyName) {
+        Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var policies = grpcClient.getPolicyStub().listPolicies(Empty.newBuilder().build()).getPoliciesList()
+                .stream().filter(p -> policyName.equals(p.getName())).toList();
+
+            assertEquals(1, policies.size());
+            assertTrue(grpcClient.getPolicyStub().deletePolicyById(Int64Value.of(policies.get(0).getId())).getValue());
+        });
+    }
+
+    @Then("Delete policy rule named {string} under policy named {string}")
+    public void deletePolicyRuleNamedUnderPolicyNamed(String ruleName, String policyName) {
+        Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            List<PolicyRuleProto> rulesMatched = new ArrayList<>();
+            grpcClient.getPolicyStub().listPolicies(Empty.newBuilder().build()).getPoliciesList()
+                .forEach(p -> {
+                    if (!policyName.equals(p.getName())) {
+                        return;
+                    }
+                    var filtered = p.getRulesList().stream().filter(r -> ruleName.equals(r.getName())).toList();
+                    rulesMatched.addAll(filtered);
+                });
+
+            assertEquals(1, rulesMatched.size());
+            assertTrue(grpcClient.getPolicyStub().deleteRuleById(Int64Value.of(rulesMatched.get(0).getId())).getValue());
+        });
     }
 
     @Then("Verify valid monitoring policy ID is set in alert for tenant {string}")

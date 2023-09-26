@@ -103,7 +103,7 @@ class TagPublisherTest {
         // Verify the Results
         //
         var matcher = prepareTagOperationKafkaMessageMatcher((actualList) -> Objects.equals(opList, actualList));
-        verify(kafkaTemplate).send(Mockito.argThat(matcher));
+        verify(kafkaTemplate, timeout(3000)).send(Mockito.argThat(matcher));
     }
 
 //========================================

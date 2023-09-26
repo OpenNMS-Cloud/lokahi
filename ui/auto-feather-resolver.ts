@@ -2,6 +2,7 @@ const mismatchedDirNames: Record<string, string> = {
   spinner: 'progress',
   'rail-item': 'navigation-rail',
   'app-bar-link': 'app-bar',
+  'app-header': 'app-rail',
   'checkbox-group': 'checkbox',
   'list-item': 'list',
   'list-header': 'list',

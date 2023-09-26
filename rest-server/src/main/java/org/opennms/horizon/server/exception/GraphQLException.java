@@ -30,11 +30,19 @@ package org.opennms.horizon.server.exception;
 
 import java.io.Serial;
 
-public class GraphQLException extends Exception {
+/**
+ * An exception that represents an error that occurred whose message can be
+ * displayed to the user, ie bad request, id not found, etc.
+ */
+public class GraphQLException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = -4543741752174882855L;
 
     public GraphQLException(String message) {
         super(message);
+    }
+
+    public GraphQLException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

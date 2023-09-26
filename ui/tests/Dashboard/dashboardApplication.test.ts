@@ -42,3 +42,10 @@ test('The DashboardApplications should call querie with paramters', () => {
   expect(spy).toHaveBeenCalled()
   expect(spy).toHaveReturnedWith(filterValuesMock)
 })
+
+test('Resetting the flows date filter to Today', () => {
+  const store = useFlowsStore()
+  expect(store.filters.dateFilter).toBe(TimeRange.Last_24Hours)
+  wrapper.unmount()
+  expect(store.filters.dateFilter).toBe(TimeRange.Today)
+})

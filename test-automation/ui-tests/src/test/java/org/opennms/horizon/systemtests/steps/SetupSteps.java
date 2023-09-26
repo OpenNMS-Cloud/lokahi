@@ -46,9 +46,8 @@ public class SetupSteps {
         return network;
     }
 
-    @Given("Logged in with a minion {string}")
-    public static void loggedInWithANamedMinion(String minionName) {
-        login();
+    @Given("Start a minion {string}")
+    public static void startNamedMinion(String minionName) {
 
         if (WelcomePage.containsWalkthroughButton()) {
             String walkthroughMinionName = "default-minion";

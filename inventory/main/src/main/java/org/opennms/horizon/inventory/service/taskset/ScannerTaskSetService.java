@@ -119,6 +119,16 @@ public class ScannerTaskSetService {
         tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, locationId, List.of(taskDefinition)));
     }
 
+    public void removeDiscoveryScanTask(Long locationId, long activeDiscoveryId, String tenantId) {
+        String taskId = identityForDiscoveryTask(locationId, activeDiscoveryId);
+        var taskDef = TaskDefinition.newBuilder()
+            .setType(TaskType.SCANNER)
+            .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
+            .setId(taskId).build();
+
+        taskSetPublisher.publishTaskDeletion(tenantId, locationId, List.of(taskDef));
+    }
+
     Optional<TaskDefinition> createDiscoveryTask(List<String> ipAddresses, Long locationId, long activeDiscoveryId) {
 
         var ipRanges = new ArrayList<IpRange>();

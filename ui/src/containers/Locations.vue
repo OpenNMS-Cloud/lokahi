@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="full-page-container">
     <div class="header">
       <HeadlinePage
         text="Locations"
@@ -103,7 +103,7 @@ const downloadCert = async () => {
 
   if (minionCertificate) {
     locationStore.setCertificatePassword(minionCertificate.password as string)
-    createAndDownloadBlobFile(minionCertificate.certificate, `${locationStore.selectedLocation?.location}-certificate.p12`)
+    createAndDownloadBlobFile(minionCertificate.certificate, `minion-${locationStore.selectedLocation?.location}.zip`)
   }
 }
 
@@ -119,7 +119,7 @@ const openInstructions = (type: InstructionsType) => {
 @use '@/styles/mediaQueriesMixins.scss';
 @use '@/styles/vars.scss';
 
-.wrapper {
+.full-page-container {
   .content-left {
     .search-location-input {
       width: 100%;

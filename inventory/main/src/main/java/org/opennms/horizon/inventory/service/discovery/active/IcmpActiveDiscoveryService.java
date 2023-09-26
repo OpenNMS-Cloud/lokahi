@@ -28,13 +28,16 @@
 
 package org.opennms.horizon.inventory.service.discovery.active;
 
+import com.google.protobuf.Int64Value;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.TagService;
@@ -49,6 +52,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class IcmpActiveDiscoveryService {
+
     private final IcmpActiveDiscoveryRepository repository;
     private final IcmpActiveDiscoveryMapper mapper;
     private final TagService tagService;
@@ -69,13 +73,58 @@ public class IcmpActiveDiscoveryService {
         return mapper.modelToDto(discovery);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
+    public IcmpActiveDiscoveryDTO upsertActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
+        if (request.hasId()) {
+            var optionalDiscovery = repository.findByIdAndTenantId(request.getId(), tenantId);
+            if (optionalDiscovery.isEmpty()) {
+                throw new IllegalArgumentException("Discovery with Id" + request.getId() + " doesn't exist");
+            }
+            var discovery = optionalDiscovery.get();
+            mapper.updateFromDto(request, discovery);
+            discovery.setCreateTime(LocalDateTime.now());
+            repository.save(discovery);
+            tagService.updateTags(tenantId, TagCreateListDTO.newBuilder()
+                .addEntityIds(TagEntityIdDTO.newBuilder()
+                    .setActiveDiscoveryId(discovery.getId()))
+                .addAllTags(request.getTagsList())
+                .build());
+            return mapper.modelToDto(discovery);
+        } else {
+            return createActiveDiscovery(request, tenantId);
+        }
+    }
+
+    @Transactional
+    public Boolean deleteActiveDiscovery(long id, String tenantId) {
+        try {
+            var discovery = repository.findByIdAndTenantId(id, tenantId);
+            if (discovery.isEmpty()) {
+                return false;
+            }
+            var icmpActiveDiscovery = discovery.get();
+            var tags = icmpActiveDiscovery.getTags();
+            tagService.removeTags(tenantId, TagRemoveListDTO.newBuilder()
+                    .addEntityIds(TagEntityIdDTO.newBuilder()
+                        .setActiveDiscoveryId(icmpActiveDiscovery.getId())
+                        .build())
+                    .addAllTagIds(tags.stream().map(Tag::getId).map(Int64Value::of).toList())
+                .build());
+            repository.deleteById(icmpActiveDiscovery.getId());
+            return true;
+        } catch (Exception e) {
+            log.error("Exception while deleting active discovery with id {}", id, e);
+            return false;
+        }
+    }
+
+
     public List<IcmpActiveDiscoveryDTO> getActiveDiscoveries(String tenantId) {
         var entities = repository.findByTenantId(tenantId);
         return entities.stream().map(mapper::modelToDto).toList();
     }
 
-    @Transactional(readOnly = true)
+
     public Optional<IcmpActiveDiscoveryDTO> getDiscoveryById(long id, String tenantId) {
         var optional = repository.findByIdAndTenantId(id, tenantId);
         return optional.map(mapper::modelToDto);

@@ -41,13 +41,7 @@ public class HomeSteps {
 
     @Then("wait until the 'Top 10 Applications' chart will reflect the received data")
     public void waitFlowsChart() {
-        for (int i = 0; i < 6; i++) {
-            Selenide.sleep(5_000);
-            Selenide.refresh();
-            if (HomePage.verifyTop10Applications()) {
-                break;
-            }
-        }
+        HomePage.waitOnTop10Applications();
         HomePage.verifyNoDataTop10ApplicationsState(false);
     }
 

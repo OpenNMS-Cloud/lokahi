@@ -22,7 +22,7 @@ import { optionsGraph } from './dashboardNetworkTraffic.config'
 import { ChartData } from '@/types'
 import { ChartOptions } from 'chart.js'
 import 'chartjs-adapter-date-fns'
-import { humanFileSize } from '../utils'
+import { humanFileSize, getColorFromFeatherVar, getChartGridColor } from '../utils'
 
 const { onThemeChange, isDark } = useTheme()
 
@@ -31,6 +31,10 @@ const networkTrafficIn = ref([] as [number, number][])
 const networkTrafficOut = ref([] as [number, number][])
 const dataGraph = ref({} as ChartData)
 const configGraph = ref({})
+
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
 
 
 onMounted(async () => {
@@ -52,7 +56,11 @@ const createConfigGraph = (list: number[]) => {
   options.scales.y = {
     ticks: {
       callback: (value) => humanFileSize(Number(value)),
-      maxTicksLimit: 8
+      maxTicksLimit: 8,
+      color: colorFromFeatherVar.value
+    },
+    grid: {
+      color: getChartGridColor(isDark.value)
     },
     position: 'right'
   }
@@ -72,7 +80,8 @@ const createConfigGraph = (list: number[]) => {
 
         return index % 2 === 0 ? format(new Date(val), 'kk:mm') : ''
       },
-      maxTicksLimit: 12
+      maxTicksLimit: 12,
+      color: colorFromFeatherVar.value
     },
     time: {
       tooltipFormat: 'kk:mm'
@@ -89,13 +98,15 @@ const createData = (list: [number, number][]) => {
         borderWidth: 0,
         data: networkTrafficIn.value,
         label: 'Inbound',
-        spanGaps: 1000 * 60 * 3 // no line over 3+ minute gaps
+        spanGaps: 1000 * 60 * 3, // no line over 3+ minute gaps
+        backgroundColor: getColorFromFeatherVar('categorical1')
       },
       {
         borderWidth: 0,
         data: networkTrafficOut.value,
         label: 'Outbound',
-        spanGaps: 1000 * 60 * 3
+        spanGaps: 1000 * 60 * 3,
+        backgroundColor: getColorFromFeatherVar('categorical0')
       }
     ]
   }
@@ -117,9 +128,9 @@ watchEffect(() => {
 })
 
 onThemeChange(() => {
-  optionsGraph.plugins.legend.labels.color = isDark.value ? '#d1d0d0' : '#00000'
-  optionsGraph.scales.x.ticks.color = isDark.value ? '#d1d0d0' : '#00000'
-  optionsGraph.scales.y.ticks.color = isDark.value ? '#d1d0d0' : '#00000'
+  optionsGraph.plugins.legend.labels.color = colorFromFeatherVar.value
+  optionsGraph.scales.x.ticks.color = colorFromFeatherVar.value
+  optionsGraph.scales.y.ticks.color = colorFromFeatherVar.value
   configGraph.value = { ...optionsGraph }
 })
 </script>

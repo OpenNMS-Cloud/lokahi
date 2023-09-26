@@ -75,6 +75,13 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
                                                               @Param("location_id") Long locationId,
                                                               @Param("monitoredState") MonitoredState monitoredState);
 
+    @Query("SELECT n " +
+        "FROM Node n " +
+        "WHERE n.tenantId = :tenantId " +
+        "AND n.monitoringLocation.id = :location_id ")
+    List<Node> findByTenantIdAndLocationId(@Param("tenantId") String tenantId,
+                                                              @Param("location_id") Long locationId);
+
     @Query("SELECT new org.opennms.horizon.inventory.model.TenantCount(n.tenantId, count(*)) " +
         "FROM Node n " +
         "GROUP BY n.tenantId"

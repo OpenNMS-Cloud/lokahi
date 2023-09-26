@@ -57,6 +57,7 @@ public class NodeKafkaProducer {
             .setId(node.getId())
             .setTenantId(node.getTenantId())
             .setNodeLabel(node.getNodeLabel())
+            .setMonitoringLocationId(node.getMonitoringLocationId())
             .build();
 
         var producerRecord = new ProducerRecord<String, byte[]>(topic, proto.toByteArray());

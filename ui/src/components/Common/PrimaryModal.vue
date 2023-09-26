@@ -1,10 +1,11 @@
 <template>
   <FeatherDialog
-    hideClose
+    :hide-close="true"
     :hide-title="hideTitle"
-    v-model="isVisible"
+    :modelValue="isVisible"
     :labels="labels"
-    @update:modelValue="$emit('close')"
+    @update:modelValue="(b: any) => updateModal(b)"
+    class="primary-modal"
   >
     <div
       class="content"
@@ -39,7 +40,7 @@ const props = defineProps({
     default: 450
   }
 })
-
+const emit = defineEmits(['close'])
 const isVisible = computed(() => props.visible)
 
 const labels = reactive({
@@ -52,6 +53,11 @@ watchEffect(() => {
     labels.title = props.title
   }
 })
+const updateModal = (isVisible: boolean) => {
+  if (!isVisible) {
+    emit('close')
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -77,5 +83,10 @@ watchEffect(() => {
       margin-bottom: var(variables.$spacing-l);
     }
   }
+}
+.primary-modal a.closeButton {
+  top: -18px !important;
+  right: -18px !important;
+  font-size: 22px !important;
 }
 </style>

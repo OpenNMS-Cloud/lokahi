@@ -1,7 +1,11 @@
 <template>
   <div class="table-chart-container">
     <div class="chart-container">
-      <Bar :data="chartData" :options="chartOptions" ref="barChart" />
+      <Bar
+        :data="chartData"
+        :options="chartOptions"
+        ref="barChart"
+      />
     </div>
 
     <div class="table-container">
@@ -14,7 +18,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(data, index) in tableData" :key="index">
+          <tr
+            v-for="(data, index) in tableData"
+            :key="index"
+          >
             <td>{{ humanFileSize(Number(addValues(data.bytesIn, data.bytesOut))) }}</td>
             <td>{{ humanFileSize(data.bytesIn) }}</td>
             <td>{{ humanFileSize(data.bytesOut) }}</td>
@@ -32,7 +39,7 @@ import { Bar } from 'vue-chartjs'
 import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartOptions } from 'chart.js'
 import { downloadCanvas } from '../Graphs/utils'
 import useTheme from '@/composables/useTheme'
-import { humanFileSize } from '../utils'
+import { getColorFromFeatherVar, humanFileSize, getChartGridColor } from '../utils'
 const { onThemeChange, isDark } = useTheme()
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -82,7 +89,8 @@ const chartOptions = computed<ChartOptions<any>>(() => {
           borderRadius: 8,
           font: {
             weight: 700
-          }
+          },
+          color: colorFromFeatherVar.value
         },
         onClick: (e: Event) => e.stopPropagation()
       },
@@ -112,12 +120,13 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         stacked: true,
         grid: {
           display: true,
-          color: isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+          color: getChartGridColor(isDark.value)
         },
         ticks: {
           callback: function (value: any) {
             return humanFileSize(value)
-          }
+          },
+          color: colorFromFeatherVar.value
         }
       },
       y: {
@@ -128,22 +137,29 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         title: {
           display: true,
           align: 'center',
-          text: 'Applications'
+          text: 'Applications',
+          color: colorFromFeatherVar.value
+        },
+        ticks: {
+          color: colorFromFeatherVar.value
         }
       }
     }
   }
 })
 
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
+
 onThemeChange(() => {
-  chartOptions.value.scales.x.grid.color = isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  chartOptions.value.scales.x.grid.color = getChartGridColor(isDark.value)
 })
 
 const addValues = (a: number, b: number) => {
   const total = (a + b).toString()
   return parseFloat(total).toPrecision(3)
 }
-
 
 defineExpose({
   downloadChart

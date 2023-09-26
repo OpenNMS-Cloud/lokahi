@@ -14,6 +14,8 @@ set -e
 CURRENT_TAG=$1
 PREVIOUS_TAG=$2
 
+echo $CURRENT_TAG " - " $PREVIOUS_TAG
+
 # Update Branch develop
 git checkout develop
 git pull -r origin develop

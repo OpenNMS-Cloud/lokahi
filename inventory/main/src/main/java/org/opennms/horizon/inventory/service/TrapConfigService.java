@@ -28,12 +28,13 @@
 package org.opennms.horizon.inventory.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
-import org.opennms.horizon.inventory.service.trapconfig.TrapConfigBean;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
+import org.opennms.horizon.inventory.service.trapconfig.TrapConfigBean;
 import org.opennms.sink.traps.contract.ListenerConfig;
 import org.opennms.sink.traps.contract.SnmpV3User;
 import org.opennms.sink.traps.contract.TrapConfig;
@@ -49,6 +50,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +65,18 @@ public class TrapConfigService {
     private final MonitoringLocationService monitoringLocationService;
     private final TaskSetPublisher taskSetPublisher;
 
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("trap-config-update-scheduler-%d")
+        .build();
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
+
     @EventListener(ApplicationReadyEvent.class)
+    public void scheduleConfigUpdate() {
+        // This is work around for Minion not to have timeout for CloudToMinion Stream.
+        // Keep sending Trap config every 15 mins.
+        // https://opennms.atlassian.net/browse/LOK-2059 
+        executorService.scheduleAtFixedRate(this::sendTrapConfigToMinionAfterStartup, 900, 900, TimeUnit.SECONDS);
+    }
     public void sendTrapConfigToMinionAfterStartup() {
         List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
 

@@ -136,7 +136,7 @@ public class PingScan implements Scanner {
                    pingSweepResponse.getPingResults().forEach(result -> {
                        var pingResponse = PingResponse.newBuilder();
                        pingResponse.setIpAddress(InetAddressUtils.toIpAddrString(result.address()));
-                       pingResponse.setRtt(pingResponse.getRtt());
+                       pingResponse.setRtt(result.rtt());
                        discoveryResultBuilder.setActiveDiscoveryId(request.getActiveDiscoveryId());
                        discoveryResultBuilder.addPingResponse(pingResponse);
                    });
@@ -171,7 +171,9 @@ public class PingScan implements Scanner {
         @Override
         public void handleResponse(InetAddress address, EchoPacket response) {
             if (response != null) {
-                PingResult sweepResult = new PingResult(address, response.elapsedTime(TimeUnit.MILLISECONDS));
+                double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
+                double responseTimeMillis = responseTimeMicros / 1000.0;
+                PingResult sweepResult = new PingResult(address, responseTimeMillis);
                 pingSweepResponse.addPingResult(sweepResult);
             }
             afterHandled(address);

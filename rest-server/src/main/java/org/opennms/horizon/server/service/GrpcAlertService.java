@@ -144,4 +144,23 @@ public class GrpcAlertService {
         return Flux.fromIterable(alertsClient.listAlertEventDefinitions(eventType, headerUtil.getAuthHeader(env)));
     }
 
+    @GraphQLMutation
+    public Mono<Boolean> deletePolicyById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.deletePolicyById(id, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLMutation
+    public Mono<Boolean> deleteRuleById(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.deleteRuleById(id, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery
+    public Mono<Long> countAlertByPolicyId(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.countAlertByPolicyId(id, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery
+    public Mono<Long> countAlertByRuleId(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.countAlertByRuleId(id, headerUtil.getAuthHeader(env)));
+    }
 }

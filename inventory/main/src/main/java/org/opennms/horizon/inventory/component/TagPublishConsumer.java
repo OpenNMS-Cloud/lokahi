@@ -46,7 +46,7 @@ public class TagPublishConsumer {
 
     private final TagService tagService;
 
-    @KafkaListener(topics = "${kafka.topics.tag-operation}")
+    @KafkaListener(topics = "${kafka.topics.tag-operation}", concurrency = "${kafka.concurrency.tag-operation}")
     public void receiveMessage(@Payload byte[] data) {
 
         try {
@@ -57,6 +57,5 @@ public class TagPublishConsumer {
         }
 
     }
-
 
 }

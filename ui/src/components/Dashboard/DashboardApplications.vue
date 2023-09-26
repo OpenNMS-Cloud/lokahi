@@ -43,6 +43,7 @@ import dashboardText from '@/components/Dashboard/dashboard.text'
 import PolarChart from '@/assets/PolarChart.svg'
 import PolarChartDark from '@/assets/PolarChart-dark.svg'
 import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
+import { getColorFromFeatherVar, getChartGridColor } from '../utils'
 
 const { onThemeChange, isDark } = useTheme()
 const flowsStore = useFlowsStore()
@@ -52,6 +53,10 @@ const dataGraph = ref()
 const hasData = ref(false)
 
 const dataApplications = computed(() => flowsStore.topApplications)
+
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
 
 const buildData = () => {
   if (dataApplications.value.length > 0) {
@@ -64,7 +69,8 @@ const buildData = () => {
       labels: labels,
       datasets: [
         {
-          data: percentages
+          data: percentages,
+          backgroundColor: getColorFromFeatherVar(undefined, true)
         }
       ]
     }
@@ -86,6 +92,15 @@ const config = {
       ticks: {
         display: false
       }
+    },
+    r: {
+      grid: {
+        color: getChartGridColor(isDark.value)
+      },
+      ticks: {
+        color: colorFromFeatherVar.value,
+        showLabelBackdrop: false
+      }
     }
   },
   plugins: {
@@ -99,7 +114,7 @@ const config = {
         borderRadius: 20,
         useBorderRadius: true,
         padding: 10,
-        color: isDark.value ? '#d1d0d0' : '#00000',
+        color: colorFromFeatherVar.value,
         font: {
           size: 12
         },
@@ -115,7 +130,9 @@ watchEffect(() => {
 })
 
 onThemeChange(() => {
-  config.plugins.legend.labels.color = isDark.value ? '#d1d0d0' : '#00000'
+  config.plugins.legend.labels.color = colorFromFeatherVar.value
+  config.scales.r.ticks.color = colorFromFeatherVar.value
+  config.scales.r.grid.color = getChartGridColor(isDark.value)
   constGraph.value = { ...config }
 })
 
@@ -123,7 +140,7 @@ onMounted(async () => {
   flowsStore.filters.selectedExporterTopApplication = undefined
 })
 
-onUnmounted(() => flowsStore.$reset)
+onUnmounted(() => flowsStore.$reset())
 </script>
 
 <style scoped lang="scss">

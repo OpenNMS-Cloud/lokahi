@@ -1,7 +1,7 @@
 const isDark = useDark({
   selector: 'body',
   attribute: 'class',
-  valueDark: 'open-light', // forces light for EAR, may remove after FMA+
+  valueDark: 'open-dark',
   valueLight: 'open-light',
   storageKey: 'theme'
 })
@@ -19,7 +19,7 @@ const useTheme = () => {
     }
   })
 
-  return { isDark: ref(false), toggleDark, onThemeChange }
+  return { isDark, toggleDark, onThemeChange }
 }
 
 export default useTheme

@@ -187,7 +187,6 @@ public class NodeService {
         MonitoringLocation monitoringLocation = findMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
-
         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
             .addEntityIds(TagEntityIdDTO.newBuilder()
                 .setNodeId(node.getId()))
@@ -196,7 +195,7 @@ public class NodeService {
         return node;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<Long, List<NodeDTO>> listNodeByIds(List<Long> ids, String tenantId) {
         List<Node> nodeList = nodeRepository.findByIdInAndTenantId(ids, tenantId);
         if (nodeList.isEmpty()) {
@@ -239,24 +238,7 @@ public class NodeService {
         });
         return tasks;
     }
-
-    public void updateNodeMonitoredState(Node node) {
-
-        // See HS-1812, Always match "default" tag.
-        final var monitored = tagRepository.findByTenantIdAndNodeId(node.getTenantId(), node.getId()).stream()
-            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
-
-        final var monitoredState = monitored ? MonitoredState.MONITORED
-            : node.getMonitoredState() == MonitoredState.DETECTED
-                ? MonitoredState.DETECTED
-                : MonitoredState.UNMONITORED;
-
-        if (node.getMonitoredState() != monitoredState) {
-            node.setMonitoredState(monitoredState);
-            this.nodeRepository.save(node);
-        }
-    }
-
+    
     public void updateNodeMonitoredState(long nodeId, String tenantId) {
 
         // See HS-1812, Always match "default" tag.
@@ -277,6 +259,13 @@ public class NodeService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public Optional<NodeDTO> getNode(String  ipAddress, long locationId, String tenantId) {
+        var optionalIpAddress = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(ipAddress),
+            locationId, tenantId, ScanType.DISCOVERY_SCAN);
+        return optionalIpAddress.map(IpInterface::getNode).map(mapper::modelToDTO);
+    }
+
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
@@ -290,8 +279,6 @@ public class NodeService {
                     node.getNodeLabel(), nodeInfo.getSystemName());
             }
         }
-
-        this.updateNodeMonitoredState(node.getId(), node.getTenantId());
 
         nodeRepository.save(node);
     }
@@ -319,11 +306,16 @@ public class NodeService {
         tagPublisher.publishTagUpdate(tagOpList);
     }
 
-    public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
-        executorService.execute(() -> sendTaskSetsToMinion(node, locationId, icmpDiscoveryDTO));
+    public void sendNewNodeTaskSetAsync(NodeDTO nodeDTO, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+        executorService.execute(() -> sendTaskSetsToMinion(nodeDTO, locationId, icmpDiscoveryDTO));
     }
 
-    private void sendTaskSetsToMinion(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+    public void sendNewNodeTaskSetAsync(Node node, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
+        var nodeDTO = mapper.modelToDTO(node);
+        executorService.execute(() -> sendTaskSetsToMinion(nodeDTO, locationId, icmpDiscoveryDTO));
+    }
+
+    private void sendTaskSetsToMinion(NodeDTO nodeDTO, Long locationId, IcmpActiveDiscoveryDTO icmpDiscoveryDTO) {
 
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
         try {
@@ -338,9 +330,9 @@ public class NodeService {
                     .setPort(port);
                 snmpConfigs.add(builder.build());
             });
-            scannerTaskSetService.sendNodeScannerTask(mapper.modelToDTO(node), locationId, snmpConfigs);
+            scannerTaskSetService.sendNodeScannerTask(nodeDTO, locationId, snmpConfigs);
         } catch (Exception e) {
-            log.error("Error while sending nodescan task for node with label {}", node.getNodeLabel());
+            log.error("Error while sending nodescan task for node with label {}", nodeDTO.getNodeLabel(), e);
         }
     }
 

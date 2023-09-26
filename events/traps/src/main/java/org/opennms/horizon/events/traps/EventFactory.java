@@ -145,8 +145,9 @@ public class EventFactory {
             }
 
             String description = econf.getDescr();
-            if (description != null) {
-                event.setDescr(description);
+            if (description != null && !description.isBlank()) {
+                // A quasi-temporary solution to clean up event descriptions inherited from Horizon.
+                event.setDescr(description.replace("<p>", "").replace("</p>", "").replace("&lt;p>", ""));
             }
 
             Logmsg econfLogMsg = econf.getLogmsg();

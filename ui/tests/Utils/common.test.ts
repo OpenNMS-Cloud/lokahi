@@ -1,4 +1,4 @@
-import { getHumanReadableDuration } from '@/components/utils'
+import { getHumanReadableDuration, addOpacity, humanFileSizeFromBits } from '@/components/utils'
 import { TimeUnit } from '@/types'
 
 test('The getHumanReadableDuration function', () => {
@@ -20,4 +20,18 @@ test('The getHumanReadableDuration function', () => {
   expect(getHumanReadableDuration(3661, TimeUnit.Secs)).toBe('1h1m1s')
   expect(getHumanReadableDuration(86461, TimeUnit.Secs)).toBe('1d1m1s')
   expect(getHumanReadableDuration(90061, TimeUnit.Secs)).toBe('1d1h1m1s')
+})
+
+test('The addOpacity function', () => {
+  const rgba = addOpacity('#FFFFFF', 0.5)
+  expect(rgba).toBe('rgba(255, 255, 255, 0.5)')
+})
+
+test('The humanFileSizeFromBits function', () => {
+  expect(humanFileSizeFromBits(800)).toBe('800 b')
+  expect(humanFileSizeFromBits(5000)).toBe('5.0 kb')
+  expect(humanFileSizeFromBits(3957278)).toBe('4.0 Mb')
+  expect(humanFileSizeFromBits(9375836293)).toBe('9.4 Gb')
+  expect(humanFileSizeFromBits(9903456789099)).toBe('9.9 Tb')
+  expect(humanFileSizeFromBits(7000938277432849)).toBe('7.0 Pb')
 })

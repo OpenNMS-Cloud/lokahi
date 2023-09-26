@@ -48,7 +48,7 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.Inventory.ServiceName }}
-          image: {{ .Values.OpenNMS.Inventory.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Inventory) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.Inventory.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -76,11 +76,13 @@ spec:
                 secretKeyRef:
                   key: encryptionKey
                   name: {{ .Values.OpenNMS.Inventory.ServiceName }}-encryption-key
-            {{- include "deployment.env" .Values.OpenNMS.Inventory | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.Inventory) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "kafkaSecretFrom" .Values.OpenNMS.Inventory | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.Inventory | indent 10 }}
           ports:
             - name: http
               containerPort: 8080

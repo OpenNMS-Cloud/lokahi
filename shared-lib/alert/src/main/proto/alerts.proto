@@ -129,6 +129,8 @@ message Alert {
   repeated uint64 monitoring_policy_id = 19;
   string node_name = 20;
   string label = 21;
+  repeated string rule_name = 22;
+  repeated string policy_name = 23;
 }
 
 message EventMatch {
@@ -278,6 +280,10 @@ service MonitorPolicyService {
   rpc listPolicies(google.protobuf.Empty) returns(MonitorPolicyList);
   rpc getPolicyById(google.protobuf.Int64Value) returns(MonitorPolicyProto);
   rpc getDefaultPolicy(google.protobuf.Empty) returns(MonitorPolicyProto);
+  rpc deletePolicyById(google.protobuf.Int64Value) returns(google.protobuf.BoolValue);
+  rpc deleteRuleById(google.protobuf.Int64Value) returns(google.protobuf.BoolValue);
+  rpc countAlertByPolicyId(google.protobuf.Int64Value) returns(google.protobuf.Int64Value);
+  rpc countAlertByRuleId(google.protobuf.Int64Value) returns(google.protobuf.Int64Value);
 }
 
 message AlertEventDefinitionProto {

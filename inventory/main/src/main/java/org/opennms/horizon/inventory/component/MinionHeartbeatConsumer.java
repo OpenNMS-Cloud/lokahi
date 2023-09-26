@@ -28,16 +28,15 @@
 
 package org.opennms.horizon.inventory.component;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-
-import javax.annotation.PreDestroy;
-
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
@@ -46,7 +45,6 @@ import org.opennms.horizon.grpc.echo.contract.EchoRequest;
 import org.opennms.horizon.grpc.echo.contract.EchoResponse;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.opennms.horizon.inventory.util.Clock;
@@ -61,14 +59,16 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PreDestroy;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Component
@@ -83,6 +83,10 @@ public class MinionHeartbeatConsumer {
     // we should still process heartbeats received closer to 30secs interval, so 2secs prior arrival should still be processed.
     private final MinionRpcClient rpcClient;
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("handle-minion-heartbeat-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
 
     @Value("${kafka.topics.task-set-results:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
@@ -96,11 +100,19 @@ public class MinionHeartbeatConsumer {
     private final Clock clock;
     private final Map<String, Long> rpcMaps = new ConcurrentHashMap<>();
 
-    @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.minion-heartbeat}", concurrency = "${kafka.concurrency.minion-heartbeat}")
     public void receiveMessage(@Payload byte[] data) {
+
         try {
             TenantLocationSpecificHeartbeatMessage message = TenantLocationSpecificHeartbeatMessage.parseFrom(data);
+            executorService.execute(() -> processHeartbeat(message));
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Error while processing heartbeat message: ", e);
+        }
+    }
 
+    public void processHeartbeat(TenantLocationSpecificHeartbeatMessage message) {
+        try {
             String tenantId = message.getTenantId();
             String locationId = message.getLocationId();
 
@@ -136,7 +148,6 @@ public class MinionHeartbeatConsumer {
             log.error("Error while processing heartbeat message: ", e);
             Span.current().recordException(e);
         }
-
     }
 
     @PreDestroy

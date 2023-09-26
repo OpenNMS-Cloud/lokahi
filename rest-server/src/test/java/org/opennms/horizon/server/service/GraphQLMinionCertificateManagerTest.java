@@ -22,8 +22,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -71,7 +77,7 @@ class GraphQLMinionCertificateManagerTest {
     }
 
     @Test
-    void testGetMinionCert() throws JSONException {
+    void testGetMinionCert() throws JSONException, IOException {
         when(mockClient.getMinionCert(TENANT_ID, LOCATION_ID, accessToken)).thenReturn(
             GetMinionCertificateResponse.newBuilder().setCertificate(ByteString.copyFromUtf8("pkcs12-here")).setPassword("passw0rd").build()
         );
@@ -82,7 +88,8 @@ class GraphQLMinionCertificateManagerTest {
                 password
               }
             }""";
-        webClient.post()
+        JSONObject resultjson = new JSONObject(new String(
+            (webClient.post()
             .uri(GRAPHQL_PATH)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +98,29 @@ class GraphQLMinionCertificateManagerTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.data.getMinionCertificate.password").isEqualTo("passw0rd")
-            .jsonPath("$.data.getMinionCertificate.certificate").isEqualTo(Base64.getEncoder().encodeToString("pkcs12-here".getBytes()));
+            .returnResult().getResponseBody())));
+
+        // Need to check the cert file inside the zip. Start by taking apart the zip and look for a .p12 file
+        String zipString = resultjson.getJSONObject("data")
+            .getJSONObject("getMinionCertificate")
+            .getString("certificate");
+
+        byte[] zipBytes = Base64.getDecoder().decode(zipString.getBytes(StandardCharsets.UTF_8));
+        ZipInputStream zstream = new ZipInputStream(new ByteArrayInputStream(zipBytes));
+        ZipEntry zentry = zstream.getNextEntry();
+        while (zstream.available() != 0 && zentry != null && !zentry.getName().contains(".p12")) {
+            zstream.closeEntry();
+            zentry = zstream.getNextEntry();
+        }
+        assertNotNull(zentry);
+        assertTrue(zentry.getName().contains(".p12"));
+
+        //Decode the cert from the zip so it can be checked
+        byte[] certBytes = new byte[2048]; // More than enough for our test file
+        int read = zstream.read(certBytes, 0, 2048);
+        String certContent = new String(certBytes, 0, read, StandardCharsets.UTF_8);
+        assertEquals("Decoded cert from zip file", "pkcs12-here", certContent);
+
         verify(mockClient).getMinionCert(TENANT_ID, LOCATION_ID, accessToken);
         verify(mockHeaderUtil, times(1)).extractTenant(any(ResolutionEnvironment.class));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));

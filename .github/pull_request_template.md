@@ -2,7 +2,7 @@
 <!-- Describe this Pull Request, what it changes, and why it's necessary. -->
 
 ## Jira link(s)
-- https://opennms.atlassian.net/browse/HS-xx
+- https://opennms.atlassian.net/browse/LOK-XXXX
 
 ## Flagged for review
 <!-- Flag things as "needs a close look" for reviewers, if necessary. Include as much detail as possible (line numbers, concerns, and so on). -->

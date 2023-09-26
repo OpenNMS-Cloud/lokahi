@@ -28,13 +28,6 @@
         :icon="Icons.Home"
       />
 
-      <!-- Hidden until after EAR -->
-      <!-- <NavigationRailNavItem
-        title="Map"
-        href="/map"
-        :icon="Icons.Location"
-      /> -->
-
       <NavigationRailNavItem
         title="Inventory"
         href="/inventory"
@@ -66,6 +59,12 @@
       />
 
       <NavigationRailNavItem
+        title="Map"
+        href="/map"
+        :icon="Icons.MapIcon"
+      />
+
+      <NavigationRailNavItem
         v-if="false"
         title="Synthetic Transactions"
         href="/synthetic-transactions"
@@ -80,7 +79,7 @@ import { IconTextAnimate, FeatherAppRail } from '@featherds/app-rail'
 
 import Appliances from '@featherds/icon/hardware/Appliances'
 import Home from '@featherds/icon/action/Home'
-// import Map from '@material-design-icons/svg/outlined/map.svg'
+import MapIcon from '@material-design-icons/svg/outlined/map.svg?component'
 import Business from '@featherds/icon/action/Business'
 import LogoIcon from '@/assets/OpenNMS-logo-icon.svg'
 import LogoText from '@/assets/OpenNMS-logo-text.svg'
@@ -94,13 +93,13 @@ import NavigationRailNavItem from '@/components/Layout/NavigationRailNavItem.vue
 const Icons = markRaw({
   Appliances,
   Home,
-  // Map,
   Business,
   Discovery,
   Monitoring,
   Cycle,
   Warning,
-  Location
+  Location,
+  MapIcon
 })
 
 const labels = {
@@ -108,3 +107,9 @@ const labels = {
 }
 const content = 'mainContent'
 </script>
+
+<style lang="scss">
+svg[aria-label='Map'] {
+  margin-top: -5px;
+}
+</style>

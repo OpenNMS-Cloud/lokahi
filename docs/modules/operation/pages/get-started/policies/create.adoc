@@ -18,11 +18,12 @@ To create a monitoring policy, follow these steps:
 .. Select an existing tag from the drop-down list, or type a name and click *New* to create a tag.
 +
 This policy will apply to any nodes that have the same tags.
-. To add a rule to the policy, click *New Rule*, near the bottom of the page.
+. To add a rule to the policy, click *New Rule*, on the bottom left of the page.
 +
 A rule specifies the conditions under which OpenNMS generates alerts.
 Rules are available only with the policy in which they were created.
-8. Set the criteria that will trigger an alert.
+
+. Set the criteria that will trigger an alert.
 . Specify the name, component type, detection method, and event type to include.
 . Set the criteria that will trigger an alert.
 .. To include multiple criteria, click *Additional Conditions*.

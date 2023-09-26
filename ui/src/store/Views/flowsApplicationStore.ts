@@ -5,6 +5,7 @@ import { RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { FlowsApplicationData, FlowsApplicationSummaries, ChartData, IExporter, FlowsLineChartItem } from '@/types'
 import { useFlowsStore } from './flowsStore'
 import { get } from 'lodash'
+import { getColorFromFeatherVar } from '@/components/utils'
 
 export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
   state: () => ({
@@ -78,14 +79,14 @@ export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
               label: 'Inbound',
               data: this.tableData.map((row) => row.bytesIn),
               barThickness: 13,
-              backgroundColor: '#0043A4',
+              backgroundColor: getColorFromFeatherVar('categorical1'),
               hidden: flowsStore.filters.traffic.selectedItem === 'outbound'
             },
             {
               label: 'Outbound',
               data: this.tableData.map((row) => row.bytesOut),
               barThickness: 13,
-              backgroundColor: '#EE7D00',
+              backgroundColor: getColorFromFeatherVar('categorical0'),
               hidden: flowsStore.filters.traffic.selectedItem === 'inbound'
             }
           ]
@@ -120,8 +121,6 @@ export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
               label: element.label,
               data: mappedData,
               fill: true,
-              borderColor: flowsStore.randomColours(index),
-              backgroundColor: flowsStore.randomColours(index, true),
               // hide the last point, which tracks the gap between the previous point and now
               pointRadius: Array.from(Array(mappedData.length).keys()).map((_, index) => element.data.length === index ? 0 : 1),
               spanGaps: flowsStore.getSpanGap()

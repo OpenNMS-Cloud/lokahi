@@ -28,19 +28,20 @@
 
 package org.opennms.horizon.flows.processing;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Objects;
+
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
 import org.opennms.horizon.flows.integration.FlowException;
 import org.opennms.horizon.flows.integration.FlowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Objects;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.google.common.collect.Maps;
 
 public class PipelineImpl implements Pipeline {
 
@@ -86,7 +87,7 @@ public class PipelineImpl implements Pipeline {
         // Filter empty logs
         if (flows.isEmpty()) {
             this.emptyFlows.inc();
-            LOG.info("Received empty flows for {}. Nothing to do.", flowsLog.getTenantId());
+            LOG.info("Received empty flows for tenant-id={}. Nothing to do.", flowsLog.getTenantId());
             return;
         }
 
@@ -114,7 +115,7 @@ public class PipelineImpl implements Pipeline {
     @SuppressWarnings("rawtypes")
     public synchronized void onBind(final FlowRepository repository, final Map properties) {
         if (properties.get(REPOSITORY_ID) == null) {
-            LOG.error("Flow repository has no repository ID defined. Ignoring...");
+            LOG.error("Flow repository {} has no repository ID defined. Ignoring...", repository);
             return;
         }
 
@@ -126,7 +127,7 @@ public class PipelineImpl implements Pipeline {
     @SuppressWarnings("rawtypes")
     public synchronized void onUnbind(final FlowRepository repository, final Map properties) {
         if (properties.get(REPOSITORY_ID) == null) {
-            LOG.error("Flow repository has no repository ID defined. Ignoring...");
+            LOG.error("Flow repository {} has no repository ID defined. Ignoring...", repository);
             return;
         }
 

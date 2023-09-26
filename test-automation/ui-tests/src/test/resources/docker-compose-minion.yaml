@@ -7,19 +7,16 @@ services:
     environment:
       TZ: 'America/New_York'
       MINION_ID: ${MINION_ID}
-      USE_KUBERNETES: "false"
-      MINION_GATEWAY_TLS: 'true'
-      GRPC_CLIENT_KEYSTORE: '/opt/karaf/minion.p12'
       GRPC_CLIENT_KEYSTORE_PASSWORD: ${GRPC_CLIENT_KEYSTORE_PASSWORD}
       MINION_GATEWAY_HOST: ${MINION_GATEWAY_HOST}
       MINION_GATEWAY_PORT: ${MINION_GATEWAY_PORT}
     ports:
       - '8181:8181/tcp'
       - '8101:8101/tcp'
+      - "162:1162/udp" # snmp
       - "8877:8877/udp" # netflow5
       - "4729:4729/udp" # netflow9
       - "9999:9999/udp" # netflow
-      - "162:162/udp"
     volumes:
       - "${CERT_FOLDER}:/opt/karaf/minion.p12"
     networks:
@@ -27,7 +24,7 @@ services:
         ipv4_address: 172.31.1.1
 
   snmpd-temp2:
-    image: snmp-udpgen2
+    image: docker.io/opennms/lokahi-snmpd-udpgen:latest
     volumes:
       - "./snmpd.conf:/etc/snmp/snmpd.conf"
     command: -s "-c /etc/snmp/snmpd.conf" -u "-h 172.31.1.1 -p 4729 -x netflow9 -r 1"

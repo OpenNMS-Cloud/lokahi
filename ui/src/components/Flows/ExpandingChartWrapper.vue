@@ -10,7 +10,7 @@
         <div class="filter-button">
           <FeatherButton
             icon="Filter"
-            @click.stop.prevent="(e) => onFilterClick(e)"
+            @click.stop.prevent="(e: any) => onFilterClick(e)"
           >
             <FeatherIcon
               class="icon"

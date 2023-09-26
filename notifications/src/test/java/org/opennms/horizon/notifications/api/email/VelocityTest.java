@@ -1,13 +1,13 @@
 package org.opennms.horizon.notifications.api.email;
 
-import jakarta.mail.Session;
-import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.notifications.api.LokahiUrlUtil;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -15,7 +15,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class VelocityTest {
+class VelocityTest {
+    @Mock
+    private LokahiUrlUtil lokahiUrlUtil;
     @InjectMocks
     Velocity velocity;
 
@@ -25,7 +27,7 @@ public class VelocityTest {
     }
 
     @Test
-    public void populateTemplate() {
+    void populateTemplate() {
         Alert alert = Alert.newBuilder()
             .setDescription("Server down")
             .setLogMessage("Some interesting details")

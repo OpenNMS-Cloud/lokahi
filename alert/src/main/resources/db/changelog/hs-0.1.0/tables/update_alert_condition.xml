@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-remove-default-value-for-over-time-unit" author="cgorantla">
+        <dropDefaultValue tableName="alert_condition" columnName="over_time_unit"/>
+    </changeSet>
+
+    <changeSet id="hs-0.1.0-remove-not-null-constraint-for-over-time-unit" author="cgorantla">
+        <dropNotNullConstraint tableName="alert_condition" columnName="over_time_unit"/>
+    </changeSet>
+
+</databaseChangeLog>

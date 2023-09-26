@@ -1,5 +1,5 @@
 <template>
-  <div class="flows-container">
+  <div class="full-page-container">
     <HeadlinePage
       text="Flows"
       data-test="flows-page-header"
@@ -142,6 +142,7 @@
         :selected-filter-range="flowsStore.filters.dateFilter"
         :chart-data="appStore.lineChartData"
         :table-data="appStore.tableData"
+        labelSuffix="/sec"
         :format="flowsStore.convertToDate"
         :get-chart-area-width-for-data-points="setMaxDataPointsAndUpdateCharts"
       />
@@ -252,7 +253,7 @@ const setMaxDataPointsAndUpdateCharts = (width: number) => {
   }
 }
 
-onUnmounted(() => flowsStore.$reset)
+onUnmounted(() => flowsStore.$reset())
 </script>
 
 <style scoped lang="scss">
@@ -264,19 +265,13 @@ onUnmounted(() => flowsStore.$reset)
   width: 100%;
   min-width: 400px;
   border: 1px solid var(variables.$border-on-surface);
-  border-radius: vars.$border-radius-s;
+  border-radius: vars.$border-radius-surface;
   padding: var(variables.$spacing-m) 40px;
   background-color: var(variables.$surface);
   display: flex;
   flex-direction: column;
   gap: var(variables.$spacing-m);
 
-  &-container {
-    margin: var(variables.$spacing-m);
-    @include mediaQueriesMixins.screen-md {
-      margin: 40px 80px;
-    }
-  }
 }
 .filters {
   margin-bottom: var(variables.$spacing-m);

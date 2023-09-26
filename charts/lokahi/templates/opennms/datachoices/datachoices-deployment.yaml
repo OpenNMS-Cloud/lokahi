@@ -45,7 +45,7 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.DataChoices.ServiceName }}
-          image: {{ .Values.OpenNMS.DataChoices.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.DataChoices) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.DataChoices.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -68,7 +68,9 @@ spec:
               value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
             - name: KEYCLOAK_REALM
               value: "{{ .Values.Keycloak.RealmName }}"
-            {{- include "deployment.env" .Values.OpenNMS.DataChoices | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.DataChoices) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env

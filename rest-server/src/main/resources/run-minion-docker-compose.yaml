@@ -1,0 +1,53 @@
+version: "3"
+name: "managed-lokahi-minion"
+services:
+  minion:
+    image: "opennms/lokahi-minion:latest"
+    ports:
+      - "1162:1162/udp"
+      - "4729:4729/udp"
+      - "8877:8877/udp"
+      - "9999:9999/udp"
+    volumes:
+      # The local certificate file must map to "minion.p12" in the container.
+      - ./storage/[CERT_FILE]:/opt/karaf/minion.p12
+      # Save the logs into a local directory outside of the container
+      - ./logs:/opt/karaf/data/log
+      # Must provide the CA.cert for the local install
+      - ./CA.cert:/opt/karaf/certs/CA.cert
+    environment:
+      # The password for the certificate file
+      GRPC_CLIENT_KEYSTORE_PASSWORD: "[KEYSTORE_PASSWORD]"
+      # This will show up as the minion name in the UI
+      MINION_ID: "[MINION_NAME]"
+
+      # Common settings for local Lokahi testing
+      IGNITE_SERVER_ADDRESSES: "localhost"
+      MINION_GATEWAY_HOST: "[MINION_ENDPOINT]"
+      MINION_GATEWAY_TLS: "true"
+      MINION_GATEWAY_PORT: "1443"
+      GRPC_CLIENT_OVERRIDE_AUTHORITY: "minion.onmshs.local"
+      GRPC_CLIENT_TRUSTSTORE: "/opt/karaf/certs/CA.cert"
+      GRPC_CLIENT_TRUSTSTORE_TYPE: "file"
+      GRPC_CLIENT_TRUSTSTORE_PASSWORD: ""
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    restart: always
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # This must point to the current user's docker config.json as Watch Tower needs to interact with the docker API
+      - ~/.docker:/dockerconfig
+    environment:
+      # Use the mounted docker directory for the config
+      DOCKER_CONFIG: "/dockerconfig"
+      # Clean up old images
+      WATCHTOWER_CLEANUP: "true"
+      # This will cause Watch Tower to only monitor containers with the "com.centurylinklabs.watchtower.enable" label set to true.
+      WATCHTOWER_LABEL_ENABLE: "true"
+      # By default we'll check for new images at 8am every day
+      # Check once every day at 8am
+      #                     s  m  h dom  m dow
+      WATCHTOWER_SCHEDULE: "0  0  8   *  *   *"
+    restart: always

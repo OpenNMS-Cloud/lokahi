@@ -47,6 +47,7 @@ import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.ScanType;
@@ -56,7 +57,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -74,6 +74,8 @@ class NodeMonitoringManagerTest {
     private PassiveDiscoveryService passiveDiscoveryService;
     @Mock
     private PassiveDiscoveryRepository passiveDiscoveryRepository;
+    @Mock
+    private TagService tagService;
     @InjectMocks
     private InternalEventConsumer internalEventConsumer;
     private final String tenantId = "test-tenant";
@@ -106,24 +108,22 @@ class NodeMonitoringManagerTest {
 
     @AfterEach
     public void afterTest() {
-        verifyNoMoreInteractions(nodeService);
         verifyNoMoreInteractions(passiveDiscoveryService);
     }
 
     @Test
     void testReceiveEventAndCreateNewNode() throws EntityExistException, LocationNotFoundException {
-        doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
-        doReturn(passiveDiscovery).when(passiveDiscoveryRepository).findByTenantIdAndLocationId(tenantId, locationId);
+        doReturn(node).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
         var eventLog = EventLog.newBuilder().addEvents(event);
         internalEventConsumer.consumeInternalEvents(eventLog.build().toByteArray());
-        verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
-        verify(passiveDiscoveryService).sendNodeScan(node, passiveDiscovery.orElse(null));
+        verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
+        verify(passiveDiscoveryService).sendNodeScan(node, null);
+        verify(passiveDiscoveryService).getPassiveDiscovery(locationId, tenantId);
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocationId()).isEqualTo(event.getLocationId());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());
         assertThat(createDTO.getLabel()).endsWith(event.getIpAddress());
-        assertEquals(createDTO.getTagsCount(),1);
     }
 
     @Test
@@ -145,15 +145,15 @@ class NodeMonitoringManagerTest {
 
     @Test
     void testEntityExistException() throws EntityExistException, LocationNotFoundException {
-        doThrow(new EntityExistException("bad request")).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.NODE_SCAN), eq(tenantId));
+        doThrow(new EntityExistException("bad request")).when(nodeService).createNode(any(NodeCreateDTO.class), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
         ArgumentCaptor<NodeCreateDTO> argumentCaptor = ArgumentCaptor.forClass(NodeCreateDTO.class);
         var eventLog = EventLog.newBuilder().addEvents(event).build();
         internalEventConsumer.consumeInternalEvents(eventLog.toByteArray());
-        verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.NODE_SCAN), eq(tenantId));
+        verify(nodeService).createNode(argumentCaptor.capture(), eq(ScanType.DISCOVERY_SCAN), eq(tenantId));
+        verify(passiveDiscoveryService).getPassiveDiscovery(locationId, tenantId);
         NodeCreateDTO createDTO = argumentCaptor.getValue();
         assertThat(createDTO.getLocationId()).isEqualTo(event.getLocationId());
         assertThat(createDTO.getManagementIp()).isEqualTo(event.getIpAddress());
         assertThat(createDTO.getLabel()).endsWith(event.getIpAddress());
-        verifyNoInteractions(passiveDiscoveryService);
     }
 }

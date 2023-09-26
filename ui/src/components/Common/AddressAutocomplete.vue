@@ -9,8 +9,8 @@
       noResults=""
       :loading="loading"
       :results="results"
-      @search="(e) => search(e)"
-      @update:modelValue="(e) => $emit('onAddressChange', e)"
+      @search="(e: any) => search(e)"
+      @update:modelValue="(e: any) => $emit('onAddressChange', e)"
     ></FeatherAutocomplete>
   </div>
 </template>

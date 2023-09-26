@@ -48,7 +48,7 @@ spec:
             name: spring-boot-app-config
       containers:
         - name: {{ .Values.OpenNMS.Alert.ServiceName }}
-          image: {{ .Values.OpenNMS.Alert.Image }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Alert) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.Alert.ImagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -67,11 +67,13 @@ spec:
                   key: alertPwd
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
-            {{- include "deployment.env" .Values.OpenNMS.Alert | nindent 12 }}
+            # Do not put any env variables below this. The lokahi.development.env include should be last
+            # in the 'env' section so variables can be overridden with Helm chart values when needed.
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.Alert) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "kafkaSecretFrom" .Values.OpenNMS.Alert | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.Alert | indent 10 }}
           ports:
             - name: http
               containerPort: 8080

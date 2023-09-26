@@ -28,6 +28,8 @@
 
 package org.opennms.horizon.inventory.component;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -43,6 +45,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -52,8 +58,14 @@ public class TaskSetResultsConsumer {
     private final ScannerResponseService scannerResponseService;
 
     private final MonitorResponseService monitorResponseService;
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("handle-taskset-%d")
+        .build();
+    // This fixed thread pool allows us to process tasksets in parallel apart from Kafka concurrency which is
+    // still tunable at the application level.
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
 
-    @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "1")
+    @KafkaListener(topics = "${kafka.topics.task-set-results}", concurrency = "${kafka.concurrency.task-set-results}")
     public void receiveMessage(@Payload byte[] data) {
         LOG.debug("Have message from Task Set Results kafka topic");
 
@@ -71,10 +83,18 @@ public class TaskSetResultsConsumer {
                 log.info("Received taskset results from minion with tenantId={}; locationId={}", tenantId, locationId);
                 if (taskResult.hasScannerResponse()) {
                     ScannerResponse response = taskResult.getScannerResponse();
-                    scannerResponseService.accept(tenantId, Long.valueOf(locationId), response);
+                    executorService.execute(() -> {
+                        try {
+                            scannerResponseService.accept(tenantId, Long.valueOf(locationId), response);
+                        } catch (InvalidProtocolBufferException e) {
+                            LOG.error("Exception while parsing response", e);
+                        } catch (Exception e) {
+                            LOG.error("Exception while consuming response", e);
+                        }
+                    });
                 } else if(taskResult.hasMonitorResponse()) {
                     var monitorResponse = taskResult.getMonitorResponse();
-                    monitorResponseService.updateMonitoredState(tenantId, monitorResponse);
+                    monitorResponseService.updateMonitoredState(tenantId, locationId, monitorResponse);
                 }
 
             }

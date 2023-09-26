@@ -10,11 +10,8 @@ services:
       TZ: 'America/New_York'
       MINION_ID: 'minion-a'
       MINION_LOCATION: 'minion-a-loc'
-      USE_KUBERNETES: false
       IGNITE_SERVER_ADDRESSES: localhost
       MINION_GATEWAY_HOST: 28eca03d-e463-442d-9d7c-b89666d7457e-i.btominion.oaaslite.opennms.com
-      MINION_GATEWAY_PORT: 443
-      MINION_GATEWAY_TLS: true
     networks:
       tenanta:
         ipv4_address: 172.1.1.1

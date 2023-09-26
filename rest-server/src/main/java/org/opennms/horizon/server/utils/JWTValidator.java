@@ -27,6 +27,12 @@
  *******************************************************************************/
 package org.opennms.horizon.server.utils;
 
+import java.net.URL;
+import java.text.ParseException;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
@@ -35,10 +41,8 @@ import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import java.net.URL;
-import java.text.ParseException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
+import io.opentelemetry.api.trace.Span;
 
 @Component
 public class JWTValidator {
@@ -56,6 +60,7 @@ public class JWTValidator {
     }
 
     public void validate(String jwt) throws BadJOSEException, ParseException, JOSEException {
-        jwtProcessor.process(jwt, null);
+        var claimSet = jwtProcessor.process(jwt, null);
+        Span.current().setAttribute("jwt.claim.sub", claimSet.getSubject());
     }
 }

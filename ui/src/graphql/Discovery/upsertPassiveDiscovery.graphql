@@ -8,3 +8,7 @@ mutation UpsertPassiveDiscovery($passiveDiscovery: PassiveDiscoveryUpsertInput!)
     toggle
   }
 }
+
+mutation DeletePassiveDiscovery($id: Long!) {
+  deletePassiveDiscovery(id: $id)
+}

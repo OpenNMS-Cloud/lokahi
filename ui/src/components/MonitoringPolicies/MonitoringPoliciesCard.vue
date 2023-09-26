@@ -28,6 +28,15 @@
       >
         <FeatherIcon :icon="icons.ContentCopy" />
       </FeatherButton>
+      <FeatherButton
+        icon="Delete"
+        class="delete"
+        @click="$emit('deletePolicy', policy)"
+        data-test="policy-delete-btn"
+        v-if="!policy.isDefault"
+      >
+        <FeatherIcon :icon="icons.Delete" />
+      </FeatherButton>
     </div>
 
     <div
@@ -77,6 +86,7 @@ import { Policy } from '@/types/policies'
 import ExpandLess from '@featherds/icon/navigation/ExpandLess'
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import ContentCopy from '@featherds/icon/action/ContentCopy'
+import Delete from '@featherds/icon/action/Delete'
 import Edit from '@featherds/icon/action/Edit'
 import { AlertCondition } from '@/types/graphql'
 
@@ -84,13 +94,16 @@ const icons = markRaw({
   ExpandLess,
   ExpandMore,
   ContentCopy,
-  Edit
+  Edit,
+  Delete
 })
 
 const props = defineProps<{
   policy: Policy
   index: number
 }>()
+
+defineEmits(['select-policy', 'copy-policy', 'delete-policy'])
 
 const ruleStates = reactive<{ [x: string]: boolean }>({})
 const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[ruleId])
@@ -102,13 +115,13 @@ onMounted(() => (ruleStates[props.policy.rules?.[0].id] = true))
 <style scoped lang="scss">
 @use '@featherds/styles/themes/variables';
 @use '@featherds/styles/mixins/typography';
-@use '@featherds/styles/mixins/elevation';
 @use '@/styles/mediaQueriesMixins.scss';
 @use '@/styles/vars.scss';
 
 .mp-card {
-  @include elevation.elevation(1);
-  border-radius: vars.$border-radius-xs;
+  background: var(variables.$surface);
+  border-radius: vars.$border-radius-surface;
+  border: 1px solid var(variables.$border-on-surface);
   display: flex;
   gap: var(variables.$spacing-xl);
   flex-direction: column;
@@ -128,6 +141,7 @@ onMounted(() => (ruleStates[props.policy.rules?.[0].id] = true))
       @include typography.headline4;
       flex: 1;
     }
+    .delete,
     .edit,
     .copy {
       @include typography.subtitle1;

@@ -1,49 +1,55 @@
 <template>
-  <FeatherAppBar :labels="{ skip: 'main' }" content="app" v-if="keycloak?.authenticated">
-    <template v-slot:right>
-      <div class="right-container">
-        <!-- All these are hidden for EAR -->
-        <!-- <OptInOutCtrl /> -->
-        <!-- <FeatherIcon
-          :icon="LightDarkMode"
-          class="pointer menu-icon"
-          @click="toggleDark()"
-          data-test="toggle-dark"
-        />
-        <FeatherIcon
-          :icon="LogOut"
-          class="pointer menu-icon"
-          @click="logout()"
-        /> -->
-      </div>
-    </template>
-  </FeatherAppBar>
+  <FeatherAppHeader v-if="keycloak?.authenticated">
+    <div class="app-header-title">
+      {{ title }}
+    </div>
+    <div class="btns">
+      <!-- Hidden until ready -->
+      <!-- <OptInOutCtrl /> -->
+      <FeatherButton
+        data-test="toggle-dark"
+        icon="Light/Dark Mode"
+        @click="toggleDark()"
+      >
+        <FeatherIcon :icon="LightDarkMode" />
+      </FeatherButton>
+
+      <FeatherButton
+        @click="keycloak.logout()"
+        icon="Logout"
+      >
+        <FeatherIcon :icon="LogOut" />
+      </FeatherButton>
+    </div>
+  </FeatherAppHeader>
 </template>
-    
+
 <script setup lang="ts">
 import LightDarkMode from '@featherds/icon/action/LightDarkMode'
 import LogOut from '@featherds/icon/action/LogOut'
 import useKeycloak from '@/composables/useKeycloak'
 import useTheme from '@/composables/useTheme'
-import { logout } from '@/services/authService'
+import { useAppStore } from '@/store/Views/appStore'
 
 const { keycloak } = useKeycloak()
 const { toggleDark } = useTheme()
+const appStore = useAppStore()
+
+const title = computed(() => appStore.isCloud ? 'OpenNMS CLOUD' : 'Lōkahi')
 </script>
 
 <style lang="scss" scoped>
-@use "@/styles/_app";
-
-.menu-icon {
-  font-size: 24px;
-  margin-top: 2px;
-  margin-right: 15px;
-  &:last-child {
-    margin-right: 0;
-  }
+@use '@featherds/styles/mixins/typography';
+.btns {
+  margin-right: 40px;
+}
+.app-header-title {
+  @include typography.caption;
+  font-size: 14px;
+  margin-left: 95px;
 }
 :deep(.header) {
   border-bottom: 0;
+  justify-content: space-between;
 }
 </style>
-  

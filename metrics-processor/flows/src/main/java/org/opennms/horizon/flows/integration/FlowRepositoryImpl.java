@@ -19,7 +19,7 @@ public class FlowRepositoryImpl implements FlowRepository {
 
     @Override
     public void persist(TenantLocationSpecificFlowDocumentLog enrichedFlowsLog) {
-        LOG.info("Persisting flow data: {}", enrichedFlowsLog);
+        LOG.trace("Persisting flow data: {}", enrichedFlowsLog);
         var enrichedFlows = enrichedFlowsLog.getMessageList();
 
         if (CollectionUtils.isEmpty(enrichedFlows)) {

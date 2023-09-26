@@ -29,7 +29,9 @@
 package org.opennms.horizon.systemtests.steps;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.LeftPanelPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
 import org.openqa.selenium.By;
@@ -37,9 +39,15 @@ import org.testcontainers.containers.Network;
 import testcontainers.MinionContainer;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Selenide.$;
@@ -53,7 +61,7 @@ public class MinionSteps {
 
 
     public static void waitForMinionUp(String minionName) {
-        SelenideElement minionStatus = $(By.xpath("//ul[@class='minions-list']/li[.//div[@data-test='header-name']/text()='" + minionName.toUpperCase() + "']//div[@class='status']//span[text()='UP']"));
+        SelenideElement minionStatus = $(By.xpath("//ul[@class='minions-list']/li[.//div[@data-test='header-name']/text()='" + minionName.toUpperCase() + "']//div[@class='status']//span[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='up']"));
 
         // Make sure we're on the locations page with the right location selected
         LeftPanelPage.clickOnPanelSection("locations");
@@ -72,12 +80,61 @@ public class MinionSteps {
         waitForMinionUp(minionName);
     }
 
-    public static MinionContainer startMinion(File bundle, String pwd, String minionId) {
+    public static MinionContainer startMinion(File bundle, String pwd, String minionId, String locationName) throws IOException {
         Network network = SetupSteps.getCommonNetwork();
+
+        File cert = File.createTempFile("minionCert", "p12");
+        extractCert(bundle, cert);
         MinionContainer minion = new MinionContainer(minionId, "minion-" + minionId.toLowerCase(), network,
-            bundle, pwd);
+            cert, pwd);
 
         minion.start();
+        minions.put(locationName, minion);
         return minion;
+    }
+
+    private static void extractCert(File zip, File cert) throws IOException {
+        ZipInputStream zstream = new ZipInputStream(Files.newInputStream(zip.toPath()));
+        ZipEntry zentry = zstream.getNextEntry();
+        while (zstream.available() != 0 && zentry != null && !zentry.getName().contains(".p12")) {
+            zstream.closeEntry();
+            zentry = zstream.getNextEntry();
+        }
+        if (zentry == null || !zentry.getName().contains(".p12")) {
+            throw new IOException("Unable to locate .p12 certificate file in zip");
+        }
+
+        OutputStream ostream = new FileOutputStream(cert);
+        byte[] buffer = new byte[4096];
+        int readBytes;
+        while ((readBytes = zstream.read(buffer)) != -1) {
+            ostream.write(buffer, 0, readBytes);
+        }
+        ostream.close();
+    }
+
+    @Then("stop minion for location {string}")
+    public void stopMinionForLocation(String locationName) {
+        minions.get(locationName).stop();
+        for (int i = 0; i < 30; i++) {
+            if (minions.get(locationName).isMinionIsStopped) {
+                break;
+            }
+            Selenide.sleep(2000);
+        }
+    }
+
+    public static boolean isMinionRunning(String locationName) {
+        MinionContainer minionContainer = minions.get(locationName);
+        boolean result = false;
+        if (minionContainer != null) {
+            result = minionContainer.isRunning();
+        }
+        return result;
+    }
+
+    public static String getMinionIp() {
+        MinionContainer minionContainer = minions.get(LocationSteps.getLocationName());
+        return DiscoverySteps.getContainerIP(minionContainer);
     }
 }

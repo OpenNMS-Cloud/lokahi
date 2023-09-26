@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.awaitility.Awaitility;
 import org.opennms.horizon.it.gqlmodels.CreateNodeData;
@@ -268,12 +271,11 @@ public class InventoryTestSteps {
         JsonPath jsonPathEvaluator = response.jsonPath();
         LinkedHashMap lhm = jsonPathEvaluator.get("data");
         Boolean done = (Boolean) lhm.get("deleteNode");
-        System.out.println("node id is: " + nodeId);
         assertTrue(done);
     }
 
     @When("Request certificate for location {string}")
-    public void requestCertificateForLocation(String location) throws MalformedURLException {
+    public void requestCertificateForLocation(String location) throws IOException {
         LOG.info("Requesting certificate for location {}.", location);
 
         Long locationId = getLocationData(location)
@@ -281,21 +283,36 @@ public class InventoryTestSteps {
             .map(LocationData::getId)
             .orElseThrow(() -> new IllegalArgumentException("Unknown location " + location));
 
-        String query = String.format(GQLQueryConstants.CREATE_MINION_CERTIFICATE, locationId);
         GQLQuery gqlQuery = new GQLQuery();
-        gqlQuery.setQuery(query);
+        gqlQuery.setQuery(String.format(GQLQueryConstants.CREATE_MINION_CERTIFICATE, locationId));
 
-        Response response = helper.executePostQuery(gqlQuery);
-
-        JsonPath jsonPathEvaluator = response.jsonPath();
+        JsonPath jsonPathEvaluator = helper.executePostQuery(gqlQuery).jsonPath();
         LinkedHashMap<String, String> lhm = jsonPathEvaluator.get("data.getMinionCertificate");
 
-        byte[] pkcs12 = Base64.getDecoder().decode(lhm.get("certificate"));
-        String pkcs12password = lhm.get("password");
-        assertTrue(pkcs12.length > 0);
-        assertNotNull(pkcs12password);
+        byte[] zipBytes = Base64.getDecoder().decode(lhm.get("certificate"));
+        try (ZipInputStream zins = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
 
-        keystores.put(location, Map.entry(pkcs12password, pkcs12));
+            ZipEntry zentry = zins.getNextEntry();
+            while (zins.available() != 0 && zentry != null && !zentry.getName().contains(".p12")) {
+                zins.closeEntry();
+                zentry = zins.getNextEntry();
+            }
+            if (zentry == null || !zentry.getName().contains(".p12")) {
+                throw new IOException("Unable to locate .p12 certificate file in zip");
+            }
+
+            byte[] pkcs12Buffer = new byte[10240]; // Usual size is around 2k or so, should be safe for tests
+            int size = zins.read(pkcs12Buffer);
+            int len = size;
+            while ((size = zins.read(pkcs12Buffer, len, 2048)) != -1) {
+                len += size;
+            }
+            byte[] pkcs12 = Arrays.copyOf(pkcs12Buffer, len);
+            String pkcs12password = lhm.get("password");
+            assertTrue(pkcs12.length > 0);
+            assertNotNull(pkcs12password);
+            keystores.put(location, Map.entry(pkcs12password, pkcs12));
+        }
     }
 
     @Then("Minion {string} is started with shared networking in location {string}")
@@ -328,8 +345,6 @@ public class InventoryTestSteps {
             .withEnv("MINION_GATEWAY_PORT", String.valueOf(helper.getMinionIngressPortSupplier().get()))
             .withEnv("MINION_GATEWAY_TLS", String.valueOf(helper.getMinionIngressTlsEnabledSupplier().get()))
             .withEnv("MINION_ID", systemId)
-            .withEnv("USE_KUBERNETES", "false")
-            .withEnv("GRPC_CLIENT_KEYSTORE", "/opt/karaf/minion.p12")
             .withEnv("GRPC_CLIENT_KEYSTORE_PASSWORD", certificate.getKey())
             .withEnv("GRPC_CLIENT_OVERRIDE_AUTHORITY", helper.getMinionIngressOverrideAuthority().get())
             .withEnv("IGNITE_SERVER_ADDRESSES", "localhost")

@@ -8,27 +8,23 @@ services:
       TZ: 'America/New_York'
       MINION_ID: 'minion-b'
       MINION_LOCATION: 'minion-b-loc'
-      USE_KUBERNETES: 'false'
       IGNITE_SERVER_ADDRESSES: localhost
       
       MINION_GATEWAY_HOST: host.docker.internal
       
       GRPC_CLIENT_OVERRIDE_AUTHORITY: minion.onmshs.local
       GRPC_CLIENT_TRUSTSTORE: /opt/karaf/ca.crt
-      GRPC_CLIENT_KEYSTORE: /opt/karaf/minion.p12
       GRPC_CLIENT_KEYSTORE_PASSWORD: '${PASSWORD}'
 
       MINION_GATEWAY_PORT: 1443
-      MINION_GATEWAY_TLS: 'true'
 
     ports:
       - '8181:8181/tcp'
       - '8101:8101/tcp'
-      - '1162:1162/udp'
+      - '162:1162/udp' # snmp
       - "8877:8877/udp" # netflow5
       - "4729:4729/udp" # netflow9
       - "9999:9999/udp" # netflow
-      - "162:162/udp"
     volumes:
       - "./../target/tmp/server-ca.crt:/opt/karaf/ca.crt"
       - "./minion.p12:/opt/karaf/minion.p12"

@@ -17,6 +17,11 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
 
+lokahi:
+  baseUrl:
+    url: "onmshs.local:1443"
+    appendTenantId: false
+
 horizon:
   kafka:
     alerts:

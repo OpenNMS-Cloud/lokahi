@@ -45,6 +45,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
+import org.opennms.horizon.inventory.service.ConfigUpdateService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,7 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
     private static final Logger LOG = LoggerFactory.getLogger(MonitoringLocationGrpcService.class);
     private final MonitoringLocationService service;
     private final TenantLookup tenantLookup;
+    private final ConfigUpdateService configUpdateService;
 
     @Override
     public void listLocations(Empty request, StreamObserver<MonitoringLocationList> responseObserver) {
@@ -153,6 +155,7 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
             .ifPresent(tenantId -> {
                 try {
                     service.delete(request.getValue(), tenantId);
+                    configUpdateService.removeConfigsFromTaskSet(tenantId, request.getValue());
                     responseObserver.onNext(BoolValue.of(true));
                     responseObserver.onCompleted();
                 } catch (Exception e) {

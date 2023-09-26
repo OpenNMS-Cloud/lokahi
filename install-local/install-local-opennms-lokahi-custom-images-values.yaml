@@ -1,7 +1,9 @@
 Host: onmshs
 OpenNMS:
+  global:
+    image:
+      tag: local
   Core:
-    Image: opennms/lokahi-core:local
     Resources:
       Limits:
         Cpu: "0"
@@ -10,7 +12,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   API:
-    Image: opennms/lokahi-rest-server:local
     Resources:
       Limits:
         Cpu: "0"
@@ -19,7 +20,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   MetricsProcessor:
-    Image: opennms/lokahi-metrics-processor:local
     Resources:
       Limits:
         Cpu: "0"
@@ -28,7 +28,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   UI:
-    Image: opennms/lokahi-ui:local
     Resources:
       Limits:
         Cpu: "0"
@@ -47,7 +46,6 @@ OpenNMS:
     Enabled: true
     addDefaultLocation: true
   MinionGateway:
-    Image: opennms/lokahi-minion-gateway:local
     Resources:
       Limits:
         Cpu: "0"
@@ -60,7 +58,6 @@ OpenNMS:
       nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.$NAMESPACE.svc.cluster.local:8080/certificate/debug"
       nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
   MinionCertificateVerifier:
-    Image: opennms/lokahi-minion-certificate-verifier:local
     Resources:
       Limits:
         Cpu: "0"
@@ -69,7 +66,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   MinionCertificateManager:
-    Image: opennms/lokahi-minion-certificate-manager:local
     CaSecretName: root-ca-certificate
     MtlsSecretName: client-root-ca-certificate
     Enabled: true
@@ -81,7 +77,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Inventory:
-    Image: opennms/lokahi-inventory:local
     Resources:
       Limits:
         Cpu: "0"
@@ -90,7 +85,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Alert:
-    Image: opennms/lokahi-alert:local
     Resources:
       Limits:
         Cpu: "0"
@@ -99,7 +93,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Notification: 
-    Image: opennms/lokahi-notification:local
     Resources:
       Limits:
         Cpu: "0"
@@ -108,7 +101,6 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
   Events:
-    Image: opennms/lokahi-events:local
     Resources:
       Limits:
         Cpu: "0"
@@ -117,10 +109,7 @@ OpenNMS:
         Cpu: "0"
         Memory: "0"
 Keycloak:
-  Image: opennms/lokahi-keycloak:local
   AdminUsername: admin
   AdminPassword: admin
-Grafana:
-  Image: opennms/lokahi-grafana:local
 MailServer:
   Enabled: true

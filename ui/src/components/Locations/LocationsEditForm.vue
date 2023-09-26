@@ -35,15 +35,14 @@
             <template #pre><FeatherIcon :icon="icons.Location" /></template
           ></FeatherInput>
         </div>
-        <!-- Hidden until the map is ready, post-EAR. Tracked with HS-1801 -->
-        <!-- <div class="row">
+        <div class="row">
           <AddressAutocomplete
             :addressModel="formInputs"
             class="full-width"
             @onAddressChange="onAddressChange"
           />
         </div>
-        <div class="row">
+        <!-- <div class="row">
           <FeatherInput
             label="Latitude (optional)"
             v-model="formInputs.latitude"
@@ -153,7 +152,7 @@ const downloadCert = async () => {
 
   if (minionCertificate) {
     locationStore.setCertificatePassword(minionCertificate.password as string)
-    createAndDownloadBlobFile(minionCertificate.certificate, `${formInputs.location}-certificate.p12`)
+    createAndDownloadBlobFile(minionCertificate.certificate, `minion-${formInputs.location}.zip`)
     form.clearErrors()
   }
 }

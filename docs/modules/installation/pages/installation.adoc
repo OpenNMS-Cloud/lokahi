@@ -10,4 +10,4 @@ For installation instructions, see the https://github.com/OpenNMS-Cloud/lokahi/w
 
 The only installation requirement for OpenNMS Cloud is to install our Minion on your system.
 You do this as part of a step-by-step guide the first-time you log in to OpenNMS Cloud.
-Refer to xref:installation:requirements.adoc#cloud-requirements[Cloud requirement] for details.
+Refer to xref:installation:requirements.adoc#cloud-requirements[Cloud requirements] for details.

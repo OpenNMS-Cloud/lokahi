@@ -4,6 +4,9 @@ Protocol: https #set depending on TLS.Enabled, do not change
 OpenShift: false
 OpenNMS:
   global:
+    image:
+      repository: opennms
+      tag: latest
     springBoot:
       env: {}
     kafkaClient:
@@ -12,11 +15,11 @@ OpenNMS:
     openTelemetry:
       otlpTracesEndpoint: null
       env:
-        OTEL_PROPAGATORS: tracecontext,baggage,jaeger,b3multi
+        OTEL_PROPAGATORS: tracecontext,baggage,jaeger
   API:
     Path: /api
     ServiceName: opennms-rest-server
-    Image: opennms/lokahi-rest-server
+    ImageShortName: lokahi-rest-server
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Resources:
@@ -30,9 +33,11 @@ OpenNMS:
     FlowsUrl: SOME-EXTERNAL-FLOW-SERVER:80
     FlowsTlsEnabled: false
     CertificateManagerUrl: ""
+    PackagedMinionFile: run-minion-docker-compose.yaml
+    MinionEndpoint: host.docker.internal
   MetricsProcessor:
     ServiceName: opennms-metrics-processor
-    Image: opennms/lokahi-metrics-processor
+    ImageShortName: lokahi-metrics-processor
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Resources:
@@ -50,7 +55,7 @@ OpenNMS:
     Path: /
     ServiceName: opennms-ui
     TlsSecretName: opennms-ui-certificate
-    Image: opennms/lokahi-ui
+    ImageShortName: lokahi-ui
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8080
@@ -75,7 +80,7 @@ OpenNMS:
   Minion:
     Enabled: false
     ServiceName: opennms-minion
-    Image: opennms/lokahi-minion
+    ImageShortName: lokahi-minion
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Port: 8181
@@ -98,7 +103,7 @@ OpenNMS:
   MinionGateway:
     ServiceName: opennms-minion-gateway
     TlsSecretName: opennms-minion-gateway-certificate
-    Image: opennms/lokahi-minion-gateway
+    ImageShortName: lokahi-minion-gateway
     ImagePullPolicy: IfNotPresent
     InternalGrpcPort: 8991
     Replicas: 1
@@ -109,7 +114,7 @@ OpenNMS:
     Resources:
       Limits:
         Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=480MB
+        Memory: 4Gi # MaxRAMPercentage=40 for heap (avg-usage=480MB) plus up to 2GB off-heap (4 Ignite Data Regions)
       Requests:
         Cpu: "1"
         Memory: 2Gi
@@ -129,7 +134,7 @@ OpenNMS:
     kafkaSecretName: ~
   Inventory:
     ServiceName: opennms-inventory
-    Image: opennms/lokahi-inventory
+    ImageShortName: lokahi-inventory
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     DbName: "horizon_stream"
@@ -147,7 +152,7 @@ OpenNMS:
     kafkaSecretName: ~
   Alert:
     ServiceName: opennms-alert
-    Image: opennms/lokahi-alert
+    ImageShortName: lokahi-alert
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     DbName: "horizon_stream"
@@ -164,7 +169,7 @@ OpenNMS:
     kafkaSecretName: ~
   Notification:
     ServiceName: opennms-notifications
-    Image: opennms/lokahi-notification
+    ImageShortName: lokahi-notification
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     DbName: "horizon_stream"
@@ -185,9 +190,12 @@ OpenNMS:
       multiplier: 2
       max: 10
     acsConnectionSecretName: {} # the ACS connection string is expected in the 'connection-string' key
+    baseUrl:
+      url: "onmshs.local:1443"
+      appendTenantId: false
   Events:
     ServiceName: opennms-events
-    Image: opennms/lokahi-events
+    ImageShortName: lokahi-events
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     DbName: "horizon_stream"
@@ -203,7 +211,7 @@ OpenNMS:
     PrivateRepoEnabled: false
   DataChoices:
     ServiceName: opennms-datachoices
-    Image: opennms/lokahi-datachoices
+    ImageShortName: lokahi-datachoices
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     DbName: "horizon_stream"
@@ -222,7 +230,7 @@ OpenNMS:
     ServiceName: opennms-minion-certificate-manager
     CaSecretName: ""
     MtlsSecretName: opennms-minion-certificate
-    Image: opennms/lokahi-minion-certificate-manager
+    ImageShortName: lokahi-minion-certificate-manager
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     VolumeSize: 1Gi
@@ -236,7 +244,7 @@ OpenNMS:
     PrivateRepoEnabled: false
   MinionCertificateVerifier:
     ServiceName: opennms-minion-certificate-verifier
-    Image: opennms/lokahi-minion-certificate-verifier
+    ImageShortName: lokahi-minion-certificate-verifier
     ImagePullPolicy: IfNotPresent
     Replicas: 1
     Resources:
@@ -270,7 +278,7 @@ Postgres:
   VolumeSize: 10Gi
 Keycloak:
   Path: /auth
-  Image: opennms/lokahi-keycloak:latest
+  ImageShortName: lokahi-keycloak
   ImagePullPolicy: IfNotPresent
   Port: 8080
   HttpsPort: 8443
@@ -302,7 +310,7 @@ Grafana:
   Port: 3000
   Replicas: 1
   ServiceName: grafana
-  Image: opennms/lokahi-grafana
+  ImageShortName: lokahi-grafana
   ImagePullPolicy: IfNotPresent
   InitContainerImage: busybox
   Resources:

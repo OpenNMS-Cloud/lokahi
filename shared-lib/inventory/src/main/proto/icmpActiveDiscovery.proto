@@ -42,6 +42,7 @@ message IcmpActiveDiscoveryCreateDTO {
   repeated string ip_addresses = 3;
   SNMPConfigDTO snmp_config = 4;
   repeated opennms.inventory.TagCreateDTO tags = 5;
+  optional int64  id = 6;
 }
 
 message IcmpActiveDiscoveryDTO {
@@ -67,4 +68,6 @@ service IcmpActiveDiscoveryService {
   rpc createDiscovery(IcmpActiveDiscoveryCreateDTO) returns (IcmpActiveDiscoveryDTO);
   rpc listDiscoveries(google.protobuf.Empty) returns(IcmpActiveDiscoveryList);
   rpc getDiscoveryById(google.protobuf.Int64Value) returns (IcmpActiveDiscoveryDTO);
+  rpc upsertActiveDiscovery(IcmpActiveDiscoveryCreateDTO) returns (IcmpActiveDiscoveryDTO);
+  rpc deleteActiveDiscovery(google.protobuf.Int64Value) returns (google.protobuf.BoolValue);
 }

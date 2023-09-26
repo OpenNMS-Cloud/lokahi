@@ -31,7 +31,6 @@ package org.opennms.horizon.server.service.grpc;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -158,7 +157,7 @@ public class InventoryClientTest {
                 }
 
                 @Override
-                public void getMonitoringSystemById(StringValue request, StreamObserver<MonitoringSystemDTO> responseObserver) {
+                public void getMonitoringSystemById(Int64Value request, StreamObserver<MonitoringSystemDTO> responseObserver) {
                     responseObserver.onNext(MonitoringSystemDTO.newBuilder().build());
                     responseObserver.onCompleted();
                 }
@@ -271,12 +270,13 @@ public class InventoryClientTest {
     @Test
     void testGetMonitoringSystemBySystemId() {
         String systemId = "test-system-id-123";
+        long id = 1234L;
         String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
-        ArgumentCaptor<StringValue> captor = ArgumentCaptor.forClass(StringValue.class);
-        MonitoringSystemDTO result = client.getSystemBySystemId(systemId, accessToken + methodName);
+        ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
+        MonitoringSystemDTO result = client.getSystemBySystemId(id, accessToken + methodName);
         assertThat(result).isNotNull();
         verify(mockSystemService).getMonitoringSystemById(captor.capture(), any());
-        assertThat(captor.getValue().getValue()).isEqualTo(systemId);
+        assertThat(captor.getValue().getValue()).isEqualTo(id);
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
 

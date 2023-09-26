@@ -337,7 +337,8 @@ store_certificate ()
 		mv -f "${CLIENT_KEYSTORE}" "${CLIENT_KEYSTORE}.bak"
 	fi
 
-	echo "${CERTIFICATE_DATA}" | base64 --decode >"${CLIENT_KEYSTORE}"
+	echo "${CERTIFICATE_DATA}" | base64 --decode >"/tmp/cert.zip"
+        unzip -o -p /tmp/cert.zip storage/minion1-default.p12 >"${CLIENT_KEYSTORE}"
 }
 
 get_ca_cert_from_k8s ()

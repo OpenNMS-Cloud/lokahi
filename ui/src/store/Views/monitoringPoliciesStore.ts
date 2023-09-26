@@ -4,16 +4,14 @@ import { Condition, Policy, ThresholdCondition } from '@/types/policies'
 import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPoliciesMutations'
 import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
 import useSnackbar from '@/composables/useSnackbar'
-import {
-  ThresholdLevels,
-  Unknowns
-} from '@/components/MonitoringPolicies/monitoringPolicies.constants'
+import { ThresholdLevels, Unknowns } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
 import {
   AlertCondition,
   DetectionMethod,
   EventType,
   ManagedObjectType,
-  MonitorPolicy, PolicyRule,
+  MonitorPolicy,
+  PolicyRule,
   Severity,
   TimeRangeUnit
 } from '@/types/graphql'
@@ -24,7 +22,9 @@ const { showSnackbar } = useSnackbar()
 type TState = {
   selectedPolicy?: Policy
   selectedRule?: PolicyRule
-  monitoringPolicies: MonitorPolicy[]
+  monitoringPolicies: MonitorPolicy[],
+  numOfAlertsForPolicy: number
+  numOfAlertsForRule: number
 }
 
 const defaultPolicy: Policy = {
@@ -52,8 +52,7 @@ function getDefaultThresholdCondition(): ThresholdCondition {
 
 async function getDefaultEventCondition(): Promise<AlertCondition> {
   const alertEventDefinitionQueries = useAlertEventDefinitionQueries()
-  const alertEventDefinitions =
-    await alertEventDefinitionQueries.listAlertEventDefinitions(EventType.SnmpTrap)
+  const alertEventDefinitions = await alertEventDefinitionQueries.listAlertEventDefinitions(EventType.SnmpTrap)
   if (alertEventDefinitions.value?.listAlertEventDefinitions?.length) {
     return {
       id: new Date().getTime(),
@@ -63,7 +62,7 @@ async function getDefaultEventCondition(): Promise<AlertCondition> {
       triggerEvent: alertEventDefinitions.value.listAlertEventDefinitions[0]
     }
   } else {
-    throw Error('Can\'t load alertEventDefinitions')
+    throw Error("Can't load alertEventDefinitions")
   }
 }
 
@@ -82,7 +81,9 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
   state: (): TState => ({
     selectedPolicy: undefined,
     selectedRule: undefined,
-    monitoringPolicies: []
+    monitoringPolicies: [],
+    numOfAlertsForPolicy: 0,
+    numOfAlertsForRule: 0
   }),
   actions: {
     // used for initial population of policies
@@ -129,12 +130,14 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       })
     },
     deleteCondition(id: string) {
-      this.selectedRule!.alertConditions = this.selectedRule!.alertConditions?.filter((c: AlertCondition) => c.id !== id)
+      this.selectedRule!.alertConditions = this.selectedRule!.alertConditions?.filter(
+        (c: AlertCondition) => c.id !== id
+      )
     },
     async saveRule() {
       const existingItemIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
 
-      if (existingItemIndex!== -1) {
+      if (existingItemIndex !== -1) {
         // replace existing rule
         this.selectedPolicy!.rules?.splice(existingItemIndex, 1, this.selectedRule!)
       } else {
@@ -156,10 +159,11 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
           return condition
         })
         if (!policy.id) delete rule.id // don't send generated ids
+        if (policy.isDefault) delete policy.isDefault // for updating default (tags only)
         return rule
       })
 
-      await addMonitoringPolicy({ policy: policy })
+      await addMonitoringPolicy({ policy })
 
       if (!error.value) {
         this.selectedPolicy = undefined
@@ -176,6 +180,36 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       delete copiedPolicy.id
       delete copiedPolicy.name
       this.displayPolicyForm(copiedPolicy)
+    },
+    async removeRule() {
+      const { deleteRule } = useMonitoringPoliciesMutations()
+      await deleteRule({ id: this.selectedRule?.id })
+
+      const ruleIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
+
+      if (ruleIndex !== -1) {
+        this.selectedPolicy!.rules?.splice(ruleIndex, 1)
+      }
+
+      this.getMonitoringPolicies()
+      this.selectedRule = undefined
+    },
+    async countAlertsForRule() {
+      const { getAlertCountByRuleId } = useMonitoringPoliciesQueries()
+      const count = await getAlertCountByRuleId(this.selectedRule?.id)
+      this.numOfAlertsForRule = count
+    },
+    async removePolicy() {
+      const { deleteMonitoringPolicy } = useMonitoringPoliciesMutations()
+      await deleteMonitoringPolicy({ id: this.selectedPolicy?.id })
+      this.getMonitoringPolicies()
+      this.selectedRule = undefined
+      this.selectedPolicy = undefined
+    },
+    async countAlerts() {
+      const { getAlertCountByPolicyId } = useMonitoringPoliciesQueries()
+      const count = await getAlertCountByPolicyId(this.selectedPolicy?.id)
+      this.numOfAlertsForPolicy = count
     }
   }
 })

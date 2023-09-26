@@ -28,21 +28,6 @@
 
 package org.opennms.horizon.flows.processing;
 
-import com.google.protobuf.UInt64Value;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import org.opennms.horizon.flows.document.FlowDocument;
-import org.opennms.horizon.flows.document.Locality;
-import org.opennms.horizon.flows.document.NodeInfo;
-import org.opennms.horizon.flows.classification.ClassificationEngine;
-import org.opennms.horizon.flows.classification.ClassificationRequest;
-import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
-import org.opennms.horizon.flows.grpc.client.InventoryClient;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
@@ -50,6 +35,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import org.opennms.horizon.flows.classification.ClassificationEngine;
+import org.opennms.horizon.flows.classification.ClassificationRequest;
+import org.opennms.horizon.flows.document.FlowDocument;
+import org.opennms.horizon.flows.document.Locality;
+import org.opennms.horizon.flows.document.NodeInfo;
+import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
+import org.opennms.horizon.flows.grpc.client.InventoryClient;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.UInt64Value;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 public class DocumentEnricherImpl {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentEnricherImpl.class);
@@ -76,7 +78,7 @@ public class DocumentEnricherImpl {
     public List<FlowDocument> enrich(TenantLocationSpecificFlowDocumentLog flowsLog) {
         var flows = flowsLog.getMessageList();
         if (flows.isEmpty()) {
-            LOG.info("Nothing to enrich.");
+            LOG.info("Nothing to enrich for tenant-id={}", flowsLog.getTenantId());
             return Collections.emptyList();
         }
 

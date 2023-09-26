@@ -346,7 +346,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
             @Override
             public void onCompleted() {
-
+                LOG.info("sink streaming stream completed");
             }
         };
     }

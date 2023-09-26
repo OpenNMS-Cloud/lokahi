@@ -14,10 +14,8 @@
       </FeatherInput>
     </li>
     <li class="push-right">
-
       <InventoryTagManagerCtrl class="tag-manager" data-test="tag-manager-ctrl" />
     </li>
-
   </ul>
   <div :class="[inventoryStore.isTagManagerOpen ? 'padding' : 'no-padding']">
     <InventoryTagManager :visible="inventoryStore.isTagManagerOpen" />
@@ -69,13 +67,20 @@ const searchNodesByLabelRef = ref()
 // so we clear the other search to avoid confusion
 const searchNodesByLabel: fncArgVoid = useDebounceFn((val: string | undefined) => {
 
-  if (val === undefined) return
-  inventoryQueries.buildNetworkInventory()
+  if (!val) {
+    inventoryQueries.buildNetworkInventory()
+  } else {
+    inventoryStore.filterNodesByLabel(val)
+  }
 })
 
 const searchNodesByTags: fncArgVoid = (tags: Tag[]) => {
   inventoryStore.tagsSelected = tags
-  inventoryQueries.buildNetworkInventory()
+  if (tags.length === 0) {
+    inventoryQueries.buildNetworkInventory()
+  } else {
+    inventoryStore.filterNodesByTags()
+  }
 }
 </script>
 

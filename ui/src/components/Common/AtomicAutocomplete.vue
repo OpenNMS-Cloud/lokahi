@@ -51,7 +51,6 @@
       >
         {{ listItem }}
       </div>
-      {{ log('NEW!') }}
       <div
         class="list-item"
         tabIndex="0"

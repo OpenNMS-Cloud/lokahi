@@ -3,7 +3,6 @@
     <template #content>
       <h3>Tags</h3>
       <h4 class="subhead-1">{{ node.nodeLabel }}</h4>
-      <p>A short line of instructions for the user on managing tags for this node</p>
       <h4 class="subhead-1 existing-tags">Existing Tags</h4>
       <FeatherChipList label="Tags">
         <FeatherChip v-for="(tag) in tagStore.filteredTags" :key="tag.id" @click="tagStore.filterTag(tag)"

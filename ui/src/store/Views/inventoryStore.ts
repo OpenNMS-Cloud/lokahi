@@ -30,6 +30,19 @@ export const useInventoryStore = defineStore('inventoryStore', {
       buildNetworkInventory()
       this.loadingTimeout = window.setTimeout(() => {this.loading = false},3000)
     },
+    async filterNodesByTags() {
+      const {getNodesByTags} = useInventoryQueries()
+      const tags = this.tagsSelected.map((tag) => tag.name!)
+      const nodes = await getNodesByTags(tags)
+      const b = InventoryMapper.fromServer(nodes.value?.findAllNodesByTags as Array<NewInventoryNode>, nodes.value?.allMetrics as RawMetrics)
+      this.nodes = b.nodes
+    },
+    async filterNodesByLabel(label: string) {
+      const {getNodesByLabel} = useInventoryQueries()
+      const nodes = await getNodesByLabel(label)
+      const b = InventoryMapper.fromServer(nodes.value?.findAllNodesByNodeLabelSearch as Array<NewInventoryNode>, nodes.value?.allMetrics as RawMetrics)
+      this.nodes = b.nodes
+    },
     receivedNetworkInventory(d: {findAllNodes:Array<NewInventoryNode>,allMetrics: RawMetrics}) {
       const b= InventoryMapper.fromServer(d.findAllNodes,d.allMetrics)
       this.nodes = b.nodes

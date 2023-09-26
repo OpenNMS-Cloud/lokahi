@@ -26,8 +26,25 @@ query FindAllNodesByNodeLabelSearch($labelSearchTerm: String!) {
       id
       location
     }
+    tags {
+      id
+      name
+    }
+    monitoredState
     monitoringLocationId
     nodeLabel
+    scanType
+  }
+  allMetrics: metric(name: "response_time_msec") {
+    status
+    data {
+      resultType
+      result {
+        metric
+        value
+        values
+      }
+    }
   }
 }
 
@@ -44,8 +61,25 @@ query FindAllNodesByTags($tags: [String]) {
       id
       location
     }
+    tags {
+      id
+      name
+    }
+    monitoredState
     monitoringLocationId
     nodeLabel
+    scanType
+  }
+  allMetrics: metric(name: "response_time_msec") {
+    status
+    data {
+      resultType
+      result {
+        metric
+        value
+        values
+      }
+    }
   }
 }
 

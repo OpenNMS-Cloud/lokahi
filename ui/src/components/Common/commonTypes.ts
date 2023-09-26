@@ -16,7 +16,7 @@ export interface ItemPreviewProps {
 }
 
 export enum BadgeTypes {
-    info = 'info',
-    error = 'error',
-    success = 'success'
+    info = 'indeterminate',
+    error = 'critical',
+    success = 'normal'
 }

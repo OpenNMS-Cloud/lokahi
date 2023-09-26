@@ -26,7 +26,6 @@ import { format, add } from 'date-fns'
 
 import { getColorFromFeatherVar, humanFileSize, getChartGridColor } from '../utils'
 const emits = defineEmits(['has-data'])
-// Chart.register(zoomPlugin) disable zoom until phase 2
 const graphs = useGraphs()
 const props = defineProps({
   graph: {
@@ -55,9 +54,15 @@ const options = computed<ChartOptions<any>>(() => ({
   responsive: true,
   aspectRatio: 1.4,
   plugins: {
+    legend: {
+      labels: {
+        color: colorFromFeatherVar.value
+      }
+    },
     title: {
       display: true,
-      text: props.graph.label
+      text: props.graph.label,
+      color: colorFromFeatherVar.value
     } as TitleOptions,
     zoom: {
       zoom: {
@@ -81,7 +86,7 @@ const options = computed<ChartOptions<any>>(() => ({
           return ''
         }
       }
-    }
+    },
   },
   scales: {
     y: {
@@ -93,6 +98,10 @@ const options = computed<ChartOptions<any>>(() => ({
         callback: (value: any, index: any) => (formatAxisBasedOnType(value)),
         maxTicksLimit: 8,
         color: colorFromFeatherVar.value
+      },
+      grid: {
+        display: true,
+        color: getChartGridColor(isDark.value)
       },
       stacked: false
     },
@@ -148,6 +157,7 @@ const render = async (update?: boolean) => {
   try {
     if (update || chart?.update) {
       chart.data = chartData.value
+      chart.options = options.value
       chart.update()
     } else {
       if (chartData.value.datasets.length) {
@@ -180,7 +190,9 @@ onMounted(async () => {
   render()
 })
 onThemeChange(() => {
-  options.value.scales.x.grid.color = getChartGridColor(isDark.value)
+  options.value.scales.x.ticks.color = colorFromFeatherVar.value
+  options.value.scales.y.ticks.color = colorFromFeatherVar.value
+  render(true)
 })
 </script>
 

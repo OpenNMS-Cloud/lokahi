@@ -17,7 +17,7 @@
         </div>
       </section>
       <div class="node-footer">
-        <FeatherButton class="tags-count-box" @click="openModalForDeletingTags(node)">
+        <FeatherButton secondary @click="openModalForDeletingTags(node)">
           Tags: <span class="count">{{ node.tags.length }}</span>
         </FeatherButton>
         <InventoryIconActionList :node="node" className="icon-action" data-test="icon-action-list" />

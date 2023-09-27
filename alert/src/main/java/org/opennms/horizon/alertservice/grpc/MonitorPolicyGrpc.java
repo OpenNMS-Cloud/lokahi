@@ -89,7 +89,7 @@ public class MonitorPolicyGrpc extends MonitorPolicyServiceGrpc.MonitorPolicySer
     @Override
     public void getDefaultPolicy(Empty request, StreamObserver<MonitorPolicyProto> responseObserver) {
         tenantLookup.lookupTenantId(Context.current())
-            .ifPresentOrElse(tenantId -> service.getDefaultPolicy()
+            .ifPresentOrElse(tenantId -> service.getDefaultPolicyProto(tenantId)
                     .ifPresentOrElse(policy -> {
                         responseObserver.onNext(policy);
                         responseObserver.onCompleted();

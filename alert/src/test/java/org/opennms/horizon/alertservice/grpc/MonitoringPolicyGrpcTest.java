@@ -49,6 +49,7 @@ import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
+import org.opennms.horizon.alertservice.db.repository.DefaultPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
@@ -99,8 +100,10 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         mockTagRepository = mock(TagRepository.class);
         mockTagOperationProducer = mock(TagOperationProducer.class);
 
+        DefaultPolicyTagRepository defaultPolicyTagRepository = mock(DefaultPolicyTagRepository.class);
+
         spyMonitorPolicyService = spy(new MonitorPolicyService(mockPolicyMapper, mockMonitorPolicyRepository,
-            mockPolicyRuleRepository, mockAlertDefinitionRepo, mockAlertRepository, mockTagRepository, mockTagOperationProducer));
+            defaultPolicyTagRepository, mockPolicyRuleRepository, mockAlertDefinitionRepo, mockAlertRepository, mockTagRepository, mockTagOperationProducer));
         MonitorPolicyGrpc grpcService = new MonitorPolicyGrpc(spyMonitorPolicyService, tenantLookup);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();

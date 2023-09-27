@@ -36,7 +36,7 @@
             <FeatherButton
               v-if="props.hasCert"
               secondary
-              @click="locationStore.revokeMinionCertificate"
+              @click="openModal"
               data-test="revoke-btn"
             >
               {{ props.secondaryButtonText }}
@@ -75,6 +75,13 @@
   <div class="row mt-m" v-if="locationStore.certificatePassword">
     <LocationsMinionCmd />
   </div>
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :customMsg="`Are you sure you want to regenerate the certificate for ${locationStore.selectedLocation.location}?`"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => locationStore.revokeMinionCertificate()"
+    actionBtnText="Continue"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -83,10 +90,12 @@ import CopyIcon from '@featherds/icon/action/ContentCopy'
 import CheckIcon from '@featherds/icon/action/CheckCircle'
 import CalendarIcon from '@featherds/icon/action/CalendarEndDate'
 import { useLocationStore } from '@/store/Views/locationStore'
+import useModal from '@/composables/useModal'
 
 import useSnackbar from '@/composables/useSnackbar'
 const { showSnackbar } = useSnackbar()
 const locationStore = useLocationStore()
+const { openModal, closeModal, isVisible } = useModal()
 
 const props = defineProps({
   title: {

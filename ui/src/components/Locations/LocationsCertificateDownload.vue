@@ -77,7 +77,7 @@
   </div>
   <DeleteConfirmationModal
     :isVisible="isVisible"
-    :customMsg="`Are you sure you want to regenerate the certificate for ${locationStore.selectedLocation.location}?`"
+    :customMsg="`Are you sure you want to regenerate the certificate for ${locationStore.selectedLocation?.location}?`"
     :closeModal="() => closeModal()"
     :deleteHandler="() => locationStore.revokeMinionCertificate()"
     actionBtnText="Continue"

@@ -5,6 +5,7 @@ import { DisplayType } from '@/types/locations.d'
 import { useLocationMutations } from '../Mutations/locationMutations'
 import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
 import useMinionCmd from '@/composables/useMinionCmd'
+import useSnackbar from '@/composables/useSnackbar'
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref<MonitoringLocation[]>([])
@@ -124,10 +125,12 @@ export const useLocationStore = defineStore('locationStore', () => {
   }
 
   const revokeMinionCertificate = async () => {
+    const { showSnackbar } = useSnackbar()
     if (!selectedLocation.value) return
     const response = await locationMutations.revokeMinionCertificate(selectedLocation.value.id)
     if(!response.value){
       setCertificatePassword('')
+      showSnackbar({ msg: 'Certificate successfully regenerated.'})
     }
 
     return !response.value

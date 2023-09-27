@@ -60,6 +60,12 @@ public class MinionDockerZipPackager {
             zipOutStream.write(dockerBytes);
             zipOutStream.closeEntry();
 
+            byte[] fileBytes = loadKarafScriptFile();
+            var fileEntry = new ZipEntry("runKarafCommand.sh");
+            zipOutStream.putNextEntry(fileEntry);
+            zipOutStream.write(fileBytes);
+            zipOutStream.closeEntry();
+
             zipOutStream.close();
             bytesOut.close();
 
@@ -91,4 +97,18 @@ public class MinionDockerZipPackager {
         dockerTxt = dockerTxt.replace("[CERT_FILE]", minionName + ".p12");
         return dockerTxt.getBytes();
     }
+
+    private static byte[] loadKarafScriptFile() throws IOException {
+
+        var  inputStream = MinionDockerZipPackager.class.getClassLoader()
+            .getResourceAsStream("runKarafCommand.sh");
+        if (inputStream == null) {
+            throw new IOException("Unable to load " + "runKarafCommand.sh" +  " from resources");
+        }
+        String fileAsText = new BufferedReader(new InputStreamReader(inputStream)).lines()
+            .parallel().collect(Collectors.joining("\n"));
+        return fileAsText.getBytes();
+    }
+
+
 }

@@ -5,7 +5,6 @@
 ##
 
 ARG BASE_IMAGE="eclipse-temurin:17"
-#ARG BASE_IMAGE="opennms/deploy-base:jre-1.3.0.b138"
 
 FROM ${BASE_IMAGE} as tarball
 
@@ -17,16 +16,6 @@ ADD --chown=10001:0 work/agent/ /opt/karaf/agent/
 
 # Set karaf.clean.cache = true in system.properties
 RUN sed -i 's/^karaf.clean.cache *=.*/karaf.clean.cache = true/' /opt/karaf/etc/system.properties
-
-# Create SSH Key-Pair to use with the Karaf Shell
-# This is a workaround to be able to use our health:check which does not work with the karaf/bin/client command
-#RUN mkdir /opt/karaf/.ssh && \
-#    ssh-keygen -t rsa -f /opt/karaf/.ssh/id_rsa -q -N "" && \
-#    chmod 700 /opt/karaf/.ssh && \
-#    chmod 600 /opt/karaf/.ssh/id_rsa && \
-#    chown 10001 /opt/karaf/.ssh -R && \
-#    echo minion=$(cat /opt/karaf/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/karaf/etc/keys.properties && \
-#    echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/karaf/etc/keys.properties
 
 # Allow users in the root group to access them with the same authorization as the directory and file owner
 # This will double the size of the our code layer because we have two copies of the karaf files -- before and after the chmod.
@@ -93,8 +82,6 @@ ENV IGNITE_UPDATE_NOTIFIER="false"
 ##------------------------------------------------------------------------------
 ## -- Java Debug - JDWP    5005/TCP
 ## -- Karaf SSH            8101/TCP
-## -- HTTP                 8181/TCP
 ## -- SNMP Trapd           1162/UDP
-## -- Syslog               1514/UDP
 ## -- Flows                9999/UDP
-EXPOSE 5005/tcp 8101/tcp 8181/tcp 1162/udp 1514/udp 9999/udp
+EXPOSE 5005/tcp 8101/tcp 1162/udp 9999/udp

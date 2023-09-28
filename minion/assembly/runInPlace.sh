@@ -57,7 +57,7 @@ do
         g) OVERRIDE_AUTHORITY="${OPTARG}";;
         h) MINION_GATEWAY_HOST="${OPTARG}" ;;
         i) MINION_ID="${OPTARG}" ;;
-        k) CLIENT_KEY_FILE="${OPTARG}" ;;
+        k) CLIENT_KEYSTORE="${OPTARG}" ;;
         l) MINION_LOCATION="${OPTARG}" ;;
         P) CLIENT_KEYSTORE_PASSWORD="${OPTARG}" ;;
         p) MINION_GATEWAY_PORT="${OPTARG}" ;;

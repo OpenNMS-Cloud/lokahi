@@ -60,10 +60,22 @@ public class MinionDockerZipPackager {
             zipOutStream.write(dockerBytes);
             zipOutStream.closeEntry();
 
-            byte[] fileBytes = loadKarafScriptFile();
-            var fileEntry = new ZipEntry("runKarafCommand.sh");
-            zipOutStream.putNextEntry(fileEntry);
-            zipOutStream.write(fileBytes);
+            var karafShFile = loadFile("runKarafCommand.sh");
+            var karafShFileEntry = new ZipEntry("scripts/runKarafCommand.sh");
+            zipOutStream.putNextEntry(karafShFileEntry);
+            zipOutStream.write(karafShFile);
+            zipOutStream.closeEntry();
+
+            byte[] karafBatFile = loadFile("runKarafCommand.bat");
+            var karafBatFileEntry = new ZipEntry("scripts/runKarafCommand.bat");
+            zipOutStream.putNextEntry(karafBatFileEntry);
+            zipOutStream.write(karafBatFile);
+            zipOutStream.closeEntry();
+
+            byte[] readMeFile = loadFile(".readme");
+            var readMeFileEntry = new ZipEntry("scripts/.readme");
+            zipOutStream.putNextEntry(readMeFileEntry);
+            zipOutStream.write(readMeFile);
             zipOutStream.closeEntry();
 
             zipOutStream.close();
@@ -98,12 +110,12 @@ public class MinionDockerZipPackager {
         return dockerTxt.getBytes();
     }
 
-    private static byte[] loadKarafScriptFile() throws IOException {
+    private static byte[] loadFile(String fileName) throws IOException {
 
         var  inputStream = MinionDockerZipPackager.class.getClassLoader()
-            .getResourceAsStream("runKarafCommand.sh");
+            .getResourceAsStream(fileName);
         if (inputStream == null) {
-            throw new IOException("Unable to load " + "runKarafCommand.sh" +  " from resources");
+            throw new IOException("Unable to load " + fileName +  " from resources");
         }
         String fileAsText = new BufferedReader(new InputStreamReader(inputStream)).lines()
             .parallel().collect(Collectors.joining("\n"));

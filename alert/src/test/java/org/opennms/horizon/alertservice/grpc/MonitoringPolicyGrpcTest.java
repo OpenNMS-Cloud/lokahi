@@ -109,8 +109,6 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     private ArgumentCaptor<Tag> tagCaptor;
     @Captor
     private ArgumentCaptor<SystemPolicyTag.RelationshipId> systemPolicyTagIdCaptor;
-    @Test
-
 
     @BeforeEach
     void prepareTest() throws VerificationException, IOException {

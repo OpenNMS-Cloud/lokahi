@@ -16,21 +16,25 @@ import lombok.ToString;
 import java.io.Serializable;
 
 @Entity
-@Table(name="default_policy_tag")
+@Table(name="system_policy_tag")
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@IdClass(DefaultPolicyTag.RelationshipId.class)
-public class DefaultPolicyTag {
+@IdClass(SystemPolicyTag.RelationshipId.class)
+public class SystemPolicyTag {
     @Id
     @Column(name = "tenant_id", nullable = false)
     private String tenantId;
 
     @Id
+    @Column(name = "policy_id", nullable = false)
+    private long policyId;
+
+    @Id
     @OneToOne
-    @JoinColumn(name = "tag_id", referencedColumnName = "id")
+    @JoinColumn(name = "tag_id", referencedColumnName = "id", nullable = false)
     private Tag tag;
 
     @AllArgsConstructor
@@ -39,6 +43,7 @@ public class DefaultPolicyTag {
     @Setter
     public static class RelationshipId implements Serializable {
         private String tenantId;
+        private long policyId;
         private Tag tag;
     }
 }

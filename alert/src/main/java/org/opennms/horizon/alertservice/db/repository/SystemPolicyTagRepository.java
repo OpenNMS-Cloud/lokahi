@@ -28,18 +28,13 @@
 
 package org.opennms.horizon.alertservice.db.repository;
 
-import org.opennms.horizon.alertservice.db.entity.DefaultPolicyTag;
-import org.opennms.horizon.alertservice.db.entity.Tag;
+import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface DefaultPolicyTagRepository extends JpaRepository<DefaultPolicyTag, DefaultPolicyTag.RelationshipId> {
-    Set<DefaultPolicyTag> findByTenantId(String tenantId);
+public interface SystemPolicyTagRepository extends JpaRepository<SystemPolicyTag, SystemPolicyTag.RelationshipId> {
+    Set<SystemPolicyTag> findByTenantIdAndPolicyId(String tenantId, long policyId);
 }

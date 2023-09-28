@@ -31,19 +31,17 @@ package org.opennms.horizon.alertservice.service;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.ObjectNotFoundException;
-import org.hibernate.annotations.NotFound;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
-import org.opennms.horizon.alertservice.db.entity.DefaultPolicyTag;
+import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.DefaultPolicyTagRepository;
+import org.opennms.horizon.alertservice.db.repository.SystemPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
@@ -69,11 +67,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MonitorPolicyService {
     public static final String SYSTEM_TENANT = "system-tenant";
-    private static final String DEFAULT_POLICY = "default_policy";
+    public static final String DEFAULT_POLICY = "default_policy";
 
     private final MonitorPolicyMapper policyMapper;
     private final MonitorPolicyRepository repository;
-    private final DefaultPolicyTagRepository defaultPolicyTagRepository;
+    private final SystemPolicyTagRepository systemPolicyTagRepository;
     private final PolicyRuleRepository policyRuleRepository;
     private final AlertDefinitionRepository definitionRepo;
     private final AlertRepository alertRepository;
@@ -109,11 +107,12 @@ public class MonitorPolicyService {
             throw new NotFoundException("Default policy not found");
         }
         final var defaultPolicy = optional.get();
+        final var existingTags = new ArrayList<>(defaultPolicy.getTags());
         final var newTags = new HashSet<Tag>();
-        final var existingTagMap = defaultPolicy.getTags().stream().collect(Collectors.toMap(Tag::getName, Function.identity()));
+        final var existingTagMap = existingTags.stream().collect(Collectors.toMap(Tag::getName, Function.identity()));
 
         requestedNewTags.forEach(tag -> {
-            DefaultPolicyTag defaultPolicyTag;
+            SystemPolicyTag defaultPolicyTag;
             var existingTag = tagRepository.findByTenantIdAndName(tenantId, tag.getName());
             var matchedTag = existingTagMap.get(tag.getName());
             if (matchedTag == null) {
@@ -125,8 +124,8 @@ public class MonitorPolicyService {
                 } else {
                     updatedTag = existingTag.get();
                 }
-                defaultPolicyTag = new DefaultPolicyTag(tenantId, updatedTag);
-                defaultPolicyTag = defaultPolicyTagRepository.save(defaultPolicyTag);
+                defaultPolicyTag = new SystemPolicyTag(tenantId, defaultPolicy.getId(), updatedTag);
+                defaultPolicyTag = systemPolicyTagRepository.save(defaultPolicyTag);
                 defaultPolicy.getTags().add(defaultPolicyTag.getTag());
                 newTags.add(updatedTag);
             } else {
@@ -135,15 +134,13 @@ public class MonitorPolicyService {
         });
 
         var removedTags = new HashSet<>(Sets.difference(defaultPolicy.getTags(), newTags));
-        var existingTags = defaultPolicy.getTags();
         removedTags.forEach(tag -> {
-                defaultPolicyTagRepository.deleteById(new DefaultPolicyTag.RelationshipId(tenantId, tag));
-                existingTags.remove(tag);
+                systemPolicyTagRepository.deleteById(new SystemPolicyTag.RelationshipId(tenantId, defaultPolicy.getId(), tag));
+                defaultPolicy.getTags().remove(tag);
             }
         );
 
-
-        handleTagOperationUpdate(new ArrayList<>(defaultPolicy.getTags()), newTags);
+        handleTagOperationUpdate(existingTags, newTags);
 
         return policyMapper.map(defaultPolicy);
     }
@@ -223,8 +220,8 @@ public class MonitorPolicyService {
     private Optional<MonitorPolicy> getDefaultPolicy(String tenantId) {
         return repository.findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT)
             .map(p -> {
-                var tags = defaultPolicyTagRepository.findByTenantId(tenantId).stream().map(DefaultPolicyTag::getTag)
-                    .collect(Collectors.toSet());
+                var tags = systemPolicyTagRepository.findByTenantIdAndPolicyId(tenantId, p.getId())
+                    .stream().map(SystemPolicyTag::getTag).collect(Collectors.toSet());
                 p.setTags(tags);
                 return p;
             });

@@ -1,7 +1,7 @@
 <template>
   <div
     class="btns"
-    v-if="store.selectedPolicy && !store.selectedPolicy.isDefault"
+    v-if="store.selectedPolicy"
   >
     <hr />
     <ButtonWithSpinner

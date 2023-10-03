@@ -222,7 +222,9 @@ public class MonitorPolicyService {
             .map(p -> {
                 var tags = systemPolicyTagRepository.findByTenantIdAndPolicyId(tenantId, p.getId())
                     .stream().map(SystemPolicyTag::getTag).collect(Collectors.toSet());
-                p.setTags(tags);
+                if (!tags.isEmpty()) {
+                    p.setTags(tags);
+                }
                 return p;
             });
     }

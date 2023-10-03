@@ -29,8 +29,8 @@
 package org.opennms.horizon.alertservice.grpc;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -72,8 +72,10 @@ import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -83,6 +85,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -152,10 +155,57 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         stopServer();
     }
 
-    void testUpdateDefaultPolicyTag() throws VerificationException, InvalidProtocolBufferException {
+    @Test
+    void testGetDefaultPolicyTagWithoutCustomTag() throws VerificationException {
+        // prepare
+        long policyId = 1L;
+        var defaultPolicy = generateDefaultPolicy(policyId, List.of("default"));
+        doReturn(Optional.of(defaultPolicy)).when(mockMonitorPolicyRepository).findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT);
+        doReturn(new HashSet<>()).when(mockSystemPolicyTagRepository).findByTenantIdAndPolicyId(tenantId, policyId);
+
+        // execute
+        var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .getDefaultPolicy(Empty.newBuilder().build());
+
+        // check
+        verify(spyMonitorPolicyService, times(1)).getDefaultPolicyProto(tenantId);
+        assertThat(result.getTagsCount()).isEqualTo(1);
+        assertThat(result.getTagsList().get(0)).isEqualTo("default");
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testGetDefaultPolicyTagWithCustomTag() throws VerificationException {
+        // prepare
+        long policyId = 2L;
+        var defaultPolicy = generateDefaultPolicy(policyId, List.of("default"));
+        var tag1 = new Tag();
+        tag1.setName("tag1");
+        tag1.setTenantId(tenantId);
+        var systemPolicyTags = new HashSet<SystemPolicyTag>();
+        systemPolicyTags.add(new SystemPolicyTag(tenantId, policyId, tag1));
+
+        doReturn(Optional.of(defaultPolicy)).when(mockMonitorPolicyRepository).findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT);
+        doReturn(systemPolicyTags).when(mockSystemPolicyTagRepository).findByTenantIdAndPolicyId(tenantId, policyId);
+
+        // execute
+        var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .getDefaultPolicy(Empty.newBuilder().build());
+
+        // check
+        verify(spyMonitorPolicyService, times(1)).getDefaultPolicyProto(tenantId);
+        assertThat(result.getTagsCount()).isEqualTo(1);
+        assertThat(result.getTagsList()).hasSameElementsAs(List.of("tag1"));
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testUpdateDefaultPolicyTag() throws VerificationException {
         // prepare
         long policyId = 10L;
-        var defaultPolicy = new MonitorPolicy();
+        var defaultPolicy = generateDefaultPolicy(policyId, new ArrayList<>(0));
         var tags = new HashSet<Tag>();
         var tag1 = new Tag();
         tag1.setName("tag1");
@@ -165,8 +215,6 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         tag2.setTenantId(tenantId);
         tags.add(tag1);
         tags.add(tag2);
-        defaultPolicy.setName(DEFAULT_POLICY);
-        defaultPolicy.setId(policyId);
         defaultPolicy.setTags(tags);
 
         doReturn(Optional.of(defaultPolicy)).when(mockMonitorPolicyRepository).findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT);
@@ -192,7 +240,7 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
 
         when(mockTagRepository.save(any(Tag.class))).thenAnswer(i -> {
             var inTag = (Tag) i.getArgument(0);
-            if (tag3.getName().equals(inTag.getName())){
+            if (tag3.getName().equals(inTag.getName())) {
                 return tag3;
             } else {
                 return null;
@@ -321,5 +369,22 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         verify(spyMonitorPolicyService).countAlertByRuleId(10, tenantId);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+
+    MonitorPolicy generateDefaultPolicy(long policyId, List<String> tagNames) {
+        Objects.requireNonNull(tagNames);
+        var defaultPolicy = new MonitorPolicy();
+        var tags = new HashSet<Tag>();
+        tagNames.forEach(tagName -> {
+            var tag = new Tag();
+            tag.setName(tagName);
+            tag.setTenantId(tenantId);
+            tags.add(tag);
+        });
+        defaultPolicy.setName(DEFAULT_POLICY);
+        defaultPolicy.setId(policyId);
+        defaultPolicy.setTags(tags);
+        return defaultPolicy;
     }
 }

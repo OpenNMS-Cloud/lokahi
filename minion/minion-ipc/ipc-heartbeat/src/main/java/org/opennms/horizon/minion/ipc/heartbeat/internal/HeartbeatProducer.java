@@ -73,7 +73,7 @@ public class HeartbeatProducer {
                     if (log.isDebugEnabled()) {
                         log.debug("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);
                     } else {
-                        log.error("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS);
+                        log.debug("An error {} occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t.getMessage());
                     }
                 }
             }

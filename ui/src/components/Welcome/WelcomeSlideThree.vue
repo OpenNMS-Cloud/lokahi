@@ -3,11 +3,11 @@
     ]">
         <div class="welcome-slide-three-inner">
             <div class="welcome-slide-three-title">
-                <h2 data-test="welcome-slide-three-title">Start Your First Discovery</h2>
-                <p>We will try to discover one network device associated with the specified IP address. </p>
+                <h2 data-test="welcome-slide-three-title">Set Up Your First Device</h2>
+                <p>Let's use node discovery to identify one of your network devices. </p>
             </div>
             <div class="welcome-slide-three-form">
-                <FeatherInput label="Name" data-test="welcome-slide-three-name-input"
+                <FeatherInput label="Node Discovery Name" data-test="welcome-slide-three-name-input"
                     :modelValue="welcomeStore.firstDiscovery.name" :error="welcomeStore.firstDiscoveryErrors.name"
                     @update:modelValue="(e: any) => welcomeStore.updateFirstDiscovery('name', e)" />
                 <FeatherInput label="Management IPV4" data-test="welcome-slide-three-ip-input"
@@ -39,7 +39,7 @@
                 <FeatherButton v-if="!welcomeStore.discoverySubmitted"
                     data-test="welcome-store-page-three-start-discovery-button" primary
                     @click="welcomeStore.startDiscovery">
-                    Start Discovery
+                    Start Monitoring
                 </FeatherButton>
             </div>
         </div>

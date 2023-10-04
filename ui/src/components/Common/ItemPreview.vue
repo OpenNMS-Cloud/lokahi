@@ -56,7 +56,7 @@ withDefaults(defineProps<ItemPreviewProps>(), {
 }
 
 .item-preview-body {
-  background-color: #e5f4f9;
+  background-color: var($background);
   padding: 12px 0;
 }
 

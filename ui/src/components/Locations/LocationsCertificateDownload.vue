@@ -24,6 +24,7 @@
         </div>
         <div class="divider"></div>
         <div class="download-buttons-wrapper">
+          <span><strong>Note:</strong> If you download a new bundle, you will need to use a new decryption password.</span>
           <div class="download-buttons">
             <ButtonWithSpinner
               primary
@@ -99,15 +100,15 @@ const { openModal, closeModal, isVisible } = useModal()
 
 const props = defineProps({
   title: {
-    default: 'Certificate Status',
+    default: 'Collector Certificate Status',
     type: String
   },
   primaryButtonText: {
-    default: 'Download Certificate',
+    default: 'Download Bundle',
     type: String
   },
   secondaryButtonText: {
-    default: 'Revoke/Regenerate',
+    default: 'Regenerate',
     type: String
   },
   onPrimaryButtonClick: {
@@ -164,7 +165,7 @@ const copyClick = () => {
   width: 100%;
   flex-wrap: wrap;
   gap: var(variables.$spacing-l);
-  @include mediaQueriesMixins.screen-xl {
+  @include mediaQueriesMixins.screen-md {
     flex-direction: row;
     justify-content: flex-start;
     gap: 60px;
@@ -187,7 +188,7 @@ const copyClick = () => {
   width: 1px;
   display: none;
 
-  @include mediaQueriesMixins.screen-xl {
+  @include mediaQueriesMixins.screen-xxl {
     display: block;
   }
 }
@@ -197,7 +198,6 @@ const copyClick = () => {
 }
 .download-copy-button {
   min-width: 87px;
-  margin-top: -25px;
 }
 .download-input {
   width: 285px;
@@ -219,6 +219,10 @@ const copyClick = () => {
   display: none;
 }
 .download-buttons-wrapper {
+  @include mediaQueriesMixins.screen-md {
+    margin-top: -40px;
+  }
+
   &.hasCert {
     max-width: unset;
   }

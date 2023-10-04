@@ -2,7 +2,6 @@
   <div class="full-page-container">
     <div class="header">
       <HeadlinePage text="Insights Dashboard" />
-      <DashboardHeaderLinks />
     </div>
     <div class="section-title">{{ dashboardText.Alerts.title }}</div>
     <div class="section-subtitle">{{ dashboardText.Alerts.timePeriod }}</div>
@@ -11,6 +10,10 @@
         @click="redirect('Alerts')"
         :timeRange="TimeRange.Last_24Hours"
       />
+    </div>
+    <div class="graphs">
+      <DashboardNodeReachability />
+      <DashboardTopNodesTable />
     </div>
     <div class="graphs">
       <DashboardCard

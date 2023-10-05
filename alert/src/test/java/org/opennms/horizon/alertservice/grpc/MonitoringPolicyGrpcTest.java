@@ -79,10 +79,12 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -229,6 +231,25 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
+
+    @Test
+    void testInvalidPolicyId() throws VerificationException {
+        // execute
+        var requestPolicy = MonitorPolicyProto.newBuilder()
+            .setId(100)
+            .setTenantId(tenantId)
+            .build();
+        StatusRuntimeException thrown = Assertions.assertThrows(StatusRuntimeException.class, () -> {
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .createPolicy(requestPolicy);
+        });
+
+        Assertions.assertEquals(String.format("INVALID_ARGUMENT: policy not found by id %s for tenant %s", 100, tenantId), thrown.getMessage());
+        verify(spyMonitorPolicyService, times(1)).createPolicy(any(), eq(tenantId));
+        verify(mockMonitorPolicyRepository, times(1)).findByIdAndTenantId(any(),eq(tenantId));
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
     @Test
     void testDeleteAlertByPolicy() throws VerificationException {
         alert1 = generateAlert("rule1", "policy1");

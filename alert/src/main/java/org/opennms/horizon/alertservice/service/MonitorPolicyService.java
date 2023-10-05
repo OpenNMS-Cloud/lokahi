@@ -115,7 +115,7 @@ public class MonitorPolicyService {
             SystemPolicyTag defaultPolicyTag;
             var existingTag = tagRepository.findByTenantIdAndName(tenantId, tag.getName());
             var matchedTag = existingTagMap.get(tag.getName());
-            if (matchedTag == null) {
+            if (matchedTag == null || !tenantId.equals(matchedTag.getTenantId())) {
                 Tag updatedTag;
                 if (existingTag.isEmpty()) {
                     tag.setPolicies(new HashSet<>());
@@ -135,12 +135,16 @@ public class MonitorPolicyService {
 
         var removedTags = new HashSet<>(Sets.difference(defaultPolicy.getTags(), newTags));
         removedTags.forEach(tag -> {
-                systemPolicyTagRepository.deleteById(new SystemPolicyTag.RelationshipId(tenantId, defaultPolicy.getId(), tag));
                 defaultPolicy.getTags().remove(tag);
+                if (SYSTEM_TENANT.equals(tag.getTenantId())) {
+                    return;
+                }
+                systemPolicyTagRepository.deleteById(new SystemPolicyTag.RelationshipId(tenantId, defaultPolicy.getId(), tag));
             }
         );
 
-        handleTagOperationUpdate(existingTags, newTags);
+        var filteredSystemTags = existingTags.stream().filter(t -> !SYSTEM_TENANT.equals(t.getTenantId())).toList();
+        handleTagOperationUpdate(filteredSystemTags, newTags);
 
         return policyMapper.map(defaultPolicy);
     }

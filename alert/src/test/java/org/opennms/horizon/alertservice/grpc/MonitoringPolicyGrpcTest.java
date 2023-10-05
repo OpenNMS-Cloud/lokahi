@@ -202,6 +202,81 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     }
 
     @Test
+    void testUpdateDefaultPolicyTagWithDefaultTag() throws VerificationException {
+        // prepare
+        final long policyId = 10L;
+        final String defaultTagName = "default";
+
+        var defaultPolicy = generateDefaultPolicy(policyId, List.of(defaultTagName));
+
+        doReturn(Optional.of(defaultPolicy)).when(mockMonitorPolicyRepository).findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT);
+
+        var tag = new Tag();
+        tag.setName("tag");
+        tag.setTenantId(tenantId);
+        var customDefaultTag = new Tag();
+        customDefaultTag.setName(defaultTagName);
+        customDefaultTag.setTenantId(tenantId);
+
+        var systemPolicyTag = new SystemPolicyTag(tenantId, policyId, tag);
+        var systemPolicyDefaultTag = new SystemPolicyTag(tenantId, policyId, customDefaultTag);
+        doReturn(new HashSet<>()).when(mockSystemPolicyTagRepository).findByTenantIdAndPolicyId(tenantId, policyId);
+        when(mockSystemPolicyTagRepository.save(any(SystemPolicyTag.class))).thenAnswer(i -> {
+            var inPolicyTag = (SystemPolicyTag) i.getArgument(0);
+            if (systemPolicyTag.getTag().getName().equals(inPolicyTag.getTag().getName())) {
+                return systemPolicyTag;
+            } else if (inPolicyTag.getTag().getName().equals(defaultTagName)) {
+                return systemPolicyDefaultTag;
+            } else {
+                return null;
+            }
+        });
+
+        doReturn(Optional.empty()).when(mockTagRepository).findByTenantIdAndName(any(), any());
+        //doReturn(Optional.empty()).when(mockTagRepository).findByTenantIdAndName(tenantId, tag.getName());
+
+        when(mockTagRepository.save(any(Tag.class))).thenAnswer(i -> {
+            var inTag = (Tag) i.getArgument(0);
+            if (tag.getName().equals(inTag.getName())) {
+                return tag;
+            } else if ("default".equals(inTag.getName())) {
+                return customDefaultTag;
+            } else {
+                return null;
+            }
+        });
+
+        // execute
+        var requestPolicy = MonitorPolicyProto.newBuilder()
+            .setName(DEFAULT_POLICY)
+            .addTags("tag")
+            .addTags(defaultTagName)
+            .build();
+        var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .createPolicy(requestPolicy);
+
+        // check
+        verify(spyMonitorPolicyService).createPolicy(requestPolicy, tenantId);
+        assertThat(result.getTagsCount()).isEqualTo(2);
+        assertThat(result.getTagsList()).hasSameElementsAs(List.of(defaultTagName, tag.getName()));
+
+        verify(mockTagRepository, times(2)).save(tagCaptor.capture());
+        var savedTags = tagCaptor.getAllValues();
+        assertThat(savedTags.get(0).getName()).isEqualTo(tag.getName());
+        assertThat(savedTags.get(0).getTenantId()).isEqualTo(tag.getTenantId());
+        assertThat(savedTags.get(1).getName()).isEqualTo(defaultTagName);
+        assertThat(savedTags.get(1).getTenantId()).isEqualTo(tag.getTenantId());
+
+        var operation = TagOperationList.newBuilder()
+            .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("default"))
+            .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("tag"))
+            .build();
+        verify(mockTagOperationProducer).sendTagUpdate(operation);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
     void testUpdateDefaultPolicyTag() throws VerificationException {
         // prepare
         long policyId = 10L;
@@ -379,7 +454,7 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         tagNames.forEach(tagName -> {
             var tag = new Tag();
             tag.setName(tagName);
-            tag.setTenantId(tenantId);
+            tag.setTenantId(SYSTEM_TENANT);
             tags.add(tag);
         });
         defaultPolicy.setName(DEFAULT_POLICY);

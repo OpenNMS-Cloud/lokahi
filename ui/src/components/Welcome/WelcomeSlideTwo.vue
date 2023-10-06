@@ -64,7 +64,7 @@
                         class="pre-wrap">Select a permanent location to unzip the bundle. Logs will be saved in that location and you will need to access this information if you restart your host network.</pre>
                 </div>
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 3: Run minion with the Run Command in a Terminal Window</h2>
+                    <h2>Step 3: Run Minion with the Run Command in a Terminal Window</h2>
                     <pre
                         class="pre-wrap">Install our minion by navigating to your chosen directory in a terminal and typing the following command:</pre>
                     <div class="welcome-slide-table docker-cmd">

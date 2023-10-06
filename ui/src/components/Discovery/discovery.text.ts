@@ -50,7 +50,7 @@ export const DiscoverySyslogSNMPTrapsForm = {
     top: {
       heading: 'Forward Syslog to Lōkahi with the following details:',
       list: {
-        text1: 'Syslog Ingest IP: 193.177.129.26 (Minion IP)',
+        text1: 'Syslog Ingest IP: 193.177.129.26 (Collector IP)',
         text2: 'Syslog Ingest UDP Port: 20013',
         text3: 'Need help configuring Syslog forwarding?'
       }

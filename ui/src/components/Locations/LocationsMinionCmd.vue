@@ -42,7 +42,7 @@ const copyClick = () => {
     .writeText(cmd)
     .then(() => {
       showSnackbar({
-        msg: 'Minion run command copied.'
+        msg: 'Collector run command copied.'
       })
     })
     .catch(() => {

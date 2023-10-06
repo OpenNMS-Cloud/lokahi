@@ -1,7 +1,7 @@
 <template>
   <div class="minions-list-wrapper">
     <HeadlineSection
-      text="Minions"
+      text="Collectors"
       data-test="headline"
     >
       <template #left>
@@ -13,7 +13,7 @@
       <template #middle>
         <FeatherInput
           v-model="searchMinionsInput"
-          label="Search Minion"
+          label="Search Collectors"
           type="search"
           class="search-minions-input"
           data-test="search-input"
@@ -85,7 +85,7 @@ const emptyListContent = reactive({
 
 watchEffect(() => {
   if (locationStore.selectedLocationId) {
-    emptyListContent.msg = 'No Minions found.'
+    emptyListContent.msg = 'No collectors found.'
   }
 })
 

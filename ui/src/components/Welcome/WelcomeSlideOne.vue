@@ -81,12 +81,9 @@
 </template>
 <script lang="ts" setup>
 import CollapsingCard from '../Common/CollapsingCard.vue'
-import Lightbulb from '../Common/LightbulbIcon.vue'
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
-import useTheme from '@/composables/useTheme';
 
 const welcomeStore = useWelcomeStore()
-const { isDark } = useTheme();
 defineProps({
     visible: { type: Boolean, default: false }
 })

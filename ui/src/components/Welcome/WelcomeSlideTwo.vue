@@ -33,7 +33,7 @@
             <div class="welcome-slide-step">
                 <h2>Step 1: Download Secure Collector Runtime Bundle</h2>
                 <pre
-                    class="pre-wrap">Select a permanent location for the download (e.g., /minion/minion-default.zip). Future Minion restarts require the certificate.</pre>
+                    class="pre-wrap">Select a permanent location for the download (e.g., /collector/collector-default.zip). Future Minion restarts require the certificate.</pre>
 
                 <div class="welcome-slide-table">
                     <div class="welcome-slide-table-header">

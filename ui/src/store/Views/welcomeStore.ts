@@ -162,7 +162,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       this.downloading = false
       this.downloaded = true
       this.downloadCopy = 'Downloaded'
-      createAndDownloadBlobFile(this.minionCert.certificate, `minion-${this.defaultLocationName}.zip`)
+      createAndDownloadBlobFile(this.minionCert.certificate, `collector-${this.defaultLocationName}.zip`)
 
       this.refreshing = true
       this.refreshMinions()

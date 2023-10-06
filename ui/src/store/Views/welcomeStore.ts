@@ -58,7 +58,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       defaultLocationName: 'default',
       detectedDevice: {},
       devicePreview: {
-        title: 'Collector Gateway',
+        title: 'Minion Gateway',
         loading: false,
         loadingCopy: 'Loading first discovery. This can take up to 3 minutes.',
         itemTitle: '',
@@ -162,7 +162,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       this.downloading = false
       this.downloaded = true
       this.downloadCopy = 'Downloaded'
-      createAndDownloadBlobFile(this.minionCert.certificate, `collector-${this.defaultLocationName}.zip`)
+      createAndDownloadBlobFile(this.minionCert.certificate, `minion-${this.defaultLocationName}.zip`)
 
       this.refreshing = true
       this.refreshMinions()
@@ -322,10 +322,10 @@ export const useWelcomeStore = defineStore('welcomeStore', {
         this.minionStatusCopy = 'Waiting for the Docker Install Command to be complete.'
       }
       if (this.minionStatusStarted && this.minionStatusLoading) {
-        this.minionStatusCopy = 'Please wait while we detect your Collector. This can take up to 10 minutes.'
+        this.minionStatusCopy = 'Please wait while we detect your Minion. This can take up to 10 minutes.'
       }
       if (this.minionStatusStarted && !this.minionStatusLoading && this.minionStatusSuccess) {
-        this.minionStatusCopy = 'Collector detected.'
+        this.minionStatusCopy = 'Minion detected.'
       }
     },
     updateDockerCommand(newCommand: string) {

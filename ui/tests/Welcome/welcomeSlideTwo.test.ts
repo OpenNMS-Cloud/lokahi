@@ -37,7 +37,7 @@ describe.skip('WelcomeSlideTwo', () => {
         expect(hiddenElem).toBeDefined();
         expect(welcomeStore.minionStatusLoading).toBeTruthy()
     })
-    test('Welcome Slide Two Collector Detector is working', async () => {
+    test('Welcome Slide Two Minion Detector is working', async () => {
 
         const welcomeStore = useWelcomeStore();
         const elem = wrapper.get('[data-test="welcome-slide-two-download-button"]')

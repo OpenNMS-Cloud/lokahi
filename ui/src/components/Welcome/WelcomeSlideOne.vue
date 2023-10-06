@@ -3,7 +3,7 @@
     ]">
         <div class="welcome-text">
             <h1 data-test="welcome-slide-one-title">Welcome to OpenNMS&nbsp;Cloud</h1>
-            <p class="margin-bottom">To start, let's install a secure collector on your network to gather <br>
+            <p class="margin-bottom">To start, let's install a secure minion on your network to gather <br>
                 monitoring data from your devices.</p>
             <p class="margin-bottom">This process takes only a few minutes.</p>
         </div>

@@ -126,7 +126,7 @@ const options = computed<ChartOptions<any>>(() => ({
 const xAxisLabels = computed(() => {
   const graphsDataSetsValues = (graphs.dataSets.value[0]?.values as any) || ([] as any)
 
-  // if collector down, this tracks the gap between the previous point and now
+  // if minion down, this tracks the gap between the previous point and now
   const date = add(new Date(), { minutes: 2 })
   graphsDataSetsValues.push([date.getTime() / 1000, 0])
 

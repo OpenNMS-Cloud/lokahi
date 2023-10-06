@@ -113,7 +113,7 @@ export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
                   y: data.value
                 }
               }),
-              // if collector down, this tracks the gap between the previous point and now
+              // if minion down, this tracks the gap between the previous point and now
               { x: new Date().toISOString(), y: 0 }
             ]
 

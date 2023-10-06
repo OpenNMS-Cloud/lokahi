@@ -8,20 +8,20 @@
     ]">
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
-                <h1 data-test="welcome-slide-two-title">Secure Collector Runtime Bundle</h1>
+                <h1 data-test="welcome-slide-two-title">Secure Minion Runtime Bundle</h1>
                 <p>
-                    To install our secure collector, you must download our runtime bundle and run it in your desired location.
-                    For optimal monitoring, the collector needs to always be available.
+                    To install our secure minion, you must download our runtime bundle and run it in your desired location.
+                    For optimal monitoring, the minion needs to always be available.
                 </p>
                 <br>
                 <p>Our runtime bundle contains:</p>
                 <br>
                 <ul>
                     <li>
-                        An encrypted collector certificate with a decryption password
+                        An encrypted minion certificate with a decryption password
                     </li>
                     <li>
-                        A docker compose file with a collector container
+                        A docker compose file with a minion container
                     </li>
                 </ul>
                 <br>
@@ -31,13 +31,13 @@
             </div>
 
             <div class="welcome-slide-step">
-                <h2>Step 1: Download Secure Collector Runtime Bundle</h2>
+                <h2>Step 1: Download Secure Minion Runtime Bundle</h2>
                 <pre
-                    class="pre-wrap">Select a permanent location for the download (e.g., /collector/collector-default.zip). Future Minion restarts require the certificate.</pre>
+                    class="pre-wrap">Select a permanent location for the download (e.g., /minion/minion-default.zip). Future Minion restarts require the certificate.</pre>
 
                 <div class="welcome-slide-table">
                     <div class="welcome-slide-table-header">
-                        <div>Secure Collector Runtime Bundle</div>
+                        <div>Secure Minion Runtime Bundle</div>
                         <div>
                             <FeatherButton text @click="localDownloadHandler" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
@@ -64,9 +64,9 @@
                         class="pre-wrap">Select a permanent location to unzip the bundle. Logs will be saved in that location and you will need to access this information if you restart your host network.</pre>
                 </div>
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 3: Run collector with the Run Command in a Terminal Window</h2>
+                    <h2>Step 3: Run minion with the Run Command in a Terminal Window</h2>
                     <pre
-                        class="pre-wrap">Install our collector by navigating to your chosen directory in a terminal and typing the following command:</pre>
+                        class="pre-wrap">Install our minion by navigating to your chosen directory in a terminal and typing the following command:</pre>
                     <div class="welcome-slide-table docker-cmd">
                         <div class="welcome-slide-table-header docker-cmd">
                             <div class="welcome-slide-table-body">
@@ -83,8 +83,8 @@
                 </div>
 
                 <div class="welcome-slide-step">
-                    <h2>Step 4: Detect Your Collector</h2>
-                    <p>We will automatically detect your Collector once it is set up.</p>
+                    <h2>Step 4: Detect Your Minion</h2>
+                    <p>We will automatically detect your Minion once it is set up.</p>
 
                     <div
                         :class="['welcome-slide-minion-status', welcomeStore.minionStatusSuccess ? 'welcome-slide-minion-success' : '']">

@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <div class="title">Run Collector with the Run Command in a Terminal Window</div>
+    <div class="title">Run Minion with the Run Command in a Terminal Window</div>
     <span
-      >Install our collector by navigating to your chosen directory in a terminal and typing the following
+      >Install our minion by navigating to your chosen directory in a terminal and typing the following
       command:</span
     >
     <div class="instructions">
@@ -42,7 +42,7 @@ const copyClick = () => {
     .writeText(cmd)
     .then(() => {
       showSnackbar({
-        msg: 'Collector run command copied.'
+        msg: 'Minion run command copied.'
       })
     })
     .catch(() => {

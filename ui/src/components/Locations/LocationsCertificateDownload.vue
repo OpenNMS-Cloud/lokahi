@@ -100,7 +100,7 @@ const { openModal, closeModal, isVisible } = useModal()
 
 const props = defineProps({
   title: {
-    default: 'Collector Certificate Status',
+    default: 'Minion Certificate Status',
     type: String
   },
   primaryButtonText: {

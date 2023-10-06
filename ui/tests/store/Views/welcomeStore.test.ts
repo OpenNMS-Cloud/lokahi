@@ -112,7 +112,7 @@ describe('Welcome Store', () => {
         const welcomeStore = useWelcomeStore()
         const ip = '192.168.1.1'
         welcomeStore.setDevicePreview({ nodeLabel: ip, createTime: 1234 }, {}, 25)
-        expect(welcomeStore.devicePreview.title).toBe('Collector Gateway');
+        expect(welcomeStore.devicePreview.title).toBe('Minion Gateway');
         expect(welcomeStore.devicePreview.itemTitle).toBe(ip);
     })
 

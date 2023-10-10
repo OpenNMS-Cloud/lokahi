@@ -30,9 +30,15 @@ package org.opennms.horizon.events.grpc.service;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.UInt64Value;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import io.grpc.Context;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.events.persistence.service.EventService;
 import org.opennms.horizon.events.proto.Event;
@@ -46,31 +52,56 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     private final EventService eventService;
+    private final InventoryClient inventoryClient;
     private final TenantLookup tenantLookup;
 
     @Override
     public void listEvents(Empty request, StreamObserver<EventLog> responseObserver) {
-        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
+            List<Event> events = eventService.findEvents(tenantId);
+            EventLog eventList = EventLog.newBuilder()
+                .setTenantId(tenantId)
+                .addAllEvents(events).build();
 
-        List<Event> events = eventService.findEvents(tenantId);
-        EventLog eventList = EventLog.newBuilder()
-            .setTenantId(tenantId)
-            .addAllEvents(events).build();
-
-        responseObserver.onNext(eventList);
-        responseObserver.onCompleted();
+            responseObserver.onNext(eventList);
+            responseObserver.onCompleted();
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
     }
 
     @Override
     public void getEventsByNodeId(UInt64Value nodeId, StreamObserver<EventLog> responseObserver) {
-        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
+            try {
+                inventoryClient.getNodeById(tenantId, nodeId.getValue());
+            } catch (StatusRuntimeException e) {
+                if (e.getStatus() != null) {
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(
+                        createStatus(e.getStatus().getCode().value(), e.getStatus().getDescription())));
+                } else {
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(
+                        createStatus(Code.INTERNAL_VALUE, e.getMessage())));
+                }
+                return;
+            }
 
-        List<Event> events = eventService.findEventsByNodeId(tenantId, nodeId.getValue());
-        EventLog eventList = EventLog.newBuilder()
-            .setTenantId(tenantId)
-            .addAllEvents(events).build();
+            List<Event> events = eventService.findEventsByNodeId(tenantId, nodeId.getValue());
+            EventLog eventList = EventLog.newBuilder()
+                .setTenantId(tenantId)
+                .addAllEvents(events).build();
 
-        responseObserver.onNext(eventList);
-        responseObserver.onCompleted();
+            responseObserver.onNext(eventList);
+            responseObserver.onCompleted();
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+    }
+
+    private Status badTenant() {
+        return createStatus(Code.INVALID_ARGUMENT_VALUE, "Tenant Id not found");
+    }
+
+    private Status createStatus(int code, String msg) {
+        return Status.newBuilder()
+            .setCode(code)
+            .setMessage(msg)
+            .build();
     }
 }

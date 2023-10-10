@@ -5,7 +5,7 @@
         text="Locations"
         data-test="locations-headline"
       />
-      <div data-test="locations-notification-ctrl"><AppliancesNotificationsCtrl /></div>
+      <div data-test="locations-notification-ctrl"><LocationsNotificationsCtrl /></div>
     </div>
     <div class="content">
       <div class="content-left">

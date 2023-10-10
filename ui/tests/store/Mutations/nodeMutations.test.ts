@@ -1,7 +1,5 @@
 import { createTestingPinia } from '@pinia/testing'
 import { nodeFixture } from '../../fixture/nodes'
-import { useAppliancesQueries } from '@/store/Queries/appliancesQueries'
-import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 
 describe('nodeMutations', () => {
   beforeEach(() => {

@@ -31,6 +31,9 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+.layout {
+  overflow-y: hidden;
+}
 :deep(.feather-app-rail) {
   border-right: 0 !important;
 }

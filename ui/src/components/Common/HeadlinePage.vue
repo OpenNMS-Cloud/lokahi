@@ -21,7 +21,7 @@ defineProps({
 @use '@featherds/styles/mixins/typography';
 
 .page-headline {
-  @include typography.headline2();
+  @include typography.headline1();
   margin-top: 40px;
   margin-bottom: 40px;
 }

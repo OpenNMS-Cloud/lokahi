@@ -232,7 +232,11 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
           await discoveryMutations.createOrUpdateDiscovery({request:discoveryFromClientToServer(this.selectedDiscovery)})
         }
         await this.init()
-        this.newDiscoveryModalActive = true
+
+        if (!discoveryMutations.passiveDiscoveryError && !discoveryMutations.createOrUpdateDiscoveryError) {
+          this.newDiscoveryModalActive = true
+        }
+
         this.validateOnKeyUp = false
       }else {
         this.validateOnKeyUp = true

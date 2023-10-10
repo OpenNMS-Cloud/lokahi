@@ -41,7 +41,6 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     isFetching: createOrUpdateDiscoveryIsFetching
   } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
  
- 
   const {
     execute: deletePassiveDiscovery,
     error: deletePassiveDiscoveryError,

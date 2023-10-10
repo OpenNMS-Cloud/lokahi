@@ -167,7 +167,6 @@
             :inputValue="discoveryStore.tagSearch"
             :itemClicked="discoveryStore.tagSelected"
             :loading="discoveryStore.loading"
-            :error="discoveryStore.validationErrors.tags"
             :resultsVisible="!!discoveryStore.foundTags.length || !!discoveryStore.tagSearch"
             :outsideClicked="discoveryStore.clearTagAuto"
             :results="discoveryStore.foundTags"
@@ -175,7 +174,6 @@
             :wrapperClicked="() => discoveryStore.searchForTags('')"
             :errMsg="discoveryStore.tagError"
             :disabled="isOverallDisabled"
-            :allowNew="true"
           />
           <FeatherChipList label="Tags">
             <FeatherChip
@@ -421,6 +419,7 @@ const activeDiscoveryTypes = [
   padding: var(variables.$spacing-m);
   background-color: var(variables.$surface);
   max-width: 900px;
+  margin-bottom: 20px;
   .headline {
     @include typography.header();
   }
@@ -434,7 +433,7 @@ const activeDiscoveryTypes = [
     height: fit-content;
     flex-grow: 1;
     min-width: auto;
-    margin-bottom: 0;
+    margin-bottom: 20px;
   }
 }
 

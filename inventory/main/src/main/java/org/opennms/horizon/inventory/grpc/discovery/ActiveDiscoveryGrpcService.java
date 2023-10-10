@@ -92,7 +92,6 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryServiceGrpc.Activ
                 responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())

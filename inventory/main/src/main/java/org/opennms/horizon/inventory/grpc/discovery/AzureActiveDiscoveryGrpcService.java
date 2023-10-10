@@ -55,7 +55,6 @@ public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryService
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
-
             try {
                 AzureActiveDiscoveryDTO discovery = service.createActiveDiscovery(tenantId, request);
 
@@ -63,7 +62,6 @@ public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryService
                 responseObserver.onCompleted();
 
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())

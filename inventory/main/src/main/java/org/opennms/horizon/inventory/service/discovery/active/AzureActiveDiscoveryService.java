@@ -36,6 +36,7 @@ import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.discovery.AzureActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
@@ -58,6 +59,7 @@ public class AzureActiveDiscoveryService {
     private final AzureActiveDiscoveryMapper mapper;
     private final AzureActiveDiscoveryRepository repository;
     private final ScannerTaskSetService scannerTaskSetService;
+    private final MonitoringLocationService monitoringLocationService;
     private final TagService tagService;
 
     public AzureActiveDiscoveryDTO createActiveDiscovery(String tenantId, AzureActiveDiscoveryCreateDTO request) {
@@ -95,6 +97,12 @@ public class AzureActiveDiscoveryService {
         } catch (Exception e) {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         }
+
+        var location = monitoringLocationService.findByLocationAndTenantId(request.getLocationId(), tenantId);
+        if (location.isEmpty()) {
+            throw new InventoryRuntimeException("Location not found.");
+        }
+
         AzureSubscription subscription;
         try {
             subscription = client.getSubscription(token, request.getSubscriptionId(),

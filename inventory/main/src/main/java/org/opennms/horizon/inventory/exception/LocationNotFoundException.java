@@ -28,7 +28,7 @@
 
 package org.opennms.horizon.inventory.exception;
 
-public class LocationNotFoundException extends Exception {
+public class LocationNotFoundException extends InventoryRuntimeException {
     public LocationNotFoundException(String message) {
         super(message);
     }

@@ -25,10 +25,9 @@ public class ActiveDiscoveryService {
 
     @Transactional
     public void deleteActiveDiscovery(String tenantId, long id) {
-        Optional<ActiveDiscovery> activeDiscoveryOptional = repository.findByTenantIdAndId(tenantId, id);
-        if (activeDiscoveryOptional.isPresent()) {
-            ActiveDiscovery activeDiscovery = activeDiscoveryOptional.get();
-            repository.delete(activeDiscovery);
-        }
+        repository.findByTenantIdAndId(tenantId, id).ifPresentOrElse(repository::delete,
+            () -> {
+                throw new IllegalArgumentException(String.format("active discovery id %d not found", id));
+            });
     }
 }

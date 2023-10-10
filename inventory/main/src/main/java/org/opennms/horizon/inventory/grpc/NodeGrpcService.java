@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.grpc;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.BoolValue;
@@ -57,6 +58,7 @@ import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
@@ -64,12 +66,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -92,6 +97,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final NodeMapper nodeMapper;
     private final TenantLookup tenantLookup;
     private final ScannerTaskSetService scannerService;
+    private final MonitoringLocationService monitoringLocationService;
 
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("send-taskset-for-node-%d")
@@ -176,6 +182,15 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
         String tenantId = tenantIdOptional.get();
         String locationId = request.getLocationId();
+        var location = monitoringLocationService.findByTenantId(locationId);
+        if (location.isEmpty()) {
+            Status status = Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage(LOCATION_NOT_FOUND)
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            return;
+        }
         String ipAddress = request.getIpAddress();
         if (Strings.isNullOrEmpty(locationId) || Strings.isNullOrEmpty(ipAddress)) {
             Status status = Status.newBuilder()
@@ -296,26 +311,45 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private void startNodeScanByIdsForTenant(String tenantId, NodeIdList request, StreamObserver<BoolValue> responseObserver) {
         Map<Long, List<NodeDTO>> nodes = nodeService.listNodeByIds(request.getIdsList(), tenantId);
 
-        if(nodes != null && !nodes.isEmpty()) {
+        if(nodes != null && request.getIdsCount() == nodes.size()) {
             executorService.execute(() -> sendScannerTasksToMinion(nodes, tenantId));
             responseObserver.onNext(BoolValue.of(true));
             responseObserver.onCompleted();
         } else {
+            Set<Long> diff;
+            if (nodes != null) {
+                diff = Sets.difference(new HashSet<>(request.getIdsList()), nodes.keySet());
+            } else {
+                diff = new HashSet<>(request.getIdsList());
+            }
             Status status = Status.newBuilder()
                 .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("No nodes exist with ids " + request.getIdsList()).build();
+                .setMessage("No nodes exist with ids " +  diff.stream().map(String::valueOf).collect(Collectors.joining())).build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
 
     @Override
     public void getIpInterfaceFromQuery(NodeIdQuery request, StreamObserver<IpInterfaceDTO> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocationId(), tenantId).ifPresentOrElse(ipInterface -> {
-            responseObserver.onNext(ipInterface);
-            responseObserver.onCompleted();
-        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(Status.newBuilder()
-            .setCode(Code.NOT_FOUND_VALUE)
-            .setMessage(String.format("IpInterface with IP: %s doesn't exist.", request.getIpAddress())).build()))), () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
+                var location = monitoringLocationService.findByLocationAndTenantId(request.getLocationId(), tenantId);
+                if (location.isEmpty()) {
+                    Status status = Status.newBuilder()
+                        .setCode(Code.NOT_FOUND_VALUE)
+                        .setMessage(LOCATION_NOT_FOUND)
+                        .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    return;
+                }
+                ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocationId(), tenantId).ifPresentOrElse(ipInterface ->
+                {
+                    responseObserver.onNext(ipInterface);
+                    responseObserver.onCompleted();
+                }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(Status.newBuilder()
+                    .setCode(Code.NOT_FOUND_VALUE)
+                    .setMessage(String.format("IpInterface with IP: %s doesn't exist.", request.getIpAddress())).build())));
+            },
+            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createTenantIdMissingStatus())));
     }
 
     @Override

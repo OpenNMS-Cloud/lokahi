@@ -233,7 +233,10 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         }
         await this.init()
 
-        if (!discoveryMutations.passiveDiscoveryError && !discoveryMutations.createOrUpdateDiscoveryError) {
+        if (
+          !discoveryMutations.passiveDiscoveryError && 
+          !discoveryMutations.createOrUpdateDiscoveryError && 
+          !discoveryMutations.azureError) {
           this.newDiscoveryModalActive = true
         }
 

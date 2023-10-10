@@ -12,7 +12,7 @@ import {
 
 export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
   // Create Azure
-  const { execute: addAzureCreds, error, isFetching } = useMutation(CreateAzureActiveDiscoveryDocument)
+  const { execute: addAzureCreds, error: azureError, isFetching } = useMutation(CreateAzureActiveDiscoveryDocument)
 
   // Create ICMP Discoveries
   const {
@@ -52,7 +52,7 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
 
   return {
     addAzureCreds,
-    azureError: computed(() => error),
+    azureError,
     createOrUpdateDiscovery,
     createOrUpdateDiscoveryError,
     createOrUpdateDiscoveryIsFetching,

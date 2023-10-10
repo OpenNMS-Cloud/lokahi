@@ -35,7 +35,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
       cachePolicy: 'network-only'
     })
     await execute()
-    return tagsSearched.value = data.value?.tags || []
+    tagsSearched.value = data.value?.tags ?? []
+    return tagsSearched.value
   }
 
   const formatActiveDiscoveries = (activeDiscoveries: ActiveDiscovery[] = []) => {

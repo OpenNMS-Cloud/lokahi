@@ -110,10 +110,10 @@
       <div class="azure-row">
         <FeatherInput
           label="Client Subscription ID"
-          :error="discoveryErrors?.clientSubscriptionId"
-          :modelValue="(discovery?.meta as DiscoveryAzureMeta).clientSubscriptionId"
+          :error="discoveryErrors?.subscriptionId"
+          :modelValue="(discovery?.meta as DiscoveryAzureMeta).subscriptionId"
           :disabled="isOverallDisabled"
-          @update:modelValue="(e?: string | number) => updateDiscoveryValue('clientSubscriptionId',String(e))"
+          @update:modelValue="(e?: string | number) => updateDiscoveryValue('subscriptionId',String(e))"
         />
         <FeatherInput
           label="Directory ID"

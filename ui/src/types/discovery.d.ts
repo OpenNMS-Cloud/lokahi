@@ -45,7 +45,7 @@ export interface DiscoverySNMPV3AuthPrivacy extends DiscoverySNMPV3Auth {
 export interface DiscoveryAzureMeta {
   clientId?: string;
   clientSecret?: string;
-  clientSubscriptionId?: string;
+  subscriptionId?: string;
   directoryId?: string;
 }
 

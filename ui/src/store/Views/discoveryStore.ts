@@ -103,7 +103,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         meta:{
           clientId: '',
           clientSecret: '',
-          clientSubscriptionId: '',
+          subscriptionId: '',
           directoryId: '',
           communityStrings: 'public',
           udpPorts: '161'
@@ -232,6 +232,8 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       if (isValid){
         if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
           await discoveryMutations.upsertPassiveDiscovery({passiveDiscovery:discoveryFromClientToServer(this.selectedDiscovery)})
+        } else if (this.selectedDiscovery.type === DiscoveryType.Azure) {
+          await discoveryMutations.addAzureCreds({ discovery: discoveryFromClientToServer(this.selectedDiscovery)})
         } else {
           await discoveryMutations.createOrUpdateDiscovery({request:discoveryFromClientToServer(this.selectedDiscovery)})
         }

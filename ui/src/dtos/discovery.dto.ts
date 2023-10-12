@@ -36,7 +36,7 @@ export const discoveryFromAzureClientToServer = (discovery: NewOrUpdatedDiscover
     name: discovery.name,
     tags: discovery.tags?.map((t) => ({name:t.name})),
     clientId: meta.clientId,
-    clientSubscriptionId: meta.clientSubscriptionId,
+    subscriptionId: meta.subscriptionId,
     clientSecret: meta.clientSecret,
     directoryId: meta.directoryId
   }
@@ -77,7 +77,7 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
         udpPorts: d?.details?.snmpConfig?.ports.join(';') ?? '',
         clientId: d?.details?.clientId,
         clientSecret: d?.details?.clientSecret ?? '',
-        clientSubscriptionId: d?.details?.subscriptionId,
+        subscriptionId: d?.details?.subscriptionId,
         directoryId: d?.details?.directoryId
       }
     })
@@ -140,7 +140,7 @@ const azureDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
   locationId:yup.string().required('Location required.'),
   clientId: yup.string().required('Client ID is required.'),
-  clientSubscriptionId: yup.string().required('Client subscription ID is required.'),
+  subscriptionId: yup.string().required('Client subscription ID is required.'),
   directoryId: yup.string().required('Directory ID is required.'),
   clientSecret: yup.string().required('Client secret is required.')
 }).required()

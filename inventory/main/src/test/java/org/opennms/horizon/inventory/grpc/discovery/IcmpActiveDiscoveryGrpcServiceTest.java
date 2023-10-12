@@ -30,6 +30,8 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 
     public static final String TEST_TENANT_ID = "x-tenant-id-x";
 
+    public static final long TEST_LOCATION_ID = 10L;
+
     public static final String TEST_LOCATION = "x-location-x";
 
     private TenantLookup mockTenantLookup;
@@ -49,13 +51,13 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         mockScannerTaskSetService = Mockito.mock(ScannerTaskSetService.class);
         mockMonitoringLocationService = mock(MonitoringLocationService.class);
 
-        MonitoringLocationDTO location = MonitoringLocationDTO.newBuilder().setLocation(TEST_LOCATION).setId(1L).setTenantId(TEST_TENANT_ID).build();
-        when(mockMonitoringLocationService.findByLocationAndTenantId(TEST_LOCATION, TEST_TENANT_ID)).thenReturn(Optional.of(location));
+        MonitoringLocationDTO location = MonitoringLocationDTO.newBuilder().setLocation(TEST_LOCATION).setId(TEST_LOCATION_ID).setTenantId(TEST_TENANT_ID).build();
+        when(mockMonitoringLocationService.findByLocationIdAndTenantId(TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.of(location));
 
         testIcmpActiveDiscoveryCreateDTO =
             IcmpActiveDiscoveryCreateDTO.newBuilder()
                 .setName("x-active-discovery-create-x")
-                .setLocationId(TEST_LOCATION)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .build();
 
         target = new IcmpActiveDiscoveryGrpcService(mockTenantLookup, mockIcmpActiveDiscoveryService,
@@ -69,6 +71,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         //
         var testDiscovery =
             IcmpActiveDiscoveryDTO.newBuilder()
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .setName("x-active-discovery-x")
                 .build();
 
@@ -264,7 +267,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
             IcmpActiveDiscoveryCreateDTO.newBuilder()
                 .setName("test-out-of-range")
                 .addIpAddresses(ipRange)
-                .setLocationId(TEST_LOCATION)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .build();
         StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
         target.upsertActiveDiscovery(discoveryCreateDTO, mockStreamObserver);

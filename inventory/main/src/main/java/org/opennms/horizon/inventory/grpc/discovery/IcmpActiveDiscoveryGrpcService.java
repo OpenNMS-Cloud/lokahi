@@ -148,7 +148,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     }
 
     private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
-        var location = monitoringLocationService.findByLocationAndTenantId(request.getLocationId(), tenantId);
+        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
         if (location.isEmpty()) {
             throw new LocationNotFoundException("Invalid location");
         }

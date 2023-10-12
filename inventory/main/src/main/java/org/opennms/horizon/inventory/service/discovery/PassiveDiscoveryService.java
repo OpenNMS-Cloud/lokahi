@@ -147,7 +147,7 @@ public class PassiveDiscoveryService {
     }
 
     private void validateDiscovery(String tenantId, PassiveDiscoveryUpsertDTO dto) {
-        var location = monitoringLocationService.findByLocationAndTenantId(dto.getLocationId(), tenantId);
+        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(dto.getLocationId()), tenantId);
         if (location.isEmpty()) {
             throw new LocationNotFoundException("Location not found");
         }

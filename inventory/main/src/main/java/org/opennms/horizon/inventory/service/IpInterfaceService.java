@@ -44,7 +44,7 @@ public class IpInterfaceService {
         return modelRepo.findByIdAndTenantId(id, tenantId).map(mapper::modelToDTO);
     }
 
-    public Optional<IpInterfaceDTO> findByIpAddressAndLocationAndTenantId(String ipAddress, String location, String tenantId) {
+    public Optional<IpInterfaceDTO> findByIpAddressAndLocationIdAndTenantId(String ipAddress, String location, String tenantId) {
             Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationIdAndTenantId(InetAddressUtils.getInetAddress(ipAddress), Long.valueOf(location), tenantId);
             return optional.map(mapper::modelToDTO);
     }

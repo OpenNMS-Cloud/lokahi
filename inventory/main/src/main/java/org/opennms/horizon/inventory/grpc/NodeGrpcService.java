@@ -181,7 +181,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
         String tenantId = tenantIdOptional.get();
         String locationId = request.getLocationId();
-        var location = monitoringLocationService.findByLocationAndTenantId(locationId, tenantId);
+        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(locationId), tenantId);
         if (location.isEmpty()) {
             Status status = Status.newBuilder()
                 .setCode(Code.NOT_FOUND_VALUE)
@@ -200,7 +200,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             return;
         }
 
-        Optional<IpInterfaceDTO> optional = ipInterfaceService.findByIpAddressAndLocationAndTenantId(ipAddress, locationId, tenantId);
+        Optional<IpInterfaceDTO> optional = ipInterfaceService.findByIpAddressAndLocationIdAndTenantId(ipAddress, locationId, tenantId);
 
         if (optional.isEmpty()) {
             Status status = Status.newBuilder()
@@ -327,7 +327,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void getIpInterfaceFromQuery(NodeIdQuery request, StreamObserver<IpInterfaceDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-                var location = monitoringLocationService.findByLocationAndTenantId(request.getLocationId(), tenantId);
+                var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
                 if (location.isEmpty()) {
                     Status status = Status.newBuilder()
                         .setCode(Code.NOT_FOUND_VALUE)
@@ -336,7 +336,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                     return;
                 }
-                ipInterfaceService.findByIpAddressAndLocationAndTenantId(request.getIpAddress(), request.getLocationId(), tenantId).ifPresentOrElse(ipInterface ->
+                ipInterfaceService.findByIpAddressAndLocationIdAndTenantId(request.getIpAddress(), request.getLocationId(), tenantId).ifPresentOrElse(ipInterface ->
                 {
                     responseObserver.onNext(ipInterface);
                     responseObserver.onCompleted();

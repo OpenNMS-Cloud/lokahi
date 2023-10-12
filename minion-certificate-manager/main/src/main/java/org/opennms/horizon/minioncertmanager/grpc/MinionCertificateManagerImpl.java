@@ -140,7 +140,10 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
             responseObserver.onNext(createResponse(Files.readAllBytes(archive.toPath()), password));
             responseObserver.onCompleted();
-        } catch (IOException | InterruptedException | RocksDBException | CertificateException e) {
+        } catch (InterruptedException e){
+            LOG.error("InterruptedException while fetching certificate", e);
+            Thread.currentThread().interrupt();
+        } catch (IOException | RocksDBException | CertificateException e) {
             LOG.error("Error while fetching certificate", e);
             responseObserver.onError(e);
         } finally {

@@ -77,8 +77,9 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class NodeGrpcServiceTest {
-    private static final String location = "x-location-x";
-    private static final String tenantId = "x-tenant-id-x";
+    private static final String TEST_LOCATION_NAME = "x-location-x";
+    private static final long TEST_LOCATION_ID = 5L;
+    private static final String TEST_TENANT_ID = "x-tenant-id-x";
     private NodeService mockNodeService;
     private IpInterfaceService mockIpInterfaceService;
     private NodeMapper mockNodeMapper;
@@ -105,23 +106,24 @@ class NodeGrpcServiceTest {
     void setUp() {
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .setManagementIp("12.0.0.1")
                 .build();
 
         testMonitoringLocation = new MonitoringLocation();
-        testMonitoringLocation.setLocation("x-monitoring-location-x");
+        testMonitoringLocation.setId(TEST_LOCATION_ID);
+        testMonitoringLocation.setLocation(TEST_LOCATION_NAME);
 
         testNode = new Node();
         testNode.setNodeLabel("x-node-label-x");
-        testNode.setTenantId(tenantId);
+        testNode.setTenantId(TEST_TENANT_ID);
         testNode.setMonitoringLocation(testMonitoringLocation);
 
         testNodeDTO1 = NodeDTO.newBuilder().setId(101010L).build();
         testNodeDTO2A = NodeDTO.newBuilder().setId(202020L).build();
         testNodeDTO2B = NodeDTO.newBuilder().setId(303030L).build();
 
-        testTenantIdOptional = Optional.of(tenantId);
+        testTenantIdOptional = Optional.of(TEST_TENANT_ID);
 
         testNodeDTOList = List.of(testNodeDTO1);
 
@@ -138,8 +140,8 @@ class NodeGrpcServiceTest {
         mockMonitoringLocationService = Mockito.mock(MonitoringLocationService.class);
 
         Optional<MonitoringLocationDTO> locationDto = Optional.of(MonitoringLocationDTO.newBuilder()
-            .setId(1L).setLocation(location).setTenantId(tenantId).build());
-        when(mockMonitoringLocationService.findByLocationAndTenantId(location, tenantId)).thenReturn(locationDto);
+            .setId(TEST_LOCATION_ID).setLocation(TEST_LOCATION_NAME).setTenantId(TEST_TENANT_ID).build());
+        when(mockMonitoringLocationService.findByLocationIdAndTenantId(TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(locationDto);
 
         target =
             new NodeGrpcService(
@@ -178,7 +180,7 @@ class NodeGrpcServiceTest {
         //
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .build();
 
         //
@@ -223,10 +225,10 @@ class NodeGrpcServiceTest {
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
                 .setManagementIp("127.0.0.1")
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .build();
 
-        doThrow(new EntityExistException("IP exists")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, tenantId);
+        doThrow(new EntityExistException("IP exists")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, TEST_TENANT_ID);
         //
         // Execute
         //
@@ -241,7 +243,7 @@ class NodeGrpcServiceTest {
                 NodeGrpcService.IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG);
 
         Mockito.verify(mockNodeDTOStreamObserver).onError(Mockito.argThat(matcher));
-        verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, tenantId);
+        verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, TEST_TENANT_ID);
     }
 
     /**
@@ -255,10 +257,10 @@ class NodeGrpcServiceTest {
         testNodeCreateDTO =
             NodeCreateDTO.newBuilder()
                 .setManagementIp("127.0.0.1")
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .build();
 
-        doThrow(new LocationNotFoundException("Location not found")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, tenantId);
+        doThrow(new LocationNotFoundException("Location not found")).when(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, TEST_TENANT_ID);
         //
         // Execute
         //
@@ -273,7 +275,7 @@ class NodeGrpcServiceTest {
                 NodeGrpcService.INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG);
 
         Mockito.verify(mockNodeDTOStreamObserver).onError(Mockito.argThat(matcher));
-        verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, tenantId);
+        verify(mockNodeService).createNode(testNodeCreateDTO, ScanType.NODE_SCAN, TEST_TENANT_ID);
     }
 
 
@@ -284,7 +286,7 @@ class NodeGrpcServiceTest {
         //
         Empty testRequest = Empty.getDefaultInstance();
 
-        Mockito.when(mockNodeService.findByTenantId(tenantId)).thenReturn(testNodeDTOList);
+        Mockito.when(mockNodeService.findByTenantId(TEST_TENANT_ID)).thenReturn(testNodeDTOList);
 
         //
         // Execute
@@ -314,7 +316,7 @@ class NodeGrpcServiceTest {
         Int64Value nodeIdRequest = Int64Value.newBuilder().setValue(131313L).build();
         Optional<NodeDTO> testNodeDTOOptional = Optional.of(testNodeDTO1);
 
-        Mockito.when(mockNodeService.getByIdAndTenantId(131313L, tenantId)).thenReturn(testNodeDTOOptional);
+        Mockito.when(mockNodeService.getByIdAndTenantId(131313L, TEST_TENANT_ID)).thenReturn(testNodeDTOOptional);
 
         //
         // Execute
@@ -337,7 +339,7 @@ class NodeGrpcServiceTest {
         Int64Value nodeIdRequest = Int64Value.newBuilder().setValue(242424L).build();
         Optional<NodeDTO> testNodeDTOOptional = Optional.empty();
 
-        Mockito.when(mockNodeService.getByIdAndTenantId(131313L, tenantId)).thenReturn(testNodeDTOOptional);
+        Mockito.when(mockNodeService.getByIdAndTenantId(131313L, TEST_TENANT_ID)).thenReturn(testNodeDTOOptional);
 
         //
         // Execute
@@ -360,7 +362,7 @@ class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .setIpAddress("127.0.0.1")
                 .build();
 
@@ -372,7 +374,7 @@ class NodeGrpcServiceTest {
         Optional<IpInterfaceDTO> testOptionalIpInterfaceDTO = Optional.of(testIpInterfaceDTO);
 
         Mockito.when(
-            mockIpInterfaceService.findByIpAddressAndLocationAndTenantId("127.0.0.1", location, tenantId)
+            mockIpInterfaceService.findByIpAddressAndLocationIdAndTenantId("127.0.0.1", String.valueOf(TEST_LOCATION_ID), TEST_TENANT_ID)
         ).thenReturn(testOptionalIpInterfaceDTO);
 
         //
@@ -400,7 +402,7 @@ class NodeGrpcServiceTest {
             .setMonitoredState(MonitoredState.DETECTED).build();
 
         Mockito.when(
-            mockNodeService.findByMonitoredState(tenantId, MonitoredState.DETECTED)
+            mockNodeService.findByMonitoredState(TEST_TENANT_ID, MonitoredState.DETECTED)
         ).thenReturn(testNodeDTOList);
 
         //
@@ -435,7 +437,7 @@ class NodeGrpcServiceTest {
 
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .setIpAddress("127.0.0.1")
                 .build();
 
@@ -459,6 +461,7 @@ class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .setIpAddress("127.0.0.1")
                 .build();
 
@@ -471,7 +474,7 @@ class NodeGrpcServiceTest {
         // Validate
         //
         StatusRuntimeExceptionMatcher matcher =
-            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesNotFound, NodeGrpcService.INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG);
+            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesNotFound, NodeGrpcService.DIDNT_MATCH_NODE_ID_MSG);
         Mockito.verify(mockInt64ValueStreamObserver).onError(Mockito.argThat(matcher));
     }
 
@@ -482,7 +485,7 @@ class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .build();
 
         //
@@ -505,12 +508,12 @@ class NodeGrpcServiceTest {
         //
         NodeIdQuery request =
             NodeIdQuery.newBuilder()
-                .setLocationId(location)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
                 .setIpAddress("127.0.0.1")
                 .build();
 
         Mockito.when(
-            mockIpInterfaceService.findByIpAddressAndLocationAndTenantId("127.0.0.1", location, tenantId)
+            mockIpInterfaceService.findByIpAddressAndLocationIdAndTenantId("127.0.0.1", String.valueOf(TEST_LOCATION_ID), TEST_TENANT_ID)
         ).thenReturn(Optional.empty());
 
         //
@@ -537,7 +540,7 @@ class NodeGrpcServiceTest {
                 .build();
 
         Optional<NodeDTO> testNodeDTOOptional = Optional.of(testNodeDTO1);
-        Mockito.when(mockNodeService.getByIdAndTenantId(111222L, tenantId)).thenReturn(testNodeDTOOptional);
+        Mockito.when(mockNodeService.getByIdAndTenantId(111222L, TEST_TENANT_ID)).thenReturn(testNodeDTOOptional);
 
 
         //
@@ -567,7 +570,7 @@ class NodeGrpcServiceTest {
         RuntimeException testException = new RuntimeException("x-test-exception-x");
 
         Optional<NodeDTO> testNodeDTOOptional = Optional.of(testNodeDTO1);
-        Mockito.when(mockNodeService.getByIdAndTenantId(101010L, tenantId)).thenReturn(testNodeDTOOptional);
+        Mockito.when(mockNodeService.getByIdAndTenantId(101010L, TEST_TENANT_ID)).thenReturn(testNodeDTOOptional);
         Mockito.doThrow(testException).when(mockNodeService).deleteNode(101010L);
 
 
@@ -594,7 +597,7 @@ class NodeGrpcServiceTest {
                 .setValue(101010L)
                 .build();
 
-        Mockito.when(mockNodeService.getByIdAndTenantId(101010L, tenantId)).thenReturn(Optional.empty());
+        Mockito.when(mockNodeService.getByIdAndTenantId(101010L, TEST_TENANT_ID)).thenReturn(Optional.empty());
 
         //
         // Execute
@@ -627,7 +630,7 @@ class NodeGrpcServiceTest {
                 1002L, List.of(testNodeDTO2A, testNodeDTO2B)
             );
 
-        Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), tenantId)).thenReturn(testNodeByLocationMap);
+        Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), TEST_TENANT_ID)).thenReturn(testNodeByLocationMap);
 
         //
         // Execute
@@ -655,8 +658,8 @@ class NodeGrpcServiceTest {
         //
         // Validate 2
         //
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO1), 1001L, tenantId);
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO2A, testNodeDTO2B), 1002L, tenantId);
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO1), 1001L, TEST_TENANT_ID);
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO2A, testNodeDTO2B), 1002L, TEST_TENANT_ID);
 
         // Make sure those 2 calls are all of them
         Mockito.verify(mockScannerTaskSetService,
@@ -676,7 +679,7 @@ class NodeGrpcServiceTest {
                 .build();
 
         Map<Long, List<NodeDTO>> testNodeByLocationMap = Collections.EMPTY_MAP;
-        Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), tenantId)).thenReturn(testNodeByLocationMap);
+        Mockito.when(mockNodeService.listNodeByIds(request.getIdsList(), TEST_TENANT_ID)).thenReturn(testNodeByLocationMap);
 
         //
         // Execute
@@ -729,7 +732,7 @@ class NodeGrpcServiceTest {
         //
         // Setup test data and interactions
         //
-        Mockito.when(mockNodeService.createNode(testNodeCreateDTO, ScanType.NODE_SCAN, tenantId)).thenReturn(testNode);
+        Mockito.when(mockNodeService.createNode(testNodeCreateDTO, ScanType.NODE_SCAN, TEST_TENANT_ID)).thenReturn(testNode);
         Mockito.when(mockNodeMapper.modelToDTO(testNode)).thenReturn(testNodeDTO1);
 
         //
@@ -761,7 +764,7 @@ class NodeGrpcServiceTest {
         // Validate
         //
        // Mockito.verify(mockDetectorTaskSetService).sendDetectorTasks(testNode);
-        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), testNode.getMonitoringLocationId(), tenantId);
+        Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), testNode.getMonitoringLocationId(), TEST_TENANT_ID);
     }
 
     private boolean statusExceptionMatchesExpectedId(Status status, Object expectedIdObj) {

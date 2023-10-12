@@ -55,7 +55,7 @@ const save = async () => {
     config.integrationkey = undefined
     closeModal()
     showSnackbar({
-      msg: 'Integration key successfuly saved.'
+      msg: 'Integration key successfully saved.'
     })
   }
 }

@@ -111,7 +111,6 @@ public class TagService {
 
 
     private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
-
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
@@ -119,7 +118,7 @@ public class TagService {
                 .setTagName(t.getName())
                 .setTenantId(tenantId)
                 .addNodeId(node.getId())
-                .build()).collect(Collectors.toList());
+                .build()).toList();
             final var result = tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();

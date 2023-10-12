@@ -54,14 +54,17 @@ public class PassiveDiscoveryServiceTest {
     private NodeRepository nodeRepository;
     private ScannerTaskSetService scannerTaskSetService;
 
+    private MonitoringLocationService monitoringLocationService;
+
     @BeforeEach
     void prepareTest() {
         PassiveDiscoveryMapper passiveDiscoveryMapper = Mappers.getMapper(PassiveDiscoveryMapper.class);
         passiveDiscoveryRepository = mock(PassiveDiscoveryRepository.class);
         tagService = mock(TagService.class);
         nodeRepository = mock(NodeRepository.class);
+        monitoringLocationService = mock(MonitoringLocationService.class);
         passiveDiscoveryService = new PassiveDiscoveryService(passiveDiscoveryMapper,
-            passiveDiscoveryRepository, tagService,nodeRepository,scannerTaskSetService);
+            passiveDiscoveryRepository, tagService, nodeRepository, scannerTaskSetService, monitoringLocationService);
     }
 
     @Test

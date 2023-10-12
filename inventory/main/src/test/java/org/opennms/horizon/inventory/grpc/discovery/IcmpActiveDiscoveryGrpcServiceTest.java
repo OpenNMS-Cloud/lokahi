@@ -13,7 +13,9 @@ import org.mockito.Mockito;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 
@@ -21,15 +23,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class IcmpActiveDiscoveryGrpcServiceTest {
 
     public static final String TEST_TENANT_ID = "x-tenant-id-x";
+
+    public static final String TEST_LOCATION = "x-location-x";
 
     private TenantLookup mockTenantLookup;
     private IcmpActiveDiscoveryService mockIcmpActiveDiscoveryService;
     private ScannerTaskSetService mockScannerTaskSetService;
 
     private IcmpActiveDiscoveryCreateDTO testIcmpActiveDiscoveryCreateDTO;
+
+    private MonitoringLocationService mockMonitoringLocationService;
 
     private IcmpActiveDiscoveryGrpcService target;
 
@@ -38,13 +47,19 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         mockTenantLookup = Mockito.mock(TenantLookup.class);
         mockIcmpActiveDiscoveryService = Mockito.mock(IcmpActiveDiscoveryService.class);
         mockScannerTaskSetService = Mockito.mock(ScannerTaskSetService.class);
+        mockMonitoringLocationService = mock(MonitoringLocationService.class);
+
+        MonitoringLocationDTO location = MonitoringLocationDTO.newBuilder().setLocation(TEST_LOCATION).setId(1L).setTenantId(TEST_TENANT_ID).build();
+        when(mockMonitoringLocationService.findByLocationAndTenantId(TEST_LOCATION, TEST_TENANT_ID)).thenReturn(Optional.of(location));
 
         testIcmpActiveDiscoveryCreateDTO =
             IcmpActiveDiscoveryCreateDTO.newBuilder()
                 .setName("x-active-discovery-create-x")
+                .setLocationId(TEST_LOCATION)
                 .build();
 
-        target = new IcmpActiveDiscoveryGrpcService(mockTenantLookup, mockIcmpActiveDiscoveryService, mockScannerTaskSetService);
+        target = new IcmpActiveDiscoveryGrpcService(mockTenantLookup, mockIcmpActiveDiscoveryService,
+            mockScannerTaskSetService, mockMonitoringLocationService);
     }
 
     @Test
@@ -59,7 +74,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 
         prepareCommonTenantLookup();
         StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.createActiveDiscovery(testIcmpActiveDiscoveryCreateDTO, TEST_TENANT_ID)).thenReturn(testDiscovery);
+        when(mockIcmpActiveDiscoveryService.createActiveDiscovery(testIcmpActiveDiscoveryCreateDTO, TEST_TENANT_ID)).thenReturn(testDiscovery);
 
         //
         // Execute
@@ -81,7 +96,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.createActiveDiscovery(testIcmpActiveDiscoveryCreateDTO, TEST_TENANT_ID)).thenThrow(testException);
+        when(mockIcmpActiveDiscoveryService.createActiveDiscovery(testIcmpActiveDiscoveryCreateDTO, TEST_TENANT_ID)).thenThrow(testException);
 
         //
         // Execute
@@ -129,7 +144,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 
         prepareCommonTenantLookup();
         StreamObserver<IcmpActiveDiscoveryList> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.getActiveDiscoveries(TEST_TENANT_ID)).thenReturn(testDiscoveries);
+        when(mockIcmpActiveDiscoveryService.getActiveDiscoveries(TEST_TENANT_ID)).thenReturn(testDiscoveries);
 
         //
         // Execute
@@ -179,7 +194,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 
         prepareCommonTenantLookup();
         StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.getDiscoveryById(1313, TEST_TENANT_ID)).thenReturn(Optional.of(testDiscovery));
+        when(mockIcmpActiveDiscoveryService.getDiscoveryById(1313, TEST_TENANT_ID)).thenReturn(Optional.of(testDiscovery));
 
         //
         // Execute
@@ -205,7 +220,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 
         prepareCommonTenantLookup();
         StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.getDiscoveryById(1313, TEST_TENANT_ID)).thenReturn(Optional.empty());
+        when(mockIcmpActiveDiscoveryService.getDiscoveryById(1313, TEST_TENANT_ID)).thenReturn(Optional.empty());
 
         //
         // Execute
@@ -249,6 +264,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
             IcmpActiveDiscoveryCreateDTO.newBuilder()
                 .setName("test-out-of-range")
                 .addIpAddresses(ipRange)
+                .setLocationId(TEST_LOCATION)
                 .build();
         StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
         target.upsertActiveDiscovery(discoveryCreateDTO, mockStreamObserver);
@@ -261,11 +277,11 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 //----------------------------------------
 
     private void prepareCommonTenantLookup() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
+        when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
     }
 
     private void prepareTenantLookupOnMissingTenant() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
+        when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
     }
 
     private ArgumentMatcher<Exception> prepareStatusExceptionMatcher(int expectedCode, String expectedMessage) {

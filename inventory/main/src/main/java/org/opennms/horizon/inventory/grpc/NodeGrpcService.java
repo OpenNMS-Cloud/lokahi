@@ -74,17 +74,16 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 @RequiredArgsConstructor
 public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
     public static final String DIDNT_MATCH_NODE_ID_MSG = "Didn't find a valid node id with the given query";
-    public static final String INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG = "Invalid Request Query, location/ipAddress can't be empty";
+    public static final String INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG = "Invalid Request Query, location/ipAddress can't be empty or not found.";
     public static final String TENANT_ID_IS_MISSING_MSG = "Tenant ID is missing";
     public static final String IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG = "Ip address already exists for location";
-    public static final String LOCATION_NOT_FOUND = "Location not found";
     public static final String EMPTY_TENANT_ID_MSG = "Tenant Id can't be empty";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(NodeGrpcService.class);
@@ -126,7 +125,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             } catch (LocationNotFoundException e) {
                 Status status = Status.newBuilder()
                     .setCode(Code.NOT_FOUND_VALUE)
-                    .setMessage(LOCATION_NOT_FOUND)
+                    .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
@@ -182,11 +181,11 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
         String tenantId = tenantIdOptional.get();
         String locationId = request.getLocationId();
-        var location = monitoringLocationService.findByTenantId(locationId);
+        var location = monitoringLocationService.findByLocationAndTenantId(locationId, tenantId);
         if (location.isEmpty()) {
             Status status = Status.newBuilder()
                 .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage(LOCATION_NOT_FOUND)
+                .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             return;
@@ -310,21 +309,17 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
     private void startNodeScanByIdsForTenant(String tenantId, NodeIdList request, StreamObserver<BoolValue> responseObserver) {
         Map<Long, List<NodeDTO>> nodes = nodeService.listNodeByIds(request.getIdsList(), tenantId);
-
-        if(nodes != null && request.getIdsCount() == nodes.size()) {
+        AtomicLong totalNodes = new AtomicLong();
+        nodes.forEach((k,v) -> totalNodes.addAndGet(v.size()));
+        if (request.getIdsCount() == totalNodes.get()) {
             executorService.execute(() -> sendScannerTasksToMinion(nodes, tenantId));
             responseObserver.onNext(BoolValue.of(true));
             responseObserver.onCompleted();
         } else {
-            Set<Long> diff;
-            if (nodes != null) {
-                diff = Sets.difference(new HashSet<>(request.getIdsList()), nodes.keySet());
-            } else {
-                diff = new HashSet<>(request.getIdsList());
-            }
+            Set<Long> diff = Sets.difference(new HashSet<>(request.getIdsList()), nodes.keySet());
             Status status = Status.newBuilder()
                 .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("No nodes exist with ids " +  diff.stream().map(String::valueOf).collect(Collectors.joining())).build();
+                .setMessage("No nodes exist with ids " + diff.stream().sorted().toList()).build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
@@ -336,7 +331,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                 if (location.isEmpty()) {
                     Status status = Status.newBuilder()
                         .setCode(Code.NOT_FOUND_VALUE)
-                        .setMessage(LOCATION_NOT_FOUND)
+                        .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
                         .build();
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                     return;

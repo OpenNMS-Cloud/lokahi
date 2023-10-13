@@ -31,6 +31,7 @@ package org.opennms.horizon.inventory.grpc;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
+import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -40,7 +41,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
+import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
+import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.test.annotation.DirtiesContext;
@@ -52,14 +55,16 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
+class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     private MonitoringSystemService mockService;
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub stub;
 
@@ -92,6 +97,18 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
         verify(mockService).findByTenantId(tenantId);
     }
 
+
+    @Test
+    void testListMonitoringSystemMissTenant() throws VerificationException {
+        Mockito.reset(spyInterceptor);
+        doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(authHeader);
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .listMonitoringSystem(Empty.newBuilder().build()));
+
+        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
+    }
     @Test
     void testListMonitoringSystemByLocationId(){
         long locationId = 1L;
@@ -100,6 +117,48 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
         doReturn(Collections.singletonList(systemDTO)).when(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
         assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystemByLocationId(Int64Value.of(locationId))).isNotNull();
         verify(mockService).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+    }
+
+    @Test
+    void testGgtMonitoringSystemByQuery(){
+        long locationId = 1L;
+
+        MonitoringSystemQuery query = MonitoringSystemQuery.newBuilder()
+            .setLocation(String.valueOf(locationId)).setSystemId(systemId)
+            .build();
+        MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
+            .setSystemId(systemId).setMonitoringLocationId(locationId).build();
+        doReturn(Optional.of(systemDTO)).when(mockService).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), tenantId);
+
+        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .getMonitoringSystemByQuery(query)).isNotNull();
+
+        verify(mockService, times(1)).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), tenantId);
+    }
+
+    @Test
+    void testGgtMonitoringSystemByQueryNotFound() {
+        MonitoringSystemQuery query = MonitoringSystemQuery.newBuilder().build();
+        doReturn(Optional.empty()).when(mockService).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), tenantId);
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .getMonitoringSystemByQuery(MonitoringSystemQuery.newBuilder().build()));
+
+        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
+        verify(mockService, times(1)).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), tenantId);
+    }
+
+    @Test
+    void testGetMonitoringSystemByQueryMissTenant() throws VerificationException {
+        Mockito.reset(spyInterceptor);
+        doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(authHeader);
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .getMonitoringSystemByQuery(MonitoringSystemQuery.newBuilder().build()));
+
+        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
     }
 
     @Test
@@ -126,6 +185,18 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
     }
 
     @Test
+    void testDeleteMonitoringSystemMissTenant() throws VerificationException {
+        Mockito.reset(spyInterceptor);
+        doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(authHeader);
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .deleteMonitoringSystem(Int64Value.of(1)));
+
+        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
+    }
+
+    @Test
     void testDeleteSystemException() {
         long id = 1L;
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
@@ -140,4 +211,15 @@ class MonitoringSystemServiceGrpcTest extends AbstractGrpcUnitTest {
         verify(mockService).deleteMonitoringSystem(id);
     }
 
+    @Test
+    void testGetMonitoringSystemByIdMissTenant() throws VerificationException {
+        Mockito.reset(spyInterceptor);
+        doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(authHeader);
+
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .getMonitoringSystemById(Int64Value.of(1)));
+
+        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
+    }
 }

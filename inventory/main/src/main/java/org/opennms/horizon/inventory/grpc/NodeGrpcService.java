@@ -324,6 +324,11 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }
     }
 
+    /**
+     * Get IpInterface by locationId and ipAddress
+     * @param request
+     * @param responseObserver
+     */
     @Override
     public void getIpInterfaceFromQuery(NodeIdQuery request, StreamObserver<IpInterfaceDTO> responseObserver) {
         tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {

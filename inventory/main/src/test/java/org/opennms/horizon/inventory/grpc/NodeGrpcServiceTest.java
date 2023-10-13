@@ -300,7 +300,7 @@ class NodeGrpcServiceTest {
         inOrder.verify(mockNodeListStreamObserver).onNext(Mockito.argThat(argument -> {
             if (argument != null) {
                 if (argument.getNodesCount() == testNodeDTOList.size()) {
-                    return ( argument.getNodesList().equals(testNodeDTOList) );
+                    return (argument.getNodesList().equals(testNodeDTOList));
                 }
             }
             return false;
@@ -417,7 +417,7 @@ class NodeGrpcServiceTest {
         inOrder.verify(mockNodeListStreamObserver).onNext(Mockito.argThat(argument -> {
             if (argument != null) {
                 if (argument.getNodesCount() == testNodeDTOList.size()) {
-                    return ( argument.getNodesList().equals(testNodeDTOList) );
+                    return (argument.getNodesList().equals(testNodeDTOList));
                 }
             }
             return false;
@@ -724,6 +724,86 @@ class NodeGrpcServiceTest {
         Mockito.verify(mockBoolValueStreamObserver).onError(Mockito.argThat(matcher));
     }
 
+    @Test
+    void testGetIpInterfaceFromQuery() {
+        //
+        // Setup test data and interactions
+        //
+        NodeIdQuery request =
+            NodeIdQuery.newBuilder()
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
+                .setIpAddress("192.168.0.1")
+                .build();
+        IpInterfaceDTO ipInterfaceDTO =
+            IpInterfaceDTO.newBuilder()
+                .setHostname("x-hostname-x")
+                .setIpAddress(request.getIpAddress())
+                .setNodeId(363636L)
+                .build();
+        StreamObserver<IpInterfaceDTO> mockIpInterfaceDTOStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.when(mockIpInterfaceService.findByIpAddressAndLocationIdAndTenantId(request.getIpAddress(),
+            request.getLocationId(), TEST_TENANT_ID)).thenReturn(Optional.of(ipInterfaceDTO));
+
+        //
+        // Execute
+        //
+        target.getIpInterfaceFromQuery(request, mockIpInterfaceDTOStreamObserver);
+
+        //
+        // Validate
+        //
+
+        Mockito.verify(mockIpInterfaceDTOStreamObserver).onNext(ipInterfaceDTO);
+    }
+
+    @Test
+    void testGetIpInterfaceFromQueryNotFound() {
+        //
+        // Setup test data and interactions
+        //
+        NodeIdQuery request = NodeIdQuery.newBuilder()
+            .setLocationId("9999").build();
+        StreamObserver<IpInterfaceDTO> mockIpInterfaceDTOStreamObserver = Mockito.mock(StreamObserver.class);
+
+        //
+        // Execute
+        //
+        target.getIpInterfaceFromQuery(request, mockIpInterfaceDTOStreamObserver);
+
+        //
+        // Validate
+        //
+
+        StatusRuntimeExceptionMatcher matcher =
+            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesNotFound, NodeGrpcService.INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG);
+        Mockito.verify(mockIpInterfaceDTOStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testGetIpInterfaceFromMissingTenant() {
+        //
+        // Setup test data and interactions
+        //
+        NodeIdQuery request = NodeIdQuery.newBuilder().build();
+
+        // Reset the tenant lookup - don't use the common, default interaction that was already configured
+        Mockito.reset(mockTenantLookup);
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
+        StreamObserver<IpInterfaceDTO> mockIpInterfaceDTOStreamObserver = Mockito.mock(StreamObserver.class);
+
+        //
+        // Execute
+        //
+        target.getIpInterfaceFromQuery(request, mockIpInterfaceDTOStreamObserver);
+
+        //
+        // Validate
+        //
+        StatusRuntimeExceptionMatcher matcher =
+            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesInvalidArgument, NodeGrpcService.TENANT_ID_IS_MISSING_MSG);
+        Mockito.verify(mockIpInterfaceDTOStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
 //========================================
 // Internals
 //----------------------------------------
@@ -763,7 +843,6 @@ class NodeGrpcServiceTest {
         //
         // Validate
         //
-       // Mockito.verify(mockDetectorTaskSetService).sendDetectorTasks(testNode);
         Mockito.verify(mockScannerTaskSetService).sendNodeScannerTask(List.of(testNodeDTO), testNode.getMonitoringLocationId(), TEST_TENANT_ID);
     }
 

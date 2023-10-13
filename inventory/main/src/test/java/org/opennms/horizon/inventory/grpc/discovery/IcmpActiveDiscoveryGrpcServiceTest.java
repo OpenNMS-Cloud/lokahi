@@ -1,5 +1,6 @@
 package org.opennms.horizon.inventory.grpc.discovery;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
@@ -14,6 +15,7 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
@@ -23,7 +25,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 public class IcmpActiveDiscoveryGrpcServiceTest {
@@ -110,6 +114,49 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         // Verify the Results
         //
         var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "Invalid request");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testCreateDiscoveryNotFoundException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testException = new LocationNotFoundException("x-test-exception-x");
+        prepareCommonTenantLookup();
+        StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        when(mockIcmpActiveDiscoveryService.createActiveDiscovery(testIcmpActiveDiscoveryCreateDTO, TEST_TENANT_ID)).thenThrow(testException);
+
+        //
+        // Execute
+        //
+        target.createDiscovery(testIcmpActiveDiscoveryCreateDTO, mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "x-test-exception-x");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testCreateDiscoveryHasId() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var icmpActiveDiscoveryCreateDTO = IcmpActiveDiscoveryCreateDTO.newBuilder().setId(1).build();
+        prepareTenantLookupOnMissingTenant();
+        StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+
+        //
+        // Execute
+        //
+        target.createDiscovery(icmpActiveDiscoveryCreateDTO, mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "createDiscovery should not set id");
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
@@ -257,10 +304,24 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
+    @Test
+    void testUpsertDiscoveryForInvalidRangeIpAddresses() {
+        prepareCommonTenantLookup();
+        String ipRange = "ABC-DEF";
+        var discoveryCreateDTO =
+            IcmpActiveDiscoveryCreateDTO.newBuilder()
+                .setName("invalid-range")
+                .addIpAddresses(ipRange)
+                .setLocationId(String.valueOf(TEST_LOCATION_ID))
+                .build();
+        StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        target.upsertActiveDiscovery(discoveryCreateDTO, mockStreamObserver);
+        var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "Invalid Ip Address entry " + ipRange);
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
 
     @Test
     void testUpsertDiscoveryForOutOfRangeIpAddresses() {
-
         prepareCommonTenantLookup();
         String ipRange = "192.168.1.0-192.169.1.0";
         var discoveryCreateDTO =
@@ -275,16 +336,70 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
+    @Test
+    void testUpsertDiscovery() {
+        // prepare
+        var discoveryCreateDTO = IcmpActiveDiscoveryCreateDTO.newBuilder().setId(10).setName("update")
+            .setLocationId(String.valueOf(TEST_LOCATION_ID)).addIpAddresses("192.168.0.1")
+            .build();
+        IcmpActiveDiscoveryDTO icmpActiveDiscoveryDTO = IcmpActiveDiscoveryDTO.newBuilder()
+            .setId(10).setName("name")
+            .setLocationId(String.valueOf(TEST_LOCATION_ID)).addIpAddresses("192.168.0.1").build();
+
+        prepareCommonTenantLookup();
+        StreamObserver<IcmpActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.when(mockIcmpActiveDiscoveryService.getDiscoveryById(10L, TEST_TENANT_ID)).thenReturn(Optional.of(icmpActiveDiscoveryDTO));
+        Mockito.when(mockIcmpActiveDiscoveryService.upsertActiveDiscovery(discoveryCreateDTO, TEST_TENANT_ID))
+            .thenReturn(IcmpActiveDiscoveryDTO.newBuilder(icmpActiveDiscoveryDTO).setName("update").build());
+
+        // execute
+        target.upsertActiveDiscovery(discoveryCreateDTO, mockStreamObserver);
+
+        // verify
+        Mockito.verify(mockIcmpActiveDiscoveryService, times(1)).upsertActiveDiscovery(
+            discoveryCreateDTO, TEST_TENANT_ID);
+        Mockito.verify(mockScannerTaskSetService, times(1)).sendDiscoveryScannerTask(
+            discoveryCreateDTO.getIpAddressesList(), Long.valueOf(discoveryCreateDTO.getLocationId()), TEST_TENANT_ID, discoveryCreateDTO.getId()
+        );
+        Mockito.verify(mockStreamObserver, times(1)).onNext(any(IcmpActiveDiscoveryDTO.class));
+    }
+
+
+    @Test
+    void testDeleteDiscovery() {
+        // prepare
+        IcmpActiveDiscoveryDTO icmpActiveDiscoveryDTO = IcmpActiveDiscoveryDTO.newBuilder()
+            .setId(10).setName("delete")
+            .setLocationId(String.valueOf(TEST_LOCATION_ID))
+            .setTenantId(TEST_TENANT_ID).addIpAddresses("192.168.0.1").build();
+
+        prepareCommonTenantLookup();
+        StreamObserver<BoolValue> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.when(mockIcmpActiveDiscoveryService.getDiscoveryById(10L, TEST_TENANT_ID)).thenReturn(Optional.of(icmpActiveDiscoveryDTO));
+        Mockito.when(mockIcmpActiveDiscoveryService.deleteActiveDiscovery(10L, TEST_TENANT_ID)).thenReturn(true);
+
+        // execute
+        target.deleteActiveDiscovery(Int64Value.of(10), mockStreamObserver);
+
+        // verify
+        Mockito.verify(mockIcmpActiveDiscoveryService, times(1)).deleteActiveDiscovery(
+            10, TEST_TENANT_ID);
+        Mockito.verify(mockScannerTaskSetService, times(1)).removeDiscoveryScanTask(
+            Long.valueOf(icmpActiveDiscoveryDTO.getLocationId()), icmpActiveDiscoveryDTO.getId(), icmpActiveDiscoveryDTO.getTenantId()
+        );
+        Mockito.verify(mockStreamObserver, times(1)).onNext(BoolValue.of(true));
+    }
+
 //========================================
 // Internals
 //----------------------------------------
 
     private void prepareCommonTenantLookup() {
-        when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
+        when(mockTenantLookup.lookupTenantId(any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
     }
 
     private void prepareTenantLookupOnMissingTenant() {
-        when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
+        when(mockTenantLookup.lookupTenantId(any(Context.class))).thenReturn(Optional.empty());
     }
 
     private ArgumentMatcher<Exception> prepareStatusExceptionMatcher(int expectedCode, String expectedMessage) {

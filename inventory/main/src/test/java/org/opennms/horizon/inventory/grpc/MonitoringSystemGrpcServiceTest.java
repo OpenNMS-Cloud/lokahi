@@ -31,7 +31,6 @@ package org.opennms.horizon.inventory.grpc;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
-import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -55,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -97,18 +95,6 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
         verify(mockService).findByTenantId(tenantId);
     }
 
-
-    @Test
-    void testListMonitoringSystemMissTenant() throws VerificationException {
-        Mockito.reset(spyInterceptor);
-        doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(authHeader);
-
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-                .listMonitoringSystem(Empty.newBuilder().build()));
-
-        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
-    }
     @Test
     void testListMonitoringSystemByLocationId(){
         long locationId = 1L;

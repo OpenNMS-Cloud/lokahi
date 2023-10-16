@@ -56,76 +56,79 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     private final TenantLookup tenantLookup;
     @Override
     public void listMonitoringSystem(Empty request, StreamObserver<MonitoringSystemList> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-                List<MonitoringSystemDTO> list = service.findByTenantId(tenantId);
-                responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
-                responseObserver.onCompleted();
-            },
-            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
+        List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
+            .map(service::findByTenantId)
+            .orElseThrow();
+        responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void listMonitoringSystemByLocationId(Int64Value locationId, StreamObserver<MonitoringSystemList> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-            List<MonitoringSystemDTO> list = service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId);
-            if (list.isEmpty()) {
-                responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(locationId.getValue())));
-            } else {
-                responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
-                responseObserver.onCompleted();
-            }
-        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
+        List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId))
+            .orElseThrow();
+
+        if (list.isEmpty()) {
+            responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(locationId.getValue())));
+        } else {
+            responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
+            responseObserver.onCompleted();
+        }
+
+        responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void getMonitoringSystemById(Int64Value id, StreamObserver<MonitoringSystemDTO> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-                Optional<MonitoringSystemDTO> monitoringSystem = service.findById(id.getValue(), tenantId);
-                monitoringSystem.ifPresentOrElse(
-                    systemDTO -> {
-                        responseObserver.onNext(systemDTO);
-                        responseObserver.onCompleted();
-                    },
-                    () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(id.getValue())))
-                );
+        Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.findById(id.getValue(), tenantId))
+            .orElseThrow();
+        monitoringSystem.ifPresentOrElse(
+            systemDTO -> {
+                responseObserver.onNext(systemDTO);
+                responseObserver.onCompleted();
             },
-            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
+            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(id.getValue())))
+        );
     }
 
     @Override
     public void getMonitoringSystemByQuery(MonitoringSystemQuery request,
-                                           StreamObserver<MonitoringSystemDTO> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId ->
-                service.findByLocationAndSystemId(request.getLocation(), request.getSystemId(), tenantId)
-                    .ifPresentOrElse(systemDTO -> {
-                        responseObserver.onNext(systemDTO);
-                        responseObserver.onCompleted();
+                                           StreamObserver<MonitoringSystemDTO> responseObserver)
+    {
+        var optional = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> service.findByLocationAndSystemId(request.getLocation(), request.getSystemId(), tenantId))
+            .orElseThrow();
+        optional.ifPresentOrElse(systemDTO -> {
+            responseObserver.onNext(systemDTO);
+            responseObserver.onCompleted();
 
-                    }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getSystemId())))),
-            () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getSystemId()))));
+
     }
+
 
     @Override
     public void deleteMonitoringSystem(Int64Value request, StreamObserver<BoolValue> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current())
-            .ifPresentOrElse(tenantId -> {
-                    Optional<MonitoringSystemDTO> monitoringSystem = service.findById(request.getValue(), tenantId);
-                    monitoringSystem.ifPresentOrElse(system -> {
-                            try {
-                                service.deleteMonitoringSystem(system.getId());
-                                responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
-                                responseObserver.onCompleted();
-                            } catch (Exception e) {
-                                log.error("Error while deleting monitoring system with systemId {}", system.getSystemId(), e);
-                                Status status = Status.newBuilder()
-                                    .setCode(Code.INTERNAL_VALUE)
-                                    .setMessage("Error while deleting monitoring system with systemId " + system.getSystemId()).build();
-                                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-                            }
-                        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getValue())))
-                    );
-                },
-                () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createMissingTenant())));
+        Optional<MonitoringSystemDTO> monitoringSystem = tenantLookup
+            .lookupTenantId(Context.current())
+            .map(tenantId -> service.findById(request.getValue(), tenantId))
+            .orElseThrow();
+        monitoringSystem.ifPresentOrElse(system -> {
+            try {
+                service.deleteMonitoringSystem(system.getId());
+                responseObserver.onNext(BoolValue.newBuilder().setValue(true).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                log.error("Error while deleting monitoring system with systemId {}", system.getSystemId(), e);
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while deleting monitoring system with systemId " + system.getSystemId()).build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }}, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(request.getValue())))
+        );
     }
 
     private Status createStatusNotExist(String systemId) {
@@ -140,9 +143,5 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
             .setCode(Code.NOT_FOUND_VALUE)
             .setMessage("Monitor system with id: " + id + " doesn't exist")
             .build();
-    }
-
-    private Status createMissingTenant() {
-        return Status.newBuilder().setCode(Code.INVALID_ARGUMENT_VALUE).setMessage("Missing tenantId").build();
     }
 }

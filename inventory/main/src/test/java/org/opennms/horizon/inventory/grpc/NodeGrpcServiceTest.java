@@ -27,17 +27,14 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.grpc;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.function.BiFunction;
-
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -63,17 +60,18 @@ import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
-
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
-
-import io.grpc.Context;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.function.BiFunction;
+
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class NodeGrpcServiceTest {
@@ -390,6 +388,28 @@ class NodeGrpcServiceTest {
         InOrder inOrder = Mockito.inOrder(mockInt64ValueStreamObserver);
         inOrder.verify(mockInt64ValueStreamObserver).onNext(Mockito.argThat(matcher));
         inOrder.verify(mockInt64ValueStreamObserver).onCompleted();
+    }
+
+
+
+    @Test
+    void testGetNodeIdFromQueryInvalidLocation() {
+        //
+        // Setup test data and interactions
+        //
+        NodeIdQuery request = NodeIdQuery.newBuilder().setLocationId("11").build();
+
+        //
+        // Execute
+        //
+        target.getNodeIdFromQuery(request, mockInt64ValueStreamObserver);
+
+        //
+        // Validate
+        //
+        StatusRuntimeExceptionMatcher matcher =
+            new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesNotFound, NodeGrpcService.INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG);
+        Mockito.verify(mockInt64ValueStreamObserver).onError(Mockito.argThat(matcher));
     }
 
     @Test

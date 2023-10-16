@@ -142,6 +142,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request) throws UnknownHostException {
         var ipList = request.getIpAddressesList();
         for (var ipAddressEntry : ipList) {
+            ipAddressEntry = ipAddressEntry.trim();
             if (!ipAddressEntry.contains("-") && !ipAddressEntry.contains("/")) {
                 try {
                     var inetAddress = InetAddressUtils.getInetAddress(ipAddressEntry);

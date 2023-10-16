@@ -10,6 +10,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.AzureActiveDiscoveryService;
 
@@ -106,6 +107,28 @@ public class AzureActiveDiscoveryGrpcServiceTest {
         // Verify the Results
         //
         var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "Tenant Id can't be empty");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testCreateDiscoveryLocationNotFound() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testException = new LocationNotFoundException("x-test-exception-x");
+        prepareCommonTenantLookup();
+        StreamObserver<AzureActiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.when(mockAzureActiveDiscoveryService.createActiveDiscovery(TEST_TENANT_ID, testAzureActiveDiscoveryCreateDTO)).thenThrow(testException);
+
+        //
+        // Execute
+        //
+        target.createDiscovery(testAzureActiveDiscoveryCreateDTO, mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "x-test-exception-x");
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 

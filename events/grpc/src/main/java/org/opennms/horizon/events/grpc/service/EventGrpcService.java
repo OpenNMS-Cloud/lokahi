@@ -33,7 +33,6 @@ import com.google.protobuf.UInt64Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
-import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
@@ -57,45 +56,41 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
     @Override
     public void listEvents(Empty request, StreamObserver<EventLog> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-            List<Event> events = eventService.findEvents(tenantId);
-            EventLog eventList = EventLog.newBuilder()
-                .setTenantId(tenantId)
-                .addAllEvents(events).build();
+        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
 
-            responseObserver.onNext(eventList);
-            responseObserver.onCompleted();
-        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+        List<Event> events = eventService.findEvents(tenantId);
+        EventLog eventList = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addAllEvents(events).build();
+
+        responseObserver.onNext(eventList);
+        responseObserver.onCompleted();
     }
 
     @Override
     public void getEventsByNodeId(UInt64Value nodeId, StreamObserver<EventLog> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
-            try {
-                inventoryClient.getNodeById(tenantId, nodeId.getValue());
-            } catch (StatusRuntimeException e) {
-                if (e.getStatus() != null) {
-                    responseObserver.onError(StatusProto.toStatusRuntimeException(
-                        createStatus(e.getStatus().getCode().value(), e.getStatus().getDescription())));
-                } else {
-                    responseObserver.onError(StatusProto.toStatusRuntimeException(
-                        createStatus(Code.INTERNAL_VALUE, e.getMessage())));
-                }
-                return;
+        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+
+        try {
+            inventoryClient.getNodeById(tenantId, nodeId.getValue());
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus() != null) {
+                responseObserver.onError(StatusProto.toStatusRuntimeException(
+                    createStatus(e.getStatus().getCode().value(), e.getStatus().getDescription())));
+            } else {
+                responseObserver.onError(StatusProto.toStatusRuntimeException(
+                    createStatus(Code.INTERNAL_VALUE, e.getMessage())));
             }
+            return;
+        }
 
-            List<Event> events = eventService.findEventsByNodeId(tenantId, nodeId.getValue());
-            EventLog eventList = EventLog.newBuilder()
-                .setTenantId(tenantId)
-                .addAllEvents(events).build();
+        List<Event> events = eventService.findEventsByNodeId(tenantId, nodeId.getValue());
+        EventLog eventList = EventLog.newBuilder()
+            .setTenantId(tenantId)
+            .addAllEvents(events).build();
 
-            responseObserver.onNext(eventList);
-            responseObserver.onCompleted();
-        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
-    }
-
-    private Status badTenant() {
-        return createStatus(Code.INVALID_ARGUMENT_VALUE, "Tenant Id not found");
+        responseObserver.onNext(eventList);
+        responseObserver.onCompleted();
     }
 
     private Status createStatus(int code, String msg) {

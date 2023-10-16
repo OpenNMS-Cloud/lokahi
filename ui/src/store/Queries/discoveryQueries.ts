@@ -12,7 +12,7 @@ import {
 
 export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   const tagsByDiscovery = ref([] as Tag[])
-  const searchTerm = ref('')
+  const tagsSearched = ref([] as Tag[])
   const discoveryId = ref({
     discoveryId: 0
   })
@@ -28,18 +28,15 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
     fetchOnMount: false
   })
 
-  const { data:tagsSearched, isFetching:isTagsSearchFetching } = useQuery({
-    query: ListTagsSearchDocument,
-    cachePolicy: 'network-only',
-    variables: {
-      searchTerm:searchTerm.value
-    }
-  })
-
-  const getTagsSearch = async (searchTermIn: string) => {
-   
-    searchTerm.value = searchTermIn
-    
+  const searchTags = async (searchTerm: string) => {
+    const { execute, data } = useQuery({
+      query: ListTagsSearchDocument,
+      variables: { searchTerm },
+      cachePolicy: 'network-only'
+    })
+    await execute()
+    tagsSearched.value = data.value?.tags ?? []
+    return tagsSearched.value
   }
 
   const formatActiveDiscoveries = (activeDiscoveries: ActiveDiscovery[] = []) => {
@@ -78,9 +75,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   return {
     locations: computed(() => locations.value?.findAllLocations ?? []),
     getLocations,
-    tagsSearched: computed(() => tagsSearched.value?.tags || []),
-    getTagsSearch,
-    isTagsSearchFetching,
+    tagsSearched,
+    searchTags,
     activeDiscoveries: computed(() => formatActiveDiscoveries(listedDiscoveries.value?.listActiveDiscovery) || []),
     passiveDiscoveries: computed(() => listedDiscoveries.value?.passiveDiscoveries || []),
     getDiscoveries,

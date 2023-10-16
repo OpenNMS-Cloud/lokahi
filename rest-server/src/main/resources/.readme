@@ -1,0 +1,21 @@
+## Running karaf commands with script file
+For Mac/Linux
+ex : sh runKarafCommand.sh ping 192.168.1.1
+For Windows
+ex : runKarafCommand.bat ping 192.68.1.1
+
+
+## Karaf commands available to run
+
+1. ping <ip-address>  - ICMP ping for a given IP Address
+2. ping-sweep <beging-ip> <end-ip>  - ICMP ping for a given range of IP Addresses
+3. node-scan <ip-address> <snmp-community>  - SNMP Node scan for a given Ip Address and community string
+4. task-set-print  - Prints the current tasks that are available on the Minion
+5. snmp-collect <ip-address> <snmp-community>
+                  - Collects and display metrics(doesn't store) for the given Ip address and community string.
+
+
+## Help with karaf command
+-- Add -h/--help to understand more about the command
+ex: sh runKarafCommand.sh task-set-print --help
+

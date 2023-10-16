@@ -1,7 +1,7 @@
 <template>
   <div class="geo-map">
     <HeadlinePage text="Geo Map" class="title"/>
-    <LeafletMap class="map" style="height: calc(100vh - 175px)" />
+    <LeafletMap class="map" style="height: calc(100vh - 180px)" />
   </div>
 </template>
 

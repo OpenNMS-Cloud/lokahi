@@ -30,9 +30,6 @@ package org.opennms.horizon.minion.ipc.heartbeat.internal;
 
 
 import com.google.protobuf.Timestamp;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -40,6 +37,9 @@ import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -70,7 +70,11 @@ public class HeartbeatProducer {
                         .build();
                     dispatcher.send(heartbeatMessage);
                 } catch (Throwable t) {
-                    log.error("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);
+                    if (log.isDebugEnabled()) {
+                        log.debug("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);
+                    } else {
+                        log.debug("An error {} occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t.getMessage());
+                    }
                 }
             }
         }, 0, PERIOD_MS);

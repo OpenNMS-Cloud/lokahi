@@ -1,15 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Appliances from '@/containers/Appliances.vue'
 import NodeStatus from '@/containers/NodeStatus.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: '/minions',
-      name: 'Minions',
-      component: Appliances
-    },
     {
       path: '/',
       name: 'Dashboard',

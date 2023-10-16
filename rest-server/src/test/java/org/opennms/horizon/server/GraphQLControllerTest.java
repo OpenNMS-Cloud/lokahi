@@ -33,10 +33,13 @@ import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.web.GraphQLExecutor;
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opennms.horizon.inventory.dto.GeoLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
@@ -51,14 +54,23 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.opennms.horizon.server.test.util.ResourceFileReader.read;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @Slf4j
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 public class GraphQLControllerTest {
+
+    private static Arguments readArgumentPair(String filePath) {
+        return Arguments.of(filePath, read(filePath));
+    }
+
+    private static final String DESCRIPTIVE_DISPLAY_NAME = "[{index}]: {0}";
+
     private static final String ENDPOINT = "/graphql";
     private static final String ACCESS_TOKEN = "test-token-12345";
 
@@ -78,7 +90,7 @@ public class GraphQLControllerTest {
             }
         }
         """;
-    public static final MonitoringLocationDTO RESPONSE_DTO = MonitoringLocationDTO.newBuilder()
+    private static final MonitoringLocationDTO RESPONSE_DTO = MonitoringLocationDTO.newBuilder()
         .setId(5L)
         .setLocation("foo")
         .setAddress("bar")
@@ -107,7 +119,6 @@ public class GraphQLControllerTest {
             .when(mockHeaderUtil)
             .getAuthHeader(any(ResolutionEnvironment.class));
     }
-
     @Test
     void doesNotAllowRequestsViaGet() {
         webClient.get()
@@ -120,6 +131,26 @@ public class GraphQLControllerTest {
             .expectBody()
             .jsonPath("$.error").isEqualTo("Method Not Allowed")
             .jsonPath("$.message").isEqualTo("Request method 'GET' is not supported.")
+            .jsonPath("$.trace").doesNotExist();
+    }
+
+    @ValueSource(strings = {
+        MediaType.APPLICATION_XML_VALUE,
+        MediaType.APPLICATION_FORM_URLENCODED_VALUE
+    })
+    @ParameterizedTest
+    void doesNotAllowUnsupportedMediaTypes(String mediaType) {
+        webClient.post()
+            .uri(ENDPOINT)
+            .header("Content-Type", mediaType)
+            .header("Authorization", "Bearer " + ACCESS_TOKEN)
+            .bodyValue(createPayload())
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.error").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
+            .jsonPath("$.message").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
             .jsonPath("$.trace").doesNotExist();
     }
 
@@ -150,6 +181,125 @@ public class GraphQLControllerTest {
                   }
                 }
                 """);
+    }
+
+    @Test
+    void wellFormedButInvalidRequestShouldReturn200WithErrorDetails() {
+        String requestBody = read("/test/data/error-mishandling.json");
+
+        webClient.post()
+            .uri(ENDPOINT)
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Authorization", "Bearer " + ACCESS_TOKEN)
+            .bodyValue(requestBody)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.data").doesNotExist()
+            .jsonPath("$.errors").isArray()
+            .jsonPath("$.trace").doesNotExist();
+    }
+
+    @Test
+    void limitsAliasOverloading() {
+        String requestBody = read("/test/data/alias-overloading.json");
+
+        webClient.post()
+            .uri(ENDPOINT)
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Authorization", "Bearer " + ACCESS_TOKEN)
+            .bodyValue(requestBody)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.data").doesNotExist()
+            .jsonPath("$.errors").isArray()
+            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
+                Matchers.matchesRegex("^Validation error.*: Alias '.+' is repeated too many times$")
+            ))
+            .jsonPath("$.trace").doesNotExist();
+    }
+
+    @Test
+    void limitsDirectiveOverloading() {
+        String requestBody = read("/test/data/directive-overloading.json");
+
+        webClient.post()
+            .uri(ENDPOINT)
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Authorization", "Bearer " + ACCESS_TOKEN)
+            .bodyValue(requestBody)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.data").doesNotExist()
+            .jsonPath("$.errors").isArray()
+            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
+                Matchers.matchesRegex("^Validation error.*: Directive '.+' is repeated too many times$")
+            ))
+            .jsonPath("$.trace").doesNotExist();
+    }
+
+    public static Stream<Arguments> introspectionRequests() {
+        return Stream.of(
+            readArgumentPair("/test/data/introspection-query.json"),
+            readArgumentPair("/test/data/introspection-circular.json")
+        );
+    }
+
+    @MethodSource("introspectionRequests")
+    @ParameterizedTest(name = DESCRIPTIVE_DISPLAY_NAME)
+    void introspectionNotAllowedWhenDisabled(
+        String description,
+        String requestBody
+    ) {
+        webClient.post()
+            .uri(ENDPOINT)
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Authorization", "Bearer " + ACCESS_TOKEN)
+            .bodyValue(requestBody)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.data").doesNotExist()
+            .jsonPath("$.errors").isArray()
+            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
+                Matchers.matchesRegex("^Validation error.*: Field '.+' in type '__.+' is undefined$")
+            ))
+            .jsonPath("$.trace").doesNotExist();
+    }
+
+    public static Stream<Arguments> fieldDuplicationRequests() {
+        return Stream.of(
+            readArgumentPair("/test/data/field-duplication.json")
+        );
+    }
+
+    @MethodSource("fieldDuplicationRequests")
+    @ParameterizedTest(name = DESCRIPTIVE_DISPLAY_NAME)
+    void limitsFieldDuplication(
+        String description,
+        String requestBody
+    ) {
+        webClient.post()
+            .uri(ENDPOINT)
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header("Authorization", "Bearer " + ACCESS_TOKEN)
+            .bodyValue(requestBody)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.data").doesNotExist()
+            .jsonPath("$.errors").isArray()
+            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
+                Matchers.matchesRegex("^Validation error.*: Field '.+' is repeated too many times$")
+            ))
+            .jsonPath("$.trace").doesNotExist();
     }
 
     @ValueSource(strings = {

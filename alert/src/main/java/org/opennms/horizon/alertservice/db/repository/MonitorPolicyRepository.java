@@ -38,7 +38,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface MonitorPolicyRepository extends JpaRepository<MonitorPolicy, Long> {
     List<MonitorPolicy> findAllByTenantId(String tenantId);
     Optional<MonitorPolicy> findByIdAndTenantId(Long id, String tenantId);
-    Optional<MonitorPolicy> findByName(String name);
+
+    Optional<MonitorPolicy> findByNameAndTenantId(String name, String tenantId);
 
     void deleteByIdAndTenantId(Long id, String tenantId);
 

@@ -9,7 +9,7 @@
     </div>
 
     <template v-slot:footer>
-      <FeatherButton @click="discoveryStore.closeDeleteModal">Cancel</FeatherButton>
+      <FeatherButton secondary @click="discoveryStore.closeDeleteModal">Cancel</FeatherButton>
       <ButtonWithSpinner
         :click="discoveryStore.deleteDiscovery"
         :isFetching="discoveryStore.loading"

@@ -20,27 +20,12 @@
         >
           Status
         </div>
-        <!-- Post EAR -->
-        <!-- <div
-          class="utilization"
-          data-test="header-utilization"
-        >
-          Utilization
-        </div>
-        <div
-          class="ip"
-          data-test="header-ip"
-        >
-          IPv4
-        </div> -->
       </div>
       <div class="content">
         <div
           class="version"
           data-test="content-version"
         >
-          <!-- No minion version until after EAR -->
-          <!-- {{ minion?.version || '1.0.0' }} -->
         </div>
         <div
           class="latency"
@@ -54,19 +39,6 @@
         >
           <PillColor :item="statusPill" />
         </div>
-        <!-- Post EAR -->
-        <!-- <div
-          class="utilization"
-          data-test="content-utilization"
-        >
-          {{ minion?.utillization || '00%' }}
-        </div>
-        <div
-          class="ip"
-          data-test="content-ip"
-        >
-          <PillColor :item="ipPill" />
-        </div> -->
       </div>
     </div>
     <MoreOptionsMenu

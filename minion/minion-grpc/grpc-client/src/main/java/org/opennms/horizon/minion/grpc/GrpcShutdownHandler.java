@@ -32,9 +32,12 @@ import org.apache.karaf.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.regex.Pattern;
+
 public class GrpcShutdownHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GrpcShutdownHandler.class);
-
+    private static final Pattern pattern = Pattern.compile("^\\+\\d+$"); // "+2" - denotes 2 min wait before shutdown
+    private static final String MINION_DELAY_BEFORE_SHUTDOWN_ENV = "MINION_DELAY_BEFORE_SHUTDOWN";
     private final SystemService systemService;
 
     public GrpcShutdownHandler(SystemService systemService) {
@@ -46,13 +49,28 @@ public class GrpcShutdownHandler {
     }
 
     public void shutdown(String message) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOG.error("*********************************************************************************************************************************");
+            LOG.error("*********************************************************************************************************************************");
+            LOG.error(message);
+            LOG.error("*********************************************************************************************************************************");
+            LOG.error("*********************************************************************************************************************************");
+        }));
         try {
             LOG.error("*********************************************************************************************************************************");
             LOG.error("*********************************************************************************************************************************");
             LOG.error(message);
             LOG.error("*********************************************************************************************************************************");
             LOG.error("*********************************************************************************************************************************");
-            systemService.halt();
+            var shutdownEnv = System.getenv(MINION_DELAY_BEFORE_SHUTDOWN_ENV);
+            String delayForShutDown = "+0"; // no wait
+            if (shutdownEnv != null) {
+                var matcher = pattern.matcher(shutdownEnv);
+                if (matcher.matches()) {
+                    delayForShutDown = shutdownEnv;
+                }
+            }
+            systemService.halt(delayForShutDown);
 
         } catch (Exception e) {
             LOG.error("Fail to shutdown properly. Calling system.exit now. Error: {}", e.getMessage());

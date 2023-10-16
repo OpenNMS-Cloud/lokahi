@@ -8,22 +8,36 @@
     ]">
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
-                <h1 data-test="welcome-slide-two-title">Minion<FeatherIcon class="info-icon" :icon="InformationIcon">
-                    </FeatherIcon>
-                    Installation
-                </h1>
-                <p>The Minion installation can take up to 10 minutes. You will download an encrypted certificate for the
-                    Minion and run a Docker command.</p>
+                <h1 data-test="welcome-slide-two-title">Secure Minion Runtime Bundle</h1>
+                <p>
+                    To install our secure minion, you must download our runtime bundle and run it in your desired location.
+                    For optimal monitoring, the minion needs to always be available.
+                </p>
+                <br>
+                <p>Our runtime bundle contains:</p>
+                <br>
+                <ul>
+                    <li>
+                        An encrypted minion certificate with a decryption password
+                    </li>
+                    <li>
+                        A docker compose file with a minion container
+                    </li>
+                </ul>
+                <br>
+                <p>
+                    Installation can take 10 minutes.
+                </p>
             </div>
 
             <div class="welcome-slide-step">
-                <h2>Step 1: Download Encrypted Minion Certificate</h2>
+                <h2>Step 1: Download Secure Minion Runtime Bundle</h2>
                 <pre
-                    class="pre-wrap">Select a permanent location for the download (e.g., /minion/default-certificate.p12). Future Minion restarts require the certificate.</pre>
+                    class="pre-wrap">Select a permanent location for the download (e.g., /minion/minion-default.zip). Future Minion restarts require the certificate.</pre>
 
                 <div class="welcome-slide-table">
                     <div class="welcome-slide-table-header">
-                        <div>Encrypted Minion Certificate</div>
+                        <div>Secure Minion Runtime Bundle</div>
                         <div>
                             <FeatherButton text @click="localDownloadHandler" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
@@ -42,17 +56,22 @@
                     </div>
                 </div>
             </div>
+
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 2: Copy and Run Docker Install Command in Terminal Window</h2>
+                    <h2>Step 2: Copy the bundle to your desired location</h2>
                     <pre
-                        class="pre-wrap">In the command, replace <strong>PATH_TO_DOWNLOADED_FILE</strong> with the full path to the certificate you downloaded. Remember to store your password, certificate and Docker command securely. You need all three to run your Minion.</pre>
-                    <div class="welcome-slide-table">
-                        <div class="welcome-slide-table-header">
-                            <span>Command</span>
-                            <div>
-                                <FeatherButton text @click="welcomeStore.copyDockerClick"
-                                    :disabled="!welcomeStore.minionCert.password">
+                        class="pre-wrap">Select a permanent location to unzip the bundle. Logs will be saved in that location and you will need to access this information if you restart your host network.</pre>
+                </div>
+                <div class="welcome-slide-step" data-test="welcome-page-two-internal">
+                    <h2>Step 3: Run Minion with the Run Command in a Terminal Window</h2>
+                    <pre
+                        class="pre-wrap">Install our minion by navigating to your chosen directory in a terminal and typing the following command:</pre>
+                    <div class="welcome-slide-table docker-cmd">
+                        <div class="welcome-slide-table-header docker-cmd">
+                            <div class="welcome-slide-table-body">
+                                <span class="cmd-text">docker compose up -d</span>
+                                <FeatherButton class="dl-btn" text @click="welcomeStore.copyDockerClick">
                                     <template #icon>
                                         <FeatherIcon :icon="welcomeStore.copied ? CheckIcon : CopyIcon" />
                                     </template>
@@ -60,25 +79,11 @@
                                 </FeatherButton>
                             </div>
                         </div>
-                        <div class="welcome-slide-table-body">
-                            <textarea :spellcheck="false" ref="textareaRef" @click="highlightStrip"
-                                @input="(e) => updateDockerCommand((e.target as HTMLTextAreaElement)?.value || '')"
-                                :value="welcomeStore.dockerCmd()" class="styled-like-pre" />
-                        </div>
-                        <div class="password-right">Password:&nbsp;{{ welcomeStore.minionCert.password }}
-                            Save the password somewhere safe.
-                            <span v-if="passwordCopyEnabled">
-                                <FeatherButton icon="CopyIcon" @click="copyPassword" v-if="!copied">
-                                    <FeatherIcon :icon="CopyIcon"></FeatherIcon>
-                                </FeatherButton>
-                                <FeatherIcon class="copy-icon" :icon="CheckIcon" v-if="copied"></FeatherIcon>
-                            </span>
-                        </div>
                     </div>
                 </div>
 
                 <div class="welcome-slide-step">
-                    <h2>Step 3: Detect Your Minion</h2>
+                    <h2>Step 4: Detect Your Minion</h2>
                     <p>We will automatically detect your Minion once it is set up.</p>
 
                     <div
@@ -102,7 +107,6 @@
                     data-id="welcome-slide-two-continue-button" @click="welcomeStore.nextSlide">
                     Continue
                 </FeatherButton>
-
             </div>
         </div>
     </div>
@@ -112,78 +116,18 @@ import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import CopyIcon from '@featherds/icon/action/ContentCopy'
 import CheckIcon from '@featherds/icon/action/CheckCircle'
 import DownloadIcon from '@featherds/icon/action/DownloadFile'
-import InformationIcon from '@featherds/icon/action/Info'
 import useTheme from '@/composables/useTheme'
 import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
-import { ref } from 'vue';
-
-const textareaRef = ref();
-const copied = ref(false);
-const passwordCopyEnabled = ref(false);
 
 defineProps({
     visible: { type: Boolean, default: false }
 })
 
-const updateDockerCommand = async (newCommand: string) => {
-    welcomeStore.updateDockerCommand(newCommand)
-    await nextTick();
-    updateScrollHeight();
-}
-onMounted(() => {
-    updateScrollHeight();
-    window.addEventListener('resize', updateScrollHeight);
-})
-onUnmounted(() => {
-    window.removeEventListener('resize', updateScrollHeight);
-    const welcomeWrapper = document.querySelector('.welcome-wrapper');
-    if (welcomeWrapper) {
-        welcomeWrapper.removeEventListener('click', highlightStrip);
-    }
-})
-
-const updateScrollHeight = () => {
-    textareaRef.value.style = `height: 0px;`
-    textareaRef.value.style = `height: ${Number(textareaRef.value.scrollHeight) + 20 + 'px'};`
-}
-
 const localDownloadHandler = () => {
     welcomeStore.downloadClick();
-    const welcomeWrapper = document.querySelector('.welcome-wrapper');
-    if (welcomeWrapper) {
-        welcomeWrapper.addEventListener('click', highlightStrip);
-    }
 }
 
-const highlightStrip = () => {
-    textareaRef.value.classList.add('visible');
-    const stringToHighlight = 'PATH_TO_DOWNLOADED_FILE';
-    const existingCommand = welcomeStore.dockerCmd();
-    const indexOf = existingCommand.indexOf(stringToHighlight);
-    if (indexOf >= 0) {
-        textareaRef.value.focus();
-        textareaRef.value.setSelectionRange(indexOf, indexOf + stringToHighlight.length);
-    }
-}
-
-/**
- * This is not currently enabled. There is a ref above called passwordCopyEnabled that
- * is set to false (set it to true to enable). I have a feeling this feature will be 
- * requested in the future, and I had a few minutes this morning to code it up and 
- * prep it for that probable request. It looked a little strange to me because of 
- * the duplicated copy icons, which is why I left it disabled. 
- * I imagine UX will have a better way to visualize this in the future.
- */
-const copyPassword = () => {
-    if (welcomeStore.minionCert.password) {
-        navigator.clipboard.writeText(welcomeStore.minionCert.password)
-        copied.value = true;
-        setTimeout(() => {
-            copied.value = false;
-        }, 1500)
-    }
-}
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
 </script>
@@ -213,13 +157,12 @@ const { isDark } = useTheme();
 .welcome-slide-two-wrapper.dark {
 
     .welcome-slide-table-body {
-        background-color: #e5f4f9;
+        background-color: var($background);
         color: var($primary-text-on-color);
     }
 }
 
 .welcome-slide-two-wrapper.light {
-
     .welcome-slide-table-body {
         background-color: var(--feather-background);
     }
@@ -239,17 +182,28 @@ const { isDark } = useTheme();
         border: 1px solid var($border-on-surface);
         border-radius: 3px;
 
+        &.docker-cmd {
+            border: none;
+        }
+
         .welcome-slide-table-header {
-            color: var($disabled-text-on-surface);
+            color: var($primary-text-on-surface);
             padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+
+            &.docker-cmd {
+                padding: 0px;
+            }
         }
 
         .welcome-slide-table-body {
+            width: 100%;
             padding: 12px 24px;
             position: relative;
+            display: flex;
+            align-items: center;
 
             pre {
                 margin: 0;
@@ -338,46 +292,12 @@ const { isDark } = useTheme();
     }
 }
 
-.password-right {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    @include caption();
-    color: var(--feather-shade-2);
-    padding: var(--feather-spacing-xs) var(--feather-spacing-s);
-
-    span :deep(.btn) {
-        font-size: 15px;
-        margin-left: var(--feather-spacing-s);
-    }
-
-    span :deep(.btn svg) {
-        width: 25px;
-        height: 25px;
-    }
-}
-
-.styled-like-pre {
-    background-color: transparent;
-    border: none;
-    resize: none;
+.cmd-text {
     width: 100%;
-    outline: 0;
-    transition: none;
-
-    &::selection {
-        background-color: var(--feather-primary);
-        color: var(--feather-state-color-on-color);
-    }
-
-    &.visible {
-        opacity: 1;
-    }
-
-    @media (min-width:500px) and (max-width:547px) {
-        padding-right: 50px;
-    }
-
+    color: var($primary-text-on-surface);
+}
+.dl-btn {
+    width: 110px;
 }
 
 .pre-wrap {
@@ -395,6 +315,12 @@ const { isDark } = useTheme();
 
     :deep(svg) {
         cursor: pointer;
+    }
+
+    li {
+        list-style-type: disc;
+        list-style-position: inside;
+        margin-left: 10px;
     }
 }
 

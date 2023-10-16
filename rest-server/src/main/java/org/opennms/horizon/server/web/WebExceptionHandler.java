@@ -29,29 +29,22 @@
 package org.opennms.horizon.server.web;
 
 import org.opennms.horizon.server.service.graphql.BffDataFetchExceptionHandler;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.web.WebProperties;
-import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.RequestPredicates;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Handles web-level exceptions, ensuring that appropriate data is returned.
@@ -63,60 +56,64 @@ import java.util.stream.Collectors;
  * @see BffDataFetchExceptionHandler
  * @see org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration#errorWebExceptionHandler
  */
-@Component
-@Order(-2)
-public class WebExceptionHandler extends AbstractErrorWebExceptionHandler {
+@RestControllerAdvice
+public class WebExceptionHandler {
+
+    private final ErrorAttributes errorAttributes;
+    private final List<HttpMessageReader<?>> messageReaders;
+
 
     public WebExceptionHandler(
         ErrorAttributes errorAttributes,
-        WebProperties webProperties,
-        ApplicationContext applicationContext,
-        ObjectProvider<ViewResolver> viewResolvers,
         ServerCodecConfigurer serverCodecConfigurer
     ) {
-        super(errorAttributes, webProperties.getResources(), applicationContext);
-
-        // Additional required config. See org.springframework.boot.autoconfigure
-        // .web.reactive.error.ErrorWebFluxAutoConfiguration.errorWebExceptionHandler
-        this.setViewResolvers(viewResolvers.orderedStream().collect(Collectors.toList()));
-        this.setMessageReaders(serverCodecConfigurer.getReaders());
-        this.setMessageWriters(serverCodecConfigurer.getWriters());
+        this.errorAttributes = errorAttributes;
+        this.messageReaders = serverCodecConfigurer.getReaders();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
-        return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
+    @ExceptionHandler(UnsupportedMediaTypeStatusException.class)
+    public Mono<ResponseEntity<Object>> handle(UnsupportedMediaTypeStatusException e, ServerWebExchange exchange) {
+        return createResponse(e, exchange, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        Throwable t = getError(request);
-
-        HttpStatus status;
-        String message;
-        if (t instanceof ResponseStatusException e) {
-            // ResponseStatusException#getMessage will reference the root cause,
-            // which we don't want to expose externally. If a reason was
-            // explicitly provided, display that, otherwise use the status
-            // reason phrase (ie, "Not Found")
-            status = HttpStatus.resolve(e.getStatusCode().value());
-            if (status == null) {
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-            }
-            message = e.getReason() != null ? e.getReason() : status.getReasonPhrase();
-        } else {
-            // Any exceptions we don't explicitly handle should be considered
-            // unexpected, and therefore an internal error.
+    @ExceptionHandler(ResponseStatusException.class)
+    public Mono<ResponseEntity<Object>> handle(ResponseStatusException e, ServerWebExchange exchange) {
+        HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+        if (status == null) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            message = status.getReasonPhrase();
         }
+        String message = e.getReason() != null ? e.getReason() : status.getReasonPhrase();
 
-        Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
-            ErrorAttributeOptions.defaults());
-        errorPropertiesMap.put("message", message);
+        return createResponse(e, exchange, status, message);
+    }
 
-        return ServerResponse.status(status)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(errorPropertiesMap));
+    @ExceptionHandler(Exception.class)
+    public Mono<ResponseEntity<Object>> handle(Exception e, ServerWebExchange exchange) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        return createResponse(e, exchange, status);
+    }
+
+    private Mono<ResponseEntity<Object>> createResponse(
+        Throwable t,
+        ServerWebExchange exchange,
+        HttpStatus status
+    ) {
+        return createResponse(t, exchange, status, status.getReasonPhrase());
+    }
+
+    private Mono<ResponseEntity<Object>> createResponse(
+        Throwable t,
+        ServerWebExchange exchange,
+        HttpStatus status,
+        String message
+    ) {
+        errorAttributes.storeErrorInformation(t, exchange);
+        var request = ServerRequest.create(exchange, messageReaders);
+        Map<String, Object> attributes = errorAttributes.getErrorAttributes(
+            request, ErrorAttributeOptions.defaults()
+        );
+        attributes.put("message", message);
+
+        return Mono.just(new ResponseEntity<>(attributes, status));
     }
 }

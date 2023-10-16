@@ -15,7 +15,6 @@ keycloak:
   realm: opennms
   signatureAlgorithm: RS256
 
-# graphql
 graphql:
   spqr:
     gui:

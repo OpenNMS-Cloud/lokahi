@@ -45,12 +45,6 @@ describe('Welcome Store', () => {
         expect(welcomeStore.firstLocation).toStrictEqual({ id: 1, location: 'default' })
     })
 
-    it('can get the docker command', async () => {
-        const welcomeStore = useWelcomeStore()
-        const theDockerCmd = welcomeStore.dockerCmd()
-        expect(theDockerCmd).toBe(`docker run --rm -p 162:1162/udp -p 9999:9999/udp -e MINION_GATEWAY_HOST="minion.onms-fb-prod.production.prod.dataservice.opennms.com" -e GRPC_CLIENT_KEYSTORE_PASSWORD='' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/default-certificate.p12",target="/opt/karaf/minion.p12",readonly opennms/lokahi-minion:latest`)
-    })
-
     it('can click on the download button', async () => {
         global.fetch = buildFetchList({
             getMinionCertificate: { getMinionCertificate: { password: 'tempPassword', certificate: '234234098098' } },
@@ -118,7 +112,7 @@ describe('Welcome Store', () => {
         const welcomeStore = useWelcomeStore()
         const ip = '192.168.1.1'
         welcomeStore.setDevicePreview({ nodeLabel: ip, createTime: 1234 }, {}, 25)
-        expect(welcomeStore.devicePreview.title).toBe('Node Discovery');
+        expect(welcomeStore.devicePreview.title).toBe('Minion Gateway');
         expect(welcomeStore.devicePreview.itemTitle).toBe(ip);
     })
 

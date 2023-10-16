@@ -103,7 +103,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         meta:{
           clientId: '',
           clientSecret: '',
-          clientSubscriptionId: '',
+          subscriptionId: '',
           directoryId: '',
           communityStrings: 'public',
           udpPorts: '161'
@@ -137,7 +137,8 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     },
     locationSelected(location: any) {
       const discoveryQueries = useDiscoveryQueries()
-      this.selectedDiscovery.locations?.push(discoveryQueries.locations.find((d) => d.location === location))
+      const foundLocation = discoveryQueries.locations.find((d) => d.location === location)
+      this.selectedDiscovery.locations = foundLocation ? [foundLocation] : undefined
       this.foundLocations = []
       this.locationSearch = ''
       if (this.validateOnKeyUp){
@@ -156,7 +157,10 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       if (!foundTag){
         foundTag = {name: tag}
       }
-      this.selectedDiscovery.tags?.push(foundTag)
+
+      const tagIsAlreadySelected = this.selectedDiscovery.tags?.find((t) => t.name === tag)
+      if (!tagIsAlreadySelected) this.selectedDiscovery.tags?.push(foundTag)
+      
       this.foundTags = []
       this.tagSearch = ''
       if (this.validateOnKeyUp){
@@ -186,7 +190,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     async searchForTags(searchVal: string){
       const discoveryQueries = useDiscoveryQueries()
       this.tagSearch = searchVal
-      await discoveryQueries.getTagsSearch(searchVal)
+      await discoveryQueries.searchTags(searchVal)
       this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name ?? '')
     },
     async toggleDiscovery(clickedToggle: NewOrUpdatedDiscovery){
@@ -228,11 +232,20 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       if (isValid){
         if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
           await discoveryMutations.upsertPassiveDiscovery({passiveDiscovery:discoveryFromClientToServer(this.selectedDiscovery)})
+        } else if (this.selectedDiscovery.type === DiscoveryType.Azure) {
+          await discoveryMutations.addAzureCreds({ discovery: discoveryFromClientToServer(this.selectedDiscovery)})
         } else {
           await discoveryMutations.createOrUpdateDiscovery({request:discoveryFromClientToServer(this.selectedDiscovery)})
         }
         await this.init()
-        this.newDiscoveryModalActive = true
+
+        if (
+          !discoveryMutations.passiveDiscoveryError && 
+          !discoveryMutations.createOrUpdateDiscoveryError && 
+          !discoveryMutations.azureError) {
+          this.newDiscoveryModalActive = true
+        }
+
         this.validateOnKeyUp = false
       }else {
         this.validateOnKeyUp = true

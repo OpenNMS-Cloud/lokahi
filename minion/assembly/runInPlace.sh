@@ -14,7 +14,7 @@ CERT_ROOTDIR="$(pwd)/target"
 CLIENT_KEYSTORE="${CERT_ROOTDIR}/minion.p12"
 CLIENT_KEYSTORE_TYPE="pkcs12"
 CLIENT_KEYSTORE_PASSWORD="changeme"
-CLIENT_TRUSTSTORE="${CERT_ROOTDIR}/CA.cert"
+CLIENT_TRUSTSTORE="$(pwd)/../../target/tmp/server-ca.crt"
 CLIENT_TRUSTSTORE_TYPE="file"
 CLIENT_TRUSTSTORE_PASSWORD=""
 
@@ -57,7 +57,7 @@ do
         g) OVERRIDE_AUTHORITY="${OPTARG}";;
         h) MINION_GATEWAY_HOST="${OPTARG}" ;;
         i) MINION_ID="${OPTARG}" ;;
-        k) CLIENT_KEY_FILE="${OPTARG}" ;;
+        k) CLIENT_KEYSTORE="${OPTARG}" ;;
         l) MINION_LOCATION="${OPTARG}" ;;
         P) CLIENT_KEYSTORE_PASSWORD="${OPTARG}" ;;
         p) MINION_GATEWAY_PORT="${OPTARG}" ;;

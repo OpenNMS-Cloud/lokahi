@@ -46,21 +46,22 @@ class GrpcShutdownHandlerTest {
     @Test
     void testShutdownWithMessage() throws Exception {
         target.shutdown("message");
-        verify(mockSystemService, times(1)).halt();
+        verify(mockSystemService, times(1)).halt("+0");
     }
 
     @Test
     void testShutdownWithThrowable() throws Exception {
         RuntimeException ex = new RuntimeException("exception");
         target.shutdown(ex);
-        verify(mockSystemService, times(1)).halt();
+        verify(mockSystemService, times(1)).halt("+0");
     }
 
     @Test
     void testShutdownException() throws Exception {
-        doThrow(new RuntimeException()).when(mockSystemService).halt();
+        doThrow(new RuntimeException()).when(mockSystemService).halt("+0");
         int statusCode = catchSystemExit(() -> target.shutdown("message"));
-        verify(mockSystemService, times(1)).halt();
+        verify(mockSystemService, times(1)).halt("+0");
         assertEquals(-1, statusCode);
     }
+
 }

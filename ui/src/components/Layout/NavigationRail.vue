@@ -76,8 +76,6 @@
 
 <script setup lang="ts">
 import { IconTextAnimate, FeatherAppRail } from '@featherds/app-rail'
-
-import Appliances from '@featherds/icon/hardware/Appliances'
 import Home from '@featherds/icon/action/Home'
 import MapIcon from '@material-design-icons/svg/outlined/map.svg?component'
 import Business from '@featherds/icon/action/Business'
@@ -91,7 +89,6 @@ import Location from '@featherds/icon/action/Location'
 import NavigationRailNavItem from '@/components/Layout/NavigationRailNavItem.vue'
 
 const Icons = markRaw({
-  Appliances,
   Home,
   Business,
   Discovery,

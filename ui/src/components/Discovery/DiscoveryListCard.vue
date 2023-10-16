@@ -128,7 +128,7 @@ defineProps<{
   padding: var(variables.$spacing-m);
   font-weight: 700;
   font-family: var(--feather-header-font-family);
-  color: #0a0c1b;
+  color: var(--feather-disabled-text-on-surface);
   opacity: 0.4;
   font-size: 13px;
   .icon {

@@ -6,7 +6,7 @@
   >
     <template #content>
       <p v-if="customMsg">{{ customMsg }}</p>
-      <p v-else>Are you sure you wish to delete <strong>{{ name }}</strong>?</p>
+      <p v-else>Are you sure you wish to delete {{ name }}?</p>
     </template>
     <template #footer>
       <FeatherButton
@@ -22,7 +22,7 @@
         :click="deleteAndCloseModal"
         :isFetching="isDeleting"
       >
-        Delete
+        {{ actionBtnText || 'Delete' }}
       </ButtonWithSpinner>
     </template>
   </PrimaryModal>
@@ -36,6 +36,7 @@ const props = defineProps<{
   closeModal: () => void
   isDeleting?: boolean
   customMsg?: string
+  actionBtnText?: string
 }>()
 
 const deleteAndCloseModal = async () => {

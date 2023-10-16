@@ -5,6 +5,15 @@ keycloak:
   realm: opennms
   signatureAlgorithm: RS256
 
+lokahi:
+  bff:
+    introspection-enabled: false
+    max-alias-occurrence: 5
+    max-complexity: 60
+    max-directive-occurrence: 5
+    max-field-occurrence: 5
+    max-query-depth: 13
+
 grpc:
   url:
     inventory: localhost:29065

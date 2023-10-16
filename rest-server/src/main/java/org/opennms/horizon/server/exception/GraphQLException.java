@@ -38,10 +38,17 @@ public class GraphQLException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = -4543741752174882855L;
 
+    /**
+     * @param message A message about the failure that will be displayed in the response.
+     */
     public GraphQLException(String message) {
         super(message);
     }
 
+    /**
+     * @param message A message about the failure that will be displayed in the response.
+     * @param cause   The cause of the exception. Will not be exposed in the response.
+     */
     public GraphQLException(String message, Throwable cause) {
         super(message, cause);
     }

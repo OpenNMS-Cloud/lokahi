@@ -81,7 +81,6 @@
           :items="tagQueries.tagsSearched"
           :label="'Tag name'"
           :preselectedItems="formattedTags"
-          :disabled="store.selectedPolicy.isDefault"
         />
       </div>
 

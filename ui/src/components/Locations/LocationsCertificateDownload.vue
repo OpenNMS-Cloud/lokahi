@@ -24,6 +24,7 @@
         </div>
         <div class="divider"></div>
         <div class="download-buttons-wrapper">
+          <span><strong>Note:</strong> If you download a new bundle, you will need to use a new decryption password.</span>
           <div class="download-buttons">
             <ButtonWithSpinner
               primary
@@ -36,7 +37,7 @@
             <FeatherButton
               v-if="props.hasCert"
               secondary
-              @click="locationStore.revokeMinionCertificate"
+              @click="openModal"
               data-test="revoke-btn"
             >
               {{ props.secondaryButtonText }}
@@ -75,6 +76,13 @@
   <div class="row mt-m" v-if="locationStore.certificatePassword">
     <LocationsMinionCmd />
   </div>
+  <DeleteConfirmationModal
+    :isVisible="isVisible"
+    :customMsg="`Are you sure you want to regenerate the certificate for ${locationStore.selectedLocation?.location}?`"
+    :closeModal="() => closeModal()"
+    :deleteHandler="() => locationStore.revokeMinionCertificate()"
+    actionBtnText="Continue"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -83,22 +91,24 @@ import CopyIcon from '@featherds/icon/action/ContentCopy'
 import CheckIcon from '@featherds/icon/action/CheckCircle'
 import CalendarIcon from '@featherds/icon/action/CalendarEndDate'
 import { useLocationStore } from '@/store/Views/locationStore'
+import useModal from '@/composables/useModal'
 
 import useSnackbar from '@/composables/useSnackbar'
 const { showSnackbar } = useSnackbar()
 const locationStore = useLocationStore()
+const { openModal, closeModal, isVisible } = useModal()
 
 const props = defineProps({
   title: {
-    default: 'Certificate Status',
+    default: 'Minion Certificate Status',
     type: String
   },
   primaryButtonText: {
-    default: 'Download Certificate',
+    default: 'Download Bundle',
     type: String
   },
   secondaryButtonText: {
-    default: 'Revoke/Regenerate',
+    default: 'Regenerate',
     type: String
   },
   onPrimaryButtonClick: {
@@ -155,7 +165,7 @@ const copyClick = () => {
   width: 100%;
   flex-wrap: wrap;
   gap: var(variables.$spacing-l);
-  @include mediaQueriesMixins.screen-xl {
+  @include mediaQueriesMixins.screen-md {
     flex-direction: row;
     justify-content: flex-start;
     gap: 60px;
@@ -178,7 +188,7 @@ const copyClick = () => {
   width: 1px;
   display: none;
 
-  @include mediaQueriesMixins.screen-xl {
+  @include mediaQueriesMixins.screen-xxl {
     display: block;
   }
 }
@@ -188,7 +198,6 @@ const copyClick = () => {
 }
 .download-copy-button {
   min-width: 87px;
-  margin-top: -25px;
 }
 .download-input {
   width: 285px;
@@ -210,6 +219,10 @@ const copyClick = () => {
   display: none;
 }
 .download-buttons-wrapper {
+  @include mediaQueriesMixins.screen-md {
+    margin-top: -40px;
+  }
+
   &.hasCert {
     max-width: unset;
   }

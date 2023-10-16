@@ -30,6 +30,7 @@ package org.opennms.horizon.alertservice.grpc;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -41,28 +42,42 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.common.VerificationException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
 import org.opennms.horizon.alertservice.db.entity.PolicyRule;
+import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
+import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
+import org.opennms.horizon.alertservice.db.repository.SystemPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.db.tenant.GrpcTenantLookupImpl;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
+import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapperImpl;
 import org.opennms.horizon.alertservice.service.MonitorPolicyService;
 import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
+import org.opennms.horizon.shared.common.tag.proto.Operation;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
+import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -70,13 +85,17 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.opennms.horizon.alertservice.service.MonitorPolicyService.DEFAULT_POLICY;
 import static org.opennms.horizon.alertservice.service.MonitorPolicyService.SYSTEM_TENANT;
 
+@ExtendWith(MockitoExtension.class)
 class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub stub;
     private MonitorPolicyService spyMonitorPolicyService;
-    private MonitorPolicyMapper mockPolicyMapper;
+    private MonitorPolicyMapper policyMapper = new MonitorPolicyMapperImpl();
     private MonitorPolicyRepository mockMonitorPolicyRepository;
+    private SystemPolicyTagRepository mockSystemPolicyTagRepository;
     private PolicyRuleRepository mockPolicyRuleRepository;
     private AlertDefinitionRepository mockAlertDefinitionRepo;
     private AlertRepository mockAlertRepository;
@@ -84,23 +103,25 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     private TagOperationProducer mockTagOperationProducer;
     private Alert alert1, alert2;
     private ManagedChannel channel;
-
-
     protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
 
+    @Captor
+    private ArgumentCaptor<Tag> tagCaptor;
+    @Captor
+    private ArgumentCaptor<SystemPolicyTag.RelationshipId> systemPolicyTagIdCaptor;
 
     @BeforeEach
-    public void prepareTest() throws VerificationException, IOException {
-        mockPolicyMapper = mock(MonitorPolicyMapper.class);
+    void prepareTest() throws VerificationException, IOException {
         mockMonitorPolicyRepository = mock(MonitorPolicyRepository.class);
         mockPolicyRuleRepository = mock(PolicyRuleRepository.class);
         mockAlertDefinitionRepo = mock(AlertDefinitionRepository.class);
         mockAlertRepository = mock(AlertRepository.class);
         mockTagRepository = mock(TagRepository.class);
         mockTagOperationProducer = mock(TagOperationProducer.class);
+        mockSystemPolicyTagRepository = mock(SystemPolicyTagRepository.class);
 
-        spyMonitorPolicyService = spy(new MonitorPolicyService(mockPolicyMapper, mockMonitorPolicyRepository,
-            mockPolicyRuleRepository, mockAlertDefinitionRepo, mockAlertRepository, mockTagRepository, mockTagOperationProducer));
+        spyMonitorPolicyService = spy(new MonitorPolicyService(policyMapper, mockMonitorPolicyRepository,
+            mockSystemPolicyTagRepository, mockPolicyRuleRepository, mockAlertDefinitionRepo, mockAlertRepository, mockTagRepository, mockTagOperationProducer));
         MonitorPolicyGrpc grpcService = new MonitorPolicyGrpc(spyMonitorPolicyService, tenantLookup);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
@@ -122,12 +143,90 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
 
     @AfterEach
     public void afterTest() throws InterruptedException {
-        verifyNoMoreInteractions(spyMonitorPolicyService, mockPolicyRuleRepository, mockMonitorPolicyRepository, spyInterceptor);
+        verifyNoMoreInteractions(spyMonitorPolicyService, mockPolicyRuleRepository, mockMonitorPolicyRepository, spyInterceptor
+            , mockSystemPolicyTagRepository, mockTagOperationProducer);
 
         reset(spyMonitorPolicyService, spyInterceptor);
         channel.shutdownNow();
         channel.awaitTermination(10, TimeUnit.SECONDS);
         stopServer();
+    }
+
+    void testUpdateDefaultPolicyTag() throws VerificationException, InvalidProtocolBufferException {
+        // prepare
+        long policyId = 10L;
+        var defaultPolicy = new MonitorPolicy();
+        var tags = new HashSet<Tag>();
+        var tag1 = new Tag();
+        tag1.setName("tag1");
+        tag1.setTenantId(tenantId);
+        var tag2 = new Tag();
+        tag2.setName("tag2");
+        tag2.setTenantId(tenantId);
+        tags.add(tag1);
+        tags.add(tag2);
+        defaultPolicy.setName(DEFAULT_POLICY);
+        defaultPolicy.setId(policyId);
+        defaultPolicy.setTags(tags);
+
+        doReturn(Optional.of(defaultPolicy)).when(mockMonitorPolicyRepository).findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT);
+        var systemPolicyTags = new HashSet<SystemPolicyTag>();
+        systemPolicyTags.add(new SystemPolicyTag(tenantId, policyId, tag1));
+        systemPolicyTags.add(new SystemPolicyTag(tenantId, policyId, tag2));
+
+        var tag3 = new Tag();
+        tag3.setName("tag3");
+        tag3.setTenantId(tenantId);
+        var systemPolicyTag3 = new SystemPolicyTag(tenantId, policyId, tag3);
+        doReturn(systemPolicyTags).when(mockSystemPolicyTagRepository).findByTenantIdAndPolicyId(tenantId, policyId);
+        when(mockSystemPolicyTagRepository.save(any(SystemPolicyTag.class))).thenAnswer(i -> {
+            var inPolicyTag = (SystemPolicyTag) i.getArgument(0);
+            if (systemPolicyTag3.getTag().getName().equals(inPolicyTag.getTag().getName()))
+                return systemPolicyTag3;
+            else
+                return null;
+        });
+
+        doReturn(Optional.of(tag1)).when(mockTagRepository).findByTenantIdAndName(tenantId, tag1.getName());
+        doReturn(Optional.empty()).when(mockTagRepository).findByTenantIdAndName(tenantId, tag3.getName());
+
+        when(mockTagRepository.save(any(Tag.class))).thenAnswer(i -> {
+            var inTag = (Tag) i.getArgument(0);
+            if (tag3.getName().equals(inTag.getName())){
+                return tag3;
+            } else {
+                return null;
+            }
+        });
+
+        // execute
+        var requestPolicy = MonitorPolicyProto.newBuilder()
+            .setName(DEFAULT_POLICY)
+            .addTags("tag1")
+            .addTags("tag3")
+            .build();
+        var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .createPolicy(requestPolicy);
+
+        // check
+        verify(spyMonitorPolicyService).createPolicy(requestPolicy, tenantId);
+        assertThat(result.getTagsCount()).isEqualTo(2);
+        assertThat(result.getTagsList()).hasSameElementsAs(requestPolicy.getTagsList());
+
+        verify(mockTagRepository).save(tagCaptor.capture());
+        assertThat(tagCaptor.getValue().getName()).isEqualTo(tag3.getName());
+        assertThat(tagCaptor.getValue().getTenantId()).isEqualTo(tag3.getTenantId());
+        verify(mockSystemPolicyTagRepository).deleteById(systemPolicyTagIdCaptor.capture());
+        assertThat(systemPolicyTagIdCaptor.getValue().getPolicyId()).isEqualTo(policyId);
+        assertThat(systemPolicyTagIdCaptor.getValue().getTag().getName()).isEqualTo(tag2.getName());
+        assertThat(systemPolicyTagIdCaptor.getValue().getTag().getTenantId()).isEqualTo(tag2.getTenantId());
+
+        var operation = TagOperationList.newBuilder().addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("tag3"))
+            .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("tag2").setOperation(Operation.REMOVE_TAG))
+            .build();
+        verify(mockTagOperationProducer).sendTagUpdate(operation);
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Test

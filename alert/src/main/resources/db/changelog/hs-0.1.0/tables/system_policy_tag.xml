@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="hs-0.1.0-system-policy-tag" author="fchu">
+        <createTable tableName="system_policy_tag">
+            <column name="tenant_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="policy_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_system_policy_tag_tag_id" onDelete="CASCADE"
+                                 baseTableName="system_policy_tag" baseColumnNames="tag_id"
+                                 referencedTableName="tag" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint constraintName="fk_system_policy_tag_policy_id" onDelete="CASCADE"
+                                 baseTableName="system_policy_tag" baseColumnNames="policy_id"
+                                 referencedTableName="monitoring_policy" referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

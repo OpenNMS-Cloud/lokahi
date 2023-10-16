@@ -37,6 +37,8 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.exception.GraphQLException;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * A {@link DataFetcherExceptionHandler} that ensures exceptions that occur
  * during graphql execution are returned with appropriate response data.
@@ -48,7 +50,9 @@ public class BffDataFetchExceptionHandler implements DataFetcherExceptionHandler
 
     /** {@inheritDoc} */
     @Override
-    public DataFetcherExceptionHandlerResult onException(DataFetcherExceptionHandlerParameters parameters) {
+    public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
+        DataFetcherExceptionHandlerParameters parameters
+    ) {
         Throwable exception = handleException(parameters.getException());
 
         ExceptionWhileDataFetching error = new ExceptionWhileDataFetching(
@@ -57,12 +61,13 @@ public class BffDataFetchExceptionHandler implements DataFetcherExceptionHandler
             parameters.getSourceLocation()
         );
 
-        log.warn(error.getMessage(), exception);
+        log.warn("Caught exception during data fetching", exception);
 
-        return DataFetcherExceptionHandlerResult
+        var result = DataFetcherExceptionHandlerResult
             .newResult()
             .error(error)
             .build();
+        return CompletableFuture.completedFuture(result);
     }
 
     private Throwable handleException(Throwable e) {

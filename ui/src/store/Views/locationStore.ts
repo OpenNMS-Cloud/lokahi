@@ -4,7 +4,7 @@ import { useMinionsQueries } from '../Queries/minionsQueries'
 import { DisplayType } from '@/types/locations.d'
 import { useLocationMutations } from '../Mutations/locationMutations'
 import { MonitoringLocation, MonitoringLocationCreateInput, MonitoringLocationUpdateInput } from '@/types/graphql'
-import useMinionCmd from '@/composables/useMinionCmd'
+import useSnackbar from '@/composables/useSnackbar'
 
 export const useLocationStore = defineStore('locationStore', () => {
   const locationsList = ref<MonitoringLocation[]>([])
@@ -21,7 +21,6 @@ export const useLocationStore = defineStore('locationStore', () => {
   const locationQueries = useLocationQueries()
   const minionsQueries = useMinionsQueries()
   const locationMutations = useLocationMutations()
-  const { minionDockerCmd, setPassword, setLocationName, clearMinionCmdVals } = useMinionCmd()
 
   const fetchLocations = async () => {
     try {
@@ -51,7 +50,6 @@ export const useLocationStore = defineStore('locationStore', () => {
 
     selectedLocationId.value = id
     certificatePassword.value = ''
-    clearMinionCmdVals()
   }
 
   const addLocation = () => {
@@ -69,7 +67,6 @@ export const useLocationStore = defineStore('locationStore', () => {
   const setDisplayType = (type: DisplayType) => {
     displayType.value = type
     certificatePassword.value = ''
-    clearMinionCmdVals()
   }
 
   const createLocation = async (location: MonitoringLocationCreateInput) => {
@@ -124,10 +121,12 @@ export const useLocationStore = defineStore('locationStore', () => {
   }
 
   const revokeMinionCertificate = async () => {
+    const { showSnackbar } = useSnackbar()
     if (!selectedLocation.value) return
     const response = await locationMutations.revokeMinionCertificate(selectedLocation.value.id)
     if(!response.value){
       setCertificatePassword('')
+      showSnackbar({ msg: 'Certificate successfully regenerated.'})
     }
 
     return !response.value
@@ -135,8 +134,6 @@ export const useLocationStore = defineStore('locationStore', () => {
 
   const setCertificatePassword = (password: string) => {
     certificatePassword.value = password
-    setPassword(certificatePassword.value)
-    setLocationName(selectedLocation.value.location)
   }
 
   const selectedLocation = computed(
@@ -165,7 +162,6 @@ export const useLocationStore = defineStore('locationStore', () => {
     setCertificatePassword,
     getMinionsForLocationId,
     addLocation,
-    selectedLocation,
-    minionDockerCmd
+    selectedLocation
   }
 })

@@ -127,10 +127,10 @@ const discoveryTypeList = [
   },
   {
     title: 'Passive Discovery',
-    subtitle: 'Use Syslog and SNMP traps to identify network devices. You can configure only one passive discovery.',
+    subtitle: 'Use SNMP traps to identify network devices. You can configure only one passive discovery.',
     discoveryTypes: [
       {
-        title: 'Syslog and SNMP Traps',
+        title: 'SNMP Traps',
         icon: AddNote,
         subtitle:
           "Identify devices through events, flows, and indirectly by evaluating other devices' configuration settings.",

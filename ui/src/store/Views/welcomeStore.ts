@@ -12,8 +12,6 @@ import { useDiscoveryMutations } from '../Mutations/discoveryMutations'
 import { useDiscoveryQueries } from '../Queries/discoveryQueries'
 import { REGEX_EXPRESSIONS } from '@/components/Discovery/discovery.constants'
 import { validationErrorsToStringRecord } from '@/services/validationService'
-import useMinionCmd from '@/composables/useMinionCmd'
-import { ComputedRef } from 'vue'
 import { useWelcomeQueries } from '../Queries/welcomeQueries'
 
 interface WelcomeStoreState {
@@ -36,12 +34,6 @@ interface WelcomeStoreState {
   firstLocation: { id: number, location: string }
   invalidForm: boolean
   minionCert: CertificateResponse
-  minionCmd: {
-    minionDockerCmd: ComputedRef<string>;
-    setPassword: (pass: string) => string;
-    setLocationName: (locationNameString: string) => string;
-    clearMinionCmdVals: () => void;
-  }
   minionErrorTimeout: number,
   minionStatusCopy: string
   minionStatusLoading: boolean
@@ -66,13 +58,12 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       defaultLocationName: 'default',
       detectedDevice: {},
       devicePreview: {
-        title: 'Node Discovery',
+        title: 'Minion Gateway',
         loading: false,
         loadingCopy: 'Loading first discovery. This can take up to 3 minutes.',
         itemTitle: '',
         itemSubtitle: '',
-        itemStatuses: [
-        ],
+        itemStatuses: [],
         bottomCopy: 'We assigned your device to a location called \'default.\''
       },
       discoverySubmitted: false,
@@ -94,7 +85,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       invalidForm: true,
       minionCert: { password: '', certificate: '' },
       minionErrorTimeout: -1,
-      minionCmd: useMinionCmd(),
       minionStatusCopy: 'Waiting for the Docker Install Command to be complete.',
       minionStatusLoading: false,
       minionStatusStarted: false,
@@ -156,26 +146,13 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       }
     },
     copyDockerClick() {
-      navigator.clipboard.writeText(this.dockerCmd()).then(() => (this.copied = true))
+      const dcmd = 'docker compose up -d'
+      navigator.clipboard.writeText(dcmd).then(() => (this.copied = true))
       this.copyButtonCopy = 'Copied'
       setTimeout(() => {
         this.copyButtonCopy = 'Copy'
         this.copied = false
       }, 5000)
-    },
-    dockerCmd() {
-      let dcmd = this.minionCmd.minionDockerCmd
-
-      if (location.origin === 'https://onmshs.local:1443' || location.origin.startsWith('http://localhost:') || location.origin.startsWith('http://onmshs.local:8080')) {
-        dcmd = `docker run --rm -p 8181:8181 -p 8101:8101 -p 162:1162/udp -p 8877:8877/udp -p 4729:4729/udp -p 9999:9999/udp -e MINION_GATEWAY_HOST="host.docker.internal" -e MINION_GATEWAY_PORT=1443 -e GRPC_CLIENT_TRUSTSTORE=/opt/karaf/gateway.crt --mount type=bind,source="${import.meta.env.VITE_MINION_PATH}/target/tmp/server-ca.crt",target="/opt/karaf/gateway.crt",readonly -e GRPC_CLIENT_KEYSTORE_PASSWORD='${this.minionCert.password}' --mount type=bind,source="/PATH_TO_DOWNLOADED_FILE/${this.defaultLocationName}-certificate.p12",target="/opt/karaf/minion.p12",readonly  -e GRPC_CLIENT_OVERRIDE_AUTHORITY="minion.onmshs.local" -e IGNITE_SERVER_ADDRESSES="localhost" opennms/lokahi-minion:latest`
-      }
-
-      //If the user made edits, thats the one we want.
-      if (this.modifiedDockerCommand) {
-        dcmd = this.modifiedDockerCommand
-      }
-
-      return dcmd
     },
     async downloadClick() {
       const { getMinionCertificate } = useWelcomeQueries()
@@ -185,8 +162,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       this.downloading = false
       this.downloaded = true
       this.downloadCopy = 'Downloaded'
-      this.minionCmd.setPassword(this.minionCert.password ?? '')
-      this.minionCmd.setLocationName(this.defaultLocationName)
       createAndDownloadBlobFile(this.minionCert.certificate, `minion-${this.defaultLocationName}.zip`)
 
       this.refreshing = true

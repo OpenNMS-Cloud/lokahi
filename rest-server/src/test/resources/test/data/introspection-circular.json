@@ -1,0 +1,4 @@
+{
+  "query": "query introcirc { __schema { types { fields { type { fields { type { fields { type { fields { type { name } } } } } } } } } } }",
+  "operationName": "introcirc"
+}

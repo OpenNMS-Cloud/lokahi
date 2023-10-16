@@ -90,6 +90,30 @@ spec:
             - name: LOKAHI_BFF_CORS_ALLOWED
               value: "{{ . }}"
             {{- end }}
+            {{- with .Values.OpenNMS.API.IntrospectionEnabled }}
+            - name: LOKAHI_BFF_INTROSPECTION_ENABLED
+              value: "{{ . }}"
+            {{- end }}
+            {{- with .Values.OpenNMS.API.MaxAliasOccurrence }}
+            - name: LOKAHI_BFF_MAX_ALIAS_OCCURRENCE
+              value: "{{ . }}"
+            {{- end }}
+            {{- with .Values.OpenNMS.API.MaxComplexity }}
+            - name: LOKAHI_BFF_MAX_COMPLEXITY
+              value: "{{ . }}"
+            {{- end }}
+            {{- with .Values.OpenNMS.API.MaxDirectiveOccurrence }}
+            - name: LOKAHI_BFF_MAX_DIRECTIVE_OCCURRENCE
+              value: "{{ . }}"
+            {{- end }}
+            {{- with .Values.OpenNMS.API.MaxFieldOccurrence }}
+            - name: LOKAHI_BFF_MAX_FIELD_OCCURRENCE
+              value: "{{ . }}"
+            {{- end }}
+            {{- with .Values.OpenNMS.API.MaxQueryDepth }}
+            - name: LOKAHI_BFF_MAX_QUERY_DEPTH
+              value: "{{ . }}"
+            {{- end }}
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
             {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.API) | nindent 12 }}

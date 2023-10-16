@@ -3,15 +3,19 @@
     ]">
         <div class="welcome-text">
             <h1 data-test="welcome-slide-one-title">Welcome to OpenNMS&nbsp;Cloud</h1>
-            <p class="margin-bottom">To start monitoring, you need to install our Minion on your system. This lightweight,
-                secure collector monitors and communicates with the devices on your network, shares collected data,
-                and connects your network with OpenNMS&nbsp;Cloud. </p>
-            <p class="margin-bottom">We’ll walk you through this setup, which takes only a few&nbsp;minutes.
-            </p>
+            <p class="margin-bottom">To start, let's install a secure minion on your network to gather <br>
+                monitoring data from your devices.</p>
+            <p class="margin-bottom">This process takes only a few minutes.</p>
         </div>
         <CollapsingCard title="Requirements: Before You Begin" data-test="welcome-slide-one-toggler"
             :open="welcomeStore.slideOneCollapseVisible" :headerClicked="welcomeStore.toggleSlideOneCollapse">
             <template #body>
+                <h4>Make sure you have the following:</h4>
+                <ul>
+                    <li>Docker environment with Docker Compose</li>
+                    <li>Access to a terminal or command line interface</li>
+                    <li>Synchronized system time (via NTP or Windows time service)</li>
+                </ul>
                 <div>
                     <h4>Minimum System Requirements:</h4>
                 </div>
@@ -45,23 +49,25 @@
                         </tr>
                     </tbody>
                 </table>
-                <h4>Make sure you have the following:</h4>
-                <ul>
-                    <li>Docker environment with Docker Compose</li>
-                    <li>Access to a terminal window</li>
-                    <li>Network Time Protocol (NTP) installed and configured</li>
-                </ul>
                 <div>
-                    <span class="docker-setup">How to set up Docker:&nbsp;
+                    <span class="docker-setup">How to set up Docker Desktop:&nbsp;
 
-                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
-                            rel="noopener noreferrer">Linux
-                        </a>
                         <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank"
                             rel="noopener noreferrer">Mac
                         </a>
+                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                            rel="noopener noreferrer">Linux
+                        </a>
                         <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank"
                             rel="noopener noreferrer">Windows
+                        </a>
+                    </span>
+                </div>
+                <br/>
+                <div>
+                    <span class="docker-setup">How to install Docker Engine (Server Version)&nbsp;
+                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                            rel="noopener noreferrer">Linux
                         </a>
                     </span>
                 </div>
@@ -75,12 +81,9 @@
 </template>
 <script lang="ts" setup>
 import CollapsingCard from '../Common/CollapsingCard.vue'
-import Lightbulb from '../Common/LightbulbIcon.vue'
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
-import useTheme from '@/composables/useTheme';
 
 const welcomeStore = useWelcomeStore()
-const { isDark } = useTheme();
 defineProps({
     visible: { type: Boolean, default: false }
 })

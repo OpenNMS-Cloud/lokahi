@@ -33,15 +33,18 @@ import io.leangen.graphql.spqr.spring.web.GraphQLController;
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import io.leangen.graphql.spqr.spring.web.reactive.GraphQLReactiveExecutor;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Replaces the {@link io.leangen.graphql.spqr.spring.web.reactive.DefaultGraphQLController},
- * disallowing GET requests from being processed.
+ * disallowing unused but potentially insecure request mappings.
  */
 @RestController
 public class BffGraphQLController extends GraphQLController<ServerWebExchange> {
@@ -58,5 +61,12 @@ public class BffGraphQLController extends GraphQLController<ServerWebExchange> {
     @Override
     public Object executeGetEventStream(GraphQLRequest graphQLRequest, ServerWebExchange request) {
         throw new MethodNotAllowedException(HttpMethod.GET, List.of(HttpMethod.POST));
+    }
+
+    @Override
+    public Object executeFormPost(
+        Map<String, String> queryParams, GraphQLRequest graphQLRequest, ServerWebExchange request
+    ) {
+        throw new UnsupportedMediaTypeStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
     }
 }

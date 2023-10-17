@@ -3,7 +3,7 @@
     v-if="count && isFilter"
     @click="alertsStore.toggleSeverity(severity)"
     :class="{ selected: isTypeAdded }"
-    class="card border pointer"
+    class="card pointer"
     data-test="severity-card"
   >
     <div class="label-add-icon">
@@ -26,14 +26,10 @@
     >
       {{ count }}
     </div>
-    <!-- <div data-test="percentage-time">
-      <span class="percentage">%5</span>
-      <span>Past 24 Hours</span>
-    </div> -->
   </div>
   <div
     v-else
-    class="card border pointer"
+    class="card pointer"
     data-test="severity-card"
   >
     <div class="label-add-icon">
@@ -46,7 +42,13 @@
       class="count"
       data-test="count"
     >
-      {{ count || 0 }}
+      {{ count || externalCount || 0 }}
+    </div>
+    <div v-if="!isStatus">
+      Cleared <span class="cleared-count"><strong>{{ cleared }}</strong></span>
+    </div>
+    <div v-if="!isStatus">
+      Total <span class="total-count"><strong>{{ total }}</strong></span>
     </div>
   </div>
 </template>
@@ -65,9 +67,14 @@ const props = defineProps<{
   severity: string
   isFilter?: boolean
   timeRange?: TimeRange
+  isStatus?: boolean,
+  externalCount?: number
 }>()
 
 const pillColor = { style: props.severity as string }
+
+const cleared = 8
+const total = 12
 
 const count = ref()
 onMounted(async () => {
@@ -93,10 +100,20 @@ const isTypeAdded = computed(() => alertsStore.alertsFilter.severities?.includes
   flex-direction: column;
   background-color: var(variables.$surface);
   padding: var(variables.$spacing-s);
-  border-radius: vars.$border-radius-surface;
+
+  &:not(:last-child) {
+    border-right: 1px solid var(variables.$shade-4);
+  }
   &.selected {
     background-color: var(variables.$shade-4);
     border-color: var(variables.$secondary-variant);
+  }
+
+  .cleared-count {
+    margin-left: 20px;
+  }
+  .total-count {
+    margin-left: 38px;
   }
 }
 

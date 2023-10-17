@@ -3,7 +3,10 @@
     <TableCard class="border">
       <div class="header">
         <div class="title-container">
-          <span class="title">Top Nodes</span>
+          <div class="title-time">
+            <span class="title">Top Nodes</span>
+            <span class="time-frame">24 h</span>
+          </div>
           <FeatherButton
             icon="Download to CSV"
             @click="downloadTopNodesToCsv"
@@ -15,18 +18,21 @@
       </div>
       <div class="container">
         <table
-          class="data-table tc3"
+          class="data-table"
           aria-label="Top Nodes Table"
         >
           <thead>
             <tr>
-              <th
+              <FeatherSortHeader
                 v-for="col of columns"
-                :key="col.id"
+                :key="col.label"
                 scope="col"
+                :property="col.id"
+                :sort="(sort as any)[col.id]"
+                v-on:sort-changed="sortChanged"
               >
                 {{ col.label }}
-              </th>
+              </FeatherSortHeader>
             </tr>
           </thead>
           <TransitionGroup
@@ -39,8 +45,8 @@
             >
               <td>{{ topNode.nodeLabel }}</td>
               <td>{{ topNode.location?.location }}</td>
-              <td>{{ topNode.responseTime }}</td>
-              <td>{{ topNode.reachability }}</td>
+              <td>{{ topNode.responseTime }} ms</td>
+              <td>{{ topNode.reachability }}%</td>
             </tr>
           </TransitionGroup>
         </table>
@@ -58,6 +64,8 @@
 import { useDashboardStore } from '@/store/Views/dashboardStore'
 import { buildCsvExport, generateBlob, generateDownload } from '../utils'
 import Download from '@featherds/icon/action/DownloadFile'
+import { SORT } from '@featherds/table'
+import { clone } from 'lodash'
 const store = useDashboardStore()
 
 const icons = markRaw({
@@ -66,7 +74,7 @@ const icons = markRaw({
 
 const page = 1
 const pageSize = 4
-const total = 100
+const total = 4
 
 const columns = [
   { id: 'nodeLabel', label: 'Node' },
@@ -75,8 +83,20 @@ const columns = [
   { id: 'reachability', label: 'Reachability' }
 ]
 
+const sort = reactive({
+  nodeLabel: SORT.NONE,
+  location: SORT.NONE,
+  responseTime: SORT.NONE,
+  reachability: SORT.NONE
+})
+
+const sortChanged = (sortObj: any) => {
+  console.log(sortObj)
+}
+
 const downloadTopNodesToCsv = async () => {
-  const exportableNodes: any = {}
+  const exportableNodes = []
+  const exportableNode: any = {}
 
   for (const node of store.topNodes) {
     for (const col of columns) {
@@ -89,12 +109,14 @@ const downloadTopNodesToCsv = async () => {
       }
 
       if (val !== null) {
-        exportableNodes[col.id] = val
+        exportableNode[col.id] = val
       }
     }
+    const copy = clone(exportableNode)
+    exportableNodes.push(copy)
   }
 
-  const csvRows = buildCsvExport(columns, [exportableNodes])
+  const csvRows = buildCsvExport(columns, exportableNodes)
   const data = csvRows.join('\n')
 
   const blob = generateBlob(data, 'text/csv')
@@ -110,7 +132,7 @@ const downloadTopNodesToCsv = async () => {
 @use '@/styles/vars.scss';
 
 .top-node-wrapper {
-  border-radius: vars.$border-radius-surface;
+  margin-bottom: 20px;
   width: 100%;
   .header {
     display: flex;
@@ -119,10 +141,20 @@ const downloadTopNodesToCsv = async () => {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      .title {
-        @include typography.headline3;
-        margin-left: 20px;
-        margin-top: 2px;
+      margin-bottom: 20px;
+
+      .title-time {
+        display: flex;
+        flex-direction: column;
+        .title {
+          @include typography.headline3;
+          margin-left: 20px;
+          margin-top: 2px;
+        }
+        .time-frame {
+          @include typography.caption;
+          margin-left: 20px;
+        }
       }
       .btn {
         margin-right: 15px;

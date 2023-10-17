@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useDashboardQueries } from '@/store/Queries/dashboardQueries'
-import { TsResult, Node } from '@/types/graphql'
+import { TsResult } from '@/types/graphql'
 
 type TState = {
   totalNetworkTrafficIn: [number, number][]
@@ -13,10 +13,39 @@ export const useDashboardStore = defineStore('dashboardStore', {
   state: (): TState => ({
     totalNetworkTrafficIn: [],
     totalNetworkTrafficOut: [],
-    topNodes: [{ id: 1, nodeLabel: 'test', monitoringLocationId: 1, location: {location: 'loc1'}, responseTime: 123, reachability: 90}],
+    topNodes: [
+      { id: 1, 
+        nodeLabel: 'Windows-Box-1', 
+        monitoringLocationId: 1, 
+        location: {location: 'loc1'}, 
+        responseTime: 1072, 
+        reachability: 46
+      },
+      { id: 2, 
+        nodeLabel: 'Windows-Box-2', 
+        monitoringLocationId: 1, 
+        location: {location: 'loc1'}, 
+        responseTime: 674, 
+        reachability: 74
+      },
+      { id: 3, 
+        nodeLabel: 'BOS-Router', 
+        monitoringLocationId: 1, 
+        location: {location: 'loc1'}, 
+        responseTime: 135, 
+        reachability: 87
+      },
+      { id: 4, 
+        nodeLabel: 'BDU-Router', 
+        monitoringLocationId: 1, 
+        location: {location: 'loc1'}, 
+        responseTime: 15, 
+        reachability: 100
+      },
+    ],
     reachability: {
-      responding: 8,
-      unresponsive: 3
+      responding: 3,
+      unresponsive: 1
     }
   }),
   actions: {

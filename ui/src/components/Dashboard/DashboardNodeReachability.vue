@@ -80,18 +80,18 @@ const options: ChartOptions<any> = {
   border-radius: vars.$border-radius-surface;
   background: var(variables.$surface);
   padding: 20px 0px;
-  height: 400px;
+  height: 442px;
   width: 300px;
   margin-bottom: 20px;
 
   .graph {
-    padding: 20px;
+    padding: 10px;
   }
 
   .title {
     display: block;
     @include typography.headline3;
-    margin: 2px 0px 10px 20px;
+    margin: 8px 0px 10px 25px;
   }
 }
 </style>

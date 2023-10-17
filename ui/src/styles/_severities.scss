@@ -31,12 +31,12 @@ $solid: 1;
 
 .minor {
   background-color: utils.alpha(variables.$minor, $solid);
-  color: var(variables.$minor) !important;
+  color: var(variables.$secondary-text-on-surface) !important;
 }
 
 .warning {
   background-color: utils.alpha(variables.$warning, $solid);
-  color: var(variables.$warning) !important;
+  color: var(variables.$secondary-text-on-surface) !important;
 }
 
 .indeterminate {
@@ -67,15 +67,16 @@ $solid: 1;
 
 .minor-color {
   background-color: utils.alpha(variables.$minor, $opacity);
-  color: var(variables.$minor) !important;
+  color: var(variables.$secondary-text-on-surface) !important;
 }
 
 .warning-color {
   background-color: utils.alpha(variables.$warning, $opacity);
-  color: var(variables.$warning) !important;
+  color: var(variables.$secondary-text-on-surface) !important;
 }
 
-.indeterminate-color {
+.indeterminate-color,
+.acknowledged-color {
   background-color: utils.alpha(variables.$indeterminate, $opacity);
   color: var(variables.$indeterminate) !important;
 }
@@ -85,7 +86,8 @@ $solid: 1;
   color: var(variables.$success) !important;
 }
 
-.cleared-color {
+.cleared-color,
+.unacknowledged-color {
   background-color: utils.alpha(variables.$cleared, $opacity);
   color: var(variables.$cleared) !important;
 }

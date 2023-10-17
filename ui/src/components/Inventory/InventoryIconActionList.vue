@@ -70,7 +70,7 @@ const onWarning = () => {
 }
 const warningIcon: IIcon = {
   image: markRaw(Warning),
-  tooltip: 'Events/Alarms',
+  tooltip: 'Events/Alerts',
   size: 1.5,
   cursorHover: true
 }

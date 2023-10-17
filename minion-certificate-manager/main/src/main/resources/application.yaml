@@ -16,4 +16,5 @@ grpc:
     port: 8990
     deadline: 60000
     bypassTokenMethods: isCertValid # comma separated list
-
+  inventory:
+    url: opennms-inventory:6565

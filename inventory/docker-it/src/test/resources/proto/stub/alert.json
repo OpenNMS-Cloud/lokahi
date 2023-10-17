@@ -1,0 +1,16 @@
+{
+  "service": "MonitorPolicyService",
+  "method": "GetPolicyById",
+  "input": {
+    "equals": {
+      "value": 9999
+    }
+  },
+  "output": {
+    "data": {
+      "id": 9999,
+      "tenantId": "tenant-stream",
+      "name": "default policy"
+    }
+  }
+}

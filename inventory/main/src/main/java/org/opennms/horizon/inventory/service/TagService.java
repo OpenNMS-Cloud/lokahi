@@ -199,7 +199,7 @@ public class TagService {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasMonitoringPolicyId()) {
             if (!isPolicyExist(entityId.getMonitoringPolicyId(), tenantId)) {
-                throw new InventoryRuntimeException("Invalid ID provided");
+                throw new InventoryRuntimeException("Invalid policyId provided");
             }
             return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
@@ -530,7 +530,8 @@ public class TagService {
             var policy = alertClient.getPolicyById(policyId, tenantId);
             return policy != null;
         } catch (StatusRuntimeException ex) {
-            log.error(String.format("Error during get policyId: %d tenantId: %s", policyId, tenantId));
+            log.error("Error during get policyId: {} tenantId: {}", policyId, tenantId);
+            ex.printStackTrace();
             return false;
         }
     }

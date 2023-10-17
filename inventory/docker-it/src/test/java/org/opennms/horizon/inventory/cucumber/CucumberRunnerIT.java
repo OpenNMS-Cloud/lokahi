@@ -43,6 +43,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
@@ -69,6 +70,7 @@ public class CucumberRunnerIT {
     private static KafkaContainer kafkaContainer;
     private static GenericContainer applicationContainer;
     private static GenericContainer azureWireMockContainer;
+    private static GenericContainer<?> mockAlertContainer;
     private static PostgreSQLContainer postgreSQLContainer;
 
     private static Network network;
@@ -101,15 +103,32 @@ public class CucumberRunnerIT {
             .withCommand("--global-response-templating", "--disable-banner", "--verbose")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("WIREMOCK"));
 
+        String alertHost = "opennms-alert";
+        int alertPort = 4770;
+        mockAlertContainer = new GenericContainer<>(DockerImageName.parse("tkpd/gripmock"))
+            .withNetwork(network)
+            .withNetworkAliases(alertHost)
+            .withExposedPorts(alertPort)
+            .withClasspathResourceMapping("proto", "/proto", BindMode.READ_ONLY)
+            // refer from jar file
+            .withClasspathResourceMapping("alerts.proto", "/proto/alerts.proto", BindMode.READ_ONLY)
+            // make sure stub file don't have tail 0A return char
+            .withCommand("--stub=/proto/stub", "/proto/alerts.proto")
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK"))
+            .waitingFor(Wait.forListeningPort()
+                .withStartupTimeout(Duration.ofSeconds(10))
+            );
+
         kafkaContainer.start();
         postgreSQLContainer.start();
         azureWireMockContainer.start();
+        mockAlertContainer.start();
 
         String bootstrapServers = kafkaContainer.getBootstrapServers();
         System.setProperty(KAFKA_BOOTSTRAP_SERVER_PROPERTYNAME, bootstrapServers);
         LOG.info("KAFKA LOCALHOST BOOTSTRAP SERVERS {}", bootstrapServers);
         
-        startApplicationContainer(false);   // DEBUGGING - set to true to expose the application debugging on host port 5005
+        startApplicationContainer(false, alertHost + ":" + alertPort);   // DEBUGGING - set to true to expose the application debugging on host port 5005
     }
 
     @AfterAll
@@ -117,11 +136,12 @@ public class CucumberRunnerIT {
         applicationContainer.stop();
         kafkaContainer.stop();
         azureWireMockContainer.stop();
+        mockAlertContainer.stop();
         postgreSQLContainer.stop();
     }
 
     @SuppressWarnings({"unchecked"})
-    private static void startApplicationContainer(boolean enableDebuggingPort5005) {
+    private static void startApplicationContainer(boolean enableDebuggingPort5005, String alertContainerUrl) {
         var azureWiremockUrl = "http://" + azureWireMockContainer.getNetworkAliases().get(0) + ":8080";
         var jdbcUrl = "jdbc:postgresql://" + postgreSQLContainer.getNetworkAliases().get(0) + ":5432" + "/" + postgreSQLContainer.getDatabaseName();
 
@@ -139,6 +159,7 @@ public class CucumberRunnerIT {
             .withEnv("INVENTORY_AZURE_LOGIN_URL", azureWiremockUrl)
             .withEnv("INVENTORY_AZURE_MANAGEMENT_URL", azureWiremockUrl)
             .withEnv("INVENTORY_ENCRYPTION_KEY", RandomStringUtils.randomAlphanumeric(32))
+            .withEnv("grpc.client.alert.url", alertContainerUrl)
             // Uncomment to get Hibernate SQL logging
             // .withEnv("logging.level.org.hibernate.SQL", "DEBUG")
             // .withEnv("logging.level.org.hibernate.orm.jdbc.bind", "TRACE")

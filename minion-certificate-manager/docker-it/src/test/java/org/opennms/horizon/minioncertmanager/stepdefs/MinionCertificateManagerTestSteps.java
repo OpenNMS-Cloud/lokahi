@@ -108,8 +108,6 @@ public class MinionCertificateManagerTestSteps {
         Supplier<GetMinionCertificateResponse> call = () -> {
             getMinionCertificateResponse = clientUtils.getMinionCertificateManagerStub()
                 .getMinionCert(minionCertificateRequest);
-            System.out.println("HERE !!!");
-            System.out.println(getMinionCertificateResponse);
             return getMinionCertificateResponse;
         };
         String serialNumber = retryUtils.retry(

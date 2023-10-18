@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.events.grpc.client;
+package org.opennms.horizon.inventory.component;
 
 import com.google.protobuf.Int64Value;
 import io.grpc.ManagedChannel;
@@ -39,8 +39,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
+import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 
 import java.io.IOException;
 
@@ -51,49 +51,51 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-public class InventoryClientTest {
+class AlertClientTest {
     @Rule
-    public static final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
+    public final static GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
 
-    private static InventoryClient client;
-    private static NodeServiceGrpc.NodeServiceImplBase mockNodeService;
-
-    private final String accessToken = "test-token";
+    private static AlertClient client;
+    private static MonitorPolicyServiceGrpc.MonitorPolicyServiceImplBase mockMonitorPolicyService;
 
     @BeforeAll
     public static void startGrpc() throws IOException {
-        mockNodeService = mock(NodeServiceGrpc.NodeServiceImplBase.class, delegatesTo(
-            new NodeServiceGrpc.NodeServiceImplBase() {
+        mockMonitorPolicyService = mock(MonitorPolicyServiceGrpc.MonitorPolicyServiceImplBase.class, delegatesTo(
+            new MonitorPolicyServiceGrpc.MonitorPolicyServiceImplBase() {
                 @Override
-                public void getNodeById(Int64Value request, StreamObserver<NodeDTO> responseObserver) {
-                    responseObserver.onNext(NodeDTO.newBuilder()
+                public void getPolicyById(Int64Value request, StreamObserver<MonitorPolicyProto> responseObserver) {
+                    responseObserver.onNext(MonitorPolicyProto.newBuilder()
                         .setId(request.getValue()).build());
                     responseObserver.onCompleted();
                 }
             }));
 
-        grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest")
-            .addService(mockNodeService)
+        when(mockMonitorPolicyService.bindService()).thenCallRealMethod();
+
+        grpcCleanUp.register(InProcessServerBuilder.forName("AlertClientTest")
+            .addService(mockMonitorPolicyService)
             .directExecutor().build().start());
-        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest").directExecutor().build());
-        client = new InventoryClient(channel, 5000);
+        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("AlertClientTest").directExecutor().build());
+        client = new AlertClient(channel, 5000);
         client.initialStubs();
     }
 
     @AfterEach
     public void afterTest() {
-        verifyNoMoreInteractions(mockNodeService);
-        reset(mockNodeService);
+        verifyNoMoreInteractions(mockMonitorPolicyService);
+        reset(mockMonitorPolicyService);
     }
 
     @Test
-    void testGetNodeById() {
-        long nodeId = 100L;
+    void testGetPolicyById() {
+        long policyId = 100L;
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
-        NodeDTO result = client.getNodeById("tenantId", nodeId);
+        MonitorPolicyProto result = client.getPolicyById(policyId, "tenantId");
         assertThat(result).isNotNull();
-        verify(mockNodeService).getNodeById(captor.capture(), any());
-        assertThat(captor.getValue().getValue()).isEqualTo(nodeId);
+        verify(mockMonitorPolicyService).bindService();
+        verify(mockMonitorPolicyService).getPolicyById(captor.capture(), any());
+        assertThat(captor.getValue().getValue()).isEqualTo(policyId);
     }
 }

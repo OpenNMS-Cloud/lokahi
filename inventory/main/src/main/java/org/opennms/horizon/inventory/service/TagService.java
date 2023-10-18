@@ -143,7 +143,7 @@ public class TagService {
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
             if (!isPolicyExist(entityId.getMonitoringPolicyId(), tenantId)) {
-                throw new InventoryRuntimeException("Invalid policyId provided");
+                throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
             }
             return tagCreateList.stream().map(tagCreateDTO ->
                     addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
@@ -199,7 +199,7 @@ public class TagService {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasMonitoringPolicyId()) {
             if (!isPolicyExist(entityId.getMonitoringPolicyId(), tenantId)) {
-                throw new InventoryRuntimeException("Invalid policyId provided");
+                throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
             }
             return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
@@ -531,7 +531,6 @@ public class TagService {
             return policy != null;
         } catch (StatusRuntimeException ex) {
             log.error("Error during get policyId: {} tenantId: {}", policyId, tenantId);
-            ex.printStackTrace();
             return false;
         }
     }

@@ -29,6 +29,9 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
+import com.google.rpc.Code;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,6 +109,22 @@ public class TagServiceTest {
         var savedTags = tagService.addTags(TEST_TENANT_ID, addTags);
 
         Assertions.assertEquals(2, savedTags.size());
+    }
+
+    @Test
+    void testAddTagsAlertClientException() {
+        long testNodeId = 1L;
+        long testPolicyId = 2L;
+        when(mockAlertClient.getPolicyById(testPolicyId, TEST_TENANT_ID)).thenThrow(new StatusRuntimeException(Status.NOT_FOUND));
+
+        var addTags = TagCreateListDTO.newBuilder()
+            .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(testNodeId).setMonitoringPolicyId(testPolicyId).build())
+            .addTags(TagCreateDTO.newBuilder().setName("tag1"))
+            .build();
+
+        var exception = Assertions.assertThrows(InventoryRuntimeException.class, () -> tagService.addTags(TEST_TENANT_ID, addTags));
+
+        Assertions.assertEquals("MonitoringPolicyId not found for id: " + testPolicyId, exception.getMessage());
     }
 
     @Test

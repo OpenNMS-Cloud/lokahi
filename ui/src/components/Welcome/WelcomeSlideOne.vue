@@ -66,7 +66,7 @@
                 <br/>
                 <div>
                     <span class="docker-setup">How to install Docker Engine (Server Version)&nbsp;
-                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                        <a href="https://docs.docker.com/engine/install/#server" target="_blank"
                             rel="noopener noreferrer">Linux
                         </a>
                     </span>

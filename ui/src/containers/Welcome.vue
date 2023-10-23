@@ -1,8 +1,6 @@
 <template>
   <div class="welcome-wrapper">
-    <div :class="['gradient', welcomeStore.doneGradient ? 'loaded' : '']" data-test="gradient-bg">
-      <GradientBG />
-    </div>
+    <div :class="['gradient', welcomeStore.doneGradient ? 'loaded' : '']" data-test="gradient-bg"></div>
     <div :class="['welcome-contain', welcomeStore.doneLoading ? 'loaded' : '']">
       <div class="welcome-inner">
         <div class="welcome-logo" data-test="welcome-logo">
@@ -23,7 +21,6 @@ import WelcomeSlideOne from '../components/Welcome/WelcomeSlideOne.vue'
 import WelcomeSlideTwo from '../components/Welcome/WelcomeSlideTwo.vue'
 import WelcomeSlideThree from '../components/Welcome/WelcomeSlideThree.vue'
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
-import GradientBG from '../components/Common/GradientBG.vue'
 import useTheme from '@/composables/useTheme'
 const welcomeStore = useWelcomeStore()
 const { isDark } = useTheme();
@@ -95,7 +92,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  background-color: var($background);
+  background-color: var($surface);
 }
 
 .welcome-contain {
@@ -132,12 +129,11 @@ onUnmounted(() => {
 
 .gradient {
   position: fixed;
-  z-index: 0;
-  left: 0;
-  top: 0;
   width: 100%;
   height: 100vh;
   pointer-events: none;
+  background-image: url( '@/assets/WelcomeScreen.svg' );
+  background-size: 100% 100%;
   opacity: 0;
   transition: opacity 0.4s ease-in-out;
 }

@@ -50,8 +50,6 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
 
 public abstract class AbstractGrpcUnitTest {
-
-    protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
     protected String serverName;
     protected Server server;
 

@@ -54,7 +54,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class AlertClientTest {
-    @Rule
     public final static GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
 
     private static AlertClient client;

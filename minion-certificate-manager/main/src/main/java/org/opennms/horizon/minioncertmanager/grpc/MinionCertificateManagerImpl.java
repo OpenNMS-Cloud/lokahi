@@ -87,12 +87,20 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     private CommandExecutor commandExecutor = new CommandExecutor();
 
     @Autowired
-    public MinionCertificateManagerImpl(@Value("${manager.mtls.certificate}") File certificate,
-        @Value("${manager.mtls.privateKey}") File privateKey, @Autowired SerialNumberRepository serialNumberRepository, @Autowired InventoryClient inventoryClient) throws IOException, InterruptedException {
+    public MinionCertificateManagerImpl(
+        @Value("${manager.mtls.certificate}") File certificate,
+        @Value("${manager.mtls.privateKey}") File privateKey,
+        @Autowired SerialNumberRepository serialNumberRepository,
+        @Autowired InventoryClient inventoryClient) throws IOException, InterruptedException {
         this(certificate, privateKey, new PKCS12Generator(), serialNumberRepository, inventoryClient);
     }
 
-    MinionCertificateManagerImpl(File certificate, File key, PKCS12Generator pkcs8Generator, SerialNumberRepository serialNumberRepository, InventoryClient inventoryClient) throws IOException, InterruptedException {
+    MinionCertificateManagerImpl(
+        File certificate,
+        File key,
+        PKCS12Generator pkcs8Generator,
+        SerialNumberRepository serialNumberRepository,
+        InventoryClient inventoryClient) throws IOException, InterruptedException {
         this.pkcs8Generator = pkcs8Generator;
         LOG.debug("=== TRYING TO RETRIEVE CA CERT");
         caCertFile = certificate;
@@ -112,7 +120,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
         this.inventoryClient = Objects.requireNonNull(inventoryClient);
     }
 
-    boolean isLocationExist(long locationId, String tenantId) {
+    private boolean locationExist(long locationId, String tenantId) {
         try {
             MonitoringLocationDTO locationDTO = inventoryClient.getLocationById(locationId, tenantId);
             return locationDTO != null;
@@ -134,7 +142,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
                 return;
             }
-            if (!isLocationExist(locationId, tenantId)) {
+            if (!locationExist(locationId, tenantId)) {
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(INVALID_LOCATION).asException());
                 return;
             }
@@ -177,7 +185,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
     @Override
     public void getMinionCertMetadata(MinionCertificateRequest request, StreamObserver<GetMinionCertificateMetadataResponse> responseObserver) {
-        if (!isLocationExist(request.getLocationId(), request.getTenantId())) {
+        if (!locationExist(request.getLocationId(), request.getTenantId())) {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(INVALID_LOCATION).asException());
             return;
         }
@@ -196,7 +204,7 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     }
     @Override
     public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
-        if (!isLocationExist(request.getLocationId(), request.getTenantId())) {
+        if (!locationExist(request.getLocationId(), request.getTenantId())) {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(INVALID_LOCATION).asException());
             return;
         }

@@ -142,7 +142,7 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
-            if (!isPolicyExist(entityId.getMonitoringPolicyId(), tenantId)) {
+            if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
                 throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
             }
             return tagCreateList.stream().map(tagCreateDTO ->
@@ -198,7 +198,7 @@ public class TagService {
         } else if (entityId.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasMonitoringPolicyId()) {
-            if (!isPolicyExist(entityId.getMonitoringPolicyId(), tenantId)) {
+            if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
                 throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
             }
             return getTagsByMonitoryPolicyId(tenantId, listParams);
@@ -525,7 +525,7 @@ public class TagService {
         });
     }
 
-    private boolean isPolicyExist(long policyId, String tenantId) {
+    private boolean policyExists(long policyId, String tenantId) {
         try {
             var policy = alertClient.getPolicyById(policyId, tenantId);
             return policy != null;

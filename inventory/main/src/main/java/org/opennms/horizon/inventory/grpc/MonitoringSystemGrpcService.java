@@ -75,9 +75,6 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
             responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
             responseObserver.onCompleted();
         }
-
-        responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
-        responseObserver.onCompleted();
     }
 
     @Override

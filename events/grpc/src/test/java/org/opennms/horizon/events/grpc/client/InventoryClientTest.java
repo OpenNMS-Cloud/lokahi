@@ -53,7 +53,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class InventoryClientTest {
-    @Rule
     public static final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
 
     private static InventoryClient client;

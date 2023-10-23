@@ -245,7 +245,6 @@ public class TagServiceTest {
                 return Optional.of(tag1);
             } else if (id == tag2.getId()) {
                 return Optional.of(tag2);
-
             } else {
                 return Optional.empty();
             }

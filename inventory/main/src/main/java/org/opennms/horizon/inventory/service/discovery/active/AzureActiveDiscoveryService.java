@@ -99,10 +99,8 @@ public class AzureActiveDiscoveryService {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         }
 
-        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
-        if (location.isEmpty()) {
-            throw new LocationNotFoundException("Location not found.");
-        }
+        monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId)
+            .orElseThrow(() -> new LocationNotFoundException("Location not found."));
 
         AzureSubscription subscription;
         try {

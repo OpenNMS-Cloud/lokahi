@@ -7,13 +7,20 @@
             <span class="title">Top Nodes</span>
             <span class="time-frame">24 h</span>
           </div>
-          <FeatherButton
-            icon="Download to CSV"
-            @click="downloadTopNodesToCsv"
-            class="btn"
-          >
-            <FeatherIcon :icon="icons.Download" />
-          </FeatherButton>
+          <div class="btns">
+            <FeatherButton
+              icon="Download to CSV"
+              @click="downloadTopNodesToCsv"
+            >
+              <FeatherIcon :icon="icons.Download" />
+            </FeatherButton>
+            <FeatherButton
+              icon="Refresh table"
+              @click="() => ''"
+            >
+              <FeatherIcon :icon="icons.Refresh" />
+            </FeatherButton>
+          </div>
         </div>
       </div>
       <div class="container">
@@ -40,10 +47,12 @@
             tag="tbody"
           >
             <tr
-              v-for="topNode in store.topNodes"
+              v-for="topNode in topNodes"
               :key="topNode.id"
             >
-              <td>{{ topNode.nodeLabel }}</td>
+              <td>
+                <a>{{ topNode.nodeLabel }}</a>
+              </td>
               <td>{{ topNode.location?.location }}</td>
               <td>{{ topNode.responseTime }} ms</td>
               <td>{{ topNode.reachability }}%</td>
@@ -64,13 +73,17 @@
 import { useDashboardStore } from '@/store/Views/dashboardStore'
 import { buildCsvExport, generateBlob, generateDownload } from '../utils'
 import Download from '@featherds/icon/action/DownloadFile'
+import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
-import { clone } from 'lodash'
+import { clone, orderBy } from 'lodash'
 const store = useDashboardStore()
 
 const icons = markRaw({
-  Download
+  Download,
+  Refresh
 })
+
+const topNodes = ref([] as any[])
 
 const page = 1
 const pageSize = 4
@@ -92,13 +105,15 @@ const sort = reactive({
 
 const sortChanged = (sortObj: any) => {
   console.log(sortObj)
+  topNodes.value = orderBy(topNodes.value, sortObj.property, sortObj.value)
+  ;(sort as any)[sortObj.property] = sortObj.value
 }
 
 const downloadTopNodesToCsv = async () => {
   const exportableNodes = []
   const exportableNode: any = {}
 
-  for (const node of store.topNodes) {
+  for (const node of topNodes.value) {
     for (const col of columns) {
       let val: string | null = null
 
@@ -122,6 +137,10 @@ const downloadTopNodesToCsv = async () => {
   const blob = generateBlob(data, 'text/csv')
   generateDownload(blob, `TopNodes.csv`)
 }
+
+onMounted(() => {
+  topNodes.value = orderBy(store.topNodes, ['reachability', 'responseTime'], ['asc', 'asc'])
+})
 </script>
 
 <style lang="scss" scoped>
@@ -156,7 +175,7 @@ const downloadTopNodesToCsv = async () => {
           margin-left: 20px;
         }
       }
-      .btn {
+      .btns {
         margin-right: 15px;
       }
     }

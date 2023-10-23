@@ -3,7 +3,7 @@
     v-if="count && isFilter"
     @click="alertsStore.toggleSeverity(severity)"
     :class="{ selected: isTypeAdded }"
-    class="card pointer"
+    class="card"
     data-test="severity-card"
   >
     <div class="label-add-icon">
@@ -29,7 +29,7 @@
   </div>
   <div
     v-else
-    class="card pointer"
+    class="card"
     data-test="severity-card"
   >
     <div class="label-add-icon">

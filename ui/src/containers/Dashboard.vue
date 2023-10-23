@@ -4,10 +4,7 @@
       <HeadlinePage text="Insights Dashboard" />
     </div>
     <div class="list-alerts">
-      <AlertsSeverityFilters
-        @click="redirect('Alerts')"
-        :timeRange="TimeRange.Last_24Hours"
-      />
+      <AlertsSeverityFilters :timeRange="TimeRange.Last_24Hours" />
     </div>
     <div class="graphs">
       <DashboardNodeReachability />
@@ -40,13 +37,8 @@ import dashboardText from '@/components/Dashboard/dashboard.text'
 import { TimeRange } from '@/types/graphql'
 import { useFlowsApplicationStore } from '@/store/Views/flowsApplicationStore'
 
-const router = useRouter()
 const flowsStore = useFlowsStore()
 const flowsAppStore = useFlowsApplicationStore()
-
-const redirect = (route: string) => {
-  router.push(route)
-}
 
 onMounted(async () => {
   await flowsAppStore.getApplicationDataset()

@@ -30,6 +30,9 @@ package org.opennms.horizon.alertservice.db.repository;
 
 import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Set;
@@ -37,4 +40,8 @@ import java.util.Set;
 @Repository
 public interface SystemPolicyTagRepository extends JpaRepository<SystemPolicyTag, SystemPolicyTag.RelationshipId> {
     Set<SystemPolicyTag> findByTenantIdAndPolicyId(String tenantId, long policyId);
+
+    @Modifying
+    @Query("DELETE FROM SystemPolicyTag pt WHERE pt.tenantId = :tenantId and pt.policyId = :policyId and tag is null")
+    void deleteEmptyTagByTenantIdAndPolicyId(@Param("tenantId") String tenantId, @Param("policyId") long policyId);
 }

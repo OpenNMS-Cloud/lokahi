@@ -112,6 +112,10 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
     private ArgumentCaptor<Tag> tagCaptor;
     @Captor
     private ArgumentCaptor<SystemPolicyTag.RelationshipId> systemPolicyTagIdCaptor;
+    @Captor
+    ArgumentCaptor<SystemPolicyTag> systemPolicyTagCaptor;
+    @Captor
+    ArgumentCaptor<TagOperationList> tagOperationListCaptor;
 
     @BeforeEach
     void prepareTest() throws VerificationException, IOException {
@@ -233,7 +237,6 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         });
 
         doReturn(Optional.empty()).when(mockTagRepository).findByTenantIdAndName(any(), any());
-        //doReturn(Optional.empty()).when(mockTagRepository).findByTenantIdAndName(tenantId, tag.getName());
 
         when(mockTagRepository.save(any(Tag.class))).thenAnswer(i -> {
             var inTag = (Tag) i.getArgument(0);
@@ -268,9 +271,44 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         assertThat(savedTags.get(1).getTenantId()).isEqualTo(tag.getTenantId());
 
         var operation = TagOperationList.newBuilder()
-            .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("default"))
             .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("tag"))
             .build();
+        verify(mockSystemPolicyTagRepository).deleteEmptyTagByTenantIdAndPolicyId(tenantId, defaultPolicy.getId());
+        verify(mockTagOperationProducer).sendTagUpdate(tagOperationListCaptor.capture());
+        assertThat(tagOperationListCaptor.getValue().getTagsList()).hasSameElementsAs(operation.getTagsList());
+        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testDeleteDefaultPolicyTagWithDefaultTag() throws VerificationException {
+        // prepare
+        final long policyId = 10L;
+        final String defaultTagName = "default";
+
+        var defaultPolicy = generateDefaultPolicy(policyId, List.of(defaultTagName));
+
+        doReturn(Optional.of(defaultPolicy)).when(mockMonitorPolicyRepository).findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT);
+        doReturn(new HashSet<>()).when(mockSystemPolicyTagRepository).findByTenantIdAndPolicyId(tenantId, policyId);
+
+        // execute
+        var requestPolicy = MonitorPolicyProto.newBuilder()
+            .setName(DEFAULT_POLICY)
+            .build();
+        var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .createPolicy(requestPolicy);
+
+        // check
+        verify(spyMonitorPolicyService).createPolicy(requestPolicy, tenantId);
+        assertThat(result.getTagsList()).isEmpty();
+
+        var operation = TagOperationList.newBuilder()
+            .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("default").setOperation(Operation.REMOVE_TAG))
+            .build();
+        verify(mockSystemPolicyTagRepository).save(systemPolicyTagCaptor.capture());
+        assertThat(systemPolicyTagCaptor.getValue().getPolicyId()).isEqualTo(defaultPolicy.getId());
+        assertThat(systemPolicyTagCaptor.getValue().getTenantId()).isEqualTo(tenantId);
+        assertThat(systemPolicyTagCaptor.getValue().getTag()).isNull();
         verify(mockTagOperationProducer).sendTagUpdate(operation);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
@@ -347,6 +385,7 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         var operation = TagOperationList.newBuilder().addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("tag3"))
             .addTags(TagOperationProto.newBuilder().setTenantId(tenantId).setTagName("tag2").setOperation(Operation.REMOVE_TAG))
             .build();
+        verify(mockSystemPolicyTagRepository).deleteEmptyTagByTenantIdAndPolicyId(tenantId, defaultPolicy.getId());
         verify(mockTagOperationProducer).sendTagUpdate(operation);
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="hs-0.1.0-system-policy-tag-nullable-tag-id" author="fchu">
+        <dropNotNullConstraint tableName="system_policy_tag" columnName="tag_id" columnDataType="BIGINT"/>
+    </changeSet>
+</databaseChangeLog>

@@ -57,6 +57,7 @@ import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -142,9 +143,19 @@ public class MonitorPolicyService {
                 systemPolicyTagRepository.deleteById(new SystemPolicyTag.RelationshipId(tenantId, defaultPolicy.getId(), tag));
             }
         );
+        if (!newTags.isEmpty()) {
+            systemPolicyTagRepository.deleteEmptyTagByTenantIdAndPolicyId(tenantId, defaultPolicy.getId());
+        } else if (!removedTags.isEmpty()) {
+            var systemPolicyTag = new SystemPolicyTag(tenantId, defaultPolicy.getId(), null);
+            systemPolicyTagRepository.save(systemPolicyTag);
+        }
 
-        var filteredSystemTags = existingTags.stream().filter(t -> !SYSTEM_TENANT.equals(t.getTenantId())).toList();
-        handleTagOperationUpdate(filteredSystemTags, newTags);
+        existingTags.forEach(t -> {
+            if (SYSTEM_TENANT.equals(t.getTenantId())) {
+                t.setTenantId(tenantId);
+            }
+        });
+        handleTagOperationUpdate(existingTags, newTags);
 
         return policyMapper.map(defaultPolicy);
     }
@@ -224,9 +235,14 @@ public class MonitorPolicyService {
     private Optional<MonitorPolicy> getDefaultPolicy(String tenantId) {
         return repository.findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT)
             .map(p -> {
-                var tags = systemPolicyTagRepository.findByTenantIdAndPolicyId(tenantId, p.getId())
-                    .stream().map(SystemPolicyTag::getTag).collect(Collectors.toSet());
-                if (!tags.isEmpty()) {
+                var systemPolicyTags = systemPolicyTagRepository.findByTenantIdAndPolicyId(tenantId, p.getId());
+                var tags = systemPolicyTags.stream().map(systemPolicyTag -> {
+                    if (systemPolicyTag == null) {
+                        return null;
+                    }
+                    return systemPolicyTag.getTag();
+                }).filter(Objects::nonNull).collect(Collectors.toSet());
+                if (!systemPolicyTags.isEmpty()) {
                     p.setTags(tags);
                 }
                 return p;

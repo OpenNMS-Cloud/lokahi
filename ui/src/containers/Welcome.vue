@@ -86,7 +86,7 @@ onUnmounted(() => {
 
 .welcome-wrapper {
   position: fixed;
-  z-index: 8001;
+  z-index: 1070;
   top: 0;
   left: 0;
   width: 100%;

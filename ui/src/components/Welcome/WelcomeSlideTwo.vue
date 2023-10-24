@@ -8,7 +8,21 @@
     ]">
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
-                <h1 data-test="welcome-slide-two-title">Secure Minion Runtime Bundle</h1>
+                <h1 data-test="welcome-slide-two-title">
+                    Secure Minion
+                    <FeatherTooltip
+                        title="A Minion is a lightweight, secure collector that monitors and communicates with your network devices."
+                        v-slot="{ attrs, on }"
+                    >
+                        <FeatherIcon        
+                            v-bind="attrs"
+                            v-on="on" 
+                            class="info-icon" 
+                            :icon="icons.InformationIcon" 
+                        />
+                    </FeatherTooltip>
+                    Runtime Bundle
+                </h1>
                 <p>
                     To install our secure minion, you must download our runtime bundle and run it in your desired location.
                     For optimal monitoring, the minion needs to always be available.
@@ -42,7 +56,7 @@
                             <FeatherButton text @click="localDownloadHandler" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
                                 <template #icon>
-                                    <FeatherIcon :icon="welcomeStore.downloaded ? CheckIcon : DownloadIcon" />
+                                    <FeatherIcon :icon="welcomeStore.downloaded ? icons.CheckIcon : icons.DownloadIcon" />
                                 </template>
                                 {{ welcomeStore.downloadCopy }}
                             </FeatherButton>
@@ -73,7 +87,7 @@
                                 <span class="cmd-text">docker compose up -d</span>
                                 <FeatherButton class="dl-btn" text @click="welcomeStore.copyDockerClick">
                                     <template #icon>
-                                        <FeatherIcon :icon="welcomeStore.copied ? CheckIcon : CopyIcon" />
+                                        <FeatherIcon :icon="welcomeStore.copied ? icons.CheckIcon : icons.CopyIcon" />
                                     </template>
                                     {{ welcomeStore.copyButtonCopy }}
                                 </FeatherButton>
@@ -90,7 +104,7 @@
                         :class="['welcome-slide-minion-status', welcomeStore.minionStatusSuccess ? 'welcome-slide-minion-success' : '']">
                         <div class="icon-spin" data-test="welcome-slide-two-icon-spin">
                             <FeatherSpinner v-if="welcomeStore.minionStatusLoading && welcomeStore.minionStatusStarted" />
-                            <FeatherIcon :icon="CheckIcon"
+                            <FeatherIcon :icon="icons.CheckIcon"
                                 v-if="!welcomeStore.minionStatusLoading && welcomeStore.minionStatusSuccess" />
                         </div>
                         <div class="copy" data-test="welcome-minion-status-txt">
@@ -116,12 +130,20 @@ import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import CopyIcon from '@featherds/icon/action/ContentCopy'
 import CheckIcon from '@featherds/icon/action/CheckCircle'
 import DownloadIcon from '@featherds/icon/action/DownloadFile'
+import InformationIcon from '@featherds/icon/action/Info'
 import useTheme from '@/composables/useTheme'
 import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
 
 defineProps({
     visible: { type: Boolean, default: false }
+})
+
+const icons = markRaw({
+    DownloadIcon,
+    InformationIcon,
+    CopyIcon,
+    CheckIcon
 })
 
 const localDownloadHandler = () => {
@@ -328,8 +350,7 @@ const { isDark } = useTheme();
     color: var(--feather-shade-2);
     font-size: 22px;
     top: -3px;
+    left: -3px;
     position: relative;
-    margin-left: 4px;
-    margin-right: 8px;
 }
 </style>

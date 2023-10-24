@@ -30,6 +30,8 @@ package org.opennms.horizon.events.grpc.client;
 
 import java.util.concurrent.TimeUnit;
 
+import com.google.protobuf.Int64Value;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -53,6 +55,16 @@ public class InventoryClient {
         if (channel != null && !channel.isShutdown()) {
             channel.shutdown();
         }
+    }
+
+    public NodeDTO getNodeById(String tenantId, long nodeId) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_BYPASS_KEY, String.valueOf(true));
+        metadata.put(GrpcConstants.TENANT_ID_BYPASS_KEY, tenantId);
+
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .getNodeById(Int64Value.of(nodeId));
     }
 
     public long getNodeIdFromQuery(String tenantId, String ipAddress, String locationId) {

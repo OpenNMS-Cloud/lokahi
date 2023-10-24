@@ -70,19 +70,33 @@ public class SetupSteps {
     }
 
     public static void login() {
-        try {
-            Selenide.open(CucumberHooks.instanceUrl);
-        } catch (Exception e) {
-            LOG.info("Exception opening url, continuing: " + e);
-        }
+        int attempts = 5;
 
-        if (CucumberHooks.keycloakLogin) {
-            LoginPage.login();
-        } else {
-            AlternativeLoginPage.login();
-        }
+        while (attempts > 0) {
+            --attempts;
+            try {
+                Selenide.open(CucumberHooks.instanceUrl);
+            } catch (Exception e) {
+                LOG.info("Exception opening url, continuing: " + e);
+            }
 
-        WelcomePage.waitOnWalkthroughOrMain();
+            try {
+                if (CucumberHooks.keycloakLogin) {
+                    LoginPage.login();
+                } else {
+                    AlternativeLoginPage.login();
+                }
+
+                WelcomePage.waitOnWalkthroughOrMain();
+                return;
+            } catch (com.codeborne.selenide.ex.ElementNotFound | com.codeborne.selenide.ex.ElementShouldNot e) {
+                // If we can't get the main page to load, will retry with a new window
+                Selenide.closeWindow();
+                LOG.info("Couldn't get main page, closed existing window");
+                if (attempts == 0) {
+                    throw e;
+                }
+            }
+        }
     }
-
 }

@@ -30,6 +30,7 @@ import org.opennms.horizon.systemtests.steps.DiscoverySteps;
 import org.opennms.horizon.systemtests.steps.LocationSteps;
 import org.opennms.horizon.systemtests.steps.MinionSteps;
 import org.opennms.horizon.systemtests.steps.SetupSteps;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.testcontainers.containers.GenericContainer;
 import testcontainers.MinionContainer;
 
@@ -63,8 +64,38 @@ public class CucumberHooks {
     @BeforeAll
     public static void setUpForAllTests() {
         Configuration.fileDownload = FileDownloadMode.FOLDER;
-        Configuration.headless = false;
-        Configuration.timeout = 10000;
+        Configuration.headless = true;
+        Configuration.timeout = 20000;
+        Configuration.reopenBrowserOnFail = true;
+
+        ChromeOptions options = new ChromeOptions();
+
+        options.addArguments("--headless=new");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--disable-background-networking");
+        options.addArguments("--enable-features=NetworkService,NetworkServiceInProcess");
+        options.addArguments("--disable-background-timer-throttling");
+        options.addArguments("--disable-backgrounding-occluded-windows");
+        options.addArguments("--disable-breakpad");
+        options.addArguments("--disable-client-side-phishing-detection");
+        options.addArguments("--disable-component-extensions-with-background-pages");
+        options.addArguments("--disable-default-apps");
+        options.addArguments("--disable-features=TranslateUI,ChromePDF");
+        options.addArguments("--disable-hang-monitor");
+        options.addArguments("--disable-ipc-flooding-protection");
+        options.addArguments("--disable-popup-blocking");
+        options.addArguments("--disable-prompt-on-repost");
+        options.addArguments("--disable-renderer-backgrounding");
+        options.addArguments("--disable-sync");
+        options.addArguments("--force-color-profile=srgb");
+        options.addArguments("--metrics-recording-only");
+        options.addArguments("--no-first-run");
+        options.addArguments("--password-store=basic");
+        options.addArguments("--use-mock-keychain");
+        options.addArguments("--hide-scrollbars");
+        options.addArguments("--mute-audio");
+
+        Configuration.browserCapabilities = options;
 
         String keycloak = System.getenv().get(KEYCLOAK_LOGIN);
         if (keycloak != null) {

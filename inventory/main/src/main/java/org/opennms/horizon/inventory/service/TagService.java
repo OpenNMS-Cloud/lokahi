@@ -29,8 +29,11 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.component.AlertClient;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -78,13 +81,16 @@ public class TagService {
     private final TagPublisher tagPublisher;
     private final NodeService nodeService;
 
+    private final AlertClient alertClient;
+
     public TagService(final TagRepository repository,
                       final NodeRepository nodeRepository,
                       final ActiveDiscoveryRepository activeDiscoveryRepository,
                       final PassiveDiscoveryRepository passiveDiscoveryRepository,
                       final TagMapper mapper,
                       final TagPublisher tagPublisher,
-                      @Lazy final NodeService nodeService) {
+                      @Lazy final NodeService nodeService,
+                      final AlertClient alertClient) {
         this.repository = Objects.requireNonNull(repository);
         this.nodeRepository = Objects.requireNonNull(nodeRepository);
         this.activeDiscoveryRepository = Objects.requireNonNull(activeDiscoveryRepository);
@@ -92,6 +98,7 @@ public class TagService {
         this.mapper = Objects.requireNonNull(mapper);
         this.tagPublisher = Objects.requireNonNull(tagPublisher);
         this.nodeService = Objects.requireNonNull(nodeService);
+        this.alertClient = Objects.requireNonNull(alertClient);
     }
 
     @Transactional
@@ -111,7 +118,6 @@ public class TagService {
 
 
     private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
-
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
@@ -119,7 +125,7 @@ public class TagService {
                 .setTagName(t.getName())
                 .setTenantId(tenantId)
                 .addNodeId(node.getId())
-                .build()).collect(Collectors.toList());
+                .build()).toList();
             final var result = tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
@@ -136,6 +142,9 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
+            if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
+                throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
+            }
             return tagCreateList.stream().map(tagCreateDTO ->
                     addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
                 .collect(Collectors.toList());
@@ -189,6 +198,9 @@ public class TagService {
         } else if (entityId.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasMonitoringPolicyId()) {
+            if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
+                throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
+            }
             return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
@@ -231,6 +243,8 @@ public class TagService {
                 for (final var node: nodes) {
                     this.nodeService.updateNodeMonitoredState(node.getId(),  node.getTenantId());
                 }
+            } else {
+                throw new InventoryRuntimeException("Invalid Tag id: " + tagId.getValue());
             }
         }
     }
@@ -509,5 +523,15 @@ public class TagService {
                 }
             }
         });
+    }
+
+    private boolean policyExists(long policyId, String tenantId) {
+        try {
+            var policy = alertClient.getPolicyById(policyId, tenantId);
+            return policy != null;
+        } catch (StatusRuntimeException ex) {
+            log.error("Error during get policyId: {} tenantId: {}", policyId, tenantId);
+            return false;
+        }
     }
 }

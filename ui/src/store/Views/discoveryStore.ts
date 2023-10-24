@@ -30,6 +30,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
   } as DiscoveryStore),
   actions: {
     async init(){
+      this.loading = true
       const discoveryQueries = useDiscoveryQueries()
       const latestDiscoveries = await discoveryQueries.getDiscoveries()
       await discoveryQueries.getLocations()
@@ -45,9 +46,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
           await discoveryQueries.getTagsByPassiveDiscoveryId(loadedDiscovery.id)
           loadedDiscovery.tags = discoveryQueries.tagsByPassiveDiscoveryId
         }
-      }
-      if (this.loadedDiscoveries.length === 0){
-        this.startNewDiscovery()
       }
       this.loading = false
     },

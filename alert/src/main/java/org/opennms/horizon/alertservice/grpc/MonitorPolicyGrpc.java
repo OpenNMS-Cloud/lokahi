@@ -56,12 +56,16 @@ public class MonitorPolicyGrpc extends MonitorPolicyServiceGrpc.MonitorPolicySer
 
     @Override
     public void createPolicy(MonitorPolicyProto request, StreamObserver<MonitorPolicyProto> responseObserver) {
-        tenantLookup.lookupTenantId(Context.current())
-            .ifPresentOrElse(tenantId -> {
+        tenantLookup.lookupTenantId(Context.current()).ifPresentOrElse(tenantId -> {
+            try {
                 MonitorPolicyProto created = service.createPolicy(request, tenantId);
                 responseObserver.onNext(created);
                 responseObserver.onCompleted();
-            }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
+            } catch (IllegalArgumentException e) {
+                responseObserver.onError(StatusProto.toStatusRuntimeException(
+                    createStatus(Code.INVALID_ARGUMENT_VALUE, e.getMessage())));
+            }
+        }, () -> responseObserver.onError(StatusProto.toStatusRuntimeException(badTenant())));
     }
 
     @Override

@@ -1,0 +1,18 @@
+{
+  "service": "MonitoringLocationService",
+  "method": "GetLocationById",
+  "input": {
+    "equals": {
+      "value": 1010
+    }
+  },
+  "output": {
+    "data": {
+      "id": 1010,
+      "tenant_id": "opennms-prime",
+      "location": "default",
+      "geo_location": {},
+      "address": "address"
+    }
+  }
+}

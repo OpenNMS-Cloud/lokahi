@@ -59,7 +59,6 @@ public class IcmpActiveDiscoveryService {
 
     @Transactional
     public IcmpActiveDiscoveryDTO createActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
-
         IcmpActiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);
         discovery.setCreateTime(LocalDateTime.now());

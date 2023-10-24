@@ -28,23 +28,25 @@
 package org.opennms.horizon.systemtests.pages;
 
 import com.codeborne.selenide.*;
+import com.google.common.io.ByteStreams;
 import lombok.SneakyThrows;
 import org.junit.Assert;
+import org.opennms.horizon.systemtests.CucumberHooks;
 import org.opennms.horizon.systemtests.steps.LocationSteps;
 import org.opennms.horizon.systemtests.steps.MinionSteps;
 import org.opennms.horizon.systemtests.utils.FileDownloadManager;
-import org.opennms.horizon.systemtests.utils.MinionStarter;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import testcontainers.DockerComposeMinionContainer;
 import testcontainers.MinionContainer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Condition.exist;
@@ -70,6 +72,7 @@ public class WelcomePage {
     private static final SelenideElement minionDetectedCheck = $(By.xpath("//div[text()='Minion detected.']"));
     private static final SelenideElement nodeDetectedCheck = $(By.xpath("//div[@data-test='item-preview-status-id'][text()='UP']"));
     private static final SelenideElement discoveryResultLatencyCheck = $(By.xpath("//div[@data-test='item-preview-status-id'][.<=800]"));
+    private static final SelenideElement INITIAL_PAGE_CHECK = $(By.xpath("//button[@data-test='welcome-slide-one-setup-button']|//div[@class='app-aside']"));
 
     public static void checkIsStartSetupButtonVisible() {
         startSetupBtn.shouldBe(enabled);
@@ -119,32 +122,46 @@ public class WelcomePage {
     }
 
     public static void waitOnWalkthroughOrMain() {
-        $(By.xpath("//button[@data-test='welcome-slide-one-setup-button']|//div[@class='app-aside']")).should(exist);
+        INITIAL_PAGE_CHECK.should(exist);
     }
 
     public static MinionContainer addMinionUsingWalkthrough(String minionName) {
         try {
             File bundle = FileDownloadManager.downloadCertificate(downloadBundleBtn);
             if (bundle != null) {
-                // Parse out the pwd for the bundle
-                String dockerText = dockerCmd.shouldBe(visible).getAttribute("value"); // getText doesn't work for textarea
-                assertNotNull("Should have docker start text with key", dockerText);
-                Pattern pattern = Pattern.compile("GRPC_CLIENT_KEYSTORE_PASSWORD='([a-z,0-9,-]*)'");
-                Matcher matcher = pattern.matcher(dockerText);
+                String key = readCertKey(bundle);
 
-                if (matcher.find()) {
-                    MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName, LocationSteps.DEFAULT_LOCATION_NAME);
-                    // Minion startup and connect is slow - need a specific timeout here
-                    minionDetectedCheck.should(exist, Duration.ofSeconds(120));
-                    return minion;
-                }
-                fail("Unable to parse p12 password from docker string: " + dockerText);
+                MinionContainer minion = MinionSteps.startMinion(bundle, key, minionName, LocationSteps.DEFAULT_LOCATION_NAME);
+                // Minion startup and connect is slow - need a specific timeout here
+                minionDetectedCheck.should(exist, Duration.ofSeconds(120));
+                return minion;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        fail("Failure downloading p12 bundle file");
-        return null;
+        throw new RuntimeException("Failure downloading certificate bundle file");
+    }
+
+    public static String readCertKey(File zipBundle) throws IOException {
+        ZipInputStream zstream = new ZipInputStream(Files.newInputStream(zipBundle.toPath()));
+        ZipEntry zentry = zstream.getNextEntry();
+        while (zstream.available() != 0 && zentry != null && !zentry.getName().equals("docker-compose.yaml")) {
+            zstream.closeEntry();
+            zentry = zstream.getNextEntry();
+        }
+        if (zentry == null || !zentry.getName().equals("docker-compose.yaml")) {
+            throw new IOException("Unable to locate certificate key in zip file");
+        }
+
+        byte[] byteData = ByteStreams.toByteArray(zstream);
+        String dockerString = new String(byteData, StandardCharsets.UTF_8);
+
+        Pattern pattern = Pattern.compile("GRPC_CLIENT_KEYSTORE_PASSWORD: \"([a-z,0-9,-]*)\"");
+        Matcher matcher = pattern.matcher(dockerString);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        throw new RuntimeException("Unable to parse cert password from docker file - " + dockerString);
     }
 
     public static void startSetup() {

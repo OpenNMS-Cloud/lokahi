@@ -58,6 +58,5 @@ public class RefreshMonitor {
                 Selenide.refresh();
             }
         }
-
     }
 }

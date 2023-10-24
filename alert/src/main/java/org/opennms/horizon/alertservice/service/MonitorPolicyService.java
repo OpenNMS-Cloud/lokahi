@@ -35,15 +35,15 @@ import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
-import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.SystemPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
+import org.opennms.horizon.alertservice.db.repository.SystemPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
 import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
@@ -84,6 +84,13 @@ public class MonitorPolicyService {
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {
         if (tenantId.isEmpty()) {
             throw new IllegalArgumentException("Missing tenantId");
+        }
+
+        if (request.hasField(MonitorPolicyProto.getDescriptor().findFieldByNumber(MonitorPolicyProto.ID_FIELD_NUMBER))) {
+            var policy = repository.findByIdAndTenantId(request.getId(), tenantId);
+            if (policy.isEmpty()) {
+                throw new IllegalArgumentException(String.format("policy not found by id %s for tenant %s", request.getId(), tenantId));
+            }
         }
 
         MonitorPolicy policy = policyMapper.map(request);

@@ -28,8 +28,9 @@
 package org.opennms.horizon.systemtests.pages;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
-import com.google.common.base.CharMatcher;
 import org.openqa.selenium.By;
 
 import java.time.Duration;
@@ -51,18 +52,18 @@ public class DiscoveryPage {
     private static final SelenideElement saveDiscoveryButton = $("[type='submit']");
     private static final SelenideElement addAnotherDiscoveryButton = $("[class='btn hover focus btn-text has-icon']");
     private static final SelenideElement ADD_DISCOVERY_BUTTON = $(By.xpath("//button[@data-test='addDiscoveryBtn']"));
-    private static final SelenideElement SAVE_DISCOVERY_BUTTON = $(By.xpath("//button[@data-test='btn-submit']"));
-    private static final SelenideElement SNMP_DISCOVERY_RADIO_BUTTON = $(By.xpath("//div[@data-test='discoveryICMP']"));
-    private static final SelenideElement DISCOVERY_NAME_INPUT = $(By.xpath("//div[@data-test='discoveryNameInput']//input"));
-    private static final SelenideElement LOCATION_NAME_INPUT = $(By.xpath("//input[@placeholder='Search Locations']"));
-    private static final SelenideElement IP_RANGE_INPUT = $(By.xpath("//div[@data-test='ipAddressInput']//div[@class='content-editable']"));
-    private static final SelenideElement COMMUNITY_STRING_INPUT = $(By.xpath("//div[@data-test='communityInput']//div[@class='content-editable']"));
-    private static final SelenideElement PORT_INPUT = $(By.xpath("//div[@data-test='portInput']//div[@class='content-editable']"));
-    private static final SelenideElement VIEW_DETECTED_NODES_BUTTON = $(By.xpath("//button[@data-test='viewDetectedNodesButton']"));
-    private static final SelenideElement NUMBER_OF_DISCOVERY_INSTANCES = $x("//div[@class='card-my-discoveries']//div[@class='count']");
-    private static final SelenideElement TOP_DISCOVERY = $x("//div[@class='card-my-discoveries']/div[@class='list']//div[@class='name'][1]");
-    private static final SelenideElement DISCOVERY_DELETE_BUTTON = $x("//div[@class='delete-button']/div");
-    private static final SelenideElement DELETE_DISCOVERY_CONFIRM_YES = $x("//div[@data-ref-id='feather-dialog-footer']//span[text()='Yes']");
+    private static final SelenideElement SAVE_DISCOVERY_BUTTON = $(By.xpath("//button[text()[contains(., 'Save')]]"));
+    private static final SelenideElement SNMP_DISCOVERY_BUTTON = $(By.xpath("//div[@class='type-selector'][contains(.//*/text() , 'ICMP/SNMP')]"));
+    private static final SelenideElement DISCOVERY_NAME_INPUT = $(By.xpath("//div[./div[@class='feather-input-border']][contains(./div/div/label/text(), 'Discovery Name')]/div/input"));
+    private static final SelenideElement LOCATION_NAME_INPUT = $(By.xpath("//input[@placeholder='Choose Location']"));
+    private static final SelenideElement LOCATION_DROPDOWN_ICON = $(By.xpath("//input[@placeholder='Choose Location']/../../div[@class='post']"));
+    private static final SelenideElement IP_RANGE_INPUT = $(By.xpath("//div[./div[@class='feather-input-border']][contains(./div/div/label/text(), 'Enter IP Ranges')]/div/textarea"));
+    private static final SelenideElement COMMUNITY_STRING_INPUT = $(By.xpath("//div[./div[@class='feather-input-border']][contains(./div/div/label/text(), 'Community String')]/div/textarea"));
+    private static final SelenideElement PORT_INPUT = $(By.xpath("//div[./div[@class='feather-input-border']][contains(./div/div/label/text(), 'Enter UDP Port')]/div/textarea"));
+    private static final SelenideElement VIEW_DETECTED_NODES_BUTTON = $(By.xpath("//button[./*/text()[contains(., 'Go To Inventory')]]"));
+    private static final ElementsCollection ACTIVE_DISCOVERY_CARDS = $$(By.xpath("//div[@class='card-my-discoveries']/div[@class='list']/div"));
+    private static final SelenideElement DISCOVERY_DELETE_BUTTON = $x("//span[@class='btn-content'][text() = 'Delete']");
+    private static final SelenideElement DELETE_DISCOVERY_CONFIRM_YES = $x("//div[@data-ref-id='feather-dialog-footer']//button[text()='Yes']");
     private static final SelenideElement POPUP_LOCATION_LIST = $x("//div[@class='list visible']/div[@class='list-item'][1]");
     public static void selectICMP_SNMP() {
         SNMPRadioButton.shouldBe(Condition.visible, Condition.enabled).click();
@@ -91,17 +92,24 @@ public class DiscoveryPage {
                                         String community, String ip) {
         LeftPanelPage.clickOnPanelSection("discovery");
         ADD_DISCOVERY_BUTTON.shouldBe(enabled).click();
-        SNMP_DISCOVERY_RADIO_BUTTON.shouldBe(enabled).click();
+        SNMP_DISCOVERY_BUTTON.should(exist).click();
+
+        // Sometimes a small delay for the UI to fill in the default values. Make sure we wait on it
+        PORT_INPUT.shouldHave(attribute("value", "161"));
 
         DISCOVERY_NAME_INPUT.shouldBe(editable).sendKeys(discoveryName);
 
         // When only 1 location exists, it is automatically selected and we don't need to add it
         if (!newDiscoveryCheckForLocation(locationName)) {
             // For the location selector to work, we need to click in it first as this shows the dropdown
-            // selections. From there, we can enter the value to filter for our specific location
-            LOCATION_NAME_INPUT.shouldBe(enabled).click();
+            // selections. Even still, it sometimes doesn't show up even after 20s, so clear it and try again
+            int tries = 5;
+            while ((tries > 0) && (! POPUP_LOCATION_LIST.exists())) {
+                LOCATION_DROPDOWN_ICON.shouldBe(enabled).click();
+                Selenide.sleep(5000);
+                --tries;
+            }
             POPUP_LOCATION_LIST.should(exist);
-            LOCATION_NAME_INPUT.sendKeys(locationName);
 
             String specificListItemSearch = "//div[@label='" + locationName + "']";
             SelenideElement locationPopupListItem = $(By.xpath(specificListItemSearch));
@@ -110,10 +118,12 @@ public class DiscoveryPage {
 
         IP_RANGE_INPUT.shouldBe(enabled).sendKeys(ip);
 
-        PORT_INPUT.shouldBe(enabled).clear();
+        // Clear seems to be buggy with the current drivers. Using backspaces instead
+        PORT_INPUT.shouldBe(enabled).sendKeys("\b\b\b");
         PORT_INPUT.sendKeys(Integer.toString(port));
 
-        COMMUNITY_STRING_INPUT.shouldBe(enabled).clear();
+        COMMUNITY_STRING_INPUT.shouldBe(enabled).click();
+        COMMUNITY_STRING_INPUT.sendKeys("\b\b\b\b\b\b");
         COMMUNITY_STRING_INPUT.sendKeys(community);
 
         SAVE_DISCOVERY_BUTTON.shouldBe(enabled).click();
@@ -123,24 +133,24 @@ public class DiscoveryPage {
     public static void deleteAllDiscoveries() {
         LeftPanelPage.clickOnPanelSection("discovery");
 
-        String rawCountString = NUMBER_OF_DISCOVERY_INSTANCES.getOwnText();
-        String intString = CharMatcher.inRange('0', '9').retainFrom(rawCountString);
-        while (!intString.isBlank() && Integer.parseInt(intString) > 0) {
-            deleteTopDiscovery();
+        int discoveries = ACTIVE_DISCOVERY_CARDS.size();
+        while (discoveries > 0) {
+            deleteIndexedDiscovery(discoveries);
 
-            // Wait to make sure the count changes
-            SelenideElement oldCountElement = $x("//div[@class='card-my-discoveries']//div[@class='count'][text()='" +
-                                rawCountString + "']");
+            // Wait to make sure the old element disappears
+            $x("//div[@class='card-my-discoveries']/div[@class='list']/div[" + discoveries + "]").shouldNot(exist);
 
-            oldCountElement.shouldNot(exist);
-
-            rawCountString = NUMBER_OF_DISCOVERY_INSTANCES.getOwnText();
-            intString = CharMatcher.inRange('0', '9').retainFrom(rawCountString);
+            --discoveries;
         }
     }
 
-    private static void deleteTopDiscovery() {
-        TOP_DISCOVERY.click();
+    private static void deleteIndexedDiscovery(int index) {
+        SelenideElement discoveryCard = $x("//div[@class='card-my-discoveries']/div[@class='list']/div[" + index + "]/div");
+        discoveryCard.isEnabled();
+        discoveryCard.click();
+
+        // If the delete button is clicked too fast (before all the fields are populated), it doesn't work
+        Selenide.sleep(3000);
         DISCOVERY_DELETE_BUTTON.should(exist).click();
         DELETE_DISCOVERY_CONFIRM_YES.should(exist).click();
     }

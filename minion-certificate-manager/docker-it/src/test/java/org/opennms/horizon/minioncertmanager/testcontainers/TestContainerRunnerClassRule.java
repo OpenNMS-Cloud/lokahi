@@ -35,6 +35,7 @@ import org.keycloak.common.util.Base64;
 import org.opennms.horizon.minioncertmanager.certificate.CaCertificateGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -57,6 +58,8 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     private GenericContainer applicationContainer;
 
+    private final GenericContainer<?> mockInventoryContainer;
+
     private Network network;
 
     private KeyPair jwtKeyPair;
@@ -65,6 +68,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
 
     public TestContainerRunnerClassRule() {
         applicationContainer = new GenericContainer(DockerImageName.parse(dockerImage));
+        mockInventoryContainer = new GenericContainer<>(DockerImageName.parse("tkpd/gripmock"));
     }
 
     @Override
@@ -78,19 +82,23 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             throw new RuntimeException(e);
         }
 
-        startApplicationContainer();
+        var inventoryUrl = startInventoryContainer();
+        LOG.info("Mock inventory server url: {}", inventoryUrl);
+
+        startApplicationContainer(inventoryUrl);
     }
 
     @Override
     protected void after() {
         applicationContainer.stop();
+        mockInventoryContainer.stop();
     }
 
 //========================================
 // Container Startups
 //----------------------------------------
 
-    private void startApplicationContainer() throws Exception {
+    private void startApplicationContainer(String inventoryUrl) throws Exception {
         // create temporary certificates
         tempDir.create();
         File temporarySecrets = tempDir.newFolder("mtls");
@@ -102,6 +110,7 @@ public class TestContainerRunnerClassRule extends ExternalResource {
             .withExposedPorts(8080, 8990, 5005)
             .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
             .withEnv("KEYCLOAK_PUBLIC_KEY", Base64.encodeBytes(jwtKeyPair.getPublic().getEncoded()))
+            .withEnv("grpc.inventory.url", inventoryUrl)
             .withFileSystemBind(new File(temporarySecrets, "ca.crt").getAbsolutePath(), "/run/secrets/mtls/tls.crt")
             .withFileSystemBind(new File(temporarySecrets, "ca.key").getAbsolutePath(), "/run/secrets/mtls/tls.key")
             .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("APPLICATION"))
@@ -121,5 +130,25 @@ public class TestContainerRunnerClassRule extends ExternalResource {
         System.setProperty("application-external-grpc-port", String.valueOf(externalGrpcPort));
         System.setProperty("application-external-http-port", String.valueOf(externalHttpPort));
         System.setProperty("application-external-http-base-url", "http://localhost:" + externalHttpPort);
+    }
+
+    private String startInventoryContainer() {
+        mockInventoryContainer
+            .withNetwork(network)
+            .withNetworkAliases("opennms-inventory")
+            .withExposedPorts(4770)
+            .withClasspathResourceMapping("proto", "/proto", BindMode.READ_ONLY)
+            // refer from jar file
+            .withClasspathResourceMapping("monitoringLocation.proto", "/proto/monitoringLocation.proto", BindMode.READ_ONLY)
+            // make sure stub file don't have tail 0A return char
+            .withCommand("--stub=/proto/stub", "/proto/monitoringLocation.proto")
+            .withLogConsumer(new Slf4jLogConsumer(LOG).withPrefix("MOCK"))
+            .waitingFor(Wait.forListeningPort()
+                .withStartupTimeout(Duration.ofSeconds(10))
+            );
+
+        mockInventoryContainer.start();
+
+        return "opennms-inventory:4770";
     }
 }

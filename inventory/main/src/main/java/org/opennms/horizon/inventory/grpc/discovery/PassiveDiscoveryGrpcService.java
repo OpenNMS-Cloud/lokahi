@@ -43,6 +43,8 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.springframework.stereotype.Component;
@@ -62,7 +64,6 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
-
             try {
                 PassiveDiscoveryDTO response;
                 if (request.hasId()) {
@@ -74,8 +75,19 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
 
+            } catch (LocationNotFoundException e) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.NOT_FOUND_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            } catch (InventoryRuntimeException e) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
@@ -131,7 +143,7 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 Status status = Status.newBuilder()
-                    .setCode(Code.INTERNAL_VALUE)
+                    .setCode(Code.NOT_FOUND_VALUE)
                     .setMessage(e.getMessage())
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
@@ -154,6 +166,12 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
                 service.deleteDiscovery(tenantId, request.getValue());
                 responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
+            } catch (InventoryRuntimeException e) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.NOT_FOUND_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             } catch (Exception e) {
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)

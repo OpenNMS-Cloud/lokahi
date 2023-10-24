@@ -36,6 +36,16 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
+    <cm:property-placeholder id="containerProperties" persistent-id="org.opennms.version" update-strategy="reload"
+                             placeholder-prefix="$(" placeholder-suffix=")">
+        <cm:default-properties>
+            <cm:property name="git.build.time" value=""/>
+            <cm:property name="git.branch" value=""/>
+            <cm:property name="git.commit.id.describe" value=""/>
+            <cm:property name="org.opencontainers.image.version" value=""/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
     <bean id="ipcIdentity" class="org.opennms.horizon.minion.grpc.MinionIpcIdentity">
         <argument value="$[id]" />
     </bean>
@@ -52,6 +62,10 @@
 
     <bean id="channelBuilderFactory" class="org.opennms.horizon.minion.grpc.channel.OkHttpChannelBuilderFactory">
         <property name="maxInboundMessageSize" value="${grpc.max.message.size}"/>
+        <property name="imageCreated" value="$(git.build.time)"/>
+        <property name="imageVersion" value="$(org.opencontainers.image.version)"/>
+        <property name="gitDescribe" value="$(git.commit.id.describe)"/>
+        <property name="gitBranch" value="$(git.branch)"/>
     </bean>
 
     <bean id="managedChannelFactory" class="org.opennms.horizon.minion.grpc.channel.SecuritySwitchedChannelFactory">

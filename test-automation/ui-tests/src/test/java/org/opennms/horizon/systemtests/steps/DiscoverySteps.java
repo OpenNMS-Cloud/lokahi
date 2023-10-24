@@ -43,6 +43,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -112,7 +113,7 @@ public class DiscoverySteps {
     }
 
     @Then("Subnet mask discovery {string} for nodes with mask {int}, port {int}, community {string}")
-    public void subnetDiscoveryWithMask(String discoverName, int mask, int port, String community) {
+    public void subnetDiscoveryWithMask(String discoverName, int mask, int port, String community) throws UnknownHostException {
         GenericContainer node = nodes.values().iterator().next();
         if (node == null) {
             throw new RuntimeException("No nodes for subnet discovery");
@@ -121,7 +122,24 @@ public class DiscoverySteps {
             throw new RuntimeException("Tests only support discovery with masks at least 24");
         }
 
-        String ipaddress = getContainerIP(node) + "/" + mask;
+        // Works if we use the actual full IP, but the expected use case is to supply
+        // the correct subnet with the mask.
+        Inet4Address ipaddr = (Inet4Address) InetAddress.getByName(getContainerIP(node));
+        byte[] addrbytes = ipaddr.getAddress();
+        int addrint = ((addrbytes[0] & 0xFF) << 24) |
+            ((addrbytes[1] & 0xFF) << 16) |
+            ((addrbytes[2] & 0xFF) << 8) |
+            (addrbytes[3] & 0xFF);
+        int maskbits = 0xFFFFFFFF << (32 - mask);
+
+        int maskedAddr = addrint & maskbits;
+        byte[] maskipbytes = {
+            (byte) ((maskedAddr >> 24) & 0xFF),
+            (byte) ((maskedAddr >> 16) & 0xFF),
+            (byte) ((maskedAddr >> 8) & 0xFF),
+            (byte) (maskedAddr & 0xFF)
+        };
+        String ipaddress = Inet4Address.getByAddress(maskipbytes).getHostAddress() + "/" + mask;
         DiscoveryPage.performDiscovery(discoverName, LocationSteps.getLocationName(), port, community, ipaddress);
     }
 
@@ -238,9 +256,9 @@ public class DiscoverySteps {
     public void statusOfShouldBe(String nodeName, String requestedStatus) {
         InventoryPage.Status status;
         if (requestedStatus.toLowerCase().equals("up")) {
-            status = InventoryPage.Status.UP;
+            status = InventoryPage.Status.Up;
         } else {
-            status = InventoryPage.Status.DOWN;
+            status = InventoryPage.Status.Down;
         }
         String ipaddress = getContainerIP(nodes.get(nodeName));
 

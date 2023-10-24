@@ -89,7 +89,7 @@ public class EventServerInterceptor implements ServerInterceptor {
         }
     }
 
-    protected Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
+    public Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
         if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(AUTH_TOKEN_PREFIX)) {
             throw new VerificationException();
         }

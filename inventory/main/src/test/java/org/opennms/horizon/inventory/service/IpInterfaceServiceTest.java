@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IpInterfaceServiceTest {
 
     public static final String TEST_TENANT_ID = "x-tenant-id-x";
-    public static final long TEST_LOCATION = 1313L;
-    public static final String TEST_LOCATION_TEXT = String.valueOf(TEST_LOCATION);
+    public static final long TEST_LOCATION_ID = 1313L;
+    public static final String TEST_LOCATION_ID_TEXT = String.valueOf(TEST_LOCATION_ID);
 
     private IpInterfaceRepository mockIpInterfaceRepository;
     private IpInterfaceMapper mockIpInterfaceMapper;
@@ -133,13 +133,13 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION, TEST_TENANT_ID)).thenReturn(Optional.of(testIpInterface));
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.of(testIpInterface));
         Mockito.when(mockIpInterfaceMapper.modelToDTO(testIpInterface)).thenReturn(testIpInterfaceDTO);
 
         //
         // Execute
         //
-        var result = target.findByIpAddressAndLocationAndTenantId("11.11.11.11", TEST_LOCATION_TEXT, TEST_TENANT_ID);
+        var result = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
 
         //
         // Verify the Results
@@ -152,12 +152,12 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION, TEST_TENANT_ID)).thenReturn(Optional.empty());
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.empty());
 
         //
         // Execute
         //
-        var result = target.findByIpAddressAndLocationAndTenantId("11.11.11.11", TEST_LOCATION_TEXT, TEST_TENANT_ID);
+        var result = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
 
         //
         // Verify the Results

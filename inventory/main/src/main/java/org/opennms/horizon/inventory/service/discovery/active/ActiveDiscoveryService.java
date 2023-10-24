@@ -1,5 +1,6 @@
 package org.opennms.horizon.inventory.service.discovery.active;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.mapper.discovery.ActiveDiscoveryMapper;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -25,10 +25,9 @@ public class ActiveDiscoveryService {
 
     @Transactional
     public void deleteActiveDiscovery(String tenantId, long id) {
-        Optional<ActiveDiscovery> activeDiscoveryOptional = repository.findByTenantIdAndId(tenantId, id);
-        if (activeDiscoveryOptional.isPresent()) {
-            ActiveDiscovery activeDiscovery = activeDiscoveryOptional.get();
-            repository.delete(activeDiscovery);
-        }
+        repository.findByTenantIdAndId(tenantId, id).ifPresentOrElse(repository::delete,
+            () -> {
+                throw new EntityNotFoundException(String.format("active discovery id %d not found", id));
+            });
     }
 }

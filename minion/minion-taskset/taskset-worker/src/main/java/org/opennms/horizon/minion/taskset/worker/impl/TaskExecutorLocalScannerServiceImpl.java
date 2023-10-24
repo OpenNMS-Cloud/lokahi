@@ -43,7 +43,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalService {
     private static final Logger log = LoggerFactory.getLogger(TaskExecutorLocalScannerServiceImpl.class);
-
+    private static final String LOG_PREFIX = "scanner";
     private final TaskDefinition taskDefinition;
     private final TaskExecutionResultProcessor resultProcessor;
     private final ScannerRegistry scannerRegistry;
@@ -64,7 +64,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
 
     @Override
     public void start() throws Exception {
-        try {
+        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(LOG_PREFIX)) {
             Scanner scanner = lookupScanner(taskDefinition);
             log.info("Create Scanner for {}", taskDefinition.getPluginName());
             if(scanner != null) {

@@ -28,11 +28,6 @@
 
 package org.opennms.minion.icmp.jni6;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.Inet6Address;
-
-import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.protocols.icmp6.ICMPv6EchoReply;
 import org.opennms.protocols.icmp6.ICMPv6Packet;
 import org.opennms.protocols.icmp6.ICMPv6Packet.Type;
@@ -41,6 +36,10 @@ import org.opennms.protocols.rt.Messenger;
 import org.opennms.protocols.rt.ReplyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.Inet6Address;
 
 /**
  * JniIcmpMessenger
@@ -108,7 +107,6 @@ public class Jni6IcmpMessenger implements Messenger<Jni6PingRequest, Jni6PingRes
 
             @Override
             public void run() {
-                Logging.putPrefix("icmp");
                 try {
                     processPackets(callback);
                 } catch (Throwable t) {

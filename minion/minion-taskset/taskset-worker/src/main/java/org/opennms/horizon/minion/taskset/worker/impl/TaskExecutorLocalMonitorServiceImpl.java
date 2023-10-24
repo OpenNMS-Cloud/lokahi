@@ -27,6 +27,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskExecutorLocalMonitorServiceImpl.class);
 
     private Logger log = DEFAULT_LOGGER;
+    private static final String LOG_PREFIX = "monitor";
 
     private TaskDefinition taskDefinition;
     private OpennmsScheduler scheduler;
@@ -88,7 +89,9 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         // Verify it's not already active
         if (active.compareAndSet(false, true)) {
             log.trace("Executing iteration of task: workflow-uuid={}", taskDefinition.getId());
-            executeIteration();
+            try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(LOG_PREFIX)) {
+                executeIteration();
+            }
         } else {
             log.debug("Skipping iteration of task as prior iteration is still active: workflow-uuid={}", taskDefinition.getId());
         }
@@ -105,7 +108,6 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             if (monitor != null) {
                 // TBD888: populate host, or stop?
                 MonitoredService monitoredService = configureMonitoredService(taskDefinition);
-                Logging.putPrefix("monitor");
                 CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {

@@ -28,20 +28,18 @@
 
 package org.opennms.horizon.minion.icmp.jna;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.nio.ByteBuffer;
-
+import com.sun.jna.Platform;
 import org.opennms.horizon.minion.jicmp.ipv6.ICMPv6EchoPacket;
 import org.opennms.horizon.minion.jicmp.ipv6.ICMPv6Packet;
 import org.opennms.horizon.minion.jicmp.ipv6.ICMPv6Packet.Type;
 import org.opennms.horizon.minion.jicmp.jna.NativeDatagramPacket;
 import org.opennms.horizon.minion.jicmp.jna.NativeDatagramSocket;
-import org.opennms.horizon.shared.logging.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jna.Platform;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
 
 /**
  * PingListener
@@ -71,7 +69,6 @@ public class V6Pinger extends AbstractPinger<Inet6Address> {
 
     @Override
     public void run() {
-        Logging.putPrefix("icmp");
         try {
             final int pingerId = getPingerId();
             while (!isFinished()) {

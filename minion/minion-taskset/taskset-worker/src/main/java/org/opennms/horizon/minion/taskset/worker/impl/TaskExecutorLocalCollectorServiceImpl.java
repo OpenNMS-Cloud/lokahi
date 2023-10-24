@@ -37,6 +37,7 @@ import org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry;
 import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
+import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
 
             if (serviceCollector != null) {
                 CollectionRequest collectionRequest = configureCollectionRequest(taskDefinition);
-
+                Logging.putPrefix("collector");
                 CompletableFuture<CollectionSet> future = serviceCollector.collect(collectionRequest, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {

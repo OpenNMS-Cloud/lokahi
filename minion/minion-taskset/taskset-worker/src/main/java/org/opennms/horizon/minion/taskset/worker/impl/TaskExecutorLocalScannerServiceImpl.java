@@ -34,6 +34,7 @@ import org.opennms.horizon.minion.plugin.api.ScannerManager;
 import org.opennms.horizon.minion.plugin.api.registries.ScannerRegistry;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
+import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,7 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
             Scanner scanner = lookupScanner(taskDefinition);
             log.info("Create Scanner for {}", taskDefinition.getPluginName());
             if(scanner != null) {
+                Logging.putPrefix("scanner");
                 future = scanner.scan(taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             }

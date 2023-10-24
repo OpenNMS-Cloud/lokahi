@@ -94,7 +94,7 @@ public class TrapListener implements TrapNotificationListener, Listener {
 
         try {
             TrapDTO trapDTO = transformTrapInfo(trapInformation);
-	    LOG.info("Received Trap {}", trapDTO);
+	        LOG.info("Received Trap {}", trapDTO);
             
             try {
                 getMessageDispatcher().send(trapDTO);

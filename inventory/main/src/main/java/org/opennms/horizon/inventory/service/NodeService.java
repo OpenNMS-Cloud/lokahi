@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -82,8 +84,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class NodeService {
-
-    private final static String DEFAULT_TAG = "default";
+    private static final String DEFAULT_TAG = "default";
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
         .setNameFormat("delete-node-task-publish-%d")
         .build();
@@ -246,8 +247,8 @@ public class NodeService {
             .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
 
         var optional = nodeRepository.findById(nodeId);
-        if(optional.isEmpty()) {
-            return;
+        if (optional.isEmpty()) {
+            throw new InventoryRuntimeException("Node not found for id: " + nodeId);
         }
         var node = optional.get();
         final var monitoredState = monitored ? MonitoredState.MONITORED
@@ -285,7 +286,7 @@ public class NodeService {
 
     private Boolean isValidInetAddress(String ipAddress) {
         try {
-            var inetAddress = InetAddressUtils.addr(ipAddress);
+            InetAddressUtils.addr(ipAddress);
             return true;
         } catch (IllegalArgumentException  e) {
             return false;

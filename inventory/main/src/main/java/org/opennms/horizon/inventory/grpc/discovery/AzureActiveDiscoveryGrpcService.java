@@ -58,7 +58,6 @@ public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryService
         tenantIdOptional.ifPresentOrElse(tenantId -> {
             try {
                 AzureActiveDiscoveryDTO discovery = service.createActiveDiscovery(tenantId, request);
-
                 responseObserver.onNext(discovery);
                 responseObserver.onCompleted();
             } catch (LocationNotFoundException e){

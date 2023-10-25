@@ -396,6 +396,9 @@ public class TagService {
         TagEntityIdDTO entityId = listParams.getEntityId();
 
         long nodeId = entityId.getNodeId();
+        if (nodeRepository.findByIdAndTenantId(nodeId, tenantId).isEmpty() ){
+            throw new InventoryRuntimeException("NodeId not found for id: " + nodeId);
+        }
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -413,6 +416,10 @@ public class TagService {
         TagEntityIdDTO entityId = listParams.getEntityId();
 
         long activeDiscoveryId = entityId.getActiveDiscoveryId();
+        if (activeDiscoveryRepository.findByTenantIdAndId(tenantId, activeDiscoveryId).isEmpty()) {
+            throw new InventoryRuntimeException("ActiveDiscoveryId not found for id: " + activeDiscoveryId);
+        }
+
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -430,6 +437,9 @@ public class TagService {
         TagEntityIdDTO entityId = listParams.getEntityId();
 
         long passiveDiscoveryId = entityId.getPassiveDiscoveryId();
+        if (passiveDiscoveryRepository.findByTenantIdAndId(tenantId, passiveDiscoveryId).isEmpty()) {
+            throw new InventoryRuntimeException("PassiveDiscovery not found for id: " + passiveDiscoveryId);
+        }
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();

@@ -55,6 +55,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
+    public static final String EMPTY_TENANT_ID_MSG = "Tenant Id can't be empty";
     private final TagService service;
     private final TenantLookup tenantLookup;
     private final NodeService nodeService;
@@ -75,7 +76,6 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
@@ -86,7 +86,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
 
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
@@ -108,7 +108,6 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                 responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
@@ -116,10 +115,9 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
         }, () -> {
-
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
@@ -135,7 +133,6 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                 responseObserver.onNext(TagListDTO.newBuilder().addAllTags(tags).build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
@@ -146,7 +143,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
 
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
@@ -173,7 +170,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
 
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
@@ -201,7 +198,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
 
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Tenant Id can't be empty")
+                .setMessage(EMPTY_TENANT_ID_MSG)
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });

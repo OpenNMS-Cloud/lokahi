@@ -9,7 +9,7 @@
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
                 <h1 data-test="welcome-slide-two-title">
-                    Secure Minion
+                    Install Secure Minion
                     <FeatherTooltip
                         title="A Minion is a lightweight, secure collector that monitors and communicates with your network devices."
                         v-slot="{ attrs, on }"
@@ -21,26 +21,25 @@
                             :icon="icons.InformationIcon" 
                         />
                     </FeatherTooltip>
-                    Runtime Bundle
                 </h1>
                 <p>
-                    To install our secure minion, you must download our runtime bundle and run it in your desired location.
-                    For optimal monitoring, the minion needs to always be available.
+                    To install our secure Minion, you must download our runtime bundle and run it in your desired location.
+                    For optimal monitoring, the Minion needs to be available at all times.
                 </p>
                 <br>
-                <p>Our runtime bundle contains:</p>
+                <p>Our runtime bundle contains the following:</p>
                 <br>
                 <ul>
                     <li>
-                        An encrypted minion certificate with a decryption password
+                        An encrypted Minion certificate with a decryption password
                     </li>
                     <li>
-                        A docker compose file with a minion container
+                        A Docker Compose file with a Minion container
                     </li>
                 </ul>
                 <br>
                 <p>
-                    Installation can take 10 minutes.
+                    Installation can take up to 10 minutes.
                 </p>
             </div>
 
@@ -73,14 +72,13 @@
 
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 2: Copy the bundle to your desired location</h2>
-                    <pre
-                        class="pre-wrap">Select a permanent location to unzip the bundle. Logs will be saved in that location and you will need to access this information if you restart your host network.</pre>
+                    <h2>Step 2: Copy the Bundle to a Permanent Location</h2>
+                    <pre class="pre-wrap">Unzip the bundle in a permanent location. <br>You will need to access this information if you restart your network. This location is also where logs are saved.</pre>
                 </div>
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 3: Run Minion with the Run Command in a Terminal Window</h2>
+                    <h2>Step 3: Run Minion in a Terminal Window</h2>
                     <pre
-                        class="pre-wrap">Install our minion by navigating to your chosen directory in a terminal and typing the following command:</pre>
+                        class="pre-wrap">To install the Minion, open a terminal window, navigate to the bundle location, and type the following command:</pre>
                     <div class="welcome-slide-table docker-cmd">
                         <div class="welcome-slide-table-header docker-cmd">
                             <div class="welcome-slide-table-body">

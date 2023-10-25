@@ -68,7 +68,6 @@ public class TaskExecutorLocalScannerServiceImpl implements TaskExecutorLocalSer
             Scanner scanner = lookupScanner(taskDefinition);
             log.info("Create Scanner for {}", taskDefinition.getPluginName());
             if(scanner != null) {
-                Logging.putPrefix("scanner");
                 future = scanner.scan(taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             }

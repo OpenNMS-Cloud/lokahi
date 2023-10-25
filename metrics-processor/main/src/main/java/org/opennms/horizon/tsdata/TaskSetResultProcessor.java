@@ -56,10 +56,9 @@ public class TaskSetResultProcessor {
     public void processTaskResult(String tenantId, String locationId, TaskResult taskResult) {
         try {
             LOG.info("Processing task set result {}", taskResult);
-            if (taskResult.hasMonitorResponse()) {
-                LOG.info("Have monitor response, tenant-id: {}; task-id={};", tenantId, taskResult.getId());
+            if (taskResult.hasMonitorResponse() && taskResult.getMonitorResponse().getResponseTimeMs() > 0) {
                 taskSetMonitorResultProcessor.processMonitorResponse(tenantId, locationId, taskResult, taskResult.getMonitorResponse());
-            } else if (taskResult.hasCollectorResponse()) {
+            } else if (taskResult.hasCollectorResponse() && taskResult.getCollectorResponse().getStatus()) {
                 taskSetCollectorResultProcessor.processCollectorResponse(tenantId, locationId, taskResult, taskResult.getCollectorResponse());
             }
         } catch (Exception exc) {

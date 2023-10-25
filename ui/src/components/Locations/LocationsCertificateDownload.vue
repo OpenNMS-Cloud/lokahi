@@ -5,75 +5,59 @@
   >
     <div class="download-container">
       <div class="download-title">{{ props.title }}</div>
-      <div class="download-functionality">
-        <div class="certificate-stats">
-          <div class="certificate-data">
-            <FeatherIcon
-              class="cert-icon"
-              :icon="CheckIcon"
-            />
-            <div>Start Date: 05-08-2023</div>
-          </div>
-          <div class="certificate-data">
-            <FeatherIcon
-              class="cert-icon"
-              :icon="CalendarIcon"
-            />
-            <div>Expire on 05-08-2024</div>
-          </div>
+      <div class="download-buttons-wrapper">
+        <span><strong>Note:</strong> If you download a new bundle, you will need to use a new decryption password.</span>
+        <div class="download-buttons">
+          <ButtonWithSpinner
+            primary
+            :click="onPrimaryButtonClick"
+            :is-fetching="locationStore.certIsFetching"
+            data-test="download-btn"
+          >
+            {{ props.primaryButtonText }}
+          </ButtonWithSpinner>
+          <FeatherButton
+            v-if="props.hasCert"
+            secondary
+            @click="openModal"
+            data-test="revoke-btn"
+          >
+            {{ props.secondaryButtonText }}
+          </FeatherButton>
         </div>
-        <div class="divider"></div>
-        <div class="download-buttons-wrapper">
-          <span><strong>Note:</strong> If you download a new bundle, you will need to use a new decryption password.</span>
-          <div class="download-buttons">
-            <ButtonWithSpinner
-              primary
-              :click="onPrimaryButtonClick"
-              :is-fetching="locationStore.certIsFetching"
-              data-test="download-btn"
-            >
-              {{ props.primaryButtonText }}
-            </ButtonWithSpinner>
-            <FeatherButton
-              v-if="props.hasCert"
-              secondary
-              @click="openModal"
-              data-test="revoke-btn"
-            >
-              {{ props.secondaryButtonText }}
-            </FeatherButton>
-          </div>
 
-          <div class="input-wrapper">
-            <FeatherInput
-              :label="inputPlaceholder"
-              :modelValue="certificatePassword"
-              type="text"
-              class="download-input"
-              :disabled="true"
-              data-test="download-input"
-            />
-            <FeatherButton
-              :disabled="!certificatePassword"
-              text
-              @click="copyClick"
-              class="download-copy-button"
-            >
-              <template v-slot:icon>
-                <FeatherIcon
-                  :icon="CopyIcon"
-                  aria-hidden="true"
-                  focusable="false"
-                />
-                Copy
-              </template>
-            </FeatherButton>
-          </div>
+        <div class="input-wrapper">
+          <FeatherInput
+            :label="inputPlaceholder"
+            :modelValue="certificatePassword"
+            type="text"
+            class="download-input"
+            :disabled="true"
+            data-test="download-input"
+          />
+          <FeatherButton
+            :disabled="!certificatePassword"
+            text
+            @click="copyClick"
+            class="download-copy-button"
+          >
+            <template v-slot:icon>
+              <FeatherIcon
+                :icon="CopyIcon"
+                aria-hidden="true"
+                focusable="false"
+              />
+              Copy
+            </template>
+          </FeatherButton>
         </div>
       </div>
     </div>
   </div>
-  <div class="row mt-m" v-if="locationStore.certificatePassword">
+  <div
+    class="row mt-m"
+    v-if="locationStore.certificatePassword"
+  >
     <LocationsMinionCmd />
   </div>
   <DeleteConfirmationModal
@@ -88,8 +72,6 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import CopyIcon from '@featherds/icon/action/ContentCopy'
-import CheckIcon from '@featherds/icon/action/CheckCircle'
-import CalendarIcon from '@featherds/icon/action/CalendarEndDate'
 import { useLocationStore } from '@/store/Views/locationStore'
 import useModal from '@/composables/useModal'
 
@@ -100,7 +82,7 @@ const { openModal, closeModal, isVisible } = useModal()
 
 const props = defineProps({
   title: {
-    default: 'Minion Certificate Status',
+    default: 'Minion Bundle',
     type: String
   },
   primaryButtonText: {
@@ -149,6 +131,7 @@ const copyClick = () => {
 
 .download-wrapper {
   width: 100%;
+  margin-bottom: 20px;
 }
 .download-container {
   background-color: var(variables.$border-light-on-warning);
@@ -157,40 +140,12 @@ const copyClick = () => {
   border-radius: 4px;
   padding: var(variables.$spacing-l);
 }
-.download-functionality {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100%;
-  flex-wrap: wrap;
-  gap: var(variables.$spacing-l);
-  @include mediaQueriesMixins.screen-md {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 60px;
-  }
-
-  :deep(.btn-primary) {
-    max-width: 285px;
-  }
-}
 .input-wrapper {
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex: 1 1 0;
   gap: var(variables.$spacing-xs);
-}
-.divider {
-  border: 1px solid #c4c4c4;
-  height: 120px;
-  width: 1px;
-  display: none;
-
-  @include mediaQueriesMixins.screen-xxl {
-    display: block;
-  }
 }
 .download-title {
   @include typography.subtitle2();
@@ -205,24 +160,12 @@ const copyClick = () => {
 .download-buttons {
   display: flex;
   flex-direction: row;
-}
-.certificate-stats {
-  display: flex;
-  flex-direction: column;
-  gap: var(variables.$spacing-xxs);
-
-  div {
-    @include typography.body-small;
-  }
+  width: 100%;
 }
 :deep(.feather-input-sub-text) {
   display: none;
 }
 .download-buttons-wrapper {
-  @include mediaQueriesMixins.screen-md {
-    margin-top: -40px;
-  }
-
   &.hasCert {
     max-width: unset;
   }
@@ -232,15 +175,5 @@ const copyClick = () => {
   flex-wrap: wrap;
   width: 100%;
   gap: var(variables.$spacing-m);
-  max-width: 450px;
-}
-.cert-icon {
-  width: 20px;
-  height: 20px;
-}
-.certificate-data {
-  display: flex;
-  align-items: center;
-  gap: var(variables.$spacing-xs);
 }
 </style>

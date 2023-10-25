@@ -29,7 +29,6 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
-import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -251,35 +250,37 @@ public class TagService {
 
     @Transactional
     public void updateTags(String tenantId, TagCreateListDTO request) {
-        if (request.getTagsList().isEmpty()) {
-            return;
+        if (request.getEntityIdsCount() != 1) {
+            throw new InventoryRuntimeException("Exactly one entity id must be provided");
         }
-        if (request.getEntityIdsList().isEmpty()) {
-            return;
-        }
-        for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
-            removeEntityTagAssociations(tenantId, entityId);
-        }
-        addTags(tenantId, request);
-    }
+        var entityId = request.getEntityIds(0);
 
-    private void removeEntityTagAssociations(String tenantId, TagEntityIdDTO entityId) {
-        if (entityId.hasNodeId()) {
-            Node node = getNode(tenantId, entityId.getNodeId());
-            node.getTags().forEach(tag -> tag.getNodes().remove(node));
-        } else if (entityId.hasActiveDiscoveryId()) {
-            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
-            activeDiscovery.getTags().forEach(tag -> {
-                tag.getActiveDiscoveries().remove(activeDiscovery);
-            });
-        } else if (entityId.hasPassiveDiscoveryId()) {
-            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
-            discovery.getTags().forEach(tag -> {
-                tag.getPassiveDiscoveries().remove(discovery);
-            });
-        }
-    }
+        var currentTagsNameToIds = getTagsByEntityId(tenantId,
+            ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(entityId).build())
+            .stream().collect(Collectors.toMap(TagDTO::getName, TagDTO::getId));
+        log.info("Tag Update: Existing: " + currentTagsNameToIds.keySet());
 
+        var requestTags = request.getTagsList().stream().map(TagCreateDTO::getName).toList();
+        log.info("Tag Update: Requested:" + requestTags);
+
+        var newTags = new ArrayList<>(requestTags);
+        newTags.removeAll(currentTagsNameToIds.keySet());
+        log.info("Adding tags: " + newTags);
+        var add = TagCreateListDTO.newBuilder()
+            .addEntityIds(entityId)
+            .addAllTags(newTags.stream().map(tagName -> TagCreateDTO.newBuilder().setName(tagName).build()).toList())
+            .build();
+        addTags(tenantId, add);
+
+        var removeTags = new ArrayList<>(currentTagsNameToIds.keySet());
+        removeTags.removeAll(requestTags);
+        log.info("Removing tags: " + removeTags);
+        var remove = TagRemoveListDTO.newBuilder()
+            .addEntityIds(entityId)
+            .addAllTagIds(removeTags.stream().map(tagName -> Int64Value.of(currentTagsNameToIds.get(tagName))).toList())
+            .build();
+        removeTags(tenantId, remove);
+    }
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();

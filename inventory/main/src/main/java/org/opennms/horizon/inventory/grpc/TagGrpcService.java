@@ -32,6 +32,7 @@ import com.google.protobuf.BoolValue;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.Context;
+import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -82,14 +83,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> {
-
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(EMPTY_TENANT_ID_MSG)
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -114,13 +108,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> {
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(EMPTY_TENANT_ID_MSG)
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -139,14 +127,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> {
-
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(EMPTY_TENANT_ID_MSG)
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -166,14 +147,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> {
-
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(EMPTY_TENANT_ID_MSG)
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -194,13 +168,14 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> {
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
+    }
 
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(EMPTY_TENANT_ID_MSG)
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+    private StatusRuntimeException getStatusRuntimeException(int code, String message){
+        Status status = Status.newBuilder()
+            .setCode(code)
+            .setMessage(message)
+            .build();
+        return StatusProto.toStatusRuntimeException(status);
     }
 }

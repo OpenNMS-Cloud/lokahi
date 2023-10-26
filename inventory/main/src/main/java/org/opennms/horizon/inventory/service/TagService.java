@@ -143,7 +143,7 @@ public class TagService {
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
             if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
-                throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
+                throw new InventoryRuntimeException("MonitoringPolicy not found for id: " + entityId.getMonitoringPolicyId());
             }
             return tagCreateList.stream().map(tagCreateDTO ->
                     addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
@@ -199,7 +199,7 @@ public class TagService {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasMonitoringPolicyId()) {
             if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
-                throw new InventoryRuntimeException("MonitoringPolicyId not found for id: " + entityId.getMonitoringPolicyId());
+                throw new InventoryRuntimeException("MonitoringPolicy not found for id: " + entityId.getMonitoringPolicyId());
             }
             return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
@@ -397,7 +397,7 @@ public class TagService {
 
         long nodeId = entityId.getNodeId();
         if (nodeRepository.findByIdAndTenantId(nodeId, tenantId).isEmpty() ){
-            throw new InventoryRuntimeException("NodeId not found for id: " + nodeId);
+            throw new InventoryRuntimeException("Node not found for id: " + nodeId);
         }
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
@@ -417,7 +417,7 @@ public class TagService {
 
         long activeDiscoveryId = entityId.getActiveDiscoveryId();
         if (activeDiscoveryRepository.findByTenantIdAndId(tenantId, activeDiscoveryId).isEmpty()) {
-            throw new InventoryRuntimeException("ActiveDiscoveryId not found for id: " + activeDiscoveryId);
+            throw new InventoryRuntimeException("ActiveDiscovery not found for id: " + activeDiscoveryId);
         }
 
         if (listParams.hasParams()) {

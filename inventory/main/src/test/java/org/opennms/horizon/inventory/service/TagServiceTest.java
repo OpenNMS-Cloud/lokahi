@@ -32,6 +32,7 @@ import com.google.protobuf.Int64Value;
 import com.google.rpc.Code;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,13 +41,18 @@ import org.opennms.horizon.inventory.component.AlertClient;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.TagMapper;
 import org.opennms.horizon.inventory.mapper.TagMapperImpl;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
@@ -124,7 +130,7 @@ public class TagServiceTest {
 
         var exception = Assertions.assertThrows(InventoryRuntimeException.class, () -> tagService.addTags(TEST_TENANT_ID, addTags));
 
-        Assertions.assertEquals("MonitoringPolicyId not found for id: " + testPolicyId, exception.getMessage());
+        Assertions.assertEquals("MonitoringPolicy not found for id: " + testPolicyId, exception.getMessage());
     }
 
     @Test
@@ -138,7 +144,7 @@ public class TagServiceTest {
 
         var exception = Assertions.assertThrows(InventoryRuntimeException.class, () -> tagService.addTags(TEST_TENANT_ID, addTags));
 
-        Assertions.assertEquals("MonitoringPolicyId not found for id: " + testPolicyId, exception.getMessage());
+        Assertions.assertEquals("MonitoringPolicy not found for id: " + testPolicyId, exception.getMessage());
     }
 
     @Test
@@ -187,7 +193,124 @@ public class TagServiceTest {
     }
 
     @Test
-    void testGetTagsByEntityId() {
+    void testGetTagsByEntityIdNode() {
+        long testNodeId = 1L;
+        long testPolicyId = 2L;
+        Tag tag1 = new Tag();
+        tag1.setName("tag1");
+        tag1.setMonitorPolicyIds(List.of(testPolicyId));
+        tag1.setTenantId(TEST_TENANT_ID);
+        Tag tag2 = new Tag();
+        tag2.setName("tag2");
+        tag2.setMonitorPolicyIds(List.of(testPolicyId));
+        tag2.setTenantId(TEST_TENANT_ID);
+        when(mockNodeRepository.findByIdAndTenantId(testNodeId, TEST_TENANT_ID)).thenReturn(Optional.of(new Node()));
+        when(mockTagRepository.findByTenantIdAndNodeId(TEST_TENANT_ID, testNodeId)).thenReturn(List.of(tag1, tag2));
+
+        var listTags = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(testNodeId).build())
+            .build();
+
+        var tags = tagService.getTagsByEntityId(TEST_TENANT_ID, listTags);
+
+        Assertions.assertEquals(2, tags.size());
+    }
+
+    @Test
+    void testGetTagsByEntityIdNodeNotFound() {
+        long testNodeId = 1L;
+
+        var listTags = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(testNodeId).build())
+            .build();
+
+        var exception = Assert.assertThrows(InventoryRuntimeException.class, () -> {
+            tagService.getTagsByEntityId(TEST_TENANT_ID, listTags);
+        });
+
+        Assertions.assertEquals("Node not found for id: 1", exception.getMessage());
+    }
+
+    @Test
+    void testGetTagsByEntityIdActiveDiscovery() {
+        long testPolicyId = 2L;
+        long testActiveDiscoveryId = 3L;
+        Tag tag1 = new Tag();
+        tag1.setName("tag1");
+        tag1.setMonitorPolicyIds(List.of(testPolicyId));
+        tag1.setTenantId(TEST_TENANT_ID);
+        Tag tag2 = new Tag();
+        tag2.setName("tag2");
+        tag2.setMonitorPolicyIds(List.of(testPolicyId));
+        tag2.setTenantId(TEST_TENANT_ID);
+        when(mockActiveDiscoveryRepository.findByTenantIdAndId(TEST_TENANT_ID, testActiveDiscoveryId)).thenReturn(Optional.of(new AzureActiveDiscovery()));
+        when(mockTagRepository.findByTenantIdAndActiveDiscoveryId(TEST_TENANT_ID, testActiveDiscoveryId)).thenReturn(List.of(tag1, tag2));
+
+        var listTags = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(testActiveDiscoveryId).build())
+            .build();
+
+        var tags = tagService.getTagsByEntityId(TEST_TENANT_ID, listTags);
+
+        Assertions.assertEquals(2, tags.size());
+    }
+
+    @Test
+    void testGetTagsByEntityIdActiveDiscoveryNotFound() {
+        long testActiveDiscoveryId = 3L;
+
+        var listTags = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(testActiveDiscoveryId).build())
+            .build();
+
+        var exception = Assert.assertThrows(InventoryRuntimeException.class, () -> {
+            tagService.getTagsByEntityId(TEST_TENANT_ID, listTags);
+        });
+
+        Assertions.assertEquals("ActiveDiscovery not found for id: 3", exception.getMessage());
+    }
+
+    @Test
+    void testGetTagsByEntityIdPassiveDiscovery() {
+        long testPolicyId = 2L;
+        long testPassiveDiscoveryId = 3L;
+        Tag tag1 = new Tag();
+        tag1.setName("tag1");
+        tag1.setMonitorPolicyIds(List.of(testPolicyId));
+        tag1.setTenantId(TEST_TENANT_ID);
+        Tag tag2 = new Tag();
+        tag2.setName("tag2");
+        tag2.setMonitorPolicyIds(List.of(testPolicyId));
+        tag2.setTenantId(TEST_TENANT_ID);
+        when(mockPassiveDiscoveryRepository.findByTenantIdAndId(TEST_TENANT_ID, testPassiveDiscoveryId)).thenReturn(Optional.of(new PassiveDiscovery()));
+        when(mockTagRepository.findByTenantIdAndPassiveDiscoveryId(TEST_TENANT_ID, testPassiveDiscoveryId)).thenReturn(List.of(tag1, tag2));
+
+        var listTags = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(testPassiveDiscoveryId).build())
+            .build();
+
+        var tags = tagService.getTagsByEntityId(TEST_TENANT_ID, listTags);
+
+        Assertions.assertEquals(2, tags.size());
+    }
+
+    @Test
+    void testGetTagsByEntityIdPassiveDiscoveryNotFound() {
+        long testPassiveDiscoveryId = 3L;
+
+        var listTags = ListTagsByEntityIdParamsDTO.newBuilder()
+            .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(testPassiveDiscoveryId).build())
+            .build();
+
+        var exception = Assert.assertThrows(InventoryRuntimeException.class, () -> {
+            tagService.getTagsByEntityId(TEST_TENANT_ID, listTags);
+        });
+
+        Assertions.assertEquals("PassiveDiscovery not found for id: 3", exception.getMessage());
+    }
+
+    @Test
+    void testGetTagsByEntityIdPolicyId() {
         long testNodeId = 1L;
         long testPolicyId = 2L;
         Tag tag1 = new Tag();
@@ -211,7 +334,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void testGetTagsByEntityIdMissingPolicy() {
+    void testGetTagsByEntityIdPolicyIdNotFound() {
         long testNodeId = 1L;
         long testPolicyId = 2L;
 
@@ -222,7 +345,7 @@ public class TagServiceTest {
         var exception = Assertions.assertThrows(InventoryRuntimeException.class, () -> tagService.getTagsByEntityId(TEST_TENANT_ID, listTags));
 
         verify(mockAlertClient).getPolicyById(testPolicyId, TEST_TENANT_ID);
-        Assertions.assertEquals("MonitoringPolicyId not found for id: " + testPolicyId, exception.getMessage());
+        Assertions.assertEquals("MonitoringPolicy not found for id: " + testPolicyId, exception.getMessage());
     }
 
     @Test

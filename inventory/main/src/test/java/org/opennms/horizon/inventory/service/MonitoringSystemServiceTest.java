@@ -52,6 +52,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 class MonitoringSystemServiceTest {
     private MonitoringLocationRepository mockLocationRepo;
@@ -113,8 +114,10 @@ class MonitoringSystemServiceTest {
     void testFindByMonitoringLocationIdAndTenantId() {
         long locationId = 1L;
         doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        doReturn(Optional.of(new MonitoringLocation())).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
         service.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
         verify(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        verify(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
     }
 
     @Test

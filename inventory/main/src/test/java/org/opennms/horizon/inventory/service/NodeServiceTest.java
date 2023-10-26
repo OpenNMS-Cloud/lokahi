@@ -106,7 +106,6 @@ public class NodeServiceTest {
         tagRepository = mock(TagRepository.class);
         mockTagPublisher = mock(TagPublisher.class);
 
-
         nodeService = new NodeService(mockNodeRepository,
             mockMonitoringLocationRepository,
             mockIpInterfaceRepository,
@@ -477,6 +476,7 @@ public class NodeServiceTest {
         final var tagMonitoredWithDefaultTag = new Tag();
         tagMonitoredWithDefaultTag.setName("default");
 
+        when(this.mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId())).thenReturn(Optional.of(testNode));
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of());
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.DETECTED, testNode.getMonitoredState());

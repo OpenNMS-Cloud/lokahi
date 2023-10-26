@@ -246,7 +246,7 @@ public class NodeService {
         final var monitored = tagRepository.findByTenantIdAndNodeId(tenantId, nodeId).stream()
             .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
 
-        var optional = nodeRepository.findById(nodeId);
+        var optional = nodeRepository.findByIdAndTenantId(nodeId, tenantId);
         if (optional.isEmpty()) {
             throw new InventoryRuntimeException("Node not found for id: " + nodeId);
         }

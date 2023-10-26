@@ -29,13 +29,13 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
-import com.google.rpc.Code;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.inventory.component.AlertClient;
 import org.opennms.horizon.inventory.component.TagPublisher;
@@ -50,6 +50,7 @@ import org.opennms.horizon.inventory.mapper.TagMapper;
 import org.opennms.horizon.inventory.mapper.TagMapperImpl;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
@@ -60,10 +61,16 @@ import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscovery
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Map.entry;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -405,5 +412,51 @@ public class TagServiceTest {
 
         verify(mockTagRepository).findByTenantIdAndId(TEST_TENANT_ID, tag1.getId());
         Assertions.assertEquals("Invalid Tag id: " + tag1.getId(), exception.getMessage());
+    }
+
+    @Test
+    void testUpdateTags() {
+        long activeDiscoveryId = 1L;
+        var activeDiscovery = new IcmpActiveDiscovery();
+        activeDiscovery.setId(activeDiscoveryId);
+
+        Map<String, Long> existingTagMap = new HashMap<>(Map.ofEntries(
+            entry("tag1", 100L),
+            entry("tag2", 200L),
+            entry("tag3", 300L)
+        ));
+        var existingTags = existingTagMap.entrySet().stream().map(entry -> {
+            var tag = new Tag();
+            tag.setId(entry.getValue());
+            tag.setName(entry.getKey());
+            tag.setTenantId(TEST_TENANT_ID);
+            return tag;
+        }).toList();
+        activeDiscovery.setTags(existingTags);
+
+        var requestedTagNames = new ArrayList<>(Arrays.asList("tag3", "tag5"));
+        var requestedTagDtos = requestedTagNames.stream()
+            .map(tagName -> TagCreateDTO.newBuilder().setName(tagName).build()).toList();
+        var request = TagCreateListDTO.newBuilder()
+            .addEntityIds(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscoveryId).build())
+            .addAllTags(requestedTagDtos)
+            .build();
+
+        when(mockActiveDiscoveryRepository.findByTenantIdAndId(TEST_TENANT_ID, activeDiscoveryId))
+            .thenReturn(Optional.of(activeDiscovery));
+        when(mockTagRepository.findByTenantIdAndActiveDiscoveryId(TEST_TENANT_ID, activeDiscoveryId))
+            .thenReturn(existingTags);
+        existingTags.forEach(tag ->
+            when(mockTagRepository.findByTenantIdAndId(TEST_TENANT_ID, tag.getId())).thenReturn(Optional.of(tag)));
+
+        tagService.updateTags(TEST_TENANT_ID, request);
+
+        // Check that tag5 was added for the active discovery
+        var tagCaptor = ArgumentCaptor.forClass(Tag.class);
+        verify(mockTagRepository).save(tagCaptor.capture());
+        assertThat(tagCaptor.getValue().getName(), equalTo("tag5"));
+
+        // If tags were being outright deleted, would be capturing: repository.delete(tag)
+        // But in this case, tags are being disassociated from the active discovery.
     }
 }

@@ -261,7 +261,7 @@ public class TagService {
         log.info("Tag Update: Existing: " + currentTagsNameToIds.keySet());
 
         var requestTags = request.getTagsList().stream().map(TagCreateDTO::getName).toList();
-        log.info("Tag Update: Requested:" + requestTags);
+        log.info("Tag Update: Requested: " + requestTags);
 
         var newTags = new ArrayList<>(requestTags);
         newTags.removeAll(currentTagsNameToIds.keySet());

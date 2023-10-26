@@ -83,7 +83,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INVALID_ARGUMENT_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INVALID_ARGUMENT_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -127,7 +127,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INVALID_ARGUMENT_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INVALID_ARGUMENT_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     @Override
@@ -168,7 +168,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
-        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INTERNAL_VALUE, EMPTY_TENANT_ID_MSG)));
+        }, () -> responseObserver.onError(getStatusRuntimeException(Code.INVALID_ARGUMENT_VALUE, EMPTY_TENANT_ID_MSG)));
     }
 
     private StatusRuntimeException getStatusRuntimeException(int code, String message){

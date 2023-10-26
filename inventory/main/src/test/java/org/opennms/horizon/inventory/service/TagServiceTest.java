@@ -415,15 +415,6 @@ public class TagServiceTest {
     }
 
     @Test
-    void testUpdateTagsMissingEntityId() {
-        var request = TagCreateListDTO.newBuilder()
-            .addEntityIds(TagEntityIdDTO.newBuilder().build())
-            .build();
-
-        Assertions.assertThrows(InventoryRuntimeException.class, () -> tagService.updateTags(TEST_TENANT_ID, request));
-    }
-
-    @Test
     void testUpdateTags() {
         long activeDiscoveryId = 1L;
         var activeDiscovery = new IcmpActiveDiscovery();

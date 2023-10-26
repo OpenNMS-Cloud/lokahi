@@ -250,36 +250,36 @@ public class TagService {
 
     @Transactional
     public void updateTags(String tenantId, TagCreateListDTO request) {
-        if (request.getEntityIdsCount() != 1) {
-            throw new InventoryRuntimeException("Exactly one entity id must be provided");
+        if (request.getEntityIdsList().isEmpty()) {
+            return;
         }
-        var entityId = request.getEntityIds(0);
+        for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
+            var currentTagsNameToIds = getTagsByEntityId(tenantId,
+                ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(entityId).build())
+                .stream().collect(Collectors.toMap(TagDTO::getName, TagDTO::getId));
+            log.info("Tag Update: Existing: " + currentTagsNameToIds.keySet());
 
-        var currentTagsNameToIds = getTagsByEntityId(tenantId,
-            ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(entityId).build())
-            .stream().collect(Collectors.toMap(TagDTO::getName, TagDTO::getId));
-        log.info("Tag Update: Existing: " + currentTagsNameToIds.keySet());
+            var requestTags = request.getTagsList().stream().map(TagCreateDTO::getName).toList();
+            log.info("Tag Update: Requested: " + requestTags);
 
-        var requestTags = request.getTagsList().stream().map(TagCreateDTO::getName).toList();
-        log.info("Tag Update: Requested: " + requestTags);
+            var newTags = new ArrayList<>(requestTags);
+            newTags.removeAll(currentTagsNameToIds.keySet());
+            log.info("Adding tags: " + newTags);
+            var add = TagCreateListDTO.newBuilder()
+                .addEntityIds(entityId)
+                .addAllTags(newTags.stream().map(tagName -> TagCreateDTO.newBuilder().setName(tagName).build()).toList())
+                .build();
+            addTags(tenantId, add);
 
-        var newTags = new ArrayList<>(requestTags);
-        newTags.removeAll(currentTagsNameToIds.keySet());
-        log.info("Adding tags: " + newTags);
-        var add = TagCreateListDTO.newBuilder()
-            .addEntityIds(entityId)
-            .addAllTags(newTags.stream().map(tagName -> TagCreateDTO.newBuilder().setName(tagName).build()).toList())
-            .build();
-        addTags(tenantId, add);
-
-        var removeTags = new ArrayList<>(currentTagsNameToIds.keySet());
-        removeTags.removeAll(requestTags);
-        log.info("Removing tags: " + removeTags);
-        var remove = TagRemoveListDTO.newBuilder()
-            .addEntityIds(entityId)
-            .addAllTagIds(removeTags.stream().map(tagName -> Int64Value.of(currentTagsNameToIds.get(tagName))).toList())
-            .build();
-        removeTags(tenantId, remove);
+            var removeTags = new ArrayList<>(currentTagsNameToIds.keySet());
+            removeTags.removeAll(requestTags);
+            log.info("Removing tags: " + removeTags);
+            var remove = TagRemoveListDTO.newBuilder()
+                .addEntityIds(entityId)
+                .addAllTagIds(removeTags.stream().map(tagName -> Int64Value.of(currentTagsNameToIds.get(tagName))).toList())
+                .build();
+            removeTags(tenantId, remove);
+        }
     }
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {

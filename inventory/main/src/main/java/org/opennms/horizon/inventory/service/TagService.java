@@ -254,7 +254,7 @@ public class TagService {
             return;
         }
         for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
-            log.info("Updating tags for " + displayEntityTypeAndId(entityId));
+            log.info("Updating tags for " + entityId);
 
             var currentTagsNameToIds = getTagsByEntityId(tenantId,
                 ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(entityId).build())
@@ -282,31 +282,6 @@ public class TagService {
                 .build();
             removeTags(tenantId, remove);
         }
-    }
-
-    private String displayEntityTypeAndId(TagEntityIdDTO entityIdDto) {
-        StringBuilder message = new StringBuilder();
-        if (entityIdDto.hasNodeId()) {
-            message.append("Node[");
-            message.append(entityIdDto.getNodeId());
-            message.append("]");
-        } else if (entityIdDto.hasMonitoringPolicyId()) {
-            message.append("MonitoringPolicy[");
-            message.append(entityIdDto.getMonitoringPolicyId());
-            message.append("]");
-        } else if (entityIdDto.hasActiveDiscoveryId()) {
-            message.append("ActiveDiscovery[");
-            message.append(entityIdDto.getActiveDiscoveryId());
-            message.append("]");
-        } else if (entityIdDto.hasPassiveDiscoveryId()) {
-            message.append("PassiveDiscovery[");
-            message.append(entityIdDto.getPassiveDiscoveryId());
-            message.append("]");
-
-        } else {
-            message.append("Unknown");
-        }
-        return message.toString();
     }
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {

@@ -254,13 +254,15 @@ public class TagService {
             return;
         }
         for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
+            log.info("Updating tags for " + displayEntityTypeAndId(entityId));
+
             var currentTagsNameToIds = getTagsByEntityId(tenantId,
                 ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(entityId).build())
                 .stream().collect(Collectors.toMap(TagDTO::getName, TagDTO::getId));
-            log.info("Tag Update: Existing: " + currentTagsNameToIds.keySet());
+            log.info("Existing tags: " + currentTagsNameToIds.keySet());
 
             var requestTags = request.getTagsList().stream().map(TagCreateDTO::getName).toList();
-            log.info("Tag Update: Requested: " + requestTags);
+            log.info("Requested tags: " + requestTags);
 
             var newTags = new ArrayList<>(requestTags);
             newTags.removeAll(currentTagsNameToIds.keySet());
@@ -280,6 +282,31 @@ public class TagService {
                 .build();
             removeTags(tenantId, remove);
         }
+    }
+
+    private String displayEntityTypeAndId(TagEntityIdDTO entityIdDto) {
+        StringBuilder message = new StringBuilder();
+        if (entityIdDto.hasNodeId()) {
+            message.append("Node[");
+            message.append(entityIdDto.getNodeId());
+            message.append("]");
+        } else if (entityIdDto.hasMonitoringPolicyId()) {
+            message.append("MonitoringPolicy[");
+            message.append(entityIdDto.getMonitoringPolicyId());
+            message.append("]");
+        } else if (entityIdDto.hasActiveDiscoveryId()) {
+            message.append("ActiveDiscovery[");
+            message.append(entityIdDto.getActiveDiscoveryId());
+            message.append("]");
+        } else if (entityIdDto.hasPassiveDiscoveryId()) {
+            message.append("PassiveDiscovery[");
+            message.append(entityIdDto.getPassiveDiscoveryId());
+            message.append("]");
+
+        } else {
+            message.append("Unknown");
+        }
+        return message.toString();
     }
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {

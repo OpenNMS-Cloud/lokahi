@@ -420,11 +420,11 @@ public class TagServiceTest {
         var activeDiscovery = new IcmpActiveDiscovery();
         activeDiscovery.setId(activeDiscoveryId);
 
-        Map<String, Long> existingTagMap = new HashMap<>(Map.ofEntries(
+        Map<String, Long> existingTagMap = Map.ofEntries(
             entry("tag1", 100L),
             entry("tag2", 200L),
             entry("tag3", 300L)
-        ));
+        );
         var existingTags = existingTagMap.entrySet().stream().map(entry -> {
             var tag = new Tag();
             tag.setId(entry.getValue());

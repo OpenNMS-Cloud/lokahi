@@ -342,7 +342,7 @@ jobs:
 
     # Need this to trigger only when PR is merged or there is a push to
     # develop (default) branch. All testing is already complete.
-    #if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
 
@@ -375,16 +375,16 @@ jobs:
 
           cat METADATA.txt
 
-          #git config --global user.email jaberry@opennms.com
-          #git config --global user.name jaberry
+          git config --global user.email jaberry@opennms.com
+          git config --global user.name jaberry
 
-          #git remote add hs https://github.com/OpenNMS-Cloud/lokahi.git
+          git remote add hs https://github.com/OpenNMS-Cloud/lokahi.git
 
-          #git checkout from-develop
+          git checkout from-develop
 
-          #git fetch hs develop
-          #git reset --hard FETCH_HEAD
-          #git push
-          #git checkout trunk
-          #git merge from-develop
-          #git push
+          git fetch hs develop
+          git reset --hard FETCH_HEAD
+          git push
+          git checkout trunk
+          git merge from-develop
+          git push

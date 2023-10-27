@@ -373,7 +373,7 @@ jobs:
           echo "\"github.triggering_actor\": ${{ github.triggering_actor }}" >> METADATA.txt
           echo "\"github.event.pull_request._links.html.href\": ${{ github.event.pull_request._links.html.href }}" >> METADATA.txt
 
-          cat touch METADATA.txt
+          cat METADATA.txt
 
           #git config --global user.email jaberry@opennms.com
           #git config --global user.name jaberry

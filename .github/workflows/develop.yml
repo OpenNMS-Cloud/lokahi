@@ -357,10 +357,20 @@ jobs:
       - name: update
         shell: bash
         env:
-          JSON_DOC: ${{ toJSON( github ) }}
+          #JSON_DOC: ${{ toJSON( github ) }}
         run: |
-          printf '%s\n' "$JSON_DOC" > foo.json
-          cat foo.json          
+          #printf '%s\n' "$JSON_DOC" > foo.json
+          #cat foo.json | grep 
+
+          echo ${{ github.ref }}
+          echo ${{ github.sha }}
+          echo ${{ github.repository }}
+          echo ${{ github.run_id }}
+          echo ${{ github.run_number }}
+          echo ${{ github.run_attempt }}
+          echo ${{ github.actor }}
+          echo ${{ github.triggering_actor }}
+          echo ${{ github.event.pull_request._links.html.href }}
 
           #git config --global user.email jaberry@opennms.com
           #git config --global user.name jaberry

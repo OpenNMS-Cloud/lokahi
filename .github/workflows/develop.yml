@@ -342,7 +342,7 @@ jobs:
 
     # Need this to trigger only when PR is merged or there is a push to
     # develop (default) branch. All testing is already complete.
-    if: github.ref == 'refs/heads/develop'
+    #if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
 

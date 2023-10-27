@@ -356,8 +356,8 @@ jobs:
           # what we need.
       - name: update
         shell: bash
-        env:
-          #JSON_DOC: ${{ toJSON( github ) }}
+        #env:
+        #  JSON_DOC: ${{ toJSON( github ) }}
         run: |
           #printf '%s\n' "$JSON_DOC" > foo.json
           #cat foo.json | grep 

@@ -15,8 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { FeatherAppRailNavItem } from '@featherds/app-rail'
-
 defineProps({
   icon: {
     type: Object,

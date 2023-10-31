@@ -29,7 +29,6 @@
 package org.opennms.horizon.alertservice.service;
 
 import com.google.common.collect.Sets;
-import com.google.protobuf.OptionOrBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.alerts.proto.AlertType;

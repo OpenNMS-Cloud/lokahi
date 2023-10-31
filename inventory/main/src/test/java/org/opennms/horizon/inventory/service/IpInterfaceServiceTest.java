@@ -1,10 +1,12 @@
 package org.opennms.horizon.inventory.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -12,6 +14,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.shared.utils.IPAddress;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 
 import java.util.List;
@@ -19,7 +22,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IpInterfaceServiceTest {
 
@@ -128,6 +134,36 @@ public class IpInterfaceServiceTest {
         );
     }
 
+
+    @Test
+    void testCreateFromAzureScanResultDuplicateIp() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testNode = new Node();
+        testNode.setMonitoringLocationId(TEST_LOCATION_ID);
+        var azureInterface = new AzureInterface();
+        azureInterface.setId(1L);
+        var testAzureScanNetworkInterfaceItem =
+            AzureScanNetworkInterfaceItem.newBuilder()
+                .setIpAddress("11.11.11.11")
+                .build();
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(InetAddressUtils.getInetAddress(testAzureScanNetworkInterfaceItem.getIpAddress()), TEST_LOCATION_ID, TEST_TENANT_ID))
+            .thenReturn(Optional.of(new IpInterface()));
+
+        //
+        // Execute
+        //
+        var exception = Assertions.assertThrows(InventoryRuntimeException.class, () ->
+            target.createFromAzureScanResult(TEST_TENANT_ID, testNode, azureInterface, testAzureScanNetworkInterfaceItem)
+        );
+
+        //
+        // Verify the Results
+        //
+        assertEquals("duplicate ip address for /11.11.11.11, locationId: 1313, tenantId: x-tenant-id-x", exception.getMessage());
+    }
+
     @Test
     void testFindByIpAddressAndLocationAndTenantId() {
         //
@@ -203,6 +239,40 @@ public class IpInterfaceServiceTest {
                     ( Objects.equals("x-netmask-x", argument.getNetmask()) )
                 )
         ));
+    }
+
+    @Test
+    void testCreateOrUpdateFromScanResultDuplicateIp() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testNode = new Node();
+        testNode.setId(1313);
+        testNode.setMonitoringLocationId(TEST_LOCATION_ID);
+        var testIpInterfaceResult =
+            IpInterfaceResult.newBuilder()
+                .setIfIndex(1)
+                .setIpHostName("x-hostname-x")
+                .setNetmask("x-netmask-x")
+                .setIpAddress("11.11.11.11")
+                .build();
+        var testSnmpInterface1 = new SnmpInterface();
+        var ipInterface = new IpInterface();
+        ipInterface.setIpAddress(new IPAddress("11.11.11.11").toInetAddress());
+        Map<Integer, SnmpInterface> snmpInterfaceMap = Map.of(1, testSnmpInterface1);
+        Mockito.when(mockIpInterfaceMapper.fromScanResult(testIpInterfaceResult)).thenReturn(ipInterface);
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.of(testIpInterface));
+
+        //
+        // Execute
+        //
+        var exception = assertThrows(InventoryRuntimeException.class, () ->
+        target.createOrUpdateFromScanResult(TEST_TENANT_ID, testNode, testIpInterfaceResult, snmpInterfaceMap));
+
+        //
+        // Verify the Results
+        //
+        assertEquals("duplicate ip address for /11.11.11.11, locationId: 1313, tenantId: x-tenant-id-x", exception.getMessage());
     }
 
     @Test

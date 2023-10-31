@@ -3,6 +3,7 @@ package org.opennms.horizon.inventory.service;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -52,6 +53,13 @@ public class IpInterfaceService {
     public void createFromAzureScanResult(String tenantId, Node node, AzureInterface azureInterface,
                                                  AzureScanNetworkInterfaceItem networkInterfaceItem) {
         Objects.requireNonNull(azureInterface);
+
+        modelRepo.findByIpAddressAndLocationIdAndTenantId(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()), node.getMonitoringLocationId(), tenantId)
+            .ifPresent(existIp -> {
+                throw new InventoryRuntimeException(String.format("duplicate ip address for %s, locationId: %s, tenantId: %s",
+                    InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()), node.getMonitoringLocationId(), tenantId));
+            });
+
         IpInterface ipInterface = new IpInterface();
         ipInterface.setNode(node);
         ipInterface.setTenantId(tenantId);
@@ -75,6 +83,12 @@ public class IpInterfaceService {
                 modelRepo.save(ipInterface);
             }, () -> {
                 IpInterface ipInterface = mapper.fromScanResult(result);
+                modelRepo.findByIpAddressAndLocationIdAndTenantId(ipInterface.getIpAddress(), node.getMonitoringLocationId(), tenantId)
+                    .ifPresent(existIp -> {
+                        throw new InventoryRuntimeException(String.format("duplicate ip address for %s, locationId: %s, tenantId: %s",
+                            ipInterface.getIpAddress(), node.getMonitoringLocationId(), tenantId));
+                    });
+
                 ipInterface.setNode(node);
                 ipInterface.setTenantId(tenantId);
                 ipInterface.setSnmpPrimary(false);

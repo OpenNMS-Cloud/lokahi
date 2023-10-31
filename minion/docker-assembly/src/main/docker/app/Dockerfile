@@ -62,6 +62,9 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opennms.cicd.buildurl="${BUILD_URL}" \
       org.opennms.cicd.branch="${BUILD_BRANCH}"
 
+RUN echo "org.opencontainers.image.created=${BUILD_DATE}" >> /opt/karaf/etc/org.opennms.version.cfg
+RUN echo "org.opencontainers.image.version=${VERSION}" >> /opt/karaf/etc/org.opennms.version.cfg
+
 WORKDIR /opt/karaf
 
 USER 10001

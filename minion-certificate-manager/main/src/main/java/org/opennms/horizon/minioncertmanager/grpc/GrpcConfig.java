@@ -28,11 +28,15 @@
 
 package org.opennms.horizon.minioncertmanager.grpc;
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.rotation.JWKPublicKeyLocator;
 import org.keycloak.representations.adapters.config.AdapterConfig;
+import org.opennms.horizon.minioncertmanager.grpc.client.InventoryClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +51,10 @@ public class GrpcConfig {
     private String keycloakAuthUrl;
     @Value("${keycloak.realm}")
     private String keycloakRealm;
+    @Value("${grpc.server.deadline:60000}")
+    private long deadline;
+    @Value("${grpc.inventory.url}")
+    private String inventoryUrl;
 
     @Bean
     public KeycloakDeployment createKeycloak() {
@@ -67,6 +75,18 @@ public class GrpcConfig {
         keycloak.setClient(client);
 
         return keycloak;
+    }
+
+    @Bean(name = "inventoryChannel")
+    public ManagedChannel createInventoryChannel() {
+        return ManagedChannelBuilder.forTarget(inventoryUrl)
+            .keepAliveWithoutCalls(true)
+            .usePlaintext().build();
+    }
+
+    @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
+    public InventoryClient createInventoryClient(@Qualifier("inventoryChannel") ManagedChannel channel) {
+        return new InventoryClient(channel, deadline);
     }
 
     @Bean(destroyMethod = "stopServer")

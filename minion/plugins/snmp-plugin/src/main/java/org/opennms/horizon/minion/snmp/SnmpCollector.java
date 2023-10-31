@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.minion.snmp;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.opennms.horizon.minion.plugin.api.CollectionRequest;
@@ -63,6 +64,10 @@ public class SnmpCollector implements ServiceCollector {
 
     private final Logger LOG = LoggerFactory.getLogger(SnmpCollector.class);
     private final SnmpHelper snmpHelper;
+    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("snmp-collector-result-processor-%d")
+        .build();
+    private final ExecutorService executorService = Executors.newCachedThreadPool(threadFactory);
 
     private static final ExecutorService REAPER_EXECUTOR = Executors.newCachedThreadPool(new ThreadFactory() {
         @Override
@@ -132,7 +137,7 @@ public class SnmpCollector implements ServiceCollector {
                 walker.start();
                 walker.waitFor();
             }
-            result = future.thenApplyAsync(snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId));
+            result = future.thenApplyAsync(snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId), executorService);
         } catch (InvalidProtocolBufferException pbe) {
             LOG.debug("Error while mapping Snmp results to proto ", pbe);
             var response = generateFailureResponse(request);

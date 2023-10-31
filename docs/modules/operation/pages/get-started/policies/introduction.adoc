@@ -4,20 +4,24 @@
 = Monitoring Policies
 :description: Learn how monitoring policies in OpenNMS Lōkahi/Cloud can define a set of rules for monitoring nodes and taking action under certain conditions.
 
-A monitoring policy defines a set of rules for monitoring nodes and automatically taking action under certain conditions (for example, sending alerts, enforcing thresholds).
-You can apply a monitoring policy to multiple devices, allowing for easy management of the devices on your network.
+A monitoring policy defines a set of rules for monitoring nodes and automatically taking action under certain conditions (for example, sending alerts), and the notification type for those alerts (email or PagerDuty).
+
+==  Tags, monitoring policies, and nodes
+
+A tag is an optional label (for example, `router`) that you can associate with nodes and monitoring policies that allows for easy and flexible filtering and grouping of devices.
+
+OpenNMS assigns the `default` tag to all nodes identified through the xref:operation:get-started/discovery/introduction.adoc[discovery process].
+Users can remove this tag or add other tags to the node (see xref:inventory/nodes.adoc#tag-create[Create tags and add them to a node]), depending on how they want to set up their system.
 
 [[default-monitoring-policy]]
 == Default monitoring policy
 
 By default, OpenNMS Cloud/Lōkahi starts monitoring the system when it discovers nodes.
-The default monitoring policy applies to all discovered nodes, and includes the following parameters:
+This is because the discovery process automatically assigns the `default` tag to all discovered nodes, and the default monitoring policy includes a `default` tag.
 
-* Accepts SNMP Traps, Syslogs, and API events.
-* MIB-II enabled.
-* Azure cloud monitoring enabled.
-* Flows, Netflow, and JFlow enabled.
-* Uses PagerDuty to send notifications to all OpenNMS Cloud/Lōkahi users in your organization.
+The default monitoring policy creates alerts for devices that are offline, coming back online, unreachable, or whose service has been restored.
+
+As you customize Lōkahi/Cloud for your own monitoring requirements, you may choose to add/remove node tags from nodes or the default monitoring policy, or create new monitoring policies.
 
 == Before you begin
 

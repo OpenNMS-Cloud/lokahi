@@ -13,3 +13,7 @@ Note that first-time login with OpenNMS Cloud includes basic onboarding of setti
 To log out of the software, click the logout symbol image:get-started/logout.png[bracket with right arrow, 30] in the top right of any screen.
 Note that with OpenNMS Cloud, this action logs you out of OpenNMS Cloud but does not log you out of the OpenNMS Cloud Portal.
 You need to log out of the Cloud Portal separately from its own UI.
+
+== Toggle light/dark mode
+By default, the OpenNMS Cloud UI appears in light mode.
+To switch between light and dark modes, click the light/dark mode symbol image:get-started/dark-mode.png[circle that is half black, half white, 30] in the top right of any screen.

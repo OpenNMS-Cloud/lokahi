@@ -29,8 +29,10 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.protobuf.Int64Value;
+import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.inventory.component.AlertClient;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -78,13 +80,16 @@ public class TagService {
     private final TagPublisher tagPublisher;
     private final NodeService nodeService;
 
+    private final AlertClient alertClient;
+
     public TagService(final TagRepository repository,
                       final NodeRepository nodeRepository,
                       final ActiveDiscoveryRepository activeDiscoveryRepository,
                       final PassiveDiscoveryRepository passiveDiscoveryRepository,
                       final TagMapper mapper,
                       final TagPublisher tagPublisher,
-                      @Lazy final NodeService nodeService) {
+                      @Lazy final NodeService nodeService,
+                      final AlertClient alertClient) {
         this.repository = Objects.requireNonNull(repository);
         this.nodeRepository = Objects.requireNonNull(nodeRepository);
         this.activeDiscoveryRepository = Objects.requireNonNull(activeDiscoveryRepository);
@@ -92,6 +97,7 @@ public class TagService {
         this.mapper = Objects.requireNonNull(mapper);
         this.tagPublisher = Objects.requireNonNull(tagPublisher);
         this.nodeService = Objects.requireNonNull(nodeService);
+        this.alertClient = Objects.requireNonNull(alertClient);
     }
 
     @Transactional
@@ -111,7 +117,6 @@ public class TagService {
 
 
     private List<TagDTO> addTags(String tenantId, TagEntityIdDTO entityId, List<TagCreateDTO> tagCreateList) {
-
         if (entityId.hasNodeId()) {
             Node node = getNode(tenantId, entityId.getNodeId());
             List<TagOperationProto> tagOpList = tagCreateList.stream().map(t -> TagOperationProto.newBuilder()
@@ -119,7 +124,7 @@ public class TagService {
                 .setTagName(t.getName())
                 .setTenantId(tenantId)
                 .addNodeId(node.getId())
-                .build()).collect(Collectors.toList());
+                .build()).toList();
             final var result = tagCreateList.stream()
                 .map(tagCreateDTO -> addTagToNode(tenantId, node, tagCreateDTO))
                 .toList();
@@ -136,6 +141,9 @@ public class TagService {
                 .map(tagCreateDTO -> addTagToPassiveDiscovery(tenantId, discovery, tagCreateDTO))
                 .toList();
         } else if (entityId.hasMonitoringPolicyId()) {
+            if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
+                throw new InventoryRuntimeException("MonitoringPolicy not found for id: " + entityId.getMonitoringPolicyId());
+            }
             return tagCreateList.stream().map(tagCreateDTO ->
                     addTagsToMonitoringPolicy(tenantId, entityId.getMonitoringPolicyId(), tagCreateDTO))
                 .collect(Collectors.toList());
@@ -189,6 +197,9 @@ public class TagService {
         } else if (entityId.hasPassiveDiscoveryId()) {
             return getTagsByPassiveDiscoveryId(tenantId, listParams);
         } else if (entityId.hasMonitoringPolicyId()) {
+            if (!policyExists(entityId.getMonitoringPolicyId(), tenantId)) {
+                throw new InventoryRuntimeException("MonitoringPolicy not found for id: " + entityId.getMonitoringPolicyId());
+            }
             return getTagsByMonitoryPolicyId(tenantId, listParams);
         } else {
             throw new InventoryRuntimeException("Invalid ID provided");
@@ -231,41 +242,47 @@ public class TagService {
                 for (final var node: nodes) {
                     this.nodeService.updateNodeMonitoredState(node.getId(),  node.getTenantId());
                 }
+            } else {
+                throw new InventoryRuntimeException("Invalid Tag id: " + tagId.getValue());
             }
         }
     }
 
     @Transactional
     public void updateTags(String tenantId, TagCreateListDTO request) {
-        if (request.getTagsList().isEmpty()) {
-            return;
-        }
         if (request.getEntityIdsList().isEmpty()) {
             return;
         }
         for (TagEntityIdDTO entityId : request.getEntityIdsList()) {
-            removeEntityTagAssociations(tenantId, entityId);
-        }
-        addTags(tenantId, request);
-    }
+            log.info("Updating tags for " + entityId);
 
-    private void removeEntityTagAssociations(String tenantId, TagEntityIdDTO entityId) {
-        if (entityId.hasNodeId()) {
-            Node node = getNode(tenantId, entityId.getNodeId());
-            node.getTags().forEach(tag -> tag.getNodes().remove(node));
-        } else if (entityId.hasActiveDiscoveryId()) {
-            ActiveDiscovery activeDiscovery = getActiveDiscovery(tenantId, entityId.getActiveDiscoveryId());
-            activeDiscovery.getTags().forEach(tag -> {
-                tag.getActiveDiscoveries().remove(activeDiscovery);
-            });
-        } else if (entityId.hasPassiveDiscoveryId()) {
-            PassiveDiscovery discovery = getPassiveDiscovery(tenantId, entityId.getPassiveDiscoveryId());
-            discovery.getTags().forEach(tag -> {
-                tag.getPassiveDiscoveries().remove(discovery);
-            });
+            var currentTagsNameToIds = getTagsByEntityId(tenantId,
+                ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(entityId).build())
+                .stream().collect(Collectors.toMap(TagDTO::getName, TagDTO::getId));
+            log.info("Existing tags: " + currentTagsNameToIds.keySet());
+
+            var requestTags = request.getTagsList().stream().map(TagCreateDTO::getName).toList();
+            log.info("Requested tags: " + requestTags);
+
+            var newTags = new ArrayList<>(requestTags);
+            newTags.removeAll(currentTagsNameToIds.keySet());
+            log.info("Adding tags: " + newTags);
+            var add = TagCreateListDTO.newBuilder()
+                .addEntityIds(entityId)
+                .addAllTags(newTags.stream().map(tagName -> TagCreateDTO.newBuilder().setName(tagName).build()).toList())
+                .build();
+            addTags(tenantId, add);
+
+            var removeTags = new ArrayList<>(currentTagsNameToIds.keySet());
+            removeTags.removeAll(requestTags);
+            log.info("Removing tags: " + removeTags);
+            var remove = TagRemoveListDTO.newBuilder()
+                .addEntityIds(entityId)
+                .addAllTagIds(removeTags.stream().map(tagName -> Int64Value.of(currentTagsNameToIds.get(tagName))).toList())
+                .build();
+            removeTags(tenantId, remove);
         }
     }
-
 
     private TagDTO addTagToNode(String tenantId, Node node, TagCreateDTO tagCreateDTO) {
         String tagName = tagCreateDTO.getName();
@@ -382,6 +399,9 @@ public class TagService {
         TagEntityIdDTO entityId = listParams.getEntityId();
 
         long nodeId = entityId.getNodeId();
+        if (nodeRepository.findByIdAndTenantId(nodeId, tenantId).isEmpty() ){
+            throw new InventoryRuntimeException("Node not found for id: " + nodeId);
+        }
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -399,6 +419,10 @@ public class TagService {
         TagEntityIdDTO entityId = listParams.getEntityId();
 
         long activeDiscoveryId = entityId.getActiveDiscoveryId();
+        if (activeDiscoveryRepository.findByTenantIdAndId(tenantId, activeDiscoveryId).isEmpty()) {
+            throw new InventoryRuntimeException("ActiveDiscovery not found for id: " + activeDiscoveryId);
+        }
+
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -416,6 +440,9 @@ public class TagService {
         TagEntityIdDTO entityId = listParams.getEntityId();
 
         long passiveDiscoveryId = entityId.getPassiveDiscoveryId();
+        if (passiveDiscoveryRepository.findByTenantIdAndId(tenantId, passiveDiscoveryId).isEmpty()) {
+            throw new InventoryRuntimeException("PassiveDiscovery not found for id: " + passiveDiscoveryId);
+        }
         if (listParams.hasParams()) {
             TagListParamsDTO params = listParams.getParams();
             String searchTerm = params.getSearchTerm();
@@ -509,5 +536,15 @@ public class TagService {
                 }
             }
         });
+    }
+
+    private boolean policyExists(long policyId, String tenantId) {
+        try {
+            var policy = alertClient.getPolicyById(policyId, tenantId);
+            return policy != null;
+        } catch (StatusRuntimeException ex) {
+            log.error("Error during get policyId: {} tenantId: {}", policyId, tenantId);
+            return false;
+        }
     }
 }

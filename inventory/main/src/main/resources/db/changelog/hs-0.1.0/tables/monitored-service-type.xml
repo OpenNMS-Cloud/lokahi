@@ -28,4 +28,8 @@
                        constraintName="pk_monitored_service_type_id"/>
 
     </changeSet>
+
+    <changeSet id="0.1.0-monitored-service-type-unique-service-type" author="cgorantla">
+        <addUniqueConstraint constraintName="unique-service-type-for-a-tenant" tableName="monitored_service_type" columnNames="tenant_id, service_name"/>
+    </changeSet>
 </databaseChangeLog>

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.MonitoringSystemMapper;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
@@ -33,6 +35,9 @@ public class MonitoringSystemService {
     }
 
     public List<MonitoringSystemDTO> findByMonitoringLocationIdAndTenantId(long locationId, String tenantId) {
+        if (locationRepository.findByIdAndTenantId(locationId, tenantId).isEmpty()) {
+            throw new LocationNotFoundException("Location not found for id: " + locationId);
+        }
         List<MonitoringSystem> all = systemRepository.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
         return all
             .stream()

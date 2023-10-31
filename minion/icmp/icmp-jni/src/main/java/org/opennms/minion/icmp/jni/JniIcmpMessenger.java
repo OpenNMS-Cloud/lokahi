@@ -28,16 +28,15 @@
 
 package org.opennms.minion.icmp.jni;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-
-import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.protocols.icmp.ICMPEchoPacket;
 import org.opennms.protocols.icmp.IcmpSocket;
 import org.opennms.protocols.rt.Messenger;
 import org.opennms.protocols.rt.ReplyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
 
 /**
  * JniIcmpMessenger
@@ -104,7 +103,6 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
         final Thread socketReader = new Thread("JNI-ICMP-"+m_pingerId+"-Socket-Reader") {
             @Override
             public void run() {
-                Logging.putPrefix("icmp");
                 try {
                     processPackets(callback);
                 } catch (Throwable t) {

@@ -15,6 +15,8 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 
@@ -58,6 +60,7 @@ public class PassiveDiscoveryGrpcServiceTest {
 
         target = new PassiveDiscoveryGrpcService(mockTenantLookup, mockIcmpActiveDiscoveryService);
     }
+
 
     @Test
     void testCreateNewDiscovery() {
@@ -112,7 +115,53 @@ public class PassiveDiscoveryGrpcServiceTest {
     }
 
     @Test
-    void testCreateDiscoveryException() {
+    void testCreateDiscoveryNotFoundException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testException = new LocationNotFoundException("x-test-exception-x");
+        var discoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder().setName("xxx-discovery-xxx").build();
+        prepareCommonTenantLookup();
+        StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, discoveryUpsertDTO)).thenThrow(testException);
+
+        //
+        // Execute
+        //
+        target.upsertDiscovery(discoveryUpsertDTO, mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.NOT_FOUND_VALUE, "x-test-exception-x");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testCreateDiscoveryInventoryRuntimeException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testException = new InventoryRuntimeException("x-test-exception-x");
+        var discoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder().setName("xxx-discovery-xxx").build();
+        prepareCommonTenantLookup();
+        StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, discoveryUpsertDTO)).thenThrow(testException);
+
+        //
+        // Execute
+        //
+        target.upsertDiscovery(discoveryUpsertDTO, mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.INTERNAL_VALUE, "x-test-exception-x");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testCreateDiscoveryInternalException() {
         //
         // Setup Test Data and Interactions
         //
@@ -266,7 +315,7 @@ public class PassiveDiscoveryGrpcServiceTest {
         //
         // Verify the Results
         //
-        var matcher = prepareStatusExceptionMatcher(Code.INTERNAL_VALUE, "x-test-exception-x");
+        var matcher = prepareStatusExceptionMatcher(Code.NOT_FOUND_VALUE, "x-test-exception-x");
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
@@ -311,6 +360,27 @@ public class PassiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onCompleted();
     }
 
+    @Test
+    void testDeleteDiscoveryInventoryRuntimeException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testException = new InventoryRuntimeException("x-test-exception-x");
+        prepareCommonTenantLookup();
+        StreamObserver<BoolValue> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.doThrow(testException).when(mockIcmpActiveDiscoveryService).deleteDiscovery(TEST_TENANT_ID, 2323);
+
+        //
+        // Execute
+        //
+        target.deleteDiscovery(Int64Value.of(2323), mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.NOT_FOUND_VALUE, "x-test-exception-x");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
+    }
     @Test
     void testDeleteDiscoveryException() {
         //

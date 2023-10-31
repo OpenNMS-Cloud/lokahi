@@ -36,6 +36,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.discovery.PassiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -43,6 +44,7 @@ import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.Constants;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
@@ -66,6 +68,7 @@ public class PassiveDiscoveryService {
     private final TagService tagService;
     private final NodeRepository nodeRepository;
     private final ScannerTaskSetService scannerTaskSetService;
+    private final MonitoringLocationService monitoringLocationService;
 
     @Transactional
     public PassiveDiscoveryDTO createDiscovery(String tenantId, PassiveDiscoveryUpsertDTO request) {
@@ -144,6 +147,10 @@ public class PassiveDiscoveryService {
     }
 
     private void validateDiscovery(String tenantId, PassiveDiscoveryUpsertDTO dto) {
+        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(dto.getLocationId()), tenantId);
+        if (location.isEmpty()) {
+            throw new LocationNotFoundException("Location not found");
+        }
         Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(dto.getLocationId()));
         if (discoveryOpt.isPresent()) {
             PassiveDiscovery discovery = discoveryOpt.get();
@@ -243,6 +250,8 @@ public class PassiveDiscoveryService {
         if (passiveDiscoveryOpt.isPresent()) {
             PassiveDiscovery discovery = passiveDiscoveryOpt.get();
             repository.delete(discovery);
+        } else {
+            throw new InventoryRuntimeException("Discovery not found.");
         }
     }
 }

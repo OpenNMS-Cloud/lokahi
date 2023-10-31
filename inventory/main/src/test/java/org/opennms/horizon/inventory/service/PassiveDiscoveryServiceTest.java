@@ -28,12 +28,15 @@
 
 package org.opennms.horizon.inventory.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.discovery.PassiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.discovery.PassiveDiscovery;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
@@ -41,10 +44,15 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 public class PassiveDiscoveryServiceTest {
@@ -54,14 +62,17 @@ public class PassiveDiscoveryServiceTest {
     private NodeRepository nodeRepository;
     private ScannerTaskSetService scannerTaskSetService;
 
+    private MonitoringLocationService monitoringLocationService;
+
     @BeforeEach
     void prepareTest() {
         PassiveDiscoveryMapper passiveDiscoveryMapper = Mappers.getMapper(PassiveDiscoveryMapper.class);
         passiveDiscoveryRepository = mock(PassiveDiscoveryRepository.class);
         tagService = mock(TagService.class);
         nodeRepository = mock(NodeRepository.class);
+        monitoringLocationService = mock(MonitoringLocationService.class);
         passiveDiscoveryService = new PassiveDiscoveryService(passiveDiscoveryMapper,
-            passiveDiscoveryRepository, tagService,nodeRepository,scannerTaskSetService);
+            passiveDiscoveryRepository, tagService, nodeRepository, scannerTaskSetService, monitoringLocationService);
     }
 
     @Test
@@ -116,5 +127,42 @@ public class PassiveDiscoveryServiceTest {
             passiveDiscoveryService.validateSnmpPorts(invalid);
         });
         assertTrue(exception.getMessage().contains("SNMP port is not in range"));
+    }
+
+    @Test
+    void testCreateDiscoveryLocationNotFound() {
+        final String tenantId = "test_tenant";
+        final String locationId = "11";
+
+        PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
+            .setLocationId(locationId).build();
+        var exception = assertThrows(LocationNotFoundException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
+
+        Assertions.assertEquals("Location not found", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteDiscovery() {
+        String tenantId = "test_tenant";
+        long discoveryId = 10L;
+        PassiveDiscovery passiveDiscovery = mock(PassiveDiscovery.class);
+        when(passiveDiscoveryRepository.findByTenantIdAndId(tenantId, discoveryId)).thenReturn(Optional.of(passiveDiscovery));
+
+        passiveDiscoveryService.deleteDiscovery(tenantId, discoveryId);
+
+        verify(passiveDiscoveryRepository, times(1)).delete(passiveDiscovery);
+    }
+
+    @Test
+    void testDeleteDiscoveryNotFound() {
+        String tenantId = "test_tenant";
+        long discoveryId = 10L;
+
+        when(passiveDiscoveryRepository.findByTenantIdAndId(tenantId, discoveryId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(InventoryRuntimeException.class,
+            () -> passiveDiscoveryService.deleteDiscovery(tenantId, discoveryId));
+
+        Assertions.assertEquals("Discovery not found.", exception.getMessage());
     }
 }

@@ -35,6 +35,7 @@ import com.google.rpc.Status;
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
@@ -91,8 +92,13 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryServiceGrpc.Activ
                 service.deleteActiveDiscovery(tenantId, request.getValue());
                 responseObserver.onNext(BoolValue.of(true));
                 responseObserver.onCompleted();
+            } catch (EntityNotFoundException e) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.NOT_FOUND_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
@@ -100,7 +106,6 @@ public class ActiveDiscoveryGrpcService extends ActiveDiscoveryServiceGrpc.Activ
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
         }, () -> {
-
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage("Tenant Id can't be empty")

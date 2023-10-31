@@ -40,7 +40,7 @@ import static com.codeborne.selenide.Selenide.actions;
 
 public class LeftPanelPage {
     private static final SelenideElement leftPanel = $(".app-aside");
-    private static final SelenideElement topRightBorder = $(By.xpath("//div[@class='right center-horiz'][1]"));
+    private static final SelenideElement topRightBorder = $(By.xpath("//div[@class='header']"));
     private static final SelenideElement leftPanelWide = $(By.xpath("//div[@class='feather-app-rail']"));
     private static final SelenideElement leftPanelSmall = $(By.xpath("//div[@class='feather-app-rail narrow']"));
 

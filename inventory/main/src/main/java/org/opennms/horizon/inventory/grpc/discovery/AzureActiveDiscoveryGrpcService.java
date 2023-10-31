@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.AzureActiveDiscoveryService;
 import org.springframework.stereotype.Component;
@@ -55,15 +56,17 @@ public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryService
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {
-
             try {
                 AzureActiveDiscoveryDTO discovery = service.createActiveDiscovery(tenantId, request);
-
                 responseObserver.onNext(discovery);
                 responseObserver.onCompleted();
-
+            } catch (LocationNotFoundException e){
+                Status status = Status.newBuilder()
+                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             } catch (Exception e) {
-
                 Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage(e.getMessage())
@@ -71,13 +74,11 @@ public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryService
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
         }, () -> {
-
             Status status = Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage("Tenant Id can't be empty")
                 .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         });
-
     }
 }

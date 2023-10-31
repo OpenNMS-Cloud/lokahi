@@ -29,6 +29,7 @@
 package org.opennms.horizon.minion.grpc;
 
 import org.apache.karaf.system.SystemService;
+import org.opennms.horizon.shared.logging.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ import java.util.regex.Pattern;
 
 public class GrpcShutdownHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GrpcShutdownHandler.class);
+    private static final String LOG_PREFIX = "error";
     private static final Pattern pattern = Pattern.compile("^\\+\\d+$"); // "+2" - denotes 2 min wait before shutdown
     private static final String MINION_DELAY_BEFORE_SHUTDOWN_ENV = "MINION_DELAY_BEFORE_SHUTDOWN";
     private final SystemService systemService;
@@ -56,7 +58,7 @@ public class GrpcShutdownHandler {
             LOG.error("*********************************************************************************************************************************");
             LOG.error("*********************************************************************************************************************************");
         }));
-        try {
+        try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(LOG_PREFIX)) {
             LOG.error("*********************************************************************************************************************************");
             LOG.error("*********************************************************************************************************************************");
             LOG.error(message);

@@ -125,6 +125,7 @@ jobs:
           docker buildx build --push \
             --tag opennms/lokahi-minion:latest \
             --tag opennms/lokahi-minion:${{ env.RELEASE_TAG }} \
+            --build-arg VERSION=${{ env.RELEASE_TAG }} \
             docker-assembly/target/docker/opennms/lokahi-minion/latest/build/ \
             -f docker-assembly/src/main/docker/app/Dockerfile \
             --platform linux/amd64,linux/arm64,linux/arm/v7

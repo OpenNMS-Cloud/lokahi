@@ -68,8 +68,13 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
         List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
             .map(tenantId -> service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId))
             .orElseThrow();
-        responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
-        responseObserver.onCompleted();
+
+        if (list.isEmpty()) {
+            responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(locationId.getValue())));
+        } else {
+            responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
+            responseObserver.onCompleted();
+        }
     }
 
     @Override

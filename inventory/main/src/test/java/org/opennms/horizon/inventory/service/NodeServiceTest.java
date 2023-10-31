@@ -30,6 +30,7 @@ package org.opennms.horizon.inventory.service;
 
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -105,7 +107,6 @@ public class NodeServiceTest {
         tagService = mock(TagService.class);
         tagRepository = mock(TagRepository.class);
         mockTagPublisher = mock(TagPublisher.class);
-
 
         nodeService = new NodeService(mockNodeRepository,
             mockMonitoringLocationRepository,
@@ -477,6 +478,7 @@ public class NodeServiceTest {
         final var tagMonitoredWithDefaultTag = new Tag();
         tagMonitoredWithDefaultTag.setName("default");
 
+        when(this.mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId())).thenReturn(Optional.of(testNode));
         when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of());
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.DETECTED, testNode.getMonitoredState());
@@ -502,5 +504,11 @@ public class NodeServiceTest {
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
         Mockito.verify(mockNodeRepository, atLeastOnce()).save(testNode);
+
+        // test node not found
+        var exception = Assert.assertThrows(InventoryRuntimeException.class, () -> {
+            nodeService.updateNodeMonitoredState(9999L, testNode.getTenantId());
+        });
+        assertEquals("Node not found for id: 9999", exception.getMessage());
     }
 }

@@ -61,7 +61,7 @@ public class SystemPolicyTag {
 
     @Id
     @OneToOne
-    @JoinColumn(name = "tag_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "tag_id", referencedColumnName = "id", nullable = true)
     private Tag tag;
 
     @AllArgsConstructor

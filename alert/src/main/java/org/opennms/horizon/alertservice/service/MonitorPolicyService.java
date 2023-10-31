@@ -35,15 +35,15 @@ import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
-import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.opennms.horizon.alertservice.db.entity.MonitorPolicy;
+import org.opennms.horizon.alertservice.db.entity.SystemPolicyTag;
 import org.opennms.horizon.alertservice.db.entity.Tag;
 import org.opennms.horizon.alertservice.db.repository.AlertDefinitionRepository;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.SystemPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.MonitorPolicyRepository;
 import org.opennms.horizon.alertservice.db.repository.PolicyRuleRepository;
+import org.opennms.horizon.alertservice.db.repository.SystemPolicyTagRepository;
 import org.opennms.horizon.alertservice.db.repository.TagRepository;
 import org.opennms.horizon.alertservice.mapper.MonitorPolicyMapper;
 import org.opennms.horizon.alertservice.service.routing.TagOperationProducer;
@@ -57,6 +57,7 @@ import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -84,6 +85,13 @@ public class MonitorPolicyService {
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {
         if (tenantId.isEmpty()) {
             throw new IllegalArgumentException("Missing tenantId");
+        }
+
+        if (request.hasField(MonitorPolicyProto.getDescriptor().findFieldByNumber(MonitorPolicyProto.ID_FIELD_NUMBER))) {
+            var policy = repository.findByIdAndTenantId(request.getId(), tenantId);
+            if (policy.isEmpty()) {
+                throw new IllegalArgumentException(String.format("policy not found by id %s for tenant %s", request.getId(), tenantId));
+            }
         }
 
         MonitorPolicy policy = policyMapper.map(request);
@@ -115,7 +123,7 @@ public class MonitorPolicyService {
             SystemPolicyTag defaultPolicyTag;
             var existingTag = tagRepository.findByTenantIdAndName(tenantId, tag.getName());
             var matchedTag = existingTagMap.get(tag.getName());
-            if (matchedTag == null) {
+            if (matchedTag == null || !tenantId.equals(matchedTag.getTenantId())) {
                 Tag updatedTag;
                 if (existingTag.isEmpty()) {
                     tag.setPolicies(new HashSet<>());
@@ -135,11 +143,25 @@ public class MonitorPolicyService {
 
         var removedTags = new HashSet<>(Sets.difference(defaultPolicy.getTags(), newTags));
         removedTags.forEach(tag -> {
-                systemPolicyTagRepository.deleteById(new SystemPolicyTag.RelationshipId(tenantId, defaultPolicy.getId(), tag));
                 defaultPolicy.getTags().remove(tag);
+                if (SYSTEM_TENANT.equals(tag.getTenantId())) {
+                    return;
+                }
+                systemPolicyTagRepository.deleteById(new SystemPolicyTag.RelationshipId(tenantId, defaultPolicy.getId(), tag));
             }
         );
+        if (!newTags.isEmpty()) {
+            systemPolicyTagRepository.deleteEmptyTagByTenantIdAndPolicyId(tenantId, defaultPolicy.getId());
+        } else if (!removedTags.isEmpty()) {
+            var systemPolicyTag = new SystemPolicyTag(tenantId, defaultPolicy.getId(), null);
+            systemPolicyTagRepository.save(systemPolicyTag);
+        }
 
+        existingTags.forEach(t -> {
+            if (SYSTEM_TENANT.equals(t.getTenantId())) {
+                t.setTenantId(tenantId);
+            }
+        });
         handleTagOperationUpdate(existingTags, newTags);
 
         return policyMapper.map(defaultPolicy);
@@ -220,9 +242,16 @@ public class MonitorPolicyService {
     private Optional<MonitorPolicy> getDefaultPolicy(String tenantId) {
         return repository.findByNameAndTenantId(DEFAULT_POLICY, SYSTEM_TENANT)
             .map(p -> {
-                var tags = systemPolicyTagRepository.findByTenantIdAndPolicyId(tenantId, p.getId())
-                    .stream().map(SystemPolicyTag::getTag).collect(Collectors.toSet());
-                p.setTags(tags);
+                var systemPolicyTags = systemPolicyTagRepository.findByTenantIdAndPolicyId(tenantId, p.getId());
+                var tags = systemPolicyTags.stream().map(systemPolicyTag -> {
+                    if (systemPolicyTag == null) {
+                        return null;
+                    }
+                    return systemPolicyTag.getTag();
+                }).filter(Objects::nonNull).collect(Collectors.toSet());
+                if (!systemPolicyTags.isEmpty()) {
+                    p.setTags(tags);
+                }
                 return p;
             });
     }

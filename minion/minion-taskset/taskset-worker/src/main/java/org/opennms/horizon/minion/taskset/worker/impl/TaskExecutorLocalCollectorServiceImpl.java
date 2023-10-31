@@ -37,6 +37,7 @@ import org.opennms.horizon.minion.plugin.api.registries.CollectorRegistry;
 import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutionResultProcessor;
 import org.opennms.horizon.minion.taskset.worker.TaskExecutorLocalService;
+import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutorLocalCollectorServiceImpl.class);
+    private static final String LOG_PREFIX = "collector";
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
@@ -101,7 +103,9 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
         // Verify it's not already active
         if (active.compareAndSet(false, true)) {
             LOG.trace("Executing iteration of task: workflow-uuid={}", taskDefinition.getId());
-            executeIteration();
+            try (Logging.MDCCloseable mdc = Logging.withPrefixCloseable(LOG_PREFIX)) {
+                executeIteration();
+            }
         } else {
             LOG.debug("Skipping iteration of task as prior iteration is still active: workflow-uuid={}", taskDefinition.getId());
         }
@@ -113,7 +117,6 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
 
             if (serviceCollector != null) {
                 CollectionRequest collectionRequest = configureCollectionRequest(taskDefinition);
-
                 CompletableFuture<CollectionSet> future = serviceCollector.collect(collectionRequest, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
@@ -147,7 +150,6 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
             } else {
                 LOG.warn("error executing workflow; workflow-uuid= {}, message = {}", taskDefinition.getId(), exc.getMessage());
             }
-
         }
     }
 

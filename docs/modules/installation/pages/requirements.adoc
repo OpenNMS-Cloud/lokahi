@@ -38,8 +38,8 @@ Make sure you have the following before you begin:
 Make sure you have the following:
 
 * Docker environment with Docker Compose
-* Access to a terminal window
-* Network Time Protocol (NTP) installed and configured
+* Access to a terminal window or command line interface
+* Synchronized system time (via Network Time Protocol (NTP) or Windows time service)
 
 === How to set up Docker
 

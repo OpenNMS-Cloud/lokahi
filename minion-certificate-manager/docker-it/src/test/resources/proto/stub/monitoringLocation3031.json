@@ -1,0 +1,18 @@
+{
+  "service": "MonitoringLocationService",
+  "method": "GetLocationById",
+  "input": {
+    "equals": {
+      "value": 3031
+    }
+  },
+  "output": {
+    "data": {
+      "id": 3031,
+      "tenant_id": "opennms-prime",
+      "location": "default",
+      "geo_location": {},
+      "address": "address"
+    }
+  }
+}

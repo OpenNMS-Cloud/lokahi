@@ -8,25 +8,38 @@
     ]">
         <div class="welcome-slide-two-inner">
             <div class="welcome-slide-two-title">
-                <h1 data-test="welcome-slide-two-title">Secure Minion Runtime Bundle</h1>
+                <h1 data-test="welcome-slide-two-title">
+                    Install Secure Minion
+                    <FeatherTooltip
+                        title="A Minion is a lightweight, secure collector that monitors and communicates with your network devices."
+                        v-slot="{ attrs, on }"
+                    >
+                        <FeatherIcon        
+                            v-bind="attrs"
+                            v-on="on" 
+                            class="info-icon" 
+                            :icon="icons.InformationIcon" 
+                        />
+                    </FeatherTooltip>
+                </h1>
                 <p>
-                    To install our secure minion, you must download our runtime bundle and run it in your desired location.
-                    For optimal monitoring, the minion needs to always be available.
+                    To install our secure Minion, you must download our runtime bundle and run it in your desired location.
+                    For optimal monitoring, the Minion needs to be available at all times.
                 </p>
                 <br>
-                <p>Our runtime bundle contains:</p>
+                <p>Our runtime bundle contains the following:</p>
                 <br>
                 <ul>
                     <li>
-                        An encrypted minion certificate with a decryption password
+                        An encrypted Minion certificate with a decryption password
                     </li>
                     <li>
-                        A docker compose file with a minion container
+                        A Docker Compose file with a Minion container
                     </li>
                 </ul>
                 <br>
                 <p>
-                    Installation can take 10 minutes.
+                    Installation can take up to 10 minutes.
                 </p>
             </div>
 
@@ -42,7 +55,7 @@
                             <FeatherButton text @click="localDownloadHandler" v-if="!welcomeStore.downloading"
                                 data-test="welcome-slide-two-download-button">
                                 <template #icon>
-                                    <FeatherIcon :icon="welcomeStore.downloaded ? CheckIcon : DownloadIcon" />
+                                    <FeatherIcon :icon="welcomeStore.downloaded ? icons.CheckIcon : icons.DownloadIcon" />
                                 </template>
                                 {{ welcomeStore.downloadCopy }}
                             </FeatherButton>
@@ -59,21 +72,20 @@
 
             <CollapsingWrapper :open="!!welcomeStore.minionCert.password">
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 2: Copy the bundle to your desired location</h2>
-                    <pre
-                        class="pre-wrap">Select a permanent location to unzip the bundle. Logs will be saved in that location and you will need to access this information if you restart your host network.</pre>
+                    <h2>Step 2: Copy the Bundle to a Permanent Location</h2>
+                    <pre class="pre-wrap">Unzip the bundle in a permanent location. <br>You will need to access this information if you restart your network. This location is also where logs are saved.</pre>
                 </div>
                 <div class="welcome-slide-step" data-test="welcome-page-two-internal">
-                    <h2>Step 3: Run Minion with the Run Command in a Terminal Window</h2>
+                    <h2>Step 3: Run Minion in a Terminal Window</h2>
                     <pre
-                        class="pre-wrap">Install our minion by navigating to your chosen directory in a terminal and typing the following command:</pre>
+                        class="pre-wrap">To install the Minion, open a terminal window, navigate to the bundle location, and type the following command:</pre>
                     <div class="welcome-slide-table docker-cmd">
                         <div class="welcome-slide-table-header docker-cmd">
                             <div class="welcome-slide-table-body">
                                 <span class="cmd-text">docker compose up -d</span>
                                 <FeatherButton class="dl-btn" text @click="welcomeStore.copyDockerClick">
                                     <template #icon>
-                                        <FeatherIcon :icon="welcomeStore.copied ? CheckIcon : CopyIcon" />
+                                        <FeatherIcon :icon="welcomeStore.copied ? icons.CheckIcon : icons.CopyIcon" />
                                     </template>
                                     {{ welcomeStore.copyButtonCopy }}
                                 </FeatherButton>
@@ -90,7 +102,7 @@
                         :class="['welcome-slide-minion-status', welcomeStore.minionStatusSuccess ? 'welcome-slide-minion-success' : '']">
                         <div class="icon-spin" data-test="welcome-slide-two-icon-spin">
                             <FeatherSpinner v-if="welcomeStore.minionStatusLoading && welcomeStore.minionStatusStarted" />
-                            <FeatherIcon :icon="CheckIcon"
+                            <FeatherIcon :icon="icons.CheckIcon"
                                 v-if="!welcomeStore.minionStatusLoading && welcomeStore.minionStatusSuccess" />
                         </div>
                         <div class="copy" data-test="welcome-minion-status-txt">
@@ -116,12 +128,20 @@ import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import CopyIcon from '@featherds/icon/action/ContentCopy'
 import CheckIcon from '@featherds/icon/action/CheckCircle'
 import DownloadIcon from '@featherds/icon/action/DownloadFile'
+import InformationIcon from '@featherds/icon/action/Info'
 import useTheme from '@/composables/useTheme'
 import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
 
 defineProps({
     visible: { type: Boolean, default: false }
+})
+
+const icons = markRaw({
+    DownloadIcon,
+    InformationIcon,
+    CopyIcon,
+    CheckIcon
 })
 
 const localDownloadHandler = () => {
@@ -328,8 +348,7 @@ const { isDark } = useTheme();
     color: var(--feather-shade-2);
     font-size: 22px;
     top: -3px;
+    left: -3px;
     position: relative;
-    margin-left: 4px;
-    margin-right: 8px;
 }
 </style>

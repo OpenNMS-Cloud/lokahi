@@ -42,7 +42,10 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
+import org.opennms.horizon.inventory.model.MonitoringLocation;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
@@ -59,24 +62,29 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     private final TenantLookup tenantLookup;
     private final IcmpActiveDiscoveryService discoveryService;
     private final ScannerTaskSetService scannerTaskSetService;
+    private final MonitoringLocationService monitoringLocationService;
     private static final Integer MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY = 65536;
 
     @Override
     public void createDiscovery(IcmpActiveDiscoveryCreateDTO request, StreamObserver<IcmpActiveDiscoveryDTO> responseObserver) {
+        if (request.hasId()) {
+            responseObserver.onError(StatusProto.toStatusRuntimeException(
+                createStatus(Code.INVALID_ARGUMENT_VALUE, "createDiscovery should not set id")));
+            return;
+        }
         tenantLookup.lookupTenantId(Context.current())
             .ifPresentOrElse(tenantId -> {
                 try {
                     var activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenantId);
-                    try {
-                        validateActiveDiscovery(request);
-                    } catch (Exception e) {
-                        log.error("Exception while validating active discovery", e);
-                        responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
-                        return;
-                    }
+
+                    validateActiveDiscovery(request, tenantId);
+
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(), Long.valueOf(request.getLocationId()), tenantId, activeDiscoveryConfig.getId());
+                } catch (LocationNotFoundException | IllegalArgumentException e) {
+                    log.error("Exception while validating active discovery", e);
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
                 } catch (Exception e) {
                     log.error("failed to create ICMP active discovery", e);
                     responseObserver.onError(StatusProto.toStatusRuntimeException(createStatus(Code.INVALID_ARGUMENT_VALUE, "Invalid request " + request)));
@@ -115,8 +123,8 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
             var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
             IcmpActiveDiscoveryDTO activeDiscoveryConfig;
             try {
-                validateActiveDiscovery(request);
-            } catch (Exception e) {
+                validateActiveDiscovery(request, tenant.get());
+            } catch (LocationNotFoundException | IllegalArgumentException e) {
                 log.error("Exception while validating active discovery", e);
                 responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
                 return;
@@ -139,33 +147,47 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         }
     }
 
-    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request) throws UnknownHostException {
+    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
+        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
+        if (location.isEmpty()) {
+            throw new LocationNotFoundException("Invalid location");
+        }
         var ipList = request.getIpAddressesList();
         for (var ipAddressEntry : ipList) {
+            ipAddressEntry = ipAddressEntry.trim();
             if (!ipAddressEntry.contains("-") && !ipAddressEntry.contains("/")) {
                 try {
-                    var inetAddress = InetAddressUtils.getInetAddress(ipAddressEntry);
+                    InetAddressUtils.getInetAddress(ipAddressEntry);
                 } catch (Exception e) {
                     log.error("Invalid Ip Address entry {}", ipAddressEntry);
                     throw new IllegalArgumentException("Invalid Ip Address entry " + ipAddressEntry);
                 }
             } else if (ipAddressEntry.contains("-")) {
-                    var ipEntry = ipAddressEntry.split("-", 2);
-                    if (ipEntry.length >= 2) {
-                        var beginAddress = ipEntry[0];
-                        var endAddress = ipEntry[1];
-                        var beginIp = InetAddress.getByName(beginAddress);
-                        var endIp = InetAddress.getByName(endAddress);
-                        var numberOfIpAddresses = InetAddressUtils.difference(beginIp, endIp);
-                        if (numberOfIpAddresses.abs().longValueExact() >= MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY) {
-                            log.error("Ip Address range is too large {}", ipAddressEntry);
-                            throw new IllegalArgumentException("Ip Address range is too large " + ipAddressEntry);
-                        }
-                    } else {
-                        log.error("Invalid Ip Address range {}", ipAddressEntry);
-                        throw new IllegalArgumentException("Invalid Ip Address range " + ipAddressEntry);
-                    }
+                try {
+                    validateIpRange(ipAddressEntry);
+                } catch (UnknownHostException e) {
+                    log.error("Invalid Ip Address entry {}", ipAddressEntry);
+                    throw new IllegalArgumentException("Invalid Ip Address entry " + ipAddressEntry);
+                }
             }
+        }
+    }
+
+    private void validateIpRange(final String ipAddressEntry) throws UnknownHostException {
+        var ipEntry = ipAddressEntry.split("-", 2);
+        if (ipEntry.length >= 2) {
+            var beginAddress = ipEntry[0];
+            var endAddress = ipEntry[1];
+            var beginIp = InetAddress.getByName(beginAddress);
+            var endIp = InetAddress.getByName(endAddress);
+            var numberOfIpAddresses = InetAddressUtils.difference(beginIp, endIp);
+            if (numberOfIpAddresses.abs().longValueExact() >= MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY) {
+                log.error("Ip Address range is too large {}", ipAddressEntry);
+                throw new IllegalArgumentException("Ip Address range is too large " + ipAddressEntry);
+            }
+        } else {
+            log.error("Invalid Ip Address range {}", ipAddressEntry);
+            throw new IllegalArgumentException("Invalid Ip Address range " + ipAddressEntry);
         }
     }
 

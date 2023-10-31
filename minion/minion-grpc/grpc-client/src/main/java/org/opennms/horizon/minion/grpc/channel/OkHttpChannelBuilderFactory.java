@@ -39,14 +39,45 @@ public class OkHttpChannelBuilderFactory implements ChannelBuilderFactory {
     @Setter
     private int maxInboundMessageSize = 0;
 
+    @Setter
+    private String imageCreated = "";
+
+    @Setter
+    private String imageVersion = "";
+
+    @Setter
+    private String gitDescribe = "";
+
+    @Setter
+    private String gitBranch = "";
+
+    public String getUserAgent() {
+        final var name = "OpenNMS_Lokahi_Minion";
+
+        final String version;
+        if (!imageVersion.isBlank()) {
+            version = String.format("%s/%s (%s)", name, imageVersion, gitDescribe);
+        } else {
+            version = String.format("%s/%s (built %s; branch %s)", name, gitDescribe, imageCreated, gitBranch);
+        }
+
+        return String.format("%s %s/%s (%s/%s; %s) %s/%s (%s)",
+            version,
+            "Java", System.getProperty("java.version"),
+            System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.vendor"),
+            System.getProperty("os.name").replaceAll("\\s+", "_"), System.getProperty("os.version"), System.getProperty("os.arch")
+            );
+    }
+
     @Override
     public ManagedChannelBuilder<?> create(String host, int port, String authority, ChannelCredentials credentials) {
-        OkHttpChannelBuilder channelBuilder = null;
+        final OkHttpChannelBuilder channelBuilder;
         if (credentials == null) {
             channelBuilder = OkHttpChannelBuilder.forAddress(host, port);
         } else {
             channelBuilder = OkHttpChannelBuilder.forAddress(host, port, credentials);
         }
+        channelBuilder.userAgent(getUserAgent());
         channelBuilder.keepAliveWithoutCalls(true);
         if (maxInboundMessageSize != 0) {
             channelBuilder.maxInboundMessageSize(maxInboundMessageSize);
@@ -61,5 +92,4 @@ public class OkHttpChannelBuilderFactory implements ChannelBuilderFactory {
 
         return channelBuilder;
     }
-
 }

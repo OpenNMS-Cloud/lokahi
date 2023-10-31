@@ -30,13 +30,18 @@ package org.opennms.horizon.minioncertmanager.grpc;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import java.security.cert.CertificateException;
+import java.util.Objects;
 import java.util.regex.Pattern;
+
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.minioncertmanager.certificate.CommandExecutor;
 import org.opennms.horizon.minioncertmanager.certificate.PKCS12Generator;
 import org.opennms.horizon.minioncertmanager.certificate.SerialNumberRepository;
+import org.opennms.horizon.minioncertmanager.grpc.client.InventoryClient;
 import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateMetadataResponse;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
@@ -62,6 +67,7 @@ import java.util.stream.Stream;
 
 @Component
 public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.MinionCertificateManagerImplBase {
+    public static final String INVALID_LOCATION = "Invalid location.";
 
     // permitted characters/values for tenant/location parameters
     private static final Pattern INPUT_PATTERN = Pattern.compile("[^a-zA-Z0-9_\\- ]");
@@ -76,15 +82,25 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
     private final SerialNumberRepository serialNumberRepository;
 
+    private final InventoryClient inventoryClient;
+
     private CommandExecutor commandExecutor = new CommandExecutor();
 
     @Autowired
-    public MinionCertificateManagerImpl(@Value("${manager.mtls.certificate}") File certificate,
-        @Value("${manager.mtls.privateKey}") File privateKey, @Autowired SerialNumberRepository serialNumberRepository) throws IOException, InterruptedException {
-        this(certificate, privateKey, new PKCS12Generator(), serialNumberRepository);
+    public MinionCertificateManagerImpl(
+        @Value("${manager.mtls.certificate}") File certificate,
+        @Value("${manager.mtls.privateKey}") File privateKey,
+        @Autowired SerialNumberRepository serialNumberRepository,
+        @Autowired InventoryClient inventoryClient) throws IOException, InterruptedException {
+        this(certificate, privateKey, new PKCS12Generator(), serialNumberRepository, inventoryClient);
     }
 
-    MinionCertificateManagerImpl(File certificate, File key, PKCS12Generator pkcs8Generator, SerialNumberRepository serialNumberRepository) throws IOException, InterruptedException {
+    MinionCertificateManagerImpl(
+        File certificate,
+        File key,
+        PKCS12Generator pkcs8Generator,
+        SerialNumberRepository serialNumberRepository,
+        InventoryClient inventoryClient) throws IOException, InterruptedException {
         this.pkcs8Generator = pkcs8Generator;
         LOG.debug("=== TRYING TO RETRIEVE CA CERT");
         caCertFile = certificate;
@@ -101,6 +117,17 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
         LOG.info("CA EXISTS: {}, CA PATH {}, CA CAN READ {}", caCertFile.exists(), caCertFile.getAbsolutePath(), caCertFile.canRead());
         this.serialNumberRepository = serialNumberRepository;
+        this.inventoryClient = Objects.requireNonNull(inventoryClient);
+    }
+
+    private boolean locationExist(long locationId, String tenantId) {
+        try {
+            MonitoringLocationDTO locationDTO = inventoryClient.getLocationById(locationId, tenantId);
+            return locationDTO != null;
+        } catch (StatusRuntimeException ex) {
+            LOG.error(String.format("Invalid location: %d tenantId: %s", locationId, tenantId));
+            return false;
+        }
     }
 
     @Override
@@ -115,11 +142,16 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
                 return;
             }
+            if (!locationExist(locationId, tenantId)) {
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(INVALID_LOCATION).asException());
+                return;
+            }
             if (!tenantId.equals(request.getTenantId())) {
                 // filtered values do not match input values, meaning we received invalid payload
                 LOG.error("Received invalid input for certificate generation, locationId {}, tenant {}", locationId, request.getTenantId());
                 responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Missing location and/or tenant information.").asException());
             }
+
 
             String password = UUID.randomUUID().toString();
             tempDirectory = Files.createTempDirectory(Files.createTempDirectory(Files.createTempDirectory("minioncert"), tenantId), String.valueOf(locationId));
@@ -140,7 +172,10 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
             responseObserver.onNext(createResponse(Files.readAllBytes(archive.toPath()), password));
             responseObserver.onCompleted();
-        } catch (IOException | InterruptedException | RocksDBException | CertificateException e) {
+        } catch (InterruptedException e){
+            LOG.error("InterruptedException while fetching certificate", e);
+            Thread.currentThread().interrupt();
+        } catch (IOException | RocksDBException | CertificateException e) {
             LOG.error("Error while fetching certificate", e);
             responseObserver.onError(e);
         } finally {
@@ -150,6 +185,10 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
 
     @Override
     public void getMinionCertMetadata(MinionCertificateRequest request, StreamObserver<GetMinionCertificateMetadataResponse> responseObserver) {
+        if (!locationExist(request.getLocationId(), request.getTenantId())) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(INVALID_LOCATION).asException());
+            return;
+        }
         try {
             var meta = serialNumberRepository.getByLocationId(request.getTenantId(), String.valueOf(request.getLocationId()));
             var response = GetMinionCertificateMetadataResponse.newBuilder()
@@ -165,6 +204,10 @@ public class MinionCertificateManagerImpl extends MinionCertificateManagerGrpc.M
     }
     @Override
     public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
+        if (!locationExist(request.getLocationId(), request.getTenantId())) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(INVALID_LOCATION).asException());
+            return;
+        }
         try {
             serialNumberRepository.revoke(request.getTenantId(), String.valueOf(request.getLocationId()));
             responseObserver.onNext(EmptyResponse.newBuilder().build());

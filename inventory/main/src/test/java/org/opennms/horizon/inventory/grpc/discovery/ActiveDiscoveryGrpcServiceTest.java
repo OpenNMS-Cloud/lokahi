@@ -7,6 +7,7 @@ import com.google.rpc.Code;
 import io.grpc.Context;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -140,6 +141,28 @@ public class ActiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockActiveDiscoveryService).deleteActiveDiscovery(TEST_TENANT_ID, 1717);
         Mockito.verify(mockStreamObserver).onNext(BoolValue.of(true));
         Mockito.verify(mockStreamObserver).onCompleted();
+    }
+
+    @Test
+    void testDeleteDiscoveryNotFoundException() {
+        //
+        // Setup Test Data and Interactions
+        //
+        var testException = new EntityNotFoundException("x-test-exception-x");
+        prepareCommonTenantLookup();
+        StreamObserver<BoolValue> mockStreamObserver = Mockito.mock(StreamObserver.class);
+        Mockito.doThrow(testException).when(mockActiveDiscoveryService).deleteActiveDiscovery(TEST_TENANT_ID, 1717);
+
+        //
+        // Execute
+        //
+        target.deleteDiscovery(Int64Value.of(1717), mockStreamObserver);
+
+        //
+        // Verify the Results
+        //
+        var matcher = prepareStatusExceptionMatcher(Code.NOT_FOUND_VALUE, "x-test-exception-x");
+        Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
     @Test

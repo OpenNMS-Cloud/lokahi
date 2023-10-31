@@ -96,11 +96,11 @@ public class LocationGrpcTest extends AbstractGrpcUnitTest {
 
     @Test
     void testListLocations() throws VerificationException {
-        doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByTenantId(tenantId);
+        doReturn(Arrays.asList(location1, location2)).when(mockLocationService).findByTenantId(TENANT_ID);
         MonitoringLocationList result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listLocations(Empty.newBuilder().build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);
-        verify(mockLocationService).findByTenantId(tenantId);
-        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(mockLocationService).findByTenantId(TENANT_ID);
+        verify(spyInterceptor).verifyAccessToken(AUTH_HEADER);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
@@ -112,7 +112,7 @@ public class LocationGrpcTest extends AbstractGrpcUnitTest {
             .stream().map(Int64Value::of).collect(Collectors.toList())).build());
         assertThat(result.getLocationsList().size()).isEqualTo(2);
         verify(mockLocationService).findByLocationIds(ids);
-        verify(spyInterceptor).verifyAccessToken(authHeader);
+        verify(spyInterceptor).verifyAccessToken(AUTH_HEADER);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 }

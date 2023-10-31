@@ -34,6 +34,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.opennms.horizon.systemtests.pages.LeftPanelPage;
 import org.opennms.horizon.systemtests.pages.LocationsPage;
+import org.opennms.horizon.systemtests.pages.WelcomePage;
 import org.opennms.horizon.systemtests.utils.FileDownloadManager;
 import org.openqa.selenium.By;
 import testcontainers.MinionContainer;
@@ -80,17 +81,9 @@ public class LocationSteps {
         try {
             bundle = FileDownloadManager.downloadCertificate(downloadCertButton);
             if (bundle != null) {
-                // Parse out the pwd for the bundle
-                String dockerText = dockerCmd.shouldBe(visible).getText();
-                Pattern pattern = Pattern.compile("GRPC_CLIENT_KEYSTORE_PASSWORD='([a-z,0-9,-]*)'");
-                Matcher matcher = pattern.matcher(dockerText);
-
-                if (matcher.find()) {
-                    MinionContainer minion = MinionSteps.startMinion(bundle, matcher.group(1), minionName, LocationSteps.getLocationName());
-                    // Minion startup and connect is slow - need a specific timeout here
-                    return minion;
-                }
-                fail("Unable to parse p12 password from docker string: " + dockerText);
+                String certkey = WelcomePage.readCertKey(bundle);
+                MinionContainer minion = MinionSteps.startMinion(bundle, certkey, minionName, LocationSteps.getLocationName());
+                return minion;
             } else {
                 fail("Failure downloading file");
             }

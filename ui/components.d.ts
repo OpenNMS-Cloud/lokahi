@@ -65,7 +65,6 @@ declare module '@vue/runtime-core' {
     FeatherSpinner: typeof import('@featherds/progress')['FeatherSpinner']
     FeatherTooltip: typeof import('@featherds/tooltip')['FeatherTooltip']
     FooterSection: typeof import('./src/components/Common/FooterSection.vue')['default']
-    GradientBG: typeof import('./src/components/Common/GradientBG.vue')['default']
     GraphIcon: typeof import('./src/components/Common/GraphIcon.vue')['default']
     HeadlinePage: typeof import('./src/components/Common/HeadlinePage.vue')['default']
     HeadlineSection: typeof import('./src/components/Common/HeadlineSection.vue')['default']

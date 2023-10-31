@@ -44,6 +44,7 @@ import org.hibernate.annotations.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -68,4 +69,20 @@ public class Tag {
     )
     private Set<MonitorPolicy> policies = new HashSet<>();
 
+    @Override
+    public int hashCode() {
+        return  Objects.hash(id, name, tenantId, nodeIds, policies);
+    }
+
+    @Override
+    public boolean equals(Object in) {
+        if(in instanceof Tag that){
+            return Objects.equals(this.getName(), that.getName())  &&
+                Objects.equals(this.getId(), that.getId()) &&
+                Objects.equals(this.getTenantId(), that.getTenantId()) &&
+                Objects.equals(this.getNodeIds(), that.getNodeIds()) &&
+                Objects.equals(this.getPolicies(), that.getPolicies());
+        }
+        return false;
+    }
 }

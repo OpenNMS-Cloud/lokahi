@@ -3,7 +3,7 @@
     ]">
         <div class="welcome-text">
             <h1 data-test="welcome-slide-one-title">Welcome to OpenNMS&nbsp;Cloud</h1>
-            <p class="margin-bottom">To start, let's install a secure minion on your network to gather <br>
+            <p class="margin-bottom">To start, let's install a secure Minion on your network to collect <br>
                 monitoring data from your devices.</p>
             <p class="margin-bottom">This process takes only a few minutes.</p>
         </div>
@@ -65,8 +65,8 @@
                 </div>
                 <br/>
                 <div>
-                    <span class="docker-setup">How to install Docker Engine (Server Version)&nbsp;
-                        <a href="https://docs.docker.com/desktop/install/linux-install/" target="_blank"
+                    <span class="docker-setup">How to install Docker Engine (server version)&nbsp;
+                        <a href="https://docs.docker.com/engine/install/#server" target="_blank"
                             rel="noopener noreferrer">Linux
                         </a>
                     </span>

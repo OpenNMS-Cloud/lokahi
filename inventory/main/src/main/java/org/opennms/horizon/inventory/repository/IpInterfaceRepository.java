@@ -47,8 +47,9 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
         "FROM IpInterface ip " +
         "WHERE ip.ipAddress = :ipAddress " +
         "AND ip.node.monitoringLocationId = :locationId " +
-        "AND ip.tenantId = :tenantId ")
-    Optional<IpInterface> findByIpAddressAndLocationIdAndTenantId(@Param("ipAddress") InetAddress ipAddress,
+        "AND ip.tenantId = :tenantId " +
+        "ORDER BY ip.id")
+    List<IpInterface> findByIpAddressAndLocationIdAndTenantId(@Param("ipAddress") InetAddress ipAddress,
                                                                 @Param("locationId") Long locationId,
                                                                 @Param("tenantId") String tenantId);
 

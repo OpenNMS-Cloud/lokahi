@@ -14,6 +14,7 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,19 +47,42 @@ public class IpInterfaceService {
     }
 
     public Optional<IpInterfaceDTO> findByIpAddressAndLocationIdAndTenantId(String ipAddress, String location, String tenantId) {
-            Optional<IpInterface> optional = modelRepo.findByIpAddressAndLocationIdAndTenantId(InetAddressUtils.getInetAddress(ipAddress), Long.valueOf(location), tenantId);
-            return optional.map(mapper::modelToDTO);
+        return findByIpAddressAndLocationIdAndTenantId(InetAddressUtils.getInetAddress(ipAddress), Long.valueOf(location), tenantId);
+    }
+
+    public Optional<IpInterfaceDTO> findByIpAddressAndLocationIdAndTenantId(InetAddress ipAddress, long locationId, String tenantId) {
+        return findByIpAddressAndLocationIdAndTenantIdModel(ipAddress, locationId, tenantId).map(mapper::modelToDTO);
+    }
+
+    /**
+     * return single IpInterface
+     * if multiple found, try return snmp primary one or first one
+     * @param ipAddress
+     * @param locationId
+     * @param tenantId
+     * @return
+     */
+    public Optional<IpInterface> findByIpAddressAndLocationIdAndTenantIdModel(InetAddress ipAddress, long locationId, String tenantId) {
+        List<IpInterface> ipInterfaces = modelRepo.findByIpAddressAndLocationIdAndTenantId(ipAddress, locationId, tenantId);
+        if (ipInterfaces.isEmpty()) {
+            return Optional.empty();
+        } else if (ipInterfaces.size() == 1) {
+            return Optional.of(ipInterfaces.get(0));
+        } else {
+            var result = ipInterfaces.stream()
+                .filter(ipInterface -> ipInterface.getSnmpPrimary() != null && ipInterface.getSnmpPrimary())
+                .findFirst();
+            if (result.isPresent()) {
+                return result;
+            } else {
+                return Optional.of(ipInterfaces.get(0));
+            }
+        }
     }
 
     public void createFromAzureScanResult(String tenantId, Node node, AzureInterface azureInterface,
                                                  AzureScanNetworkInterfaceItem networkInterfaceItem) {
         Objects.requireNonNull(azureInterface);
-
-        modelRepo.findByIpAddressAndLocationIdAndTenantId(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()), node.getMonitoringLocationId(), tenantId)
-            .ifPresent(existIp -> {
-                throw new InventoryRuntimeException(String.format("duplicate ip address for %s, locationId: %s, tenantId: %s",
-                    InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()), node.getMonitoringLocationId(), tenantId));
-            });
 
         IpInterface ipInterface = new IpInterface();
         ipInterface.setNode(node);
@@ -83,11 +107,6 @@ public class IpInterfaceService {
                 modelRepo.save(ipInterface);
             }, () -> {
                 IpInterface ipInterface = mapper.fromScanResult(result);
-                modelRepo.findByIpAddressAndLocationIdAndTenantId(ipInterface.getIpAddress(), node.getMonitoringLocationId(), tenantId)
-                    .ifPresent(existIp -> {
-                        throw new InventoryRuntimeException(String.format("duplicate ip address for %s, locationId: %s, tenantId: %s",
-                            ipInterface.getIpAddress(), node.getMonitoringLocationId(), tenantId));
-                    });
 
                 ipInterface.setNode(node);
                 ipInterface.setTenantId(tenantId);

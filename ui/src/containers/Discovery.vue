@@ -25,6 +25,7 @@
             :selectDiscovery="discoveryStore.editDiscovery"
             :selectedId="discoveryStore.selectedDiscovery.id"
             :showInstructions="() => openInstructions(InstructionsType.Active)"
+            :selectedType="discoveryStore.selectedDiscovery.type"
           />
           <DiscoveryListCard
             passive
@@ -34,6 +35,7 @@
             :selectDiscovery="discoveryStore.editDiscovery"
             :selectedId="discoveryStore.selectedDiscovery.id"
             :showInstructions="() => openInstructions(InstructionsType.Passive)"
+            :selectedType="discoveryStore.selectedDiscovery.type"
           />
         </div>
       </section>

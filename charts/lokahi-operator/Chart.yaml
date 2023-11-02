@@ -1,9 +1,0 @@
-apiVersion: v2
-name: lokahi-operator
-version: 0.6.1
-description: A Kubernetes operator for deploying and maintaining OpenNMS in the cloud.
-home: https://github.com/OpenNMS/lokahi
-maintainers:
-  - name: Jeffrey-David Kapp
-    email: jkapp@opennms.com
-icon: https://www.opennms.com/wp-content/uploads/2021/04/OpenNMS_Horizontal-Logo_Light-BG-retina-website.png

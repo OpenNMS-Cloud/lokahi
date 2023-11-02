@@ -253,6 +253,7 @@ class MonitoringPolicyGrpcTest extends AbstractGrpcUnitTest {
         // execute
         var requestPolicy = MonitorPolicyProto.newBuilder()
             .setName(DEFAULT_POLICY)
+            .setId(1L)
             .addTags("tag")
             .addTags(defaultTagName)
             .build();

@@ -9,7 +9,7 @@
         v-for="(item, index) in list"
         :key="index"
         class="discovery-name pointer"
-        :class="{ selected: selectedId == item.id }"
+        :class="{ selected: selectedId == item.id && item.type === selectedType }"
       >
         <div
           class="name pointer"
@@ -56,6 +56,7 @@ defineProps<{
   toggleDiscovery?: (discovery: NewOrUpdatedDiscovery) => void
   passive?: boolean
   selectedId?: number
+  selectedType?: string
 }>()
 </script>
 

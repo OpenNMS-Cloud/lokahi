@@ -88,14 +88,21 @@ public class MonitorPolicyService {
         }
 
         if (request.hasField(MonitorPolicyProto.getDescriptor().findFieldByNumber(MonitorPolicyProto.ID_FIELD_NUMBER))) {
-            var policy = repository.findByIdAndTenantId(request.getId(), tenantId);
+            Optional<MonitorPolicy> policy;
+            if (DEFAULT_POLICY.equals(request.getName())) {
+                policy = getDefaultPolicy(tenantId);
+            } else {
+                policy = repository.findByIdAndTenantId(request.getId(), tenantId);
+            }
             if (policy.isEmpty()) {
-                throw new IllegalArgumentException(String.format("policy not found by id %s for tenant %s", request.getId(), tenantId));
+                String message = String.format("policy not found by id %s for tenant %s", request.getId(), tenantId);
+                log.warn(message);
+                throw new IllegalArgumentException(message);
             }
         }
 
         MonitorPolicy policy = policyMapper.map(request);
-        if (request.getName().equals(DEFAULT_POLICY)) {
+        if (DEFAULT_POLICY.equals(request.getName())) {
             return handleDefaultTagOperationUpdate(policy.getTags(), tenantId);
         } else {
             updateData(policy, tenantId);

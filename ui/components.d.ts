@@ -47,6 +47,7 @@ declare module '@vue/runtime-core' {
     ExternalIcon: typeof import('./src/components/Common/ExternalIcon.vue')['default']
     FeatherAppHeader: typeof import('@featherds/app-rail')['FeatherAppHeader']
     FeatherAppLayout: typeof import('@featherds/app-layout')['FeatherAppLayout']
+    FeatherAppRailNavItem: typeof import('@featherds/app-rail')['FeatherAppRailNavItem']
     FeatherAutocomplete: typeof import('@featherds/autocomplete')['FeatherAutocomplete']
     FeatherButton: typeof import('@featherds/button')['FeatherButton']
     FeatherCheckbox: typeof import('@featherds/checkbox')['FeatherCheckbox']

@@ -50,7 +50,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   const { data: tagsByDiscoveryIdData, execute: tagsByDiscoveryIdExecute } = useQuery({
     query: TagsByActiveDiscoveryIdDocument,
     cachePolicy: 'network-only',
-    variables: discoveryId
+    variables: discoveryId,
+    paused: true
   })
 
   const getTagsByActiveDiscoveryId = async (id: number) => {
@@ -63,7 +64,8 @@ export const useDiscoveryQueries = defineStore('discoveryQueries', () => {
   const { data: tagsByPassiveDiscoveryIdData, execute: tagsByPassiveDiscoveryIdExecute } = useQuery({
     query: TagsByPassiveDiscoveryIdDocument,
     cachePolicy: 'network-only',
-    variables: discoveryId
+    variables: discoveryId,
+    paused: true
   })
 
   const getTagsByPassiveDiscoveryId = async (id: number) => {

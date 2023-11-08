@@ -127,7 +127,7 @@
             <div class="footer-container">
                 <p>This email was sent to <span class="recipient">${recipient}</span>.</p>
                 <p>OpenNMS, 3000 RDU Center Dr, Suite 200 Morrisville, NC 27560</p>
-                <p>&copy;2023 OpenNMS Group</p>
+                <p>&copy;${currentYear} OpenNMS Group</p>
                 <p style="height:10px;">&nbsp;</p>
                 <img src="https://www.opennms.com/wp-content/uploads/2023/03/OpenNMS_Horizontal-Logo_Grey.png" width="148" alt="OpenNMS Logo" />
             </div>

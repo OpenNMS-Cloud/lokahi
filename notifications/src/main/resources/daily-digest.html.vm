@@ -45,11 +45,6 @@
             border: 3px solid #00BFCB;
             margin: 0;
         }
-        .vertical-rule {
-            border-right: 1px solid #F4F7FC;
-            height: 50px;
-            opacity: 0.3;
-        }
         .summary {
             background: #ffffff;
             height: 380px;
@@ -86,11 +81,9 @@
             padding-bottom: 10px;
             padding-top: 5px;
         }
-        
         th {
             font-size: 32px;
         }
-
         td {
             font-size: 14px;
         }

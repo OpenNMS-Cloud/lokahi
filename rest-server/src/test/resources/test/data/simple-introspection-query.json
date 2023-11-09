@@ -1,0 +1,5 @@
+{
+  "operationName": "cop",
+  "variables": {},
+  "query": "query cop {  __schema { types { name fields { name }}}}"
+}

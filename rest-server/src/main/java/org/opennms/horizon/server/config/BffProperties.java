@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Configuration;
 public class BffProperties {
 
     private boolean corsAllowed = false;
-    private boolean introspectionEnabled = true;
+    private boolean introspectionEnabled = false;
     private int maxAliasOccurrence = -1;
     private int maxComplexity = -1;
     private int maxDirectiveOccurrence = -1;

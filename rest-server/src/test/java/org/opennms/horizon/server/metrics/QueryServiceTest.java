@@ -30,9 +30,11 @@ package org.opennms.horizon.server.metrics;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.service.metrics.QueryService;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
@@ -56,6 +58,18 @@ public class QueryServiceTest {
         Assertions.assertEquals("(irate(ifHCInOctets{if_name=\"en0\",monitor=\"SNMP\",node_id=\"5\"}[4m])*8) / " +
             "(ifHighSpeed{if_name=\"en0\",monitor=\"SNMP\",node_id=\"5\"} *1000000) * 100 " +
             "unless ifHighSpeed{if_name=\"en0\",monitor=\"SNMP\",node_id=\"5\"} == 0", bwUtilQuery);
+    }
+
+    @Test
+    public void testCustomQuery() {
+        QueryService queryService = new QueryService();
+        var labels = new HashMap<String, String>();
+        labels.put("instance", "192.168.1.1");
+        labels.put("monitor", "ICMP");
+        labels.put("system_id", "minion-standalone");
+        var queryString = queryService.getQueryString(Optional.empty(), "availability_percentage", labels, 24, TimeRangeUnit.HOUR);
+        Assertions.assertEquals("query=(count_over_time(response_time_msec{instance=\"192.168.1.1\"," +
+            "system_id=\"minion-standalone\",monitor=\"ICMP\"}[24h])/1440)*100 or vector(0)", queryString);
     }
 
 }

@@ -50,6 +50,8 @@ public final class Constants {
     public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
 
+    public static final String AVAILABILITY_PERCENTAGE = "availability_percentage";
+
     public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets%1$s[4m])*8) " +
         "/ (ifHighSpeed%1$s *1000000) * 100 unless ifHighSpeed%1$s == 0";
     public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets%1$s[4m])*8) " +

@@ -1,0 +1,12 @@
+{
+  "variables": {
+    "location": {
+      "location": "location",
+      "address": "",
+      "longitude": 0,
+      "latitude": 0
+    }
+  },
+  "query": "mutation CreateLocation($location: MonitoringLocationCreateInput!) {\n  createLocation(location: $location) {\n    id\n    location\n    address\n    longitude\n    latitude\n  }\n}",
+  "operationName": null
+}

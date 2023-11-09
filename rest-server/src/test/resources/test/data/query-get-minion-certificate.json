@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "\tquery { getMinionCertificate(locationId: 1) { certificate, password } }",
+  "operationName": null
+}

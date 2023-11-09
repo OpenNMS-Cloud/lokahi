@@ -312,7 +312,7 @@ onUnmounted(() => {
 const typeOptions = ref([
   { value: DiscoveryType.ICMP, _text: 'ICMP/SNMP' },
   { value: DiscoveryType.Azure, _text: 'Azure' },
-  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Syslog Traps' }
+  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Traps' }
 ])
 if (discoveryStore.snmpV3Enabled) {
   typeOptions.value = typeOptions.value.concat([

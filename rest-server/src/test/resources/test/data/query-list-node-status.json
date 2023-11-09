@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "id": 1
+  },
+  "query": "query ListNodeStatus($id: Long) {\n  ...EventsByNodeIdParts\n  ...NodeByIdParts\n}\n\nfragment EventsByNodeIdParts on Query {\n  events: findEventsByNodeId(id: $id) {\n    id\n    uei\n    nodeId\n    ipAddress\n    producedTime\n  }\n}\n\nfragment NodeByIdParts on Query {\n  node: findNodeById(id: $id) {\n    id\n    nodeLabel\n    objectId\n    systemContact\n    systemDescr\n    systemLocation\n    systemName\n    scanType\n    location {\n      location\n    }\n    ipInterfaces {\n      id\n      hostname\n      ipAddress\n      netmask\n      nodeId\n      snmpPrimary\n      azureInterfaceId\n    }\n    snmpInterfaces {\n      id\n      ifAdminStatus\n      ifAlias\n      ifDescr\n      ifIndex\n      ifName\n      ifOperatorStatus\n      ifSpeed\n      ifType\n      ipAddress\n      nodeId\n      physicalAddr\n    }\n    azureInterfaces {\n      id\n      nodeId\n      interfaceName\n      privateIpId\n      publicIpAddress\n      publicIpId\n      location\n    }\n  }\n}",
+  "operationName": null
+}

@@ -71,7 +71,7 @@ if os.getenv('CI'):
 # Functions #
 cluster_arch_cmd = '$(tilt get cluster default -o=jsonpath --template="{.status.arch}")'
 
-def jib_project(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], labels=None):
+def jib_project(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], links=[], labels=None):
     """
     Builds and streams log output for our single-module Maven/Jib projects. Supports rapid development.
 
@@ -136,10 +136,11 @@ def jib_project(resource_name, image_name, base_path, k8s_resource_name, resourc
         new_name=resource_name,
         labels=labels,
         resource_deps=resource_deps + [compile_resource_name],
+        links=links,
         port_forwards=port_forwards,
     )
 
-def jib_project_multi_module(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], labels=None, submodule=None):
+def jib_project_multi_module(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], links=[], labels=None, submodule=None):
     """
     Builds our multi-module Maven/Jib projects. Does not support rapid development.
 
@@ -180,6 +181,7 @@ def jib_project_multi_module(resource_name, image_name, base_path, k8s_resource_
         labels=labels,
         resource_deps=resource_deps,
         port_forwards=port_forwards,
+        links=links,
         trigger_mode=TRIGGER_MODE_MANUAL,
     )
 
@@ -439,6 +441,10 @@ jib_project(
     'opennms-rest-server',
     labels=['vuejs-app'],
     port_forwards=['13080:9090', '13050:5005'],
+    links=[
+      link('https://onmshs.local:1443/api/graphql', 'GraphQL Endpoint'),
+      link('https://onmshs.local:1443/api/gui', 'GraphQL Playground'),
+    ],
     resource_deps=['shared-lib'],
 )
 
@@ -566,6 +572,10 @@ k8s_resource(
     new_name='keycloak',
     labels='keycloak',
     port_forwards=['26080:8080'],
+    links=[
+      link('https://onmshs.local:1443/auth/admin/', 'Admin Console'),
+      link('http://localhost:26080/auth', 'Welcome Page')
+    ]
 )
 
 ### Email ###
@@ -599,6 +609,9 @@ k8s_resource(
     'postgres',
     labels='z_dependencies',
     port_forwards=['25054:5432'],
+    links=[
+        link('jdbc:postgresql://localhost:25054/horizon_stream?user=postgres&password=any', name='JDBC URL'),
+    ]
 )
 
 ### Kafka ###

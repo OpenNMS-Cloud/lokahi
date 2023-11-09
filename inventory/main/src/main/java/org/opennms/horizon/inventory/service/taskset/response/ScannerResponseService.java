@@ -36,6 +36,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
@@ -280,8 +281,8 @@ public class ScannerResponseService {
         log.info("Received Detector tenantId={}; locationId={}; response={}", serviceResult, tenantId, locationId);
 
         InetAddress ipAddress = InetAddressUtils.getInetAddress(serviceResult.getIpAddress());
-        Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-            .findByIpAddressAndLocationIdAndTenantId(ipAddress, locationId, tenantId);
+        Optional<IpInterface> ipInterfaceOpt = ipInterfaceService
+            .findByIpAddressAndLocationIdAndTenantIdModel(ipAddress, locationId, tenantId);
 
         if (ipInterfaceOpt.isPresent()) {
             IpInterface ipInterface = ipInterfaceOpt.get();

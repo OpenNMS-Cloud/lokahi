@@ -1,0 +1,9 @@
+{
+  "variables": {
+    "name": "total_network_bytes_out",
+    "timeRange": 24,
+    "timeRangeUnit": "HOUR"
+  },
+  "query": "query NetworkTraffic($name: String!, $timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {\n  metric(name: $name, timeRange: $timeRange, timeRangeUnit: $timeRangeUnit) {\n    status\n    ...MetricParts\n  }\n}\n\nfragment MetricParts on TimeSeriesQueryResult {\n  data {\n    result {\n      metric\n      values\n    }\n  }\n}",
+  "operationName": null
+}

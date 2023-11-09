@@ -2,10 +2,10 @@
 = Manage Monitoring Policies
 :description: Learn how to edit a monitoring policy in OpenNMS Lōkahi/Cloud.
 
-You can edit monitoring policies.
-Currently, it is not possible to delete a monitoring policy or edit the default monitoring policy.
+You can edit or delete any monitoring policy, except for the default one.
 
-// <TBD - any caveats for deleting/editing policies?>
+With the default policy, you can only edit add or remove tags.
+To turn off the default monitoring policy, remove the tag(s) associated with it.
 
 == Edit a monitoring policy
 
@@ -18,3 +18,20 @@ Follow these steps to edit a monitoring policy:
 . Click **Save Rule** (if you edited a rule) and **Save Policy**.
 
 The policy's configuration settings are updated.
+
+== Delete a monitoring policy
+
+When you delete a monitoring policy, all associated alerts will be removed.
+Before deletion, a prompt appears that details the number of associated alerts, to confirm you want to proceed.
+
+Note that you cannot delete the default monitoring policy.
+
+Follow these steps to delete a monitoring policy:
+
+. Click **Monitoring Policies** in the left navigation menu.
+. Select a policy from the **Existing Policies** list.
+. Click the *delete* symbol on the top right of the *Policy Name* area.
+. Click *Delete* to confirm deletion.
+
+
+

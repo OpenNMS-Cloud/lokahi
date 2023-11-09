@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "query ListMinionsForTable {\n  ...MinionsTableParts\n}\n\nfragment MinionsTableParts on Query {\n  findAllMinions {\n    id\n    label\n    lastCheckedTime\n    location {\n      id\n      location\n    }\n    status\n    systemId\n  }\n}",
+  "operationName": null
+}

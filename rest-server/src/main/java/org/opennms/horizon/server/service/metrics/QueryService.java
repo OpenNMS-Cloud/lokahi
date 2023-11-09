@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
+import static org.opennms.horizon.server.service.metrics.Constants.AVAILABILITY_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
 import static org.opennms.horizon.server.service.metrics.Constants.BW_IN_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.BW_OUT_PERCENTAGE;
@@ -80,10 +81,9 @@ public class QueryService {
             || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
             || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
     }
-
+    
     public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
                                  Integer timeRange, TimeRangeUnit timeRangeUnit) {
-
         if (isRangeQuery(metricName)) {
             long end = System.currentTimeMillis() / 1000L;
             long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
@@ -139,9 +139,15 @@ public class QueryService {
                         return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
             }
+        } else if (AVAILABILITY_PERCENTAGE.equals(metricName)) {
+                String query = "response_time_msec" + getLabelsQueryString(labels);
+                query = addTimeRange(timeRange, timeRangeUnit, query);
+                return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
+                    numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
         }
         String queryString = getQueryString(metricName, labels);
         return addTimeRange(timeRange, timeRangeUnit, queryString);
+
     }
 
     public String getQueryString(Map<String, String> queryParams) {
@@ -194,6 +200,11 @@ public class QueryService {
             LOG.warn("Exception while parsing time range with timeRange {} in units {}", timeRange, timeRangeUnit, e);
         }
         return Optional.empty();
+    }
+
+    public static long numOfMinutesInDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {
+        var duration = getDuration(timeRange, timeRangeUnit);
+        return duration.map(Duration::toMinutes).orElseThrow();
     }
 
     private String encode(String value) {

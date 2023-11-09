@@ -96,11 +96,10 @@ public class DocumentEnricherImpl {
         try {
             iface = inventoryClient.getIpInterfaceFromQuery(tenantId, ipAddress, location);
         } catch (StatusRuntimeException e) {
-            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())) {
-                return null;
-            } else {
-                throw e;
+            if (!Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())) {
+                LOG.warn("Fail to get NodeInfo ipAddress: {} location: {} unknown error: {}", ipAddress, location, e.getStatus());
             }
+            return null;
         }
 
         if (iface == null) {

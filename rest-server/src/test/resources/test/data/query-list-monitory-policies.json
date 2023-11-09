@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "query ListMonitoryPolicies {\n  listMonitoryPolicies {\n    ...MonitoringPolicyParts\n  }\n  defaultPolicy {\n    ...MonitoringPolicyParts\n  }\n}\n\nfragment MonitoringPolicyParts on MonitorPolicy {\n  id\n  memo\n  name\n  notifyByEmail\n  notifyByPagerDuty\n  notifyByWebhooks\n  rules {\n    id\n    name\n    componentType\n    detectionMethod\n    eventType\n    thresholdMetricName\n    alertConditions {\n      id\n      count\n      clearEvent {\n        id\n        name\n        eventType\n      }\n      overtime\n      overtimeUnit\n      severity\n      triggerEvent {\n        id\n        name\n        eventType\n      }\n    }\n  }\n  tags\n}",
+  "operationName": null
+}

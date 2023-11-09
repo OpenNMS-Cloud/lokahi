@@ -29,31 +29,25 @@
 package org.opennms.horizon.server.config;
 
 import graphql.GraphQL;
-import graphql.analysis.MaxQueryComplexityInstrumentation;
-import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.execution.DataFetcherExceptionHandler;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.fieldvalidation.FieldValidationInstrumentation;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.visibility.NoIntrospectionGraphqlFieldVisibility;
 import io.leangen.graphql.GraphQLRuntime;
-import io.leangen.graphql.GraphQLSchemaGenerator;
-import io.leangen.graphql.spqr.spring.autoconfigure.BaseAutoConfiguration;
-import io.leangen.graphql.spqr.spring.autoconfigure.SpqrProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.service.graphql.BffDataFetchExceptionHandler;
 import org.opennms.horizon.server.service.graphql.DuplicateFieldValidation;
+import org.opennms.horizon.server.service.graphql.ExecutionTimingInstrumentation;
+import org.opennms.horizon.server.service.graphql.IntrospectionDisabler;
 import org.opennms.horizon.server.service.graphql.MaxAliasOccurrenceValidation;
+import org.opennms.horizon.server.service.graphql.MaxComplexityInstrumentation;
+import org.opennms.horizon.server.service.graphql.MaxDepthInstrumentation;
 import org.opennms.horizon.server.service.graphql.MaxDirectiveOccurrenceInstrumentation;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -67,29 +61,36 @@ import java.util.List;
 public class GraphqlConfig {
 
     @Bean
-    @ConditionalOnExpression("${lokahi.bff.max-query-depth:-1} > 1")
     @Order(1)
+    public Instrumentation timingInstrumentation() {
+        return new ExecutionTimingInstrumentation();
+    }
+
+    @Bean
+    @ConditionalOnExpression("${lokahi.bff.max-query-depth:-1} > 1")
+    @Order(2)
     public Instrumentation maxDepthInstrumentation(
         BffProperties properties
     ) {
         log.info("Limiting max query depth to {}", properties.getMaxQueryDepth());
-        return new MaxQueryDepthInstrumentation(properties.getMaxQueryDepth());
+        return new MaxDepthInstrumentation(properties.getMaxQueryDepth());
     }
 
     @Bean
     @ConditionalOnExpression("${lokahi.bff.max-complexity:-1} > 1")
-    @Order(2)
+    @Order(3)
     public Instrumentation maxComplexityInstrumentation(
         BffProperties properties
     ) {
         log.info("Limiting max query complexity to {}", properties.getMaxComplexity());
-        return new MaxQueryComplexityInstrumentation(properties.getMaxComplexity());
+        return new MaxComplexityInstrumentation(properties.getMaxComplexity());
+
     }
 
     @Bean
     @ConditionalOnExpression("${lokahi.bff.max-directive-occurrence:-1} > 0")
     @ConditionalOnBean
-    @Order(3)
+    @Order(4)
     public Instrumentation maxDirectiveOccurrenceInstrumentation(
         BffProperties properties
     ) {
@@ -101,7 +102,7 @@ public class GraphqlConfig {
 
     @Bean
     @ConditionalOnExpression("${lokahi.bff.max-alias-occurrence:-1} > 0")
-    @Order(4)
+    @Order(5)
     public Instrumentation maxAliasOccurrenceInstrumentation(
         BffProperties properties
     ) {
@@ -113,7 +114,7 @@ public class GraphqlConfig {
 
     @Bean
     @ConditionalOnExpression("${lokahi.bff.max-field-occurrence:-1} > 0")
-    @Order(5)
+    @Order(6)
     public Instrumentation fieldDuplicationInstrumentation(
         BffProperties properties
     ) {
@@ -128,32 +129,11 @@ public class GraphqlConfig {
         return new BffDataFetchExceptionHandler();
     }
 
-    /**
-     * Takes the previously auto-configured {@link GraphQLSchemaGenerator}
-     * instance and additionally configures it to disable introspection. This is
-     * done to re-use the relatively complex original autoconfiguration instead
-     * of replacing it.
-     *
-     * @see BaseAutoConfiguration#graphQLSchemaGenerator(SpqrProperties)
-     */
-    @Component
-    @ConditionalOnProperty(value = "lokahi.bff.introspection-enabled", havingValue = "false")
-    public static class IntrospectionDisabler implements BeanPostProcessor {
-        @Override
-        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-            if (bean instanceof GraphQLSchemaGenerator schemaGenerator) {
-                log.info("Disabling introspection in graphql");
-                schemaGenerator.withSchemaProcessors((schemaBuilder, buildContext) -> {
-                    buildContext.codeRegistry.fieldVisibility(
-                        NoIntrospectionGraphqlFieldVisibility.NO_INTROSPECTION_FIELD_VISIBILITY);
-                    schemaBuilder.codeRegistry(buildContext.codeRegistry.build());
-                    return schemaBuilder;
-                });
-                return schemaGenerator;
-            }
-
-            return bean;
-        }
+    @Bean
+    @ConditionalOnExpression("${lokahi.bff.introspection-enabled:false} == false")
+    public IntrospectionDisabler introspectionDisabler() {
+        log.info("Disabling introspection in graphql");
+        return new IntrospectionDisabler();
     }
 
     @Bean
@@ -162,7 +142,11 @@ public class GraphqlConfig {
         List<Instrumentation> instrumentations,
         DataFetcherExceptionHandler exceptionResolver
     ) {
-        log.info("Configured Instrumentations: {}", instrumentations);
+        if (log.isInfoEnabled()) {
+            log.info("Configured Instrumentations: {}",
+                instrumentations.stream().map(i -> i.getClass().getSimpleName()).toList()
+            );
+        }
 
         GraphQLRuntime.Builder builder = GraphQLRuntime.newGraphQL(schema);
         instrumentations.forEach(builder::instrumentation);

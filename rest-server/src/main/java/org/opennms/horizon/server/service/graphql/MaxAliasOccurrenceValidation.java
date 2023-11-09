@@ -34,6 +34,7 @@ import graphql.analysis.QueryVisitorFieldEnvironment;
 import graphql.execution.instrumentation.fieldvalidation.FieldValidation;
 import graphql.execution.instrumentation.fieldvalidation.FieldValidationEnvironment;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Slf4j
 public class MaxAliasOccurrenceValidation implements FieldValidation {
 
     private final int maxFieldOccurrence;
@@ -49,6 +51,16 @@ public class MaxAliasOccurrenceValidation implements FieldValidation {
     public List<GraphQLError> validateFields(FieldValidationEnvironment environment) {
         QueryTraverser queryTraverser = Traversers.queryTraverser(environment);
         var occurrences = queryTraverser.reducePreOrder(this::reduceField, new LinkedHashMap<>());
+
+        if (log.isDebugEnabled()) {
+            occurrences.forEach((field, count) -> log.debug(
+                "Field: {}, Occurrences: {} > {}, Over Limit: {}",
+                field,
+                count,
+                maxFieldOccurrence,
+                count > maxFieldOccurrence
+            ));
+        }
 
         return occurrences
             .entrySet().stream()

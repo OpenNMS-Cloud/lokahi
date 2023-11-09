@@ -1,0 +1,26 @@
+{
+  "variables": {
+    "request": {
+      "ipAddresses": [
+        "172.4.2.1"
+      ],
+      "locationId": 1,
+      "name": "Discovery",
+      "snmpConfig": {
+        "ports": [
+          "161"
+        ],
+        "readCommunities": [
+          "public"
+        ]
+      },
+      "tags": [
+        {
+          "name": "default"
+        }
+      ]
+    }
+  },
+  "query": "mutation CreateOrUpdateActiveIcmpDiscovery($request: IcmpActiveDiscoveryCreateInput!) {\n  upsertIcmpActiveDiscovery(request: $request) {\n    id\n    name\n    ipAddresses\n    locationId\n    snmpConfig {\n      ports\n      readCommunities\n    }\n  }\n}",
+  "operationName": null
+}

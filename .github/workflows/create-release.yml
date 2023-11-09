@@ -1,0 +1,40 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        type: boolean
+        description: 'Dry run: Do not push changes to GitHub'
+        default: false
+      version:
+        description: 'What version to tag as; default is a new patch version'
+        required: false
+        type: string
+  pull_request:
+    paths:
+      - '.github/workflows/create-release.yml'
+      - 'build-tools/release/release.sh'
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # so we can get tags and history for the changelog
+
+      - name: Create release
+        run: |
+          if [ "${{ github.ref != 'refs/heads/develop' || github.event.inputs.dryRun }}" == true ]; then
+              DRYRUN="-n"
+          else
+              DRYRUN=""
+          fi
+
+          git config --global user.email "${{ vars.GH_USER_EMAIL }}"
+          git config --global user.name "${{ vars.GH_USER_NAME }}"
+
+          build-tools/release/release.sh $DRYRUN

@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "query ListDiscoveries {\n  passiveDiscoveries {\n    id\n    locationId\n    name\n    snmpCommunities\n    snmpPorts\n    toggle\n  }\n  listActiveDiscovery {\n    details\n    discoveryType\n  }\n}",
+  "operationName": null
+}

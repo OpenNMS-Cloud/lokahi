@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "discoveryId": 1
+  },
+  "query": "query TagsByActiveDiscoveryId($discoveryId: Long!) {\n  tagsByActiveDiscoveryId(activeDiscoveryId: $discoveryId) {\n    id\n    name\n  }\n}",
+  "operationName": null
+}

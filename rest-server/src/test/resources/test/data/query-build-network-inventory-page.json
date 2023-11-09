@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "query BuildNetworkInventoryPage {\n  findAllNodes {\n    id\n    ipInterfaces {\n      id\n      ipAddress\n      nodeId\n      snmpPrimary\n    }\n    location {\n      id\n      location\n    }\n    tags {\n      id\n      name\n    }\n    monitoredState\n    monitoringLocationId\n    nodeLabel\n    scanType\n  }\n  allMetrics: metric(name: \"response_time_msec\") {\n    status\n    data {\n      resultType\n      result {\n        metric\n        value\n        values\n      }\n    }\n  }\n}",
+  "operationName": null
+}

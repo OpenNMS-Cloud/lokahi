@@ -1,0 +1,15 @@
+{
+  "variables": {
+    "requestCriteria": {
+      "count": 10,
+      "exporter": [],
+      "timeRange": {
+        "startTime": 1698334268770,
+        "endTime": 1698420668770
+      },
+      "applications": []
+    }
+  },
+  "query": "query findExporters($requestCriteria: RequestCriteriaInput!) {\n  findExporters(requestCriteria: $requestCriteria) {\n    node {\n      id\n      nodeLabel\n    }\n    ipInterface {\n      id\n      ipAddress\n    }\n  }\n}",
+  "operationName": null
+}

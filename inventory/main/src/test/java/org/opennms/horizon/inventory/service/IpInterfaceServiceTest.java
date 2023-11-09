@@ -1,10 +1,12 @@
 package org.opennms.horizon.inventory.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -12,14 +14,20 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.shared.utils.IPAddress;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IpInterfaceServiceTest {
 
@@ -133,7 +141,7 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.of(testIpInterface));
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(List.of(testIpInterface));
         Mockito.when(mockIpInterfaceMapper.modelToDTO(testIpInterface)).thenReturn(testIpInterfaceDTO);
 
         //
@@ -152,7 +160,7 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.empty());
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(new ArrayList<>());
 
         //
         // Execute
@@ -163,6 +171,42 @@ public class IpInterfaceServiceTest {
         // Verify the Results
         //
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    void testFindByIpAddressAndLocationAndTenantIdMoreThanOne() {
+        //
+        // Setup Test Data and Interactions
+        //
+        IpInterface ipAddress1  = new IpInterface();
+        ipAddress1.setId(1L);
+        IpInterface ipAddress2  = new IpInterface();
+        ipAddress2.setId(2L);
+        IpInterface ipAddress3  = new IpInterface();
+        ipAddress3.setId(3L);
+        ipAddress3.setSnmpPrimary(true);
+        var testIpInterfaceDTO1 = IpInterfaceDTO.newBuilder().setId(1L).build();
+        var testIpInterfaceDTO3 = IpInterfaceDTO.newBuilder().setId(1L).build();
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
+            .thenReturn(List.of(ipAddress1, ipAddress2));
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.12").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
+            .thenReturn(List.of(ipAddress1, ipAddress2, ipAddress3));
+        Mockito.when(mockIpInterfaceMapper.modelToDTO(ipAddress1)).thenReturn(testIpInterfaceDTO1);
+        Mockito.when(mockIpInterfaceMapper.modelToDTO(ipAddress3)).thenReturn(testIpInterfaceDTO3);
+
+        //
+        // Execute
+        //
+        var expectFirstAddress = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
+        var expectSnmpAddress = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.12", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
+
+        //
+        // Verify the Results
+        //
+        assertTrue(expectFirstAddress.isPresent());
+        assertEquals(testIpInterfaceDTO1.getId(), expectFirstAddress.get().getId());
+        assertTrue(expectSnmpAddress.isPresent());
+        assertEquals(testIpInterfaceDTO3.getId(), expectSnmpAddress.get().getId());
     }
 
     @Test

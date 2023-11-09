@@ -1,0 +1,13 @@
+{
+  "variables": {
+    "page": 0,
+    "pageSize": 10,
+    "severities": [],
+    "sortAscending": true,
+    "sortBy": "id",
+    "timeRange": "ALL",
+    "nodeLabel": ""
+  },
+  "query": "query AlertsList($page: Int!, $pageSize: Int, $severities: [String], $sortAscending: Boolean!, $sortBy: String, $timeRange: TimeRange!, $nodeLabel: String) {\n  ...AlertsParts\n}\n\nfragment AlertsParts on Query {\n  findAllAlerts(\n    page: $page\n    pageSize: $pageSize\n    severities: $severities\n    sortAscending: $sortAscending\n    sortBy: $sortBy\n    timeRange: $timeRange\n    nodeLabel: $nodeLabel\n  ) {\n    lastPage\n    nextPage\n    totalAlerts\n    alerts {\n      acknowledged\n      description\n      firstEventTimeMs\n      lastUpdateTimeMs\n      severity\n      label\n      nodeName\n      databaseId\n      location\n      ruleNameList\n      policyNameList\n    }\n  }\n}",
+  "operationName": null
+}

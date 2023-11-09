@@ -1,0 +1,15 @@
+{
+  "variables": {
+    "requestCriteria": {
+      "count": 10,
+      "exporter": [],
+      "timeRange": {
+        "startTime": 1698334267634,
+        "endTime": 1698420667634
+      },
+      "applications": []
+    }
+  },
+  "query": "query findApplicationSummaries($requestCriteria: RequestCriteriaInput!) {\n  findApplicationSummaries(requestCriteria: $requestCriteria) {\n    label\n    bytesIn\n    bytesOut\n  }\n}",
+  "operationName": null
+}

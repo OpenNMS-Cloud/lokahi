@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.server.web;
 
+import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.service.graphql.BffDataFetchExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -57,6 +58,7 @@ import java.util.Map;
  * @see org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration#errorWebExceptionHandler
  */
 @RestControllerAdvice
+@Slf4j
 public class WebExceptionHandler {
 
     private final ErrorAttributes errorAttributes;
@@ -107,6 +109,9 @@ public class WebExceptionHandler {
         HttpStatus status,
         String message
     ) {
+        if (status.is5xxServerError()) {
+            log.error("Exception occurred during request processing", t);
+        }
         errorAttributes.storeErrorInformation(t, exchange);
         var request = ServerRequest.create(exchange, messageReaders);
         Map<String, Object> attributes = errorAttributes.getErrorAttributes(

@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "searchTerm": "tag"
+  },
+  "query": "query ListTagsSearch($searchTerm: String) {\n  ...TagsSearchParts\n}\n\nfragment TagsSearchParts on Query {\n  tags(searchTerm: $searchTerm) {\n    id\n    name\n  }\n}",
+  "operationName": null
+}

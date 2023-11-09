@@ -54,6 +54,16 @@ public class DuplicateFieldValidation implements FieldValidation {
             .queryTraverser(environment)
             .reducePreOrder(this::reduceField, new LinkedHashMap<>());
 
+        if (log.isDebugEnabled()) {
+            occurrences.forEach((field, count) -> log.debug(
+                "Field: {}, Occurrences: {} > {}, Over Limit: {}",
+                field,
+                count,
+                maxFieldOccurrence,
+                count > maxFieldOccurrence
+            ));
+        }
+
         return occurrences
             .entrySet().stream()
             .filter(entry -> entry.getValue() > maxFieldOccurrence)

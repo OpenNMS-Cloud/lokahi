@@ -190,7 +190,14 @@ public class AlertEventProcessor {
             thresholdMet = true;
         }
 
-        if (queryResult.isEmpty() && thresholdMet) {
+        // a cleared alert will reset threshold limit
+        if (queryResult.isPresent() && queryResult.get().getSeverity() == Severity.CLEARED
+            && queryResult.get().getEventUei().equals(event.getUei())) {
+            archiveClearedAlert(queryResult.get(), event);
+            thresholdMet = false;
+        }
+
+        if (queryResult.isEmpty() || !thresholdMet) {
             var newAlert = createNewAlert(event, alertData);
             newAlert.setMonitoringPolicyId(alertData.monitoringPolicyId());
             return Optional.of(newAlert);
@@ -228,6 +235,16 @@ public class AlertEventProcessor {
         });
 
         return queryResult;
+    }
+
+    private void archiveClearedAlert(org.opennms.horizon.alertservice.db.entity.Alert clearedAlert, Event event) {
+        if(clearedAlert == null || clearedAlert.getSeverity() != Severity.CLEARED) {
+            throw new IllegalArgumentException("Only cleared alert can be archived");
+        }
+        clearedAlert.setReductionKey(reductionKeyService.renderArchiveReductionKey(clearedAlert, event));
+        clearedAlert.setClearKey(reductionKeyService.renderArchiveClearKey(clearedAlert, event));
+
+        alertRepository.saveAndFlush(clearedAlert);
     }
 
     private boolean isThresholdMet(AlertData alertData, String tenantId) {

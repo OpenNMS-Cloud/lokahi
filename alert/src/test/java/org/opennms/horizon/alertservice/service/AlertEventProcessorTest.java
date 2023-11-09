@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AlertEventProcessorTest {
+    private static final String TEST_TENANT_ID = "tenantA";
 
     @InjectMocks
     AlertEventProcessor processor;
@@ -58,8 +59,8 @@ class AlertEventProcessorTest {
     @Mock
     AlertDefinitionRepository alertDefinitionRepository;
 
-    @Mock
-    ReductionKeyService reductionKeyService;
+    @Spy // for InjectMocks
+    ReductionKeyService reductionKeyService = new ReductionKeyService();
 
     @Mock
     MeterRegistry registry;
@@ -79,14 +80,14 @@ class AlertEventProcessorTest {
     @BeforeEach
     void setUp() {
         when(registry.counter(any())).thenReturn(counter);
-
+        when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TEST_TENANT_ID));
         processor.init();
     }
 
     @Test
     void generateAlert() {
         Event event = Event.newBuilder()
-            .setTenantId("tenantA")
+            .setTenantId(TEST_TENANT_ID)
             .setUei("uei")
             .setDescription("desc")
             .setNodeId(10L)
@@ -95,14 +96,14 @@ class AlertEventProcessorTest {
             .build();
 
         AlertCondition alertCondition = new AlertCondition();
-        alertCondition.setTenantId("tenantA");
+        alertCondition.setTenantId(TEST_TENANT_ID);
         alertCondition.setId(1L);
         alertCondition.setSeverity(Severity.MAJOR);
         alertCondition.setCount(1);
         alertCondition.setOvertime(0);
 
         AlertDefinition alertDefinition = new AlertDefinition();
-        alertDefinition.setTenantId("tenantA");
+        alertDefinition.setTenantId(TEST_TENANT_ID);
         alertDefinition.setUei("uei");
         alertDefinition.setReductionKey("reduction");
         alertDefinition.setAlertCondition(alertCondition);
@@ -115,7 +116,7 @@ class AlertEventProcessorTest {
 
         MonitorPolicy monitorPolicy = new MonitorPolicy();
         monitorPolicy.setId(1L);
-        monitorPolicy.setTenantId("tenantA");
+        monitorPolicy.setTenantId(TEST_TENANT_ID);
 
         var tag = new Tag();
         tag.getPolicies().add(monitorPolicy);
@@ -134,7 +135,88 @@ class AlertEventProcessorTest {
 
         assertThat(alerts).hasSize(1);
         assertThat(alerts.get(0))
-            .returns("tenantA", Alert::getTenantId)
+            .returns(TEST_TENANT_ID, Alert::getTenantId)
+            .returns("desc", Alert::getDescription)
+            .returns(alertCondition.getSeverity(), Alert::getSeverity)
+            .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyIdList);
+
+        ArgumentCaptor<Location> saveLocationArg = ArgumentCaptor.forClass(Location.class);
+        verify(locationRepository, times(1)).save(saveLocationArg.capture());
+
+        Assert.assertEquals(saveLocationArg.getValue().getLocationName(), event.getLocationName());
+        Assert.assertEquals(saveLocationArg.getValue().getId(), Long.parseLong(event.getLocationId()));
+        Assert.assertEquals(saveLocationArg.getValue().getTenantId(), event.getTenantId());
+    }
+
+    @Test
+    void generateMultipleAlertsWithClear() {
+        final String reductionKey = "reductionKey";
+        final String cleanKey = "cleanKey";
+        final String uei = "uei";
+
+        Event event = Event.newBuilder()
+            .setTenantId(TEST_TENANT_ID)
+            .setUei(uei)
+            .setDescription("desc")
+            .setNodeId(10L)
+            .setLocationId("11")
+            .setLocationName("locationName")
+            .build();
+
+        AlertCondition alertCondition = new AlertCondition();
+        alertCondition.setTenantId(TEST_TENANT_ID);
+        alertCondition.setId(1L);
+        alertCondition.setSeverity(Severity.MAJOR);
+        alertCondition.setCount(1);
+        alertCondition.setOvertime(0);
+
+        AlertDefinition alertDefinition = new AlertDefinition();
+        alertDefinition.setTenantId(TEST_TENANT_ID);
+        alertDefinition.setUei(uei);
+        alertDefinition.setReductionKey(reductionKey);
+        alertDefinition.setClearKey(cleanKey);
+        alertDefinition.setAlertCondition(alertCondition);
+
+        MonitorPolicy policy = new MonitorPolicy();
+        policy.setName("policyName");
+        PolicyRule rule = new PolicyRule();
+        rule.setName("ruleName");
+        rule.setPolicy(policy);
+        alertCondition.setRule(rule);
+
+        MonitorPolicy monitorPolicy = new MonitorPolicy();
+        monitorPolicy.setId(1L);
+        monitorPolicy.setTenantId(TEST_TENANT_ID);
+
+        var existingAlert = new org.opennms.horizon.alertservice.db.entity.Alert();
+        existingAlert.setClearKey(cleanKey);
+        existingAlert.setEventUei(uei);
+        existingAlert.setSeverity(Severity.CLEARED);
+
+        var tag = new Tag();
+        tag.getPolicies().add(monitorPolicy);
+
+        when(alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei()))
+            .thenReturn(List.of(alertDefinition));
+
+        when(tagRepository.findByTenantIdAndNodeId(anyString(), anyLong())).thenReturn(List.of(tag));
+        
+        when(alertRepository.findByReductionKeyAndTenantId(cleanKey, TEST_TENANT_ID)).thenReturn(Optional.of(existingAlert));
+
+        var node = new Node();
+        node.setId(event.getNodeId());
+        node.setNodeLabel("nodeLabel");
+        when(nodeRepository.findByIdAndTenantId(event.getNodeId(), event.getTenantId())).thenReturn(Optional.of(node));
+
+        List<Alert> alerts = processor.process(event);
+
+        verify(reductionKeyService, times(1)).renderArchiveReductionKey(existingAlert, event);
+        verify(reductionKeyService, times(1)).renderArchiveClearKey(existingAlert, event);
+        verify(alertRepository, times(1)).saveAndFlush(existingAlert);
+
+        assertThat(alerts).hasSize(1);
+        assertThat(alerts.get(0))
+            .returns(TEST_TENANT_ID, Alert::getTenantId)
             .returns("desc", Alert::getDescription)
             .returns(alertCondition.getSeverity(), Alert::getSeverity)
             .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyIdList);

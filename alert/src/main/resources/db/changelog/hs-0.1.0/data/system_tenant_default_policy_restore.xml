@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-add-default-alert-conditions-restore-for-system-tenant" author="fchu">
+        <insert tableName="alert_condition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="event_count" valueNumeric="1"/>
+            <column name="severity" value="CRITICAL"/>
+            <column name="rule_id" valueComputed="(select id from policy_rule where tenant_id = 'system-tenant'
+            and rule_name = 'default_rule')"/>
+            <column name="trigger_event_definition_id" valueComputed="(select id from event_definition where
+            event_uei = 'uei.opennms.org/internal/node/serviceRestored')"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="hs-0.1.0-add-default-alert-definitions-restore-for-system-tenant" author="fchu">
+        <insert tableName="alert_definition">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="uei" value="uei.opennms.org/internal/node/serviceRestored"/>
+            <column name="reduction_key" value="%s:%s:%d:%d"/>
+            <column name="clear_key" value="%s:uei.opennms.org/internal/node/serviceUnreachable:%d:%d"/>
+            <column name="type" value="CLEAR"/>
+            <column name="alert_condition_id" valueComputed="(SELECT ac.id FROM alert_condition ac INNER JOIN event_definition ed
+            ON ed.id = ac.trigger_event_definition_id  WHERE tenant_id = 'system-tenant' AND ed.event_uei = 'uei.opennms.org/internal/node/serviceRestored')"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

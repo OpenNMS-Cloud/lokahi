@@ -32,6 +32,7 @@ import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.alertservice.db.entity.Alert;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.events.proto.Event;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,15 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ReductionKeyService {
+    public static final String ARCHIVE_SUFFIX = ":archive:";
+
+    public String renderArchiveReductionKey(Alert alert, Event event) {
+        return alert.getReductionKey() == null ? null : alert.getReductionKey() + ARCHIVE_SUFFIX + event.getProducedTimeMs();
+    }
+
+    public String renderArchiveClearKey(Alert alert, Event event) {
+        return alert.getClearKey() == null ? null : alert.getClearKey() + ARCHIVE_SUFFIX + event.getProducedTimeMs();
+    }
 
     public String renderReductionKey(
         @NonNull Event event, @NonNull AlertDefinition alertDefinition

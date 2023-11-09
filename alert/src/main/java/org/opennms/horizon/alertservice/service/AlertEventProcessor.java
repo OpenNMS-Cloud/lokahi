@@ -194,10 +194,11 @@ public class AlertEventProcessor {
         if (queryResult.isPresent() && queryResult.get().getSeverity() == Severity.CLEARED
             && queryResult.get().getEventUei().equals(event.getUei())) {
             archiveClearedAlert(queryResult.get(), event);
-            thresholdMet = false;
+            thresholdMet = true;
+            queryResult = Optional.empty();
         }
 
-        if (queryResult.isEmpty() || !thresholdMet) {
+        if (queryResult.isEmpty() && thresholdMet) {
             var newAlert = createNewAlert(event, alertData);
             newAlert.setMonitoringPolicyId(alertData.monitoringPolicyId());
             return Optional.of(newAlert);

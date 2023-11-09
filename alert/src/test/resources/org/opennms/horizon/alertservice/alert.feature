@@ -81,9 +81,9 @@ Feature: Alert Service Basic Functionality
       | alerts[0].severity == CLEARED |
     When An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
     Then List alerts for the tenant, until JSON response matches the following JSON path expressions
-      | alerts.size() == 1          |
-      | alerts[0].counter == 3      |
-      | alerts[0].severity == MINOR |
+      | alerts.size() == 2         |
+      | alerts[1].counter == 1      |
+      | alerts[1].severity == MINOR |
 
   Scenario: Alerts can be acknowledged and unacknowledged
     When An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10

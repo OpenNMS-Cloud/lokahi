@@ -81,14 +81,9 @@ public class QueryService {
             || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
             || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
     }
-
-    public boolean isCustomQuery(String metricName) {
-        return AVAILABILITY_PERCENTAGE.equals(metricName);
-    }
-
+    
     public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
                                  Integer timeRange, TimeRangeUnit timeRangeUnit) {
-
         if (isRangeQuery(metricName)) {
             long end = System.currentTimeMillis() / 1000L;
             long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
@@ -144,19 +139,15 @@ public class QueryService {
                         return QUERY_PREFIX + query + rangeQuerySuffix;
                     }
             }
-        }
-
-        if (isCustomQuery(metricName)) {
-            switch (metricName) {
-                case AVAILABILITY_PERCENTAGE:
-                    String query = "response_time_msec" + getLabelsQueryString(labels);
-                    query = addTimeRange(timeRange, timeRangeUnit, query);
-                    return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
-                        numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
-            }
+        } else if (AVAILABILITY_PERCENTAGE.equals(metricName)) {
+                String query = "response_time_msec" + getLabelsQueryString(labels);
+                query = addTimeRange(timeRange, timeRangeUnit, query);
+                return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
+                    numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
         }
         String queryString = getQueryString(metricName, labels);
         return addTimeRange(timeRange, timeRangeUnit, queryString);
+
     }
 
     public String getQueryString(Map<String, String> queryParams) {

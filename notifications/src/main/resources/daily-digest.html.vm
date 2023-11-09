@@ -65,6 +65,7 @@
             letter-spacing: 1px;
         }
         .footer-container {
+            margin-top: 20px;
             padding: 16px 32px 0px 32px;
         }
         .recipient {
@@ -105,7 +106,7 @@
                         <thead>
                             <th style="padding-left: 25px;" align="left">${alerts}</th>
                             <th style="padding-left: 25px;" align="left">${yesterday}</th>
-                            <th style="padding-left: 25px;" align="left">&{change}</th>
+                            <th style="padding-left: 25px;" align="left">${change}</th>
                         </thead>
                         <tr>
                             <td style="width: 55px; padding-left: 25px;">Alerts</td>

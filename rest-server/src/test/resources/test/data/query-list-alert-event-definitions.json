@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "eventType": "SNMP_TRAP"
+  },
+  "query": "query ListAlertEventDefinitions($eventType: EventType) {\n  listAlertEventDefinitions(eventType: $eventType) {\n    id\n    name\n    eventType\n  }\n}",
+  "operationName": null
+}

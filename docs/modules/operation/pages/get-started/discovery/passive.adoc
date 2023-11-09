@@ -1,5 +1,5 @@
 = Create a Passive Discovery
-:description: Learn how to identify network inventory with OpenNMS Lōkahi/Cloud using Syslog and SNMP traps (passive discovery).
+:description: Learn how to identify network inventory with OpenNMS Lōkahi/Cloud using SNMP traps (passive discovery).
 
 A xref:get-started/discovery/introduction.adoc#passive-discovery[passive discovery] is one method to identify the devices on your network and add them to your monitoring inventory.
 You may also choose to xref:get-started/discovery/active.adoc[create an active discovery].
@@ -10,10 +10,11 @@ You can create only one passive discovery:
 
 . Choose *Discovery* in the left navigation menu.
 . On the Discovery page, click *Add Discovery*.
-. In the Passive Discovery area, toggle *SYSLOG & SNMP TRAPS* on.
+. In the Passive Discovery area, click *SNMP Traps*.
 . Fill in the appropriate information in each field.
 +
-NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], click the drop-down arrow in the *Search/Add tags* field, type a name for the tag, and click *New*.
+NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], type a name for the tag in the *Tags* field, and click on the name when it appears in the drop-down list.
+The new tag appears below the field and is available for use elsewhere, such as with nodes and alerts.
 
 . Click *Save Discovery*.
 

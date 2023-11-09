@@ -25,6 +25,7 @@
             :selectDiscovery="discoveryStore.editDiscovery"
             :selectedId="discoveryStore.selectedDiscovery.id"
             :showInstructions="() => openInstructions(InstructionsType.Active)"
+            :selectedType="discoveryStore.selectedDiscovery.type"
           />
           <DiscoveryListCard
             passive
@@ -34,6 +35,7 @@
             :selectDiscovery="discoveryStore.editDiscovery"
             :selectedId="discoveryStore.selectedDiscovery.id"
             :showInstructions="() => openInstructions(InstructionsType.Passive)"
+            :selectedType="discoveryStore.selectedDiscovery.type"
           />
         </div>
       </section>
@@ -310,7 +312,7 @@ onUnmounted(() => {
 const typeOptions = ref([
   { value: DiscoveryType.ICMP, _text: 'ICMP/SNMP' },
   { value: DiscoveryType.Azure, _text: 'Azure' },
-  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Syslog Traps' }
+  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Traps' }
 ])
 if (discoveryStore.snmpV3Enabled) {
   typeOptions.value = typeOptions.value.concat([

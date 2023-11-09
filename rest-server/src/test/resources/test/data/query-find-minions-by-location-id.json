@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "locationId": 0
+  },
+  "query": "query FindMinionsByLocationId($locationId: Long!) {\n  findMinionsByLocationId(locationId: $locationId) {\n    id\n    label\n    lastCheckedTime\n    status\n    systemId\n    location {\n      id\n      location\n    }\n  }\n}",
+  "operationName": null
+}

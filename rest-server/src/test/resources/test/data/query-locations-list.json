@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "query LocationsList {\n  ...LocationsParts\n}\n\nfragment LocationsParts on Query {\n  findAllLocations {\n    id\n    location\n    address\n    longitude\n    latitude\n  }\n}",
+  "operationName": null
+}

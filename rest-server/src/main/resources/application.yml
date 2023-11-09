@@ -17,8 +17,7 @@ keycloak:
 
 graphql:
   spqr:
-    gui:
-      enabled: true
+    # See https://github.com/leangen/graphql-spqr/issues/320
     base-packages:
       - org.opennms.horizon.server.model
 

@@ -5,7 +5,7 @@
 A monitoring policy uses tags and rules to customize the type of monitoring data that you collect and the notifications you receive about that data.
 
 Note that you can also create a monitoring policy by copying an existing one and editing it.
-Click the *copy* symbol next to the policy name field label.
+Click the policy, then click the *copy* symbol at the top right of the *Policy Name* .
 
 To create a monitoring policy, follow these steps:
 

@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "searchTerm": ""
+  },
+  "query": "query SearchLocation($searchTerm: String) {\n  searchLocation(searchTerm: $searchTerm) {\n    id\n    location\n    address\n    longitude\n    latitude\n  }\n}",
+  "operationName": null
+}

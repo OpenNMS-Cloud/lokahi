@@ -81,7 +81,7 @@ public class QueryService {
             || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
             || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
     }
-
+    
     public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
                                  Integer timeRange, TimeRangeUnit timeRangeUnit) {
         if (isRangeQuery(metricName)) {

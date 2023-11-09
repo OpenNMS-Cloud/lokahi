@@ -70,6 +70,13 @@
         href="/synthetic-transactions"
         :icon="Icons.Cycle"
       />
+
+      <FeatherAppRailNavItem
+        :icon="Icons.Documentation"
+        title="Documentation"
+        href="https://docs.opennms.com/lokahi/latest/index.html"
+        target="_blank"
+      />
     </template>
   </FeatherAppRail>
 </template>
@@ -86,6 +93,7 @@ import Monitoring from '@featherds/icon/hardware/MinionProfiles'
 import Cycle from '@featherds/icon/action/Cycle'
 import Warning from '@featherds/icon/notification/Warning'
 import Location from '@featherds/icon/action/Location'
+import Documentation from '@featherds/icon/communication/Documentation'
 import NavigationRailNavItem from '@/components/Layout/NavigationRailNavItem.vue'
 
 const Icons = markRaw({
@@ -96,6 +104,7 @@ const Icons = markRaw({
   Cycle,
   Warning,
   Location,
+  Documentation,
   MapIcon
 })
 

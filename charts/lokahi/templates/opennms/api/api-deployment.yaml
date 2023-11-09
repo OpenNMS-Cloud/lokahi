@@ -65,6 +65,13 @@ spec:
               value: /api
             - name: GRAPHQL_SPQR_GUI_TARGET_ENDPOINT
               value: /api/graphql
+            {{- if .Values.OpenNMS.API.PlaygroundGuiEnabled }}
+            - name: GRAPHQL_SPQR_GUI_ENABLED
+              value: "true"
+            {{- else }}
+            - name: GRAPHQL_SPQR_GUI_ENABLED
+              value: "false"
+            {{- end }}
             - name: GRPC_URL_INVENTORY
               value: "{{ .Values.OpenNMS.Inventory.ServiceName }}:6565"
             - name: GRPC_URL_EVENTS
@@ -90,9 +97,12 @@ spec:
             - name: LOKAHI_BFF_CORS_ALLOWED
               value: "{{ . }}"
             {{- end }}
-            {{- with .Values.OpenNMS.API.IntrospectionEnabled }}
+            {{- if .Values.OpenNMS.API.IntrospectionEnabled }}
             - name: LOKAHI_BFF_INTROSPECTION_ENABLED
-              value: "{{ . }}"
+              value: "true"
+            {{- else }}
+            - name: LOKAHI_BFF_INTROSPECTION_ENABLED
+              value: "false"
             {{- end }}
             {{- with .Values.OpenNMS.API.MaxAliasOccurrence }}
             - name: LOKAHI_BFF_MAX_ALIAS_OCCURRENCE

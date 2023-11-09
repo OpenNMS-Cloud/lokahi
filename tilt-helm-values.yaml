@@ -40,6 +40,8 @@ OpenNMS:
         Cpu: '0'
         Memory: '0'
     CorsAllowed: true
+    PlaygroundGuiEnabled: true
+    IntrospectionEnabled: true
   UI:
     Resources:
       Limits:

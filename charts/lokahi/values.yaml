@@ -35,6 +35,13 @@ OpenNMS:
     CertificateManagerUrl: ""
     PackagedMinionFile: run-minion-docker-compose.yaml
     MinionEndpoint: host.docker.internal
+    IntrospectionEnabled: false
+    MaxAliasOccurrence: 5
+    MaxComplexity: 60
+    MaxDirectiveOccurrence: 5
+    MaxFieldOccurrence: 5
+    MaxQueryDepth: 5
+    PlaygroundGuiEnabled: false
   MetricsProcessor:
     ServiceName: opennms-metrics-processor
     ImageShortName: lokahi-metrics-processor

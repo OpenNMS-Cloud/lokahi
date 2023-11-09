@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "\tquery { locationByName(locationName: \"default\") { id } }",
+  "operationName": null
+}

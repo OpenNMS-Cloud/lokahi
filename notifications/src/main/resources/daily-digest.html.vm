@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;">
+    <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
+
+    <title>Daily Email</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <style type="text/css">
+        #outlook a { 
+            padding: 0;
+        }
+        body { 
+            width:100% !important; 
+            size-adjust:100%; 
+            -ms-text-size-adjust:100%; 
+            margin:0; 
+            padding:0;
+        }
+        p, span {
+            font-family: 'Inter', 'Open Sans', Georgia, sans-serif;
+            font-size: 14px;
+            color: #000000
+        }
+        h2 {
+            margin: 0;
+            font-family:'Inter', Helvetica, Arial, sans-serif;
+            color: #000000
+        }
+        .container {
+            background: #F4F7FC;
+            max-width: 600px;
+            height: 804px;
+            width: 100%;
+        }
+        .inner-container {
+            padding: 32px;
+        }
+        .opennms-icon {
+            margin: 40px 0px 40px 32px;
+        }
+        .horizontal-rule {
+            border: 3px solid #00BFCB;
+            margin: 0;
+        }
+        .summary {
+            background: #ffffff;
+            height: 380px;
+        }
+        .msg {
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .btn {
+            background: #273180;
+            color: #ffffff;
+            text-decoration: none;
+            font-family: 'Inter', Helvetica, Arial, sans-serif;
+            padding: 10px 15px 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .footer-container {
+            margin-top: 20px;
+            padding: 16px 32px 0px 32px;
+        }
+        .recipient {
+            color: #273180;
+        }
+        table {
+            width: 100%;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            background: #3a4bd3;
+            color: #ffffff;
+            font-family: 'Inter', Helvetica, Arial, sans-serif;
+            border-radius: 3px;
+            padding-bottom: 10px;
+            padding-top: 5px;
+        }
+        th {
+            font-size: 32px;
+        }
+        td {
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="inner-container">
+            <img class="opennms-icon" src="https://www.opennms.com/wp-content/uploads/2021/04/OpenNMS_Horizontal-Logo_Light-BG-retina-website.png" width="250" alt="OpenNMS Logo" />
+            <hr class="horizontal-rule">
+            <div class="summary">
+                <div class="inner-container">
+                    <p>${date}</p>
+                    <h2>
+                        Daily Alert Summary
+                    </h2>
+                    <table>
+                        <thead>
+                            <th style="padding-left: 25px;" align="left">${alerts}</th>
+                            <th style="padding-left: 25px;" align="left">${yesterday}</th>
+                            <th style="padding-left: 25px;" align="left">${change}</th>
+                        </thead>
+                        <tr>
+                            <td style="width: 55px; padding-left: 25px;">Alerts</td>
+                            <td style="width: 50px; padding-left: 25px;">Alerts Yesterday</td>
+                            <td style="width: 50px; padding-left: 25px;">Change</td>
+                        </tr>
+                    </table>
+                    <p class="msg">Log into Cloud to further investigate all recent alerts.</p>
+                    <a class="btn" style="color: #ffffff" href="${url}" target="_blank">SEE YOUR ALERTS</a>
+                </div>
+            </div>
+            <div class="footer-container">
+                <p>This email was sent to <span class="recipient">${recipient}</span>.</p>
+                <p>OpenNMS, 3000 RDU Center Dr, Suite 200 Morrisville, NC 27560</p>
+                <p>&copy;${currentYear} OpenNMS Group</p>
+                <p style="height:10px;">&nbsp;</p>
+                <img src="https://www.opennms.com/wp-content/uploads/2023/03/OpenNMS_Horizontal-Logo_Grey.png" width="148" alt="OpenNMS Logo" />
+            </div>
+        </div>
+    </div>
+</body>

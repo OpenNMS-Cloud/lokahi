@@ -1,0 +1,65 @@
+{
+  "variables": {
+    "policy": {
+      "name": "A Policy",
+      "memo": "Memo",
+      "notifyByEmail": true,
+      "notifyByPagerDuty": true,
+      "notifyByWebhooks": false,
+      "tags": [
+        "default",
+        "tag"
+      ],
+      "rules": [
+        {
+          "name": "A Rule",
+          "componentType": "NODE",
+          "detectionMethod": "EVENT",
+          "eventType": "SNMP_TRAP",
+          "alertConditions": [
+            {
+              "count": 1,
+              "severity": "CRITICAL",
+              "overtimeUnit": "UNKNOWN_UNIT",
+              "triggerEvent": {
+                "id": 1,
+                "name": "SNMP Cold Start",
+                "eventType": "SNMP_TRAP"
+              }
+            },
+            {
+              "count": 1,
+              "severity": "CRITICAL",
+              "overtimeUnit": "UNKNOWN_UNIT",
+              "triggerEvent": {
+                "id": 2,
+                "name": "SNMP Warm Start",
+                "eventType": "SNMP_TRAP"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rule 2",
+          "componentType": "NODE",
+          "detectionMethod": "EVENT",
+          "eventType": "INTERNAL",
+          "alertConditions": [
+            {
+              "count": 1,
+              "severity": "CRITICAL",
+              "overtimeUnit": "UNKNOWN_UNIT",
+              "triggerEvent": {
+                "id": 7,
+                "name": "Device Unreachable",
+                "eventType": "INTERNAL"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "query": "mutation CreateMonitorPolicy($policy: MonitorPolicyInput!) {\n  createMonitorPolicy(policy: $policy) {\n    id\n  }\n}",
+  "operationName": null
+}

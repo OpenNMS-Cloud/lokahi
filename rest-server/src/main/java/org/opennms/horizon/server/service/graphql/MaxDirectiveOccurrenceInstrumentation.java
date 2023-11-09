@@ -44,12 +44,14 @@ import graphql.util.TraverserContext;
 import graphql.validation.ValidationError;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Slf4j
 public class MaxDirectiveOccurrenceInstrumentation extends SimplePerformantInstrumentation {
 
     private final int maxDirectiveOccurrence;
@@ -63,8 +65,19 @@ public class MaxDirectiveOccurrenceInstrumentation extends SimplePerformantInstr
     ) {
         var nodeVisitor = new DirectiveCounterVisitor();
         new NodeTraverser().preOrder(nodeVisitor, parameters.getDocument().getChildren());
+        Map<String, Integer> occurrences = nodeVisitor.getOccurrences();
 
-        var errors = nodeVisitor.getOccurrences().entrySet().stream()
+        if (log.isDebugEnabled()) {
+            occurrences.forEach((field, count) -> log.debug(
+                "Field: {}, Occurrences: {} > {}, Over Limit: {}",
+                field,
+                count,
+                maxDirectiveOccurrence,
+                count > maxDirectiveOccurrence
+            ));
+        }
+
+        var errors = occurrences.entrySet().stream()
             .filter(entry -> entry.getValue() > maxDirectiveOccurrence)
             .map(Map.Entry::getKey)
             .map(field -> GraphQLError.newError()

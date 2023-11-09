@@ -59,8 +59,7 @@ import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
-public class DocumentEnricherTest {
+class DocumentEnricherTest {
 
     private InventoryClient mockInventoryClient;
     private ClassificationEngine mockClassificationEngine;
@@ -310,18 +309,12 @@ public class DocumentEnricherTest {
         //
         // Execute
         //
-        Exception actual = null;
-        try {
-            List<FlowDocument> result = target.enrich(testDocumentLog);
-            fail("Missing expected exception");
-        } catch (Exception caught) {
-            actual = caught;
-        }
+        List<FlowDocument> result = target.enrich(testDocumentLog);
 
         //
         // Verify the Results
         //
-        assertSame(testException, actual);
+        assertFalse(result.get(0).hasSrcNode());
     }
 
     @Test

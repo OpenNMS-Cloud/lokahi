@@ -2,7 +2,7 @@
 :!sectids:
 
 = Network Discovery
-:description: Learn about network discovery with OpenNMS Lōkahi/Cloud using ICMP/SNMP, Azure, or Syslog and SNMP traps to identify monitoring inventory and devices.
+:description: Learn about network discovery with OpenNMS Lōkahi/Cloud using ICMP/SNMP, Azure, or SNMP traps to identify monitoring inventory and devices.
 
 The discovery process identifies devices and entities on your monitored network through either active or passive discovery.
 
@@ -24,10 +24,10 @@ _**Disadvantages:** Can slow network performance as the discovery process tries 
 [[passive-discovery]]
 == What is passive discovery?
 
-Passive discovery uses Syslog and SNMP traps to identify network devices. It does so by monitoring their activity through events, flows, and indirectly by evaluating other devices' configuration settings.
+Passive discovery uses SNMP traps to identify network devices. It does so by monitoring their activity through events, flows, and indirectly by evaluating other devices' configuration settings.
 
 Note that you can set only one passive discovery configuration.
 
 _**Benefits:** Low bandwidth consumption._
 
-_**Disadvantages:** May miss devices if they are not active. All devices must be enabled and configured to send Syslogs._
+_**Disadvantages:** May miss devices if they are not active._

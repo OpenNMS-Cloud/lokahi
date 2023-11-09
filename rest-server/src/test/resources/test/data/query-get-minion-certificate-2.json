@@ -1,0 +1,1 @@
+{"variables":{"location":2},"query":"query getMinionCertificate($location: Long) {\n  getMinionCertificate(locationId: $location) {\n    password\n    certificate\n  }\n}","operationName":null}

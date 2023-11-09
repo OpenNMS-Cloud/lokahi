@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "query NodesForMap {\n  findAllNodes {\n    id\n    nodeLabel\n    location {\n      latitude\n      longitude\n      location\n    }\n  }\n}",
+  "operationName": null
+}

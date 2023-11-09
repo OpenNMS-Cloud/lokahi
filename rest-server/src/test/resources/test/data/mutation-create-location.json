@@ -1,0 +1,5 @@
+{
+  "variables": {},
+  "query": "\tmutation createLocation { createLocation(location: { location: \"default\" }) { id } }",
+  "operationName": null
+}

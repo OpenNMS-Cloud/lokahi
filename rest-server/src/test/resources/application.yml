@@ -12,7 +12,13 @@ lokahi:
     max-complexity: 60
     max-directive-occurrence: 5
     max-field-occurrence: 5
-    max-query-depth: 13
+    max-query-depth: 5
+
+graphql:
+  spqr:
+    # See https://github.com/leangen/graphql-spqr/issues/320
+    base-packages:
+      - org.opennms.horizon.server.model
 
 grpc:
   url:

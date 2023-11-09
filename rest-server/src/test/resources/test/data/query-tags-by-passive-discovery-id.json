@@ -1,0 +1,7 @@
+{
+  "variables": {
+    "discoveryId": 1
+  },
+  "query": "query TagsByPassiveDiscoveryId($discoveryId: Long!) {\n  tagsByPassiveDiscoveryId(passiveDiscoveryId: $discoveryId) {\n    id\n    name\n  }\n}",
+  "operationName": null
+}

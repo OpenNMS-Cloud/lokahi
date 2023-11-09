@@ -1,0 +1,17 @@
+{
+  "variables": {
+    "requestCriteria": {
+      "exporter": [
+        {
+          "nodeId": 1
+        }
+      ],
+      "timeRange": {
+        "startTime": 1697816401615,
+        "endTime": 1698421201615
+      }
+    }
+  },
+  "query": "query findExportersForNodeStatus($requestCriteria: RequestCriteriaInput!) {\n  findExporters(requestCriteria: $requestCriteria) {\n    snmpInterface {\n      ifIndex\n      ifName\n    }\n    ipInterface {\n      id\n      ipAddress\n    }\n  }\n}",
+  "operationName": null
+}

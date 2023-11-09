@@ -33,17 +33,15 @@ import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.web.GraphQLExecutor;
 import lombok.extern.slf4j.Slf4j;
-import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opennms.horizon.inventory.dto.GeoLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,23 +52,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.opennms.horizon.server.test.util.ResourceFileReader.read;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @Slf4j
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 public class GraphQLControllerTest {
-
-    private static Arguments readArgumentPair(String filePath) {
-        return Arguments.of(filePath, read(filePath));
-    }
-
-    private static final String DESCRIPTIVE_DISPLAY_NAME = "[{index}]: {0}";
-
     private static final String ENDPOINT = "/graphql";
     private static final String ACCESS_TOKEN = "test-token-12345";
 
@@ -100,9 +89,6 @@ public class GraphQLControllerTest {
             .build())
         .build();
 
-    @Autowired
-    private WebTestClient webClient;
-
     @MockBean
     private InventoryClient inventoryClient;
 
@@ -113,25 +99,23 @@ public class GraphQLControllerTest {
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
 
+    private GraphQLWebTestClient webClient;
+
     @BeforeEach
-    void setUp() {
+    void setUp(@Autowired WebTestClient webTestClient) {
         doReturn(ACCESS_TOKEN)
             .when(mockHeaderUtil)
             .getAuthHeader(any(ResolutionEnvironment.class));
+
+        this.webClient = GraphQLWebTestClient.builder().webClient(webTestClient).build();
     }
+
     @Test
     void doesNotAllowRequestsViaGet() {
-        webClient.get()
-            .uri(ENDPOINT + "?query={q}", Map.of("q", QUERY))
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
+        webClient.exchangeGet(ENDPOINT + "?query={q}", Map.of("q", QUERY))
+            .expectJsonResponse(HttpStatus.METHOD_NOT_ALLOWED)
             .jsonPath("$.error").isEqualTo("Method Not Allowed")
-            .jsonPath("$.message").isEqualTo("Request method 'GET' is not supported.")
-            .jsonPath("$.trace").doesNotExist();
+            .jsonPath("$.message").isEqualTo("Request method 'GET' is not supported.");
     }
 
     @ValueSource(strings = {
@@ -140,35 +124,22 @@ public class GraphQLControllerTest {
     })
     @ParameterizedTest
     void doesNotAllowUnsupportedMediaTypes(String mediaType) {
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", mediaType)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(createPayload())
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
+        webClient
+            .withContentType(MediaType.parseMediaType(mediaType))
+            .exchangePost(createPayload())
+            .expectJsonResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
             .jsonPath("$.error").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
-            .jsonPath("$.message").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
-            .jsonPath("$.trace").doesNotExist();
+            .jsonPath("$.message").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
     }
 
     @Test
     void allowsPostRequests() {
         when(inventoryClient.createLocation(any(), any())).thenReturn(RESPONSE_DTO);
 
-        String body = createPayload();
-
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(body)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody().json("""
+        webClient
+            .exchangePost(createPayload())
+            .expectCleanResponse()
+            .json("""
                 {
                   "data": {
                     "createLocation": {
@@ -183,142 +154,16 @@ public class GraphQLControllerTest {
                 """);
     }
 
-    @Test
-    void wellFormedButInvalidRequestShouldReturn200WithErrorDetails() {
-        String requestBody = read("/test/data/error-mishandling.json");
-
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(requestBody)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.data").doesNotExist()
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.trace").doesNotExist();
-    }
-
-    @Test
-    void limitsAliasOverloading() {
-        String requestBody = read("/test/data/alias-overloading.json");
-
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(requestBody)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.data").doesNotExist()
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
-                Matchers.matchesRegex("^Validation error.*: Alias '.+' is repeated too many times$")
-            ))
-            .jsonPath("$.trace").doesNotExist();
-    }
-
-    @Test
-    void limitsDirectiveOverloading() {
-        String requestBody = read("/test/data/directive-overloading.json");
-
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(requestBody)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.data").doesNotExist()
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
-                Matchers.matchesRegex("^Validation error.*: Directive '.+' is repeated too many times$")
-            ))
-            .jsonPath("$.trace").doesNotExist();
-    }
-
-    public static Stream<Arguments> introspectionRequests() {
-        return Stream.of(
-            readArgumentPair("/test/data/introspection-query.json"),
-            readArgumentPair("/test/data/introspection-circular.json")
-        );
-    }
-
-    @MethodSource("introspectionRequests")
-    @ParameterizedTest(name = DESCRIPTIVE_DISPLAY_NAME)
-    void introspectionNotAllowedWhenDisabled(
-        String description,
-        String requestBody
-    ) {
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(requestBody)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.data").doesNotExist()
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
-                Matchers.matchesRegex("^Validation error.*: Field '.+' in type '__.+' is undefined$")
-            ))
-            .jsonPath("$.trace").doesNotExist();
-    }
-
-    public static Stream<Arguments> fieldDuplicationRequests() {
-        return Stream.of(
-            readArgumentPair("/test/data/field-duplication.json")
-        );
-    }
-
-    @MethodSource("fieldDuplicationRequests")
-    @ParameterizedTest(name = DESCRIPTIVE_DISPLAY_NAME)
-    void limitsFieldDuplication(
-        String description,
-        String requestBody
-    ) {
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(requestBody)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.data").doesNotExist()
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.errors[*].message").value(Matchers.everyItem(
-                Matchers.matchesRegex("^Validation error.*: Field '.+' is repeated too many times$")
-            ))
-            .jsonPath("$.trace").doesNotExist();
-    }
-
     @ValueSource(strings = {
         "NONSENSE", "{\"query\":"
     })
     @ParameterizedTest
     void invalidRequestsBodyShouldReturn400Error(String requestBody) {
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(requestBody)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
+        webClient
+            .exchangePost(requestBody)
+            .expectJsonResponse(HttpStatus.BAD_REQUEST)
             .jsonPath("$.error").isEqualTo("Bad Request")
-            .jsonPath("$.message").isEqualTo("Failed to read HTTP message")
-            .jsonPath("$.trace").doesNotExist();
+            .jsonPath("$.message").isEqualTo("Failed to read HTTP message");
     }
 
     @Test
@@ -327,18 +172,11 @@ public class GraphQLControllerTest {
         doThrow(new RuntimeException("internal error details"))
             .when(graphQLExecutor).execute(any(), any());
 
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(createPayload())
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
+        webClient
+            .exchangePost(createPayload())
+            .expectJsonResponse(HttpStatus.INTERNAL_SERVER_ERROR)
             .jsonPath("$.error").isEqualTo("Internal Server Error")
-            .jsonPath("$.message").isEqualTo("Internal Server Error")
-            .jsonPath("$.trace").doesNotExist();
+            .jsonPath("$.message").isEqualTo("Internal Server Error");
     }
 
     @Test
@@ -346,20 +184,14 @@ public class GraphQLControllerTest {
         when(inventoryClient.createLocation(any(), any()))
             .thenThrow(new RuntimeException("internal error details"));
 
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(createPayload())
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
+        webClient
+            .exchangePost(createPayload())
+            .expectJsonResponse(HttpStatus.OK)
+            .jsonPath("$.errors").isArray()
             .jsonPath("$.errors[0].message").isEqualTo(
                 "Exception while fetching data (/createLocation) : Internal Error"
             )
-            .jsonPath("$.errors[0].path[0]").isEqualTo("createLocation")
-            .jsonPath("$.trace").doesNotExist();
+            .jsonPath("$.errors[0].path[0]").isEqualTo("createLocation");
     }
 
     @Test
@@ -373,20 +205,14 @@ public class GraphQLControllerTest {
             }
             """;
 
-        webClient.post()
-            .uri(ENDPOINT)
-            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .header("Authorization", "Bearer " + ACCESS_TOKEN)
-            .bodyValue(createPayload(query))
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.OK)
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
+        webClient
+            .exchangePost(createPayload(query))
+            .expectJsonResponse(HttpStatus.OK)
+            .jsonPath("$.errors").isArray()
             .jsonPath("$.errors[0].message").isEqualTo(
                 "Exception while fetching data (/deleteLocation) : Internal Error"
             )
-            .jsonPath("$.errors[0].path[0]").isEqualTo("deleteLocation")
-            .jsonPath("$.trace").doesNotExist();
+            .jsonPath("$.errors[0].path[0]").isEqualTo("deleteLocation");
     }
 
     private String createPayload() {

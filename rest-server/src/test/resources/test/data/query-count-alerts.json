@@ -1,0 +1,10 @@
+{
+  "variables": {
+    "severityFilters": [
+      "WARNING"
+    ],
+    "timeRange": "ALL"
+  },
+  "query": "query CountAlerts($severityFilters: [String], $timeRange: TimeRange!) {\n  countAlerts(severityFilters: $severityFilters, timeRange: $timeRange) {\n    count\n    error\n  }\n}",
+  "operationName": null
+}

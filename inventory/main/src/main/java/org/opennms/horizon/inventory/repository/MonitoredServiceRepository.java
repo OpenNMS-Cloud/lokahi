@@ -53,4 +53,15 @@ public interface MonitoredServiceRepository extends JpaRepository<MonitoredServi
                                                                 @Param("ipInterface") IpInterface ipInterface);
 
     Optional<MonitoredService> findByIdAndTenantId(long id, String tenantId);
+
+
+    @Query("SELECT ms " +
+        "FROM MonitoredService ms " +
+        "WHERE ms.tenantId = :tenantId " +
+        "AND ms.monitoredServiceType.serviceName = :serviceName " +
+        "AND ms.ipInterfaceId = :ipInterfaceId")
+    Optional<MonitoredService> findByServiceNameAndIpInterfaceId(@Param("tenantId") String tenantId,
+                                                                 @Param("serviceName") String serviceName,
+                                                                 @Param("ipInterfaceId") long ipInterfaceId);
+
 }

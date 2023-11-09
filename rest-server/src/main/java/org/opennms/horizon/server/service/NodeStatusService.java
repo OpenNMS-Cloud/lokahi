@@ -35,6 +35,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
+import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.status.NodeReachability;
 import org.opennms.horizon.server.model.status.NodeResponseTime;
@@ -56,6 +57,9 @@ import static java.util.Objects.isNull;
 import static org.opennms.horizon.server.service.metrics.Constants.AVG_RESPONSE_TIME;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_MONITOR_TYPE;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
+import static org.opennms.horizon.server.service.metrics.Constants.INSTANCE_KEY;
+import static org.opennms.horizon.server.service.metrics.Constants.MONITOR_KEY;
+import static org.opennms.horizon.server.service.metrics.Constants.NODE_ID_KEY;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -64,9 +68,6 @@ public class NodeStatusService {
     private static final Logger LOG = LoggerFactory.getLogger(NodeStatusService.class);
     private static final String RESPONSE_TIME_METRIC = "response_time_msec";
     private static final int TIME_RANGE_IN_SECONDS = 90;
-    private static final String NODE_ID_KEY = "node_id";
-    private static final String MONITOR_KEY = "monitor";
-    private static final String INSTANCE_KEY = "instance";
     private final InventoryClient client;
     private final TSDBMetricsService tsdbMetricsService;
     private final ServerHeaderUtil headerUtil;
@@ -150,9 +151,16 @@ public class NodeStatusService {
         labels.put(NODE_ID_KEY, String.valueOf(node.getId()));
         labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
         labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
+        var request = new MonitoredServiceStatusRequest();
+        request.setNodeId(node.getId());
+        request.setMonitorType(Constants.DEFAULT_MONITOR_TYPE);
+        request.setIpAddress(ipInterface.getIpAddress());
 
-        var future = tsdbMetricsService
-            .getMetric(env, Constants.REACHABILITY_PERCENTAGE, labels, timeRange, timeRangeUnit).toFuture();
+        var monitorStatusProto = client.getMonitorStatus(request, headerUtil.getAuthHeader(env));
+        long firstObservationTime = monitorStatusProto.getFirstObservationTime();
+        var optionalParams = Map.of("first_observation_time", String.valueOf(firstObservationTime));
+        var future = tsdbMetricsService.
+            getCustomMetric(env, Constants.REACHABILITY_PERCENTAGE, labels, timeRange, timeRangeUnit, optionalParams).toFuture();
         try {
             var timeSeriesResult = future.join();
             return transformToNodeReachability(node.getId(), timeSeriesResult);
@@ -184,7 +192,8 @@ public class NodeStatusService {
                 continue;
             }
             Double reachability = doubles.get(1);
-            return new NodeReachability(id, reachability);
+            var roundedValue = Math.min(reachability, 100.0);
+            return new NodeReachability(id, roundedValue);
         }
         return new NodeReachability(id, 0);
     }

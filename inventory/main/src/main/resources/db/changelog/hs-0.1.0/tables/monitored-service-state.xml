@@ -32,6 +32,14 @@
     <addForeignKeyConstraint constraintName="fk_monitored_service_state_monitored_service" onDelete="CASCADE"
                              baseTableName="monitored_service_state" baseColumnNames="monitored_service_id"
                              referencedTableName="monitored_service" referencedColumnNames="id"/>
-
 </changeSet>
+    
+    <changeSet id="0.1.0-monitored-service-state-add-update-first-observation-time" author="cgorantla">
+        <addColumn tableName="monitored_service_state">
+            <column name="first_observation_time" type="TIMESTAMP" valueDate="now()">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

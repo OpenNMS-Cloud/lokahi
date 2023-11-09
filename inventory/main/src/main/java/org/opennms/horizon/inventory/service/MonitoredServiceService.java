@@ -34,7 +34,9 @@ import org.opennms.horizon.inventory.mapper.MonitoredServiceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
+import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,13 +46,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MonitoredServiceService {
-    private final MonitoredServiceRepository modelRepo;
 
+    private final MonitoredServiceRepository modelRepo;
     private final MonitoredServiceMapper mapper;
+    private final IpInterfaceRepository ipInterfaceRepository;
 
     public MonitoredService createSingle(MonitoredServiceDTO newMonitoredService,
-                             MonitoredServiceType monitoredServiceType,
-                             IpInterface ipInterface) {
+                                         MonitoredServiceType monitoredServiceType,
+                                         IpInterface ipInterface) {
 
         String tenantId = newMonitoredService.getTenantId();
 
@@ -75,5 +78,16 @@ public class MonitoredServiceService {
             .stream()
             .map(mapper::modelToDTO)
             .collect(Collectors.toList());
+    }
+
+    public Optional<MonitoredServiceDTO> findMonitoredService(String tenantId, String ipAddress, String monitorType, long nodeId) {
+
+        var optionalIpInterface = ipInterfaceRepository.findByNodeIdAndTenantIdAndIpAddress(nodeId, tenantId, InetAddressUtils.addr(ipAddress));
+        if(optionalIpInterface.isPresent()) {
+            var optionalService = modelRepo.findByServiceNameAndIpInterfaceId(tenantId,
+                monitorType, optionalIpInterface.get().getId());
+            return optionalService.map(mapper::modelToDTO);
+        }
+        return Optional.empty();
     }
 }

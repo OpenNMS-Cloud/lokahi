@@ -27,26 +27,22 @@
  *******************************************************************************/
 syntax = "proto3";
 
-import "google/protobuf/any.proto";
+import "google/protobuf/wrappers.proto";
+import "monitoredService.proto";
 
 package opennms.inventory;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.dto";
 
-message MonitoredServiceDTO {
+message MonitoredServiceStatusDTO {
   int64 id = 1;
   string tenant_id = 2;
-  int64 monitored_service_type_id = 3;
-  int64 ip_interface_id = 4;
+  int64 monitored_service_id = 3;
+  bool state = 4;
+  int64 first_observation_time = 5;
 }
 
-message MonitoredServiceQuery {
-  string  tenant_id = 1;
-  string  ip_address = 2;
-  string monitored_service_type = 3;
-  int64 node_id = 4;
-}
-
-service MonitoredService {
-  rpc getMonitoredService(MonitoredServiceQuery) returns (MonitoredServiceDTO) {};
+service MonitorStatusService {
+  rpc getServiceStatus(google.protobuf.Int64Value) returns (MonitoredServiceStatusDTO) {};
+  rpc getMonitoredServiceStatus(MonitoredServiceQuery) returns (MonitoredServiceStatusDTO) {};
 }

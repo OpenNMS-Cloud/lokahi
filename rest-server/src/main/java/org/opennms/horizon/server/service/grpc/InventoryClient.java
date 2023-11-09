@@ -48,6 +48,9 @@ import org.opennms.horizon.inventory.dto.IdList;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.MonitorStatusServiceGrpc;
+import org.opennms.horizon.inventory.dto.MonitoredServiceQuery;
+import org.opennms.horizon.inventory.dto.MonitoredServiceStatusDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
@@ -73,6 +76,7 @@ import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
+import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.util.StringUtils;
 
@@ -91,6 +95,7 @@ public class InventoryClient {
     private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub icmpActiveDiscoveryServiceBlockingStub;
     private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
     private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
+    private MonitorStatusServiceGrpc.MonitorStatusServiceBlockingStub monitorStatusServiceBlockingStub;
 
     protected void initialStubs() {
         locationStub = MonitoringLocationServiceGrpc.newBlockingStub(channel);
@@ -102,6 +107,7 @@ public class InventoryClient {
         icmpActiveDiscoveryServiceBlockingStub = IcmpActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(channel);
         passiveDiscoveryServiceBlockingStub = PassiveDiscoveryServiceGrpc.newBlockingStub(channel);
+        monitorStatusServiceBlockingStub = MonitorStatusServiceGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() {
@@ -382,12 +388,28 @@ public class InventoryClient {
     public MonitoringLocationDTO updateLocation(MonitoringLocationDTO location, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).updateLocation(location);
+        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .updateLocation(location);
     }
 
     public boolean deleteLocation(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteLocation(Int64Value.of(id)).getValue();
+        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .deleteLocation(Int64Value.of(id)).getValue();
+    }
+
+    public MonitoredServiceStatusDTO getMonitorStatus(MonitoredServiceStatusRequest request, String accessToken) {
+        MonitoredServiceQuery monitoredStateQuery = MonitoredServiceQuery.newBuilder()
+            .setNodeId(request.getNodeId())
+            .setMonitoredServiceType(request.getMonitorType())
+            .setIpAddress(request.getIpAddress()).build();
+
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return monitorStatusServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoredServiceStatus(monitoredStateQuery);
     }
 }

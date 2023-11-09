@@ -99,7 +99,5 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
         certificateManagerClient.revokeCertificate(tenantId, id, accessToken);
         return Mono.just(status);
     }
-
-
-
+    
 }

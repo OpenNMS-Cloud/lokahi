@@ -26,48 +26,26 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.model;
+package org.opennms.horizon.inventory.service;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import org.opennms.horizon.inventory.dto.MonitoredServiceStatusDTO;
+import org.opennms.horizon.inventory.mapper.MonitoredServiceStatusMapper;
+import org.opennms.horizon.inventory.repository.MonitoredServiceStateRepository;
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Optional;
 
-@Getter
-@Setter
+@Service
 @RequiredArgsConstructor
-@Entity
-public class MonitoredServiceState {
+public class MonitoredStatusService {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+   private final MonitoredServiceStateRepository monitoredServiceStateRepository;
+   private final MonitoredServiceStatusMapper monitoredServiceStatusMapper;
 
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
+    public Optional<MonitoredServiceStatusDTO> getServiceStatus(String tenantId, long serviceId) {
+        var optional = monitoredServiceStateRepository.findByTenantIdAndMonitoredServiceId(tenantId, serviceId);
+        return optional.map(monitoredServiceStatusMapper::modelToDTO);
+    }
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "monitored_service_id", referencedColumnName = "id")
-    private MonitoredService monitoredService;
-
-    @Column(name = "service_state")
-    private Boolean serviceState = true;
-
-    @Column(name = "monitored_service_id", insertable = false, updatable = false)
-    private long monitoredServiceId;
-
-    @NotNull
-    @Column(name = "first_observation_time", columnDefinition = "TIMESTAMP")
-    private LocalDateTime firstObservationTime;
 }

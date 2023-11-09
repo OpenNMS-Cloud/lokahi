@@ -26,48 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.inventory.model;
+package org.opennms.horizon.server.model.inventory;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
-@Entity
-public class MonitoredServiceState {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @NotNull
-    @Column(name = "tenant_id")
-    private String tenantId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "monitored_service_id", referencedColumnName = "id")
-    private MonitoredService monitoredService;
-
-    @Column(name = "service_state")
-    private Boolean serviceState = true;
-
-    @Column(name = "monitored_service_id", insertable = false, updatable = false)
-    private long monitoredServiceId;
-
-    @NotNull
-    @Column(name = "first_observation_time", columnDefinition = "TIMESTAMP")
-    private LocalDateTime firstObservationTime;
+public class MonitoredServiceStatusRequest {
+    private String ipAddress;
+    private String monitorType;
+    private long nodeId;
 }

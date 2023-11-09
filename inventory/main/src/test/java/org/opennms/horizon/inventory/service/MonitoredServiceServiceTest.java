@@ -1,6 +1,5 @@
 package org.opennms.horizon.inventory.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -9,12 +8,14 @@ import org.opennms.horizon.inventory.mapper.MonitoredServiceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
+import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class MonitoredServiceServiceTest {
 
@@ -31,6 +32,7 @@ public class MonitoredServiceServiceTest {
     private MonitoredService testMonitoredService3;
     private MonitoredServiceType testMonitoredServiceType;
     private IpInterface testIpInterface;
+    private IpInterfaceRepository ipInterfaceRepository;
 
     private MonitoredServiceService target;
 
@@ -38,6 +40,7 @@ public class MonitoredServiceServiceTest {
     public void setUp() {
         mockMonitoredServiceRepository = Mockito.mock(MonitoredServiceRepository.class);
         mockMonitoredServiceMapper = Mockito.mock(MonitoredServiceMapper.class);
+        ipInterfaceRepository = Mockito.mock(IpInterfaceRepository.class);
 
         testMonitoredServiceDTO1 =
             MonitoredServiceDTO.newBuilder()
@@ -72,7 +75,7 @@ public class MonitoredServiceServiceTest {
         testIpInterface = new IpInterface();
         testIpInterface.setHostname("x-hostname-x");
 
-        target = new MonitoredServiceService(mockMonitoredServiceRepository, mockMonitoredServiceMapper);
+        target = new MonitoredServiceService(mockMonitoredServiceRepository, mockMonitoredServiceMapper, ipInterfaceRepository);
     }
 
     @Test

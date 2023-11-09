@@ -43,6 +43,7 @@ import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Slf4j
@@ -82,6 +83,7 @@ public class MonitorResponseService {
             monitoredServiceState.setTenantId(tenantId);
             monitoredServiceState.setMonitoredService(monitoredService);
             monitoredServiceState.setServiceState(statusFromMonitor);
+            monitoredServiceState.setFirstObservationTime(LocalDateTime.now());
             serviceStateRepository.save(monitoredServiceState);
         }
         if (!Objects.equals(statusFromMonitor, previousState)) {

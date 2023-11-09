@@ -152,7 +152,7 @@ public class QueryService {
                     String query = "response_time_msec" + getLabelsQueryString(labels);
                     query = addTimeRange(timeRange, timeRangeUnit, query);
                     return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
-                        numofMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
+                        numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
             }
         }
         String queryString = getQueryString(metricName, labels);
@@ -211,7 +211,7 @@ public class QueryService {
         return Optional.empty();
     }
 
-    public static long numofMinutesInDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {
+    public static long numOfMinutesInDuration(Integer timeRange, TimeRangeUnit timeRangeUnit) {
         var duration = getDuration(timeRange, timeRangeUnit);
         return duration.map(Duration::toMinutes).orElseThrow();
     }

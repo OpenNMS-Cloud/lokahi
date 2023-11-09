@@ -10,8 +10,8 @@ const alertsFilterDefault: AlertsFilters = {
   timeRange: TimeRange.All,
   nodeLabel: '',
   severities: [],
-  sortAscending: true,
-  sortBy: 'id'
+  sortAscending: false,
+  sortBy: 'lastEventTime'
 }
 
 const alertsPaginationDefault = {

@@ -63,8 +63,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
         "AND a.lastEventTime between :start and :end " +
         "AND a.managedObjectType = :managedObjectType " +
         "AND a.managedObjectInstance in (:managedObjectInstance) " +
-        "AND a.tenantId = :tenantId " +
-        "ORDER BY a.lastEventTime DESC, a.firstEventTime DESC",
+        "AND a.tenantId = :tenantId ",
         countQuery = "SELECT count(a) " +
             "FROM Alert a " +
             "WHERE a.severity in (:severityList) " +
@@ -83,8 +82,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
         "LEFT JOIN FETCH a.alertCondition.rule.policy " +
         "WHERE a.severity in (:severityList) " +
         "AND a.lastEventTime between :start and :end " +
-        "AND a.tenantId = :tenantId " +
-        "ORDER BY a.lastEventTime DESC, a.firstEventTime DESC",
+        "AND a.tenantId = :tenantId ",
         countQuery = "SELECT count(a) " +
             "FROM Alert a " +
             "WHERE a.severity in (:severityList) " +

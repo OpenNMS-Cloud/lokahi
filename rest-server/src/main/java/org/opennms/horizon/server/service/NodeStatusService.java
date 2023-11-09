@@ -35,10 +35,16 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
+import org.opennms.horizon.server.model.inventory.TopNNode;
+import org.opennms.horizon.server.model.status.NodeReachability;
+import org.opennms.horizon.server.model.status.NodeResponseTime;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.service.metrics.Constants;
 import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -54,6 +60,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @Service
 @RequiredArgsConstructor
 public class NodeStatusService {
+    private static final Logger LOG = LoggerFactory.getLogger(NodeStatusService.class);
     private static final String RESPONSE_TIME_METRIC = "response_time_msec";
     private static final int TIME_RANGE_IN_SECONDS = 90;
     private static final String NODE_ID_KEY = "node_id";
@@ -132,4 +139,105 @@ public class NodeStatusService {
         return tsdbMetricsService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
     }
+
+    public NodeReachability getNodeReachability(NodeDTO node,
+                                                Integer timeRange,
+                                                TimeRangeUnit timeRangeUnit,
+                                                ResolutionEnvironment env) {
+        IpInterfaceDTO ipInterface = getPrimaryInterface(node);
+        Map<String, String> labels = new HashMap<>();
+        labels.put(NODE_ID_KEY, String.valueOf(node.getId()));
+        labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
+        labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
+
+        var future = tsdbMetricsService
+            .getMetric(env, Constants.REACHABILITY_PERCENTAGE, labels, timeRange, timeRangeUnit).toFuture();
+        try {
+            var timeSeriesResult = future.join();
+            return transformToNodeReachability(node.getId(), timeSeriesResult);
+        } catch (Exception e) {
+            LOG.warn("Failed to get reachability for node id {}", node.getId(), e);
+        }
+        return new NodeReachability(node.getId(), 0);
+    }
+
+    private NodeReachability transformToNodeReachability(long id, TimeSeriesQueryResult result) {
+        if (isNull(result)) {
+            return new NodeReachability(id, 0);
+        }
+        List<TSResult> tsResults = result.getData().getResult();
+
+        if (isEmpty(tsResults)) {
+            return new NodeReachability(id, 0);
+        }
+
+        TSResult tsResult = tsResults.get(0);
+        List<List<Double>> values = tsResult.getValues();
+
+        if (isEmpty(values)) {
+            return new NodeReachability(id, 0);
+        }
+
+        List<Double> doubles = values.get(values.size() - 1);
+        if (doubles.size() != 2) {
+            return new NodeReachability(id, 0);
+        }
+        Double reachability = doubles.get(1);
+        return new NodeReachability(id, reachability);
+    }
+
+    public NodeResponseTime getNodeAvgResponseTime(NodeDTO node, Integer timeRange, TimeRangeUnit timeRangeUnit, ResolutionEnvironment env) {
+        IpInterfaceDTO ipInterface = getPrimaryInterface(node);
+        Map<String, String> labels = new HashMap<>();
+        labels.put(NODE_ID_KEY, String.valueOf(node.getId()));
+        labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
+        labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
+
+        var future = tsdbMetricsService.getMetric(env,
+            RESPONSE_TIME_METRIC, labels, timeRange, timeRangeUnit).toFuture();
+        try {
+            var timeSeriesResult = future.join();
+            return transformToNodeResponseTime(node.getId(), timeSeriesResult);
+        } catch (Exception e) {
+            LOG.warn("Failed to get response time for node id {}", node.getId(), e);
+        }
+        return new NodeResponseTime(node.getId(), 0);
+    }
+
+    public TopNNode getTopNNode(NodeDTO nodeDTO, Integer timeRange, TimeRangeUnit timeRangeUnit, ResolutionEnvironment env) {
+         var nodeReachability = getNodeReachability(nodeDTO, timeRange, timeRangeUnit, env);
+         var nodeResponseTime = getNodeAvgResponseTime(nodeDTO, timeRange, timeRangeUnit, env);
+         var topNNode = new TopNNode();
+         topNNode.setNodeLabel(nodeDTO.getNodeLabel());
+         topNNode.setLocation(nodeDTO.getLocation());
+         topNNode.setReachability(nodeReachability.getReachability());
+         topNNode.setAvgResponseTime(nodeResponseTime.getResponseTime());
+         return topNNode;
+    }
+
+    private NodeResponseTime transformToNodeResponseTime(long id, TimeSeriesQueryResult result) {
+        if (isNull(result)) {
+            return new NodeResponseTime(id, 0);
+        }
+        List<TSResult> tsResults = result.getData().getResult();
+
+        if (isEmpty(tsResults)) {
+            return new NodeResponseTime(id, 0);
+        }
+
+        TSResult tsResult = tsResults.get(0);
+        List<List<Double>> values = tsResult.getValues();
+
+        if (isEmpty(values)) {
+            return new NodeResponseTime(id, 0);
+        }
+
+        List<Double> doubles = values.get(values.size() - 1);
+        if (doubles.size() != 2) {
+            return new NodeResponseTime(id, 0);
+        }
+        Double responseTime = doubles.get(1);
+        return new NodeResponseTime(id, responseTime);
+    }
+
 }

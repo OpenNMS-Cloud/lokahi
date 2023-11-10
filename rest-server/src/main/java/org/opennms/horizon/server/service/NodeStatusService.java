@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static org.opennms.horizon.server.service.metrics.Constants.AVG_RESPONSE_TIME;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_MONITOR_TYPE;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -171,19 +172,21 @@ public class NodeStatusService {
             return new NodeReachability(id, 0);
         }
 
-        TSResult tsResult = tsResults.get(0);
-        List<List<Double>> values = tsResult.getValues();
-
-        if (isEmpty(values)) {
-            return new NodeReachability(id, 0);
+        for (TSResult tsResult : tsResults) {
+            List<List<Double>> values = tsResult.getValues();
+            List<Double> doubles;
+            if (isEmpty(values)) {
+                doubles = tsResult.getValue();
+            } else {
+                doubles = values.get(values.size() - 1);
+            }
+            if (doubles.size() != 2) {
+                continue;
+            }
+            Double reachability = doubles.get(1);
+            return new NodeReachability(id, reachability);
         }
-
-        List<Double> doubles = values.get(values.size() - 1);
-        if (doubles.size() != 2) {
-            return new NodeReachability(id, 0);
-        }
-        Double reachability = doubles.get(1);
-        return new NodeReachability(id, reachability);
+        return new NodeReachability(id, 0);
     }
 
     public NodeResponseTime getNodeAvgResponseTime(NodeDTO node, Integer timeRange, TimeRangeUnit timeRangeUnit, ResolutionEnvironment env) {
@@ -194,7 +197,7 @@ public class NodeStatusService {
         labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
 
         var future = tsdbMetricsService.getMetric(env,
-            RESPONSE_TIME_METRIC, labels, timeRange, timeRangeUnit).toFuture();
+            AVG_RESPONSE_TIME, labels, timeRange, timeRangeUnit).toFuture();
         try {
             var timeSeriesResult = future.join();
             return transformToNodeResponseTime(node.getId(), timeSeriesResult);
@@ -225,19 +228,23 @@ public class NodeStatusService {
             return new NodeResponseTime(id, 0);
         }
 
-        TSResult tsResult = tsResults.get(0);
-        List<List<Double>> values = tsResult.getValues();
+        for (TSResult tsResult : tsResults) {
+            List<List<Double>> values = tsResult.getValues();
 
-        if (isEmpty(values)) {
-            return new NodeResponseTime(id, 0);
+            List<Double> doubles;
+            if (isEmpty(values)) {
+                doubles = tsResult.getValue();
+            } else {
+                doubles = values.get(values.size() - 1);
+            }
+            if (doubles.size() != 2) {
+                continue;
+            }
+            Double responseTime = doubles.get(1);
+            return new NodeResponseTime(id, responseTime);
         }
+        return new NodeResponseTime(id, 0);
 
-        List<Double> doubles = values.get(values.size() - 1);
-        if (doubles.size() != 2) {
-            return new NodeResponseTime(id, 0);
-        }
-        Double responseTime = doubles.get(1);
-        return new NodeResponseTime(id, responseTime);
     }
 
 }

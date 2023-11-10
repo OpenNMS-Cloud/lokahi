@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
+import static org.opennms.horizon.server.service.metrics.Constants.AVG_RESPONSE_TIME;
 import static org.opennms.horizon.server.service.metrics.Constants.REACHABILITY_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
 import static org.opennms.horizon.server.service.metrics.Constants.BW_IN_PERCENTAGE;
@@ -144,6 +145,10 @@ public class QueryService {
                 query = addTimeRange(timeRange, timeRangeUnit, query);
                 return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
                     numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
+        } else if (AVG_RESPONSE_TIME.equals(metricName)) {
+            String query = "response_time_msec" + getLabelsQueryString(labels);
+            query = addTimeRange(timeRange, timeRangeUnit, query);
+            return  QUERY_PREFIX + "avg_over_time" + "(" + query + ")";
         }
         String queryString = getQueryString(metricName, labels);
         return addTimeRange(timeRange, timeRangeUnit, queryString);

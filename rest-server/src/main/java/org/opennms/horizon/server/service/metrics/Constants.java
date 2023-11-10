@@ -52,7 +52,8 @@ public final class Constants {
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
 
     public static final String REACHABILITY_PERCENTAGE = "reachability_percentage";
-    
+    public static final String AVG_RESPONSE_TIME = "avg_response_time_msec";
+
     public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets%1$s[4m])*8) " +
         "/ (ifHighSpeed%1$s *1000000) * 100 unless ifHighSpeed%1$s == 0";
     public static final String QUERY_FOR_BW_OUT_UTIL_PERCENTAGE = "(irate(ifHCOutOctets%1$s[4m])*8) " +

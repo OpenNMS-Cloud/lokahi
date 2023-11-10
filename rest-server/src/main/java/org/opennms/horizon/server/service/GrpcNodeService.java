@@ -67,8 +67,7 @@ public class GrpcNodeService {
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
-       var nodes = client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList();
-       return Flux.fromIterable(nodes);
+       return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
     }
 
     @GraphQLQuery

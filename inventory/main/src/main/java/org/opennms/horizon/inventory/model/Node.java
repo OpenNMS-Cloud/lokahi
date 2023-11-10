@@ -72,6 +72,9 @@ public class Node {
     @Column(name = "node_label")
     private String nodeLabel;
 
+    @Column(name = "node_alias")
+    private String nodeAlias;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "scan_type")

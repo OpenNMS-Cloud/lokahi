@@ -68,7 +68,9 @@ message NodeCreateDTO {
 }
 
 message NodeUpdateDTO {
-  optional string node_alias = 1;
+  int64 id = 1;
+  string tenant_id = 2;
+  optional string node_alias = 3;
 }
 
 enum MonitoredState {

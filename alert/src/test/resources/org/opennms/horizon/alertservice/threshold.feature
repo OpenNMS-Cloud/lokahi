@@ -81,6 +81,8 @@ Feature: Alert Service Thresholding Functionality
       | alerts[0].severity == CLEARED |
     Then An event is sent with UEI "uei.opennms.org/generic/traps/SNMP_Link_Down" on node 10
     Then List alerts for the tenant, until JSON response matches the following JSON path expressions
-      | alerts.size() == 2          |
-      | alerts[1].counter == 1      |
-      | alerts[1].severity == MAJOR |
+      | alerts.size() == 2            |
+      | alerts[0].counter == 2        |
+      | alerts[0].severity == CLEARED |
+      | alerts[1].counter == 1        |
+      | alerts[1].severity == MAJOR   |

@@ -178,6 +178,13 @@ public class AlertEventProcessor {
                 .flatMap(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.reductionKey(), tenantId));
         }
 
+        // a cleared alert will reset threshold limit
+        if (queryResult.isPresent() && queryResult.get().getSeverity() == Severity.CLEARED
+            && queryResult.get().getEventUei().equals(event.getUei())) {
+            archiveClearedAlert(queryResult.get(), event);
+            queryResult = Optional.empty();
+        }
+
         boolean thresholdMet;
         if (isThresholding(alertData) && !AlertType.CLEAR.equals(alertData.type())) {
             // TODO: (Quote from Jose) We will have to add an option to auto close if rate is no longer met - that will be post FMA.
@@ -188,14 +195,6 @@ public class AlertEventProcessor {
             thresholdMet = isThresholdMet(alertData, event.getTenantId());
         } else {
             thresholdMet = true;
-        }
-
-        // a cleared alert will reset threshold limit
-        if (queryResult.isPresent() && queryResult.get().getSeverity() == Severity.CLEARED
-            && queryResult.get().getEventUei().equals(event.getUei())) {
-            archiveClearedAlert(queryResult.get(), event);
-            thresholdMet = true;
-            queryResult = Optional.empty();
         }
 
         if (queryResult.isEmpty() && thresholdMet) {

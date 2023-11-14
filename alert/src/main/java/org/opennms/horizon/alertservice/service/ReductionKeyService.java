@@ -43,7 +43,8 @@ public class ReductionKeyService {
     public static final String ARCHIVE_SUFFIX = ":archive:";
 
     public String renderArchiveReductionKey(Alert alert, Event event) {
-        return alert.getReductionKey() == null ? null : alert.getReductionKey() + ARCHIVE_SUFFIX + event.getProducedTimeMs();
+        String archiveSuffix = ARCHIVE_SUFFIX + event.getProducedTimeMs();
+        return alert.getReductionKey() == null ? archiveSuffix : alert.getReductionKey() + archiveSuffix;
     }
 
     public String renderArchiveClearKey(Alert alert, Event event) {

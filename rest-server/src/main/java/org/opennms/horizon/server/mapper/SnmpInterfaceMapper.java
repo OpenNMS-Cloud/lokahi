@@ -44,11 +44,13 @@ public interface SnmpInterfaceMapper {
 
     @Named("mapAdminStatus")
     default String mapAdminStatus(int ifAdminStatus) {
-        return SnmpInterfaceAdminStatus.valueOf(ifAdminStatus).name();
+        var status = SnmpInterfaceAdminStatus.valueOf(ifAdminStatus);
+        return status != null ? status.name() : null;
     }
 
     @Named("mapOperatorStatus")
     default String mapOperatorStatus(int ifOperatorStatus) {
-        return SnmpInterfaceOperatorStatus.valueOf(ifOperatorStatus).name();
+        var status = SnmpInterfaceOperatorStatus.valueOf(ifOperatorStatus);
+        return status != null ? status.name() : null;
     }
 }

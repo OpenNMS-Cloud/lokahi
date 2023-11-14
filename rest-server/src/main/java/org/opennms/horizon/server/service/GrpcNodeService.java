@@ -39,9 +39,11 @@ import lombok.RequiredArgsConstructor;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -65,7 +67,7 @@ public class GrpcNodeService {
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
+       return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToNode).toList());
     }
 
     @GraphQLQuery
@@ -113,5 +115,12 @@ public class GrpcNodeService {
     @GraphQLMutation
     public Mono<Boolean> discoveryByNodeIds(List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.startScanByNodeIds(ids, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery
+    public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env, Integer timeRange, TimeRangeUnit timeRangeUnit) {
+        var nodes = client.listNodes(headerUtil.getAuthHeader(env));
+        var topNNodes = nodes.stream().map(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange,timeRangeUnit, env)).toList();
+        return Flux.fromIterable(topNNodes);
     }
 }

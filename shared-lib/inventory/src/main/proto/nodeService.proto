@@ -55,6 +55,7 @@ message NodeDTO {
   optional MonitoredState monitored_state = 14;
   repeated opennms.inventory.AzureInterfaceDTO azure_interfaces = 15;
   repeated opennms.inventory.TagDTO tags = 16;
+  string location = 17;
 }
 
 message NodeCreateDTO {

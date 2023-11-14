@@ -35,6 +35,7 @@ import lombok.NoArgsConstructor;
 public final class Constants {
     public static final String AZURE_MONITOR_TYPE = "AZURE";
     public static final String AZURE_SCAN_TYPE = "AZURE_SCAN";
+    public static final String DEFAULT_MONITOR_TYPE = "ICMP";
 
 
     public static final String QUERY_PREFIX = "query=";
@@ -50,7 +51,8 @@ public final class Constants {
     public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
 
-    public static final String AVAILABILITY_PERCENTAGE = "availability_percentage";
+    public static final String REACHABILITY_PERCENTAGE = "reachability_percentage";
+    public static final String AVG_RESPONSE_TIME = "avg_response_time_msec";
 
     public static final String QUERY_FOR_BW_IN_UTIL_PERCENTAGE = "(irate(ifHCInOctets%1$s[4m])*8) " +
         "/ (ifHighSpeed%1$s *1000000) * 100 unless ifHighSpeed%1$s == 0";

@@ -31,6 +31,7 @@ package org.opennms.horizon.server.metrics;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.server.model.TimeRangeUnit;
+import org.opennms.horizon.server.service.metrics.Constants;
 import org.opennms.horizon.server.service.metrics.QueryService;
 
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class QueryServiceTest {
         labels.put("instance", "192.168.1.1");
         labels.put("monitor", "ICMP");
         labels.put("system_id", "minion-standalone");
-        var queryString = queryService.getQueryString(Optional.empty(), "availability_percentage", labels, 24, TimeRangeUnit.HOUR);
+        var queryString = queryService.getQueryString(Optional.empty(), Constants.REACHABILITY_PERCENTAGE, labels, 24, TimeRangeUnit.HOUR);
         Assertions.assertEquals("query=(count_over_time(response_time_msec{instance=\"192.168.1.1\"," +
             "system_id=\"minion-standalone\",monitor=\"ICMP\"}[24h])/1440)*100 or vector(0)", queryString);
     }

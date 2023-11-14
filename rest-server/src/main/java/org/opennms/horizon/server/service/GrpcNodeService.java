@@ -46,6 +46,7 @@ import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.inventory.NodeUpdate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
 import org.opennms.horizon.server.model.status.NodeStatus;
@@ -101,7 +102,10 @@ public class GrpcNodeService {
         return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
     }
 
-    // TODO: add mutation here for node (will only support alias, other fields in the future)
+    @GraphQLMutation
+    public Mono<Node> updateNode(NodeUpdate node, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToNode(client.updateNode(mapper.nodeUpdateToProto(node), headerUtil.getAuthHeader(env))));
+    }
 
     @GraphQLQuery
     public CompletableFuture<MonitoringLocation> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {

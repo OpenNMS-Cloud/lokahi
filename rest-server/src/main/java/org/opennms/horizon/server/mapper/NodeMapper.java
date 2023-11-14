@@ -34,8 +34,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.inventory.NodeUpdate;
 
 
 @Mapper(componentModel = "spring", uses = {TagMapper.class, IpInterfaceMapper.class, SnmpInterfaceMapper.class,
@@ -53,4 +55,6 @@ public interface NodeMapper {
     @Mapping(target = "locationId", source = "locationId", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     @Mapping(target = "tagsList", source = "tags", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     NodeCreateDTO nodeCreateToProto(NodeCreate request);
+
+    NodeUpdateDTO nodeUpdateToProto(NodeUpdate request);
 }

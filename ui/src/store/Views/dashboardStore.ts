@@ -35,7 +35,7 @@ export const useDashboardStore = defineStore('dashboardStore', {
       await queries.getTopNodes()
       this.topNodes = queries.topNodes
 
-      this.reachability.responding = queries.topNodes.filter((n) => n.reachability > 0).length
+      this.reachability.responding = queries.topNodes.filter((n) => n.avgResponseTime > 0).length
       this.reachability.unchrachable = queries.topNodes.length - this.reachability.responding
     }
   }

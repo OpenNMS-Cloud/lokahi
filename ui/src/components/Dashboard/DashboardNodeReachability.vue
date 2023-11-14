@@ -49,12 +49,6 @@ const doughnutCentreText = {
 }
 
 let plugins = [doughnutCentreText]
-onThemeChange(() => {
-  display.value = false
-  setTimeout(() => {
-    display.value = true
-  })
-})
 
 const data = computed(() => {
   return {
@@ -71,18 +65,31 @@ const data = computed(() => {
   }
 })
 
-const options: ChartOptions<any> = {
+const colorFromFeatherVar = computed(() =>
+  isDark.value ? getColorFromFeatherVar('primary-text-on-color') : getColorFromFeatherVar('primary-text-on-surface')
+)
+
+const options: ChartOptions<any> = computed(() => ({
   cutout: 75,
   plugins: {
     legend: {
       position: 'bottom',
       labels: {
         usePointStyle: true,
-        padding: 30
+        padding: 30,
+        color: colorFromFeatherVar.value
       }
     }
-  }
-}
+  },
+  animation: false
+}))
+
+onThemeChange(() => {
+  display.value = false
+  setTimeout(() => {
+    display.value = true
+  })
+})
 </script>
 
 <style lang="scss" scoped>

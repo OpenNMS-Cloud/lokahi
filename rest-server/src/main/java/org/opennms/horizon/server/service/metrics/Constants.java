@@ -77,7 +77,7 @@ public final class Constants {
                 sum(irate(ifHCInOctets[4m]))*8 or vector(0) +
                 sum(sum_over_time(network_in_total_bytes[4m])) or vector(0)
                     unless
-                count(irate(ifHCInOctets[4m]))*8 == 0 and
+                count(irate(ifHCInOctets[4m])) == 0 and
                 count(sum_over_time(network_in_total_bytes[4m])) == 0
         """;
 
@@ -86,6 +86,6 @@ public final class Constants {
                 sum(sum_over_time(network_out_total_bytes[4m]))*8 or vector(0)
                     unless
                 count(irate(ifHCOutOctets[4m]))*8 == 0 and
-                count(sum_over_time(network_out_total_bytes[4m]))*8 == 0
+                count(sum_over_time(network_out_total_bytes[4m])) == 0
         """;
 }

@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class MonitorServiceStatusGrpcService extends MonitorStatusServiceGrpc.MonitorStatusServiceImplBase {
+public class MonitoredServiceStatusGrpcService extends MonitorStatusServiceGrpc.MonitorStatusServiceImplBase {
 
     private final MonitoredStatusService monitorStatusService;
     private final MonitoredServiceService monitoredServiceService;

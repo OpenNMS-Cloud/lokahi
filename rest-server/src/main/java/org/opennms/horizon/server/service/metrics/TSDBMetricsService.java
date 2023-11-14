@@ -119,7 +119,6 @@ public class TSDBMetricsService {
         String tenantId = headerUtil.extractTenant(env);
         String queryString = queryService.getCustomQueryString(name, metricLabels, timeRange, timeRangeUnit, optionalParams);
         return getMetrics(tenantId, queryString);
-
     }
     private Optional<NodeDTO> getNode(ResolutionEnvironment env, Map<String, String> metricLabels) {
         return metricLabelUtils.getNodeId(metricLabels).map(nodeId -> {

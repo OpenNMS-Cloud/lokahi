@@ -52,8 +52,8 @@ public class MonitorStatusGrpcService {
     @GraphQLQuery
     public Mono<MonitoredServiceStatus> getMonitorStatus(@GraphQLArgument(name = "request") MonitoredServiceStatusRequest request,
                                                          @GraphQLEnvironment ResolutionEnvironment env) {
-       var monitorStatusProto = client.getMonitorStatus(request, headerUtil.getAuthHeader(env));
-       var monitoredServiceStatus = mapper.protoToModel(monitorStatusProto);
-       return  Mono.just(monitoredServiceStatus);
+        var monitorStatusProto = client.getMonitorStatus(request, headerUtil.getAuthHeader(env));
+        var monitoredServiceStatus = mapper.protoToModel(monitorStatusProto);
+        return Mono.just(monitoredServiceStatus);
     }
 }

@@ -40,8 +40,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MonitoredStatusService {
 
-   private final MonitoredServiceStateRepository monitoredServiceStateRepository;
-   private final MonitoredServiceStatusMapper monitoredServiceStatusMapper;
+    private final MonitoredServiceStateRepository monitoredServiceStateRepository;
+    private final MonitoredServiceStatusMapper monitoredServiceStatusMapper;
 
     public Optional<MonitoredServiceStatusDTO> getServiceStatus(String tenantId, long serviceId) {
         var optional = monitoredServiceStateRepository.findByTenantIdAndMonitoredServiceId(tenantId, serviceId);

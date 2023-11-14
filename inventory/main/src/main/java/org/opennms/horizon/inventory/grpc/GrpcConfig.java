@@ -87,7 +87,7 @@ public class GrpcConfig {
                                          ActiveDiscoveryGrpcService activeDiscoveryGrpcService,
                                          IcmpActiveDiscoveryGrpcService icmpActiveDiscoveryGrpcService,
                                          PassiveDiscoveryGrpcService passiveDiscoveryGrpcService,
-                                         MonitorServiceStatusGrpcService monitorServiceStatusGrpcService,
+                                         MonitoredServiceStatusGrpcService monitoredServiceStatusGrpcService,
                                          MonitoredServiceGrpcService monitoredServiceGrpcService) {
         GrpcServerManager manager = new GrpcServerManager(port, interceptor);
         manager.startServer(locationGrpc,
@@ -99,7 +99,7 @@ public class GrpcConfig {
             icmpActiveDiscoveryGrpcService,
             passiveDiscoveryGrpcService,
             monitoredServiceGrpcService,
-            monitorServiceStatusGrpcService);
+            monitoredServiceStatusGrpcService);
         return manager;
     }
 }

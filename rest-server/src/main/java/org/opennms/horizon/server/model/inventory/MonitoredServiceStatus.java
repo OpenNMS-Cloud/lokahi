@@ -36,8 +36,8 @@ import lombok.Setter;
 public class MonitoredServiceStatus {
 
     private long id;
-    private String tenant_id;
-    private long monitored_service_id;
+    private String tenantId;
+    private long monitoredServiceId;
     private boolean state;
-    private long first_observation_time;
+    private long firstObservationTime;
 }

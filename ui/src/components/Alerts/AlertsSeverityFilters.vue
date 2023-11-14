@@ -20,43 +20,19 @@
           />
         </div>
       </div>
-
-      <!-- Awaiting BE changes -->
-      <!-- <div class="alerts-box status-box border">
-        <div class="subtitle2">Status</div>
-        <div class="list">
-          <AlertsSeverityCard
-            v-for="status in statuses"
-            :key="status.label"
-            :severity="status.label"
-            :class="status.label.toLowerCase()"
-            :isFilter="isFilter"
-            :timeRange="timeRange"
-            :isStatus="true"
-            :externalCount="status.count"
-          />
-        </div>
-      </div> -->
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Severity, TimeRange } from '@/types/graphql'
+import { TimeRange } from '@/types/graphql'
 
 defineProps<{
   isFilter?: boolean
   timeRange?: TimeRange
 }>()
 
-const severitiesDisplay = ['critical', 'major', 'minor', 'warning']
-const severities = Object.values(Severity).filter((s) => severitiesDisplay.includes(s.toLowerCase()))
-
-// Awaiting BE changes
-// const statuses = [
-//   { label: 'Acknowledged', count: 32 },
-//   { label: 'Unacknowledged', count: 20 }
-// ]
+const severities = ['critical', 'major', 'minor', 'warning', 'indeterminate']
 
 // for setting CSS properties
 const gap = 1.5
@@ -107,21 +83,6 @@ const listItemWidth = `${100 - (gap * (severities.length - 1)) / severities.leng
   gap: v-bind(itemGap);
   > * {
     width: v-bind(listItemWidth);
-  }
-  .critical {
-    order: 0;
-  }
-  .major {
-    order: 1;
-  }
-  .minor {
-    order: 2;
-  }
-  .warning {
-    order: 3;
-  }
-  .indeterminate {
-    order: 4;
   }
 }
 </style>

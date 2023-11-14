@@ -7,21 +7,6 @@
             <span class="title">Top Nodes</span>
             <span class="time-frame">24 h</span>
           </div>
-          <!-- Awaiting BE changes -->
-          <!-- <div class="btns">
-            <FeatherButton
-              icon="Download to CSV"
-              @click="downloadTopNodesToCsv"
-            >
-              <FeatherIcon :icon="icons.Download" />
-            </FeatherButton>
-            <FeatherButton
-              icon="Refresh table"
-              @click="() => ''"
-            >
-              <FeatherIcon :icon="icons.Refresh" />
-            </FeatherButton>
-          </div> -->
         </div>
       </div>
       <div class="container">
@@ -72,19 +57,10 @@
 
 <script setup lang="ts">
 import { useDashboardStore } from '@/store/Views/dashboardStore'
-import { buildCsvExport, generateBlob, generateDownload } from '../utils'
-import Download from '@featherds/icon/action/DownloadFile'
-import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
-import { clone, orderBy } from 'lodash'
+import { orderBy } from 'lodash'
 import { TopNNode } from '@/types/graphql'
 const store = useDashboardStore()
-
-const icons = markRaw({
-  Download,
-  Refresh
-})
-
 const topNodes = ref([] as TopNNode[])
 
 const page = 1
@@ -108,29 +84,6 @@ const sort = reactive({
 const sortChanged = (sortObj: any) => {
   topNodes.value = orderBy(topNodes.value, sortObj.property, sortObj.value)
   ;(sort as any)[sortObj.property] = sortObj.value
-}
-
-const downloadTopNodesToCsv = async () => {
-  const exportableNodes = []
-  const exportableNode: any = {}
-
-  for (const node of topNodes.value) {
-    for (const col of columns) {
-      let val: string | null = null
-      val = (node as any)[col.id]
-      if (val !== null) {
-        exportableNode[col.id] = val
-      }
-    }
-    const copy = clone(exportableNode)
-    exportableNodes.push(copy)
-  }
-
-  const csvRows = buildCsvExport(columns, exportableNodes)
-  const data = csvRows.join('\n')
-
-  const blob = generateBlob(data, 'text/csv')
-  generateDownload(blob, `TopNodes.csv`)
 }
 
 onMounted(async () => {

@@ -42,15 +42,8 @@
       class="count"
       data-test="count"
     >
-      {{ count || externalCount || 0 }}
+      {{ count || 0 }}
     </div>
-    <!-- Awaiting BE changes -->
-    <!-- <div v-if="!isStatus">
-      Cleared <span class="cleared-count"><strong>{{ cleared }}</strong></span>
-    </div>
-    <div v-if="!isStatus">
-      Total <span class="total-count"><strong>{{ total }}</strong></span>
-    </div> -->
   </div>
 </template>
 
@@ -68,8 +61,6 @@ const props = defineProps<{
   severity: string
   isFilter?: boolean
   timeRange?: TimeRange
-  isStatus?: boolean,
-  externalCount?: number
 }>()
 
 const pillColor = { style: props.severity as string }

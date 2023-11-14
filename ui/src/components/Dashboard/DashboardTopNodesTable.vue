@@ -36,12 +36,10 @@
               v-for="topNode in topNodes"
               :key="topNode.nodeLabel"
             >
-              <td>
-                <a>{{ topNode.nodeLabel }}</a>
-              </td>
+              <td>{{ topNode.nodeLabel }}</td>
               <td>{{ topNode.location }}</td>
-              <td>{{ topNode.avgResponseTime ? `${topNode.avgResponseTime} ms` : `--` }}</td>
-              <td>{{ topNode.reachability }}%</td>
+              <td>{{ topNode.avgResponseTime ? `${+topNode.avgResponseTime.toFixed(2)}ms` : `--` }}</td>
+              <td>{{ +topNode.reachability.toFixed(2) }}%</td>
             </tr>
           </TransitionGroup>
         </table>

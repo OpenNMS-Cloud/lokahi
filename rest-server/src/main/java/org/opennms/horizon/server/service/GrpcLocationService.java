@@ -100,6 +100,4 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
         return Mono.just(status);
     }
 
-
-
 }

@@ -2,7 +2,7 @@
   <div>
     <FeatherAutocomplete
       class="my-autocomplete"
-      label="Address"
+      label="Physical Address"
       type="single"
       :modelValue="addressModelValue"
       :minChar="1"

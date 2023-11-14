@@ -164,7 +164,7 @@ public class QueryService {
         if (REACHABILITY_PERCENTAGE.equals(metricName)) {
             String query = "response_time_msec" + getLabelsQueryString(labels);
             query = addTimeRange(timeRange, timeRangeUnit, query);
-            String firstObservationTimeProp = optionalParams.get("first_observation_time");
+            String firstObservationTimeProp = optionalParams.get(Constants.FIRST_OBSERVATION_TIME);
             if (Strings.isNullOrEmpty(firstObservationTimeProp)) {
                 throw new IllegalArgumentException("Invalid Observation time");
             } else {

@@ -151,6 +151,7 @@ public class NodeStatusService {
         labels.put(NODE_ID_KEY, String.valueOf(node.getId()));
         labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
         labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
+
         var request = new MonitoredServiceStatusRequest();
         request.setNodeId(node.getId());
         request.setMonitorType(Constants.DEFAULT_MONITOR_TYPE);
@@ -158,7 +159,7 @@ public class NodeStatusService {
 
         var monitorStatusProto = client.getMonitorStatus(request, headerUtil.getAuthHeader(env));
         long firstObservationTime = monitorStatusProto.getFirstObservationTime();
-        var optionalParams = Map.of("first_observation_time", String.valueOf(firstObservationTime));
+        var optionalParams = Map.of(Constants.FIRST_OBSERVATION_TIME, String.valueOf(firstObservationTime));
         var future = tsdbMetricsService.
             getCustomMetric(env, Constants.REACHABILITY_PERCENTAGE, labels, timeRange, timeRangeUnit, optionalParams).toFuture();
         try {
@@ -203,7 +204,7 @@ public class NodeStatusService {
         Map<String, String> labels = new HashMap<>();
         labels.put(NODE_ID_KEY, String.valueOf(node.getId()));
         labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
-        labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
+        labels.put(MONITOR_KEY, ipInterface.getIpAddress());
 
         var future = tsdbMetricsService.getMetric(env,
             AVG_RESPONSE_TIME, labels, timeRange, timeRangeUnit).toFuture();

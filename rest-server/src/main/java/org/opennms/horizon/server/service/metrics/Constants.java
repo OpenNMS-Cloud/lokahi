@@ -36,10 +36,11 @@ public final class Constants {
     public static final String AZURE_MONITOR_TYPE = "AZURE";
     public static final String AZURE_SCAN_TYPE = "AZURE_SCAN";
     public static final String DEFAULT_MONITOR_TYPE = "ICMP";
-
     public static final String NODE_ID_KEY = "node_id";
     public static final String MONITOR_KEY = "monitor";
     public static final String INSTANCE_KEY = "instance";
+    public static final String FIRST_OBSERVATION_TIME = "first_observation_time";
+
 
 
     public static final String QUERY_PREFIX = "query=";

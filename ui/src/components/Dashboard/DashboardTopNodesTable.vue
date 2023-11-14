@@ -45,11 +45,6 @@
             </tr>
           </TransitionGroup>
         </table>
-        <FeatherPagination
-          v-model="page"
-          :pageSize="pageSize"
-          :total="total"
-        ></FeatherPagination>
       </div>
     </TableCard>
   </div>
@@ -62,10 +57,6 @@ import { orderBy } from 'lodash'
 import { TopNNode } from '@/types/graphql'
 const store = useDashboardStore()
 const topNodes = ref([] as TopNNode[])
-
-const page = 1
-const pageSize = 4
-const total = 4
 
 const columns = [
   { id: 'nodeLabel', label: 'Node' },

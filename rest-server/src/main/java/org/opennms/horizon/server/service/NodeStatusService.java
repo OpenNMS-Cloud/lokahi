@@ -204,7 +204,7 @@ public class NodeStatusService {
         Map<String, String> labels = new HashMap<>();
         labels.put(NODE_ID_KEY, String.valueOf(node.getId()));
         labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
-        labels.put(MONITOR_KEY, ipInterface.getIpAddress());
+        labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
 
         var future = tsdbMetricsService.getMetric(env,
             AVG_RESPONSE_TIME, labels, timeRange, timeRangeUnit).toFuture();

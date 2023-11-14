@@ -123,7 +123,7 @@ public class GrpcNodeService {
     public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env, Integer timeRange, TimeRangeUnit timeRangeUnit) {
         var nodes = client.listNodes(headerUtil.getAuthHeader(env));
         var topNNodes = nodes.stream().map(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
-            .sorted(Comparator.comparingDouble(TopNNode::getReachability).reversed()).collect(Collectors.toList());
+            .sorted(Comparator.comparingDouble(TopNNode::getReachability)).collect(Collectors.toList());
         return Flux.fromIterable(topNNodes);
     }
 }

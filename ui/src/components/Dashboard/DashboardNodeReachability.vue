@@ -29,17 +29,23 @@ const doughnutCentreText = {
     const reachable = data.datasets[0].data[0] as number
     const unreachable = data.datasets[0].data[1] as number
     const availability = Math.round(reachable / (reachable  + unreachable) * 100)
-    const text = `${availability}%`
+    const text = isNaN(availability) ? '0%' : `${availability}%`
 
     const xCoord = chart.getDatasetMeta(0).data[0].x
     const yCoord = chart.getDatasetMeta(0).data[0].y
-    ctx.font = '30px inter'
-    ctx.fillStyle = getColorFromFeatherVar('shade-1') as string
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(text, xCoord, yCoord - 10)
-    ctx.font = '12px inter'
-    ctx.fillText('Available', xCoord, yCoord + 15)
+
+    
+    setTimeout(() => {
+      ctx.font = '30px inter'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, xCoord, yCoord - 10)
+      ctx.font = '12px inter'
+      ctx.fillText('Available', xCoord, yCoord + 15)
+      setTimeout(() => {
+        ctx.fillStyle = getColorFromFeatherVar('shade-1') as string
+      })
+    })
   }
 }
 

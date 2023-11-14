@@ -44,12 +44,13 @@
     >
       {{ count || externalCount || 0 }}
     </div>
-    <div v-if="!isStatus">
+    <!-- Awaiting BE changes -->
+    <!-- <div v-if="!isStatus">
       Cleared <span class="cleared-count"><strong>{{ cleared }}</strong></span>
     </div>
     <div v-if="!isStatus">
       Total <span class="total-count"><strong>{{ total }}</strong></span>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -72,9 +73,6 @@ const props = defineProps<{
 }>()
 
 const pillColor = { style: props.severity as string }
-
-const cleared = 8
-const total = 12
 
 const count = ref()
 onMounted(async () => {

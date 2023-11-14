@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { NetworkTrafficDocument, TimeRangeUnit, TsData } from '@/types/graphql'
+import { NetworkTrafficDocument, TopNNodesDocument, TimeRangeUnit, TsData } from '@/types/graphql'
 
 export const useDashboardQueries = defineStore('dashboardQueries', () => {
   const totalNetworkTrafficIn = ref([] as TsData)
@@ -12,9 +12,20 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
     timeRangeUnit: TimeRangeUnit.Hour
   })
 
+  const topNNodesQuery = ref({
+    timeRange: 24,
+    timeRangeUnit: TimeRangeUnit.Hour
+  })
+
   const { data: networkTrafficData, execute: getMetrics } = useQuery({
     query: NetworkTrafficDocument,
     variables: metricsQuery
+  })
+
+  const { data: topNodes, execute: getTopNodes } = useQuery({
+    query: TopNNodesDocument,
+    variables: topNNodesQuery,
+    fetchOnMount: false
   })
 
   const getNetworkTrafficInMetrics = async () => {
@@ -30,6 +41,8 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
   }
 
   return {
+    getTopNodes,
+    topNodes: computed(() => topNodes.value?.topNNode || []),
     getNetworkTrafficInMetrics,
     getNetworkTrafficOutMetrics,
     networkTrafficIn: computed(() => totalNetworkTrafficIn.value),

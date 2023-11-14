@@ -1,13 +1,14 @@
 <template>
   <div class="top-node-wrapper">
-    <TableCard class="border">
+    <TableCard class="card border">
       <div class="header">
         <div class="title-container">
           <div class="title-time">
             <span class="title">Top Nodes</span>
             <span class="time-frame">24 h</span>
           </div>
-          <div class="btns">
+          <!-- Awaiting BE changes -->
+          <!-- <div class="btns">
             <FeatherButton
               icon="Download to CSV"
               @click="downloadTopNodesToCsv"
@@ -20,7 +21,7 @@
             >
               <FeatherIcon :icon="icons.Refresh" />
             </FeatherButton>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="container">
@@ -48,13 +49,13 @@
           >
             <tr
               v-for="topNode in topNodes"
-              :key="topNode.id"
+              :key="topNode.nodeLabel"
             >
               <td>
                 <a>{{ topNode.nodeLabel }}</a>
               </td>
-              <td>{{ topNode.location?.location }}</td>
-              <td>{{ topNode.responseTime }} ms</td>
+              <td>{{ topNode.location }}</td>
+              <td>{{ topNode.avgResponseTime ? `${topNode.avgResponseTime} ms` : `--` }}</td>
               <td>{{ topNode.reachability }}%</td>
             </tr>
           </TransitionGroup>
@@ -76,6 +77,7 @@ import Download from '@featherds/icon/action/DownloadFile'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
 import { clone, orderBy } from 'lodash'
+import { TopNNode } from '@/types/graphql'
 const store = useDashboardStore()
 
 const icons = markRaw({
@@ -83,7 +85,7 @@ const icons = markRaw({
   Refresh
 })
 
-const topNodes = ref([] as any[])
+const topNodes = ref([] as TopNNode[])
 
 const page = 1
 const pageSize = 4
@@ -92,19 +94,18 @@ const total = 4
 const columns = [
   { id: 'nodeLabel', label: 'Node' },
   { id: 'location', label: 'Location' },
-  { id: 'responseTime', label: 'Response Time' },
+  { id: 'avgResponseTime', label: 'Response Time' },
   { id: 'reachability', label: 'Reachability' }
 ]
 
 const sort = reactive({
   nodeLabel: SORT.NONE,
   location: SORT.NONE,
-  responseTime: SORT.NONE,
+  avgResponseTime: SORT.NONE,
   reachability: SORT.NONE
 })
 
 const sortChanged = (sortObj: any) => {
-  console.log(sortObj)
   topNodes.value = orderBy(topNodes.value, sortObj.property, sortObj.value)
   ;(sort as any)[sortObj.property] = sortObj.value
 }
@@ -116,13 +117,7 @@ const downloadTopNodesToCsv = async () => {
   for (const node of topNodes.value) {
     for (const col of columns) {
       let val: string | null = null
-
-      if (col.id === 'location') {
-        val = (node as any)[col.id][col.id]
-      } else {
-        val = (node as any)[col.id]
-      }
-
+      val = (node as any)[col.id]
       if (val !== null) {
         exportableNode[col.id] = val
       }
@@ -138,8 +133,9 @@ const downloadTopNodesToCsv = async () => {
   generateDownload(blob, `TopNodes.csv`)
 }
 
-onMounted(() => {
-  topNodes.value = orderBy(store.topNodes, ['reachability', 'responseTime'], ['asc', 'asc'])
+onMounted(async () => {
+  await store.getTopNNodes()
+  topNodes.value = orderBy(store.topNodes, ['reachability', 'avgResponseTime'], ['asc', 'asc'])
 })
 </script>
 
@@ -153,30 +149,35 @@ onMounted(() => {
 .top-node-wrapper {
   margin-bottom: 20px;
   width: 100%;
-  .header {
-    display: flex;
-    justify-content: space-between;
-    .title-container {
+
+  .card {
+    height: 442px;
+
+    .header {
       display: flex;
       justify-content: space-between;
-      width: 100%;
-      margin-bottom: 20px;
-
-      .title-time {
+      .title-container {
         display: flex;
-        flex-direction: column;
-        .title {
-          @include typography.headline3;
-          margin-left: 20px;
-          margin-top: 2px;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 20px;
+
+        .title-time {
+          display: flex;
+          flex-direction: column;
+          .title {
+            @include typography.headline3;
+            margin-left: 20px;
+            margin-top: 2px;
+          }
+          .time-frame {
+            @include typography.caption;
+            margin-left: 20px;
+          }
         }
-        .time-frame {
-          @include typography.caption;
-          margin-left: 20px;
+        .btns {
+          margin-right: 15px;
         }
-      }
-      .btns {
-        margin-right: 15px;
       }
     }
   }

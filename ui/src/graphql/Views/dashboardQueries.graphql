@@ -4,3 +4,12 @@ query NetworkTraffic($name: String!, $timeRange: Int!, $timeRangeUnit: TimeRange
     ...MetricParts
   }
 }
+
+query TopNNodes($timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
+  topNNode(timeRange: $timeRange, timeRangeUnit: $timeRangeUnit) {
+    nodeLabel
+    location
+    avgResponseTime
+    reachability
+  }
+}

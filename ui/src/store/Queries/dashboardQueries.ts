@@ -7,7 +7,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
   const totalNetworkTrafficOut = ref([] as TsData)
 
   const metricsQuery = ref({
-    name: 'total_network_bytes_in',
+    name: 'total_network_bits_in',
     timeRange: 24,
     timeRangeUnit: TimeRangeUnit.Hour
   })
@@ -29,13 +29,13 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
   })
 
   const getNetworkTrafficInMetrics = async () => {
-    metricsQuery.value.name = 'total_network_bytes_in'
+    metricsQuery.value.name = 'total_network_bits_in'
     await getMetrics()
     totalNetworkTrafficIn.value = (networkTrafficData.value || []) as TsData
   }
 
   const getNetworkTrafficOutMetrics = async () => {
-    metricsQuery.value.name = 'total_network_bytes_out'
+    metricsQuery.value.name = 'total_network_bits_out'
     await getMetrics()
     totalNetworkTrafficOut.value = (networkTrafficData.value || []) as TsData
   }

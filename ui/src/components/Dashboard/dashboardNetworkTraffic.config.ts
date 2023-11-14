@@ -1,4 +1,4 @@
-import { humanFileSize } from "../utils"
+import { humanFileSizeFromBits } from "../utils"
 
 export const optionsGraph: any = {
   fill: true,
@@ -31,7 +31,7 @@ export const optionsGraph: any = {
       usePointStyle: true,
       callbacks: {
         label: (context: any) => {
-          return ` ${context.label} - ${humanFileSize(context.parsed.y.toFixed(1))}`
+          return ` ${context.label} - ${humanFileSizeFromBits(context.parsed.y.toFixed(1))}`
         },
         title: () => {
           return ''
@@ -68,7 +68,7 @@ export const optionsGraph: any = {
       },
       ticks: {
         callback(val: number): string {
-          return humanFileSize(val)
+          return humanFileSizeFromBits(val)
         }
       }
     }

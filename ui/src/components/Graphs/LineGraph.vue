@@ -24,7 +24,7 @@ import useTheme from '@/composables/useTheme'
 import 'chartjs-adapter-date-fns'
 import { format, add } from 'date-fns'
 
-import { getColorFromFeatherVar, humanFileSize, getChartGridColor } from '../utils'
+import { getColorFromFeatherVar, humanFileSizeFromBits, getChartGridColor } from '../utils'
 const emits = defineEmits(['has-data'])
 const graphs = useGraphs()
 const props = defineProps({
@@ -44,7 +44,7 @@ let chart: any = {}
 const formatAxisBasedOnType = (context: number) => {
   let formattedAxis = context.toFixed(1)
   if (props.type === 'bytes') {
-    formattedAxis = humanFileSize(context)
+    formattedAxis = humanFileSizeFromBits(context)
   } else if (props.type === 'percentage') {
     formattedAxis = (context * 100).toFixed(2) + '%'
   }

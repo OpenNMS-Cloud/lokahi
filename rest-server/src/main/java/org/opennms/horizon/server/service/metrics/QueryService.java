@@ -58,14 +58,14 @@ import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_BW_
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_BW_OUT_UTIL_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_NETWORK_ERRORS_IN;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_NETWORK_ERRORS_OUT;
-import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BYTES_OUT;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BITS_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BITS_OUT;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_PREFIX;
 import static org.opennms.horizon.server.service.metrics.Constants.REACHABILITY_PERCENTAGE;
-import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BYTES_IN;
-import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BYTES_OUT;
+import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_OUT;
 
 @Component
 @RequiredArgsConstructor
@@ -80,7 +80,7 @@ public class QueryService {
     }
 
     public boolean isRangeQuery(String metricName) {
-        return TOTAL_NETWORK_BYTES_IN.equals(metricName) || TOTAL_NETWORK_BYTES_OUT.equals(metricName)
+        return TOTAL_NETWORK_BITS_IN.equals(metricName) || TOTAL_NETWORK_BITS_OUT.equals(metricName)
             || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName)
             || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
             || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
@@ -94,10 +94,10 @@ public class QueryService {
             String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                 "&step=2m";
             switch (metricName) {
-                case TOTAL_NETWORK_BYTES_IN:
-                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_IN) + rangeQuerySuffix;
-                case TOTAL_NETWORK_BYTES_OUT:
-                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BYTES_OUT) + rangeQuerySuffix;
+                case TOTAL_NETWORK_BITS_IN:
+                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BITS_IN) + rangeQuerySuffix;
+                case TOTAL_NETWORK_BITS_OUT:
+                    return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BITS_OUT) + rangeQuerySuffix;
                 case NETWORK_IN_BITS:
                     if (isAzureNode(node)) {
                         var query = String.format(QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS, getLabelsQueryString(labels));

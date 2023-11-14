@@ -71,21 +71,21 @@ public final class Constants {
     public static final String QUERY_FOR_NETWORK_ERRORS_OUT = "irate(ifOutErrors%s[4m])";
 
     // Total Network
-    public static final String TOTAL_NETWORK_BYTES_IN = "total_network_bytes_in";
-    public static final String TOTAL_NETWORK_BYTES_OUT = "total_network_bytes_out";
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_IN = """
-                sum(irate(ifHCInOctets[4m])) or vector(0) +
+    public static final String TOTAL_NETWORK_BITS_IN = "total_network_bits_in";
+    public static final String TOTAL_NETWORK_BITS_OUT = "total_network_bits_out";
+    public static final String QUERY_FOR_TOTAL_NETWORK_BITS_IN = """
+                sum(irate(ifHCInOctets[4m]))*8 or vector(0) +
                 sum(sum_over_time(network_in_total_bytes[4m])) or vector(0)
                     unless
-                count(irate(ifHCInOctets[4m])) == 0 and
+                count(irate(ifHCInOctets[4m]))*8 == 0 and
                 count(sum_over_time(network_in_total_bytes[4m])) == 0
         """;
 
-    public static final String QUERY_FOR_TOTAL_NETWORK_BYTES_OUT = """
-                sum(irate(ifHCOutOctets[4m])) or vector(0) +
-                sum(sum_over_time(network_out_total_bytes[4m])) or vector(0)
+    public static final String QUERY_FOR_TOTAL_NETWORK_BITS_OUT = """
+                sum(irate(ifHCOutOctets[4m]))*8 or vector(0) +
+                sum(sum_over_time(network_out_total_bytes[4m]))*8 or vector(0)
                     unless
-                count(irate(ifHCOutOctets[4m])) == 0 and
-                count(sum_over_time(network_out_total_bytes[4m])) == 0
+                count(irate(ifHCOutOctets[4m]))*8 == 0 and
+                count(sum_over_time(network_out_total_bytes[4m]))*8 == 0
         """;
 }

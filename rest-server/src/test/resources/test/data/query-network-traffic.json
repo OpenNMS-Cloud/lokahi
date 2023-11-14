@@ -1,6 +1,6 @@
 {
   "variables": {
-    "name": "total_network_bytes_out",
+    "name": "total_network_bits_out",
     "timeRange": 24,
     "timeRangeUnit": "HOUR"
   },

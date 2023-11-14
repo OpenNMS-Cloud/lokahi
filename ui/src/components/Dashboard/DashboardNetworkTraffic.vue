@@ -22,7 +22,7 @@ import { optionsGraph } from './dashboardNetworkTraffic.config'
 import { ChartData } from '@/types'
 import { ChartOptions } from 'chart.js'
 import 'chartjs-adapter-date-fns'
-import { humanFileSize, getColorFromFeatherVar, getChartGridColor } from '../utils'
+import { humanFileSizeFromBits, getColorFromFeatherVar, getChartGridColor } from '../utils'
 
 const { onThemeChange, isDark } = useTheme()
 
@@ -55,7 +55,7 @@ const createConfigGraph = (list: number[]) => {
   options.aspectRatio = 1.4
   options.scales.y = {
     ticks: {
-      callback: (value) => humanFileSize(Number(value)),
+      callback: (value) => humanFileSizeFromBits(Number(value)),
       maxTicksLimit: 8,
       color: colorFromFeatherVar.value
     },

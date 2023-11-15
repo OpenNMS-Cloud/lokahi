@@ -41,8 +41,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -66,8 +64,4 @@ public class MonitoredServiceState {
 
     @Column(name = "monitored_service_id", insertable = false, updatable = false)
     private long monitoredServiceId;
-
-    @NotNull
-    @Column(name = "first_observation_time", columnDefinition = "TIMESTAMP")
-    private LocalDateTime firstObservationTime;
 }

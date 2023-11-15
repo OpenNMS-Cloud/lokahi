@@ -39,14 +39,3 @@ message MonitoredServiceDTO {
   int64 monitored_service_type_id = 3;
   int64 ip_interface_id = 4;
 }
-
-message MonitoredServiceQuery {
-  string tenant_id = 1;
-  string ip_address = 2;
-  string monitored_service_type = 3;
-  int64 node_id = 4;
-}
-
-service MonitoredService {
-  rpc getMonitoredService(MonitoredServiceQuery) returns (MonitoredServiceDTO) {};
-}

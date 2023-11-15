@@ -109,17 +109,6 @@ public class TSDBMetricsService {
         return getMetrics(tenantId, queryString);
     }
 
-    public Mono<TimeSeriesQueryResult> getCustomMetric(@GraphQLEnvironment ResolutionEnvironment env,
-                                                 String name, Map<String, String> labels,
-                                                 Integer timeRange, TimeRangeUnit timeRangeUnit, Map<String,String> optionalParams) {
-
-        Map<String, String> metricLabels = Optional.ofNullable(labels)
-            .map(HashMap::new).orElseGet(HashMap::new);
-
-        String tenantId = headerUtil.extractTenant(env);
-        String queryString = queryService.getCustomQueryString(name, metricLabels, timeRange, timeRangeUnit, optionalParams);
-        return getMetrics(tenantId, queryString);
-    }
     private Optional<NodeDTO> getNode(ResolutionEnvironment env, Map<String, String> metricLabels) {
         return metricLabelUtils.getNodeId(metricLabels).map(nodeId -> {
             String accessToken = headerUtil.getAuthHeader(env);

@@ -28,8 +28,6 @@
 
 package org.opennms.horizon.server.service.metrics;
 
-import com.google.common.base.Strings;
-import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.slf4j.Logger;
@@ -39,12 +37,13 @@ import org.springframework.stereotype.Component;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+
 import static org.opennms.horizon.server.service.metrics.Constants.AVG_RESPONSE_TIME;
+import static org.opennms.horizon.server.service.metrics.Constants.REACHABILITY_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
 import static org.opennms.horizon.server.service.metrics.Constants.BW_IN_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.BW_OUT_PERCENTAGE;
@@ -63,12 +62,10 @@ import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOT
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_OUT_BITS;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_PREFIX;
-import static org.opennms.horizon.server.service.metrics.Constants.REACHABILITY_PERCENTAGE;
 import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_IN;
 import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_OUT;
 
 @Component
-@RequiredArgsConstructor
 public class QueryService {
     private static final Logger LOG = LoggerFactory.getLogger(QueryService.class);
     private static final String OPERATION_NOT_SUPPORTED_FOR_AZURE_NODE = "Operation not supported for Azure node: ";
@@ -158,37 +155,6 @@ public class QueryService {
 
     }
 
-    public String getCustomQueryString(String metricName, Map<String, String> labels,
-                                 Integer timeRange, TimeRangeUnit timeRangeUnit, Map<String, String> optionalParams) {
-
-        if (REACHABILITY_PERCENTAGE.equals(metricName)) {
-            String query = "response_time_msec" + getLabelsQueryString(labels);
-            query = addTimeRange(timeRange, timeRangeUnit, query);
-            String firstObservationTimeProp = optionalParams.get(Constants.FIRST_OBSERVATION_TIME);
-            if (Strings.isNullOrEmpty(firstObservationTimeProp)) {
-                throw new IllegalArgumentException("Invalid Observation time");
-            } else {
-                long firstObservationTime = Long.parseLong(firstObservationTimeProp);
-                long totalSamples = getTotalSamples(timeRange, timeRangeUnit, 60, firstObservationTime);
-                return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
-                    totalSamples + ")" + "*100" + " or vector(0)";
-            }
-        }
-        throw new IllegalArgumentException("Custom query not supported for " + metricName);
-
-    }
-
-    private long getTotalSamples(Integer timeRange, TimeRangeUnit timeRangeUnit, Integer samplingPeriodInSecs, long firstObservationTime) {
-        var duration = getDuration(timeRange, timeRangeUnit).orElseThrow();
-        var totalDuration = Duration.ofMillis(Instant.now().toEpochMilli() - firstObservationTime);
-        if (totalDuration.toMillis() < duration.toMillis()) {
-            return totalDuration.toSeconds() / samplingPeriodInSecs;
-        } else {
-            return duration.toSeconds() / samplingPeriodInSecs;
-        }
-    }
-
-
     public String getQueryString(Map<String, String> queryParams) {
         StringBuilder sb = new StringBuilder(QUERY_PREFIX + "{");
 
@@ -257,5 +223,4 @@ public class QueryService {
     private boolean isNodeScanType(Optional<NodeDTO> node, String scanType) {
         return node.map(NodeDTO::getScanType).orElse("").equals(scanType);
     }
-
 }

@@ -75,7 +75,7 @@ public final class Constants {
     public static final String TOTAL_NETWORK_BITS_OUT = "total_network_bits_out";
     public static final String QUERY_FOR_TOTAL_NETWORK_BITS_IN = """
                 sum(irate(ifHCInOctets[4m]))*8 or vector(0) +
-                sum(sum_over_time(network_in_total_bytes[4m])) or vector(0)
+                sum(sum_over_time(network_in_total_bytes[4m]))*8 or vector(0)
                     unless
                 count(irate(ifHCInOctets[4m])) == 0 and
                 count(sum_over_time(network_in_total_bytes[4m])) == 0
@@ -85,7 +85,7 @@ public final class Constants {
                 sum(irate(ifHCOutOctets[4m]))*8 or vector(0) +
                 sum(sum_over_time(network_out_total_bytes[4m]))*8 or vector(0)
                     unless
-                count(irate(ifHCOutOctets[4m]))*8 == 0 and
+                count(irate(ifHCOutOctets[4m])) == 0 and
                 count(sum_over_time(network_out_total_bytes[4m])) == 0
         """;
 }

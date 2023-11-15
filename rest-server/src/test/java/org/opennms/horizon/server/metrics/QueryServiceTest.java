@@ -34,11 +34,19 @@ import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.service.metrics.Constants;
 import org.opennms.horizon.server.service.metrics.QueryService;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Optional;
 
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_BW_IN_UTIL_PERCENTAGE;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BITS_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_BITS_OUT;
 import static org.opennms.horizon.server.service.metrics.Constants.QUERY_FOR_TOTAL_NETWORK_IN_BITS;
+import static org.opennms.horizon.server.service.metrics.Constants.QUERY_PREFIX;
+import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_IN;
+import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_OUT;
 
 public class QueryServiceTest {
 
@@ -71,6 +79,26 @@ public class QueryServiceTest {
         var queryString = queryService.getQueryString(Optional.empty(), Constants.REACHABILITY_PERCENTAGE, labels, 24, TimeRangeUnit.HOUR);
         Assertions.assertEquals("query=(count_over_time(response_time_msec{instance=\"192.168.1.1\"," +
             "system_id=\"minion-standalone\",monitor=\"ICMP\"}[24h])/1440)*100 or vector(0)", queryString);
+    }
+
+    @Test
+    void testTotalQuery() {
+        long end = System.currentTimeMillis() / 1000L;
+        long start = end - Duration.ofHours(24).getSeconds();
+        QueryService queryService = new QueryService();
+        var bitsInQuery = queryService.getQueryString(Optional.empty(), TOTAL_NETWORK_BITS_IN, new HashMap<>(), 24, TimeRangeUnit.HOUR);
+        var inSplitQuery = bitsInQuery.split("&");
+        Assertions.assertEquals(QUERY_PREFIX + URLEncoder.encode(QUERY_FOR_TOTAL_NETWORK_BITS_IN, StandardCharsets.UTF_8), inSplitQuery[0]);
+        Assertions.assertEquals("start=" + start, inSplitQuery[1]);
+        Assertions.assertEquals("end=" + end, inSplitQuery[2]);
+        Assertions.assertEquals("step=2m", inSplitQuery[3]);
+
+        var bitsOutQuery = queryService.getQueryString(Optional.empty(), TOTAL_NETWORK_BITS_OUT, new HashMap<>(), 24, TimeRangeUnit.HOUR);
+        var outSplitQuery = bitsOutQuery.split("&");
+        Assertions.assertEquals(QUERY_PREFIX + URLEncoder.encode(QUERY_FOR_TOTAL_NETWORK_BITS_OUT, StandardCharsets.UTF_8), outSplitQuery[0]);
+        Assertions.assertEquals("start=" + start, outSplitQuery[1]);
+        Assertions.assertEquals("end=" + end, outSplitQuery[2]);
+        Assertions.assertEquals("step=2m", outSplitQuery[3]);
     }
 
 }

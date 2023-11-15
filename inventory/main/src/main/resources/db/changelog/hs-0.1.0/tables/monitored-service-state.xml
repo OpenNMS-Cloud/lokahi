@@ -32,6 +32,10 @@
     <addForeignKeyConstraint constraintName="fk_monitored_service_state_monitored_service" onDelete="CASCADE"
                              baseTableName="monitored_service_state" baseColumnNames="monitored_service_id"
                              referencedTableName="monitored_service" referencedColumnNames="id"/>
-
 </changeSet>
+
+    <changeSet id="0.1.0-monitored-service-state-remove-first-observation-time-column" author="cgorantla">
+        <dropColumn tableName="monitored_service_state" columnName="first_observation_time"/>
+    </changeSet>
+
 </databaseChangeLog>

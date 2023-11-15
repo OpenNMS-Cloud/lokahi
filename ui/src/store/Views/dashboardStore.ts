@@ -6,7 +6,7 @@ type TState = {
   totalNetworkTrafficIn: [number, number][]
   totalNetworkTrafficOut: [number, number][],
   topNodes: any[],
-  reachability: Record<string, number>
+  reachability: { responding: number, unresponsive: number }
 }
 
 export const useDashboardStore = defineStore('dashboardStore', {
@@ -36,7 +36,7 @@ export const useDashboardStore = defineStore('dashboardStore', {
       this.topNodes = queries.topNodes
 
       this.reachability.responding = queries.topNodes.filter((n) => n.avgResponseTime > 0).length
-      this.reachability.unchrachable = queries.topNodes.length - this.reachability.responding
+      this.reachability.unresponsive = queries.topNodes.length - this.reachability.responding
     }
   }
 })

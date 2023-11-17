@@ -25,32 +25,6 @@
             {{ props.secondaryButtonText }}
           </FeatherButton>
         </div>
-
-        <div class="input-wrapper">
-          <FeatherInput
-            :label="inputPlaceholder"
-            :modelValue="certificatePassword"
-            type="text"
-            class="download-input"
-            :disabled="true"
-            data-test="download-input"
-          />
-          <FeatherButton
-            :disabled="!certificatePassword"
-            text
-            @click="copyClick"
-            class="download-copy-button"
-          >
-            <template v-slot:icon>
-              <FeatherIcon
-                :icon="CopyIcon"
-                aria-hidden="true"
-                focusable="false"
-              />
-              Copy
-            </template>
-          </FeatherButton>
-        </div>
       </div>
     </div>
   </div>
@@ -71,12 +45,9 @@
 
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import CopyIcon from '@featherds/icon/action/ContentCopy'
 import { useLocationStore } from '@/store/Views/locationStore'
 import useModal from '@/composables/useModal'
 
-import useSnackbar from '@/composables/useSnackbar'
-const { showSnackbar } = useSnackbar()
 const locationStore = useLocationStore()
 const { openModal, closeModal, isVisible } = useModal()
 
@@ -102,10 +73,6 @@ const props = defineProps({
     type: Function as PropType<(event: Event) => void>,
     default: () => ({})
   },
-  inputPlaceholder: {
-    default: 'Unlock File Password',
-    type: String
-  },
   certificatePassword: {
     required: true,
     type: String
@@ -115,13 +82,6 @@ const props = defineProps({
     type: Boolean
   }
 })
-
-const copyClick = () => {
-  navigator.clipboard.writeText(props.certificatePassword).catch(() => 'Copy to clipboard was unsuccessful.')
-  showSnackbar({
-    msg: 'Certificate password copied.'
-  })
-}
 </script>
 
 <style lang="scss" scoped>
@@ -140,22 +100,9 @@ const copyClick = () => {
   border-radius: 4px;
   padding: var(variables.$spacing-l);
 }
-.input-wrapper {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex: 1 1 0;
-  gap: var(variables.$spacing-xs);
-}
 .download-title {
   @include typography.subtitle2();
   margin-bottom: var(variables.$spacing-m);
-}
-.download-copy-button {
-  min-width: 87px;
-}
-.download-input {
-  width: 285px;
 }
 .download-buttons {
   display: flex;

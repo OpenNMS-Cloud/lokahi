@@ -53,7 +53,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -120,9 +119,7 @@ public class GrpcNodeService {
 
     @GraphQLQuery
     public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env, Integer timeRange, TimeRangeUnit timeRangeUnit) {
-        var nodes = client.listNodes(headerUtil.getAuthHeader(env));
-        var topNNodes = nodes.stream().map(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
-            .collect(Collectors.toList());
-        return Flux.fromIterable(topNNodes).flatMap(mono -> mono);
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
+            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env));
     }
 }

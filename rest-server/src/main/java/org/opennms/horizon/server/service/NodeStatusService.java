@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -223,9 +224,9 @@ public class NodeStatusService {
     }
 
     public Mono<TopNNode> getTopNNode(NodeDTO nodeDTO, Integer timeRange, TimeRangeUnit timeRangeUnit, ResolutionEnvironment env) {
-        var nodeReachability = getNodeReachability(nodeDTO, timeRange, timeRangeUnit, env);
-        var nodeResponseTime = getNodeAvgResponseTime(nodeDTO, timeRange, timeRangeUnit, env);
-        var result = nodeReachability.zipWith(nodeResponseTime);
+        Mono<NodeReachability> nodeReachability = getNodeReachability(nodeDTO, timeRange, timeRangeUnit, env);
+        Mono<NodeResponseTime>  nodeResponseTime = getNodeAvgResponseTime(nodeDTO, timeRange, timeRangeUnit, env);
+        Mono<Tuple2<NodeReachability, NodeResponseTime>> result = nodeReachability.zipWith(nodeResponseTime);
         return result.map(tuple -> {
             var topNNode = new TopNNode();
             topNNode.setNodeLabel(nodeDTO.getNodeLabel());

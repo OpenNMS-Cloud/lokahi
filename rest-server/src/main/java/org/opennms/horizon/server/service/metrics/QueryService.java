@@ -169,9 +169,12 @@ public class QueryService {
                 throw new IllegalArgumentException("Invalid Observation time");
             } else {
                 long firstObservationTime = Long.parseLong(firstObservationTimeProp);
-                long totalSamples = getTotalSamples(timeRange, timeRangeUnit, 60, firstObservationTime);
+                long samplesCount = getTotalSamples(timeRange, timeRangeUnit, 60, firstObservationTime);
+                if (samplesCount < 1) {
+                    samplesCount = 1;
+                }
                 return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
-                    totalSamples + ")" + "*100" + " or vector(0)";
+                    samplesCount + ")" + "*100" + " or vector(0)";
             }
         }
         throw new IllegalArgumentException("Custom query not supported for " + metricName);

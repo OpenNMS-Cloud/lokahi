@@ -28,15 +28,13 @@
 
 package org.opennms.horizon.server.model.status;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class NodeResponseTime {
 
     private final long id;
-    private final double responseTime;
-    public NodeResponseTime(long id, double responseTime) {
-        this.id = id;
-        this.responseTime = responseTime;
-    }
+    private final Double responseTime;
 }

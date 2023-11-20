@@ -28,16 +28,13 @@
 
 package org.opennms.horizon.server.model.status;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class NodeReachability {
 
     private final long id;
-    private final double reachability;
-
-    public NodeReachability(long id, double reachability) {
-        this.id = id;
-        this.reachability = reachability;
-    }
+    private final Double reachability;
 }

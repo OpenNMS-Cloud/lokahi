@@ -212,9 +212,6 @@ public class NodeStatusService {
         labels.put(MONITOR_KEY, Constants.DEFAULT_MONITOR_TYPE);
         labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
 
-        var future = tsdbMetricsService.getMetric(env,
-            AVG_RESPONSE_TIME, labels, timeRange, timeRangeUnit).map(result ->
-            transformToNodeResponseTime(node.getId(), result));
         try {
             return tsdbMetricsService.getMetric(env,
                 AVG_RESPONSE_TIME, labels, timeRange, timeRangeUnit).map(result ->

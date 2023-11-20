@@ -28,27 +28,10 @@
 
 package org.opennms.horizon.server.model.inventory;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 
-import java.util.Comparator;
-
-@Getter
-@Setter
-public class TopNNode {
-    private String nodeLabel;
-    private String location;
-    private double avgResponseTime;
-    private double reachability;
-
-    public static Comparator<TopNNode> getComparator(String fieldName, boolean sortByAscending) {
-        Comparator<TopNNode> comparator = switch (fieldName) {
-            case "nodeLabel" -> Comparator.comparing(TopNNode::getNodeLabel);
-            case "location" -> Comparator.comparing(TopNNode::getLocation);
-            case "avgResponseTime" -> Comparator.comparingDouble(TopNNode::getAvgResponseTime);
-            default -> Comparator.comparingDouble(TopNNode::getReachability);
-        };
-        // Apply ascending or descending sorting based on the flag
-        return sortByAscending ? comparator : comparator.reversed();
-    }
+@AllArgsConstructor
+public class TopNResponse {
+    private byte[] topNBytes;
+    public DownloadFormat downloadFormat;
 }

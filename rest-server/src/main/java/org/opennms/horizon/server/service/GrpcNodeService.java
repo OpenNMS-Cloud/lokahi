@@ -40,10 +40,12 @@ import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
+import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
+import org.opennms.horizon.server.model.inventory.TopNResponse;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -51,9 +53,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -118,7 +120,7 @@ public class GrpcNodeService {
         return Mono.just(client.startScanByNodeIds(ids, headerUtil.getAuthHeader(env)));
     }
 
-    @GraphQLQuery
+    @GraphQLQuery(name = "topNNode")
     public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env,
                                       @GraphQLArgument(name = "timeRange") Integer timeRange,
                                       @GraphQLArgument(name = "timeRangeUnit") TimeRangeUnit timeRangeUnit,
@@ -131,6 +133,39 @@ public class GrpcNodeService {
             .sort(TopNNode.getComparator(sortBy, sortAscending))
             .skip((long) (page - 1) * pageSize)
             .take(pageSize);
+    }
+
+    @GraphQLQuery(name = "downloadTopN")
+    public Mono<TopNResponse> downloadTopN(@GraphQLEnvironment ResolutionEnvironment env,
+                                           @GraphQLArgument(name = "timeRange") Integer timeRange,
+                                           @GraphQLArgument(name = "timeRangeUnit") TimeRangeUnit timeRangeUnit,
+                                           @GraphQLArgument(name = "sortBy") String sortBy,
+                                           @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+                                           @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
+            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
+            .sort(TopNNode.getComparator(sortBy, sortAscending)).collectList()
+            .map(topNList -> generateDownloadFromTopNNodes(topNList, downloadFormat));
+    }
+
+    private static TopNResponse generateDownloadFromTopNNodes(List<TopNNode> topNNodes, DownloadFormat downloadFormat) {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            csvData.append("Node Label,Location,Avg Response Time,Reachability\n");
+            for (TopNNode node : topNNodes) {
+                csvData.append(String.format("%s,%s,%.2f,%.2f\n",
+                    node.getNodeLabel(),
+                    node.getLocation(),
+                    node.getAvgResponseTime(),
+                    node.getReachability()));
+            }
+            return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 
 }

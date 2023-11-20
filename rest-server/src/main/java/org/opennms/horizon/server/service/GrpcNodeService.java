@@ -119,10 +119,19 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery
-    public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env, Integer timeRange, TimeRangeUnit timeRangeUnit) {
+    public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env,
+                                      @GraphQLArgument(name = "timeRange") Integer timeRange,
+                                      @GraphQLArgument(name = "timeRangeUnit") TimeRangeUnit timeRangeUnit,
+                                      @GraphQLArgument(name = "pageSize") Integer pageSize,
+                                      @GraphQLArgument(name = "page") Integer page,
+                                      @GraphQLArgument(name = "sortBy") String sortBy,
+                                      @GraphQLArgument(name = "sortAscending") boolean sortAscending) {
         var nodes = client.listNodes(headerUtil.getAuthHeader(env));
-        var topNNodes = nodes.stream().map(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
-            .collect(Collectors.toList());
-        return Flux.fromIterable(topNNodes).flatMap(mono -> mono);
+        var topNNodes = nodes.stream().map(nodeDTO ->
+            nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env)).collect(Collectors.toList());
+        return Flux.fromIterable(topNNodes).flatMap(mono -> mono)
+            .sort(TopNNode.getComparator(sortBy, sortAscending))
+            .skip((long) (page - 1) * pageSize)
+            .take(pageSize);
     }
 }

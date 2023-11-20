@@ -9,6 +9,14 @@ server:
 spring:
   jackson:
     default-property-inclusion: non_null
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Providing this value will cause Spring to autoconfigure a
+          # org.springframework.security.oauth2.jwt.ReactiveJwtDecoder instance.
+          jwk-set-uri: ${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/certs
+          jws-algorithms: ${keycloak.signatureAlgorithm}
 
 keycloak:
   url: http://onms-keycloak:8080/auth

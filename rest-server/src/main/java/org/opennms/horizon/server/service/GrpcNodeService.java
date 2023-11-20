@@ -126,12 +126,11 @@ public class GrpcNodeService {
                                       @GraphQLArgument(name = "page") Integer page,
                                       @GraphQLArgument(name = "sortBy") String sortBy,
                                       @GraphQLArgument(name = "sortAscending") boolean sortAscending) {
-        var nodes = client.listNodes(headerUtil.getAuthHeader(env));
-        var topNNodes = nodes.stream().map(nodeDTO ->
-            nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env)).collect(Collectors.toList());
-        return Flux.fromIterable(topNNodes).flatMap(mono -> mono)
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
+            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
             .sort(TopNNode.getComparator(sortBy, sortAscending))
             .skip((long) (page - 1) * pageSize)
             .take(pageSize);
     }
+
 }

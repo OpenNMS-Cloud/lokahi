@@ -29,10 +29,15 @@
 package org.opennms.horizon.server.test.util;
 
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.CookieAssertions;
@@ -45,8 +50,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.Map;
 
 @Builder
-@With
+@Getter
 @Slf4j
+@With
 public class GraphQLWebTestClient {
 
     private final WebTestClient webClient;
@@ -60,11 +66,33 @@ public class GraphQLWebTestClient {
     @Builder.Default
     private final String accessToken = "test-token-12345";
 
+    public static GraphQLWebTestClient from(WebTestClient webTestClient) {
+        return GraphQLWebTestClient.builder().webClient(webTestClient).build();
+    }
+
+    public static String createPayload(String graphQLQuery) {
+        try {
+            return new JSONObject().put("query", graphQLQuery).toString();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Takes a graphql query, creates a json request body for it, and submits a
+     * POST request for it.
+     *
+     * @see GraphQLWebTestClient#createPayload(String)
+     */
+    public GraphQLResponseSpec exchangeGraphQLQuery(String query) {
+        return this.exchangePost(createPayload(query));
+    }
+
     public GraphQLResponseSpec exchangePost(String body) {
         WebTestClient.ResponseSpec base = webClient.post()
             .uri(endpoint)
-            .header("Content-Type", contentType.toString())
-            .header("Authorization", "Bearer " + accessToken)
+            .header(HttpHeaders.CONTENT_TYPE, contentType.toString())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
             .bodyValue(body)
             .exchange();
         return new GraphQLResponseSpec(base);
@@ -73,8 +101,8 @@ public class GraphQLWebTestClient {
     public GraphQLResponseSpec exchangeGet(String uri, Map<String, ?> uriVariables) {
         WebTestClient.ResponseSpec base = webClient.get()
             .uri(uri, uriVariables)
-            .header("Content-Type", contentType.toString())
-            .header("Authorization", "Bearer " + accessToken)
+            .header(HttpHeaders.CONTENT_TYPE, contentType.toString())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
             .exchange();
         return new GraphQLResponseSpec(base);
     }
@@ -83,12 +111,16 @@ public class GraphQLWebTestClient {
         return webClient.get();
     }
 
+    public WebTestClient.RequestBodyUriSpec post() {
+        return webClient.post();
+    }
+
     @RequiredArgsConstructor
     public static class GraphQLResponseSpec implements WebTestClient.ResponseSpec {
 
         private final WebTestClient.ResponseSpec delegate;
 
-        public WebTestClient.BodyContentSpec expectCleanResponse() {
+        public @NonNull WebTestClient.BodyContentSpec expectCleanResponse() {
             return this.expectStatus().isEqualTo(HttpStatus.OK)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
@@ -98,7 +130,11 @@ public class GraphQLWebTestClient {
                 .jsonPath("$.data").exists();
         }
 
-        public WebTestClient.BodyContentSpec expectJsonResponse(HttpStatus status) {
+        public @NonNull WebTestClient.BodyContentSpec expectJsonResponse() {
+            return this.expectJsonResponse(HttpStatus.OK);
+        }
+
+        public @NonNull WebTestClient.BodyContentSpec expectJsonResponse(HttpStatus status) {
             return this.expectStatus().isEqualTo(status)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
@@ -106,7 +142,7 @@ public class GraphQLWebTestClient {
                 .jsonPath("$.trace").doesNotExist();
         }
 
-        public WebTestClient.BodyContentSpec expectGraphQLErrorResponse() {
+        public @NonNull WebTestClient.BodyContentSpec expectGraphQLErrorResponse() {
             return this.expectStatus().isEqualTo(HttpStatus.OK)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
@@ -129,52 +165,52 @@ public class GraphQLWebTestClient {
         }
 
         @Override
-        public StatusAssertions expectStatus() {
+        public @NonNull StatusAssertions expectStatus() {
             return delegate.expectStatus();
         }
 
         @Override
-        public HeaderAssertions expectHeader() {
+        public @NonNull HeaderAssertions expectHeader() {
             return delegate.expectHeader();
         }
 
         @Override
-        public CookieAssertions expectCookie() {
+        public @NonNull CookieAssertions expectCookie() {
             return delegate.expectCookie();
         }
 
         @Override
-        public <B> WebTestClient.BodySpec<B, ?> expectBody(Class<B> bodyType) {
+        public @NonNull <B> WebTestClient.BodySpec<B, ?> expectBody(Class<B> bodyType) {
             return delegate.expectBody(bodyType);
         }
 
         @Override
-        public <B> WebTestClient.BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
+        public @NonNull <B> WebTestClient.BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
             return delegate.expectBody(bodyType);
         }
 
         @Override
-        public <E> WebTestClient.ListBodySpec<E> expectBodyList(Class<E> elementType) {
+        public @NonNull <E> WebTestClient.ListBodySpec<E> expectBodyList(Class<E> elementType) {
             return delegate.expectBodyList(elementType);
         }
 
         @Override
-        public <E> WebTestClient.ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
+        public @NonNull <E> WebTestClient.ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
             return delegate.expectBodyList(elementType);
         }
 
         @Override
-        public WebTestClient.BodyContentSpec expectBody() {
+        public @NonNull WebTestClient.BodyContentSpec expectBody() {
             return delegate.expectBody();
         }
 
         @Override
-        public <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
+        public @NonNull <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
             return delegate.returnResult(elementClass);
         }
 
         @Override
-        public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
+        public @NonNull <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
             return delegate.returnResult(elementTypeRef);
         }
     }

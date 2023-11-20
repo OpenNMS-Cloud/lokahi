@@ -1,10 +1,10 @@
 
 = Visualizations
-:description: Learn about the types of visualizations available in OpenNMS Lōkahi/Cloud: insights dashboard, top 10 applications and talkers, top nodes, total network traffic.
+:description: Learn about the types of visualizations available in OpenNMS Lōkahi/Cloud: insights dashboard, top 10 applications and talkers, top nodes, total network traffic, and maps.
 
 The insights dashboard displays statistics and visualizations that represent the current state of your monitored network.
 
-It also provides quick links to the xref:operation:inventory:introduction.adoc[inventory] and xref:operation:flows/introduction.adoc[flows] pages for additional data visualizations.
+It also provides quick links to the xref:operation:inventory/introduction.adoc[inventory] and xref:operation:flows/introduction.adoc[flows] pages for additional data visualizations.
 
 == Statistics and visualizations
 
@@ -32,10 +32,15 @@ image::flows/flows-node.png[Node card with events/alarms symbol circled, 300]
 
 == Shortcuts
 
-The Insights Dashboard includes shortcuts for the following functions through the *Quick Actions* button:
+The Insights Dashboard includes shortcuts for the following:
 
-* *Add Discovery:* Create a new xref:get-started/discovery/active.adoc[active] or xref:get-started/discovery/passive.adoc[passive discovery].
-* *Add Monitoring Policy:* Define a new xref:get-started/policies/create.adoc[monitoring policy].
-* *View Flows:* View visualizations of flows data collected from your monitored network.
+* The *Inventory* link on the Total Network Traffic graph navigates users to the Network Inventory page.
+* The *Flows* link on the Top 10 Applications graph navigates users to the Flows page.
 
-You can also view inventory by clicking the *inventory* link on the Total Network Traffic graph, and view flows by clicking the *flows* link on the Top 10 Applications graph.
+[[geo-map]]
+== Geographical Map
+
+The *Map* page displays the geolocation of your Minion(s) on a world map, and indicates the number of nodes associated with it.
+You can zoom in and out for a more granular view of node geolocations.
+
+You must define a physical address or geo-coordinates for the monitoring location to display nodes on the map. (See xref:minions/introduction.adoc#create-location[Create a location].)

@@ -40,7 +40,6 @@ import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.service.grpc.MinionCertificateManagerClient;
 import org.opennms.horizon.server.service.grpc.NotificationClient;
-import org.opennms.horizon.server.utils.JWTValidator;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +49,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class ConfigurationUtil {
+public class GrpcConfig {
     @Value("${grpc.url.inventory}")
     private String inventoryGrpcAddress;
 
@@ -80,8 +79,8 @@ public class ConfigurationUtil {
     private String minionCertificateManagerGrpcAddress;
 
     @Bean
-    public ServerHeaderUtil createHeaderUtil(JWTValidator validator) {
-        return new ServerHeaderUtil(validator);
+    public ServerHeaderUtil createHeaderUtil() {
+        return new ServerHeaderUtil();
     }
 
     @Bean(name = "inventory")

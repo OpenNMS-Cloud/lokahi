@@ -26,7 +26,8 @@
         <graphql.spqr.version>1.0.0</graphql.spqr.version>
         <netty4.version>4.1.94.Final</netty4.version>
         <sonar.projectKey>opennms_lokahi_bff</sonar.projectKey>
-        <spring-boot.version>3.1.1</spring-boot.version>
+        <spring-boot.version>3.1.5</spring-boot.version>
+        <spring-security.version>6.1.5</spring-security.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -57,6 +58,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -164,6 +173,11 @@
                     <artifactId>junit-vintage-engine</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

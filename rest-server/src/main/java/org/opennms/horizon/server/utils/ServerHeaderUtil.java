@@ -29,34 +29,25 @@
 package org.opennms.horizon.server.utils;
 
 import com.nimbusds.jwt.SignedJWT;
-import java.util.List;
-
-import java.util.Optional;
-
-import org.opennms.horizon.shared.constants.GrpcConstants;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.server.ServerWebExchange;
-
 import graphql.GraphQLContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.autoconfigure.DefaultGlobalContext;
 import io.leangen.graphql.util.ContextUtils;
 import io.opentelemetry.api.trace.Span;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.server.ServerWebExchange;
+
+import java.util.List;
+import java.util.Optional;
 
 public class ServerHeaderUtil {
-    private final JWTValidator validator;
-
-    public ServerHeaderUtil(JWTValidator validator) {
-        this.validator = validator;
-    }
 
     public String getAuthHeader(ResolutionEnvironment env) {
         String authHeader = retrieveAuthHeader(env);
         try {
             if (authHeader != null) {
-                // return token only if its valid
-                validator.validate(authHeader.substring(7));
                 try {
                     String tenantId = parseHeader(authHeader);
                     if (tenantId != null) {
@@ -82,11 +73,11 @@ public class ServerHeaderUtil {
     }
     private String retrieveAuthHeader(ResolutionEnvironment env) {
         GraphQLContext graphQLContext = env.dataFetchingEnvironment.getContext();
-        DefaultGlobalContext context = (DefaultGlobalContext) ContextUtils.unwrapContext(graphQLContext);
+        DefaultGlobalContext context = ContextUtils.unwrapContext(graphQLContext);
         ServerWebExchange webExchange = (ServerWebExchange) context.getNativeRequest();
         ServerHttpRequest request = webExchange.getRequest();
         List<String> authHeaders = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
-        return authHeaders != null? authHeaders.get(0): null;
+        return authHeaders != null ? authHeaders.get(0) : null;
     }
 
     private static String parseHeader(String header) {

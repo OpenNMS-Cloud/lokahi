@@ -34,7 +34,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,11 +48,11 @@ import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
@@ -68,12 +67,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GrpcFlowServiceTest {
-    private static final String GRAPHQL_PATH = "/graphql";
     private final String tenantId = "tenantId";
-    private final String accessToken = "accessToken";
-
-    @Autowired
-    private WebTestClient webClient;
 
     @MockBean(name = "flowQuerier")
     private ManagedChannel channel;
@@ -83,6 +77,9 @@ class GrpcFlowServiceTest {
     private InventoryClient mockInventoryClient;
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
+
+    private GraphQLWebTestClient webClient;
+    private String accessToken;
     private IpInterfaceDTO ipInterfaceDTO = IpInterfaceDTO.newBuilder()
         .setId(1L).setNodeId(1L).setIpAddress("127.0.0.1").setHostname("localhost").setSnmpPrimary(true)
         .setSnmpInterfaceId(2).build();
@@ -94,7 +91,10 @@ class GrpcFlowServiceTest {
         .build();
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired WebTestClient webTestClient) {
+        webClient = GraphQLWebTestClient.from(webTestClient);
+        accessToken = webClient.getAccessToken();
+
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any());
         doReturn(tenantId).when(mockHeaderUtil).extractTenant(any());
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
@@ -142,8 +142,9 @@ class GrpcFlowServiceTest {
             """;
 
         var matchedSnmpInterface = nodeDTO.getSnmpInterfacesList().stream().filter(s -> s.getId() == ipInterfaceDTO.getSnmpInterfaceId()).findFirst();
-        webClient.post().uri(GRAPHQL_PATH).accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request)).exchange().expectStatus().isOk().expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             // id = 2 is expected to skip silently
             .jsonPath("$.data.findExporters.size()").isEqualTo(1)
             .jsonPath("$.data.findExporters[0].node.nodeLabel").isEqualTo(nodeDTO.getNodeLabel())
@@ -172,8 +173,9 @@ class GrpcFlowServiceTest {
             }
             """;
 
-        webClient.post().uri(GRAPHQL_PATH).accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request)).exchange().expectStatus().isOk().expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.findApplications.size()").isEqualTo(applications.size())
             .jsonPath("$.data.findApplications[0]").isEqualTo(applications.get(0));
         assertEquals(tenantId, tenantIdArg.getValue());
@@ -203,8 +205,9 @@ class GrpcFlowServiceTest {
             }
             """;
 
-        webClient.post().uri(GRAPHQL_PATH).accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request)).exchange().expectStatus().isOk().expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.findApplicationSummaries.size()").isEqualTo(summaries.getSummariesCount())
             .jsonPath("$.data.findApplicationSummaries[0].label").isEqualTo(summaries.getSummaries(0).getApplication());
         assertEquals(tenantId, tenantIdArg.getValue());
@@ -239,15 +242,12 @@ class GrpcFlowServiceTest {
             }
             """;
 
-        webClient.post().uri(GRAPHQL_PATH).accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request)).exchange().expectStatus().isOk().expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.findApplicationSeries.size()").isEqualTo(flowingPoints.getPointCount())
             .jsonPath("$.data.findApplicationSeries[0].label").isEqualTo(flowingPoints.getPoint(0).getApplication());
         assertEquals(tenantId, tenantIdArg.getValue());
         assertEquals(accessToken, accessTokenArg.getValue());
-    }
-
-    private String createPayload(String request) throws JSONException {
-        return new JSONObject().put("query", request).toString();
     }
 }

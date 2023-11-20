@@ -34,7 +34,7 @@ Note that you can also download a PDF file of the data or refresh it by clicking
 
 To configure your flows data display, follow these steps:
 
-. On the Insights Dashboard page, click *Quick Actions>View Flows* or click the *flows* link on the Top 10 Applications chart.
+. On the Insights Dashboard page, click the *Flows* link on the Top 10 Applications chart.
 . On the Flows page, specify the following information:
 .. Time period (current calendar day, last 24 hours, last 7 days)
 .. Exporters (devices configured to export flow reports)

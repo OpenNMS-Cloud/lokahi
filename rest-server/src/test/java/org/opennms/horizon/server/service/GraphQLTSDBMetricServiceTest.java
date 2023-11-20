@@ -32,8 +32,6 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +42,11 @@ import org.opennms.horizon.server.model.TSData;
 import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.ArrayList;
@@ -65,29 +63,30 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLTSDBMetricServiceTest {
-    private static final String GRAPHQL_PATH = "/graphql";
     private static final long NODE_ID_1 = 1L;
     private static final long NODE_ID_2 = 2L;
     private static final long LOCATION_ID = 1L;
     private static final String TEST_LOCATION = "test-location1";
     private static final String NODE_SCAN_SCAN_TYPE = "NODE_SCAN";
     private static final String AZURE_SCAN_SCAN_TYPE = "AZURE_SCAN";
-    private static final String TEST_ACCESS_TOKEN_123 = "test-access-token-123";
     private static final String TEST_TENANT_ID = "test-tenant-id";
     public WireMockRule wireMock = new WireMockRule(wireMockConfig().port(12345));
 
     @MockBean
     private InventoryClient mockClient;
 
-    @Autowired
-    private WebTestClient webClient;
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
+    private GraphQLWebTestClient webClient;
+    private String accessToken;
 
     private NodeDTO nodeDTO1, nodeDTO2;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired WebTestClient webTestClient) {
+        webClient = GraphQLWebTestClient.from(webTestClient);
+        accessToken = webClient.getAccessToken();
+
         wireMock.start();
         MonitoringLocationDTO locationDTO1 = MonitoringLocationDTO.newBuilder().setId(LOCATION_ID).setLocation(TEST_LOCATION).build();
         nodeDTO1 = NodeDTO.newBuilder().setId(NODE_ID_1).setScanType(NODE_SCAN_SCAN_TYPE).setMonitoringLocationId(locationDTO1.getId()).build();
@@ -101,8 +100,8 @@ class GraphQLTSDBMetricServiceTest {
 
     @Test
     void getMetricForNodeScanSnmpNetworkInBytes() throws Exception {
-        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(TEST_ACCESS_TOKEN_123);
-        when(mockClient.getNodeById(eq(NODE_ID_1), eq((TEST_ACCESS_TOKEN_123)))).thenReturn(nodeDTO1);
+        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(accessToken);
+        when(mockClient.getNodeById(eq(NODE_ID_1), eq((accessToken)))).thenReturn(nodeDTO1);
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
@@ -120,20 +119,15 @@ class GraphQLTSDBMetricServiceTest {
             "        } " +
             "    } " +
             "}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody();
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectJsonResponse();
     }
 
     @Test
     void getMetricForNodeScanSnmpNetworkOutBytes() throws Exception {
-        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(TEST_ACCESS_TOKEN_123);
-        when(mockClient.getNodeById(eq(NODE_ID_1), eq((TEST_ACCESS_TOKEN_123)))).thenReturn(nodeDTO1);
+        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(accessToken);
+        when(mockClient.getNodeById(eq(NODE_ID_1), eq((accessToken)))).thenReturn(nodeDTO1);
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
@@ -151,20 +145,15 @@ class GraphQLTSDBMetricServiceTest {
             "        } " +
             "    } " +
             "}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody();
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectJsonResponse();
     }
 
     @Test
     void getMetricForAzureScanNetworkInBytes() throws Exception {
-        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(TEST_ACCESS_TOKEN_123);
-        when(mockClient.getNodeById(eq(NODE_ID_2), eq((TEST_ACCESS_TOKEN_123)))).thenReturn(nodeDTO2);
+        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(accessToken);
+        when(mockClient.getNodeById(eq(NODE_ID_2), eq((accessToken)))).thenReturn(nodeDTO2);
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
@@ -182,20 +171,15 @@ class GraphQLTSDBMetricServiceTest {
             "        } " +
             "    } " +
             "}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody();
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectJsonResponse();
     }
 
     @Test
     void getMetricForAzureScanNetworkOutBytes() throws Exception {
-        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(TEST_ACCESS_TOKEN_123);
-        when(mockClient.getNodeById(eq(NODE_ID_2), eq((TEST_ACCESS_TOKEN_123)))).thenReturn(nodeDTO2);
+        when(mockHeaderUtil.getAuthHeader(any(ResolutionEnvironment.class))).thenReturn(accessToken);
+        when(mockClient.getNodeById(eq(NODE_ID_2), eq((accessToken)))).thenReturn(nodeDTO2);
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
@@ -213,20 +197,10 @@ class GraphQLTSDBMetricServiceTest {
             "        } " +
             "    } " +
             "}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody();
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectJsonResponse();
     }
-
-    private String createPayload(String request) throws JSONException {
-        return new JSONObject().put("query", request).toString();
-    }
-
     private TimeSeriesQueryResult buildTsQueryResult(long nodeId, String monitor, String... metricNames) {
         TimeSeriesQueryResult result = new TimeSeriesQueryResult();
         result.setStatus("success");

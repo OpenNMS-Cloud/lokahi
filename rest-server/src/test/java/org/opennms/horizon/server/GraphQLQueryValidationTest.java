@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opennms.horizon.server.test.config.GraphQLQueryValidationConfig;
 import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,9 +72,7 @@ public class GraphQLQueryValidationTest {
 
     @BeforeEach
     void setUp(@Autowired WebTestClient webTestClient) {
-        webClient = GraphQLWebTestClient.builder()
-            .webClient(webTestClient)
-            .build();
+        webClient = GraphQLWebTestClient.from(webTestClient);
     }
 
     public static Stream<Arguments> allowedRequests() {

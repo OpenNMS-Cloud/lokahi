@@ -28,26 +28,14 @@
 
 package org.opennms.horizon.server.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
-import java.util.Collections;
-import java.util.List;
-
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
 import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.DeleteAlertResponse;
 import org.opennms.horizon.alerts.proto.EventType;
@@ -59,28 +47,34 @@ import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
 import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 //This purpose of this test class is keep checking the dataloader logic is correct.
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 public class GraphQLAlertsServiceTest {
-    private static final String GRAPHQL_PATH = "/graphql";
     @MockBean
     private AlertsClient mockClient;
-    @Autowired
-    private WebTestClient webClient;
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
     @MockBean
     private TSDBMetricsService tsdbMetricsService;
-    private final String accessToken = "test-token-12345";
+    private GraphQLWebTestClient webClient;
+    private String accessToken;
     private Alert alerts1, alerts2;
 
     private AlertEventDefinition alertEventDefinition1, alertEventDefinition2;
@@ -88,7 +82,10 @@ public class GraphQLAlertsServiceTest {
     private ArgumentCaptor<List<DataLoaderFactory.Key>> keyCaptor;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired WebTestClient webTestClient) {
+        webClient = GraphQLWebTestClient.from(webTestClient);
+        accessToken = webClient.getAccessToken();
+
         alerts1 = Alert.newBuilder().setDatabaseId(1).setTenantId("tenant1").setReductionKey("reductionKey1").setSeverity(Severity.CRITICAL).build();
         alerts2 = Alert.newBuilder().setDatabaseId(2).setTenantId("tenant2").setReductionKey("reductionKey2").setSeverity(Severity.CRITICAL).build();
         alertEventDefinition1 = getAlertEventDefinition(1L, "snmpTrap1", "uei1", EventType.SNMP_TRAP, "reductionKey1", "clearKey1");
@@ -120,14 +117,9 @@ public class GraphQLAlertsServiceTest {
                 }
               }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.findAllAlerts.alerts.size()").isEqualTo(2)
             .jsonPath("$.data.findAllAlerts.alerts[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.findAllAlerts.alerts[0].reductionKey").isEqualTo(alerts1.getReductionKey());
@@ -139,14 +131,9 @@ public class GraphQLAlertsServiceTest {
     public void testAcknowledgeAlert() throws JSONException {
         doReturn(AlertResponse.newBuilder().addAlert(Alert.newBuilder(alerts1).setIsAcknowledged(true).build()).build()).when(mockClient).acknowledgeAlert(List.of(1L), accessToken);
         String request = "mutation {acknowledgeAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{severity reductionKey acknowledged}}}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.acknowledgeAlert.alertList.size()").isEqualTo(1)
             .jsonPath("$.data.acknowledgeAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.acknowledgeAlert.alertList[0].acknowledged").isEqualTo(true)
@@ -172,14 +159,9 @@ public class GraphQLAlertsServiceTest {
             "    }\n" +
             "  }\n" +
             "}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.unacknowledgeAlert.alertList.size()").isEqualTo(1)
             .jsonPath("$.data.unacknowledgeAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.unacknowledgeAlert.alertList[0].acknowledged").isEqualTo(false);
@@ -191,14 +173,9 @@ public class GraphQLAlertsServiceTest {
     public void testEscalateAlert() throws JSONException {
         doReturn(AlertResponse.newBuilder().addAlert(alerts1).build()).when(mockClient).escalateAlert(List.of(1L), accessToken);
         String request = "mutation {escalateAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{reductionKey severity}}}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.escalateAlert.alertList.size()").isEqualTo(1)
             .jsonPath("$.data.escalateAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.escalateAlert.alertList[0].reductionKey").isEqualTo(alerts1.getReductionKey());
@@ -210,14 +187,9 @@ public class GraphQLAlertsServiceTest {
     public void testClearAlert() throws JSONException {
         doReturn(AlertResponse.newBuilder().addAlert(alerts1).build()).when(mockClient).clearAlert(List.of(1L), accessToken);
         String request = "mutation {clearAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertList{reductionKey severity}}}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.clearAlert.alertList.size()").isEqualTo(1)
             .jsonPath("$.data.clearAlert.alertList[0].severity").isEqualTo(alerts1.getSeverity().name())
             .jsonPath("$.data.clearAlert.alertList[0].reductionKey").isEqualTo(alerts1.getReductionKey());
@@ -229,14 +201,9 @@ public class GraphQLAlertsServiceTest {
     public void testDeleteAlert() throws JSONException {
         doReturn(DeleteAlertResponse.newBuilder().addAlertId(1L).build()).when(mockClient).deleteAlert(List.of(1L), accessToken);
         String request = "mutation {deleteAlert(ids: [\"" + alerts1.getDatabaseId() + "\"]){alertDatabaseIdList}}";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.deleteAlert.alertDatabaseIdList.size()").isEqualTo(1)
             .jsonPath("$.data.deleteAlert.alertDatabaseIdList[0]").isEqualTo(alerts1.getDatabaseId());
         verify(mockClient).deleteAlert(List.of(1L), accessToken);
@@ -258,14 +225,9 @@ public class GraphQLAlertsServiceTest {
                 clearKey
               }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.listAlertEventDefinitions.size()").isEqualTo(2)
             .jsonPath("$.data.listAlertEventDefinitions[0].id").isEqualTo(alertEventDefinition1.getId())
             .jsonPath("$.data.listAlertEventDefinitions[0].uei").isEqualTo(alertEventDefinition1.getUei())
@@ -277,10 +239,6 @@ public class GraphQLAlertsServiceTest {
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
-
-    private String createPayload(String request) throws JSONException {
-        return new JSONObject().put("query", request).toString();
-    }
 
     private AlertEventDefinition getAlertEventDefinition(Long id, String snmpTrap, String uei, EventType eventType, String reductionKey, String clearKey) {
         AlertEventDefinition alertEventDefinition = new AlertEventDefinition();

@@ -30,7 +30,6 @@ package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +37,11 @@ import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Instant;
@@ -53,22 +52,25 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opennms.horizon.server.test.util.GraphQLWebTestClient.createPayload;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLAzureActiveDiscoveryServiceTest {
-    private static final String GRAPHQL_PATH = "/graphql";
+
     @MockBean
     private InventoryClient mockClient;
-    @Autowired
-    private WebTestClient webClient;
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
-    private final String accessToken = "test-token-12345";
+    private GraphQLWebTestClient webClient;
+    private String accessToken;
     private AzureActiveDiscoveryDTO azureActiveDiscoveryDTO;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired WebTestClient webTestClient) {
+        webClient = GraphQLWebTestClient.from(webTestClient);
+        accessToken = webClient.getAccessToken();
+
         azureActiveDiscoveryDTO = AzureActiveDiscoveryDTO.newBuilder()
             .setId(1L)
             .setLocationId("Default")
@@ -122,14 +124,9 @@ class GraphQLAzureActiveDiscoveryServiceTest {
             "    } " +
             "}");
 
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(request)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangePost(request)
+            .expectCleanResponse()
             .jsonPath("$.data.createAzureActiveDiscovery.id").isEqualTo(azureActiveDiscoveryDTO.getId())
             .jsonPath("$.data.createAzureActiveDiscovery.locationId").isEqualTo(azureActiveDiscoveryDTO.getLocationId())
             .jsonPath("$.data.createAzureActiveDiscovery.name").isEqualTo(azureActiveDiscoveryDTO.getName())
@@ -139,9 +136,5 @@ class GraphQLAzureActiveDiscoveryServiceTest {
             .jsonPath("$.data.createAzureActiveDiscovery.createTimeMsec").isEqualTo(azureActiveDiscoveryDTO.getCreateTimeMsec());
         verify(mockClient).createAzureActiveDiscovery(any(AzureActiveDiscoveryCreateDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
-    }
-
-    private String createPayload(String request) throws JSONException {
-        return new JSONObject().put("query", request).toString();
     }
 }

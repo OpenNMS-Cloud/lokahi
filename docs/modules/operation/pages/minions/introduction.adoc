@@ -4,67 +4,87 @@
 
 A Minion is a lightweight, secure collector that monitors and communicates with the devices on your network, shares collected data, and connects your network with OpenNMS Cloud/Lōkahi.
 
-This section describes management tasks for installed Minions.
-If you have not yet installed at least one Minion, see <documentation> for instructions.
-
-Each Minion is associated with a location.
-A location defines a network area where you installed your Minion.
-The Minion's security certificate is closely tied to the location.
 With OpenNMS Cloud, you install your first Minion as part of the onboarding process.
-We create a location called "default" to associate with this Minion.
 
-Before you can add a Minion, you need to create a location.
+Each Minion is associated with a monitoring location.
+The monitoring location defines a network area where you installed your Minion (for example, "Boston" or "Building 3").
+The Minion installed as part of onboarding belongs to the "default" location.
+The Minion's security certificate is closely tied to the location.
 
+This section describes management tasks for installed Minions, and how to deploy a Minion from the UI.
+
+[[create-location]]
 == Create a location
 A location defines the network area where you installed your Minion.
-
-Follow these steps to add a location:
 
 . Click *Locations* in the left navigation menu.
 . Click the *+ Location* button.
 . Type the location name in the field.
 +
 Note that you cannot edit the location name after you save the location.
+. (Optional) In the *Physical Address* field, type the street address for the location or the latitude and longitude to display nodes associated with the location on the xref:visualizations/introduction.adoc#geo-map[geographical map] page.
 . Click *Save*.
 
 The new location is saved.
-From the Locations list, you can edit the location (to add a Minion to it) or delete it.
 
-== Associate a Minion with a location
-To install a Minion on your system and associate it with a location, make sure your system meets the following requirements:
+If you want to deploy a Minion, you can download the Minion software bundle, following the instructions in <<minion-deploy, Deploy a Minion>>.
+
+From the Locations list, you can edit the location (to add a Minion or specify a physical address) or delete it.
+
+[[minion-deploy]]
+== Deploy a Minion
+To deploy a Minion, you need to download the software bundle and install it locally.
+The bundle includes the following:
+
+* Encrypted Minion certificate with a decryption password
+* Docker Compose file with a Minion container
+
+Deployment can take up to 10 minutes.
+
+=== Requirements
+
+Make sure your system meets the following requirements:
 
 * CPU: 3GHz quad core x86_64 and above
 * RAM: 8GB (physical) and above
 * Storage (disk space): 100GB with SSD and above
 * Docker environment with Docker Compose (installation instructions: https://docs.docker.com/desktop/install/mac-install/[Mac], https://docs.docker.com/desktop/install/linux-install/[Linux], https://docs.docker.com/desktop/install/windows-install/[Windows])
-* Access to a terminal window
-* Network Time Protocol (NTP) installed and configured
+* Access to a terminal window or command line interface
+* Synchronized system time (via NTP or Windows time service)
 
 NOTE: We recommend using Linux for production environments.
 Mac and Windows work as test environments for the Minion, but sending traps to the Minion does not work correctly.
 Traps will not be associated with the correct node, and xref:get-started/discovery/introduction.adoc#passive-discovery[passive discovery] will not be able to find the node that is sending traps.
 
-To associate a Minion with a location, follow these steps:
+To deploy a Minion, follow these steps:
 
 . Click *Locations* in the left navigation menu.
-. In the *Locations* list, click the vertical ellipsis (*⋮*) next to the location you want to add the Minion to.
+. In the *Locations* list, click the vertical ellipsis (*⋮*) next to the location where you want to deploy the Minion.
 . Click *Edit*.
-. Click *Download Certifcate*.
++
+NOTE: You can also deploy a Minion when you <<create-location, create a new location>>.
+. Click *Download Bundle*.
 . Create a permanent directory for the Minion on the device where you want to run it.
-. Copy the downloaded security certificate to the permanent directory.
-Do not change its name.
-. Copy the password in the *Unlock File Password* field.
-. Open the certificate file and, when prompted, enter the password in the field.
-. Open a terminal window.
-. In OpenNMS, copy the Docker command.
-. Paste the command into the terminal window.
-. Edit the `PATH_TO_DOWNLOADED_FILE` with the full path to the certificate file.
-. Run the command.
-. In OpenNMS, click *Save*.
+. Copy the downloaded bundle to the permanent directory and unzip it.
++
+NOTE: You can ignore the *Unlock File Password* field, as it is no longer required.
+. Open a terminal window, navigate to the bundle location, and type the following command: `docker compose up -d`.
 
-Your Minion will appear in the Locations screen once it is running and OpenNMS detects it.
+Refresh the browser to view your Minion.
+It will appear in the Locations screen once it is running and OpenNMS detects it.
 
-// do they click save after the Minion has been discovered or will it show up in the UI when it's been detected?
+== Regenerate a Minion certificate
+If at any point you are concerned your Minion might have been compromised, you may want to revoke the Minion's current security certificate and create a new one for it.
+
+To regenerate a Minion certificate, follow these steps:
+
+. Click *Locations* in the left navigation menu.
+. In the *Locations* list, click the vertical ellipsis (*⋮*) next to the location with the Minion whose certificate you want to revoke and recreate.
+. Click *Edit*.
+. Click the *Regenerate* button.
+. When prompted, click *Continue*.
+
+//is there anything else they need to do when they regenerate a certificate? Does the Minion reboot or do anything which might result in a gap in monitoring? I'd like to tell the users.
 
 == View Minion details
 

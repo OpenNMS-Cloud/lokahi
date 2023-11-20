@@ -5,7 +5,6 @@ import com.google.rpc.Status;
 import io.grpc.protobuf.StatusProto;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,21 +14,19 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.service.grpc.MinionCertificateManagerClient;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -38,22 +35,22 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLMonitoringLocationServiceTest {
-    private static final String GRAPHQL_PATH = "/graphql";
     @MockBean
     private InventoryClient mockClient;
     @MockBean
     private MinionCertificateManagerClient mockCertificateClient;
-    @Autowired
-    private WebTestClient webClient;
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
-
-    private final String accessToken = "test-token-12345";
+    private GraphQLWebTestClient webClient;
+    private String accessToken;
     private static final Long INVALID_LOCATION_ID = 404L;
     private MonitoringLocationDTO location1, location2;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired WebTestClient webTestClient) {
+        webClient = GraphQLWebTestClient.from(webTestClient);
+        accessToken = webClient.getAccessToken();
+
         location1 = getLocationDTO("tenant1", "LOC1", 1L, "address1");
         location2 = getLocationDTO("tenant2", "LOC2", 2L, "address2");
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
@@ -82,14 +79,9 @@ class GraphQLMonitoringLocationServiceTest {
                     location
                 }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.findAllLocations").isArray()
             .jsonPath("$.data.findAllLocations[0].location").isEqualTo("LOC1");
         verify(mockClient).listLocations(accessToken);
@@ -105,14 +97,9 @@ class GraphQLMonitoringLocationServiceTest {
                     location
                 }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.findLocationById.location").isEqualTo("LOC1");
         verify(mockClient).getLocationById(1, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
@@ -127,14 +114,9 @@ class GraphQLMonitoringLocationServiceTest {
                     location
                 }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.locationByName.location").isEqualTo("LOC1");
         verify(mockClient).getLocationByName("LOC1", accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
@@ -149,14 +131,9 @@ class GraphQLMonitoringLocationServiceTest {
                     location
                 }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.searchLocation").isArray()
             .jsonPath("$.data.searchLocation[0].location").isEqualTo("LOC1");
         verify(mockClient).searchLocations("LOC", accessToken);
@@ -184,14 +161,9 @@ class GraphQLMonitoringLocationServiceTest {
                 }
             }""";
 
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.createLocation.location").isEqualTo("LOC1")
             .jsonPath("$.data.createLocation.address").isEqualTo("address create")
             .jsonPath("$.data.createLocation.latitude").isEqualTo(1.0)
@@ -220,14 +192,9 @@ class GraphQLMonitoringLocationServiceTest {
                     address
                 }
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.updateLocation.location").isEqualTo("LOC2")
             .jsonPath("$.data.updateLocation.id").isEqualTo(2)
             .jsonPath("$.data.updateLocation.address").isEqualTo("address2")
@@ -244,14 +211,9 @@ class GraphQLMonitoringLocationServiceTest {
             mutation {
                 deleteLocation(id: 1)
             }""";
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.deleteLocation").isEqualTo(true);
         verify(mockClient).deleteLocation(1, accessToken);
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
@@ -265,14 +227,9 @@ class GraphQLMonitoringLocationServiceTest {
             mutation {
                 deleteLocation(id: %s)
             }""".formatted(INVALID_LOCATION_ID);
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectJsonResponse()
             .jsonPath("$.data.deleteLocation").isEmpty()
             .jsonPath("$.errors").isNotEmpty();
         verify(mockClient, times(1)).deleteLocation(INVALID_LOCATION_ID, accessToken);
@@ -293,14 +250,9 @@ class GraphQLMonitoringLocationServiceTest {
             mutation {
                 deleteLocation(id: %s)
             }""".formatted(INVALID_LOCATION_ID);
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(createPayload(request))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectJsonResponse()
             .jsonPath("$.data.deleteLocation").isEmpty()
             .jsonPath("$.errors").isNotEmpty();
         verify(mockClient, times(1)).deleteLocation(INVALID_LOCATION_ID, accessToken);
@@ -339,9 +291,5 @@ class GraphQLMonitoringLocationServiceTest {
             .setTenantId(tenantId)
             .setAddress(address)
             .setGeoLocation(getGeoLocationToCreate()).build();
-    }
-
-    private String createPayload(String request) throws JSONException {
-        return new JSONObject().put("query", request).toString();
     }
 }

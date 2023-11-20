@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  */
 
-package org.opennms.horizon.server;
+package org.opennms.horizon.server.test.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mockito.Mockito;

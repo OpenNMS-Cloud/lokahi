@@ -36,7 +36,6 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.EventType;
-import org.opennms.horizon.server.mapper.TagMapper;
 import org.opennms.horizon.server.mapper.alert.AlertMapper;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.AlertResponse;
@@ -46,7 +45,6 @@ import org.opennms.horizon.server.model.alerts.ListAlertResponse;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
-import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -62,8 +60,6 @@ public class GrpcAlertService {
     private final AlertsClient alertsClient;
     private final ServerHeaderUtil headerUtil;
     private final AlertMapper mapper;
-    private final TagMapper tagMapper;
-    private final InventoryClient client;
 
     @SuppressWarnings("squid:S107")
     @GraphQLQuery
@@ -75,7 +71,11 @@ public class GrpcAlertService {
                                                  @GraphQLArgument(name = "sortAscending") boolean sortAscending,
                                                  @GraphQLArgument(name = "nodeLabel") String nodeLabel,
                                                  @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlertResponse(alertsClient.listAlerts(pageSize, page, severities, timeRange, sortBy, sortAscending, nodeLabel, headerUtil.getAuthHeader(env))));
+        return Mono
+            .just(alertsClient.listAlerts(
+                pageSize, page, severities, timeRange, sortBy, sortAscending, nodeLabel, headerUtil.getAuthHeader(env)
+            ))
+            .map(mapper::protoToAlertResponse);
     }
 
     @GraphQLQuery(

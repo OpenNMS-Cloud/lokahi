@@ -30,21 +30,20 @@ package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
+import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.server.RestServerApplication;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
+import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Instant;
@@ -60,18 +59,19 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLPassiveDiscoveryServiceTest {
-    private static final String GRAPHQL_PATH = "/graphql";
     @MockBean
     private InventoryClient mockClient;
-    @Autowired
-    private WebTestClient webClient;
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
-    private final String accessToken = "test-token-12345";
+    private GraphQLWebTestClient webClient;
+    private String accessToken;
     private PassiveDiscoveryDTO passiveDiscoveryDTO;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired WebTestClient webTestClient) {
+        webClient = GraphQLWebTestClient.from(webTestClient);
+        accessToken = webClient.getAccessToken();
+
         passiveDiscoveryDTO = PassiveDiscoveryDTO.newBuilder()
             .setId(1L)
             .setName("passive-discovery-name")
@@ -95,7 +95,7 @@ class GraphQLPassiveDiscoveryServiceTest {
     void testCreatePassiveDiscovery() throws JSONException {
         doReturn(passiveDiscoveryDTO).when(mockClient).upsertPassiveDiscovery(any(PassiveDiscoveryUpsertDTO.class), eq(accessToken));
 
-        String request = createPayload("mutation { " +
+        String request = "mutation { " +
             "    upsertPassiveDiscovery( " +
             "        discovery: { " +
             "            name: \"passive-discovery-name\", " +
@@ -117,16 +117,11 @@ class GraphQLPassiveDiscoveryServiceTest {
             "        snmpCommunities, " +
             "        createTimeMsec " +
             "    } " +
-            "}");
+            "}";
 
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(request)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.upsertPassiveDiscovery.id").isEqualTo(passiveDiscoveryDTO.getId())
             .jsonPath("$.data.upsertPassiveDiscovery.name").isEqualTo(passiveDiscoveryDTO.getName())
             .jsonPath("$.data.upsertPassiveDiscovery.toggle").isEqualTo(passiveDiscoveryDTO.getToggle())
@@ -139,21 +134,16 @@ class GraphQLPassiveDiscoveryServiceTest {
     void testTogglePassiveDiscovery() throws JSONException {
         doReturn(passiveDiscoveryDTO).when(mockClient).createPassiveDiscoveryToggle((any(PassiveDiscoveryToggleDTO.class)), eq(accessToken));
 
-        String request = createPayload(
+        String request =
             "mutation {"
-                +"  togglePassiveDiscovery(toggle: { id: 1, toggle: true }) {"
-                +"    toggle"
-                +"  }"
-                +"}");
+                + "  togglePassiveDiscovery(toggle: { id: 1, toggle: true }) {"
+                + "    toggle"
+                + "  }"
+                + "}";
 
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(request)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.togglePassiveDiscovery.toggle").isEqualTo(passiveDiscoveryDTO.getToggle());
 
         verify(mockClient).createPassiveDiscoveryToggle(any(PassiveDiscoveryToggleDTO.class), eq(accessToken));
@@ -165,7 +155,7 @@ class GraphQLPassiveDiscoveryServiceTest {
         doReturn(PassiveDiscoveryListDTO.newBuilder().addDiscoveries(passiveDiscoveryDTO).build())
             .when(mockClient).listPassiveDiscoveries(eq(accessToken));
 
-        String request = createPayload("query { " +
+        String request = "query { " +
             "    passiveDiscoveries { " +
             "        id, " +
             "        name, " +
@@ -175,25 +165,16 @@ class GraphQLPassiveDiscoveryServiceTest {
             "        snmpCommunities, " +
             "        createTimeMsec " +
             "    } " +
-            "}");
+            "}";
 
-        webClient.post()
-            .uri(GRAPHQL_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(request)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody()
+        webClient
+            .exchangeGraphQLQuery(request)
+            .expectCleanResponse()
             .jsonPath("$.data.passiveDiscoveries[0].id").isEqualTo(passiveDiscoveryDTO.getId())
             .jsonPath("$.data.passiveDiscoveries[0].name").isEqualTo(passiveDiscoveryDTO.getName())
             .jsonPath("$.data.passiveDiscoveries[0].toggle").isEqualTo(passiveDiscoveryDTO.getToggle())
             .jsonPath("$.data.passiveDiscoveries[0].createTimeMsec").isEqualTo(passiveDiscoveryDTO.getCreateTimeMsec());
         verify(mockClient).listPassiveDiscoveries(eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
-    }
-
-    private String createPayload(String request) throws JSONException {
-        return new JSONObject().put("query", request).toString();
     }
 }

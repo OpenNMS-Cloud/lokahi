@@ -239,6 +239,10 @@ public class NodeStatusService {
         });
     }
 
+    public Mono<NodeStatus> getNodeStatus(NodeDTO nodeDTO,  ResolutionEnvironment env) {
+        return getNodeStatus(nodeDTO.getId(), Constants.DEFAULT_MONITOR_TYPE, env);
+    }
+
     private NodeResponseTime transformToNodeResponseTime(long id, TimeSeriesQueryResult result) {
         if (isNull(result)) {
             return new NodeResponseTime(id, 0.0);

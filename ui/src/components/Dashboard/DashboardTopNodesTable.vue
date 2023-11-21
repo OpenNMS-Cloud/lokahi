@@ -64,6 +64,7 @@
           :pageSize="store.topNNodesQueryVariables.pageSize"
           :total="store.totalNodeCount"
           @update:model-value="store.setTopNNodesTablePage"
+          v-if="store.totalNodeCount > 0"
         >
         </FeatherPagination>
       </div>

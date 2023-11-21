@@ -18,7 +18,7 @@
             <FeatherButton
               primary
               icon="Refresh"
-              @click="store.getTopNNodes()"
+              @click="store.getTopNNodes"
             >
               <FeatherIcon :icon="icons.Refresh"> </FeatherIcon>
             </FeatherButton>

@@ -8,7 +8,8 @@ import {
   TopNNodesQueryVariables,
   DownloadTopNQueryVariables,
   DownloadTopNDocument,
-  NodeCountDocument
+  NodeCountDocument,
+  AllNodeStatusDocument
 } from '@/types/graphql'
 
 export const useDashboardQueries = defineStore('dashboardQueries', () => {
@@ -48,6 +49,16 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
     return data.value?.nodeCount || 0
   }
 
+  const getAllNodesStatus = async () => {
+    const { execute, data } = useQuery({
+      query: AllNodeStatusDocument,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.allNodeStatus || []
+  }
+
   const getTopNodes = async (topNNodesQueryVariables: TopNNodesQueryVariables) => {
     const { execute, data } = useQuery({
       query: TopNNodesDocument,
@@ -74,6 +85,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
     getTopNodes,
     getNodeCount,
     downloadTopNodes,
+    getAllNodesStatus,
     getNetworkTrafficInMetrics,
     getNetworkTrafficOutMetrics,
     networkTrafficIn: computed(() => totalNetworkTrafficIn.value),

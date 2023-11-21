@@ -83,3 +83,8 @@ export const AZURE_SCAN = 'AZURE_SCAN'
 export type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: DeepPartial<T[P]>
 } : T
+
+export enum Status {
+  UP = 'UP',
+  DOWN = 'DOWN'
+}

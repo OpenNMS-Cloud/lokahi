@@ -50,7 +50,7 @@
           >
             <tr
               v-for="topNode in store.topNodes"
-              :key="topNode.nodeLabel"
+              :key="topNode.nodeLabel + topNode.avgResponseTime"
             >
               <td>{{ topNode.nodeLabel }}</td>
               <td>{{ topNode.location }}</td>
@@ -96,11 +96,16 @@ const sort = reactive({
   location: SORT.NONE,
   avgResponseTime: SORT.NONE,
   reachability: SORT.ASCENDING
-})
+}) as any
 
 const sortChanged = (sortObj: Record<string, string>) => {
   store.setTopNNodesTableSort(sortObj)
-  ;(sort as any)[sortObj.property] = sortObj.value
+
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+
+  sort[sortObj.property] = sortObj.value
 }
 
 onMounted(async () => {

@@ -9,6 +9,13 @@ query NodeCount {
   nodeCount
 }
 
+query AllNodeStatus {
+  allNodeStatus {
+    id
+    status
+  }
+}
+
 query TopNNodes(
   $timeRange: Int!, 
   $timeRangeUnit: TimeRangeUnit!, 

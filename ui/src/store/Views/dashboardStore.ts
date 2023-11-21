@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { useDashboardQueries } from '@/store/Queries/dashboardQueries'
-import { TsResult, TopNNodesQueryVariables, TimeRangeUnit, DownloadTopNQueryVariables, DownloadFormat } from '@/types/graphql'
+import { TsResult, TopNNodesQueryVariables, TimeRangeUnit, DownloadTopNQueryVariables, DownloadFormat, NodeStatus } from '@/types/graphql'
 import { createAndDownloadBlobFile } from '@/components/utils'
+import { Status } from '@/types'
 
 type TState = {
   totalNetworkTrafficIn: [number, number][]
@@ -9,7 +10,8 @@ type TState = {
   topNodes: any[],
   reachability: { responding: number, unresponsive: number },
   topNNodesQueryVariables: Required<TopNNodesQueryVariables>,
-  totalNodeCount: number
+  totalNodeCount: number,
+  allNodesStatus: NodeStatus[]
 }
 
 export const useDashboardStore = defineStore('dashboardStore', {
@@ -29,7 +31,8 @@ export const useDashboardStore = defineStore('dashboardStore', {
       sortBy: 'reachability',
       page: 1
     },
-    totalNodeCount: 0
+    totalNodeCount: 0,
+    allNodesStatus: []
   }),
   actions: {
     async getNetworkTrafficInValues() {
@@ -46,11 +49,17 @@ export const useDashboardStore = defineStore('dashboardStore', {
       const queries = useDashboardQueries()
       this.totalNodeCount = await queries.getNodeCount()
     },
+    async getAllNodesStatus() {
+      const queries = useDashboardQueries()
+      this.allNodesStatus = await queries.getAllNodesStatus()
+      this.reachability.responding = this.allNodesStatus.filter((s) => s.status === Status.UP).length
+      this.reachability.unresponsive = this.allNodesStatus.length - this.reachability.responding
+    },
     async getTopNNodes() {
       const queries = useDashboardQueries()
       this.topNodes = await queries.getTopNodes(this.topNNodesQueryVariables)
-      this.reachability.responding = this.topNodes.filter((n) => n.avgResponseTime > 0).length
-      this.reachability.unresponsive = this.topNodes.length - this.reachability.responding
+      this.getNodeCount()
+      this.getAllNodesStatus()
     },
     async downloadTopNNodesToCsv() {
       const queries = useDashboardQueries()

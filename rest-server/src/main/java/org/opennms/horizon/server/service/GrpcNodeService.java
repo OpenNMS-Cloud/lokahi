@@ -110,6 +110,12 @@ public class GrpcNodeService {
         return nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
     }
 
+    @GraphQLQuery(name = "allNodeStatus")
+    public Flux<NodeStatus> getAllNodeStatus(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
+            .flatMap(nodeDTO -> nodeStatusService.getNodeStatus(nodeDTO, env));
+    }
+
     @GraphQLMutation
     public Mono<Boolean> deleteNode(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteNode(id, headerUtil.getAuthHeader(env)));
@@ -133,6 +139,11 @@ public class GrpcNodeService {
             .sort(TopNNode.getComparator(sortBy, sortAscending))
             .skip((long) (page - 1) * pageSize)
             .take(pageSize);
+    }
+
+    @GraphQLQuery(name = "nodeCount")
+    public Mono<Integer> getNodeCount(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.listNodes(headerUtil.getAuthHeader(env)).size());
     }
 
     @GraphQLQuery(name = "downloadTopN")

@@ -29,9 +29,11 @@
 package org.opennms.horizon.server.model.inventory;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public class TopNResponse {
     private byte[] topNBytes;
-    public DownloadFormat downloadFormat;
+    private DownloadFormat downloadFormat;
 }

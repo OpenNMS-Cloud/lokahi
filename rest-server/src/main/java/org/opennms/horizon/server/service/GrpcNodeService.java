@@ -135,6 +135,11 @@ public class GrpcNodeService {
             .take(pageSize);
     }
 
+    @GraphQLQuery(name = "nodeCount")
+    public Mono<Integer> getNodeCount(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.listNodes(headerUtil.getAuthHeader(env)).size());
+    }
+
     @GraphQLQuery(name = "downloadTopN")
     public Mono<TopNResponse> downloadTopN(@GraphQLEnvironment ResolutionEnvironment env,
                                            @GraphQLArgument(name = "timeRange") Integer timeRange,

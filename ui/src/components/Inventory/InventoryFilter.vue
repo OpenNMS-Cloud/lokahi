@@ -38,7 +38,6 @@ import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useTagQueries } from '@/store/Queries/tagQueries'
 import { Tag } from '@/types/graphql'
 import { PropType } from 'vue'
-import { FeatherButton } from '@featherds/button'
 import { useTagStore } from '@/store/Components/tagStore'
 const inventoryStore = useInventoryStore()
 const tagStore = useTagStore()

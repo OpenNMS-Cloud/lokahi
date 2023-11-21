@@ -1,6 +1,15 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { NetworkTrafficDocument, TopNNodesDocument, TimeRangeUnit, TsData } from '@/types/graphql'
+import {
+  NetworkTrafficDocument,
+  TopNNodesDocument,
+  TimeRangeUnit,
+  TsData,
+  TopNNodesQueryVariables,
+  DownloadTopNQueryVariables,
+  DownloadTopNDocument,
+  NodeCountDocument
+} from '@/types/graphql'
 
 export const useDashboardQueries = defineStore('dashboardQueries', () => {
   const totalNetworkTrafficIn = ref([] as TsData)
@@ -12,20 +21,9 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
     timeRangeUnit: TimeRangeUnit.Hour
   })
 
-  const topNNodesQuery = ref({
-    timeRange: 24,
-    timeRangeUnit: TimeRangeUnit.Hour
-  })
-
   const { data: networkTrafficData, execute: getMetrics } = useQuery({
     query: NetworkTrafficDocument,
     variables: metricsQuery
-  })
-
-  const { data: topNodes, execute: getTopNodes } = useQuery({
-    query: TopNNodesDocument,
-    variables: topNNodesQuery,
-    fetchOnMount: false
   })
 
   const getNetworkTrafficInMetrics = async () => {
@@ -40,9 +38,42 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
     totalNetworkTrafficOut.value = (networkTrafficData.value || []) as TsData
   }
 
+  const getNodeCount = async () => {
+    const { execute, data } = useQuery({
+      query: NodeCountDocument,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.nodeCount || 0
+  }
+
+  const getTopNodes = async (topNNodesQueryVariables: TopNNodesQueryVariables) => {
+    const { execute, data } = useQuery({
+      query: TopNNodesDocument,
+      variables: topNNodesQueryVariables,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.topNNode || []
+  }
+
+  const downloadTopNodes = async (downloadTopNQueryVariables: DownloadTopNQueryVariables) => {
+    const { execute, data } = useQuery({
+      query: DownloadTopNDocument,
+      variables: downloadTopNQueryVariables,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.downloadTopN?.topNBytes
+  }
+
   return {
     getTopNodes,
-    topNodes: computed(() => topNodes.value?.topNNode || []),
+    getNodeCount,
+    downloadTopNodes,
     getNetworkTrafficInMetrics,
     getNetworkTrafficOutMetrics,
     networkTrafficIn: computed(() => totalNetworkTrafficIn.value),

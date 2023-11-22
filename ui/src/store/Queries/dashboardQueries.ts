@@ -46,7 +46,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
       fetchOnMount: false
     })
     await execute()
-    return data.value?.nodeCount || 0
+    return data.value?.nodeCount ?? 0
   }
 
   const getAllNodesStatus = async () => {
@@ -56,7 +56,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
       fetchOnMount: false
     })
     await execute()
-    return data.value?.allNodeStatus || []
+    return data.value?.allNodeStatus ?? []
   }
 
   const getTopNodes = async (topNNodesQueryVariables: TopNNodesQueryVariables) => {
@@ -67,7 +67,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
       fetchOnMount: false
     })
     await execute()
-    return data.value?.topNNode || []
+    return data.value?.topNNode ?? []
   }
 
   const downloadTopNodes = async (downloadTopNQueryVariables: DownloadTopNQueryVariables) => {

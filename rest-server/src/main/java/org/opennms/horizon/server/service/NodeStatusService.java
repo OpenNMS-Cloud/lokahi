@@ -233,8 +233,9 @@ public class NodeStatusService {
             var topNNode = new TopNNode();
             topNNode.setNodeLabel(nodeDTO.getNodeLabel());
             topNNode.setLocation(nodeDTO.getLocation());
-            topNNode.setReachability(tuple.getT1().getReachability());
-            topNNode.setAvgResponseTime(tuple.getT2().getResponseTime());
+            // Round to 2 points after decimal
+            topNNode.setReachability(Math.round(tuple.getT1().getReachability() * 100.0) / 100.0);
+            topNNode.setAvgResponseTime(Math.round(tuple.getT2().getResponseTime() * 100.0) / 100.0);
             return topNNode;
         });
     }

@@ -36,6 +36,8 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
@@ -53,6 +55,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -157,23 +160,30 @@ public class GrpcNodeService {
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
             .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
             .sort(TopNNode.getComparator(sortBy, sortAscending)).collectList()
-            .map(topNList -> generateDownloadFromTopNNodes(topNList, downloadFormat));
+            .map(topNList -> {
+                try {
+                    return generateDownloadableTopNResponse(topNList, downloadFormat);
+                } catch (IOException e) {
+                   throw new IllegalArgumentException("Failed to download TopN List");
+                }
+            });
     }
 
-    private static TopNResponse generateDownloadFromTopNNodes(List<TopNNode> topNNodes, DownloadFormat downloadFormat) {
+    private static TopNResponse generateDownloadableTopNResponse(List<TopNNode> topNNodes, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
             downloadFormat = DownloadFormat.CSV;
         }
         if (downloadFormat.equals(DownloadFormat.CSV)) {
             StringBuilder csvData = new StringBuilder();
-            csvData.append("Node Label,Location,Avg Response Time,Reachability\n");
-            for (TopNNode node : topNNodes) {
-                csvData.append(String.format("%s,%s,%.2f,%.2f\n",
-                    node.getNodeLabel(),
-                    node.getLocation(),
-                    node.getAvgResponseTime(),
-                    node.getReachability()));
+            var csvformat = CSVFormat.Builder.create()
+                .setHeader("Node Label", "Location", "Avg Response Time", "Reachability").build();
+
+            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
+            for (TopNNode topNNode : topNNodes) {
+                csvPrinter.printRecord(topNNode.getNodeLabel(),
+                    topNNode.getLocation(), topNNode.getAvgResponseTime(), topNNode.getReachability());
             }
+            csvPrinter.flush();
             return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);

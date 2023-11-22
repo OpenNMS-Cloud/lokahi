@@ -1,5 +1,8 @@
 overwrite: true
-schema: "https://onmshs.local:1443/api/graphql"
+schema:
+  - https://onmshs.local:1443/api/graphql:
+      headers:
+        Authorization: "Bearer <token>"
 documents: './src/graphql/**/*'
 generates:
   src/types/graphql.ts:

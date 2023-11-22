@@ -7,6 +7,22 @@
             <span class="title">Top Nodes</span>
             <span class="time-frame">24 h</span>
           </div>
+          <div class="btns">
+            <FeatherButton
+              primary
+              icon="Download"
+              @click="store.downloadTopNNodesToCsv"
+            >
+              <FeatherIcon :icon="icons.DownloadFile"> </FeatherIcon>
+            </FeatherButton>
+            <FeatherButton
+              primary
+              icon="Refresh"
+              @click="store.getTopNNodes"
+            >
+              <FeatherIcon :icon="icons.Refresh"> </FeatherIcon>
+            </FeatherButton>
+          </div>
         </div>
       </div>
       <div class="container">
@@ -33,8 +49,8 @@
             tag="tbody"
           >
             <tr
-              v-for="topNode in topNodes"
-              :key="topNode.nodeLabel"
+              v-for="topNode in store.topNodes"
+              :key="topNode.nodeLabel + topNode.avgResponseTime"
             >
               <td>{{ topNode.nodeLabel }}</td>
               <td>{{ topNode.location }}</td>
@@ -43,6 +59,14 @@
             </tr>
           </TransitionGroup>
         </table>
+        <FeatherPagination
+          v-model="store.topNNodesQueryVariables.page"
+          :pageSize="store.topNNodesQueryVariables.pageSize"
+          :total="store.totalNodeCount"
+          @update:model-value="store.setTopNNodesTablePage"
+          v-if="store.totalNodeCount > 0"
+        >
+        </FeatherPagination>
       </div>
     </TableCard>
   </div>
@@ -51,10 +75,15 @@
 <script setup lang="ts">
 import { useDashboardStore } from '@/store/Views/dashboardStore'
 import { SORT } from '@featherds/table'
-import { orderBy } from 'lodash'
-import { TopNNode } from '@/types/graphql'
+import DownloadFile from '@featherds/icon/action/DownloadFile'
+import Refresh from '@featherds/icon/navigation/Refresh'
+
 const store = useDashboardStore()
-const topNodes = ref([] as TopNNode[])
+
+const icons = markRaw({
+  DownloadFile,
+  Refresh
+})
 
 const columns = [
   { id: 'nodeLabel', label: 'Node' },
@@ -67,17 +96,22 @@ const sort = reactive({
   nodeLabel: SORT.NONE,
   location: SORT.NONE,
   avgResponseTime: SORT.NONE,
-  reachability: SORT.NONE
-})
+  reachability: SORT.ASCENDING
+}) as any
 
-const sortChanged = (sortObj: any) => {
-  topNodes.value = orderBy(topNodes.value, sortObj.property, sortObj.value)
-  ;(sort as any)[sortObj.property] = sortObj.value
+const sortChanged = (sortObj: Record<string, string>) => {
+  store.setTopNNodesTableSort(sortObj)
+
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+
+  sort[sortObj.property] = sortObj.value
 }
 
 onMounted(async () => {
+  await store.getNodeCount()
   await store.getTopNNodes()
-  topNodes.value = orderBy(store.topNodes, ['reachability', 'avgResponseTime'], ['asc', 'asc'])
 })
 </script>
 

@@ -5,11 +5,50 @@ query NetworkTraffic($name: String!, $timeRange: Int!, $timeRangeUnit: TimeRange
   }
 }
 
-query TopNNodes($timeRange: Int!, $timeRangeUnit: TimeRangeUnit!) {
-  topNNode(timeRange: $timeRange, timeRangeUnit: $timeRangeUnit) {
-    nodeLabel
-    location
-    avgResponseTime
-    reachability
+query NodeCount {
+  nodeCount
+}
+
+query AllNodeStatus {
+  allNodeStatus {
+    id
+    status
+  }
+}
+
+query TopNNodes(
+  $timeRange: Int!, 
+  $timeRangeUnit: TimeRangeUnit!, 
+  $sortAscending: Boolean!, 
+  $pageSize: Int, 
+  $sortBy: String, 
+  $page: Int) {
+  topNNode(
+    timeRange: $timeRange, 
+    timeRangeUnit: $timeRangeUnit, 
+    sortAscending: $sortAscending, 
+    pageSize: $pageSize, 
+    sortBy: $sortBy, 
+    page: $page) {
+      nodeLabel
+      location
+      avgResponseTime
+      reachability
+  }
+}
+
+query DownloadTopN(
+  $downloadFormat: DownloadFormat!
+  $timeRange: Int!, 
+  $timeRangeUnit: TimeRangeUnit!, 
+  $sortAscending: Boolean!, 
+  $sortBy: String) {
+  downloadTopN(
+    timeRange: $timeRange, 
+    timeRangeUnit: $timeRangeUnit, 
+    sortAscending: $sortAscending,
+    sortBy: $sortBy,
+    downloadFormat: $downloadFormat) {
+      topNBytes
   }
 }

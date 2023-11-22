@@ -29,7 +29,10 @@
 package org.opennms.horizon.alertservice.grpc;
 
 import com.google.protobuf.Timestamp;
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import io.grpc.Context;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
@@ -50,6 +53,8 @@ import org.opennms.horizon.alertservice.db.repository.LocationRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
 import org.opennms.horizon.alertservice.db.tenant.TenantLookup;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -72,6 +77,8 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AlertGrpcService.class);
     public static final int PAGE_SIZE_DEFAULT = 10;
     public static final String SORT_BY_DEFAULT = "id";
     public static final int DURATION = 24;
@@ -313,6 +320,24 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             responseObserver.onNext(CountAlertResponse.newBuilder().setCount(-1).setError(AlertError.newBuilder().setError(TENANT_ID_NOT_FOUND)).build());
             responseObserver.onCompleted();
         }
+    }
+    @Override
+    public void alertCounts(com.google.protobuf.Empty request,
+                            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.AlertCount> responseObserver) {
+        try {
+            String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+            var alertCount = alertService.getAlertsCount(tenantId);
+            responseObserver.onNext(alertCount);
+            responseObserver.onCompleted();
+        } catch (NoSuchElementException e) {
+            var status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage(TENANT_ID_NOT_FOUND).build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        } catch (Exception e) {
+            responseObserver.onError(e);
+        }
+
     }
 
     private void getFilter(ListAlertsRequest request, List<Date> timeRange, List<Severity> severities, List<String> nodeIds) {

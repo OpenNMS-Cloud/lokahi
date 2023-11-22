@@ -50,7 +50,9 @@ import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TimeRangeFilter;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
+import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
+import org.opennms.horizon.server.model.alerts.AlertCount;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
@@ -68,6 +70,7 @@ public class AlertsClient {
     private final long deadline;
     private final MonitorPolicyMapper policyMapper;
     private final AlertEventDefinitionMapper alertEventDefinitionMapper;
+    private final AlertsCountMapper alertsCountMapper;
 
     private AlertServiceGrpc.AlertServiceBlockingStub alertStub;
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub policyStub;
@@ -282,5 +285,15 @@ public class AlertsClient {
             .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .countAlertByRuleId(Int64Value.of(id)).getValue();
+    }
+
+    public AlertCount countAlerts(String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        var alertCountProto = alertStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .alertCounts(Empty.getDefaultInstance());
+        return alertsCountMapper.protoToAlertCount(alertCountProto);
     }
 }

@@ -84,6 +84,13 @@ enum AlertType {
   PROBLEM_WITHOUT_CLEAR = 3;
 }
 
+enum AlertCountType {
+  COUNT_ALL = 0;
+  COUNT_CLEARED = 1;
+  COUNT_ACKNOWLEDGED = 2;
+  COUNT_UNACKNOWLEDGED = 3;
+}
+
 message TimeRangeFilter {
   google.protobuf.Timestamp start_time = 1;
   google.protobuf.Timestamp end_time = 2;
@@ -193,6 +200,15 @@ message CountAlertResponse {
   AlertError error = 2;
 }
 
+message AlertCountByType {
+  AlertCountType count_type = 1;
+  int64 count = 2;
+}
+
+message AlertCount {
+  repeated  AlertCountByType alert_count = 1;
+}
+
 message AlertRequest {
   repeated uint64 alert_id = 1;
 }
@@ -220,6 +236,7 @@ service AlertService {
   rpc escalateAlert(AlertRequest) returns (AlertResponse) {};
   rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
   rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
+  rpc alertCounts(google.protobuf.Empty) returns (AlertCount) {};
 }
 
 // Proto for Monitoring policy

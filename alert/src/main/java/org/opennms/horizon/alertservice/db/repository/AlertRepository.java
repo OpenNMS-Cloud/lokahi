@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.alertservice.db.repository;
 
+import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.db.entity.Alert;
@@ -111,4 +112,14 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     @Query(value = "SELECT count(distinct a) FROM Alert a LEFT JOIN AlertCondition ac LEFT JOIN PolicyRule r "
         + "WHERE a.tenantId = :tenantId AND r.id = :ruleId")
     long countByRuleIdAndTenantId(@Param("ruleId") long ruleId, @Param("tenantId") String tenantId);
+
+    long countByTenantId(String tenantId);
+
+    long countByTenantIdAndType(String tenantId, AlertType alertType);
+
+    @Query(value = "SELECT count(distinct a) FROM Alert a WHERE a.tenantId = :tenantId AND a.acknowledgedByUser IS NOT NULL")
+    long countByTenantIdAndAcknowledged(@Param("tenantId") String tenantId);
+
+    @Query(value = "SELECT count(distinct a) FROM Alert a WHERE a.tenantId = :tenantId AND a.acknowledgedByUser IS NULL")
+    long countByTenantIdAndUnAcknowledged(@Param("tenantId") String tenantId);
 }

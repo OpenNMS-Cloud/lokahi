@@ -26,37 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.server.mapper.alert;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.server.model.alerts.AlertCountType;
 
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.AlertCount;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.inventory.dto.NodeDTO;
+@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+public interface AlertCountTypeMapper {
 
-import java.util.List;
-import java.util.Optional;
-
-public interface AlertService {
-    List<Alert> reduceEvent(Event e);
-
-    boolean deleteByIdAndTenantId(long id, String tenantId);
-
-    void deleteByTenantId(Alert alert, String tenantId);
-
-    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
-
-    void addListener(AlertLifecycleListener listener);
-
-    void removeListener(AlertLifecycleListener listener);
-
-    void saveNode(NodeDTO node);
-
-    AlertCount getAlertsCount(String tenantId);
+     default AlertCountType mapProtoToAlertCountType(org.opennms.horizon.alerts.proto.AlertCountType alertCountType) {
+         return  AlertCountType.valueOf(alertCountType.name());
+     }
 }

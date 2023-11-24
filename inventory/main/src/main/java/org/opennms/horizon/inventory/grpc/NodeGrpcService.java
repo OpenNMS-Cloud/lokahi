@@ -136,14 +136,11 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void updateNode(NodeUpdateDTO request, StreamObserver<Int64Value> responseObserver) {
         try {
-            LOG.info("Updating node with id " + request.getId() + " and alias " + request.getNodeAlias() + ".");
             String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
             var nodeId = nodeService.updateNode(request, tenantId);
-            LOG.info("DB Updated!");
             responseObserver.onNext(Int64Value.of(nodeId));
             responseObserver.onCompleted();
         } catch (Exception e) {
-            LOG.error("Unable to update node alias", e);
             responseObserver.onError(e);
         }
     }

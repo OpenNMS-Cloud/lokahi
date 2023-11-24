@@ -554,6 +554,11 @@ export type NodeCreateInput = {
   tags?: InputMaybe<Array<InputMaybe<TagCreateInput>>>;
 };
 
+export type NodeUpdateInput = {
+  id: Scalars['Long'];
+  nodeAlias?: InputMaybe<Scalars['String']>;
+};
+
 export type NodeRef = {
   __typename?: 'NodeRef';
   nodeID: Scalars['Long'];

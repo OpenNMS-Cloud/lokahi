@@ -106,7 +106,7 @@ message NodeIdList {
 
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
-  rpc updateNode(NodeUpdateDTO) returns (NodeDTO) {};
+  rpc updateNode(NodeUpdateDTO) returns (google.protobuf.Int64Value) {};
   rpc listNodes(google.protobuf.Empty) returns (NodeList) {};
   rpc listNodesByNodeLabel(NodeLabelSearchQuery) returns (NodeList) {};
   rpc listNodesByMonitoredState(MonitoredStateQuery) returns (NodeList) {};

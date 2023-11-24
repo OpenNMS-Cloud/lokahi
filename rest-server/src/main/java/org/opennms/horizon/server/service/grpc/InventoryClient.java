@@ -166,10 +166,11 @@ public class InventoryClient {
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createNode(node);
     }
 
-    public NodeDTO updateNode(NodeUpdateDTO node, String accessToken) {
+    public Long updateNode(NodeUpdateDTO node, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).updateNode(node);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).updateNode(node).getValue();
     }
 
     public List<NodeDTO> listNodes(String accessToken) {

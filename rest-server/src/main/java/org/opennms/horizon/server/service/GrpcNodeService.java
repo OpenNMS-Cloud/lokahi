@@ -103,8 +103,8 @@ public class GrpcNodeService {
     }
 
     @GraphQLMutation
-    public Mono<Node> updateNode(NodeUpdate node, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToNode(client.updateNode(mapper.nodeUpdateToProto(node), headerUtil.getAuthHeader(env))));
+    public Mono<Long> updateNode(NodeUpdate node, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.updateNode(mapper.nodeUpdateToProto(node), headerUtil.getAuthHeader(env)));
     }
 
     @GraphQLQuery

@@ -95,13 +95,13 @@ public class Node {
     @Column(name = "monitoring_location_id", insertable = false, updatable = false)
     private long monitoringLocationId;
 
-    @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "node", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<IpInterface> ipInterfaces = new ArrayList<>();
 
-    @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "node", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<SnmpInterface> snmpInterfaces = new ArrayList<>();
 
-    @OneToMany(mappedBy = "node", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "node", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<AzureInterface> azureInterfaces = new ArrayList<>();
 
     @ManyToMany(mappedBy = "nodes")

@@ -35,12 +35,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.opennms.horizon.inventory.component.TagPublisher;
-import org.opennms.horizon.inventory.dto.MonitoredState;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.TagCreateDTO;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -73,16 +71,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class NodeServiceTest {
 
@@ -510,5 +502,45 @@ public class NodeServiceTest {
             nodeService.updateNodeMonitoredState(9999L, testNode.getTenantId());
         });
         assertEquals("Node not found for id: 9999", exception.getMessage());
+    }
+
+    @Test
+    void testNodeUpdate() {
+        var testNode = new Node();
+        testNode.setTenantId("onms");
+        testNode.setId(42);
+        testNode.setNodeAlias("AAA");
+
+        var updateNodeAlias = "BBB";
+        var nodeUpdateRequest = NodeUpdateDTO.newBuilder()
+            .setId(testNode.getId())
+            .setTenantId(testNode.getTenantId())
+            .setNodeAlias(updateNodeAlias)
+            .build();
+
+        when(mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
+            .thenReturn(Optional.of(testNode));
+        doAnswer(returnsFirstArg()).when(mockNodeRepository).save(any());
+
+        var testNodeId = nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId());
+        assertEquals(testNode.getId(), testNodeId);
+
+        ArgumentCaptor<Node> nodeCaptor = ArgumentCaptor.forClass(Node.class);
+        verify(mockNodeRepository).save(nodeCaptor.capture());
+        var persistedNode = nodeCaptor.getValue();
+        assertEquals(testNode.getId(), persistedNode.getId());
+        assertEquals(testNode.getTenantId(), persistedNode.getTenantId());
+        assertEquals(updateNodeAlias, persistedNode.getNodeAlias());
+
+        // test node not found
+        var otherNodeUpdateRequest = NodeUpdateDTO.newBuilder()
+            .setId(55)
+            .setTenantId(testNode.getTenantId())
+            .setNodeAlias(updateNodeAlias)
+            .build();
+
+        var exception = Assert.assertThrows(InventoryRuntimeException.class,
+            () -> nodeService.updateNode(otherNodeUpdateRequest, otherNodeUpdateRequest.getTenantId()));
+        assertEquals("Node with ID " + otherNodeUpdateRequest.getId() + " not found", exception.getMessage());
     }
 }

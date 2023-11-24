@@ -51,9 +51,9 @@ public final class Constants {
     public static final String QUERY_FOR_TOTAL_NETWORK_OUT_BITS = "irate(ifHCOutOctets%s[4m])*8";
 
     public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_IN_BITS =
-        "sum(avg_over_time(network_in_total_bytes[1m]))/sum(count_over_time(network_in_total_byte[1m]))*8";
+        "avg_over_time(network_in_total_bytes%s[4m])*8";
     public static final String QUERY_FOR_AZURE_TOTAL_NETWORK_OUT_BITS =
-        "sum(avg_over_time(network_out_total_bytes[1m]))/sum(count_over_time(network_out_total_bytes[1m]))*8";
+        "avg_over_time(network_out_total_bytes%s[4m])*8";
 
     public static final String BW_IN_PERCENTAGE = "bw_util_network_in";
     public static final String BW_OUT_PERCENTAGE = "bw_util_network_out";
@@ -75,15 +75,15 @@ public final class Constants {
     // Total Network
     public static final String TOTAL_NETWORK_BITS_IN = "total_network_bits_in";
     public static final String TOTAL_NETWORK_BITS_OUT = "total_network_bits_out";
-    // network_in_total_bytes 1m due to azure always have missing data, avg_over_time will return 0 if data point missing
+
     public static final String QUERY_FOR_TOTAL_NETWORK_BITS_IN = """
-                (sum(irate(ifHCInOctets[4m])) + sum(sum_over_time(network_in_total_bytes[1m]))/sum(count_over_time(network_in_total_bytes[1m]))) or vector(0)
+                (sum(irate(ifHCInOctets[4m])) + sum(avg_over_time(network_in_total_bytes[4m])))*8 or vector(0)
                     unless
                 count(irate(ifHCInOctets[4m])) == 0 and count(sum_over_time(network_in_total_bytes[1m])) == 0
         """;
 
     public static final String QUERY_FOR_TOTAL_NETWORK_BITS_OUT = """
-                (sum(irate(ifHCOutOctets[4m])) + sum(sum_over_time(network_out_total_bytes[1m]))/sum(count_over_time(network_out_total_bytes[1m])))*8 or vector(0)
+                (sum(irate(ifHCInOctets[4m])) + sum(avg_over_time(network_out_total_bytes[4m])))*8 or vector(0)
                     unless
                 count(irate(ifHCOutOctets[4m])) == 0 and count(sum_over_time(network_out_total_bytes[1m])) == 0
         """;

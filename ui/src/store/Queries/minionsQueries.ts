@@ -13,7 +13,7 @@ import { Monitor } from '@/types'
 
 export const useMinionsQueries = defineStore('minionsQueries', () => {
   const minionsList = ref<ExtendedMinion[]>([])
-  const minionLocationId = reactive({ locationId: 0 })
+  const savedLocId = ref()
 
   const { startSpinner, stopSpinner } = useSpinner()
 
@@ -68,34 +68,33 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     })
   }
 
-  // find minions by location id
-  const {
-    onData: onFindMinionsByLocationId,
-    isFetching: isFetchingMinionsByLocationId,
-    execute: refreshMinionsById
-  } = useQuery({
-    query: FindMinionsByLocationIdDocument,
-    cachePolicy: 'network-only',
-    fetchOnMount: false,
-    variables: minionLocationId
-  })
+  const findMinionsByLocationId = async (locationId?: number) => {
+    if (!locationId && !savedLocId.value) return
+    if (locationId) savedLocId.value = locationId
 
-  const findMinionsByLocationId = (locationId: number) => (minionLocationId.locationId = locationId)
+    const { execute, data } = useQuery({
+      query: FindMinionsByLocationIdDocument,
+      variables: { locationId: savedLocId.value },
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
 
-  watchEffect(() => (isFetchingMinionsByLocationId.value ? startSpinner() : stopSpinner()))
+    startSpinner()
+    await execute()
+    stopSpinner()
 
-  onFindMinionsByLocationId((data) => {
-    if (data.findMinionsByLocationId?.length) {
-      addMetricsToMinions(data.findMinionsByLocationId as Minion[])
+    if (data.value?.findMinionsByLocationId?.length) {
+      addMetricsToMinions(data.value.findMinionsByLocationId as Minion[])
     } else {
       minionsList.value = []
     }
-  })
+
+    return data.value?.findMinionsByLocationId
+  }
 
   return {
     minionsList: computed(() => minionsList.value),
     fetchMinions,
-    findMinionsByLocationId,
-    refreshMinionsById
+    findMinionsByLocationId
   }
 })

@@ -13,18 +13,6 @@
           data-test="locationNameButton"
         />
       </div>
-      <!-- Post EAR -->
-      <!-- <PillColor
-        :item="statusPill"
-        class="status"
-        data-test="status"
-      />
-      <div class="expiry">
-        <FeatherIcon
-          :icon="icons.cert"
-          data-test="icon-expiry"
-        />
-      </div> -->
     </div>
     <div class="context-menu">
       <MoreOptionsMenu
@@ -36,9 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import Cert from '@featherds/icon/communication/Certificate'
 import { IButtonTextIcon } from '@/types'
-import { Severity } from '@/types/graphql'
 import { LocationTemp } from '@/types/locations.d'
 import { useLocationStore } from '@/store/Views/locationStore'
 import { useMinionsQueries } from '@/store/Queries/minionsQueries'
@@ -59,19 +45,10 @@ const nameBtn = computed<IButtonTextIcon>(() => ({
   label: props.item.location
 }))
 
-const statusPill = {
-  label: props.item.status,
-  style: props.item.status === 'UP' ? Severity.Normal : Severity.Critical
-}
-
 const contextMenuItems = [
   { label: 'Edit', handler: () => locationStore.selectLocation(props.item.id) },
   { label: 'Delete', handler: () => props.openModalForDelete(props.item) }
 ]
-
-const icons = markRaw({
-  cert: Cert
-})
 
 const getMinionsForLocationId = (locationId: number) => {
   locationStore.getMinionsForLocationId(locationId)
@@ -80,7 +57,7 @@ const getMinionsForLocationId = (locationId: number) => {
 
 // Following functions are for polling new minions every 1 min.
 const refreshMinions = async () => {
-  await minionsQueries.refreshMinionsById().catch(() => console.warn('Could not refresh minions.'))
+  await minionsQueries.findMinionsByLocationId().catch(() => console.warn('Could not refresh minions.'))
 }
 
 const { resume: sartMinionsPoll, pause: pauseMinionPoll } = useTimeoutPoll(refreshMinions, 60000)
@@ -109,17 +86,6 @@ onUnmounted(() => pauseMinionPoll())
 
 .name {
   width: 40%;
-}
-.status {
-  width: 30%;
-  display: flex;
-  justify-content: center;
-}
-.expiry {
-  font-size: 20px;
-  width: 15%;
-  display: flex;
-  justify-content: center;
 }
 .context-menu {
   width: 7%;

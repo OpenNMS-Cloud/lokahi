@@ -159,7 +159,7 @@ const downloadCert = async () => {
 
 const deleteLocation = async () => {
   const success = await locationStore.deleteLocation(props.id)
-  await minionsQueries.refreshMinionsById()
+  await minionsQueries.findMinionsByLocationId()
 
   if (success) {
     form.clearErrors()

@@ -1,18 +1,11 @@
 import { useQuery } from 'villus'
 import { defineStore } from 'pinia'
-import { LocationsListDocument, ListMinionsForTableDocument, SearchLocationDocument, GetMinionCertificateDocument } from '@/types/graphql'
+import { LocationsListDocument, SearchLocationDocument, GetMinionCertificateDocument } from '@/types/graphql'
 
 export const useLocationQueries = defineStore('locationQueries', () => {
   const fetchLocations = () =>
     useQuery({
       query: LocationsListDocument,
-      fetchOnMount: false,
-      cachePolicy: 'network-only'
-    })
-
-  const fetchMinions = () =>
-    useQuery({
-      query: ListMinionsForTableDocument,
       fetchOnMount: false,
       cachePolicy: 'network-only'
     })
@@ -39,7 +32,6 @@ export const useLocationQueries = defineStore('locationQueries', () => {
 
   return {
     fetchLocations,
-    fetchMinions,
     searchLocation,
     getMinionCertificate
   }

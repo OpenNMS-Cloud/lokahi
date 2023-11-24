@@ -144,17 +144,11 @@ public class ScannerResponseService {
                 icmpActiveDiscoveryService.getDiscoveryById(discoveryScanResult.getActiveDiscoveryId(), tenantId);
             if (discoveryOptional.isPresent()) {
                 var icmpDiscovery = discoveryOptional.get();
-                var tagsList = tagService.getTagsByEntityId(tenantId,
-                    ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
-                        .setActiveDiscoveryId(icmpDiscovery.getId()).build()).build());
-                List<TagCreateDTO> tags = tagsList.stream()
-                    .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
-                    .toList();
                 NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                     .setLocationId(String.valueOf(locationId))
                     .setManagementIp(pingResponse.getIpAddress())
                     .setLabel(pingResponse.getIpAddress())
-                    .addAllTags(tags)
+                    .addAllTags(getTagCreateDTO(icmpDiscovery.getId(), tenantId))
                     .build();
                 try {
                     var optionalNode = nodeService.getNode(pingResponse.getIpAddress(), locationId, tenantId);
@@ -204,6 +198,7 @@ public class ScannerResponseService {
                     NodeCreateDTO createDTO = NodeCreateDTO.newBuilder()
                         .setLocationId(String.valueOf(locationId))
                         .setLabel(nodeLabel)
+                        .addAllTags(getTagCreateDTO(discovery.getId(), tenantId))
                         .build();
 
                     node = nodeService.createNode(createDTO, ScanType.AZURE_SCAN, tenantId);
@@ -224,13 +219,7 @@ public class ScannerResponseService {
                     taskSetHandler.sendAzureMonitorTasks(discovery, azureScanItem, nodeId);
                     taskSetHandler.sendAzureCollectorTasks(discovery, azureScanItem, nodeId);
                 }
-                List<TagCreateDTO> tags = discovery.getTags().stream()
-                    .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
-                    .toList();
-                tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-                    .addEntityIds(TagEntityIdDTO.newBuilder()
-                        .setNodeId(node.getId()))
-                    .addAllTags(tags).build());
+                nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
             } catch (EntityExistException e) {
                 log.error("Error while adding new Azure node for tenantId={}; locationId={}", tenantId, locationId);
             } catch (LocationNotFoundException e) {
@@ -318,5 +307,14 @@ public class ScannerResponseService {
             .build();
 
         return monitoredServiceService.createSingle(newMonitoredService, monitoredServiceType, ipInterface);
+    }
+
+    private List<TagCreateDTO> getTagCreateDTO(long discoveryId, String tenantId){
+        var tagsList = tagService.getTagsByEntityId(tenantId,
+            ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
+                .setActiveDiscoveryId(discoveryId).build()).build());
+        return tagsList.stream()
+            .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
+            .toList();
     }
 }

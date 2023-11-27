@@ -37,6 +37,7 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.VerificationException;
@@ -44,6 +45,7 @@ import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -87,7 +89,7 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     }
 
     @Test
-    void testListMonitoringSystem(){
+    void testListMonitoringSystem() {
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
             .setSystemId(systemId).build();
         doReturn(Collections.singletonList(systemDTO)).when(mockService).findByTenantId(TENANT_ID);
@@ -96,7 +98,7 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     }
 
     @Test
-    void testListMonitoringSystemByLocationId(){
+    void testListMonitoringSystemByLocationId() {
         long locationId = 1L;
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
             .setSystemId(systemId).setMonitoringLocationId(locationId).build();
@@ -106,7 +108,35 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     }
 
     @Test
-    void testGetMonitoringSystemByQuery(){
+    void testListMonitoringSystemByLocationIdNoMinions() {
+        long locationId = 1L;
+        doReturn(Collections.emptyList()).when(mockService)
+            .findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+
+        var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+            .listMonitoringSystemByLocationId(Int64Value.of(locationId)).getSystemsList();
+
+        Assertions.assertTrue(result.isEmpty());
+        verify(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+    }
+
+    @Test
+    void testListMonitoringSystemByLocationIdLocationNotFound() {
+        long locationId = 1L;
+        var locationException = new LocationNotFoundException("Location not found for id: " + locationId);
+        doThrow(locationException)
+            .when(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+
+        var exception = assertThrows(StatusRuntimeException.class, () ->
+            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .listMonitoringSystemByLocationId(Int64Value.of(locationId)));
+
+        assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
+        verify(mockService, times(1)).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+    }
+
+    @Test
+    void testGetMonitoringSystemByQuery() {
         long locationId = 1L;
 
         MonitoringSystemQuery query = MonitoringSystemQuery.newBuilder()
@@ -123,7 +153,7 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     }
 
     @Test
-    void testGgtMonitoringSystemByQueryNotFound() {
+    void testGetMonitoringSystemByQueryNotFound() {
         MonitoringSystemQuery query = MonitoringSystemQuery.newBuilder().build();
         doReturn(Optional.empty()).when(mockService).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), TENANT_ID);
 

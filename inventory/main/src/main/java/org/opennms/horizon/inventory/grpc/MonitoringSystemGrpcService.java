@@ -2,7 +2,7 @@
  * This file is part of OpenNMS(R).
  *
  * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -42,6 +42,7 @@ import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
 import org.opennms.horizon.inventory.dto.MonitoringSystemList;
 import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
 import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
+import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.stereotype.Component;
 
@@ -65,15 +66,18 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
 
     @Override
     public void listMonitoringSystemByLocationId(Int64Value locationId, StreamObserver<MonitoringSystemList> responseObserver) {
-        List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
-            .map(tenantId -> service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId))
-            .orElseThrow();
-
-        if (list.isEmpty()) {
-            responseObserver.onError(StatusProto.toStatusRuntimeException(createStatusNotExist(locationId.getValue())));
-        } else {
+        try {
+            List<MonitoringSystemDTO> list = tenantLookup.lookupTenantId(Context.current())
+                .map(tenantId -> service.findByMonitoringLocationIdAndTenantId(locationId.getValue(), tenantId))
+                .orElseThrow();
             responseObserver.onNext(MonitoringSystemList.newBuilder().addAllSystems(list).build());
             responseObserver.onCompleted();
+        } catch (LocationNotFoundException e) {
+            var status = Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage("Location with id " + locationId.getValue() + " does not exist")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
 
@@ -131,14 +135,14 @@ public class MonitoringSystemGrpcService extends MonitoringSystemServiceGrpc.Mon
     private Status createStatusNotExist(String systemId) {
         return Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
-            .setMessage("Monitor system with system id: " + systemId + " doesn't exist")
+            .setMessage("Monitoring system with system id " + systemId + " does not exist")
             .build();
     }
 
     private Status createStatusNotExist(long id) {
         return Status.newBuilder()
             .setCode(Code.NOT_FOUND_VALUE)
-            .setMessage("Monitor system with id: " + id + " doesn't exist")
+            .setMessage("Monitoring system with id " + id + " does not exist")
             .build();
     }
 }

@@ -53,10 +53,11 @@
     <!-- Chart Area -->
     <div class="flows filters">
       <div class="top-of-flows">
-        <div class="total-container">
+        <!-- enable after LOK-2225 -->
+        <!--div class="total-container">
           <div class="total-title">Total Flows:</div>
           <div class="total-flows">{{ appStore.totalFlows }}</div>
-        </div>
+        </div-->
         <div class="utilitys">
           <FeatherButton
             icon="Download"

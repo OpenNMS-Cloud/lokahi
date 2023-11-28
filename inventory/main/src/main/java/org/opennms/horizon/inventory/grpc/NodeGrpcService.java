@@ -137,7 +137,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     public void updateNode(NodeUpdateDTO request, StreamObserver<Int64Value> responseObserver) {
         try {
             String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-            var nodeId = nodeService.updateNode(request, tenantId);
+            Long nodeId = nodeService.updateNode(request, tenantId);
             responseObserver.onNext(Int64Value.of(nodeId));
             responseObserver.onCompleted();
         } catch (Exception e) {

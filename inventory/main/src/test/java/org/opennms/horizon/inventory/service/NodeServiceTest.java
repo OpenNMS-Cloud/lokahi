@@ -541,9 +541,16 @@ public class NodeServiceTest {
         assertEquals(testNode.getId(), persistedNode.getId());
         assertEquals(testNode.getTenantId(), persistedNode.getTenantId());
         assertEquals(updateNodeAlias, persistedNode.getNodeAlias());
+    }
 
-        // test node not found
-        var otherNodeUpdateRequest = NodeUpdateDTO.newBuilder()
+    @Test
+    void testNodeUpdateNodeNotFound() {
+        var testNode = new Node();
+        testNode.setTenantId("onms");
+        testNode.setId(42);
+        testNode.setNodeAlias("AAA");
+
+        var updateNodeAlias = "BBB";        var otherNodeUpdateRequest = NodeUpdateDTO.newBuilder()
             .setId(55)
             .setTenantId(testNode.getTenantId())
             .setNodeAlias(updateNodeAlias)

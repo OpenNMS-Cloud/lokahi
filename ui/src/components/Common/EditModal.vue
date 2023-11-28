@@ -6,8 +6,9 @@
     <template #content>
       <div class="title">{{ title }}</div>
       <FeatherInput
+        ref="input"
         :label="inputLabel"
-        :modelValue="newValue"
+        :modelValue="currentValue"
         @update:modelValue="updateValue"
       />
     </template>
@@ -32,7 +33,8 @@
 <script setup lang="ts">
 import { fncArgVoid } from '@/types'
 
-const newValue = ref()
+const input = ref()
+const newValue = ref("")
 const isCalling = ref(false)
 
 const props = defineProps<{
@@ -42,7 +44,16 @@ const props = defineProps<{
   handler: (newVal: string) => any
   callback: () => any
   closeModal: () => void
+  currentValue: string
 }>()
+
+watchEffect(() => {
+  if (props.isVisible && input.value) {
+    setTimeout(() => {
+      input.value.focus()
+    }, 800)
+  }
+})
 
 const updateValue: fncArgVoid = (val: string) => (newValue.value = val)
 

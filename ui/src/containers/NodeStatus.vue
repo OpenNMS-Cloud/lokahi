@@ -30,6 +30,7 @@
     :callback="() => queries.fetchNodeStatus()"
     title="Edit Node Name"
     inputLabel="Type a new name"
+    :currentValue="nodeStatusStore.node.nodeAlias || ''"
   />
 </template>
 

@@ -46,6 +46,7 @@ import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.inventory.NodeUpdate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
 import org.opennms.horizon.server.model.status.NodeStatus;
@@ -99,6 +100,11 @@ public class GrpcNodeService {
     @GraphQLMutation
     public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLMutation
+    public Mono<Long> updateNode(NodeUpdate node, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.updateNode(mapper.nodeUpdateToProto(node), headerUtil.getAuthHeader(env)));
     }
 
     @GraphQLQuery

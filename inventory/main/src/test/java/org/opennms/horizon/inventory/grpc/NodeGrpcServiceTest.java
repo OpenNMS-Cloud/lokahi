@@ -50,7 +50,9 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -69,6 +71,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -499,7 +502,7 @@ class NodeGrpcServiceTest {
     }
 
     @Test
-    void cetNodeIdFromQueryMissingIpAddress() {
+    void testGetNodeIdFromQueryMissingIpAddress() {
         //
         // Setup test data and interactions
         //
@@ -547,6 +550,72 @@ class NodeGrpcServiceTest {
         StatusRuntimeExceptionMatcher matcher =
             new StatusRuntimeExceptionMatcher(this::statusExceptionMatchesNotFound, NodeGrpcService.DIDNT_MATCH_NODE_ID_MSG);
         Mockito.verify(mockInt64ValueStreamObserver).onError(Mockito.argThat(matcher));
+    }
+
+    @Test
+    void testUpdateNodeSuccess() {
+        //
+        // Setup test data and interactions
+        //
+        NodeUpdateDTO request =
+            NodeUpdateDTO.newBuilder()
+                .setTenantId(TEST_TENANT_ID)
+                .setId(testNodeDTO1.getId())
+                .setNodeAlias("AAA")
+                .build();
+
+        Node node = new Node();
+        node.setTenantId(request.getTenantId());
+        node.setId(request.getId());
+        node.setNodeAlias(request.getNodeAlias());
+
+        var nodeDto = NodeDTO.newBuilder()
+            .setTenantId(request.getTenantId())
+            .setId(request.getId())
+            .setNodeAlias(request.getNodeAlias())
+            .build();
+
+        when(mockNodeService.updateNode(request, TEST_TENANT_ID)).thenReturn(testNodeDTO1.getId());
+        when(mockNodeMapper.modelToDTO(node)).thenReturn(nodeDto);
+
+        //
+        // Execute
+        //
+        target.updateNode(request, mockInt64ValueStreamObserver);
+
+        //
+        // Validate
+        //
+        InOrder inOrder = Mockito.inOrder(mockInt64ValueStreamObserver);
+        inOrder.verify(mockInt64ValueStreamObserver).onNext(Int64Value.of(testNodeDTO1.getId()));
+        inOrder.verify(mockInt64ValueStreamObserver).onCompleted();
+    }
+
+    @Test
+    void testUpdateNodeException() {
+        //
+        // Setup test data and interactions
+        //
+        NodeUpdateDTO request =
+            NodeUpdateDTO.newBuilder()
+                .setTenantId(TEST_TENANT_ID)
+                .setId(testNodeDTO1.getId())
+                .setNodeAlias("AAA")
+                .build();
+
+        var testException = new InventoryRuntimeException("x-test-exception-x");
+        Mockito.doThrow(testException).when(mockNodeService).updateNode(request, TEST_TENANT_ID);
+
+        //
+        // Execute
+        //
+        target.updateNode(request, mockInt64ValueStreamObserver);
+
+        //
+        // Validate
+        //
+        InOrder inOrder = Mockito.inOrder(mockInt64ValueStreamObserver);
+        inOrder.verify(mockInt64ValueStreamObserver).onError(any(InventoryRuntimeException.class));
     }
 
     @Test

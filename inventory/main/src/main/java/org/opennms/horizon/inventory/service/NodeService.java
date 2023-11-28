@@ -29,7 +29,6 @@
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +37,7 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
@@ -194,6 +194,15 @@ public class NodeService {
             .addAllTags(request.getTagsList())
             .build());
         return node;
+    }
+
+    @Transactional
+    public Long updateNode(NodeUpdateDTO request, String tenantId) {
+        var node = nodeRepository.findByIdAndTenantId(request.getId(), tenantId)
+            .orElseThrow(() -> new InventoryRuntimeException("Node with ID " + request.getId() + " not found"));
+
+        node.setNodeAlias(request.getNodeAlias());
+        return nodeRepository.save(node).getId();
     }
 
     @Transactional(readOnly = true)

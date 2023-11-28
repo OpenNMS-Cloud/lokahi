@@ -1,0 +1,10 @@
+{
+  "variables": {
+    "node": {
+      "id": 1,
+      "nodeAlias": "node-alias"
+    }
+  },
+  "query": "mutation UpdateNode($node: NodeUpdateInput!) {\n  updateNode(node: $node) \n}",
+  "operationName": null
+}

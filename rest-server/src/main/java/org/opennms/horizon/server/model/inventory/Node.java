@@ -39,6 +39,7 @@ import java.util.List;
 public class Node {
     private long id;
     private String nodeLabel;
+    private String nodeAlias;
     private String scanType;
     private String monitoredState;
     private long createTime;

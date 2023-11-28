@@ -52,6 +52,7 @@ import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -129,6 +130,18 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }
+        }
+    }
+
+    @Override
+    public void updateNode(NodeUpdateDTO request, StreamObserver<Int64Value> responseObserver) {
+        try {
+            String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+            Long nodeId = nodeService.updateNode(request, tenantId);
+            responseObserver.onNext(Int64Value.of(nodeId));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(e);
         }
     }
 

@@ -8,26 +8,16 @@
 		http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
 	<changeSet author="jhutc" id="pager_duty_tenant_key_update">
-		<validCheckSum>ANY</validCheckSum>
-		<preConditions onFail="MARK_RAN">
-			<tableExists tableName="pager_duty_config" />
-            <primaryKeyExists primaryKeyName="pk_pager_duty_config_id"/>
+            <validCheckSum>ANY</validCheckSum>
+            <preConditions onFail="MARK_RAN">
+                <tableExists tableName="pager_duty_config" />
+                <primaryKeyExists primaryKeyName="pk_pager_duty_config_id"/>
             <tableExists tableName="monitoring_policy"/>
-        </preConditions>
+            </preConditions>
 
-        <dropPrimaryKey tableName="pager_duty_config"/>
-        <addPrimaryKey tableName="pager_duty_config" columnNames="id, tenant_id"
+            <dropPrimaryKey tableName="pager_duty_config"/>
+            <addPrimaryKey tableName="pager_duty_config" columnNames="id, tenant_id"
                        constraintName="pk_pager_duty_config_id"/>
-        <sql>DO
-             '
-             BEGIN
-             if exists(select 1 from pg_extension where extname = ''citus'') THEN
-               if exists(select * from master_get_active_worker_nodes()) THEN
-                 perform create_distributed_table(''pager_duty_config'', ''tenant_id'', colocate_with => ''monitoring_policy'');
-               END IF;
-             END IF;
-             END; ';
-         </sql>
     </changeSet>
 
 </databaseChangeLog>

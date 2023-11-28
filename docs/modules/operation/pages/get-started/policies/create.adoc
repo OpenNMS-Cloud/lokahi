@@ -5,7 +5,7 @@
 A monitoring policy uses tags and rules to customize the type of monitoring data that you collect and the notifications you receive about that data.
 
 Note that you can also create a monitoring policy by copying an existing one and editing it.
-Click the policy, then click the *copy* symbol at the top right of the *Policy Name* .
+Click the policy, then click the *copy* symbol at the top right of the *Policy Name* area.
 
 To create a monitoring policy, follow these steps:
 
@@ -23,11 +23,10 @@ This policy will apply to any nodes that have the same tags.
 A rule specifies the conditions under which OpenNMS generates alerts.
 Rules are available only with the policy in which they were created.
 
-. Set the criteria that will trigger an alert.
 . Specify the name, component type, detection method, and event type to include.
 . Set the criteria that will trigger an alert.
 .. To include multiple criteria, click *Additional Conditions*.
 . Click *Save Rule*.
 . Click *Save Policy*.
 
-// Are there guidelines around conflicts with rules? 
+Users should take care to test monitoring policies in a non-production or staging environment prior to rollout on production, particularly to make sure rules do not conflict.

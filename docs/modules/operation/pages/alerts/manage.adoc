@@ -13,24 +13,23 @@ To do so, type your search term in the *Search Alerts* box.
 Note that the search works only with the full name or IP address associated with the alert.
 It will not search for partial terms.
 The search returns results only for alerts that occurred during the selected time range.
-For example, if an alert occurred 7 days earlier, but you search for it in the *Today* tab, it will not appear.
+For example, if an alert occurred 7 days earlier, but you search for it with *Today* as the time period, it will not appear.
 
 == Filter
 
 You can filter alerts by severity and time range.
 
-To filter alerts by severity, at the top of the screen click the plus sign beside the severity (for example, *Major*) that has alerts.
-The associated alerts are displayed.
+To filter alerts by severity, at the top of the screen click on the severity (for example, *Major*) that has alerts.
+The associated alerts appear.
 
 To filter alerts by time range, select an option from the time filter settings (for example, *7D*).
-The alerts that occurred over the specified time period are displayed.
+The alerts that occurred over the specified time period appear.
 By default, the page displays alerts that occurred within the last 24 hours.
 
 === Clear filters
 
 To clear filters on your alerts click *Clear All Filters*.
 The alerts list displays all alerts.
-You can also click the `X` beside any alert severities at the top of the screen that you filtered on.
 
 == View alert type definitions
 

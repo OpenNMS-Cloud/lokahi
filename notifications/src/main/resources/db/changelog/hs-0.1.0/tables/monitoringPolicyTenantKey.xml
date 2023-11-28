@@ -18,17 +18,6 @@
 
         <dropPrimaryKey tableName="monitoring_policy"/>
         <addPrimaryKey tableName="monitoring_policy" columnNames="id, tenant_id" constraintName="pk_monitoring_policy_id"/>
-        <sql>DO
-             '
-             BEGIN
-             if exists(select 1 from pg_extension where extname = ''citus'') THEN
-               if exists(select * from master_get_active_worker_nodes()) THEN
-                 perform create_distributed_table(''monitoring_policy'', ''tenant_id'');
-               END IF;
-             END IF;
-             END; ';
-         </sql>
-
     </changeSet>
 
 </databaseChangeLog>

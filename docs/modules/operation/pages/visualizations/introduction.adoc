@@ -10,7 +10,7 @@ It also provides quick links to the xref:operation:inventory/introduction.adoc[i
 
 The Insights Dashboard displays the following statistics and visualizations:
 
-* *Alert Status:* Number of alerts of each status (Critical, Major, and so on) and their incidence rate compared to the average for the selected time period (for example, "-15% Past 24 Hours").
+* *Alert Summary:* Number of alerts of each status (Critical, Major, and so on) and their incidence rate compared to the average for the selected time period (for example, "-15% Past 24 Hours").
 * *Node Reachability*: Percentage of nodes that OpenNMS can see and that respond to communication (ping, and so on).
 * *Top Nodes*: A sortable list of the most active monitored nodes on your network.
 * *Total Network Traffic:* A graph of inbound and outbound network traffic over the selected time period.
@@ -41,6 +41,5 @@ The Insights Dashboard includes shortcuts for the following:
 == Geographical Map
 
 The *Map* page displays the geolocation of your Minion(s) on a world map, and indicates the number of nodes associated with it.
-You can zoom in and out for a more granular view of node geolocations.
 
-You must define a physical address or geo-coordinates for the monitoring location to display nodes on the map. (See xref:minions/introduction.adoc#create-location[Create a location].)
+You must define a physical address or geo-coordinates (latitude and longitude) for the monitoring location to display nodes on the map. (See xref:minions/introduction.adoc#create-location[Create a location].)

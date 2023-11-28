@@ -18,8 +18,11 @@ To create an active discovery, follow these steps:
     * Azure: Connects to the Azure API, queries the virtual machines list, and creates entities for each virtual machine (VM) in the node inventory.
 +
 . Fill in the appropriate information in each field.
+.. The community string is used to access device statistics.
+.. The UDP port is the port on which SNMP operates.
 +
-NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], click the drop-down arrow in the *Search/Add tags* field, type a name for the tag, and click *New*.
+NOTE: To create xref:inventory/nodes.adoc#tag-create[tags], type a name for the tag in the *Tags* field, and click on the name when it appears in the drop-down list.
+The new tag appears below the field and is available for use elsewhere, such as with nodes and alerts.
 
 . Click *Save Discovery*.
 

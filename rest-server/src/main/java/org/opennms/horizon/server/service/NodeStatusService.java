@@ -224,17 +224,24 @@ public class NodeStatusService {
     }
 
     public Mono<TopNNode> getTopNNode(NodeDTO nodeDTO, Integer timeRange, TimeRangeUnit timeRangeUnit, ResolutionEnvironment env) {
+
         Mono<NodeReachability> nodeReachability = getNodeReachability(nodeDTO, timeRange, timeRangeUnit, env);
-        Mono<NodeResponseTime>  nodeResponseTime = getNodeAvgResponseTime(nodeDTO, timeRange, timeRangeUnit, env);
+        Mono<NodeResponseTime> nodeResponseTime = getNodeAvgResponseTime(nodeDTO, timeRange, timeRangeUnit, env);
         Mono<Tuple2<NodeReachability, NodeResponseTime>> result = nodeReachability.zipWith(nodeResponseTime);
+
         return result.map(tuple -> {
             var topNNode = new TopNNode();
             topNNode.setNodeLabel(nodeDTO.getNodeLabel());
             topNNode.setLocation(nodeDTO.getLocation());
-            topNNode.setReachability(tuple.getT1().getReachability());
-            topNNode.setAvgResponseTime(tuple.getT2().getResponseTime());
+            // Round to 2 points after decimal
+            topNNode.setReachability(Math.round(tuple.getT1().getReachability() * 100.0) / 100.0);
+            topNNode.setAvgResponseTime(Math.round(tuple.getT2().getResponseTime() * 100.0) / 100.0);
             return topNNode;
         });
+    }
+
+    public Mono<NodeStatus> getNodeStatus(NodeDTO nodeDTO,  ResolutionEnvironment env) {
+        return getNodeStatus(nodeDTO.getId(), Constants.DEFAULT_MONITOR_TYPE, env);
     }
 
     private NodeResponseTime transformToNodeResponseTime(long id, TimeSeriesQueryResult result) {

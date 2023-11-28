@@ -12,7 +12,6 @@ Anyone who can should focus on fixing the alert's root cause.
 * *Minor:* A portion of a device (a service, an interface, a power supply, and so on) has stopped functioning.
 * *Warning:* An alert has occurred that requires attention.
 This severity can also indicate a condition that should be logged, but that does not require direct action.
-* *Normal:* An informational message; no action is required.
 * *Cleared:* An alert with a self-clearing error condition has been corrected and service is restored.
 * *Indeterminate:* No severity could be associated with the alert.
 

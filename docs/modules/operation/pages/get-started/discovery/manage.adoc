@@ -13,7 +13,7 @@ Discovery behavior varies depending on the information you edit:
 This will create new nodes (same IP Address, but different location).
 * Updated tags: new tags are added to previously discovered nodes.
 Old tags are not removed.
-* Updated SNMP information: Node Scan runs again for all the nodes (existing/new) with new SNMP credentials.
+* Updated SNMP information: node scan runs again for all the nodes (existing/new) with new SNMP credentials.
 
 When you save an edited active discovery, it runs again immediately, and then every 24 hours thereafter.
 

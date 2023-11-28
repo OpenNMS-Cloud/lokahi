@@ -2,8 +2,32 @@
 = Glossary
 :description: Glossary of terms related to OpenNMS Lōkahi/Cloud.
 
-== M
-Minion:: A Minion is a lightweight, secure collector that monitors and communicates with the devices on your network, shares collected data, and connects your network with OpenNMS Cloud/Lōkahi.
+== A
+[[glossary-active-discovery]]
+Active discovery:: Queries nodes to detect the entities to monitor through ping sweeps (ICMP/SNMP) or querying the virtual machine list (Azure).
+
+== D
+[[glossary-discovery]]
+Discovery:: A discovery is a process to identify <<glossary-node, nodes>> on your monitored network through either <<glossary-active-discovery, active>> or <<glossary-passive-discovery, passive>> discovery.
 
 == L
-location:: A location defines a network area where you installed your Minion.
+[[glossary-location]]
+location (monitoring location):: A location defines a network area that you want to monitor (for example, "Boston" or "Building 3", and where you install a <<glossary-minion, Minion>>.
+
+== M
+[[glossary-minion]]
+Minion:: A Minion is a lightweight, secure collector that monitors and communicates with the devices on your network, shares collected data, and connects your network with OpenNMS Cloud/Lōkahi.
+
+== N
+[[glossary-node]]
+Node:: Any device with at least one IP interface.
+
+== P
+[[glossary-passive-discovery]]
+Passive discovery:: A passive discovery uses SNMP traps to identify network devices.
+[[glossary-physical-address]]
+Physical address:: The street address or geo-coordinates (latitude and longitude) for the <<glossary-location, monitoring location>>.
+
+== T
+[[glossary-tag]]
+Tag:: A tag is an optional label (for example, "router") that you can associate with nodes and monitoring policies for easy and flexible filtering and grouping of devices.

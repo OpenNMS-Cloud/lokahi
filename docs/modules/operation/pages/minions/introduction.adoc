@@ -62,7 +62,7 @@ To deploy a Minion, follow these steps:
 . In the *Locations* list, click the vertical ellipsis (*⋮*) next to the location where you want to deploy the Minion.
 . Click *Edit*.
 +
-NOTE: You can also deploy a Minion when you <<create-location, create a new location>>.
+NOTE: You can also deploy a Minion when you <<create-location, create a location>>.
 . Click *Download Bundle*.
 . Create a permanent directory for the Minion on the device where you want to run it.
 . Copy the downloaded bundle to the permanent directory and unzip it.

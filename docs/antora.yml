@@ -5,6 +5,7 @@ asciidoc:
   attributes:
     source-language: asciidoc@
     xrefstyle: short@
+    full-display-version: '1.0.0'
 nav:
 - modules/ROOT/index.adoc
 - modules/installation/nav.adoc

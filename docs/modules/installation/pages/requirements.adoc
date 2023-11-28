@@ -35,7 +35,7 @@ Make sure you have the following before you begin:
 * *RAM:* 8GB (physical) and above
 * *Storage (disk space):* 100GB with SSD and above
 
-Make sure you have the following:
+*Environment*
 
 * Docker environment with Docker Compose
 * Access to a terminal window or command line interface

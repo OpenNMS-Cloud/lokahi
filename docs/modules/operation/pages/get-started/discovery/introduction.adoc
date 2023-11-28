@@ -9,7 +9,7 @@ The discovery process identifies devices and entities on your monitored network 
 [[active-discovery]]
 == What is active discovery?
 
-Active discovery queries nodes and cloud APIs to detect the entities that you want to monitor. You can choose from two active discovery methods:
+Active discovery queries nodes and to detect the entities that you want to monitor. You can choose from two active discovery methods:
 
 * *ICMP/SNMP:* Performs a ping sweep and scans for SNMP MIBs on nodes that respond.
 

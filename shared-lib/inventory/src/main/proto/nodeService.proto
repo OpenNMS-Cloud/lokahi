@@ -56,6 +56,7 @@ message NodeDTO {
   repeated opennms.inventory.AzureInterfaceDTO azure_interfaces = 15;
   repeated opennms.inventory.TagDTO tags = 16;
   string location = 17;
+  optional string node_alias = 18;
 }
 
 message NodeCreateDTO {
@@ -64,6 +65,12 @@ message NodeCreateDTO {
   optional string management_ip = 3;
   repeated opennms.inventory.TagCreateDTO tags = 4;
   optional MonitoredState monitored_state = 5; // optional for now - may change
+}
+
+message NodeUpdateDTO {
+  int64 id = 1;
+  string tenant_id = 2;
+  optional string node_alias = 3;
 }
 
 enum MonitoredState {
@@ -99,6 +106,7 @@ message NodeIdList {
 
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
+  rpc updateNode(NodeUpdateDTO) returns (google.protobuf.Int64Value) {};
   rpc listNodes(google.protobuf.Empty) returns (NodeList) {};
   rpc listNodesByNodeLabel(NodeLabelSearchQuery) returns (NodeList) {};
   rpc listNodesByMonitoredState(MonitoredStateQuery) returns (NodeList) {};

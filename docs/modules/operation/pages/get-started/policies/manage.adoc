@@ -4,7 +4,7 @@
 
 You can edit or delete any monitoring policy, except for the default one.
 
-With the default policy, you can only edit add or remove tags.
+With the default policy, you can only add or remove tags.
 To turn off the default monitoring policy, remove the tag(s) associated with it.
 
 == Edit a monitoring policy

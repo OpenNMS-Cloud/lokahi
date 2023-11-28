@@ -5,11 +5,11 @@
       <h4 class="subhead-1">{{ node.nodeLabel }}</h4>
       <h4 class="subhead-1 existing-tags">Existing Tags</h4>
       <FeatherChipList label="Tags">
-        <FeatherChip v-for="(tag) in tagStore.filteredTags" :key="tag.id" @click="tagStore.filterTag(tag)"
-          :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }" class="pointer">
+        <FeatherChip v-for="(tag) in tagStore.filteredTags" :key="tag.id"
+          :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }">
           {{ tag.name }}
           <template v-slot:icon>
-            <FeatherIcon :icon="deleteIcon" />
+            <FeatherIcon :icon="deleteIcon" @click="tagStore.filterTag(tag)" class="pointer" />
           </template>
         </FeatherChip>
       </FeatherChipList>

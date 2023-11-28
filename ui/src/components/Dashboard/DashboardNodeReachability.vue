@@ -54,7 +54,7 @@ const data = computed(() => {
   return {
     labels: [
       `${store.reachability.responding ? `Responding (${store.reachability.responding})` : 'Responding'}`,
-      `${store.reachability.unresponsive ? `Not Responsive (${store.reachability.unresponsive})` : 'Not Responsive'}`
+      `${store.reachability.unresponsive ? `Not Responding (${store.reachability.unresponsive})` : 'Not Responding'}`
     ],
     datasets: [
       {
@@ -90,6 +90,8 @@ onThemeChange(() => {
     display.value = true
   })
 })
+
+onMounted(async () => await store.getAllNodesStatus())
 </script>
 
 <style lang="scss" scoped>

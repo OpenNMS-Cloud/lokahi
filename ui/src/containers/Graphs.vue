@@ -86,7 +86,7 @@ const bytesInOut = computed<GraphProps>(() => {
 const azureNodeBytesInOut = computed<GraphProps>(() => {
   return {
     label: 'Bytes Inbound / Outbound Total',
-    metrics: ['network_in_total_bytes', 'network_out_total_bytes'],
+    metrics: ['network_in_bits', 'network_out_bits'],
     monitor: monitor.value,
     nodeId: route.params.id as string,
     instance: 'node',

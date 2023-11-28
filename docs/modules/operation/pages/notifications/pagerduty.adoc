@@ -33,7 +33,7 @@ The integration details page appears:
 +
 image::notifications/pd-integration-details.png["PagerDuty integration details page. Integration Key field highlighted.", 500]
 . Copy the integration key.
-. In Lōkahi/Cloud, click *Minions>Outbound Notification*.
+. In Lōkahi/Cloud, click *Locations>Outbound Notification*.
 . Paste your integration key into the field and click *Save*.
 . Select *Monitoring Policies* in the left navigation menu.
 . Make sure you have a monitoring policy with notifications configured via PagerDuty.
@@ -49,5 +49,5 @@ image::notifications/pd-open-incidents.png["PagerDuty page displaying open incid
 
 To disable PagerDuty notifications, follow these steps:
 
-. Log in to Lōkahi/Cloud, and click *Minions>Outbound Notification*.
+. Log in to Lōkahi/Cloud, and click *Locations>Outbound Notification*.
 . Type a space in the integration key field to create a blank line and click *Save*.

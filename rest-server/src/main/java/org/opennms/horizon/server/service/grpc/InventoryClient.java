@@ -63,6 +63,7 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
@@ -163,6 +164,13 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createNode(node);
+    }
+
+    public Long updateNode(NodeUpdateDTO node, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).updateNode(node).getValue();
     }
 
     public List<NodeDTO> listNodes(String accessToken) {

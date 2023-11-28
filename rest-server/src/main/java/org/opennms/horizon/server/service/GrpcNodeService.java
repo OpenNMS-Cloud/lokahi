@@ -36,14 +36,19 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
+import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
+import org.opennms.horizon.server.model.inventory.NodeUpdate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
+import org.opennms.horizon.server.model.inventory.TopNResponse;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -51,6 +56,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -95,6 +102,11 @@ public class GrpcNodeService {
         return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
     }
 
+    @GraphQLMutation
+    public Mono<Long> updateNode(NodeUpdate node, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.updateNode(mapper.nodeUpdateToProto(node), headerUtil.getAuthHeader(env)));
+    }
+
     @GraphQLQuery
     public CompletableFuture<MonitoringLocation> location(@GraphQLContext Node node, @GraphQLEnvironment ResolutionEnvironment env) {
         DataLoader<DataLoaderFactory.Key, MonitoringLocation> locationLoader = env.dataFetchingEnvironment.getDataLoader(DataLoaderFactory.DATA_LOADER_LOCATION);
@@ -107,6 +119,12 @@ public class GrpcNodeService {
         return nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
     }
 
+    @GraphQLQuery(name = "allNodeStatus")
+    public Flux<NodeStatus> getAllNodeStatus(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
+            .flatMap(nodeDTO -> nodeStatusService.getNodeStatus(nodeDTO, env));
+    }
+
     @GraphQLMutation
     public Mono<Boolean> deleteNode(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.deleteNode(id, headerUtil.getAuthHeader(env)));
@@ -117,9 +135,64 @@ public class GrpcNodeService {
         return Mono.just(client.startScanByNodeIds(ids, headerUtil.getAuthHeader(env)));
     }
 
-    @GraphQLQuery
-    public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env, Integer timeRange, TimeRangeUnit timeRangeUnit) {
+    @GraphQLQuery(name = "topNNode")
+    public Flux<TopNNode> getTopNNode(@GraphQLEnvironment ResolutionEnvironment env,
+                                      @GraphQLArgument(name = "timeRange") Integer timeRange,
+                                      @GraphQLArgument(name = "timeRangeUnit") TimeRangeUnit timeRangeUnit,
+                                      @GraphQLArgument(name = "pageSize") Integer pageSize,
+                                      @GraphQLArgument(name = "page") Integer page,
+                                      @GraphQLArgument(name = "sortBy") String sortBy,
+                                      @GraphQLArgument(name = "sortAscending") boolean sortAscending) {
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
-            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env));
+            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
+            .sort(TopNNode.getComparator(sortBy, sortAscending))
+            .skip((long) (page - 1) * pageSize)
+            .take(pageSize);
     }
+
+    @GraphQLQuery(name = "nodeCount")
+    public Mono<Integer> getNodeCount(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.listNodes(headerUtil.getAuthHeader(env)).size());
+    }
+
+    @GraphQLQuery(name = "downloadTopN")
+    public Mono<TopNResponse> downloadTopN(@GraphQLEnvironment ResolutionEnvironment env,
+                                           @GraphQLArgument(name = "timeRange") Integer timeRange,
+                                           @GraphQLArgument(name = "timeRangeUnit") TimeRangeUnit timeRangeUnit,
+                                           @GraphQLArgument(name = "sortBy") String sortBy,
+                                           @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+                                           @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
+            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
+            .sort(TopNNode.getComparator(sortBy, sortAscending)).collectList()
+            .map(topNList -> {
+                try {
+                    return generateDownloadableTopNResponse(topNList, downloadFormat);
+                } catch (IOException e) {
+                   throw new IllegalArgumentException("Failed to download TopN List");
+                }
+            });
+    }
+
+    private static TopNResponse generateDownloadableTopNResponse(List<TopNNode> topNNodes, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                .setHeader("Node Label", "Location", "Avg Response Time", "Reachability").build();
+
+            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
+            for (TopNNode topNNode : topNNodes) {
+                csvPrinter.printRecord(topNNode.getNodeLabel(),
+                    topNNode.getLocation(), topNNode.getAvgResponseTime(), topNNode.getReachability());
+            }
+            csvPrinter.flush();
+            return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
+    }
+
 }

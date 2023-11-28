@@ -105,7 +105,8 @@ public class GraphQLQueryValidationTest {
             readArgumentPair("/test/data/query-nodes-for-map-find-all-nodes.json"),
             readArgumentPair("/test/data/query-search-location.json"),
             readArgumentPair("/test/data/query-tags-by-active-discovery-id.json"),
-            readArgumentPair("/test/data/query-tags-by-passive-discovery-id.json")
+            readArgumentPair("/test/data/query-tags-by-passive-discovery-id.json"),
+            readArgumentPair("/test/data/mutation-update-node.json")
         );
     }
 

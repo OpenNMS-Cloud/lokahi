@@ -30,7 +30,13 @@ package org.opennms.horizon.server.model.alerts;
 
 public enum AlertCountType {
     COUNT_ALL,
-    COUNT_CLEARED,
     COUNT_ACKNOWLEDGED,
-    COUNT_UNACKNOWLEDGED;
+    COUNT_UNACKNOWLEDGED,
+    COUNT_INDETERMINATE,
+    COUNT_CLEARED,
+    COUNT_NORMAL,
+    COUNT_WARNING,
+    COUNT_MINOR,
+    COUNT_MAJOR,
+    COUNT_CRITICAL;
 }

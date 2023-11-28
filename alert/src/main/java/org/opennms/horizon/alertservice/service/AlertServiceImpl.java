@@ -33,7 +33,6 @@ import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertCount;
 import org.opennms.horizon.alerts.proto.AlertCountByType;
 import org.opennms.horizon.alerts.proto.AlertCountType;
-import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
@@ -156,14 +155,36 @@ public class AlertServiceImpl implements AlertService {
     @Override
     public AlertCount getAlertsCount(String tenantId) {
         long allAlerts = alertRepository.countByTenantId(tenantId);
-        long clearedAlerts = alertRepository.countByTenantIdAndType(tenantId, AlertType.CLEAR);
         long acknowledgedAlerts = alertRepository.countByTenantIdAndAcknowledged(tenantId);
         long unacknowledgedAlerts = alertRepository.countByTenantIdAndUnAcknowledged(tenantId);
+        long indeterminateAlerts = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.INDETERMINATE);
+        long clearedAlerts = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.CLEARED);
+        long alertsByNormal = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.NORMAL);
+        long alertCountByWarning = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.WARNING);
+        long alertCountByMinor =  alertRepository.countByTenantIdAndSeverity(tenantId, Severity.MINOR);
+        long alertCountByMajor = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.MAJOR);
+        long alertCountByCritical = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.CRITICAL);
+
         return AlertCount.newBuilder()
             .addAlertCount(AlertCountByType.newBuilder().setCount(allAlerts).setCountType(AlertCountType.COUNT_ALL).build())
-            .addAlertCount(AlertCountByType.newBuilder().setCount(clearedAlerts).setCountType(AlertCountType.COUNT_CLEARED).build())
-            .addAlertCount(AlertCountByType.newBuilder().setCount(acknowledgedAlerts).setCountType(AlertCountType.COUNT_ACKNOWLEDGED).build())
-            .addAlertCount(AlertCountByType.newBuilder().setCount(unacknowledgedAlerts).setCountType(AlertCountType.COUNT_UNACKNOWLEDGED).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(acknowledgedAlerts)
+                .setCountType(AlertCountType.COUNT_ACKNOWLEDGED).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(unacknowledgedAlerts)
+                .setCountType(AlertCountType.COUNT_UNACKNOWLEDGED).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(indeterminateAlerts)
+                .setCountType(AlertCountType.COUNT_INDETERMINATE).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(clearedAlerts)
+                .setCountType(AlertCountType.COUNT_CLEARED).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(alertsByNormal)
+                .setCountType(AlertCountType.COUNT_NORMAL).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(alertCountByWarning)
+                .setCountType(AlertCountType.COUNT_WARNING).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(alertCountByMinor)
+                .setCountType(AlertCountType.COUNT_MINOR).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(alertCountByMajor)
+                .setCountType(AlertCountType.COUNT_MAJOR).build())
+            .addAlertCount(AlertCountByType.newBuilder().setCount(alertCountByCritical)
+                .setCountType(AlertCountType.COUNT_CRITICAL).build())
             .build();
     }
 

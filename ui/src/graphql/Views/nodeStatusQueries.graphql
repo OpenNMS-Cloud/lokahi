@@ -12,6 +12,7 @@ fragment NodeByIdParts on Query {
   node: findNodeById(id: $id) {
     id
     nodeLabel
+    nodeAlias
     objectId
     systemContact
     systemDescr

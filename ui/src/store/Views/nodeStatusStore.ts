@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
+import { useNodeMutations } from '../Mutations/nodeMutations'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { Exporter, RequestCriteriaInput } from '@/types/graphql'
+import { Exporter, NodeUpdateInput, RequestCriteriaInput } from '@/types/graphql'
 
 export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()
+  const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
   const exporters = ref<DeepPartial<Exporter>[]>([])
 
@@ -52,7 +54,17 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     return { ...node, snmpInterfaces, azureInterfaces }
   })
 
+  const updateNodeAlias = async (nodeAlias: string) => {
+    const updateInput: NodeUpdateInput = {
+      id: node.value.id,
+      nodeAlias
+    }
+
+    await mutations.updateNode({ node: updateInput })
+  }
+
   return {
+    updateNodeAlias,
     fetchedData,
     setNodeId,
     isAzure: computed(() => fetchedData.value.node.scanType === AZURE_SCAN),

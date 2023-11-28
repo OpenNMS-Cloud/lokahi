@@ -41,6 +41,7 @@ declare module '@vue/runtime-core' {
     DiscoveryNewModal: typeof import('./src/components/Discovery/DiscoveryNewModal.vue')['default']
     DiscoveryTypeSelector: typeof import('./src/components/Discovery/DiscoveryTypeSelector.vue')['default']
     DrawerBtn: typeof import('./src/components/Topology/DrawerBtn.vue')['default']
+    EditModal: typeof import('./src/components/Common/EditModal.vue')['default']
     EmptyList: typeof import('./src/components/Common/EmptyList.vue')['default']
     EventsTable: typeof import('./src/components/NodeStatus/EventsTable.vue')['default']
     ExpandingChartWrapper: typeof import('./src/components/Flows/ExpandingChartWrapper.vue')['default']

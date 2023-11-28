@@ -17,6 +17,19 @@
             :class="severity.toLowerCase()"
             :isFilter="isFilter"
             :timeRange="timeRange"
+            :count="countMap[severity]"
+          />
+        </div>
+      </div>
+      <div class="alerts-box status-box border">
+        <div class="subtitle2">Status</div>
+        <div class="list">
+          <AlertsStatusCard
+            v-for="status in statuses"
+            :key="status"
+            :status="status"
+            :class="status.toLowerCase()"
+            :count="countMap[status]"
           />
         </div>
       </div>
@@ -25,7 +38,11 @@
 </template>
 
 <script lang="ts" setup>
-import {Severity, TimeRange} from '@/types/graphql'
+import { Severity, TimeRange } from '@/types/graphql'
+import { useAlertsQueries } from '@/store/Queries/alertsQueries'
+
+const queries = useAlertsQueries()
+const countMap = ref<Record<string, number>>({})
 
 defineProps<{
   isFilter?: boolean
@@ -33,13 +50,31 @@ defineProps<{
 }>()
 
 const severities: Severity[] = [
-  Severity.Critical, Severity.Major, Severity.Minor, Severity.Warning, Severity.Indeterminate
+  Severity.Critical,
+  Severity.Major,
+  Severity.Minor,
+  Severity.Warning
 ]
+
+const statuses = ['Acknowledged', 'Unacknowledged']
+
+const populateCountsMap = async () => {
+  const types = await queries.getCounts()
+  for (const type of types) {
+    for (const severity of severities) {
+      if (type.countType?.split('_')[1] === severity) {
+        countMap.value[severity] = type.count
+      }
+    }
+  }
+}
 
 // for setting CSS properties
 const gap = 1.5
 const itemGap = `${gap}%`
 const listItemWidth = `${100 - (gap * (severities.length - 1)) / severities.length}%` // to set card with equal width
+
+onMounted(async () => await populateCountsMap())
 </script>
 
 <style lang="scss" scoped>

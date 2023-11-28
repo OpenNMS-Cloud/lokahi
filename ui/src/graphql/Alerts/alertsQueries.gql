@@ -48,3 +48,12 @@ query CountAlerts(
     error
   }
 }
+
+query AlertCounts {
+  alertCounts {
+    alertCount {
+      count
+      countType
+    }
+  }
+}

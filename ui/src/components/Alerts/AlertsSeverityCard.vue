@@ -24,7 +24,7 @@
       class="count"
       data-test="count"
     >
-      {{ count }}
+      {{ count || 0 }}
     </div>
   </div>
   <div
@@ -52,29 +52,17 @@ import Add from '@featherds/icon/action/Add'
 import Cancel from '@featherds/icon/navigation/Cancel'
 import { Severity, TimeRange } from '@/types/graphql'
 import { useAlertsStore } from '@/store/Views/alertsStore'
-import { useAlertsQueries } from '@/store/Queries/alertsQueries'
 
 const alertsStore = useAlertsStore()
-const alertsQueries = useAlertsQueries()
 
 const props = defineProps<{
   severity: Severity
   isFilter?: boolean
   timeRange?: TimeRange
+  count: number
 }>()
 
 const pillColor = { style: props.severity as string }
-
-const count = ref()
-onMounted(async () => {
-  try {
-    await alertsQueries.fetchCountAlerts([props.severity], props.timeRange || TimeRange.All)
-    count.value = alertsQueries.fetchCountAlertsData
-  } catch (err) {
-    count.value = 0
-  }
-})
-
 const isTypeAdded = computed(() => alertsStore.alertsFilter.severities?.includes(props.severity))
 </script>
 
@@ -97,13 +85,6 @@ const isTypeAdded = computed(() => alertsStore.alertsFilter.severities?.includes
     background-color: var(variables.$shade-4);
     border-color: var(variables.$secondary-variant);
   }
-
-  .cleared-count {
-    margin-left: 20px;
-  }
-  .total-count {
-    margin-left: 38px;
-  }
 }
 
 .label-add-icon {
@@ -125,10 +106,6 @@ const isTypeAdded = computed(() => alertsStore.alertsFilter.severities?.includes
   margin-bottom: var(variables.$spacing-l);
   font-family: var(variables.$header-font-family);
   color: var(variables.$primary-text-on-surface);
-}
-
-.percentage {
-  margin-right: var(variables.$spacing-xs);
 }
 
 .icon-anim-enter-active {

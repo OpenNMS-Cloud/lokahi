@@ -212,7 +212,7 @@ message AlertCountByType {
 }
 
 message AlertCount {
-  repeated  AlertCountByType alert_count = 1;
+  repeated  AlertCountByType count_by_type = 1;
 }
 
 message AlertRequest {

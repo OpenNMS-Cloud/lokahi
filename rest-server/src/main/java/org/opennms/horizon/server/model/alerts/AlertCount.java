@@ -36,5 +36,5 @@ import java.util.List;
 @Getter
 @Setter
 public class AlertCount {
-    private List<AlertCountByType> alertCount;
+    private List<AlertCountByType> countByTypeList;
 }

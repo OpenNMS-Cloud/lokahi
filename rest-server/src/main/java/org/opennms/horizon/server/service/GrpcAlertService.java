@@ -165,7 +165,7 @@ public class GrpcAlertService {
         return Mono.just(alertsClient.countAlertByRuleId(id, headerUtil.getAuthHeader(env)));
     }
 
-    @GraphQLQuery
+    @GraphQLQuery(name = "alertCounts")
     public Mono<AlertCount> getAlertCounts(@GraphQLEnvironment ResolutionEnvironment env) {
          return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
     }

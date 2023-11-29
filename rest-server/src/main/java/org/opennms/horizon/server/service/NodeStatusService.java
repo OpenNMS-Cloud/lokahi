@@ -77,18 +77,23 @@ public class NodeStatusService {
 
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
         NodeDTO node = client.getNodeById(id, headerUtil.getAuthHeader(env));
+        return getNodeStatus(node, monitorType, env);
+    }
+
+    public Mono<NodeStatus> getNodeStatus(NodeDTO node,  String monitorType, ResolutionEnvironment env) {
 
         if (AZURE_SCAN_TYPE.equals(node.getScanType())) {
-            return getStatusMetric(id, "azure-node-" + id, AZURE_MONITOR_TYPE, env)
-                .map(result -> getNodeStatus(id, result));
+            return getStatusMetric(node.getId(), "azure-node-" + node.getId(), AZURE_MONITOR_TYPE, env)
+                .map(result -> getNodeStatus(node.getId(), result));
         } else {
             if (node.getIpInterfacesCount() > 0) {
                 IpInterfaceDTO ipInterface = getPrimaryInterface(node);
-                return getNodeStatusByInterface(id, monitorType, ipInterface, env);
+                return getNodeStatusByInterface(node.getId(), monitorType, ipInterface, env);
             }
         }
-        return Mono.just(new NodeStatus(id, false));
+        return Mono.just(new NodeStatus(node.getId(), false));
     }
+
 
     private IpInterfaceDTO getPrimaryInterface(NodeDTO node) {
         List<IpInterfaceDTO> ipInterfacesList = node.getIpInterfacesList();

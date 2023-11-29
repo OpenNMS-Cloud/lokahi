@@ -12,6 +12,7 @@ tilt_config.json
 tilt-helm-values-local.yaml
 dev/tmp
 local-sample/tmp
+.jqwik-database
 
 # Package Files #
 *.jar

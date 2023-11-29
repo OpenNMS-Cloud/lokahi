@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.horizon.notifications.GrpcTestBase;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 import java.util.Collections;
@@ -32,23 +33,7 @@ public class SingleTenantKeyCloakAPITest {
         try (MockedStatic<Keycloak> mock = Mockito.mockStatic(Keycloak.class, RETURNS_DEEP_STUBS)) {
             mock.when(() -> Keycloak.getInstance(any(), any(), any(), any(), any(String.class)).realm(any()).users().list()).thenReturn(List.of(user));
 
-            assertEquals(List.of(user.getEmail()), keyCloakAPI.getTenantEmailAddresses(GrpcConstants.DEFAULT_TENANT_ID));
+            assertEquals(List.of(user.getEmail()), keyCloakAPI.getTenantEmailAddresses(GrpcTestBase.defaultTenant));
         }
     }
-
-    @Test
-    public void onlySupportsDefaultTenant() {
-        UserRepresentation user = new UserRepresentation();
-        user.setFirstName("First");
-        user.setLastName("Last");
-        user.setEmail("my@email.com");
-
-        try (MockedStatic<Keycloak> mock = Mockito.mockStatic(Keycloak.class, RETURNS_DEEP_STUBS)) {
-            mock.when(() -> Keycloak.getInstance(any(), any(), any(), any(), any(String.class)).realm(any()).users().list()).thenReturn(List.of(user));
-
-            assertEquals(Collections.emptyList(), keyCloakAPI.getTenantEmailAddresses("AnyOtherTenantHere"));
-        }
-    }
-
-
 }

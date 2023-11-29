@@ -34,6 +34,8 @@ import graphql.execution.DataFetcherExceptionHandlerParameters;
 import graphql.execution.DataFetcherExceptionHandlerResult;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.exception.GraphQLException;
 
@@ -49,6 +51,7 @@ import java.util.concurrent.CompletableFuture;
 public class BffDataFetchExceptionHandler implements DataFetcherExceptionHandler {
 
     /** {@inheritDoc} */
+    @WithSpan
     @Override
     public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
         DataFetcherExceptionHandlerParameters parameters
@@ -61,6 +64,7 @@ public class BffDataFetchExceptionHandler implements DataFetcherExceptionHandler
             parameters.getSourceLocation()
         );
 
+        Span.current().recordException(exception);
         log.warn("Caught exception during data fetching", exception);
 
         var result = DataFetcherExceptionHandlerResult

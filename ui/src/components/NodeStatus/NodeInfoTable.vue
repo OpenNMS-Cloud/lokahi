@@ -1,12 +1,5 @@
 <template>
   <TableCard>
-    <div class="header">
-      <div class="title-container">
-        <span class="title">
-          Node ({{ nodeData.node.nodeLabel }})
-        </span>
-      </div>
-    </div>
     <div class="container">
       <table class="data-table" aria-label="Node Info Table">
         <thead>
@@ -47,22 +40,8 @@ const nodeData = computed(() => {
 
 <style lang="scss" scoped>
 @use "@featherds/styles/themes/variables";
-@use "@featherds/styles/mixins/typography";
 @use "@featherds/table/scss/table";
 @use "@/styles/_transitionDataTable";
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  .title-container {
-    display: flex;
-    .title {
-      @include typography.headline3;
-      margin-left: 15px;
-      margin-top: 2px;
-    }
-  }
-}
 
 .container {
   display: block;

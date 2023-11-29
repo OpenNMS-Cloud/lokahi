@@ -23,6 +23,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.Severity;
+import org.opennms.horizon.notifications.GrpcTestBase;
 import org.opennms.horizon.notifications.NotificationsApplication;
 import org.opennms.horizon.notifications.SpringContextTestInitializer;
 import org.opennms.horizon.notifications.api.PagerDutyAPI;
@@ -99,12 +100,12 @@ class AlertKafkaConsumerIntegrationTestNoConfig {
     @Test
     void testProducingAlertWithNoConfigSetup() throws InvalidProtocolBufferException {
         int id = 1234;
-        String tenantId = "opennms-prime";
+        String tenantId = GrpcTestBase.defaultTenant;
         Alert alert = Alert.newBuilder()
             .setSeverity(Severity.MINOR)
             .setLogMessage("hello")
             .setDatabaseId(1234)
-            .setTenantId("opennms-prime")
+            .setTenantId(GrpcTestBase.defaultTenant)
             .build();
         var producerRecord = new ProducerRecord<String,byte[]>(alertsTopic, alert.toByteArray());
 

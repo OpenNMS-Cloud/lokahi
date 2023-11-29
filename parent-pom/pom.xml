@@ -110,7 +110,8 @@
         <netty4.version>4.1.78.Final</netty4.version>
         <opennms.tracker.version>0.7</opennms.tracker.version>
         <opentracing.version>0.31.0</opentracing.version>
-        <opentelemetry.version>1.25.0</opentelemetry.version>
+        <opentelemetry.version>1.32.0</opentelemetry.version>
+        <opentelemetry-semconv.version>1.23.1-alpha</opentelemetry-semconv.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <osgi.version>7.0.0</osgi.version>
         <micrometer.version>1.11.1</micrometer.version>
@@ -973,7 +974,7 @@
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-semconv</artifactId>
-                <version>${opentelemetry.version}-alpha</version>
+                <version>${opentelemetry-semconv.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

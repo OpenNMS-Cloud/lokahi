@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-drop-default-tenant" author="jbeuree">
+        <dropDefaultValue tableName="alert" columnName="tenant_id"/>
+        <dropDefaultValue tableName="thresholded_event" columnName="tenant_id"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -7,7 +7,8 @@ import {
   AddTagsToNodesDocument,
   TagListNodesAddInput,
   RemoveTagsFromNodesDocument,
-  TagListNodesRemoveInput
+  TagListNodesRemoveInput,
+  UpdateNodeDocument
 } from '@/types/graphql'
 
 const { startSpinner, stopSpinner } = useSpinner()
@@ -37,7 +38,10 @@ export const useNodeMutations = defineStore('nodeMutations', () => {
     }
   })
 
+  const { execute: updateNode } = useMutation(UpdateNodeDocument)
+
   return {
+    updateNode,
     deleteNode,
     addNode,
     error,

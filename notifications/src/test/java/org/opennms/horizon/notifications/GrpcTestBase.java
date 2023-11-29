@@ -59,6 +59,7 @@ public abstract class GrpcTestBase {
     protected final String authHeader = "Bearer esgs12345";
     protected final String headerWithoutTenant = "Bearer esgs12345invalid";
     protected final String differentTenantHeader = "Bearer esgs12345different";
+    public static final String defaultTenant = "opennms-prime";
     protected ManagedChannel channel;
     @Autowired
     @SpyBean

@@ -47,7 +47,7 @@ import java.util.Optional;
 class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
     private static final Logger LOG = LoggerFactory.getLogger(TenantIdentifierResolver.class);
     private final TenantLookup tenantLookup;
-    private String defaultTenantId = GrpcConstants.DEFAULT_TENANT_ID;
+    private String defaultTenantId = "";
 
     @Override
     public String resolveCurrentTenantIdentifier() {

@@ -21,3 +21,7 @@ mutation AddTagsToNodes($tags: TagListNodesAddInput!) {
 mutation RemoveTagsFromNodes ($tags: TagListNodesRemoveInput!) {
   removeTagsFromNodes (tags: $tags)
 }
+
+mutation UpdateNode($node: NodeUpdateInput!) {
+  updateNode(node: $node)
+}

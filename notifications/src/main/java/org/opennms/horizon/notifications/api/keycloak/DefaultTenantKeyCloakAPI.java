@@ -58,12 +58,8 @@ public class DefaultTenantKeyCloakAPI implements KeyCloakAPI {
 
     @Override
     public List<String> getTenantEmailAddresses(String tenant) {
-        // Only do lookups for the default tenant
-        if (Objects.equals(tenant, GrpcConstants.DEFAULT_TENANT_ID)) {
             try (Keycloak client = Keycloak.getInstance(baseUrl, realm, username, password, clientId)) {
                 return client.realm(realm).users().list().stream().map(UserRepresentation::getEmail).toList();
             }
-        }
-        return Collections.emptyList();
     }
 }

@@ -32,4 +32,5 @@
     <include file="/db/changelog/hs-0.1.0/tables/system_policy_tag.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/update_system_policy_tag_nullable_tag_id.xml" />
     <include file="/db/changelog/hs-0.1.0/data/system_tenant_default_policy_restore.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/drop_default_tenant.xml" />
 </databaseChangeLog>

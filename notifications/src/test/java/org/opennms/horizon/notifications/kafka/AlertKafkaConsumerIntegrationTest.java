@@ -27,6 +27,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.Severity;
+import org.opennms.horizon.notifications.GrpcTestBase;
 import org.opennms.horizon.notifications.NotificationsApplication;
 import org.opennms.horizon.notifications.SpringContextTestInitializer;
 import org.opennms.horizon.notifications.exceptions.NotificationException;
@@ -100,14 +101,14 @@ class AlertKafkaConsumerIntegrationTest {
     @Test
     void testProducingAlertWithConfigSetup() throws NotificationException, InvalidProtocolBufferException {
         MonitoringPolicy monitoringPolicy  = new MonitoringPolicy();
-        monitoringPolicy.setTenantId("opennms-prime");
+        monitoringPolicy.setTenantId(GrpcTestBase.defaultTenant);
         monitoringPolicy.setId(1);
         monitoringPolicy.setNotifyByPagerDuty(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn(anyString(), anyList())).thenReturn(
             List.of(monitoringPolicy)
         );
 
-        String tenantId = "opennms-prime";
+        String tenantId = GrpcTestBase.defaultTenant;
         alertKafkaConsumerTestHelper.setupConfig(tenantId);
 
         int id = 1234;
@@ -115,7 +116,7 @@ class AlertKafkaConsumerIntegrationTest {
             .setSeverity(Severity.MINOR)
             .setLogMessage("hello")
             .setDatabaseId(1234)
-            .setTenantId("opennms-prime")
+            .setTenantId(GrpcTestBase.defaultTenant)
             .addMonitoringPolicyId(1)
             .build();
         var producerRecord = new ProducerRecord<String,byte[]>(alertsTopic, alert.toByteArray());

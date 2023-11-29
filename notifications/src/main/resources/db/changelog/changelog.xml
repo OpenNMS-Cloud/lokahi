@@ -12,5 +12,5 @@
     <include file="db/changelog/hs-0.1.0/tables/monitoringPolicy.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/monitoringPolicyTenantKey.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/pagerDutyTenantKey.xml" />
-
+    <include file="db/changelog/hs-0.1.0/tables/pagerDutyDropDefaultTenant.xml" />
 </databaseChangeLog>

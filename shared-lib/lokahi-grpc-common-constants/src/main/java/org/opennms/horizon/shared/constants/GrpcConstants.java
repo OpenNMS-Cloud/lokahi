@@ -35,7 +35,6 @@ import io.grpc.Metadata;
 public interface GrpcConstants {
     String TENANT_ID_KEY = "tenant-id";
     String LOCATION_ID_KEY = "location-id";
-    String DEFAULT_TENANT_ID = "opennms-prime";
 
     //gRPC constants
     Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);

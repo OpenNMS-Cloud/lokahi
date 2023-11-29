@@ -69,7 +69,7 @@ public class ServerHeaderUtil {
 
     public String extractTenant(ResolutionEnvironment env) {
         String header = getAuthHeader(env);
-        return header != null ? parseHeader(header) : "opennms-prime";
+        return header != null ? parseHeader(header) : null;
     }
     private String retrieveAuthHeader(ResolutionEnvironment env) {
         GraphQLContext graphQLContext = env.dataFetchingEnvironment.getContext();

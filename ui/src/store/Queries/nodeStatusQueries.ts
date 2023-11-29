@@ -9,7 +9,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     variables.value = { id }
   }
 
-  const { data } = useQuery({
+  const { data, execute: fetchNodeStatus } = useQuery({
     query: ListNodeStatusDocument,
     variables,
     cachePolicy: 'network-only'
@@ -35,6 +35,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   return {
     setNodeId,
     fetchedData,
-    fetchExporters
+    fetchExporters,
+    fetchNodeStatus
   }
 })

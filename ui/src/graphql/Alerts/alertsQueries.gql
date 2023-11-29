@@ -51,7 +51,7 @@ query CountAlerts(
 
 query AlertCounts {
   alertCounts {
-    alertCount {
+    countByTypeList {
       count
       countType
     }

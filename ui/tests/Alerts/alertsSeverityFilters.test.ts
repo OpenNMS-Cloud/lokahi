@@ -6,7 +6,10 @@ let wrapper: any
 describe('AlertsSeverityFilters', () => {
   beforeEach(() => {
     wrapper = mount({
-      component: AlertsSeverityFilters
+      component: AlertsSeverityFilters,
+      props: {
+        isFilter: true
+      }
     })
   })
   afterEach(() => {

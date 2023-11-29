@@ -51,7 +51,7 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
       fetchOnMount: false
     })
     await execute()
-    return data.value?.alertCounts?.alertCount || []
+    return data.value?.alertCounts?.countByTypeList ?? []
   }
 
   return {

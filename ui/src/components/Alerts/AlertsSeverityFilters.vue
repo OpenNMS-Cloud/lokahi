@@ -11,7 +11,7 @@
           data-test="severity-list"
         >
           <AlertsSeverityCard
-            v-for="severity in severities"
+            v-for="severity in Severities"
             :key="severity"
             :severity="severity"
             :class="severity.toLowerCase()"
@@ -25,7 +25,7 @@
         <div class="subtitle2">Status</div>
         <div class="list">
           <AlertsStatusCard
-            v-for="status in statuses"
+            v-for="status in Statuses"
             :key="status"
             :status="status"
             :class="status.toLowerCase()"
@@ -38,43 +38,35 @@
 </template>
 
 <script lang="ts" setup>
-import { Severity, TimeRange } from '@/types/graphql'
+import { TimeRange, Severity } from '@/types/graphql'
 import { useAlertsQueries } from '@/store/Queries/alertsQueries'
+import { Severities, Statuses, Ack, UnAck } from './alerts.constants'
+import { getCountMap } from './alerts.utils'
 
 const queries = useAlertsQueries()
-const countMap = ref<Record<string, number>>({})
+const countMap = ref<Record<string, number>>({
+  [Severity.Critical]: 0,
+  [Severity.Major]: 0,
+  [Severity.Minor]: 0,
+  [Severity.Warning]: 0,
+  [Ack]: 0,
+  [UnAck]: 0
+})
 
 defineProps<{
   isFilter?: boolean
   timeRange?: TimeRange
 }>()
 
-const severities: Severity[] = [
-  Severity.Critical,
-  Severity.Major,
-  Severity.Minor,
-  Severity.Warning
-]
-
-const statuses = ['Acknowledged', 'Unacknowledged']
-
-const populateCountsMap = async () => {
-  const types = await queries.getCounts()
-  for (const type of types) {
-    for (const item of [...severities, ...statuses]) {
-      if (type.countType?.split('_')[1].toUpperCase() === item.toUpperCase()) {
-        countMap.value[item] = type.count
-      }
-    }
-  }
-}
-
 // for setting CSS properties
 const gap = 1.5
 const itemGap = `${gap}%`
-const listItemWidth = `${100 - (gap * (severities.length - 1)) / severities.length}%` // to set card with equal width
+const listItemWidth = `${100 - (gap * (Severities.length - 1)) / Severities.length}%` // to set card with equal width
 
-onMounted(async () => await populateCountsMap())
+onMounted(async () => {
+  const types = await queries.getCounts()
+  countMap.value = getCountMap(types, Severities, Statuses)
+})
 </script>
 
 <style lang="scss" scoped>

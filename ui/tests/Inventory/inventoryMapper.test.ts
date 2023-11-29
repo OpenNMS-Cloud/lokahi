@@ -10,6 +10,7 @@ describe('Inventory Mapper Tests', () => {
       monitoringLocationId:1,
       nodeLabel:'192.168.1.1',
       scanType:'DISCOVERY_SCAN',
+      nodeAlias: 'alias',
       ipInterfaces:[
         {
           id:1,

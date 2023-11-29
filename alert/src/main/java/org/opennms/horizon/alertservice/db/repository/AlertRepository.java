@@ -116,6 +116,9 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     long countByTenantIdAndSeverity(String tenantId, Severity severity);
 
+    @Query(value = "SELECT a.severity as severity, COUNT(DISTINCT a.id) as count FROM Alert a WHERE a.tenantId = :tenantId GROUP BY a.severity")
+    List<SeverityCount> countByTenantIdAndGroupBySeverity(@Param("tenantId") String tenantId);
+
     @Query(value = "SELECT count(distinct a) FROM Alert a WHERE a.tenantId = :tenantId AND a.acknowledgedByUser IS NOT NULL")
     long countByTenantIdAndAcknowledged(@Param("tenantId") String tenantId);
 

@@ -31,14 +31,13 @@ package org.opennms.horizon.alertservice.service;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertCount;
-import org.opennms.horizon.alerts.proto.AlertCountByType;
-import org.opennms.horizon.alerts.proto.AlertCountType;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
+import org.opennms.horizon.alertservice.db.repository.SeverityCount;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.alertservice.mapper.NodeMapper;
 import org.opennms.horizon.events.proto.Event;
@@ -154,39 +153,15 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public AlertCount getAlertsCount(String tenantId) {
-        long allAlerts = alertRepository.countByTenantId(tenantId);
+        long allAlertsCount = alertRepository.countByTenantId(tenantId);
         long acknowledgedAlerts = alertRepository.countByTenantIdAndAcknowledged(tenantId);
-        long unacknowledgedAlerts = alertRepository.countByTenantIdAndUnAcknowledged(tenantId);
-        long indeterminateAlerts = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.INDETERMINATE);
-        long clearedAlerts = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.CLEARED);
-        long alertsByNormal = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.NORMAL);
-        long alertCountByWarning = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.WARNING);
-        long alertCountByMinor =  alertRepository.countByTenantIdAndSeverity(tenantId, Severity.MINOR);
-        long alertCountByMajor = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.MAJOR);
-        long alertCountByCritical = alertRepository.countByTenantIdAndSeverity(tenantId, Severity.CRITICAL);
 
-        return AlertCount.newBuilder()
-            .addCountByType(AlertCountByType.newBuilder().setCount(allAlerts)
-                .setCountType(AlertCountType.COUNT_ALL).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(acknowledgedAlerts)
-                .setCountType(AlertCountType.COUNT_ACKNOWLEDGED).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(unacknowledgedAlerts)
-                .setCountType(AlertCountType.COUNT_UNACKNOWLEDGED).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(indeterminateAlerts)
-                .setCountType(AlertCountType.COUNT_INDETERMINATE).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(clearedAlerts)
-                .setCountType(AlertCountType.COUNT_CLEARED).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(alertsByNormal)
-                .setCountType(AlertCountType.COUNT_NORMAL).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(alertCountByWarning)
-                .setCountType(AlertCountType.COUNT_WARNING).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(alertCountByMinor)
-                .setCountType(AlertCountType.COUNT_MINOR).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(alertCountByMajor)
-                .setCountType(AlertCountType.COUNT_MAJOR).build())
-            .addCountByType(AlertCountByType.newBuilder().setCount(alertCountByCritical)
-                .setCountType(AlertCountType.COUNT_CRITICAL).build())
-            .build();
+        List<SeverityCount> severityCountList = alertRepository.countByTenantIdAndGroupBySeverity(tenantId);
+        var countBuilder = AlertCount.newBuilder();
+        countBuilder.setAcknowledgedCount(acknowledgedAlerts).setTotalAlertCount(allAlertsCount);
+        severityCountList.forEach(severityCount ->
+            countBuilder.putCountBySeverity(severityCount.getSeverity().name(), severityCount.getCount()));
+        return countBuilder.build();
     }
 
     @Override

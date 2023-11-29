@@ -31,10 +31,12 @@ package org.opennms.horizon.server.model.alerts;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
 public class AlertCount {
-    private List<AlertCountByType> countByTypeList;
+    private Map<String, Long> countBySeverity;
+    private Long acknowledgedCount;
+    private Long totalAlertCount;
 }

@@ -33,7 +33,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.server.model.alerts.AlertCount;
 
-@Mapper(componentModel = "spring", uses = AlertCountTypeMapper.class, nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+@Mapper(componentModel = "spring",  nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
     collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface AlertsCountMapper {
     public AlertCount protoToAlertCount(org.opennms.horizon.alerts.proto.AlertCount alertCount);

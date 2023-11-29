@@ -26,17 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.model.alerts;
+package org.opennms.horizon.alertservice.db.repository;
 
-public enum AlertCountType {
-    COUNT_ALL,
-    COUNT_ACKNOWLEDGED,
-    COUNT_UNACKNOWLEDGED,
-    COUNT_INDETERMINATE,
-    COUNT_CLEARED,
-    COUNT_NORMAL,
-    COUNT_WARNING,
-    COUNT_MINOR,
-    COUNT_MAJOR,
-    COUNT_CRITICAL;
+import org.opennms.horizon.alerts.proto.Severity;
+
+public interface SeverityCount {
+
+    Long getCount();
+
+    Severity getSeverity();
 }

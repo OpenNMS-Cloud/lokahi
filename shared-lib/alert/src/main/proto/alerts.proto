@@ -84,19 +84,6 @@ enum AlertType {
   PROBLEM_WITHOUT_CLEAR = 3;
 }
 
-enum AlertCountType {
-  COUNT_ALL = 0;
-  COUNT_ACKNOWLEDGED = 1;
-  COUNT_UNACKNOWLEDGED = 2;
-  COUNT_INDETERMINATE = 3;
-  COUNT_CLEARED = 4;
-  COUNT_NORMAL = 5;
-  COUNT_WARNING = 6;
-  COUNT_MINOR = 7;
-  COUNT_MAJOR = 8;
-  COUNT_CRITICAL = 9;
-}
-
 message TimeRangeFilter {
   google.protobuf.Timestamp start_time = 1;
   google.protobuf.Timestamp end_time = 2;
@@ -206,13 +193,10 @@ message CountAlertResponse {
   AlertError error = 2;
 }
 
-message AlertCountByType {
-  AlertCountType count_type = 1;
-  int64 count = 2;
-}
-
 message AlertCount {
-  repeated  AlertCountByType count_by_type = 1;
+  map<string, int64> count_by_severity = 1;
+  int64 total_alert_count = 2;
+  int64 acknowledged_count = 3;
 }
 
 message AlertRequest {

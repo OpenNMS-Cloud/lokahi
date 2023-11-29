@@ -1,4 +1,3 @@
-import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import mount from '../mountWithPiniaVillus'
 import WelcomeSlideThree from '@/components/Welcome/WelcomeSlideThree.vue'
 

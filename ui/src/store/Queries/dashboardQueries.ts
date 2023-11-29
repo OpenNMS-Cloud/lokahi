@@ -7,9 +7,7 @@ import {
   TsData,
   TopNNodesQueryVariables,
   DownloadTopNQueryVariables,
-  DownloadTopNDocument,
-  NodeCountDocument,
-  AllNodeStatusDocument
+  DownloadTopNDocument
 } from '@/types/graphql'
 
 export const useDashboardQueries = defineStore('dashboardQueries', () => {
@@ -39,26 +37,6 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
     totalNetworkTrafficOut.value = (networkTrafficData.value || []) as TsData
   }
 
-  const getNodeCount = async () => {
-    const { execute, data } = useQuery({
-      query: NodeCountDocument,
-      cachePolicy: 'network-only',
-      fetchOnMount: false
-    })
-    await execute()
-    return data.value?.nodeCount ?? 0
-  }
-
-  const getAllNodesStatus = async () => {
-    const { execute, data } = useQuery({
-      query: AllNodeStatusDocument,
-      cachePolicy: 'network-only',
-      fetchOnMount: false
-    })
-    await execute()
-    return data.value?.allNodeStatus ?? []
-  }
-
   const getTopNodes = async (topNNodesQueryVariables: TopNNodesQueryVariables) => {
     const { execute, data } = useQuery({
       query: TopNNodesDocument,
@@ -67,7 +45,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
       fetchOnMount: false
     })
     await execute()
-    return data.value?.topNNode ?? []
+    return data.value
   }
 
   const downloadTopNodes = async (downloadTopNQueryVariables: DownloadTopNQueryVariables) => {
@@ -83,9 +61,7 @@ export const useDashboardQueries = defineStore('dashboardQueries', () => {
 
   return {
     getTopNodes,
-    getNodeCount,
     downloadTopNodes,
-    getAllNodesStatus,
     getNetworkTrafficInMetrics,
     getNetworkTrafficOutMetrics,
     networkTrafficIn: computed(() => totalNetworkTrafficIn.value),

@@ -61,9 +61,9 @@ const statuses = ['Acknowledged', 'Unacknowledged']
 const populateCountsMap = async () => {
   const types = await queries.getCounts()
   for (const type of types) {
-    for (const severity of severities) {
-      if (type.countType?.split('_')[1] === severity) {
-        countMap.value[severity] = type.count
+    for (const item of [...severities, ...statuses]) {
+      if (type.countType?.split('_')[1].toUpperCase() === item.toUpperCase()) {
+        countMap.value[item] = type.count
       }
     }
   }

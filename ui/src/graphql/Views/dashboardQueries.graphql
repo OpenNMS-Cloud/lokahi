@@ -5,17 +5,6 @@ query NetworkTraffic($name: String!, $timeRange: Int!, $timeRangeUnit: TimeRange
   }
 }
 
-query NodeCount {
-  nodeCount
-}
-
-query AllNodeStatus {
-  allNodeStatus {
-    id
-    status
-  }
-}
-
 query TopNNodes(
   $timeRange: Int!, 
   $timeRangeUnit: TimeRangeUnit!, 
@@ -35,6 +24,11 @@ query TopNNodes(
       avgResponseTime
       reachability
   }
+  allNodeStatus {
+    id
+    status
+  }
+  nodeCount
 }
 
 query DownloadTopN(

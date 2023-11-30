@@ -72,6 +72,8 @@ declare module '@vue/runtime-core' {
     FeatherSortHeader: typeof import('@featherds/table')['FeatherSortHeader']
     FeatherSpinner: typeof import('@featherds/progress')['FeatherSpinner']
     FeatherTab: typeof import('@featherds/tabs')['FeatherTab']
+    FeatherTabContainer: typeof import('@featherds/tabs')['FeatherTabContainer']
+    FeatherTabPanel: typeof import('@featherds/tabs')['FeatherTabPanel']
     FeatherTextarea: typeof import('@featherds/textarea')['FeatherTextarea']
     FeatherTooltip: typeof import('@featherds/tooltip')['FeatherTooltip']
     FooterSection: typeof import('./src/components/Common/FooterSection.vue')['default']

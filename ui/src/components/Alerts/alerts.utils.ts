@@ -1,16 +1,23 @@
-import { AlertCountByType, Severity } from '@/types/graphql'
+import { AlertCount, Severity } from '@/types/graphql'
+import { Ack, UnAck, DefaultCountMap } from './alerts.constants'
 
-export const getCountMap = (types: AlertCountByType[] = [], severities: Severity[] = [], statuses: string[] = []) => {
+export const getCountMap = (
+  alertCount: AlertCount = { acknowledgedCount: 0, totalAlertCount: 0, countBySeverity: {} },
+  severities: Severity[] = []
+) => {
   const map: any = {}
-  const severitiesAndStatuses = [...severities, ...statuses]
+  const countsBySeverity = alertCount.countBySeverity
 
-  for (const type of types) {
-    for (const item of severitiesAndStatuses) {
-      if (type.countType?.split('_')[1].toUpperCase() === item.toUpperCase()) {
-        map[item] = type.count
+  for (const key in countsBySeverity) {
+    for (const item of severities) {
+      if (key.toUpperCase().includes(item.toUpperCase())) {
+        map[item] = countsBySeverity[key]
       }
     }
   }
 
-  return map
+  map[Ack] = alertCount.acknowledgedCount
+  map[UnAck] = alertCount.totalAlertCount - alertCount.acknowledgedCount
+
+  return { ...DefaultCountMap, ...map }
 }

@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { AlertCountsDocument, AlertsListDocument, CountAlertsDocument, TimeRange } from '@/types/graphql'
+import {
+  AlertCountsDocument,
+  AlertsListDocument,
+  CountAlertsDocument,
+  TimeRange
+} from '@/types/graphql'
 import { AlertsFilters, Pagination } from '@/types/alerts'
 
 export const useAlertsQueries = defineStore('alertsQueries', () => {
@@ -51,7 +56,7 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
       fetchOnMount: false
     })
     await execute()
-    return data.value?.alertCounts?.countByTypeList ?? []
+    return data.value?.alertCounts ?? {}
   }
 
   return {

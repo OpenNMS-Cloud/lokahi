@@ -51,9 +51,8 @@ query CountAlerts(
 
 query AlertCounts {
   alertCounts {
-    countByTypeList {
-      count
-      countType
-    }
+    acknowledgedCount
+    totalAlertCount
+    countBySeverity
   }
 }

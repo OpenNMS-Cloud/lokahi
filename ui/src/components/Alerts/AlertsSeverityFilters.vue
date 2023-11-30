@@ -38,20 +38,13 @@
 </template>
 
 <script lang="ts" setup>
-import { TimeRange, Severity } from '@/types/graphql'
+import { TimeRange } from '@/types/graphql'
 import { useAlertsQueries } from '@/store/Queries/alertsQueries'
-import { Severities, Statuses, Ack, UnAck } from './alerts.constants'
+import { Severities, Statuses, DefaultCountMap } from './alerts.constants'
 import { getCountMap } from './alerts.utils'
 
 const queries = useAlertsQueries()
-const countMap = ref<Record<string, number>>({
-  [Severity.Critical]: 0,
-  [Severity.Major]: 0,
-  [Severity.Minor]: 0,
-  [Severity.Warning]: 0,
-  [Ack]: 0,
-  [UnAck]: 0
-})
+const countMap = ref<Record<string, number>>(DefaultCountMap)
 
 defineProps<{
   isFilter?: boolean
@@ -64,8 +57,8 @@ const itemGap = `${gap}%`
 const listItemWidth = `${100 - (gap * (Severities.length - 1)) / Severities.length}%` // to set card with equal width
 
 onMounted(async () => {
-  const types = await queries.getCounts()
-  countMap.value = getCountMap(types, Severities, Statuses)
+  const alertCount = await queries.getCounts()
+  countMap.value = getCountMap(alertCount, Severities)
 })
 </script>
 

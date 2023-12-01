@@ -1,15 +1,9 @@
 <template>
   <div class="card">
     <div class="label-add-icon">
-      <PillColor
-        :item="pillColor"
-        data-test="severity-label"
-      />
+      <PillColor :item="pillColor" />
     </div>
-    <div
-      class="count"
-      data-test="count"
-    >
+    <div class="count">
       {{ count || 0 }}
     </div>
   </div>
@@ -21,7 +15,7 @@ const props = defineProps<{
   count: number
 }>()
 
-const pillColor = { style: props.status as string }
+const pillColor = { style: props.status }
 </script>
 
 <style lang="scss" scoped>

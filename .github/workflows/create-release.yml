@@ -25,6 +25,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # so we can get tags and history for the changelog
+          # We use a token so our push will trigger the release workflow
+          # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Create release
         run: |

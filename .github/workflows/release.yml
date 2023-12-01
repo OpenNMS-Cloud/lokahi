@@ -2,8 +2,8 @@ name: release
 
 on:
   push:
-    branches:
-      - 'release'
+    tags:
+      - v*
   workflow_call:
     inputs:
       image-tag:
@@ -43,10 +43,7 @@ jobs:
           # workflow, neither the output nor the env variables seem to persist
           # to this job.
 
-          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
-
-          echo "Head commit message: ${{ github.event.head_commit.message }}"
-          echo "Extracted tag: $TAG."
+          TAG="${{  github.ref_name }}"
           
           # Validate tag format
           # Format of commit message: RELEASE <tag> - <message>
@@ -222,3 +219,18 @@ jobs:
           docker push opennms/${{ matrix.image }}:latest
           docker push opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
 
+  notify:
+    needs: [release, minion]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create the Mattermost Init Message
+        run: |
+          echo "{\"text\":\"Release ${{ env.RELEASE_TAG }} completed.\"}" > mattermost.json
+
+      - name: Post Init Message to Mattermost
+        uses: mattermost/action-mattermost-notify@master
+        env:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          MATTERMOST_CHANNEL: "horizon-stream-wg"
+          MATTERMOST_USERNAME: "github_actions"
+          MATTERMOST_ICON: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"

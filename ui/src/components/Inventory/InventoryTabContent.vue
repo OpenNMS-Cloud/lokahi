@@ -2,7 +2,7 @@
   <div class="cards">
     <div v-for="node in tabContent" :key="node.id" class="card" :data-test="state">
       <section class="node-header">
-        <h5 data-test="heading" class="node-label">{{ node?.nodeLabel }}</h5>
+        <h5 data-test="heading" class="node-label">{{ node?.nodeAlias || node?.nodeLabel }}</h5>
         <div class="card-chip-list">
           <div class="text-badge-row" v-if="state === MonitoredStates.MONITORED">
             <div v-for="badge, index in metricsAsTextBadges(node?.metrics)" :key="index">

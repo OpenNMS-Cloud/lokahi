@@ -73,8 +73,7 @@ git pull $PULL_FLAGS origin develop
 git checkout release
 git pull $PULL_FLAGS origin release
 
-# Do the rest of the work on develop, which we'll merge into release when we're done
-git checkout develop
+git merge --no-edit develop
 
 CHANGELOG="CHANGELOG/changelog-$CURRENT_TAG.md"
 
@@ -85,8 +84,6 @@ git log $PREVIOUS_TAG..HEAD --oneline --graph | grep 'Merge pull request' | sed 
 git add $CHANGELOG
 git commit -m "RELEASE $CURRENT_TAG - updated" $CHANGELOG
 
-git checkout release
-git merge --no-edit develop
 if [ $DRYRUN -eq 0 ]; then
     git push origin release
 fi

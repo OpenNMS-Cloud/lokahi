@@ -26,37 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.alertservice.api;
+package org.opennms.horizon.alertservice.db.repository;
 
+import org.opennms.horizon.alerts.proto.Severity;
 
-import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.AlertCount;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.inventory.dto.NodeDTO;
+public interface SeverityCount {
 
-import java.util.List;
-import java.util.Optional;
+    Long getCount();
 
-public interface AlertService {
-    List<Alert> reduceEvent(Event e);
-
-    boolean deleteByIdAndTenantId(long id, String tenantId);
-
-    void deleteByTenantId(Alert alert, String tenantId);
-
-    Optional<Alert> acknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> unacknowledgeByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> escalateByIdAndTenantId(long id, String tenantId);
-
-    Optional<Alert> clearByIdAndTenantId(long id, String tenantId);
-
-    void addListener(AlertLifecycleListener listener);
-
-    void removeListener(AlertLifecycleListener listener);
-
-    void saveNode(NodeDTO node);
-
-    AlertCount getAlertsCount(String tenantId);
+    Severity getSeverity();
 }

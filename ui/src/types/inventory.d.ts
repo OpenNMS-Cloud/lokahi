@@ -30,6 +30,7 @@ interface NewInventoryNode {
   nodeLabel: string,
   scanType: string,
   tags: [{id:number, name: string}],
+  nodeAlias: string
 }
 interface RawMetric {
   metric: {

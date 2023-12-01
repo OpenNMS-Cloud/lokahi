@@ -22,7 +22,7 @@ You can also optionally use tags to categorize and identify these nodes.
 [[tag-create]]
 === Create tags and add them to a node
 
-A tag is an optional, arbitrary label that you can associate with a node or device and its components, alerts, events, Minions, and network monitoring policies.
+A tag is an optional label that you can associate with a node or device and its components, alerts, events, Minions, and network monitoring policies.
 It allows for easy and flexible filtering and grouping of devices.
 
 A tag can be any word or number.
@@ -77,6 +77,18 @@ To remove a node from a monitoring list, follow these steps:
 . Click on the node tab that displays the node you do not want to monitor.
 . Click the *delete* symbol on the node card.
 . When prompted to confirm deletion, click *Delete*.
+
+== Change the node name
+You may want to change the node name displayed in the inventory screen to an easy-to-remember name (alias) to make it easier to identify.
+Node names are case-sensitive, and duplicate aliases are not allowed.
+
+To change the name of a node, follow these steps:
+
+. Click *Inventory* in the left navigation menu.
+. Click on the node tab that displays the node whose name you want to change.
+. Click the *!* symbol on the node card.
+. Click the *edit* symbol beside the node name.
+. Type a new name (alias) in the field and click *Apply*.
 
 == View detailed node information
 

@@ -10,6 +10,7 @@ describe('Inventory Mapper Tests', () => {
       monitoringLocationId:1,
       nodeLabel:'192.168.1.1',
       scanType:'DISCOVERY_SCAN',
+      nodeAlias: 'alias',
       ipInterfaces:[
         {
           id:1,
@@ -29,7 +30,7 @@ describe('Inventory Mapper Tests', () => {
         
       location: {id:1,location:'default'},
       metrics:{metric:{__name__:'response_time_msec','instance':'192.168.1.1','location_id':'1',monitor:'ICMP',node_id:'1',system_id:'default'},value:[12213123,0.423],values:[]},tags:[{id:1,name:'default'}],
-      monitoredState:MonitoredStates.MONITORED,monitoringLocationId:1,nodeLabel:'192.168.1.1',scanType: 'DISCOVERY_SCAN',ipInterfaces:[{id:1,ipAddress:'192.168.1.1',nodeId:1,snmpPrimary:true}]}]})
+      monitoredState:MonitoredStates.MONITORED,monitoringLocationId:1,nodeLabel:'192.168.1.1', nodeAlias: 'alias',scanType: 'DISCOVERY_SCAN',ipInterfaces:[{id:1,ipAddress:'192.168.1.1',nodeId:1,snmpPrimary:true}]}]})
   })
 
 })

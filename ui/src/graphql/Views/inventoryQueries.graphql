@@ -123,6 +123,7 @@ query BuildNetworkInventoryPage {
     monitoringLocationId
     nodeLabel
     scanType
+    nodeAlias
   }
   allMetrics: metric(name: "response_time_msec") {
     status

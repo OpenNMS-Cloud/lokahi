@@ -28,34 +28,6 @@
 
 package org.opennms.horizon.server.service.grpc;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
-import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
-import org.opennms.horizon.alerts.proto.ListAlertsRequest;
-import org.opennms.horizon.alerts.proto.ListAlertsResponse;
-import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
-import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
-import org.opennms.horizon.server.model.alerts.TimeRange;
-import org.opennms.horizon.shared.constants.GrpcConstants;
-
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -67,6 +39,34 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
+import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
+import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
+import org.opennms.horizon.alerts.proto.ListAlertsRequest;
+import org.opennms.horizon.alerts.proto.ListAlertsResponse;
+import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
+import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
+import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
+import org.opennms.horizon.server.model.alerts.TimeRange;
+import org.opennms.horizon.shared.constants.GrpcConstants;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class AlertsClientDeadlineTest {
     @Rule
@@ -79,6 +79,7 @@ public class AlertsClientDeadlineTest {
     private static MockServerInterceptor mockInterceptor;
     private static AlertServiceGrpc.AlertServiceImplBase mockAlertService;
     private final String accessToken = "test-token";
+    private static AlertsCountMapper alertsCountMapper;
 
     @BeforeAll
     public static void startGrpc() throws IOException {
@@ -103,7 +104,7 @@ public class AlertsClientDeadlineTest {
             .start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("AlertsClientDeadlineTest").directExecutor().build());
         monitorPolicyMapper = Mappers.getMapper(MonitorPolicyMapper.class);
-        client = new AlertsClient(channel, 1000, monitorPolicyMapper, alertEventDefinitionMapper);
+        client = new AlertsClient(channel, 1000, monitorPolicyMapper, alertEventDefinitionMapper, alertsCountMapper);
         client.initialStubs();
     }
 

@@ -6,7 +6,7 @@ const tabContent: InventoryItem[] = [
   {
     id: 1,
     nodeLabel: 'Monitored Node 1',
-    
+    nodeAlias: 'alias',
     location: {id:-1, location:''},
     metrics: {
       metric:{instance: '192.168.1.1',__name__:'response_time_msec',location_id:'1',monitor:'ICMP',node_id:'1',system_id:'default'},

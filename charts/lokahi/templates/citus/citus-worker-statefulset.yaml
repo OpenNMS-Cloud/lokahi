@@ -162,5 +162,5 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: {{ .Values.citus.workervolumeSize }}
+          storage: {{ .Values.citus.workerVolumeSize }}
 {{- end }}

@@ -268,7 +268,7 @@ citus:
   serviceName: postgres
   pgBouncerPort: 30099
   coordinatorvolumeSize: 4Gi
-  workervolumeSize: 2Gi
+  workerVolumeSize: 2Gi
   adminUser: desenv
   adminPassword: notset
   openNMSPassword: notset

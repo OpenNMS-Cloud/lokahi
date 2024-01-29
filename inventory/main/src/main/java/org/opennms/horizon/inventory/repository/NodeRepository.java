@@ -52,9 +52,7 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node>  getNodesByLimit(@Param("limit") int limit);
     @Query("SELECT COUNT(n) FROM Node n")
     long countNodes();
-    
-    
-    
+ 
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +

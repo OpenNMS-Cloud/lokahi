@@ -94,7 +94,7 @@
     {
       "username": "{{ .Values.keycloak.adminUsername }}",
       "email": "admin@test.opennms.org",
-      "enabled": false,
+      "enabled": true,
       "emailVerified": false,
       "credentials": [
         {

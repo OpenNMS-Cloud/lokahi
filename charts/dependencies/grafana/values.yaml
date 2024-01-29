@@ -23,6 +23,13 @@ grafana:
     requests:
       cpu: 100m
       memory: 100Mi
+citus:
+  enabled: false
+  workersEnabled: true
+  serviceName: postgres
+  adminUser: desenv
+  adminPassword: notset
+  grafanaPassword: notset
 cortex:
   enabled: true
   serviceName: cortex

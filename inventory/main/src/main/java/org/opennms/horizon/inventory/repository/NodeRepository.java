@@ -54,6 +54,7 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     long countNodes();
     
     
+    
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +

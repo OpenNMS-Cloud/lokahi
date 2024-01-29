@@ -18,7 +18,7 @@ spec:
         app: {{ .Values.cortex.serviceName }}
       annotations:
         # roll the deployment when the cortex configmap changes
-        checksum/cortex-configmap: {{ include (print $.Template.BasePath "/cortex/cortex-configmap.yaml") . | sha256sum }}
+        checksum/cortex-configmap: {{ include (print $.Template.BasePath "/cortex-configmap.yaml") . | sha256sum }}
         kubectl.kubernetes.io/default-container: "{{ .Values.cortex.serviceName }}"
     spec:
       {{- if .Values.nodeRestrictions.enabled }}

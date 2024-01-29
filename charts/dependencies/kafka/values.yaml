@@ -1,0 +1,26 @@
+OpenNMS: # we might be able to remove this
+  global:
+    image:
+      repository: opennms
+      tag: latest
+kafka:
+  enabled: true
+  serviceName: onms-kafka
+  image: bitnami/kafka:3.3.2-debian-11-r28 # latest 3.3.2 version not affected by https://github.com/bitnami/containers/issues/33271
+  imagePullPolicy: IfNotPresent
+  replicas: 1
+  port: 9092
+  controllerPort: 9093
+  localPort: 59092
+  resources:
+    limits:
+      cpu: "2"
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  volumeSize: 10Gi
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot

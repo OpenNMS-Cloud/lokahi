@@ -389,6 +389,12 @@ k8s_yaml(
     )
 )
 
+k8s_yaml(
+    helm(
+        'charts/lokahi-minion',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
 # Builds #
 ## Shared ##
 local_resource(

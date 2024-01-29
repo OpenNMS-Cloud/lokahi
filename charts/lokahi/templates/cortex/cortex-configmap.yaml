@@ -1,9 +1,9 @@
-{{ if .Values.Cortex.Enabled }}
+{{ if .Values.cortex.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app: {{ .Values.Cortex.ServiceName }}
+    app: {{ .Values.cortex.serviceName }}
   name: cortex-config-map
   namespace: {{ .Release.Namespace }}
 data:
@@ -13,7 +13,7 @@ data:
     # and development.
         
     server:
-      http_listen_port: {{ .Values.Cortex.Port }}
+      http_listen_port: {{ .Values.cortex.port }}
 
       # Configure the server to allow messages up to 100MB.
       grpc_server_max_recv_msg_size: 104857600

@@ -1,8 +1,8 @@
-{{- if .Values.Citus.Enabled }}
+{{- if .Values.citus.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.Citus.ServiceName }}
+  name: {{ .Values.citus.serviceName }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: citus

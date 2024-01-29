@@ -1,4 +1,4 @@
-{{- if .Values.Citus.Enabled }}
+{{- if .Values.citus.enabled }}
 apiVersion: v1
 kind: Service
 metadata:

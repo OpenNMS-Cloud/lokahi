@@ -1,48 +1,48 @@
-{{- if .Values.Grafana.Enabled }}
+{{- if .Values.grafana.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: {{ .Values.Grafana.ServiceName }}
-  name: {{ .Values.Grafana.ServiceName }}
+    app: {{ .Values.grafana.serviceName }}
+  name: {{ .Values.grafana.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.Grafana.ServiceName }}
+      app: {{ .Values.grafana.serviceName }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.Grafana.ServiceName }}
+        app: {{ .Values.grafana.serviceName }}
       annotations:
-        kubectl.kubernetes.io/default-container: "{{ .Values.Grafana.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.grafana.serviceName }}"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}
       tolerations:
         - effect: "NoSchedule"
-          key: "{{ .Values.NodeRestrictions.Key }}"
+          key: "{{ .Values.nodeRestrictions.key }}"
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }}
+          value: {{ .Values.nodeRestrictions.value }}
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
             preference:
               matchExpressions:
-              - key: "{{ .Values.NodeRestrictions.Key }}"
+              - key: "{{ .Values.nodeRestrictions.key }}"
                 operator: In
                 values:
-                - {{ .Values.NodeRestrictions.Value }}
+                - {{ .Values.nodeRestrictions.value }}
       {{- end }}
       volumes:
         - name: grafana-config
           secret:
-            secretName: {{ .Values.Grafana.ServiceName }}
+            secretName: {{ .Values.grafana.serviceName }}
             defaultMode: 420
-      {{- if .Values.Citus.Enabled }}
+      {{- if .Values.citus.enabled }}
       initContainers:
         - name: wait-for-db
           image: postgres:16-alpine
@@ -51,18 +51,18 @@ spec:
           - -c
           - | 
             set -x;
-            while ! psql -U {{ .Values.Citus.AdminUser }} -h postgres -c 'select 1'; do
+            while ! psql -U {{ .Values.citus.adminUser }} -h postgres -c 'select 1'; do
               echo "Waiting for DB to be available"
               sleep 10
             done
             echo "Database is available"
       {{- end }}
       containers:
-        - name: {{ .Values.Grafana.ServiceName }}
-          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.Grafana) | quote }}
-          imagePullPolicy: {{ .Values.Grafana.ImagePullPolicy }}
+        - name: {{ .Values.grafana.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.grafana) | quote }}
+          imagePullPolicy: {{ .Values.grafana.imagePullPolicy }}
           ports:
-            - containerPort: {{ .Values.Grafana.Port }}
+            - containerPort: {{ .Values.grafana.port }}
           volumeMounts:
             - name: grafana-config
               mountPath: "/etc/grafana/provisioning/datasources/default.yml"
@@ -76,7 +76,7 @@ spec:
             - name: grafana-config
               mountPath: "/usr/share/grafana/public/dashboards/opennms-entities.json"
               subPath: "opennms-entities.json"
-            {{- if .Values.Prometheus.Enabled }}
+            {{- if .Values.prometheus.enabled }}
             - name: grafana-config
               mountPath: "/usr/share/grafana/public/dashboards/opennms-tenant-metrics.json"
               subPath: "opennms-tenant-metrics.json"
@@ -85,7 +85,7 @@ spec:
             failureThreshold: 3
             httpGet:
               path: /robots.txt
-              port: {{ .Values.Grafana.Port }}
+              port: {{ .Values.grafana.port }}
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 30
@@ -93,12 +93,12 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             tcpSocket:
-              port: {{ .Values.Grafana.Port }}
+              port: {{ .Values.grafana.port }}
           resources:
             limits:
-              cpu: "{{ .Values.Grafana.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.Grafana.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.grafana.resources.limits.cpu }}"
+              memory: "{{ .Values.grafana.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.Grafana.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.Grafana.Resources.Requests.Memory }}"
+              cpu: "{{ .Values.grafana.resources.requests.cpu }}"
+              memory: "{{ .Values.grafana.resources.requests.memory }}"
 {{- end }}

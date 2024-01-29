@@ -1,47 +1,47 @@
-{{ if .Values.Kafka.Enabled }}
+{{ if .Values.kafka.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.Kafka.ServiceName }}
+  name: {{ .Values.kafka.serviceName }}
   labels:
     app: kafka
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.Kafka.ServiceName }}
-  replicas: {{ .Values.Kafka.Replicas }}
+      app: {{ .Values.kafka.serviceName }}
+  replicas: {{ .Values.kafka.replicas }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.Kafka.ServiceName }}
+        app: {{ .Values.kafka.serviceName }}
       annotations:
-        kubectl.kubernetes.io/default-container: "{{ .Values.Kafka.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.kafka.serviceName }}"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
       tolerations:
         - effect: "NoSchedule"                                                                         
-          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }} 
+          value: {{ .Values.nodeRestrictions.value }} 
       affinity: 
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:                                             
           - weight: 1                                                                                  
             preference:                                                                                
               matchExpressions:                                                                        
-              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
                 operator: In
                 values:                                                                                
-                - {{ .Values.NodeRestrictions.Value }}                                                 
+                - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       containers:
-        - name: {{ .Values.Kafka.ServiceName }}
-          image: {{ .Values.Kafka.Image }}
-          imagePullPolicy: {{ .Values.Kafka.ImagePullPolicy }}
+        - name: {{ .Values.kafka.serviceName }}
+          image: {{ .Values.kafka.image }}
+          imagePullPolicy: {{ .Values.kafka.imagePullPolicy }}
           env:
             - name: BITNAMI_DEBUG
               value: "true"
@@ -58,27 +58,27 @@ spec:
             - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
               value: "CONTROLLER"
             - name: KAFKA_CFG_LISTENERS
-              value: "CLIENT://:{{ .Values.Kafka.Port }},CONTROLLER://:{{ .Values.Kafka.ControllerPort }},LOCALCLIENT://:{{ .Values.Kafka.LocalPort }}"
+              value: "CLIENT://:{{ .Values.kafka.port }},CONTROLLER://:{{ .Values.kafka.controllerPort }},LOCALCLIENT://:{{ .Values.kafka.localPort }}"
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: "CLIENT://{{ .Values.Kafka.ServiceName }}:{{ .Values.Kafka.Port }},LOCALCLIENT://localhost:{{ .Values.Kafka.LocalPort }}"
+              value: "CLIENT://{{ .Values.kafka.serviceName }}:{{ .Values.kafka.port }},LOCALCLIENT://localhost:{{ .Values.kafka.localPort }}"
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: "CLIENT"
             - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
-              value: "1@localhost:{{ .Values.Kafka.ControllerPort }}"
+              value: "1@localhost:{{ .Values.kafka.controllerPort }}"
           resources:
             limits:
-              cpu: "{{ .Values.Kafka.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.Kafka.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.kafka.resources.limits.cpu }}"
+              memory: "{{ .Values.kafka.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.Kafka.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.Kafka.Resources.Requests.Memory }}"
+              cpu: "{{ .Values.kafka.resources.requests.cpu }}"
+              memory: "{{ .Values.kafka.resources.requests.memory }}"
           ports:
             - name: client
-              containerPort: {{ .Values.Kafka.Port }}
+              containerPort: {{ .Values.kafka.port }}
             - name: controller
-              containerPort: {{ .Values.Kafka.ControllerPort }}
+              containerPort: {{ .Values.kafka.controllerPort }}
             - name: local
-              containerPort: {{ .Values.Kafka.LocalPort }}
+              containerPort: {{ .Values.kafka.localPort }}
           livenessProbe:
             failureThreshold: 15
             initialDelaySeconds: 10

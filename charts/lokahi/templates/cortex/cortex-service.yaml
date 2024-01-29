@@ -1,17 +1,17 @@
-{{ if .Values.Cortex.Enabled }}
+{{ if .Values.cortex.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: {{ .Values.Cortex.ServiceName }}
-  name: {{ .Values.Cortex.ServiceName }}
+    app: {{ .Values.cortex.serviceName }}
+  name: {{ .Values.cortex.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.Cortex.Port }}
+    - port: {{ .Values.cortex.port }}
       protocol: TCP
       name: cortex-http
   selector:
-    app: {{ .Values.Cortex.ServiceName }}
+    app: {{ .Values.cortex.serviceName }}
 {{ end }}

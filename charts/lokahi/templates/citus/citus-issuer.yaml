@@ -1,4 +1,4 @@
-{{- if .Values.Citus.Enabled }}
+{{- if .Values.citus.enabled }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -16,7 +16,7 @@ spec:
   secretName: citus-cert
   commonName: citus.default
   dnsNames:
-  - '*.{{ .Values.Citus.ServiceName }}.default.svc.cluster.local'
+  - '*.{{ .Values.citus.serviceName }}.default.svc.cluster.local'
   issuerRef:
     name: citus-issuer
 

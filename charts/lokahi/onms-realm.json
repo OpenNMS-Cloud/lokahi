@@ -1,5 +1,5 @@
 {
-  "realm": "{{ .Values.Keycloak.RealmName }}",
+  "realm": "{{ .Values.keycloak.realmName }}",
   "accessTokenLifespan": 6000,
   "enabled": true,
   "loginTheme": "lokahi",
@@ -92,14 +92,14 @@
   },
   "users": [
     {
-      "username": "{{ .Values.Keycloak.AdminUsername }}",
+      "username": "{{ .Values.keycloak.adminUsername }}",
       "email": "admin@test.opennms.org",
       "enabled": true,
       "emailVerified": false,
       "credentials": [
         {
           "type": "password",
-          "value": "{{ .Values.Keycloak.AdminPassword }}"
+          "value": "{{ .Values.keycloak.adminPassword }}"
         }
       ],
       "realmRoles": [

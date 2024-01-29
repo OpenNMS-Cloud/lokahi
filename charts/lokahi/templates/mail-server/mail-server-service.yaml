@@ -1,20 +1,20 @@
-{{- if .Values.MailServer.Enabled }}
+{{- if .Values.mailServer.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.MailServer.ServiceName }}
+  name: {{ .Values.mailServer.serviceName }}
   labels:
-    app: {{ .Values.MailServer.ServiceName }}
+    app: {{ .Values.mailServer.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.MailServer.Port }}
+    - port: {{ .Values.mailServer.port }}
       protocol: TCP
       name: http
-    - port: {{ .Values.MailServer.SmtpPort }}
+    - port: {{ .Values.mailServer.smtpPort }}
       protocol: TCP
       name: smtp
   selector:
-    app: {{ .Values.MailServer.ServiceName }}
+    app: {{ .Values.mailServer.serviceName }}
 {{- end }}

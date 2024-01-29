@@ -1,4 +1,4 @@
-{{- if .Values.Citus.Enabled }}
+{{- if .Values.citus.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -56,7 +56,7 @@ spec:
         - -c
         - |
           sh <<'SH' &
-          node_name={{ .Values.Citus.ServiceName }}.${POD_NAMESPACE}.svc.cluster.local;
+          node_name={{ .Values.citus.serviceName }}.${POD_NAMESPACE}.svc.cluster.local;
 
           echo [$(date -Iseconds)] Wait pg_isready;
           timeout 5m sh -c 'until pg_isready -U desenv --timeout=5 --quiet; do sleep 2; done;';
@@ -158,5 +158,5 @@ spec:
       # storageClassName: local-path
       resources:
         requests:
-          storage: {{ .Values.Citus.CoordinatorVolumeSize }}
+          storage: {{ .Values.citus.coordinatorvolumeSize }}
 {{- end }}

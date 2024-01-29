@@ -6,10 +6,6 @@ spec:
   allowedUsers: []
   host: onmshs
   namespace: tilt-instance
-  core:
-    image: opennms/lokahi-core
-    cpu: "0"
-    mem: "0"
   api:
     image: opennms/lokahi-rest-server
     cpu: "0"

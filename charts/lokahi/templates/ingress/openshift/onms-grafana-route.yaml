@@ -1,13 +1,13 @@
-{{ if .Values.OpenShift }}
+{{- if eq (include "onOpenShift" .) "true" }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: opennms-grafana-route
   namespace: {{ .Release.Namespace }}
 spec:
-  host: {{ .Values.Host }}.apps-crc.testing
-  path: {{ .Values.Grafana.Path }}  
+  host: {{ .Values.hostname }}.apps-crc.testing
+  path: {{ .Values.grafana.path }}  
   to:
     kind: Service
-    name: {{ .Values.Grafana.ServiceName }}
-{{ end }}
+    name: {{ .Values.grafana.serviceName }}
+{{- end }}

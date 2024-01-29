@@ -1,17 +1,17 @@
-{{ if .Values.OpenShift }}
+{{- if eq (include "onOpenShift" .) "true" }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: opennms-minion-grpc-route
   namespace: {{ .Release.Namespace }}
 spec:
-  host: "minion.{{ .Values.Host }}.apps-crc.testing"
+  host: "minion.{{ .Values.hostname }}.apps-crc.testing"
   port:
-    targetPort: {{ .Values.OpenNMS.MinionGateway.GrpcPort }}
+    targetPort: {{ .Values.OpenNMS.minionGateway.grpcPort }}
   tls:
     termination: passthrough
     insecureEdgeTerminationPolicy: None
   to:
     kind: Service
-    name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
-{{ end }}
+    name: {{ .Values.OpenNMS.minionGateway.serviceName }}
+{{- end }}

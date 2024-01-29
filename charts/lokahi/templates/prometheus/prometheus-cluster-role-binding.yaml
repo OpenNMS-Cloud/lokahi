@@ -1,16 +1,16 @@
-{{- if .Values.Prometheus.Enabled }}
+{{- if .Values.prometheus.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.Prometheus.ServiceName }}
+  name: {{ .Values.prometheus.serviceName }}
   labels:
-    app: {{ .Values.Prometheus.ServiceName }}
+    app: {{ .Values.prometheus.serviceName }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Values.Prometheus.ServiceName }}
+  name: {{ .Values.prometheus.serviceName }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.Prometheus.ServiceName }}-sa
+    name: {{ .Values.prometheus.serviceName }}-sa
     namespace: default
 {{- end }}

@@ -1,13 +1,13 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}-rb
+  name: {{ .Values.OpenNMS.minionGateway.serviceName }}-rb
   labels:
-    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+    app: {{ .Values.OpenNMS.minionGateway.serviceName }}
   namespace: {{ .Release.Namespace }}
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}-sa
+  name: {{ .Values.OpenNMS.minionGateway.serviceName }}-sa
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role

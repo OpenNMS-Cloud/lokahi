@@ -47,6 +47,13 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByNodeLabel(String label);
     List<Node> findByTenantIdAndMonitoredStateEquals(String tenantId, MonitoredState monitoredState);
 
+    List<Node> findByNodeAlias(String alias);    
+    @Query("SELECT * FROM Node e ORDER BY e.id LIMIT :limit", nativeQuery=true)
+    List<Node>  getNodesByLimit(@Param("limit") int limit);
+    @Query("SELECT COUNT(n) FROM Node n")
+    long countNodes();
+    
+    
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +

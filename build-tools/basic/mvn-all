@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+# Get base dir of project
+base="$(realpath "$(dirname "$(realpath "$0")")"/../..)"
+
+# Find all top-level dirs containing a pom.xml
+projects="$(find "$base" -maxdepth 2 -type f -name "pom.xml" -print)"
+
+while IFS= read -r project; do
+    project="$(dirname "$project")"
+
+    (
+        cd "$project"
+        mvn "$@"
+    )
+done <<< "$projects"

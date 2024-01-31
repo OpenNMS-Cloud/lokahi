@@ -273,32 +273,6 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.24.0</version>
-                <configuration>
-                    <ratchetFrom>origin/main</ratchetFrom>
-                    <java>
-                        <palantirJavaFormat>
-                            <version>2.10.0</version>
-                        </palantirJavaFormat>
-                        <licenseHeader>
-                            <file>${maven.multiModuleProjectDirectory}/spotless/header-java.txt</file>
-                        </licenseHeader>
-                    </java>
-                    <pom>
-                        <includes>
-                            <include>pom.xml</include>
-                        </includes>
-                        <sortPom />
-                        <licenseHeader>
-                            <file>${maven.multiModuleProjectDirectory}/spotless/header-xml.txt</file>
-                            <delimiter><![CDATA[<project]]></delimiter>
-                        </licenseHeader>
-                    </pom>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 

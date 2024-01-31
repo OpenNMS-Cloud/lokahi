@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opennms.lokahi</groupId>
+        <artifactId>lokahi-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>parent-pom</relativePath>
+    </parent>
+
+    <name>OpenNMS Lokahi :: Lokahi Top-Level</name>
+    <description>
+        Top-level POM for all Lokahi modules
+    </description>
+
+    <groupId>org.opennms.lokahi</groupId>
+    <artifactId>lokahi-toplevel</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>alert</module>
+        <module>datachoices</module>
+        <module>events</module>
+        <module>inventory</module>
+        <module>metrics-processor</module>
+        <module>minion-certificate-manager</module>
+        <module>minion-certificate-verifier</module>
+        <module>minion-gateway-grpc-proxy</module>
+        <module>minion-gateway</module>
+        <module>minion</module>
+        <module>notifications</module>
+        <module>rest-server</module>
+        <module>shared-lib</module>
+    </modules>
+</project>
+

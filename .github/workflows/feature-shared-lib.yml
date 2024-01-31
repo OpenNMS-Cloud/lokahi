@@ -30,6 +30,11 @@ jobs:
         with:
           cache-key-hash: ${{ hashFiles('parent-pom/pom.xml', 'shared-lib/**/pom.xml') }}
 
+      - name: Run maven spotless checks
+        uses: ./.github/actions/maven-spotless
+        with:
+          working-directory: 'shared-lib'
+
       - name: Maven Install & Sonar Scan
         uses: ./.github/actions/maven-install-sonar
         with:

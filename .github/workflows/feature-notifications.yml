@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and test - Notification 
+    name: Build and test - Notification
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -63,6 +63,11 @@ jobs:
 
       - name: Build and install prerequisites
         uses: ./.github/actions/java-install-prereqs
+
+      - name: Run maven spotless checks
+        uses: ./.github/actions/maven-spotless
+        with:
+          working-directory: 'notifications'
 
       - name: Jib Maven build, scan, and push
         uses: ./.github/actions/jib-maven-sonar

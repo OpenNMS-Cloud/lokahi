@@ -29,6 +29,8 @@ citus:
   serviceName: postgres
   adminUser: desenv
   adminPassword: notset
+  grafanaUser: grafana
+  grafanaDatabaseName: grafana
   grafanaPassword: notset
 cortex:
   enabled: true

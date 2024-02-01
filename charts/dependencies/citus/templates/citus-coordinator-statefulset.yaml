@@ -59,8 +59,8 @@ spec:
           node_name={{ .Values.citus.serviceName }}.${POD_NAMESPACE}.svc.cluster.local;
 
           echo [$(date -Iseconds)] Wait pg_isready;
-          timeout 5m sh -c 'until pg_isready -U desenv --timeout=5 --quiet; do sleep 2; done;';
-          pg_isready -U desenv --quiet || { echo pg not ready; kill -9 1; exit 1; };
+          timeout 5m sh -c 'until pg_isready -U {{ .Values.citus.adminUser }} --timeout=5 --quiet; do sleep 2; done;';
+          pg_isready -U {{ .Values.citus.adminUser }} --quiet || { echo pg not ready; kill -9 1; exit 1; };
           echo [$(date -Iseconds)] pg is ready;
           # wait for extension
           sleep 5;
@@ -69,7 +69,7 @@ spec:
           timeout 10m sh -c "until nslookup ${node_name} > /dev/null; do sleep 2; done;";
 
           echo [$(date -Iseconds)] citus_set_coordinator_host ${node_name};
-          su-exec postgres psql -U desenv -c "SELECT * from citus_set_coordinator_host('${node_name}', 5432);"  || {
+          su-exec postgres psql -U {{ .Values.citus.adminUser }} -c "SELECT * from citus_set_coordinator_host('${node_name}', 5432);"  || {
             echo citus_set_coordinator_host failed;
             kill -9 1;
           }
@@ -94,7 +94,7 @@ spec:
               name: postgres
               key: password
         - name: POSTGRES_USER
-          value: desenv
+          value: {{ .Values.citus.adminUser }}
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -127,7 +127,7 @@ spec:
             command:
             - 'pg_isready'
             - '-U'
-            - 'desenv'
+            - '{{ .Values.citus.adminUser }}'
             - '--timeout=5'
             - '--quiet'
           initialDelaySeconds: 60

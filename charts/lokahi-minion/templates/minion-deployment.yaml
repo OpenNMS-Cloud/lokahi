@@ -63,7 +63,7 @@ spec:
           {{ toYaml .Values.OpenNMS.minion.extraVolumes | nindent 8 }}
         {{- end }}
       initContainers:
-        {{- if eq (include "onOpenShift" .) "true" }}
+        {{- if eq (include "onOpenShift" .) "false" }}
         - name: init-sysctl
           image: busybox
           command:
@@ -118,7 +118,7 @@ spec:
             - name: GRPC_CLIENT_KEYSTORE_PASSWORD
               value: "changeme"
             - name: MINION_GATEWAY_HOST
-              value: "ingress-nginx-controller" # we're inside the cluster, so we need to talk to the internal service name
+              value: "{{ .Values.OpenNMS.minion.gatewayHost }}" # we're inside the cluster, so we need to talk to the internal service name
             - name: GRPC_CLIENT_OVERRIDE_AUTHORITY
               value: "minion.{{ .Values.hostname }}" # but the TLS certificate will have the external name, so expect that
             - name: GRPC_CLIENT_TRUSTSTORE
@@ -147,7 +147,7 @@ spec:
               containerPort: {{ .Values.OpenNMS.minion.port }}
             - name: snmp-traps
               protocol: UDP
-              containerPort: {{ .Values.OpenNMS.minion.TrapsListenerPort }}
+              containerPort: {{ .Values.OpenNMS.minion.trapsListenerPort }}
             - name: ssh
               containerPort: {{ .Values.OpenNMS.minion.sshPort }}
             - name: netflow5

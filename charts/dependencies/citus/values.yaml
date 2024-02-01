@@ -21,4 +21,6 @@ citus:
   dataChoicesPassword: notset
   minionGatewayPassword: notset
   notificationPassword: notset
+  grafanaUser: grafana
+  grafanaDatabaseName: grafana
   grafanaPassword: notset

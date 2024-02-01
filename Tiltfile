@@ -90,23 +90,6 @@ def jib_project(resource_name, image_name, base_path, k8s_resource_name, resourc
         labels=[resource_name]
 
 
-    compile_resource_name = '{}:live-reload'.format(resource_name)
-
-    # This is the Tilt resource that compiles code for the purpose of rapid development.
-    #
-    # Triggers compilation when source files are changed. This produces compiled class files, which are copied in to the
-    # running container by the main Tilt resource.
-    #
-    # Disable this resource to turn off live reload. Trigger the main Tilt resource for full builds instead.
-    local_resource(
-        compile_resource_name,
-        'mvn clean compile -f {} -am'.format(base_path),
-        deps=['{}/src'.format(base_path)],
-        ignore=['**/target'],
-        labels=labels,
-    )
-
-
     # This is the image build part of the main Tilt resource.
     #
     # It will perform a full build and produces an image using Jib. This can be triggered manually when needed.
@@ -135,9 +118,10 @@ def jib_project(resource_name, image_name, base_path, k8s_resource_name, resourc
         k8s_resource_name,
         new_name=resource_name,
         labels=labels,
-        resource_deps=resource_deps + [compile_resource_name],
+        resource_deps=resource_deps,
         links=links,
         port_forwards=port_forwards,
+        trigger_mode=TRIGGER_MODE_MANUAL,
     )
 
 def jib_project_multi_module(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], links=[], labels=None, submodule=None):

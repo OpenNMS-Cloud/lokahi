@@ -27,7 +27,7 @@ OpenNMS: # we might be able to remove this
     netflow5ListenerPort: 8877
     netflow9ListenerPort: 4729
     netflowListenerPort: 9999
-    gatewayHost: opennms-minion-gateway.default.svc.cluster.local
+    gatewayHost: ingress-nginx-controller
     resources:
       limits:
         cpu: "2"

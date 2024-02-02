@@ -358,8 +358,8 @@ public class NodeService {
             .map(mapper::modelToDTO).toList();
     }
     @Transactional(readOnly = true)
-    public Long countNodes() {
-        return nodeRepository.countDistinctNodes();
+    public Long countNodes(String tenantId) {
+        return nodeRepository.countDistinctNodes(tenantId);
     }
 
 }

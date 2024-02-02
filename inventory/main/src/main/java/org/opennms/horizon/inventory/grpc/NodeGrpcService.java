@@ -419,7 +419,19 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void getNodesCount(Empty request,StreamObserver<Int64Value> responseObserver) {
         try {
-           long val= nodeService.countNodes();
+            Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+            if (tenantIdOptional.isEmpty()) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                    .setMessage(EMPTY_TENANT_ID_MSG)
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                return;
+            }
+
+            String tenantId = tenantIdOptional.get();
+           long val= nodeService.countNodes(tenantId);
             responseObserver.onNext(Int64Value.of(val));
             responseObserver.onCompleted();
         } catch (Exception e) {

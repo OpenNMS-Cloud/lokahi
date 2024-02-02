@@ -152,7 +152,7 @@ public class GrpcNodeService {
 
     @GraphQLQuery(name = "nodeCount")
     public Mono<Integer> getNodeCount(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(client.listNodes(headerUtil.getAuthHeader(env)).size());
+        return Mono.just(Long.valueOf(client.getNodesCount(headerUtil.getAuthHeader(env))).intValue());
     }
 
     @GraphQLQuery(name = "downloadTopN")
@@ -173,10 +173,6 @@ public class GrpcNodeService {
                    throw new IllegalArgumentException("Failed to download TopN List");
                 }
             });
-    }
-    @GraphQLQuery(name= "countNodes" )
-    public Mono<Long> countNodeRows(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(client.getNodesCount(headerUtil.getAuthHeader(env)));
     }
     private static TopNResponse generateDownloadableTopNResponse(List<TopNNode> topNNodes, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {

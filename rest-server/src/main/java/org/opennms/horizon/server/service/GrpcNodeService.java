@@ -174,7 +174,10 @@ public class GrpcNodeService {
                 }
             });
     }
-
+    @GraphQLQuery(name= "countNodes" )
+    public Mono<Long> countNodeRows(@GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.getNodesCount(headerUtil.getAuthHeader(env)));
+    }
     private static TopNResponse generateDownloadableTopNResponse(List<TopNNode> topNNodes, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
             downloadFormat = DownloadFormat.CSV;

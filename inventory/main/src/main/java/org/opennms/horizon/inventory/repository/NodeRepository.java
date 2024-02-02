@@ -46,7 +46,8 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     Optional<Node> findByIdAndTenantId(long id, String tenantID);
     List<Node> findByNodeLabel(String label);
     List<Node> findByTenantIdAndMonitoredStateEquals(String tenantId, MonitoredState monitoredState);
-
+    @Query("SELECT COUNT(DISTINCT n.id) FROM Node n")
+    long countDistinctNodes();
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +

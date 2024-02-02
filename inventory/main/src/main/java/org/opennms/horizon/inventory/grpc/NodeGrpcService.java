@@ -153,6 +153,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         responseObserver.onCompleted();
     }
 
+
     @Override
     public void listNodesByMonitoredState(MonitoredStateQuery request, StreamObserver<NodeList> responseObserver) {
         try {
@@ -415,4 +416,17 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
     }
+    @Override
+    public void getNodesCount(Empty request,StreamObserver<Int64Value> responseObserver) {
+        try {
+           long val= nodeService.countNodes();
+            responseObserver.onNext(Int64Value.of(val));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            LOG.error("Error while count nodes ");
+
+        }
+
+    }
+
 }

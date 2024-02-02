@@ -357,5 +357,9 @@ public class NodeService {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
             .map(mapper::modelToDTO).toList();
     }
+    @Transactional(readOnly = true)
+    public Long countNodes() {
+        return nodeRepository.countDistinctNodes();
+    }
 
 }

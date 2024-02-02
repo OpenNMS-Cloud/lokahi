@@ -83,29 +83,6 @@ OpenNMS: # we might be able to remove this
       nginx.ingress.kubernetes.io/large-client-header-buffers: 4 16k
       nginx.ingress.kubernetes.io/proxy-body-size: 4m
       nginx.ingress.kubernetes.io/proxy-buffer-size: 6k
-  minion:
-    enabled: false
-    serviceName: opennms-minion
-    imageShortName: lokahi-minion
-    imagePullPolicy: IfNotPresent
-    replicas: 1
-    port: 8181
-    sshPort: 8101
-    trapsListenerPort: 1162
-    netflow5ListenerPort: 8877
-    netflow9ListenerPort: 4729
-    netflowListenerPort: 9999
-    resources:
-      limits:
-        cpu: "2"
-        memory: 4Gi
-      requests:
-        cpu: "1"
-        memory: 2Gi
-    extraVolumes: []
-    extraMounts: []
-    extraInitContainers: []
-    addDefaultLocation: false
   minionGateway:
     serviceName: opennms-minion-gateway
     tlsSecretName: opennms-minion-gateway-certificate
@@ -126,10 +103,10 @@ OpenNMS: # we might be able to remove this
         memory: 2Gi
     ingressAnnotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0" # To avoid HTTP 413 and "client intended to send too large chunked body: X bytes while sending request to upstream"
-      nginx.ingress.kubernetes.io/auth-tls-secret: "{{ .Release.Namespace }}/client-root-ca-certificate"
+      nginx.ingress.kubernetes.io/auth-tls-secret: "default/client-root-ca-certificate"
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
       nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.{{ .Release.Namespace }}.svc.cluster.local:8080/certificate/debug"
+      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.default.svc.cluster.local:8080/certificate/debug"
       nginx.ingress.kubernetes.io/auth-response-headers: "tenant-id, location-id"
       nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
       nginx.ingress.kubernetes.io/server-snippet: |

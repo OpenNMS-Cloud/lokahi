@@ -421,9 +421,9 @@ public class InventoryClient {
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoredServiceStatus(monitoredStateQuery);
     }
 
-    public long getNodesCount(String accessToken) {
+    public long getNodeCount(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getNodesCount(Empty.newBuilder().build()).getValue();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getNodeCount(Empty.newBuilder().build()).getValue();
     }
 }

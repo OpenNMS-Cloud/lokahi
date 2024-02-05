@@ -167,4 +167,12 @@ public class NodeStepDefinitions {
         log.info("Found {} messages for tenant {}", foundMessages, tenant);
         return foundMessages == expectedMessages;
     }
+
+    @Then("fetch a count of nodes")
+    public void fetchCountOfNondes() {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        Int64Value nodeCount;
+        nodeCount = nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build());
+
+    }
 }

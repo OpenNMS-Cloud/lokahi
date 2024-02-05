@@ -417,7 +417,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }
     }
     @Override
-    public void getNodesCount(Empty request,StreamObserver<Int64Value> responseObserver) {
+    public void getNodeCount(Empty request,StreamObserver<Int64Value> responseObserver) {
         try {
             Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 

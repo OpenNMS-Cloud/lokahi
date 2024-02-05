@@ -207,9 +207,8 @@ public class MinionHeartbeatConsumerTest {
                     (Objects.equals("Unable to complete echo request for monitoring with tenantId={}; locationId={}; systemId={}", logEvent.getMessage())) &&
                     (logEvent.getArguments().size() == 3) &&
                     (Objects.equals(TEST_SYSTEM_ID, logEvent.getArguments().get(2))) &&
-                    (Objects.equals(TEST_LOCATION_ID_TEXT, logEvent.getArguments().get(1)) &&
-                    (Objects.equals(TEST_TENANT_ID, logEvent.getArguments().get(0))))
-                    // (logEvent.getThrowable().orElse(null) != null)
+                    (Objects.equals(TEST_LOCATION_ID_TEXT, logEvent.getArguments().get(1))) &&
+                    (Objects.equals(TEST_TENANT_ID, logEvent.getArguments().get(0)))
                 );
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));

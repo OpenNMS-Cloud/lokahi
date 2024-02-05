@@ -46,7 +46,7 @@ import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
-import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsGraphQLService;
 import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,7 @@ public class GraphQLAlertsServiceTest {
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
     @MockBean
-    private TSDBMetricsService tsdbMetricsService;
+    private TSDBMetricsGraphQLService tsdbMetricsGraphQLService;
     private GraphQLWebTestClient webClient;
     private String accessToken;
     private Alert alerts1, alerts2;

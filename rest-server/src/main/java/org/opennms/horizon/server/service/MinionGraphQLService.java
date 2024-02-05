@@ -52,7 +52,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcMinionService {
+public class MinionGraphQLService {
     private final InventoryClient client;
     private final MinionMapper mapper;
     private final ServerHeaderUtil headerUtil;

@@ -56,7 +56,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcAlertService {
+public class AlertGraphQLService {
 
     private final AlertsClient alertsClient;
     private final ServerHeaderUtil headerUtil;

@@ -58,8 +58,8 @@ import java.util.Objects;
 @GraphQLApi
 @Service
 @RequiredArgsConstructor
-public class GrpcFlowService {
-    private static final Logger LOG = LoggerFactory.getLogger(GrpcFlowService.class);
+public class FlowGraphQLService {
+    private static final Logger LOG = LoggerFactory.getLogger(FlowGraphQLService.class);
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
     private final InventoryClient inventoryClient;

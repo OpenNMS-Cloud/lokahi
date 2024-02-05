@@ -46,7 +46,7 @@ import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
-import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsGraphQLService;
 import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +83,7 @@ public class GraphQLNodeServiceTest {
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
     @MockBean
-    private TSDBMetricsService tsdbMetricsService;
+    private TSDBMetricsGraphQLService tsdbMetricsGraphQLService;
     private GraphQLWebTestClient webClient;
     private String accessToken;
     private MonitoringLocationDTO locationDTO1, locationDTO2;
@@ -252,7 +252,7 @@ public class GraphQLNodeServiceTest {
         TimeSeriesQueryResult tsQueryResult = buildTsQueryResult(true);
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
-        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsService)
+        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsGraphQLService)
             .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
@@ -270,7 +270,7 @@ public class GraphQLNodeServiceTest {
         TimeSeriesQueryResult tsQueryResult = buildTsQueryResult(false);
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
-        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsService)
+        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsGraphQLService)
             .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());

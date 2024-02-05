@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,35 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.horizon.server.service.discovery;
+package org.opennms.horizon.server.service;
 
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
-import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
-import org.opennms.horizon.server.mapper.discovery.AzureActiveDiscoveryMapper;
-import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscovery;
-import org.opennms.horizon.server.model.inventory.discovery.active.AzureActiveDiscoveryCreate;
+import org.opennms.horizon.server.mapper.MonitoredServiceStatusMapper;
+import org.opennms.horizon.server.model.inventory.MonitoredServiceStatus;
+import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
-@GraphQLApi
 @Service
-public class GrpcAzureActiveDiscoveryService {
-    private final InventoryClient client;
-    private final AzureActiveDiscoveryMapper mapper;
-    private final ServerHeaderUtil headerUtil;
+@RequiredArgsConstructor
+public class MonitorStatusGraphQLService {
 
-    @GraphQLMutation
-    public Mono<AzureActiveDiscovery> createAzureActiveDiscovery(AzureActiveDiscoveryCreate discovery, @GraphQLEnvironment ResolutionEnvironment env) {
-        AzureActiveDiscoveryCreateDTO createDto = mapper.azureDiscoveryCreateToProto(discovery);
-        AzureActiveDiscoveryDTO discoveryDto = client.createAzureActiveDiscovery(createDto, headerUtil.getAuthHeader(env));
-        return Mono.just(mapper.dtoToAzureActiveDiscovery(discoveryDto));
+    private final ServerHeaderUtil headerUtil;
+    private final MonitoredServiceStatusMapper mapper;
+    private final InventoryClient client;
+
+    @GraphQLQuery
+    public Mono<MonitoredServiceStatus> getMonitorStatus(@GraphQLArgument(name = "request") MonitoredServiceStatusRequest request,
+                                                         @GraphQLEnvironment ResolutionEnvironment env) {
+        var monitorStatusProto = client.getMonitorStatus(request, headerUtil.getAuthHeader(env));
+        var monitoredServiceStatus = mapper.protoToModel(monitorStatusProto);
+        return Mono.just(monitoredServiceStatus);
     }
 }

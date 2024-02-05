@@ -51,7 +51,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcPassiveDiscoveryService {
+public class PassiveDiscoveryGraphQLService {
     private final InventoryClient client;
     private final PassiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;

@@ -42,7 +42,7 @@ import org.opennms.horizon.server.model.status.NodeResponseTime;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.service.metrics.Constants;
-import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsGraphQLService;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,12 +67,12 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
-public class NodeStatusService {
-    private static final Logger LOG = LoggerFactory.getLogger(NodeStatusService.class);
+public class NodeStatusGraphQLService {
+    private static final Logger LOG = LoggerFactory.getLogger(NodeStatusGraphQLService.class);
     private static final String RESPONSE_TIME_METRIC = "response_time_msec";
     private static final int TIME_RANGE_IN_SECONDS = 90;
     private final InventoryClient client;
-    private final TSDBMetricsService tsdbMetricsService;
+    private final TSDBMetricsGraphQLService tsdbMetricsGraphQLService;
     private final ServerHeaderUtil headerUtil;
 
     public Mono<NodeStatus> getNodeStatus(long id, String monitorType, ResolutionEnvironment env) {
@@ -146,7 +146,7 @@ public class NodeStatusService {
         labels.put(MONITOR_KEY, monitorType);
         labels.put(INSTANCE_KEY, instance);
 
-        return tsdbMetricsService
+        return tsdbMetricsGraphQLService
             .getMetric(env, RESPONSE_TIME_METRIC, labels, TIME_RANGE_IN_SECONDS, TimeRangeUnit.SECOND);
     }
 
@@ -174,7 +174,7 @@ public class NodeStatusService {
         }
         var optionalParams = Map.of(Constants.FIRST_OBSERVATION_TIME, String.valueOf(firstObservationTime));
         try {
-            return tsdbMetricsService.
+            return tsdbMetricsGraphQLService.
                 getCustomMetric(env, Constants.REACHABILITY_PERCENTAGE, labels, timeRange, timeRangeUnit, optionalParams)
                 .map(result -> transformToNodeReachability(node.getId(), result));
         } catch (Exception e) {
@@ -219,7 +219,7 @@ public class NodeStatusService {
         labels.put(INSTANCE_KEY, ipInterface.getIpAddress());
 
         try {
-            return tsdbMetricsService.getMetric(env,
+            return tsdbMetricsGraphQLService.getMetric(env,
                 AVG_RESPONSE_TIME, labels, timeRange, timeRangeUnit).map(result ->
                 transformToNodeResponseTime(node.getId(), result));
         } catch (Exception e) {

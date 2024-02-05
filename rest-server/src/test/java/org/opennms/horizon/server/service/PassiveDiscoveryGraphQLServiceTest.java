@@ -58,7 +58,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
-class GraphQLPassiveDiscoveryServiceTest {
+class PassiveDiscoveryGraphQLServiceTest {
     @MockBean
     private InventoryClient mockClient;
     @MockBean

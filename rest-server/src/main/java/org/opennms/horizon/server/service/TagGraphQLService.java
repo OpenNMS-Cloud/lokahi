@@ -55,7 +55,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcTagService {
+public class TagGraphQLService {
     private final InventoryClient client;
     private final TagMapper mapper;
     private final ServerHeaderUtil headerUtil;

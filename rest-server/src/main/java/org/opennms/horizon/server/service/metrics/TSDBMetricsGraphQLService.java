@@ -52,7 +52,7 @@ import java.util.Optional;
 @Slf4j
 @GraphQLApi
 @Service
-public class TSDBMetricsService {
+public class TSDBMetricsGraphQLService {
 
     private static final String QUERY_ENDPOINT = "/query";
     private static final String QUERY_RANGE_ENDPOINT = "/query_range";
@@ -64,11 +64,11 @@ public class TSDBMetricsService {
     private final WebClient tsdbQueryWebClient;
     private final WebClient tsdbrangeQueryWebClient;
 
-    public TSDBMetricsService(ServerHeaderUtil headerUtil,
-                              MetricLabelUtils metricLabelUtils,
-                              QueryService queryService,
-                              InventoryClient inventoryClient,
-                              @Value("${tsdb.url}") String tsdbURL) {
+    public TSDBMetricsGraphQLService(ServerHeaderUtil headerUtil,
+                                     MetricLabelUtils metricLabelUtils,
+                                     QueryService queryService,
+                                     InventoryClient inventoryClient,
+                                     @Value("${tsdb.url}") String tsdbURL) {
 
         this.headerUtil = headerUtil;
         this.metricLabelUtils = metricLabelUtils;

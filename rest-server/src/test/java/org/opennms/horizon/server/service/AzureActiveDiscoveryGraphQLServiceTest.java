@@ -56,7 +56,7 @@ import static org.opennms.horizon.server.test.util.GraphQLWebTestClient.createPa
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
-class GraphQLAzureActiveDiscoveryServiceTest {
+class AzureActiveDiscoveryGraphQLServiceTest {
 
     @MockBean
     private InventoryClient mockClient;

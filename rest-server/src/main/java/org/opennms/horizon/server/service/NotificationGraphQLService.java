@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class NotificationService {
+public class NotificationGraphQLService {
     private final NotificationClient client;
     private final PagerDutyConfigMapper mapper;
     private final ServerHeaderUtil headerUtil;

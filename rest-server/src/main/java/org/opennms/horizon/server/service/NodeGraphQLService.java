@@ -64,13 +64,13 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcNodeService {
+public class NodeGraphQLService {
     private static final String ICMP_MONITOR_TYPE = "ICMP";
 
     private final InventoryClient client;
     private final NodeMapper mapper;
     private final ServerHeaderUtil headerUtil;
-    private final NodeStatusService nodeStatusService;
+    private final NodeStatusGraphQLService nodeStatusGraphQLService;
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
@@ -116,13 +116,13 @@ public class GrpcNodeService {
 
     @GraphQLQuery
     public Mono<NodeStatus> getNodeStatus(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return nodeStatusService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
+        return nodeStatusGraphQLService.getNodeStatus(id, ICMP_MONITOR_TYPE, env);
     }
 
     @GraphQLQuery(name = "allNodeStatus")
     public Flux<NodeStatus> getAllNodeStatus(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
-            .flatMap(nodeDTO -> nodeStatusService.getNodeStatus(nodeDTO, env));
+            .flatMap(nodeDTO -> nodeStatusGraphQLService.getNodeStatus(nodeDTO, env));
     }
 
     @GraphQLMutation
@@ -144,7 +144,7 @@ public class GrpcNodeService {
                                       @GraphQLArgument(name = "sortBy") String sortBy,
                                       @GraphQLArgument(name = "sortAscending") boolean sortAscending) {
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
-            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
+            .flatMap(nodeDTO -> nodeStatusGraphQLService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
             .sort(TopNNode.getComparator(sortBy, sortAscending))
             .skip((long) (page - 1) * pageSize)
             .take(pageSize);
@@ -164,7 +164,7 @@ public class GrpcNodeService {
                                            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
 
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)))
-            .flatMap(nodeDTO -> nodeStatusService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
+            .flatMap(nodeDTO -> nodeStatusGraphQLService.getTopNNode(nodeDTO, timeRange, timeRangeUnit, env))
             .sort(TopNNode.getComparator(sortBy, sortAscending)).collectList()
             .map(topNList -> {
                 try {

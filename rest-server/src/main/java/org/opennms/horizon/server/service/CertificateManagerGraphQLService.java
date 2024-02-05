@@ -20,7 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcMinionCertificateManager {
+public class CertificateManagerGraphQLService {
     private final MinionCertificateManagerClient client;
     private final ServerHeaderUtil headerUtil;
     private final CertificateMapper mapper;

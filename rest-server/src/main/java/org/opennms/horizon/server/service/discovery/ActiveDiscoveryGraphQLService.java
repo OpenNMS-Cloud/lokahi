@@ -50,7 +50,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcActiveDiscoveryService {
+public class ActiveDiscoveryGraphQLService {
     private final InventoryClient client;
     private final ActiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;

@@ -32,20 +32,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opennms.horizon.server.service.GrpcAlertService;
-import org.opennms.horizon.server.service.GrpcEventService;
-import org.opennms.horizon.server.service.GrpcLocationService;
-import org.opennms.horizon.server.service.GrpcMinionCertificateManager;
-import org.opennms.horizon.server.service.GrpcMinionService;
-import org.opennms.horizon.server.service.GrpcNodeService;
-import org.opennms.horizon.server.service.GrpcTagService;
-import org.opennms.horizon.server.service.NotificationService;
-import org.opennms.horizon.server.service.discovery.GrpcActiveDiscoveryService;
-import org.opennms.horizon.server.service.discovery.GrpcAzureActiveDiscoveryService;
-import org.opennms.horizon.server.service.discovery.GrpcIcmpActiveDiscoveryService;
-import org.opennms.horizon.server.service.discovery.GrpcPassiveDiscoveryService;
-import org.opennms.horizon.server.service.flows.GrpcFlowService;
-import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.service.AlertGraphQLService;
+import org.opennms.horizon.server.service.EventGraphQLService;
+import org.opennms.horizon.server.service.LocationGraphQLService;
+import org.opennms.horizon.server.service.CertificateManagerGraphQLService;
+import org.opennms.horizon.server.service.MinionGraphQLService;
+import org.opennms.horizon.server.service.NodeGraphQLService;
+import org.opennms.horizon.server.service.TagGraphQLService;
+import org.opennms.horizon.server.service.NotificationGraphQLService;
+import org.opennms.horizon.server.service.discovery.ActiveDiscoveryGraphQLService;
+import org.opennms.horizon.server.service.discovery.AzureActiveDiscoveryGraphQLService;
+import org.opennms.horizon.server.service.discovery.IcmpActiveDiscoveryGraphQLService;
+import org.opennms.horizon.server.service.discovery.PassiveDiscoveryGraphQLService;
+import org.opennms.horizon.server.service.flows.FlowGraphQLService;
+import org.opennms.horizon.server.service.metrics.TSDBMetricsGraphQLService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -58,86 +58,86 @@ public class GraphQLQueryValidationConfig {
 
     @Bean
     @Primary
-    public GrpcAlertService grpcAlertService() {
-        return Mockito.mock(GrpcAlertService.class, new GraphQLAnswer());
+    public AlertGraphQLService grpcAlertService() {
+        return Mockito.mock(AlertGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcEventService grpcEventService() {
-        return Mockito.mock(GrpcEventService.class, new GraphQLAnswer());
+    public EventGraphQLService grpcEventService() {
+        return Mockito.mock(EventGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcLocationService grpcLocationService() {
-        return Mockito.mock(GrpcLocationService.class, new GraphQLAnswer());
+    public LocationGraphQLService grpcLocationService() {
+        return Mockito.mock(LocationGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcMinionCertificateManager grpcMinionCertificateManager() {
-        return Mockito.mock(GrpcMinionCertificateManager.class, new GraphQLAnswer());
+    public CertificateManagerGraphQLService grpcMinionCertificateManager() {
+        return Mockito.mock(CertificateManagerGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcMinionService grpcMinionService() {
-        return Mockito.mock(GrpcMinionService.class, new GraphQLAnswer());
+    public MinionGraphQLService grpcMinionService() {
+        return Mockito.mock(MinionGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcNodeService grpcNodeService() {
-        return Mockito.mock(GrpcNodeService.class, new GraphQLAnswer());
+    public NodeGraphQLService grpcNodeService() {
+        return Mockito.mock(NodeGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcTagService grpcTagService() {
-        return Mockito.mock(GrpcTagService.class, new GraphQLAnswer());
+    public TagGraphQLService grpcTagService() {
+        return Mockito.mock(TagGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public NotificationService notificationService() {
-        return Mockito.mock(NotificationService.class, new GraphQLAnswer());
+    public NotificationGraphQLService notificationService() {
+        return Mockito.mock(NotificationGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcActiveDiscoveryService grpcActiveDiscoveryService() {
-        return Mockito.mock(GrpcActiveDiscoveryService.class, new GraphQLAnswer());
+    public ActiveDiscoveryGraphQLService grpcActiveDiscoveryService() {
+        return Mockito.mock(ActiveDiscoveryGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcAzureActiveDiscoveryService grpcAzureActiveDiscoveryService() {
-        return Mockito.mock(GrpcAzureActiveDiscoveryService.class, new GraphQLAnswer());
+    public AzureActiveDiscoveryGraphQLService grpcAzureActiveDiscoveryService() {
+        return Mockito.mock(AzureActiveDiscoveryGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcIcmpActiveDiscoveryService grpcIcmpActiveDiscoveryService() {
-        return Mockito.mock(GrpcIcmpActiveDiscoveryService.class, new GraphQLAnswer());
+    public IcmpActiveDiscoveryGraphQLService grpcIcmpActiveDiscoveryService() {
+        return Mockito.mock(IcmpActiveDiscoveryGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcPassiveDiscoveryService grpcPassiveDiscoveryService() {
-        return Mockito.mock(GrpcPassiveDiscoveryService.class, new GraphQLAnswer());
+    public PassiveDiscoveryGraphQLService grpcPassiveDiscoveryService() {
+        return Mockito.mock(PassiveDiscoveryGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcFlowService grpcFlowService() {
-        return Mockito.mock(GrpcFlowService.class, new GraphQLAnswer());
+    public FlowGraphQLService grpcFlowService() {
+        return Mockito.mock(FlowGraphQLService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public TSDBMetricsService TSDBMetricsService() {
-        return Mockito.mock(TSDBMetricsService.class, new GraphQLAnswer());
+    public TSDBMetricsGraphQLService TSDBMetricsService() {
+        return Mockito.mock(TSDBMetricsGraphQLService.class, new GraphQLAnswer());
     }
 
     static class GraphQLAnswer implements Answer<Object> {

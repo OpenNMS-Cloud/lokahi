@@ -3,7 +3,6 @@ package org.opennms.horizon.inventory.service;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -91,6 +90,11 @@ public class IpInterfaceService {
         ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
         ipInterface.setAzureInterface(azureInterface);
         modelRepo.save(ipInterface);
+    }
+
+    public IpInterface getPrimaryInterfaceForNode(long nodeId) {
+        var optionalIpInterface = modelRepo.findByNodeIdAndSnmpPrimary(nodeId, true);
+        return optionalIpInterface.orElseThrow();
     }
 
     // TODO: is this executed inside a transaction?  If not, there is a race condition in this code (find-then-save).

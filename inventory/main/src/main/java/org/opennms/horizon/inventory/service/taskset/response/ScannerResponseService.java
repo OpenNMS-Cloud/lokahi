@@ -36,7 +36,6 @@ import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
@@ -250,6 +249,10 @@ public class ScannerResponseService {
             Map<Integer, SnmpInterface> ifIndexSNMPMap = new HashMap<>();
             nodeService.updateNodeInfo(node, result.getNodeInfo());
 
+            IpInterface ipInterface = ipInterfaceService.getPrimaryInterfaceForNode(node.getId());
+            snmpConfigService.saveOrUpdateSnmpConfig(tenantId, locationId,
+                InetAddressUtils.toIpAddrString(ipInterface.getIpAddress()), snmpConfiguration);
+
             for (SnmpInterfaceResult snmpIfResult : result.getSnmpInterfacesList()) {
                 SnmpInterface snmpInterface = snmpInterfaceService.createOrUpdateFromScanResult(tenantId, node, snmpIfResult);
                 ifIndexSNMPMap.put(snmpInterface.getIfIndex(), snmpInterface);
@@ -259,7 +262,6 @@ public class ScannerResponseService {
             }
             result.getDetectorResultList().forEach(detectorResult ->
                 processDetectorResults(tenantId, locationId, node.getId(), detectorResult));
-
         } else {
             log.error("Error while process node scan results, tenantId={}; locationId={}; node with id {} doesn't exist", tenantId, locationId, result.getNodeId());
         }

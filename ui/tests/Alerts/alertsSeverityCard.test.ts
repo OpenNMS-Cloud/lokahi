@@ -13,7 +13,8 @@ describe('AlertsSeverityCard', () => {
       component: AlertsSeverityCard,
       props: {
         severity: 'CRITICAL',
-        isFilter: true
+        isFilter: true,
+        count: 4
       }
     })
     alertsQueries = useAlertsQueries()
@@ -46,11 +47,6 @@ describe('AlertsSeverityCard', () => {
 
   test('Should have a count', () => {
     const elem = wrapper.get('[data-test="count"]')
-    expect(elem.exists()).toBeTruthy()
-  })
-
-  test.skip('Should have a percentage/time', () => {
-    const elem = wrapper.get('[data-test="percentage-time"]')
     expect(elem.exists()).toBeTruthy()
   })
 

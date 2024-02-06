@@ -49,7 +49,7 @@
     </feature>
 
     <feature name="icmp-plugins" version="${project.version}">
-        <feature>icmp-jna</feature>
+        <feature>icmp-best</feature>
         <feature>plugins-api</feature>
         <bundle>mvn:org.opennms.lokahi.minion/icmp-plugin/${project.version}</bundle>
     </feature>

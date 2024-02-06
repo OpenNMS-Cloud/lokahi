@@ -64,7 +64,7 @@ public class NotificationService {
     @WithTenant(tenantIdArg = 0, tenantIdArgInternalMethod = "getTenantId", tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
     public void postNotification(Alert alert) {
         Span span = Span.current();
-        span.setAttribute("tenantId", alert.getTenantId());
+        span.setAttribute("user", alert.getTenantId());
         span.setAttribute("alertId", alert.getDatabaseId());
 
         if (alert.getMonitoringPolicyIdList().isEmpty()) {

@@ -180,11 +180,26 @@ create_namespace () {
   kubectl create namespace $NAMESPACE
 }
 
+install_nginx () {
+  # The controller.service.type=ClusterIP is because kind doesn't provide a LoadBalancer by default.
+  # https://github.com/fluxcd/flux2/issues/2476#issuecomment-1051275654
+  # https://github.com/kubernetes-sigs/kind/issues/2889#issuecomment-1321223613
+  helm upgrade --install ingress-nginx ingress-nginx \
+    --repo https://kubernetes.github.io/ingress-nginx \
+    --version 4.7.0 \
+    --namespace $NAMESPACE \
+    --set controller.service.type=ClusterIP \
+    --set controller.hostPort.enabled=true \
+    --values=../tilt-ingress-nginx-values.yaml \
+    --wait --timeout "${TIMEOUT}"
+}
+
 install_helm_chart_custom_images () {
   echo
   echo ________________Installing Lokahi________________
   echo
 
+  install_nginx
   if ! time helm upgrade -i lokahi ./../charts/lokahi \
   -f ./tmp/install-local-opennms-lokahi-custom-images-values.yaml \
   --namespace $NAMESPACE \
@@ -246,8 +261,8 @@ if [ $CONTEXT == "local" ]; then
   echo
   echo ________________Installing Lokahi________________
   echo
+  install_nginx
   time helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
-  if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check
 
@@ -271,8 +286,6 @@ elif [ "$CONTEXT" == "custom-images" ]; then
 
   install_helm_chart_custom_images
 
-  if [ $? -ne 0 ]; then exit; fi
-
   cluster_ready_check
 
 elif [ "$CONTEXT" == "cicd" ]; then
@@ -288,8 +301,6 @@ elif [ "$CONTEXT" == "cicd" ]; then
   # output values from the release to help with debugging pipelines
   helm get values lokahi --namespace $NAMESPACE
 
-  if [ $? -ne 0 ]; then exit; fi
-
   cluster_ready_check
 
 elif [ $CONTEXT == "existing-k8s" ]; then
@@ -297,8 +308,8 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Lokahi________________
   echo
+  install_nginx
   time helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
-  if [ $? -ne 0 ]; then exit; fi
 
   cluster_ready_check
 

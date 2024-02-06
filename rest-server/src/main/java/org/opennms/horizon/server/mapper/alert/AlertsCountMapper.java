@@ -1,4 +1,4 @@
-/*
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
  * Copyright (C) 2023 The OpenNMS Group, Inc.
@@ -24,17 +24,17 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- */
+ *******************************************************************************/
 
-package org.opennms.horizon.shared.ipc.grpc.server.manager;
+package org.opennms.horizon.server.mapper.alert;
 
-import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
+import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.server.model.alerts.AlertCount;
 
-import io.grpc.stub.StreamObserver;
-import io.opentelemetry.api.trace.SpanContext;
-
-public interface OutgoingMessageFactory {
-
-    void create(String systemId, String tenantId, String location, SpanContext streamSpan, StreamObserver<CloudToMinionMessage> streamObserver);
-
+@Mapper(componentModel = "spring",  nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+    collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
+public interface AlertsCountMapper {
+    public AlertCount protoToAlertCount(org.opennms.horizon.alerts.proto.AlertCount alertCount);
 }

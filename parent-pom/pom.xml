@@ -1191,6 +1191,30 @@
                 <jib.container.creationTime>USE_CURRENT_TIMESTAMP</jib.container.creationTime>
             </properties>
         </profile>
+
+        <profile>
+            <id>arch-amd64</id>
+            <activation>
+                <os>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <properties>
+                <jib.from.platforms>linux/amd64</jib.from.platforms>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>arch-arm64</id>
+            <activation>
+                <os>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <jib.from.platforms>linux/arm64</jib.from.platforms>
+            </properties>
+        </profile>
     </profiles>
 
     <repositories>

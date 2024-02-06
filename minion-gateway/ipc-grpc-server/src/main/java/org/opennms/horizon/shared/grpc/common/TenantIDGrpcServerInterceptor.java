@@ -38,7 +38,6 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 
 import java.time.Duration;

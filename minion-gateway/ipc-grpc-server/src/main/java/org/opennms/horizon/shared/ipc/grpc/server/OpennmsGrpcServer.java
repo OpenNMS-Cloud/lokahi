@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -49,7 +50,9 @@ import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
+import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
+import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.horizon.shared.grpc.interceptor.InterceptorFactory;
 import org.opennms.horizon.shared.grpc.interceptor.MeteringInterceptorFactory;
@@ -72,6 +75,7 @@ import org.slf4j.MDC.MDCCloseable;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Empty;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import io.grpc.BindableService;
@@ -80,8 +84,9 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
@@ -124,6 +129,9 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private RpcRequestTimeoutManager rpcRequestTimeoutManager;
     private MinionManager minionManager;
     private TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor;
+    private LocationServerInterceptor locationServerInterceptor;
+    private final boolean debugSpanFullMessage;
+    private final boolean debugSpanContent;
 
     private final Map<String, Consumer<SinkMessage>> sinkDispatcherById = new ConcurrentHashMap<>();
 
@@ -132,7 +140,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private BiConsumer<RpcRequestProto, StreamObserver<RpcResponseProto>> incomingRpcHandler;
     private OutgoingMessageHandler outgoingMessageHandler;
 
-    private Tracer tracer = GlobalOpenTelemetry.get().getTracer(getClass().getName());
+    private final Tracer tracer;
 
     private MeterRegistry meterRegistry;
 
@@ -140,13 +148,16 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 // Constructor
 //----------------------------------------
 
-    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer, final MeterRegistry meterRegistry) {
+    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer, final MeterRegistry meterRegistry, final Tracer tracer, boolean debugSpanFullMessage, boolean debugSpanContent) {
         this.grpcIpcServer = grpcIpcServer;
         this.interceptors = List.of(
             new MeteringInterceptorFactory(meterRegistry)
         );
 
         this.meterRegistry = Objects.requireNonNull(meterRegistry);
+        this.tracer = tracer;
+        this.debugSpanFullMessage = debugSpanFullMessage;
+        this.debugSpanContent = debugSpanContent;
     }
 
 //========================================
@@ -243,6 +254,13 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     public void setTenantIDGrpcServerInterceptor(TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
         this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
     }
+    public LocationServerInterceptor getLocationServerInterceptor() {
+        return locationServerInterceptor;
+    }
+
+    public void setLocationServerInterceptor(LocationServerInterceptor locationServerInterceptor) {
+        this.locationServerInterceptor = locationServerInterceptor;
+    }
 
 //========================================
 // Operations
@@ -263,14 +281,10 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         sinkDispatcherById.computeIfAbsent(module.getId(), id -> sinkMessage -> {
             final T message = module.unmarshal(sinkMessage.getContent().toByteArray());
             final var span = tracer.spanBuilder("dispatch " + module.getId())
-                .setNoParent()
-                .addLink(Span.current().getSpanContext())
                 .setAttribute(SemanticAttributes.CODE_NAMESPACE, module.getClass().getName())
                 .startSpan();
 
             try (var ss = span.makeCurrent()) {
-                // we might want to do this in the future in a debugging mode
-                //span.setAttribute("message", message.toString());
                 dispatch(module, message);
             } catch (Throwable throwable) {
                 span.setStatus(StatusCode.ERROR, "Received exception during dispatch: " + throwable);
@@ -304,33 +318,99 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 //----------------------------------------
 
     private StreamObserver<MinionToCloudMessage> processSinkStreamingCall(StreamObserver<Empty> responseObserver) {
-        return new StreamObserver<>() {
+        final var streamSpan = Span.current(); // stash for linking future messages back to the stream
+        final AtomicReference<Attributes> attributes = new AtomicReference<>(Attributes.builder()
+            .put("user", tenantIDGrpcServerInterceptor.readCurrentContextTenantId())
+            .put("location", locationServerInterceptor.readCurrentContextLocationId())
+            // we don't have systemId yet -- we grab this from the first heartbeat message we see
+            .build());
+        final var haveSystemId = new AtomicBoolean(false);
 
+        streamSpan.setAllAttributes(attributes.get()); // Add attributes to the stream span now
+
+        return new StreamObserver<MinionToCloudMessage>() {
             @Override
             public void onNext(MinionToCloudMessage message) {
-                if (message.hasSinkMessage()) {
-                    SinkMessage sinkMessage = message.getSinkMessage();
-                    if (!Strings.isNullOrEmpty(sinkMessage.getModuleId())) {
-                        ExecutorService sinkModuleExecutor = sinkConsumersByModuleId.get(sinkMessage.getModuleId());
-                        if (sinkModuleExecutor != null) {
-                            // Schedule execution with the ExecutorService, with the current GRPC context active
-                            Context.currentContextExecutor(sinkModuleExecutor)
-                                .execute(() -> dispatchSinkMessage(sinkMessage));
+                // We don't know the message type yet, but will update later if we can
+                final var span = tracer.spanBuilder("MinionToCloudMessage receive unknown")
+                    .setSpanKind(SpanKind.CONSUMER)
+                    .setAllAttributes(attributes.get())
+                    .setAttribute("size", message.getSerializedSize())
+                    .setNoParent() // we don't want each message to be lost in the long-running streaming trace
+                    .addLink(Span.current().getSpanContext()) // but we do want to link to the long-running trace
+                    .startSpan();
+
+                try (var ss = span.makeCurrent()) {
+                    if (message.hasSinkMessage()) {
+                        SinkMessage sinkMessage = message.getSinkMessage();
+                        span.updateName("MinionToCloudMessages receive " + sinkMessage.getModuleId());
+                        span.setAttribute("moduleId", sinkMessage.getModuleId());
+                        span.setAttribute("messageId", sinkMessage.getMessageId());
+                        if (sinkMessage.hasIdentity()) {
+                            span.setAttribute("identity", sinkMessage.getIdentity().toString());
+                        }
+
+                        if (debugSpanFullMessage) {
+                            span.setAttribute("message", sinkMessage.toString());
+                        }
+                        if (debugSpanContent) {
+                            span.setAttribute("content", sinkMessage.getContent().toString());
+                        }
+
+                        // We won't have the system ID until we receive the first heartbeat message, so
+                        // once we get it, (1) we stash it with a full set of identity attributes for
+                        // future message spans, (2) we set it on the long-running stream span, and
+                        // (3) we set it on our current span. And we make sure to only do this once.
+                        if (!haveSystemId.get() && "heartbeat".equals(sinkMessage.getModuleId())) {
+                            try {
+                                var heartbeatMessage = HeartbeatMessage.parseFrom(sinkMessage.getContent());
+                                if (heartbeatMessage.getIdentity() != null) {
+                                    var systemId = heartbeatMessage.getIdentity().getSystemId();
+                                    attributes.set(Attributes.builder()
+                                        .putAll(attributes.get())
+                                        .put("systemId", systemId)
+                                        .build());
+                                    streamSpan.setAttribute("systemId", systemId);
+                                    span.setAttribute("systemId", systemId);
+                                    haveSystemId.set(true);
+                                }
+                            } catch (InvalidProtocolBufferException e) {
+                                // ignore
+                            }
+                        }
+
+                        if (!Strings.isNullOrEmpty(sinkMessage.getModuleId())) {
+                            ExecutorService sinkModuleExecutor = sinkConsumersByModuleId.get(sinkMessage.getModuleId());
+                            if (sinkModuleExecutor != null) {
+                                // Schedule execution with the ExecutorService, with the current GRPC context active
+                                Context.currentContextExecutor(sinkModuleExecutor)
+                                    .execute(() -> dispatchSinkMessage(sinkMessage));
+                            } else {
+                                LOG.error("Ignoring sink message; no module executor registered: module-id={}; identity={}; message-id={}",
+                                    sinkMessage.getModuleId(),
+                                    sinkMessage.getIdentity(),
+                                    sinkMessage.getMessageId()
+                                );
+                                span.setStatus(StatusCode.ERROR, "Ignoring sink message; no module executor registered");
+                            }
                         } else {
-                            LOG.error("Ignoring sink message; no module executor registered: module-id={}; identity={}; message-id={}",
-                                sinkMessage.getModuleId(),
+                            LOG.error("Ignoring sink message with null or empty module-id: identity={}; message-id={}",
                                 sinkMessage.getIdentity(),
                                 sinkMessage.getMessageId()
                             );
+                            span.setStatus(StatusCode.ERROR, "Ignoring sink message with null or empty module-id");
                         }
                     } else {
-                        LOG.error("Ignoring sink message with null or empty module-id: identity={}; message-id={}",
-                            sinkMessage.getIdentity(),
-                            sinkMessage.getMessageId()
-                        );
+                        LOG.error("Unsupported message {}", message);
+                        span.setStatus(StatusCode.ERROR, "Unsupported message (expecting SinkMessage)");
+                        span.setAttribute("message", message.toString());
                     }
-                } else {
-                    LOG.error("Unsupported message {}", message);
+                } catch (Throwable throwable) {
+                    span.setStatus(StatusCode.ERROR, "Received exception during dispatch: " + throwable);
+                    span.recordException(throwable);
+                    throw new UndeclaredThrowableException(throwable);
+                } finally {
+                    span.end();
                 }
             }
 
@@ -387,26 +467,67 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     private CompletableFuture<GatewayRpcResponseProto> dispatch(StreamObserver<RpcRequestProto> rpcHandler, String location, RpcRequestProto request) {
-        CompletableFuture<RpcResponseProto> future = new CompletableFuture<>();
-        String rpcId = request.getRpcId();
-        BasicRpcResponseHandler responseHandler = new BasicRpcResponseHandler(request.getExpirationTime(), rpcId, request.getModuleId(), future);
-        rpcHandler.onNext(request);
-        rpcRequestTracker.addRequest(rpcId, responseHandler);
-        rpcRequestTimeoutManager.registerRequestTimeout(responseHandler);
-        return future.whenComplete((r, e) -> {
-            rpcRequestTracker.remove(rpcId);
-        }).thenApply(response -> {
-            return GatewayRpcResponseProto.newBuilder()
-                .setRpcId(response.getRpcId())
-                .setIdentity(MinionIdentity.newBuilder()
-                    .setSystemId(response.getIdentity().getSystemId())
-                    .setLocationId(location)
-                )
-                .setModuleId(response.getModuleId())
-                .setPayload(response.getPayload())
-                .build();
-        });
-    }
+        final var span = tracer.spanBuilder("CloudToMinionRPC dispatch " + request.getModuleId())
+            .setSpanKind(SpanKind.CLIENT)
+            .addLink(rpcConnectionTracker.getConnectionSpanContext(rpcHandler))
+            .setAllAttributes(rpcConnectionTracker.getConnectionSpanAttributes(rpcHandler))
+            .setAttribute("request_size", request.getSerializedSize())
+            .setAttribute("rpcId", request.getRpcId())
+            .setAttribute("expiration", request.getExpirationTime())
+            .setAttribute("moduleId", request.getModuleId())
+            .startSpan();
 
+        if (debugSpanFullMessage) {
+            span.setAttribute("request", request.toString());
+        }
+        if (debugSpanContent && request.hasPayload()) {
+            span.setAttribute("request_payload", request.getPayload().toString());
+        }
+
+        try (var ss = span.makeCurrent()) {
+            CompletableFuture<RpcResponseProto> future = new CompletableFuture<>();
+            String rpcId = request.getRpcId();
+            BasicRpcResponseHandler responseHandler = new BasicRpcResponseHandler(request.getExpirationTime(), rpcId, request.getModuleId(), future);
+            rpcHandler.onNext(request);
+            rpcRequestTracker.addRequest(rpcId, responseHandler);
+            rpcRequestTimeoutManager.registerRequestTimeout(responseHandler);
+            return future.whenComplete((r, e) -> {
+                rpcRequestTracker.remove(rpcId);
+                if (r != null) {
+                    span.setAttribute("response_size", r.getSerializedSize());
+                    if (debugSpanFullMessage) {
+                        span.setAttribute("response", r.toString());
+                    }
+                    if (debugSpanContent) {
+                        span.setAttribute("response_payload", r.getPayload().toString());
+                    }
+                }
+                if (e != null) {
+                    span.setStatus(StatusCode.ERROR, "Received exception during dispatch future: " + e);
+                    span.recordException(e);
+                }
+                span.end();
+            }).thenApply(response -> {
+                return GatewayRpcResponseProto.newBuilder()
+                    .setRpcId(response.getRpcId())
+                    .setIdentity(MinionIdentity.newBuilder()
+                        .setSystemId(response.getIdentity().getSystemId())
+                        .setLocationId(location)
+                    )
+                    .setModuleId(response.getModuleId())
+                    .setPayload(response.getPayload())
+                    .build();
+            });
+        } catch (Throwable throwable) {
+            span.setStatus(StatusCode.ERROR, "Received exception during dispatch: " + throwable);
+            span.recordException(throwable);
+            span.end();
+            throw new UndeclaredThrowableException(throwable);
+        } finally {
+            // In the non-exception case the span is ended earlier in future's whenComplete action.
+            // In the exception case, the span is ended in the catch clause earlier.
+            // So, no span.end() here.
+        }
+    }
 
 }

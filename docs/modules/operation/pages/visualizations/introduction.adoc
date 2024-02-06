@@ -20,15 +20,31 @@ By default, information is shown for the last 24 hours.
 
 == View data on a per-node basis
 
-If you are using SNMP, you can view rate of traffic observed on a given interface through the Inventory page on a per-node basis:
+If you are using SNMP, you can view rate of traffic observed on a given interface through the Inventory page on a per-node basis.
+
+Available graphs depend on the data being collected and include the following:
+
+* Bandwidth inbound/outbound (combined graph)
+* Bits inbound
+* Bits outbound
+* Bits inbound/outbound (combined graph)
+* Public interface byte count
+* Node latency
+* Errors inbound/outbound (combined graph)
+* Azure node bytes inbound/outbound
+
+To view graphs, follow these steps:
 
 . Choose *Inventory* in the left navigation menu.
-. Click the *Events/Alarms* symbol on the node whose flows data you want to see.
+. Click the *graph* symbol on the node to view traffic graphs.
 +
-image::flows/flows-node.png[Node card with events/alarms symbol circled, 300]
+.Node card
+image::flows/flows-node.png[Node card with graph symbol circled, 300]
 
-. Click the *graphs* symbol beside an interface in the SNMP interfaces area to view traffic graphs.
-. Click the browser back button or an item in the left navigation menu to exit the details screen.
+.. Hover over points on the graph to see details.
+.. Click the download symbol on each graph to save a PDF copy of the graph locally or click **Download All** to save a PDF of all the displayed graphs.
+
+. Click the browser back button or an item in the left navigation menu to exit the node graphs screen.
 
 == Shortcuts
 

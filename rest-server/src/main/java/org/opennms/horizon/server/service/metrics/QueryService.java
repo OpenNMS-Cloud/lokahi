@@ -88,8 +88,12 @@ public class QueryService {
     
     public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
                                  Integer timeRange, TimeRangeUnit timeRangeUnit) {
+        return getQueryString(node, metricName, labels, timeRange, timeRangeUnit, System.currentTimeMillis() / 1000L);
+    }
+
+    public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
+            Integer timeRange, TimeRangeUnit timeRangeUnit, long end) {
         if (isRangeQuery(metricName)) {
-            long end = System.currentTimeMillis() / 1000L;
             long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
             String rangeQuerySuffix = "&start=" + start + "&end=" + end +
                 "&step=2m";

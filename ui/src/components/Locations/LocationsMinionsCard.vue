@@ -108,7 +108,7 @@ const minion = computed(() => {
 
 const deleteMinion = async () => {
   await minionMutations.deleteMinion({ id: props.item.id })
-  await minionsQueries.refreshMinionsById()
+  await minionsQueries.findMinionsByLocationId()
   locationStore.fetchLocations() // location may be gone if last minion deleted
 }
 

@@ -45,21 +45,15 @@ export const useDashboardStore = defineStore('dashboardStore', {
       await queries.getNetworkTrafficOutMetrics()
       this.totalNetworkTrafficOut = (queries.networkTrafficOut as TsResult).metric?.data?.result[0]?.values || []
     },
-    async getNodeCount() {
-      const queries = useDashboardQueries()
-      this.totalNodeCount = await queries.getNodeCount()
-    },
-    async getAllNodesStatus() {
-      const queries = useDashboardQueries()
-      this.allNodesStatus = await queries.getAllNodesStatus()
-      this.reachability.responding = this.allNodesStatus.filter((s) => s.status === Status.UP).length
-      this.reachability.unresponsive = this.allNodesStatus.length - this.reachability.responding
-    },
     async getTopNNodes() {
       const queries = useDashboardQueries()
-      this.topNodes = await queries.getTopNodes(this.topNNodesQueryVariables)
-      this.getNodeCount()
-      this.getAllNodesStatus()
+      const data = await queries.getTopNodes(this.topNNodesQueryVariables)
+      this.topNodes = data?.topNNode ?? []
+      this.totalNodeCount = data?.nodeCount ?? 0
+      this.allNodesStatus = data?.allNodeStatus ?? []
+
+      this.reachability.responding = this.allNodesStatus.filter((s) => s.status === Status.UP).length
+      this.reachability.unresponsive = this.allNodesStatus.length - this.reachability.responding
     },
     async downloadTopNNodesToCsv() {
       const queries = useDashboardQueries()

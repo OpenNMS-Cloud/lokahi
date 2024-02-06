@@ -67,4 +67,5 @@ spec:
             - --web.console.templates=/usr/share/prometheus/consoles
             # Add the prefix /prometheus to the URLs so the paths going through the ingress will work
             - --web.external-url=/prometheus
+            - --web.enable-remote-write-receiver
 {{- end }}

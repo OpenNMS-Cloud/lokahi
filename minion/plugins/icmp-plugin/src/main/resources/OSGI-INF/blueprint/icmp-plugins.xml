@@ -9,7 +9,7 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <bean id="pingerFactory" class="org.opennms.horizon.minion.icmp.jna.JnaPingerFactory"/>
+  <bean id="pingerFactory" class="org.opennms.minion.icmp.best.BestMatchPingerFactory"/>
 
   <bean id="icmpDetectorManager" class="org.opennms.horizon.minion.icmp.IcmpDetectorManager">
       <argument ref="pingerFactory"/>

@@ -11,12 +11,25 @@
           data-test="severity-list"
         >
           <AlertsSeverityCard
-            v-for="severity in severities"
+            v-for="severity in Severities"
             :key="severity"
             :severity="severity"
             :class="severity.toLowerCase()"
             :isFilter="isFilter"
             :timeRange="timeRange"
+            :count="countMap[severity]"
+          />
+        </div>
+      </div>
+      <div class="alerts-box status-box border">
+        <div class="subtitle2">Status</div>
+        <div class="list">
+          <AlertsStatusCard
+            v-for="status in Statuses"
+            :key="status"
+            :status="status"
+            :class="status.toLowerCase()"
+            :count="countMap[status]"
           />
         </div>
       </div>
@@ -25,21 +38,28 @@
 </template>
 
 <script lang="ts" setup>
-import {Severity, TimeRange} from '@/types/graphql'
+import { TimeRange } from '@/types/graphql'
+import { useAlertsQueries } from '@/store/Queries/alertsQueries'
+import { Severities, Statuses, DefaultCountMap } from './alerts.constants'
+import { getCountMap } from './alerts.utils'
+
+const queries = useAlertsQueries()
+const countMap = ref<Record<string, number>>(DefaultCountMap)
 
 defineProps<{
   isFilter?: boolean
   timeRange?: TimeRange
 }>()
 
-const severities: Severity[] = [
-  Severity.Critical, Severity.Major, Severity.Minor, Severity.Warning, Severity.Indeterminate
-]
-
 // for setting CSS properties
 const gap = 1.5
 const itemGap = `${gap}%`
-const listItemWidth = `${100 - (gap * (severities.length - 1)) / severities.length}%` // to set card with equal width
+const listItemWidth = `${100 - (gap * (Severities.length - 1)) / Severities.length}%` // to set card with equal width
+
+onMounted(async () => {
+  const alertCount = await queries.getCounts()
+  countMap.value = getCountMap(alertCount, Severities)
+})
 </script>
 
 <style lang="scss" scoped>

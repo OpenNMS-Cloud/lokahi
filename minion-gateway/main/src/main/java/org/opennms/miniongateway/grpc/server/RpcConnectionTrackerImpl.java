@@ -1,10 +1,12 @@
 package org.opennms.miniongateway.grpc.server;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import io.grpc.stub.StreamObserver;
-import org.opennms.cloud.grpc.minion.RpcRequestProto;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
@@ -14,12 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 
 public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
@@ -44,6 +48,8 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
      * Semaphore per connection that is used to ensure thread-safe sending to each connection.
      */
     private Map<StreamObserver<RpcRequestProto>, Semaphore> semaphoreByConnection = new IdentityHashMap<>();
+    private Map<StreamObserver<RpcRequestProto>, SpanContext> spanContextByConnection = new IdentityHashMap<>();
+    private Map<StreamObserver<RpcRequestProto>, Attributes> spanAttributesByConnection = new IdentityHashMap<>();
 
     @Override
     public boolean addConnection(String tenantId, String location, String minionId, StreamObserver<RpcRequestProto> connection) {
@@ -63,6 +69,13 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
                 locationByConnection.put(connection, tenantLocation);
                 minionIdByConnection.put(connection, tenantMinionId);
+                spanContextByConnection.put(connection, Span.current().getSpanContext());
+                spanAttributesByConnection.put(connection,
+                    Attributes.builder()
+                        .put("user", tenantId)
+                        .put("location", location)
+                        .put("systemId", minionId)
+                        .build());
 
                 semaphoreByConnection.put(connection, new Semaphore(1, true));
 
@@ -127,6 +140,8 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
             }
 
             semaphoreByConnection.remove(connection);
+            spanContextByConnection.remove(connection);
+            spanAttributesByConnection.remove(connection);
         }
 
         return removedMinionInfo;
@@ -140,6 +155,20 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
     }
 
     @Override
+    public SpanContext getConnectionSpanContext(StreamObserver<RpcRequestProto> connection) {
+        synchronized (lock) {
+            return spanContextByConnection.get(connection);
+        }
+    }
+
+    @Override
+    public Attributes getConnectionSpanAttributes(StreamObserver<RpcRequestProto> connection) {
+        synchronized (lock) {
+            return spanAttributesByConnection.get(connection);
+        }
+    }
+
+    @Override
     public void clear() {
         log.info("Clearing all connections");
 
@@ -149,6 +178,8 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
             locationByConnection.clear();
             minionIdByConnection.clear();
             semaphoreByConnection.clear();
+            spanContextByConnection.clear();
+            spanAttributesByConnection.clear();
         }
     }
 

@@ -28,8 +28,14 @@
 
 package org.opennms.horizon.notifications.service;
 
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.sdk.testing.assertj.TracesAssert;
+import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -56,6 +62,9 @@ import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationServiceImplTest {
+    @RegisterExtension
+    static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
+    private final Tracer tracer = otelTesting.getOpenTelemetry().getTracer("test");
 
     @InjectMocks
     NotificationService notificationService;
@@ -87,10 +96,20 @@ public class NotificationServiceImplTest {
 
         Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
-        notificationService.postNotification(alert);
+        // We need to explicitly start a span because we don't have the one that is auto-created by the agent instrumentation
+        var span = tracer.spanBuilder("postNotification").startSpan();
+        try (var ignored = span.makeCurrent()) {
+            notificationService.postNotification(alert);
+        } finally {
+            span.end();
+        }
 
         Mockito.verify(pagerDutyAPI, times(1)).postNotification(alert);
         Mockito.verify(emailAPI, times(0)).sendEmail(any(), any(), any());
+
+        TracesAssert.assertThat(otelTesting.getSpans()).hasSize(1);
+        var firstSpan = otelTesting.getSpans().get(0);
+        Assert.assertEquals("user attribute (tenant)", "T1", firstSpan.getAttributes().get(AttributeKey.stringKey("user")));
     }
 
     @Test

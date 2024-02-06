@@ -86,14 +86,17 @@ public class QueryServiceTest {
         long end = System.currentTimeMillis() / 1000L;
         long start = end - Duration.ofHours(24).getSeconds();
         QueryService queryService = new QueryService();
-        var bitsInQuery = queryService.getQueryString(Optional.empty(), TOTAL_NETWORK_BITS_IN, new HashMap<>(), 24, TimeRangeUnit.HOUR);
+
+        // We pass our 'end' value to ensure our start/end values match exactly
+        var bitsInQuery = queryService.getQueryString(Optional.empty(), TOTAL_NETWORK_BITS_IN, new HashMap<>(), 24, TimeRangeUnit.HOUR, end);
         var inSplitQuery = bitsInQuery.split("&");
         Assertions.assertEquals(QUERY_PREFIX + URLEncoder.encode(QUERY_FOR_TOTAL_NETWORK_BITS_IN, StandardCharsets.UTF_8), inSplitQuery[0]);
         Assertions.assertEquals("start=" + start, inSplitQuery[1]);
         Assertions.assertEquals("end=" + end, inSplitQuery[2]);
         Assertions.assertEquals("step=2m", inSplitQuery[3]);
 
-        var bitsOutQuery = queryService.getQueryString(Optional.empty(), TOTAL_NETWORK_BITS_OUT, new HashMap<>(), 24, TimeRangeUnit.HOUR);
+        // We pass our 'end' value to ensure our start/end values match exactly
+        var bitsOutQuery = queryService.getQueryString(Optional.empty(), TOTAL_NETWORK_BITS_OUT, new HashMap<>(), 24, TimeRangeUnit.HOUR, end);
         var outSplitQuery = bitsOutQuery.split("&");
         Assertions.assertEquals(QUERY_PREFIX + URLEncoder.encode(QUERY_FOR_TOTAL_NETWORK_BITS_OUT, StandardCharsets.UTF_8), outSplitQuery[0]);
         Assertions.assertEquals("start=" + start, outSplitQuery[1]);

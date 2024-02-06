@@ -93,7 +93,9 @@ time {
 	echo "==="
 	echo "=== GRAFANA IMAGE"
 	echo "==="
-	docker build -t opennms/lokahi-grafana:local-basic grafana
+	docker build \
+		-t opennms/lokahi-grafana:local-basic \
+		grafana
 
 	echo ""
 	echo "==="
@@ -102,7 +104,7 @@ time {
 	DOCKER_BUILDKIT=1 docker build \
 		--build-arg VITE_BASE_URL=http://localhost:14080 \
 		--build-arg VITE_KEYCLOAK_URL=http://localhost:26080 \
-		--target development \
+		--target production \
 		-t opennms/lokahi-ui:local-basic \
 		ui
 }

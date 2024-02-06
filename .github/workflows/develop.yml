@@ -356,33 +356,15 @@ jobs:
           # what we need.
       - name: update
         shell: bash
-        #env:
-        #  JSON_DOC: ${{ toJSON( github ) }}
         run: |
-          #printf '%s\n' "$JSON_DOC" > foo.json
-          #cat foo.json | grep 
+          git config --global user.email "${{ vars.GH_USER_EMAIL }}"
+          git config --global user.name "${{ vars.GH_USER_NAME }}"
 
-          touch METADATA.txt
-          echo "\"github.ref\": ${{ github.ref }}" >> METADATA.txt
-          echo "\"github.sha\": ${{ github.sha }}" >> METADATA.txt
-          echo "\"github.repository\": ${{ github.repository }}" >> METADATA.txt
-          echo "\"github.run_id\": ${{ github.run_id }}" >> METADATA.txt
-          echo "\"github.run_number\": ${{ github.run_number }}" >> METADATA.txt
-          echo "\"github.run_attempt\": ${{ github.run_attempt }}" >> METADATA.txt
-          echo "\"github.actor\": ${{ github.actor }}" >> METADATA.txt
-          echo "\"github.triggering_actor\": ${{ github.triggering_actor }}" >> METADATA.txt
-          echo "\"github.event.pull_request._links.html.href\": ${{ github.event.pull_request._links.html.href }}" >> METADATA.txt
-
-          cat METADATA.txt
-
-          git config --global user.email jaberry@opennms.com
-          git config --global user.name jaberry
-
-          git remote add hs https://github.com/OpenNMS-Cloud/lokahi.git
+          git remote add lokahi https://github.com/OpenNMS-Cloud/lokahi.git
 
           git checkout from-develop
 
-          git fetch hs develop
+          git fetch lokahi develop
           git reset --hard FETCH_HEAD
           git push
           git checkout trunk

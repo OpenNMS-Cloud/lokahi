@@ -109,10 +109,7 @@ const sortChanged = (sortObj: Record<string, string>) => {
   sort[sortObj.property] = sortObj.value
 }
 
-onMounted(async () => {
-  await store.getNodeCount()
-  await store.getTopNNodes()
-})
+onMounted(async () => await store.getTopNNodes())
 </script>
 
 <style lang="scss" scoped>

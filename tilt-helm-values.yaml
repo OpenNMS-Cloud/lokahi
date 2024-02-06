@@ -13,9 +13,6 @@ Keycloak:
   HostnamePort: 1443
   HostnameAdminUrl: https://onmshs.local:1443/auth
 
-Ingress:
-  Enabled: false
-
 MailServer:
   Enabled: true
 
@@ -25,7 +22,7 @@ Citus:
 OpenNMS:
   global:
     openTelemetry:
-      otlpTracesEndpoint: "http://jaeger-collector:4317"
+      otlpTracesEndpoint: "http://tempo:4317"
   Alert:
     Resources:
       Limits:
@@ -99,6 +96,9 @@ OpenNMS:
         grpc_set_header 'traceparent' $opentelemetry_context_traceparent; # This doesn't get sent downstream normally. :(
         opentelemetry_attribute "user" "$authHeader0";
         opentelemetry_attribute "location" "$authHeader1";
+    env:
+      DEBUG_SPAN_FULL_MESSAGE: "true"
+      DEBUG_SPAN_CONTENT: "true"
   MinionCertificateManager:
     Enabled: true
     CaSecretName: root-ca-certificate
@@ -166,6 +166,7 @@ Grafana:
     Requests:
       Cpu: 100m
       Memory: 100Mi
+  autoAssignOrgRole: Admin  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#auto_assign_org_role
 Prometheus:
   Server:
     Resources:

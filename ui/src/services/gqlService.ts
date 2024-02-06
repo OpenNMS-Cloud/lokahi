@@ -21,7 +21,24 @@ const getGqlClient = (kc: Keycloak) => {
 // error notification plugin for specific status codes
 const errorNotificationPlugin = definePlugin(({ afterQuery }) => {
   afterQuery(({ error }, { response }) => {
-    if (!error) return
+    if (!error || !response) {
+      return
+    }
+
+    const serverTiming = response.headers.get('server-timing')
+
+    let traceDetails = ''
+
+    if (serverTiming) {
+      // This is added by our ingress-nginx config. We only care about the trace ID.
+      // traceparent format: https://www.w3.org/TR/trace-context/#traceparent-header
+      const pattern = /traceparent;desc="([0-9a-f]{2})-([0-9a-f]{32})-([0-9a-f]{16})-([0-9a-f]{2})"/
+      const result = pattern.exec(serverTiming)
+
+      if (result && result.length > 1) {
+        traceDetails = ` (Trace ID: ${result[2]})`
+      }
+    }
 
     const errorsMsgs = [
       {
@@ -50,11 +67,11 @@ const errorNotificationPlugin = definePlugin(({ afterQuery }) => {
       },
       {
         err: 409,
-        msg: 'Conflicting entry has occured.'
+        msg: 'Conflicting entry has occurred.'
       },
       {
         err: 500,
-        msg: 'Server error has occured.'
+        msg: 'Server error has occurred.'
       }
     ]
 
@@ -65,17 +82,9 @@ const errorNotificationPlugin = definePlugin(({ afterQuery }) => {
     }
 
     const notificationMsg = () => {
-      let errMsg = 'An unknown error has occured.'
+      const errorObj = errorsMsgs.filter(({ err }) => hasError(err))?.[0];
 
-      errorsMsgs.some(({ err, msg }) => {
-        const hasErr = hasError(err)
-
-        if (hasErr) errMsg = msg
-
-        return hasErr
-      })
-
-      return errMsg
+      return (errorObj?.msg || 'An unknown error has occurred.') + traceDetails
     }
 
     showSnackbar({

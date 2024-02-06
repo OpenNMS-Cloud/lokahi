@@ -46,7 +46,7 @@ devmode_list = cfg.get('devmode', [])
 
 secret_settings(disable_scrub=True)  ## TODO: update secret values so we can reenable scrub
 load('ext://uibutton', 'cmd_button', 'location')
-load('ext://helm_remote', 'helm_remote') # for simple charts like jaeger and cert-manager
+load('ext://helm_remote', 'helm_remote') # for simple charts like tempo and cert-manager
 load('ext://helm_resource', 'helm_resource', 'helm_repo') # for charts that we want to have resources for
 
 cmd_button(name='reload-certificates',
@@ -90,23 +90,6 @@ def jib_project(resource_name, image_name, base_path, k8s_resource_name, resourc
         labels=[resource_name]
 
 
-    compile_resource_name = '{}:live-reload'.format(resource_name)
-
-    # This is the Tilt resource that compiles code for the purpose of rapid development.
-    #
-    # Triggers compilation when source files are changed. This produces compiled class files, which are copied in to the
-    # running container by the main Tilt resource.
-    #
-    # Disable this resource to turn off live reload. Trigger the main Tilt resource for full builds instead.
-    local_resource(
-        compile_resource_name,
-        'mvn clean compile -f {} -am'.format(base_path),
-        deps=['{}/src'.format(base_path)],
-        ignore=['**/target'],
-        labels=labels,
-    )
-
-
     # This is the image build part of the main Tilt resource.
     #
     # It will perform a full build and produces an image using Jib. This can be triggered manually when needed.
@@ -135,9 +118,10 @@ def jib_project(resource_name, image_name, base_path, k8s_resource_name, resourc
         k8s_resource_name,
         new_name=resource_name,
         labels=labels,
-        resource_deps=resource_deps + [compile_resource_name],
+        resource_deps=resource_deps,
         links=links,
         port_forwards=port_forwards,
+        trigger_mode=TRIGGER_MODE_MANUAL,
     )
 
 def jib_project_multi_module(resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], links=[], labels=None, submodule=None):
@@ -281,22 +265,51 @@ def get_toggled_devmode_list(resource_name, original_list):
 def is_devmode_enabled(devmode_key):
     return devmode_key in devmode_list;
 
+
+# Setup certificates #
 load_certificate_authority('root-ca-certificate', 'opennms-ca', 'target/tmp/server-ca.key', 'target/tmp/server-ca.crt')
 generate_certificate('opennms-minion-gateway-certificate', 'minion.onmshs.local', 'target/tmp/server-ca.key', 'target/tmp/server-ca.crt')
 generate_certificate('opennms-ui-certificate', 'onmshs.local', 'target/tmp/server-ca.key', 'target/tmp/server-ca.crt')
 load_certificate_authority('client-root-ca-certificate', 'client-ca', 'target/tmp/client-ca.key', 'target/tmp/client-ca.crt')
-ssl_check('onmshs.local', 1443, check_http=False) # Skip HTTP checks since the ingress isn't up yet
-certs = [ 'target/tmp/server-ca.key', 'target/tmp/server-ca.crt', 'target/tmp/client-ca.key', 'target/tmp/client-ca.crt' ]
-ssl_check('onmshs.local', 1443, tries=300, deps=certs, resource_deps=['ingress-nginx']) # We'll do the HTTP checks later once ingress-nginx is up
+
+# Do a quick sanity check on certificates, but skip HTTP checks for now since the ingress, etc. aren't up yet
+ssl_check('onmshs.local', 1443, check_http=False)
+
+# We wait to do the full HTTP checks once ingress-nginx, UI, and minion-gateway are up
+ssl_check('onmshs.local', 1443, tries=300,
+    deps=[
+        'target/tmp/server-ca.key',
+        'target/tmp/server-ca.crt',
+        'target/tmp/client-ca.key',
+        'target/tmp/client-ca.crt',
+    ],
+    resource_deps=[
+        'ingress-nginx',
+        'ui:prod',
+        'minion-gateway',
+    ]
+)
 
 
 # Deployment #
-# https://github.com/jaegertracing/helm-charts/tree/main/charts/jaeger
-helm_remote('jaeger', version='0.71.0', repo_url='https://jaegertracing.github.io/helm-charts', values='tilt-jaeger-values.yaml')
+# https://github.com/grafana/helm-charts/tree/main/charts/tempo
+helm_remote('tempo', version='1.7.1', repo_url='https://grafana.github.io/helm-charts',
+    set=[
+        'tempo.metricsGenerator.enabled=True',
+        'tempo.metricsGenerator.remoteWriteUrl=http://prometheus:9090/prometheus/api/v1/write',
+    ]
+)
 k8s_resource(
-    'jaeger',
+    'tempo',
     labels=['0_useful'],
-    port_forwards=port_forward(16686, name='Jaeger UI'),
+    port_forwards=port_forward(3100, name='Tempo HTTP API'), # https://grafana.com/docs/tempo/latest/api_docs/
+    links=[
+        link('https://onmshs.local:1443/grafana/explore?orgId=1&left=%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22datasource%22:%7B%22type%22:%22tempo%22,%22uid%22:%22tempo%22%7D,%22queryType%22:%22traceql%22,%22limit%22:20,%22query%22:%22%7B%7D%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D', 'Grafana - Explore Tempo'),
+    ]
+)
+k8s_resource(
+    'tempo',
+    objects=['tempo:serviceaccount', 'tempo:configmap', ],
 )
 
 # Deployment #
@@ -381,6 +394,12 @@ local_resource(
     resource_deps=['parent-pom'],
 )
 
+k8s_resource(
+    new_name='shared-kube',
+    objects=['spring-boot-app-config:configmap', 'spring-boot-env:configmap', 'opennms-ingress:ingress'],
+    labels='shared',
+)
+
 ## Microservices ##
 ### Notification ###
 jib_project(
@@ -401,18 +420,18 @@ if is_devmode_enabled(uiDevmodeKey):
         'VITE_KEYCLOAK_URL': 'https://onmshs.local:1443/auth'
     }
     local_resource(
-        'vuejs-ui:dev',
+        'ui:dev',
         cmd='yarn install',
         dir='ui',
         serve_cmd='yarn run dev',
         serve_dir='ui',
         serve_env=serve_env,
-        labels=['vuejs-app'],
+        labels=['ui'],
         links=[
-            link('http://onmshs.local:8080/', 'Web UI (dev server)')
+            link('http://onmshs.local:8080/', 'Web UI (yarn run dev)')
         ]
     )
-    create_devmode_toggle_btn(uiDevmodeKey, resource='vuejs-ui:dev')
+    create_devmode_toggle_btn(uiDevmodeKey, resource='ui:dev')
 
 #### UI - Production container ####
 docker_build(
@@ -423,23 +442,23 @@ docker_build(
 
 k8s_resource(
     'opennms-ui',
-    new_name='vuejs-ui:prod',
-    labels=['vuejs-app'],
+    new_name='ui:prod',
+    labels=['ui'],
     trigger_mode=TRIGGER_MODE_MANUAL if is_devmode_enabled(uiDevmodeKey) else TRIGGER_MODE_AUTO,
     links=[
         link('https://onmshs.local:1443/', 'Web UI (prod container)')
     ],
 )
 
-create_devmode_toggle_btn(uiDevmodeKey, resource='vuejs-ui:prod')
+create_devmode_toggle_btn(uiDevmodeKey, resource='ui:prod')
 
 #### BFF ####
 jib_project(
-    'vuejs-bff',
+    'rest-server',
     'opennms/lokahi-rest-server',
     'rest-server',
     'opennms-rest-server',
-    labels=['vuejs-app'],
+    labels=['rest-server'],
     port_forwards=['13080:9090', '13050:5005'],
     links=[
       link('https://onmshs.local:1443/api/graphql', 'GraphQL Endpoint'),
@@ -456,6 +475,10 @@ jib_project_multi_module(
     'opennms-inventory',
     port_forwards=['29080:8080', '29050:5005', '29065:6565'],
     resource_deps=['shared-lib', 'citus-worker'],
+)
+k8s_resource(
+    'inventory',
+    objects=['opennms-inventory-encryption-key:secret'],
 )
 
 ### Alert ###
@@ -497,6 +520,10 @@ jib_project_multi_module(
     port_forwards=['16080:8080', '16050:5005'],
     resource_deps=['shared-lib', 'citus-worker'],
 )
+k8s_resource(
+    'minion-gateway',
+    objects=['opennms-minion-gateway-sa:serviceaccount', 'opennms-minion-gateway-rb:rolebinding', 'minion-gateway-ignite-config:configmap', 'opennms-minion-gateway:ingress' ],
+)
 
 ### DataChoices ###
 jib_project(
@@ -524,6 +551,10 @@ k8s_resource(
     trigger_mode=TRIGGER_MODE_MANUAL,
     resource_deps=['shared-lib'],
 )
+k8s_resource(
+    'minion',
+    objects=['opennms-minion-sa:serviceaccount', 'opennms-minion-rb:rolebinding', 'minion-scripts:configmap', 'role-endpoints:role'],
+)
 cmd_button(
     name='button-opennms-minion',
     text='Rollout restart minion',
@@ -545,6 +576,10 @@ jib_project(
     'opennms-minion-certificate-manager',
     port_forwards=['34089:8990', '34050:5005'],
     resource_deps=['shared-lib']
+)
+k8s_resource(
+    'minion-certificate-manager',
+    objects=['minion-certificate-manager-pvc:persistentvolumeclaim'],
 )
 
 # resource_name, image_name, base_path, k8s_resource_name, resource_deps=[], port_forwards=[], labels=None)
@@ -578,6 +613,10 @@ k8s_resource(
       link('http://localhost:26080/auth', 'Welcome Page')
     ]
 )
+k8s_resource(
+    'keycloak',
+    objects=['keycloak-realm-configmap:configmap', 'onms-keycloak-initial-admin:secret', ],
+)
 
 ### Email ###
 k8s_resource(
@@ -597,43 +636,50 @@ k8s_resource(
     port_forwards=['18080:3000'],
     resource_deps=['citus-worker'],
 )
+k8s_resource(
+    'grafana',
+    objects=['grafana:secret'],
+)
 
 ### Cortex ###
 k8s_resource(
     'cortex',
     labels='z_dependencies',
     port_forwards=['19000:9000'],
+    links=[
+        link('https://onmshs.local:1443/grafana/explore?orgId=1&left=%7B%22datasource%22:%22EdAkOOOSk%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%22,%22range%22:true,%22instant%22:true,%22datasource%22:%7B%22type%22:%22prometheus%22,%22uid%22:%22EdAkOOOSk%22%7D%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D', 'Grafana - Explore Metrics'),
+    ]
+)
+k8s_resource(
+    'cortex',
+    objects=['cortex-config-map:configmap'],
 )
 
 ### Citus/Postgres ###
 k8s_resource(
     'citus',
-    labels='citus',
+    labels='z_dependencies',
     port_forwards=['25054:5432'],
     resource_deps=['cert-manager'],
     links=[
-        link('jdbc:postgresql://localhost:25054/horizon_stream?user=desenv&password=any', name='JDBC URL'),
+        link('jdbc:postgresql://localhost:25054/desenv?user=desenv&password=any', name='JDBC URL'),
     ]
 )
 
 k8s_resource(
     'citus-worker',
-    labels='citus',
+    labels='z_dependencies',
     resource_deps=['citus'],
 )
 
 k8s_resource(
     'citus',
     objects=['citus-issuer:issuer', 'citus-cert:certificate', 'citus-conf:configmap', 'postgres:secret', 'citus-initial-sql:secret'],
-    labels='citus',
-    resource_deps=['cert-manager'],
 )
 
 k8s_resource(
     'citus-worker',
     objects=['citus-worker-conf:configmap'],
-    labels='citus',
-    resource_deps=['cert-manager'],
 )
 
 ### Kafka ###
@@ -649,6 +695,13 @@ k8s_resource(
     'prometheus',
     labels='z_dependencies',
     port_forwards=['32090:9090'],
+    links=[
+        link('https://onmshs.local:1443/grafana/explore?orgId=1&left=%7B%22datasource%22:%22zK0kOddIk%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%22,%22range%22:true,%22instant%22:true,%22datasource%22:%7B%22type%22:%22prometheus%22,%22uid%22:%22zK0kOddIk%22%7D%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D', 'Grafana - Explore Internal Metrics'),
+    ]
+)
+k8s_resource(
+    'prometheus',
+    objects=['prometheus-sa:serviceaccount', 'prometheus:clusterrole', 'prometheus:clusterrolebinding', 'prometheus-config-map:configmap'],
 )
 
 ### Others ###

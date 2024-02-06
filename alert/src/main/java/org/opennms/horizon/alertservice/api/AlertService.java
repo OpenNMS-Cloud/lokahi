@@ -29,12 +29,13 @@
 package org.opennms.horizon.alertservice.api;
 
 
-import java.util.List;
-import java.util.Optional;
-
 import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.AlertCount;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface AlertService {
     List<Alert> reduceEvent(Event e);
@@ -56,4 +57,6 @@ public interface AlertService {
     void removeListener(AlertLifecycleListener listener);
 
     void saveNode(NodeDTO node);
+
+    AlertCount getAlertsCount(String tenantId);
 }

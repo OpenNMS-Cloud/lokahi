@@ -182,7 +182,7 @@
 
         <h3>Tag Discovered Nodes (optional)</h3>
         <p class="margin-bottom">
-          A tag is an optional, arbitrary label that you can associate with a discovered node or device and its<br />
+          A tag is an optional label that you can associate with a discovered node or device and its<br />
           components for easy and flexible filtering.
         </p>
         <div class="auto-with-chips">

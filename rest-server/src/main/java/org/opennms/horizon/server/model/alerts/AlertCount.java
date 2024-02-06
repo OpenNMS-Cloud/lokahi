@@ -1,4 +1,4 @@
-/*
+/*******************************************************************************
  * This file is part of OpenNMS(R).
  *
  * Copyright (C) 2023 The OpenNMS Group, Inc.
@@ -24,17 +24,19 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- */
+ *******************************************************************************/
 
-package org.opennms.horizon.shared.ipc.grpc.server.manager;
+package org.opennms.horizon.server.model.alerts;
 
-import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
+import lombok.Getter;
+import lombok.Setter;
 
-import io.grpc.stub.StreamObserver;
-import io.opentelemetry.api.trace.SpanContext;
+import java.util.Map;
 
-public interface OutgoingMessageFactory {
-
-    void create(String systemId, String tenantId, String location, SpanContext streamSpan, StreamObserver<CloudToMinionMessage> streamObserver);
-
+@Getter
+@Setter
+public class AlertCount {
+    private Map<String, Long> countBySeverity;
+    private Long acknowledgedCount;
+    private Long totalAlertCount;
 }

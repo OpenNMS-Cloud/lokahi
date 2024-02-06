@@ -90,8 +90,6 @@ onThemeChange(() => {
     display.value = true
   })
 })
-
-onMounted(async () => await store.getAllNodesStatus())
 </script>
 
 <style lang="scss" scoped>

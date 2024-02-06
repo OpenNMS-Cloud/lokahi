@@ -390,7 +390,7 @@ TLS:
   CertificateGeneration: false
 
 Ingress:
-  Enabled: true
+  Enabled: false
   DefaultEndpointsEnabled: true
   HttpPort: 80
   HttpsPort: 443

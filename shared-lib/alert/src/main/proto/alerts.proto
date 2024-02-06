@@ -193,6 +193,12 @@ message CountAlertResponse {
   AlertError error = 2;
 }
 
+message AlertCount {
+  map<string, int64> count_by_severity = 1;
+  int64 total_alert_count = 2;
+  int64 acknowledged_count = 3;
+}
+
 message AlertRequest {
   repeated uint64 alert_id = 1;
 }
@@ -220,6 +226,7 @@ service AlertService {
   rpc escalateAlert(AlertRequest) returns (AlertResponse) {};
   rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
   rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
+  rpc alertCounts(google.protobuf.Empty) returns (AlertCount) {};
 }
 
 // Proto for Monitoring policy

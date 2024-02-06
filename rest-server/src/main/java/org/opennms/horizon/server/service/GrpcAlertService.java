@@ -37,6 +37,7 @@ import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.server.mapper.alert.AlertMapper;
+import org.opennms.horizon.server.model.alerts.AlertCount;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.AlertResponse;
 import org.opennms.horizon.server.model.alerts.CountAlertResponse;
@@ -162,5 +163,10 @@ public class GrpcAlertService {
     @GraphQLQuery
     public Mono<Long> countAlertByRuleId(Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(alertsClient.countAlertByRuleId(id, headerUtil.getAuthHeader(env)));
+    }
+
+    @GraphQLQuery(name = "alertCounts")
+    public Mono<AlertCount> getAlertCounts(@GraphQLEnvironment ResolutionEnvironment env) {
+         return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
     }
 }

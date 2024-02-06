@@ -1,5 +1,5 @@
 #ARG GRAFANA_VERSION="8.2.3"
-ARG GRAFANA_VERSION="8.2.7"
+ARG GRAFANA_VERSION="10.0.10"
 FROM grafana/grafana:${GRAFANA_VERSION}
 
 ARG GF_INSTALL_PLUGINS="https://github.com/OpenNMS/opennms-helm/releases/download/v7.2.0/opennms-helm-app-7.2.0.zip;opennms-helm-app"

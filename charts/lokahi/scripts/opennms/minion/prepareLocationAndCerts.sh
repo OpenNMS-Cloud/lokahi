@@ -418,6 +418,12 @@ setup_curl_args ()
 set -eEuo pipefail
 trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
+if ! grep -q '^[4-9]\.' <<< "$BASH_VERSION"; then
+	echo "$(basename $0): Running on '$BASH_VERSION', but this needs to run on bash version 4 or higher." >&2
+	echo "If you are running on macOS, run 'brew install bash' and make sure Homebrew's bin directory is in your PATH." >&2
+	exit 1
+fi
+
 parse_command_line "$@"
 
 setup_curl_args

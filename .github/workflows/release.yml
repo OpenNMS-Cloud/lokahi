@@ -2,22 +2,27 @@ name: release
 
 on:
   push:
-    branches:
-      - 'release'
+    tags:
+      - v*
   workflow_call:
     inputs:
       image-tag:
-        description: 'Tag for all images'
+        description: 'Tag for images built by develop workflow'
         required: false
         type: string
       image-registry:
-        description: 'Docker image registry for all images'
+        description: 'Docker image registry for images built by develop workflow'
+        required: false
+        type: string
+      tag:
+        description: 'Tag for images published to Docker Hub'
         required: false
         type: string
 
 env:
   IMAGE_TAG: ${{ inputs.image-tag || github.sha }}
   IMAGE_REGISTRY: ${{ inputs.image-registry || 'ghcr.io' }}
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   build-all:
@@ -35,34 +40,6 @@ jobs:
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
-      - name: init
-        id: extract-tag
-        run: |
-
-          # This needs to be in this job, when run at the beginning of the
-          # workflow, neither the output nor the env variables seem to persist
-          # to this job.
-
-          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
-
-          echo "Head commit message: ${{ github.event.head_commit.message }}"
-          echo "Extracted tag: $TAG."
-          
-          # Validate tag format
-          # Format of commit message: RELEASE <tag> - <message>
-          # Format of tag (change numbers or dev, but leave everything else): 
-          #   v0.0.5-dev
-          #   v0.0.5
-          if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
-          then
-            echo "Valid format, proceed with test."
-          else
-            echo "Tag format is invalid."
-            exit 1
-          fi
-
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
-
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.
@@ -156,33 +133,6 @@ jobs:
     environment: docker-publish-account
     # Environment that contains the required secrets.
     steps:
-      - name: init
-        id: extract-tag
-        run: |
-
-          # This needs to be in this job, when run at the beginning of the
-          # workflow, neither the output nor the env variables seem to persist
-          # to this job.
-
-          TAG=$(echo ${{ github.event.head_commit.message }} | awk '{ print $2 }')
-
-          echo "Head commit message: ${{ github.event.head_commit.message }}"
-          echo "Extracted tag: $TAG."
-          
-          # Validate tag format
-          # Format of commit message: RELEASE <tag> - <message>
-          # Format of tag (change numbers or dev, but leave everything else): 
-          #   v0.0.5-dev
-          #   v0.0.5
-          if [[ $TAG =~ ^v[0-9]+.[0-9]+.([0-9]+-[a-z]+|[0-9]+)$ ]]
-          then
-            echo "Valid format, proceed with test."
-          else
-            echo "Tag format is invalid."
-            exit 1
-          fi
-
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
       - name: Check out repository code
         uses: actions/checkout@v3
         # Is required to call actions.
@@ -222,3 +172,18 @@ jobs:
           docker push opennms/${{ matrix.image }}:latest
           docker push opennms/${{ matrix.image }}:${{ env.RELEASE_TAG }}
 
+  notify:
+    needs: [release, minion]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create the Mattermost Init Message
+        run: |
+          echo "{\"text\":\"Release ${{ env.RELEASE_TAG }} completed.\"}" > mattermost.json
+
+      - name: Post Init Message to Mattermost
+        uses: mattermost/action-mattermost-notify@master
+        env:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          MATTERMOST_CHANNEL: "horizon-stream-wg"
+          MATTERMOST_USERNAME: "github_actions"
+          MATTERMOST_ICON: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"

@@ -105,7 +105,7 @@ public class CucumberRunnerIT {
 
         String alertHost = "opennms-alert";
         int alertPort = 4770;
-        mockAlertContainer = new GenericContainer<>(DockerImageName.parse("tkpd/gripmock"))
+        mockAlertContainer = new GenericContainer<>(DockerImageName.parse("tkpd/gripmock:v1.12.1"))
             .withNetwork(network)
             .withNetworkAliases(alertHost)
             .withExposedPorts(alertPort)

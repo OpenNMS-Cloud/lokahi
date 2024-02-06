@@ -113,8 +113,12 @@ public class KeycloakTestSteps {
                 .build()
         ;
 
-        AccessTokenResponse accessTokenResponse = keycloakClient.tokenManager().getAccessToken();
-        keycloakAccessToken = accessTokenResponse.getToken();
+        try {
+            AccessTokenResponse accessTokenResponse = keycloakClient.tokenManager().getAccessToken();
+            keycloakAccessToken = accessTokenResponse.getToken();
+        } finally {
+            keycloakClient.close();
+        }
 
         assertNotNull(keycloakAccessToken);
 

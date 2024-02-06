@@ -28,11 +28,18 @@
 
 package org.opennms.miniongateway.grpc.twin;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 import org.apache.ignite.Ignite;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -45,16 +52,19 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 
 public class GrpcTwinPublisher extends AbstractTwinPublisher implements OutgoingMessageFactory {
 
@@ -66,8 +76,15 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
             .build();
     private final ExecutorService twinRpcExecutor = Executors.newCachedThreadPool(twinRpcThreadFactory);
 
-    public GrpcTwinPublisher(Ignite ignite) {
+    private final Tracer tracer;
+    private final boolean debugSpanFullMessage;
+    private final boolean debugSpanContent;
+
+    public GrpcTwinPublisher(Ignite ignite, final Tracer tracer, boolean debugSpanFullMessage, boolean debugSpanContent) {
         super(ignite);
+        this.tracer = tracer;
+        this.debugSpanFullMessage = debugSpanFullMessage;
+        this.debugSpanContent = debugSpanContent;
     }
 
     @Override
@@ -132,14 +149,19 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         }
     }
 
-    static class AdapterObserver implements StreamObserver<TwinResponseProto> {
-
+    class AdapterObserver implements StreamObserver<TwinResponseProto> {
         private final Logger logger = LoggerFactory.getLogger(AdapterObserver.class);
         private final StreamObserver<CloudToMinionMessage> delegate;
         private Runnable completionCallback;
+        //private final Tracer tracer;
+        private final Attributes attributes;
+        private SpanContext streamSpanContext;
 
-        AdapterObserver(StreamObserver<CloudToMinionMessage> delegate) {
+        AdapterObserver(StreamObserver<CloudToMinionMessage> delegate, Tracer tracer, SpanContext streamSpanContext, Attributes streamAttributes) {
             this.delegate = delegate;
+            //this.tracer = tracer;
+            this.streamSpanContext = streamSpanContext;
+            this.attributes = streamAttributes;
         }
 
         public void setCompletionCallback(Runnable completion) {
@@ -148,7 +170,38 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
 
         @Override
         public void onNext(TwinResponseProto value) {
-            delegate.onNext(map(value));
+            SpanBuilder spanBuilder = tracer.spanBuilder("CloudToMinionMessage send " + value.getConsumerKey())
+                .setSpanKind(SpanKind.PRODUCER)
+                .setAllAttributes(this.attributes)
+                .setAttribute("consumer_key", value.getConsumerKey())
+                .setAttribute("is_patch", value.getIsPatchObject())
+                .setAttribute("session_id", value.getSessionId())
+                .setAttribute("version", value.getVersion());
+
+            if (debugSpanFullMessage) {
+                spanBuilder.setAttribute("message", value.toString());
+            }
+            if (debugSpanContent) {
+                spanBuilder.setAttribute("twin_object", value.getTwinObject().toStringUtf8());
+            }
+
+            // When we get our original task-set, it is triggered from this span for the incoming connection, so don't add the link
+            if (!Span.current().getSpanContext().equals(this.streamSpanContext)) {
+                spanBuilder.addLink(this.streamSpanContext);
+            }
+
+            final var span = spanBuilder.startSpan();
+            try (var ss = span.makeCurrent()) {
+                CloudToMinionMessage message = map(value);
+                span.setAttribute("size", message.getSerializedSize());
+                delegate.onNext(message);
+            } catch (Throwable throwable) {
+                span.setStatus(StatusCode.ERROR, "Received exception during send: " + throwable);
+                span.recordException(throwable);
+                throw new UndeclaredThrowableException(throwable);
+            } finally {
+                span.end();
+            }
         }
 
         @Override
@@ -192,7 +245,7 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
 
 
     @Override
-    public void create(String systemId, String tenantId, String location, StreamObserver<CloudToMinionMessage> streamObserver) {
+    public void create(String systemId, String tenantId, String location, SpanContext streamSpanContext, StreamObserver<CloudToMinionMessage> streamObserver) {
         TenantKey systemIdKey = new TenantKey(tenantId, systemId);
         TenantKey locationKey = new TenantKey(tenantId, location);
         if (sinkStreamsBySystemId.containsKey(systemIdKey)) {
@@ -200,7 +253,12 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
             sinkStreamsByLocation.remove(locationKey, sinkStream);
             sinkStream.onCompleted(); // force termination of session.
         }
-        AdapterObserver delegate = new AdapterObserver(streamObserver);
+        var streamAttributes = Attributes.builder()
+            .put("user", tenantId)
+            .put("location", location)
+            .put("systemId", systemId)
+            .build();
+        AdapterObserver delegate = new AdapterObserver(streamObserver, tracer, streamSpanContext, streamAttributes);
         delegate.setCompletionCallback(() -> {
             sinkStreamsByLocation.remove(locationKey, delegate);
             sinkStreamsBySystemId.remove(systemIdKey);

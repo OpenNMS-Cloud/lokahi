@@ -31,12 +31,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>snmp-ipc</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>protobuf</artifactId>
             <version>${project.version}</version>

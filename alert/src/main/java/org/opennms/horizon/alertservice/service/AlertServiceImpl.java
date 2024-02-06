@@ -30,12 +30,14 @@ package org.opennms.horizon.alertservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
+import org.opennms.horizon.alerts.proto.AlertCount;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
 import org.opennms.horizon.alertservice.db.entity.Node;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
 import org.opennms.horizon.alertservice.db.repository.NodeRepository;
+import org.opennms.horizon.alertservice.db.repository.SeverityCount;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.alertservice.mapper.NodeMapper;
 import org.opennms.horizon.events.proto.Event;
@@ -147,6 +149,19 @@ public class AlertServiceImpl implements AlertService {
         alert.setSeverity(Severity.CLEARED);
         alertRepository.save(alert);
         return Optional.of(alertMapper.toProto(alert));
+    }
+
+    @Override
+    public AlertCount getAlertsCount(String tenantId) {
+        long allAlertsCount = alertRepository.countByTenantId(tenantId);
+        long acknowledgedAlerts = alertRepository.countByTenantIdAndAcknowledged(tenantId);
+
+        List<SeverityCount> severityCountList = alertRepository.countByTenantIdAndGroupBySeverity(tenantId);
+        var countBuilder = AlertCount.newBuilder();
+        countBuilder.setAcknowledgedCount(acknowledgedAlerts).setTotalAlertCount(allAlertsCount);
+        severityCountList.forEach(severityCount ->
+            countBuilder.putCountBySeverity(severityCount.getSeverity().name(), severityCount.getCount()));
+        return countBuilder.build();
     }
 
     @Override

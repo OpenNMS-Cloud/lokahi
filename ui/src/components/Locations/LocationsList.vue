@@ -14,7 +14,7 @@
         <FeatherIcon
           :icon="icons.Help"
           data-test="icon-help"
-          @click="$emit('showInstructions')"
+          @click="$emit('show-instructions')"
           class="pointer"
         />
       </template>
@@ -24,13 +24,6 @@
         <div class="name">
           Name
         </div>
-        <!-- Post EAR -->
-        <!-- <div
-          class="status"
-          data-test="status"
-        >
-          Status
-        </div> -->
       </div>
       <ul>
         <li
@@ -77,7 +70,7 @@ const locationsList = computed(() => props.items)
 const deleteLocation = async () => {
   if (locationToDelete.value) {
     await locationStore.deleteLocation(locationToDelete.value.id)
-    await minionsQueries.refreshMinionsById()
+    await minionsQueries.findMinionsByLocationId()
   }
 }
 

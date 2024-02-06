@@ -52,7 +52,7 @@
           </div>
           <div class="check-circle">
             <FeatherTooltip
-              :title="alert.acknowledged ? 'Acknowledged' : 'Unacknowledged'"
+              :title="alert.acknowledged ? Ack : UnAck"
               v-slot="{ attrs, on }"
             >
               <FeatherIcon
@@ -87,6 +87,7 @@
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { format as fnsFormat, formatDistanceToNow as fnsFormatDistanceToNow } from 'date-fns'
 import { IAlert } from '@/types/alerts'
+import { Ack, UnAck } from './alerts.constants'
 
 const emits = defineEmits(['alert-selected'])
 

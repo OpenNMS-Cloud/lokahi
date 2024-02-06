@@ -1,9 +1,8 @@
 package org.opennms.horizon.shared.ipc.grpc.server.manager.adapter;
 
-import com.google.protobuf.Empty;
-import io.grpc.stub.StreamObserver;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceImplBase;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -11,6 +10,11 @@ import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.OutgoingMessageHandler;
+
+import com.google.protobuf.Empty;
+
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.trace.Span;
 
 public class MinionRSTransportAdapter extends CloudServiceImplBase {
 
@@ -36,7 +40,7 @@ public class MinionRSTransportAdapter extends CloudServiceImplBase {
 
     @Override
     public void cloudToMinionMessages(Identity request, StreamObserver<CloudToMinionMessage> responseObserver) {
-        cloudToMinionMessages.handleOutgoingStream(request, responseObserver);
+        cloudToMinionMessages.handleOutgoingStream(request, responseObserver, Span.current());
     }
 
     @Override

@@ -1,9 +1,12 @@
 package org.opennms.horizon.shared.ipc.grpc.server.manager;
 
-import io.grpc.stub.StreamObserver;
 import java.util.concurrent.Semaphore;
+
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
+
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanContext;
 
 public interface RpcConnectionTracker {
     boolean addConnection(String tenantId, String location, String minionId, StreamObserver<RpcRequestProto> connection);
@@ -11,6 +14,8 @@ public interface RpcConnectionTracker {
     StreamObserver<RpcRequestProto> lookupByLocationRoundRobin(String tenantId, String locationId);
     MinionInfo removeConnection(StreamObserver<RpcRequestProto> connection);
     Semaphore getConnectionSemaphore(StreamObserver<RpcRequestProto> connection);
+    SpanContext getConnectionSpanContext(StreamObserver<RpcRequestProto> connection);
+    Attributes getConnectionSpanAttributes(StreamObserver<RpcRequestProto> connection);
 
     void clear();
 }

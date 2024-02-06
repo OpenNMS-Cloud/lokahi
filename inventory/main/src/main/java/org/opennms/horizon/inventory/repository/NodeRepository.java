@@ -56,11 +56,13 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
                                                     @Param("location_id") Long location,
                                                     @Param("nodeLabel") String nodeLabel);
 
+
     @Query("SELECT n " +
         "FROM Node n " +
         "WHERE n.tenantId = :tenantId " +
-        "AND LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%'))")
-    List<Node> findByTenantIdAndNodeLabelLike(@Param("tenantId") String tenantId,
+        "AND (LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%'))"+
+        "OR LOWER(n.nodeAlias) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%')))")
+    List<Node> findByTenantIdAndNodeLabelOrAliasLike(@Param("tenantId") String tenantId,
                                               @Param("nodeLabelSearchTerm") String nodeLabelSearchTerm);
 
     List<Node> findByIdInAndTenantId(List<Long> ids, String tenantId);
@@ -95,4 +97,6 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
         "AND tag.name IN :tags")
     List<Node> findByTenantIdAndTagNamesIn(@Param("tenantId") String tenantId,
                                            @Param("tags") List<String> tags);
+
+
 }

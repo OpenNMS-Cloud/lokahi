@@ -81,10 +81,11 @@ class AzureActiveDiscoveryServiceTest {
         final String locationId = "11";
 
         AzureActiveDiscoveryCreateDTO createDTO = AzureActiveDiscoveryCreateDTO.newBuilder()
-            .setLocationId(locationId).build();
+            .setLocationId(locationId)
+            .setName("not blank").build();
         var exception = assertThrows(LocationNotFoundException.class, () -> azureActiveDiscoveryService.createActiveDiscovery(tenantId, createDTO));
 
-        Assertions.assertEquals("Location not found with location 11", exception.getMessage());
+        Assertions.assertEquals("Location not found with id 11", exception.getMessage());
     }
 
     @Test

@@ -31,6 +31,7 @@ package org.opennms.horizon.alertservice.service;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.PolicyRuleProto;
@@ -83,6 +84,9 @@ public class MonitorPolicyService {
     private final TagOperationProducer tagOperationProducer;
 
     private void validatePolicyName(MonitorPolicyProto request, String tenantId) {
+        if (StringUtils.isBlank(request.getName())) {
+            throw new IllegalArgumentException("Policy name is Blank");
+        }
         if (repository.findByNameAndTenantId(request.getName(), tenantId).isPresent()) {
             throw new IllegalArgumentException("Duplicate monitoring policy with name " + request.getName());
         }
@@ -92,9 +96,13 @@ public class MonitorPolicyService {
         var duplicatedRules = request.getRulesList().stream().collect(Collectors.groupingBy(PolicyRuleProto::getName))
             .entrySet().stream().filter(e -> e.getValue().size() > 1).toList();
         if (!duplicatedRules.isEmpty()) {
-            throw new IllegalArgumentException("Duplicate monitoring rule with name " + duplicatedRules.stream().map(Map.Entry::getKey).collect(Collectors.joining(", ")));
-
+            throw new IllegalArgumentException("Duplicate monitoring rule with name " +
+                duplicatedRules.stream().map(Map.Entry::getKey).collect(Collectors.joining(", ")));
         }
+        if (request.getRulesList().stream().anyMatch(rule -> StringUtils.isBlank(rule.getName()))) {
+            throw new IllegalArgumentException("Rule name is blank");
+        }
+
     }
     @Transactional
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {

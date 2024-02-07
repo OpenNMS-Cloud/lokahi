@@ -38,7 +38,6 @@ import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
-import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.AzureActiveDiscoveryService;
 import org.springframework.stereotype.Component;
@@ -61,7 +60,7 @@ public class AzureActiveDiscoveryGrpcService extends AzureActiveDiscoveryService
                 AzureActiveDiscoveryDTO discovery = service.createActiveDiscovery(tenantId, request);
                 responseObserver.onNext(discovery);
                 responseObserver.onCompleted();
-            } catch (InventoryRuntimeException e){
+            } catch (InventoryRuntimeException e) {
                 Status status = Status.newBuilder()
                     .setCode(Code.INVALID_ARGUMENT_VALUE)
                     .setMessage(e.getMessage())

@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.service.discovery.active;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
@@ -46,7 +47,10 @@ public interface ActiveDiscoveryValidationService {
     default void validateActiveDiscoveryName(String name, long discoveryId, String tenantId) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(tenantId);
-        if (getActiveDiscoveryRepository().findByNameAndTenantId(name, tenantId)
+        if (StringUtils.isBlank(name)) {
+            throw new InventoryRuntimeException("Blank discovery name");
+        }
+        if (getActiveDiscoveryRepository().findByNameAndTenantId(name.trim(), tenantId)
             .stream().anyMatch(d -> d.getId() != discoveryId)) {
             throw new InventoryRuntimeException("Duplicate active discovery with name " + name);
         }
@@ -54,7 +58,7 @@ public interface ActiveDiscoveryValidationService {
 
     default void validateLocation(String locationId, String tenantId) {
         if (getMonitoringLocationService().findByLocationIdAndTenantId(Long.parseLong(locationId), tenantId).isEmpty()) {
-            throw new LocationNotFoundException("Location not found with location " + locationId);
+            throw new LocationNotFoundException("Location not found with id " + locationId);
         }
     }
 }

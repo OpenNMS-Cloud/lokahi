@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.service.discovery;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
@@ -147,7 +148,10 @@ public class PassiveDiscoveryService {
     }
 
     private void validateDiscovery(String tenantId, PassiveDiscoveryUpsertDTO dto) {
-        if (repository.findByTenantIdAndName(tenantId, dto.getName()).stream().anyMatch(d -> d.getId() != dto.getId())) {
+        if (StringUtils.isBlank(dto.getName())) {
+            throw new InventoryRuntimeException("Discovery name is blank");
+        }
+        if (repository.findByTenantIdAndName(tenantId, dto.getName().trim()).stream().anyMatch(d -> d.getId() != dto.getId())) {
             throw new InventoryRuntimeException("Duplicate passive discovery with name " + dto.getName());
         }
         var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(dto.getLocationId()), tenantId);

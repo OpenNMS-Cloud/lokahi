@@ -76,10 +76,12 @@ class IcmpActiveDiscoveryServiceTest {
         final String locationId = "11";
 
         IcmpActiveDiscoveryCreateDTO createDTO = IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .setLocationId(locationId).build();
+            .setLocationId(locationId)
+            .setName("not blank")
+            .build();
         var exception = assertThrows(LocationNotFoundException.class, () -> icmpActiveDiscoveryService.createActiveDiscovery(createDTO, tenantId));
 
-        Assertions.assertEquals("Location not found with location 11", exception.getMessage());
+        Assertions.assertEquals("Location not found with id 11", exception.getMessage());
     }
 
     @Test

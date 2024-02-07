@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -47,7 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -136,7 +134,8 @@ public class PassiveDiscoveryServiceTest {
         final String locationId = "11";
 
         PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
-            .setLocationId(locationId).build();
+            .setLocationId(locationId)
+            .setName("not blank").build();
         var exception = assertThrows(LocationNotFoundException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
 
         Assertions.assertEquals("Location not found with location 11", exception.getMessage());

@@ -117,6 +117,7 @@ public class IcmpDiscoveryStepDefinitions {
     @Given("New Active Discovery with IpAddresses {string} and SNMP community as {string} at location {string}")
     public void newActiveDiscoveryWithIpAddressesAndSNMPCommunityAsAtLocation(String ipAddressStrings, String snmpReadCommunity, String location) {
         icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .setName("icmp-discovery-1")
             .addIpAddresses(ipAddressStrings).setSnmpConfig(SNMPConfigDTO.newBuilder().addReadCommunity(snmpReadCommunity).build())
             .setLocationId(backgroundHelper.findLocationId(location)).build();
     }
@@ -143,6 +144,7 @@ public class IcmpDiscoveryStepDefinitions {
                                                                                       String location, String tags) {
         var tagsList = tags.split(",");
         icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
+            .setName("icmp-discovery-2")
             .addIpAddresses(ipAddressStrings).setSnmpConfig(SNMPConfigDTO.newBuilder()
                 .addReadCommunity(snmpReadCommunity).build())
             .setId(activeDiscoveryId)

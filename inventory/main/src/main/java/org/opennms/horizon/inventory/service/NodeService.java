@@ -202,7 +202,7 @@ public class NodeService {
             .orElseThrow(() -> new InventoryRuntimeException("Node with ID " + request.getId() + " not found"));
 
         if (request.hasNodeAlias()) {
-            String alias = request.getNodeAlias();
+            String alias = request.getNodeAlias().trim();
             if (!StringUtils.isBlank(alias) &&
                 nodeRepository.findByNodeAliasAndTenantId(alias, tenantId).stream().anyMatch(n -> request.getId() != n.getId())) {
                 throw new InventoryRuntimeException("Duplicate node alias with name " + alias);

@@ -58,7 +58,7 @@ public interface MonitorPolicyMapper {
 
     @AfterMapping
     default void trimName(@MappingTarget MonitorPolicy monitorPolicy) {
-        var name = monitorPolicy.getName();
+        var name = monitorPolicy.getName().trim();
         monitorPolicy.setName(name);
     }
 

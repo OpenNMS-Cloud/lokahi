@@ -48,7 +48,7 @@ public interface MonitoringLocationMapper {
 
     @AfterMapping
     default void trimLocationName(@MappingTarget MonitoringLocation monitoringLocation) {
-        var location = monitoringLocation.getLocation();
+        var location = monitoringLocation.getLocation().trim();
         monitoringLocation.setLocation(location);
     }
 }

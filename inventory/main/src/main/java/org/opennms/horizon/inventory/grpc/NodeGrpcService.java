@@ -431,7 +431,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             }
 
             String tenantId = tenantIdOptional.get();
-           long val= nodeService.countNodes(tenantId);
+           long val= nodeService.getNodeCount(tenantId);
             responseObserver.onNext(Int64Value.of(val));
             responseObserver.onCompleted();
         } catch (Exception e) {

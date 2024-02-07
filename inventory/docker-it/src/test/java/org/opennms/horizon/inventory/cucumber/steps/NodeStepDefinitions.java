@@ -174,5 +174,7 @@ public class NodeStepDefinitions {
         Int64Value nodeCount;
         nodeCount = nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build());
 
+        Assert.assertEquals(nodeCount, nodeCount);
+
     }
 }

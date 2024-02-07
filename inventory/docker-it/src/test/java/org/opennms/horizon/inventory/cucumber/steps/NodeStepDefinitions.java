@@ -102,14 +102,22 @@ public class NodeStepDefinitions {
         assertEquals(locationId, String.valueOf(node.getMonitoringLocationId()));
     }
 
-    @Then("fetch a list of nodes by node label with search term {string} or node alias with search term {string}")
+    @Then("fetch a list of nodes by node label with search term {string}")
     public void fetchAListOfNodesByNodeLabelWithSearchTerm(String labelSearchTerm) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
             .setSearchTerm(labelSearchTerm).build());
     }
 
-    @Then("verify the list of nodes has size {int} and labels contain {string} or alias contain {string}")
+    @Then("fetch a list of nodes by node alias with search term {string}")
+    public void fetchAListOfNodesByNodeAliasWithSearchTerm(String labelSearchTerm) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
+            .setSearchTerm(labelSearchTerm).build());
+    }
+
+
+    @Then("verify the list of nodes has size {int} and labels contain {string}")
     public void verifyTheListOfNodesHasSizeAndLabelsContain(int nodeListSize, String labelSearchTerm) {
         assertEquals(nodeListSize, fetchedNodeList.getNodesCount());
 

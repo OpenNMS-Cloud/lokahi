@@ -36,6 +36,7 @@ import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
 import org.opennms.horizon.alerts.proto.AlertRequest;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.CountAlertResponse;
@@ -295,5 +296,14 @@ public class AlertsClient {
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .alertCounts(Empty.getDefaultInstance());
         return alertsCountMapper.protoToAlertCount(alertCountProto);
+    }
+    public ListAlertsResponse getRecentAlertsByNode(Long id,String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        var alertCountProto = alertStub
+            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+            .getRecentAlertsByNode(AlertRequestByNode.newBuilder().addAllNodeId(id).build());
+        return alertCountProto;
     }
 }

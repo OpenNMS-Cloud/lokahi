@@ -218,6 +218,10 @@ message AlertError {
   string error = 2;
 }
 
+message AlertRequestByNode {
+  repeated uint64 node_id = 1;
+}
+
 service AlertService {
   rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {};
   rpc acknowledgeAlert(AlertRequest) returns (AlertResponse) {};
@@ -227,6 +231,7 @@ service AlertService {
   rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
   rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
   rpc alertCounts(google.protobuf.Empty) returns (AlertCount) {};
+  rpc getRecentAlertsByNode(AlertRequestByNode)  returns (ListAlertsResponse) {};
 }
 
 // Proto for Monitoring policy
@@ -281,6 +286,7 @@ enum OverTimeUnit {
 message MonitorPolicyList {
   repeated MonitorPolicyProto policies = 1;
 }
+
 
 service MonitorPolicyService {
   rpc createPolicy(MonitorPolicyProto) returns(MonitorPolicyProto);

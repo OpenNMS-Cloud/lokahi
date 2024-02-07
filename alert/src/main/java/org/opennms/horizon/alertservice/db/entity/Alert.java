@@ -40,6 +40,10 @@ import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
 import org.opennms.horizon.alerts.proto.Severity;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -54,6 +58,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
 
 @Entity
 @Table(name="alert")
@@ -138,4 +143,7 @@ public class Alert implements Serializable {
     public void incrementCount() {
         counter++;
     }
+
+    @Column(name = "node_id")
+    private long nodeId;
 }

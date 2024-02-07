@@ -312,6 +312,13 @@ public class AlertEventProcessor {
         } else {
             alert.setManagedObjectType(ManagedObjectType.UNDEFINED);
         }
+        if (event.getNodeId() > 0) {
+            alert.setManagedObjectType(ManagedObjectType.NODE);
+            alert.setManagedObjectInstance(Long.toString(event.getNodeId()));
+            alert.setNodeId(event.getNodeId());
+        } else {
+            alert.setManagedObjectType(ManagedObjectType.UNDEFINED);
+        }
 
         // FIXME: We should be using the source time of the event and not the time at which it was produced
         if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.PRODUCED_TIME_MS_FIELD_NUMBER))) {

@@ -27,8 +27,10 @@
  *******************************************************************************/
 package org.opennms.horizon.inventory.mapper.discovery;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.mapper.DateTimeMapper;
@@ -37,6 +39,13 @@ import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery
 @Mapper(componentModel = "spring")
 public interface AzureActiveDiscoveryMapper extends DateTimeMapper {
     AzureActiveDiscovery dtoToModel(AzureActiveDiscoveryCreateDTO dto);
+
+
+    @AfterMapping
+    default void trimName(@MappingTarget AzureActiveDiscovery azureActiveDiscovery) {
+        var trimmedName = azureActiveDiscovery.getName().trim();
+        azureActiveDiscovery.setName(trimmedName);
+    }
 
     @Mapping(source = "createTime", target = "createTimeMsec")
     AzureActiveDiscoveryDTO modelToDto(AzureActiveDiscovery model);

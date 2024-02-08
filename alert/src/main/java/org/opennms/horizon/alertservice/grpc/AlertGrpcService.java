@@ -177,12 +177,6 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         return alertBuilder.build();
     }
 
-    private Alert getEnrichAlertProtoTwo(org.opennms.horizon.alertservice.db.entity.Alert dbAlert) {
-        var alertBuilder = Alert.newBuilder(alertMapper.toProto(dbAlert));
-
-        return alertBuilder.build();
-    }
-
     private Map<Long, Node> getNodeLabels(Set<String> nodeIds, String tenantId) {
         Map<Long, Node> nodes = new HashMap<>();
         for (String strNodeId : nodeIds) {
@@ -347,41 +341,16 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     @Override
     public void getRecentAlertsByNode(AlertRequestByNode request, StreamObserver<ListAlertsResponse> responseObserver) {
        try {
-           var alertResponse = AlertResponse.newBuilder();
-           int pageSize = PAGE_SIZE_DEFAULT;
-           int page = 1;
-           String sortBy = SORT_BY_DEFAULT;
-           boolean sortAscending = false;
 
-           // Create a PageRequest object based on the page size, next page, filter, and sort parameters
-           Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
-           PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
-
-           Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage  ;
 
            String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+           List<org.opennms.horizon.alertservice.db.entity.Alert> alerts = alertRepository.findByNodeIdAndTenantId(request.getNodeId(), tenantId);
 
-
-                   alertPage= alertRepository.findByNodeIdAndTenantId(pageRequest,request.getNodeIdList().get(0), tenantId);
-
-
-           List<Alert> alerts = alertPage.getContent().stream()
-               .map(dbAlert -> getEnrichAlertProtoTwo(dbAlert))
-               .toList();
+           List<Alert> protoList = getEnrichAlertProto2nd(alerts);
 
            ListAlertsResponse.Builder responseBuilder = ListAlertsResponse.newBuilder()
-               .addAllAlerts(alerts);
+               .addAllAlerts(protoList);
 
-           // If there is a next page, add the page number to the response's next_page_token field
-           if (alertPage.hasNext()) {
-               responseBuilder.setNextPage(alertPage.nextPageable().getPageNumber());
-           }
-
-           // Set last_page_token
-           responseBuilder.setLastPage(alertPage.getTotalPages() - 1);
-
-           // Set total alerts
-           responseBuilder.setTotalAlerts(alertPage.getTotalElements());
 
            // Build the final ListAlertsResponse object and send it to the client using the responseObserver
            ListAlertsResponse response = responseBuilder.build();
@@ -439,5 +408,15 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     private static Date convertTimestampToDate(Timestamp timestamp) {
         Instant instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
         return Date.from(instant);
+    }
+
+    private List<Alert> getEnrichAlertProto2nd(List<org.opennms.horizon.alertservice.db.entity.Alert> dbAlertList) {
+        List<Alert> protoList = new ArrayList<Alert>();
+
+        for(org.opennms.horizon.alertservice.db.entity.Alert alert : dbAlertList) {
+            var alertBuilder = Alert.newBuilder(alertMapper.toProto(alert));
+            protoList.add(alertBuilder.build());
+        }
+        return protoList;
     }
 }

@@ -297,13 +297,18 @@ public class AlertsClient {
             .alertCounts(Empty.getDefaultInstance());
         return alertsCountMapper.protoToAlertCount(alertCountProto);
     }
-    public ListAlertsResponse getRecentAlertsByNode(Long id,String accessToken) {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        var alertCountProto = alertStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .getRecentAlertsByNode(AlertRequestByNode.newBuilder().addAllNodeId(id).build());
-        return alertCountProto;
+    @SuppressWarnings("squid:S107")
+    public ListAlertsResponse getRecentAlertsByNode(long nodeId,int pageSize, int page, String sortBy, boolean sortAscending,String accessToken) {
+        Metadata metadata = getMetadata(accessToken);
+
+        final var request = AlertRequestByNode.newBuilder();
+         request.setPageSize(pageSize)
+            .setPage(page)
+            .setSortBy(sortBy)
+            .setNodeId(nodeId)
+            .setSortAscending(sortAscending)
+            .build();
+        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getRecentAlertsByNode(request.build());
+
     }
 }

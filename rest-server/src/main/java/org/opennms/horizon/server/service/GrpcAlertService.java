@@ -169,8 +169,19 @@ public class GrpcAlertService {
     public Mono<AlertCount> getAlertCounts(@GraphQLEnvironment ResolutionEnvironment env) {
          return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
     }
+    @SuppressWarnings("squid:S107")
     @GraphQLQuery(name = "getRecentAlertsByNode")
-    public Mono<AlertCount> getAlertCounts(@GraphQLArgument(name = "id") Long id,@GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
-    }
+    public Mono<ListAlertResponse> getRecentAlertsByNode(@GraphQLArgument(name = "nodeId") long nodeId,
+                                           @GraphQLArgument(name = "pageSize") Integer pageSize,
+                                           @GraphQLArgument(name = "page") int page,
+                                           @GraphQLArgument(name = "sortBy") String sortBy,
+                                           @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+                                           @GraphQLEnvironment ResolutionEnvironment env) {
+
+            return Mono
+                .just(alertsClient.getRecentAlertsByNode(
+                    nodeId ,pageSize, page, sortBy, sortAscending,headerUtil.getAuthHeader(env)
+        ))
+        .map(mapper::protoToAlertResponse);
+}
 }

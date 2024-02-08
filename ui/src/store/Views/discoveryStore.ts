@@ -246,6 +246,21 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
 
         this.validateOnKeyUp = false
       }else {
+        if (toRaw(this.validationErrors).name) {
+          this.setSelectedDiscoveryValue('name', '')
+        }
+        if (toRaw(this.validationErrors).clientId) {
+          this.setMetaSelectedDiscoveryValue('clientId', '');
+        }
+        if (toRaw(this.validationErrors).clientSecret) {
+          this.setMetaSelectedDiscoveryValue('clientSecret', '');
+        }
+        if (toRaw(this.validationErrors).directoryId) {
+          this.setMetaSelectedDiscoveryValue('directoryId', '');
+        }
+        if (toRaw(this.validationErrors).subscriptionId) {
+          this.setMetaSelectedDiscoveryValue('subscriptionId', '');
+        }
         this.validateOnKeyUp = true
       }
       this.loading = false

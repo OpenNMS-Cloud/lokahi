@@ -36,7 +36,6 @@ import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.azure.api.AzureScanItem;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.azure.api.AzureScanResponse;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
@@ -149,11 +148,13 @@ public class ScannerResponseService {
                     .setManagementIp(pingResponse.getIpAddress())
                     .setLabel(pingResponse.getIpAddress())
                     .addAllTags(getTagCreateDTO(icmpDiscovery.getId(), tenantId))
+                    .addDiscoveryIds(icmpDiscovery.getId())
                     .build();
                 try {
                     var optionalNode = nodeService.getNode(pingResponse.getIpAddress(), locationId, tenantId);
                     if (optionalNode.isPresent()) {
                         var nodeDTO = optionalNode.get();
+                        //nodeDTO.getDiscoveryIDs().addDiscoveryIds(icmpDiscovery.getId());
                         tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
                             .addEntityIds(TagEntityIdDTO.newBuilder()
                                 .setNodeId(nodeDTO.getId()))

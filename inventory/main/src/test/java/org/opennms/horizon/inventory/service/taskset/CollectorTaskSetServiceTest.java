@@ -34,13 +34,17 @@ import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
+import org.opennms.horizon.inventory.snmp.SnmpCollectorConfig;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 
 public class CollectorTaskSetServiceTest {
 
     private final NodeRepository nodeRepository = mock(NodeRepository.class);
     private CollectorTaskSetService taskSetService = new CollectorTaskSetService(
-            nodeRepository, mock(IpInterfaceRepository.class), mock(SnmpInterfaceRepository.class));
+            nodeRepository,
+            mock(IpInterfaceRepository.class),
+            mock(SnmpInterfaceRepository.class),
+            mock(SnmpCollectorConfig.class));
 
     public static final long NODE_ID = 1;
     public static final String TENANT_ID = "tenantId";

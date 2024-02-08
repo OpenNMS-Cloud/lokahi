@@ -80,6 +80,15 @@ public class TaskSetCollectorSnmpResponseProcessor {
                 builder.addLabels(
                         PrometheusTypes.Label.newBuilder().setName("if_name").setValue(snmpResult.getIfName()));
 
+                builder.addLabels(
+                        PrometheusTypes.Label.newBuilder().setName("instance").setValue(snmpResult.getInstance()));
+
+                for (final var e : snmpResult.getLabelsMap().entrySet()) {
+                    builder.addLabels(PrometheusTypes.Label.newBuilder()
+                            .setName(CortexTSS.sanitizeLabelName(e.getKey()))
+                            .setValue(CortexTSS.sanitizeLabelValue(e.getValue())));
+                }
+
                 if (snmpResult.hasIpAddress()) {
                     builder.addLabels(PrometheusTypes.Label.newBuilder()
                             .setName("ip_address")

@@ -27,7 +27,6 @@ import java.util.Optional;
 import org.opennms.horizon.shared.snmp.RowCallback;
 import org.opennms.horizon.shared.snmp.SnmpInstId;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
-import org.opennms.horizon.shared.snmp.SnmpResult;
 import org.opennms.horizon.shared.snmp.SnmpRowResult;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.TableTracker;
@@ -78,13 +77,13 @@ public class IPAddressTableTracker extends TableTracker {
         }
 
         public String getIpAddress() {
-            final SnmpResult result = getResult(IP_ADDRESS_IF_INDEX);
-            if (result == null) {
+            final var result = getResult(IP_ADDRESS_IF_INDEX);
+            if (result.isEmpty()) {
                 LOG.warn("BAD AGENT: Device is missing IP-MIB::ipAddressIfIndex. Skipping.");
                 return null;
             }
 
-            SnmpInstId instance = result.getInstance();
+            SnmpInstId instance = result.get().getInstance();
             final int[] instanceIds = instance.getIds();
 
             final int addressType = instanceIds[0];
@@ -229,16 +228,6 @@ public class IPAddressTableTracker extends TableTracker {
                 ipInterfaceBuilder.setIfIndex(ifIndex);
             }
             return Optional.of(ipInterfaceBuilder.build());
-        }
-
-        private SnmpResult getResult(final SnmpObjId base) {
-            for (final SnmpResult result : getResults()) {
-                if (base.equals(result.getBase())) {
-                    return result;
-                }
-            }
-
-            return null;
         }
     }
 

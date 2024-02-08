@@ -24,6 +24,7 @@ package org.opennms.horizon.shared.snmp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 public class SnmpRowResult {
@@ -76,18 +77,18 @@ public class SnmpRowResult {
         return m_instance;
     }
 
-    /**
-     * @param base
-     * @return
-     */
-    public SnmpValue getValue(SnmpObjId base) {
+    public Optional<SnmpResult> getResult(SnmpObjId base) {
         for (SnmpResult result : getResults()) {
             if (base.equals(result.getBase())) {
-                return result.getValue();
+                return Optional.of(result);
             }
         }
 
-        return null;
+        return Optional.empty();
+    }
+
+    public SnmpValue getValue(SnmpObjId base) {
+        return this.getResult(base).map(SnmpResult::getValue).orElse(null);
     }
 
     private void assertTrue(boolean b, String fmt, Object... args) {

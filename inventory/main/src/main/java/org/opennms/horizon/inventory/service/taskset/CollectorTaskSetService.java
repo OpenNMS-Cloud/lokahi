@@ -41,9 +41,11 @@ import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
+import org.opennms.horizon.inventory.snmp.SnmpCollectorConfig;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.snmp.api.SnmpConfiguration;
+import org.opennms.snmp.contract.SnmpCollectorPart;
 import org.opennms.snmp.contract.SnmpCollectorRequest;
 import org.opennms.snmp.contract.SnmpInterfaceElement;
 import org.opennms.snmp.contract.SnmpInterfaceElement.Builder;
@@ -51,6 +53,7 @@ import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.opennms.taskset.contract.TaskType;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -59,7 +62,9 @@ public class CollectorTaskSetService {
     private final NodeRepository nodeRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
     private final SnmpInterfaceRepository snmpInterfaceRepository;
+    private final SnmpCollectorConfig snmpCollectorConfig;
 
+    @Transactional
     public TaskDefinition getCollectorTask(
             MonitorType monitorType, IpInterface ipInterface, long nodeId, SnmpConfiguration snmpConfiguration) {
         if (MonitorType.SNMP.equals(monitorType)) {
@@ -68,9 +73,11 @@ public class CollectorTaskSetService {
         return null;
     }
 
+    @Transactional
     public TaskDefinition addSnmpCollectorTask(
             IpInterface ipInterface, long nodeId, SnmpConfiguration snmpConfiguration) {
         String monitorTypeValue = MonitorType.SNMP.name();
+        final var node = this.nodeRepository.getReferenceById(nodeId);
         String ipAddress = InetAddressUtils.toIpAddrString(ipInterface.getIpAddress());
 
         List<SnmpInterface> snmpInterfaces = getSnmpInterfaces(nodeId);
@@ -80,6 +87,9 @@ public class CollectorTaskSetService {
         for (IpInterface anInterface : ipInterfaces) {
             ifIndexMap.put(ipInterface.getIfIndex(), anInterface);
         }
+
+        // TODO fooker: Can we remove the simple interface type and replace it with data from the collection parts
+        // below?
         List<SnmpInterfaceElement> snmpInterfaceElements = new ArrayList<>();
         for (SnmpInterface snmpInterface : snmpInterfaces) {
             IpInterface ipInterfaceDTO = ifIndexMap.get(snmpInterface.getIfIndex());
@@ -105,6 +115,44 @@ public class CollectorTaskSetService {
         if (snmpConfiguration != null) {
             requestBuilder.setAgentConfig(snmpConfiguration);
         }
+
+        // Find all parts to collect for the systemObjectID we know about this node
+        this.snmpCollectorConfig.findMatchingParts(node.getObjectId()).forEach(part -> {
+            final var partBuilder = SnmpCollectorPart.newBuilder();
+
+            part.asScalar().ifPresent(scalarPart -> {
+                final var scalarBuilder = SnmpCollectorPart.Scalar.newBuilder();
+
+                scalarPart.getElements().stream()
+                        .map(element -> SnmpCollectorPart.Element.newBuilder()
+                                .setOid(element.getOid())
+                                .setAlias(element.getAlias())
+                                .setType(element.getType()))
+                        .forEach(scalarBuilder::addElement);
+
+                partBuilder.setScalar(scalarBuilder);
+            });
+
+            part.asTable().ifPresent(tablePart -> {
+                final var tableBuilder = SnmpCollectorPart.Table.newBuilder().setInstance(tablePart.getInstance());
+
+                if (tablePart.getPersistFilterExpr() != null) {
+                    tableBuilder.setPersistFilterExpr(tablePart.getPersistFilterExpr());
+                }
+
+                tablePart.getColumns().stream()
+                        .map(column -> SnmpCollectorPart.Element.newBuilder()
+                                .setOid(column.getOid())
+                                .setAlias(column.getAlias())
+                                .setType(column.getType()))
+                        .forEach(tableBuilder::addElement);
+
+                partBuilder.setTable(tableBuilder);
+            });
+
+            requestBuilder.addPart(partBuilder);
+        });
+
         Any configuration = Any.pack(requestBuilder.build());
 
         String taskId = identityForIpTask(nodeId, ipAddress, name);

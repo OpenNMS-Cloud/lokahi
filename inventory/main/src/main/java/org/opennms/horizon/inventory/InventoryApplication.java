@@ -21,13 +21,22 @@
  */
 package org.opennms.horizon.inventory;
 
+import jakarta.xml.bind.JAXBException;
+import java.io.IOException;
+import org.opennms.horizon.inventory.snmp.SnmpCollectorConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class InventoryApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(InventoryApplication.class, args);
+    }
+
+    @Bean
+    public static SnmpCollectorConfig snmpCollectorConfig() throws IOException, JAXBException {
+        return SnmpCollectorConfig.load();
     }
 }

@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.opennms.horizon.shared.snmp.Collectable;
 import org.opennms.horizon.shared.snmp.IfNumberTracker;
-import org.opennms.horizon.shared.snmp.SnmpNodeTracker;
 import org.opennms.horizon.shared.snmp.SnmpResult;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SysUpTimeTracker;
@@ -34,12 +33,8 @@ import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.horizon.snmp.api.SnmpResultMetric;
 import org.opennms.horizon.snmp.api.SnmpValueMetric;
 import org.opennms.horizon.snmp.api.SnmpValueType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SnmpCollectionSet {
-
-    private final Logger LOG = LoggerFactory.getLogger(SnmpCollectionSet.class);
 
     private final SnmpResponseMetric.Builder builder;
     private final List<Collectable> trackers = new ArrayList<>();
@@ -59,14 +54,6 @@ public class SnmpCollectionSet {
             @Override
             protected void storeResult(org.opennms.horizon.shared.snmp.SnmpResult res) {
                 addResult(res, builder, "sysUpTime");
-            }
-        };
-        SnmpNodeTracker nodeTracker = new SnmpNodeTracker() {
-
-            @Override
-            protected void storeResult(org.opennms.horizon.shared.snmp.SnmpResult res) {
-                var aliasOptional = getAlias(res);
-                aliasOptional.ifPresent((alias) -> addResult(res, builder, alias));
             }
         };
         trackers.add(ifNumberTracker);
@@ -104,7 +91,7 @@ public class SnmpCollectionSet {
                 .build();
     }
 
-    private static org.opennms.horizon.snmp.api.SnmpValueMetric mapValue(SnmpValue value) {
+    public static org.opennms.horizon.snmp.api.SnmpValueMetric mapValue(SnmpValue value) {
         SnmpValueMetric.Builder builder = org.opennms.horizon.snmp.api.SnmpValueMetric.newBuilder();
         SnmpValueType valueType = SnmpValueType.forNumber(value.getType());
         builder.setType(valueType);

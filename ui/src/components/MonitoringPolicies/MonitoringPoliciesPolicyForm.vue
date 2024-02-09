@@ -131,8 +131,10 @@ const icons = markRaw({
   Delete
 })
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => tag.name))
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: string) => ({ name: tag, id: tag })))
 
 const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
@@ -144,7 +146,7 @@ const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
 }
 
 const deleteMsg = computed(() => 
-`Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
+  `Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
 )
 </script>
 

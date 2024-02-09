@@ -615,7 +615,7 @@ class NodeGrpcServiceTest {
         // Validate
         //
         InOrder inOrder = Mockito.inOrder(mockInt64ValueStreamObserver);
-        inOrder.verify(mockInt64ValueStreamObserver).onError(any(InventoryRuntimeException.class));
+        inOrder.verify(mockInt64ValueStreamObserver).onError(any(StatusRuntimeException.class));
     }
 
     @Test

@@ -66,6 +66,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -84,6 +85,7 @@ public class MonitorPolicySteps {
 
     private MonitorPolicyProto lastCreatedPolicy;
     private MonitorPolicyProto defaultPolicy;
+    private Exception lastException;
 
     @Given("A monitoring policy named {string} with tag {string}, notifying by email")
     public void defineNewPolicyNotifyViaEmail(String name, String tag) {
@@ -134,6 +136,12 @@ public class MonitorPolicySteps {
             .forEach(triggerBuilders::add);
     }
 
+    @Given("The policy has a simple rule named {string} with component type {string}")
+    public void addPolicyRules(String ruleName, String type) {
+        policyBuilder.addRules(PolicyRuleProto.newBuilder().setName(ruleName)
+            .setComponentType(ManagedObjectType.valueOf(type.toUpperCase())).build());
+    }
+
     private Map<String, AlertEventDefinitionProto> loadSnmpTrapDefinitions() {
         ListAlertEventDefinitionsRequest request = ListAlertEventDefinitionsRequest.newBuilder()
             .setEventType(EventType.SNMP_TRAP)
@@ -155,9 +163,13 @@ public class MonitorPolicySteps {
             .addRules(ruleBuilder.build())
             .build();
 
-        log.info("Creating policy {}", policy);
-        lastCreatedPolicy = grpcClient.getPolicyStub().createPolicy(policy);
-        assertThat(lastCreatedPolicy).isNotNull();
+        try {
+            log.info("Creating policy {}", policy);
+            lastCreatedPolicy = grpcClient.getPolicyStub().createPolicy(policy);
+            assertThat(lastCreatedPolicy).isNotNull();
+        } catch (Exception e) {
+            lastException = e;
+        }
     }
 
     @Then("Verify the new policy has been created")
@@ -287,5 +299,15 @@ public class MonitorPolicySteps {
             }
         }).filter(predicate).toList();
 
+    }
+
+    @Then("Verify exception {string} thrown with message {string}")
+    public void monitoringLocationVerifyException(String exceptionName, String message) {
+        if (lastException == null) {
+            fail("No exception caught");
+        } else {
+            assertThat(lastException.getClass().getSimpleName()).isEqualTo(exceptionName);
+            assertThat(lastException.getMessage()).isEqualTo(message);
+        }
     }
 }

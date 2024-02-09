@@ -6,8 +6,9 @@ export const findByText = (wrap: any, selector: string, text: string) => {
 }
 export const buildFetchList = (items: Record<string, any>) => {
   return (_: any, c: any) => {
-    const keys = Object.keys(items);
-    let foundKey = keys.find((d) => c?.body?.includes(d)) || ''
+    const keys = Object.keys(items)
+    const foundKey = keys.find((d) => c?.body?.includes(d)) || ''
+
     return Promise.resolve({ json: () => Promise.resolve({ data: items[foundKey] ?? {} }), ok: true }) as any
   }
 } 

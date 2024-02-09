@@ -44,6 +44,7 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.ConfigUpdateService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
@@ -175,9 +176,9 @@ public class MonitoringLocationGrpcService extends MonitoringLocationServiceGrpc
     }
 
     private Status handleException(Throwable e) {
-        if (e instanceof LocationNotFoundException) {
+        if (e instanceof InventoryRuntimeException) {
             return Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage(e.getMessage()).build();
         } else {
             return Status.newBuilder()

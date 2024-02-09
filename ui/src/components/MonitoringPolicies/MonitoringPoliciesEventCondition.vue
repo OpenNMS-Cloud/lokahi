@@ -108,6 +108,7 @@ const props = defineProps<{
 
 const alertEventDefinitionStore = useAlertEventDefinitionQueries()
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit = defineEmits(['updateCondition', 'deleteCondition'])
 
 const alertCondition = ref(props.condition)

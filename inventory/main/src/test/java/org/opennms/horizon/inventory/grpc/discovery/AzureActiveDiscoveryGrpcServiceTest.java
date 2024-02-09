@@ -16,8 +16,6 @@ import org.opennms.horizon.inventory.service.discovery.active.AzureActiveDiscove
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 public class AzureActiveDiscoveryGrpcServiceTest {
 
     public static final String TEST_TENANT_ID = "x-tenant-id-x";

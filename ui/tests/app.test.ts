@@ -6,16 +6,15 @@ import { useWelcomeStore } from '@/store/Views/welcomeStore'
 let wrapper: any
 
 describe('AppTest', () => {
-    beforeAll(() => {
-        createTestingPinia()
-        const welcomeStore = useWelcomeStore();
-        welcomeStore.ready = true;
-        wrapper = mount(App, { shallow: true })
-    })
+  beforeAll(() => {
+    createTestingPinia()
+    const welcomeStore = useWelcomeStore()
+    welcomeStore.ready = true
+    wrapper = mount(App, { shallow: true })
+  })
 
-    test('Mount component', () => {
-        const cmp = wrapper.get('[data-test="main-content"]')
-        expect(cmp.exists()).toBeTruthy()
-    })
-
+  test('Mount component', () => {
+    const cmp = wrapper.get('[data-test="main-content"]')
+    expect(cmp.exists()).toBeTruthy()
+  })
 })

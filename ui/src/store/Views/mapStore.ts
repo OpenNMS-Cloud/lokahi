@@ -13,6 +13,7 @@ export const useMapStore = defineStore('mapStore', () => {
   const nodesWithCoordinates = computed(() => mapQueries.nodes.filter((node: Node) => node.location?.latitude && node.location.longitude))
 
   const devicesInbounds = computed(() =>
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapQueries.nodes.filter((node: Node) => {
       return false
       // const location: LatLngLiteral = {
@@ -61,6 +62,6 @@ export const useMapStore = defineStore('mapStore', () => {
     deviceSortObject,
     alarmSortObject,
     fetchAlarms,
-    getDeviceAlarmSeverityMap,
+    getDeviceAlarmSeverityMap
   }
 })

@@ -156,7 +156,7 @@ public class PassiveDiscoveryGrpcServiceTest {
         //
         // Verify the Results
         //
-        var matcher = prepareStatusExceptionMatcher(Code.INTERNAL_VALUE, "x-test-exception-x");
+        var matcher = prepareStatusExceptionMatcher(Code.INVALID_ARGUMENT_VALUE, "x-test-exception-x");
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 

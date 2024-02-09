@@ -10,7 +10,7 @@ Feature: Active Discovery
 
 
   Scenario: Create Active discovery and verify task set is published
-    Given New Active Discovery with IpAddresses "192.168.1.1-192.168.1.255" and SNMP community as "stream-snmp" at location named "MINION" with tags "mercury,pluto"
+    Given New Active Discovery "stream-snmp" with IpAddresses "192.168.1.1-192.168.1.255" and SNMP community as "stream-snmp" at location named "MINION" with tags "mercury,pluto"
     Given Discovery Subscribe to kafka topic "task-set-publisher"
     Then  create Active Discovery and validate it's created active discovery with above details.
     Then  verify get active discovery with above details.
@@ -21,12 +21,16 @@ Feature: Active Discovery
     Then Discovery shutdown kafka consumer
 
   Scenario: Create another Active discovery and verify list has two items
-    Given New Active Discovery with IpAddresses "192.168.1.1-192.168.1.211" and SNMP community as "second-snmp" at location named "MINION" with tags "mars, venus"
+    Given New Active Discovery "second-snmp" with IpAddresses "192.168.1.1-192.168.1.211" and SNMP community as "second-snmp" at location named "MINION" with tags "mars, venus"
     Then  create Active Discovery and validate it's created active discovery with above details.
     Then verify list has 2 items
 
+  Scenario: Create duplicate Active discovery name
+    Given New Active Discovery "second-snmp" with IpAddresses "192.168.99.0/24" and SNMP community as "stream-snmp2" at location named "MINION" with tags "default"
+    Then create Active Discovery check exception "StatusRuntimeException" message "INVALID_ARGUMENT: Duplicate active discovery with name second-snmp"
+
   Scenario: Update Active discovery and verify task set is published
-    Given New Active Discovery with IpAddresses "192.168.2.0/4" and SNMP community as "lokahi" at location named "MINION" with tags "lokahi,default"
+    Given New Active Discovery "lokahi" with IpAddresses "192.168.2.0/4" and SNMP community as "lokahi" at location named "MINION" with tags "lokahi,default"
     Given Discovery Subscribe to kafka topic "task-set-publisher"
     Then  create Active Discovery and validate it's created active discovery with above details.
     Then  verify get active discovery with above details.
@@ -40,7 +44,7 @@ Feature: Active Discovery
     Then Discovery shutdown kafka consumer
 
   Scenario: Delete Active discovery and verify task set is published
-    Given New Active Discovery with IpAddresses "192.168.2.0/4" and SNMP community as "lokahi" at location named "MINION" with tags "lokahi,default"
+    Given New Active Discovery "lokahi2" with IpAddresses "192.168.2.0/4" and SNMP community as "lokahi" at location named "MINION" with tags "lokahi,default"
     Given Discovery Subscribe to kafka topic "task-set-publisher"
     Then  create Active Discovery and validate it's created active discovery with above details.
     Then  verify get active discovery with above details.

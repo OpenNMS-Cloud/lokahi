@@ -1,5 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import casual from 'casual'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { rndNumber, rndStatus, rndLatency, rndUptime } from '../helpers/random'
 
 casual.define('minion', function () {

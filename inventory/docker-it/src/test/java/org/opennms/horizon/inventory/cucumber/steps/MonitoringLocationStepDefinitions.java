@@ -38,6 +38,7 @@ import io.cucumber.java.en.When;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.GeoLocation;
 import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
@@ -50,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MonitoringLocationStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
@@ -57,6 +59,7 @@ public class MonitoringLocationStepDefinitions {
     private String lastLocation;
     private List<MonitoringLocationDTO> lastMonitoringLocations;
     private BoolValue lastDelete;
+    private Exception lastException;
 
     public MonitoringLocationStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -103,17 +106,31 @@ public class MonitoringLocationStepDefinitions {
                 Matchers.is(0));
     }
 
+    @Then("[MonitoringLocation] verify exception {string} thrown with message {string}")
+    public void monitoringLocationVerifyException(String exceptionName, String message) {
+        if (lastException == null) {
+            fail("No exception caught");
+        } else {
+            Assertions.assertEquals(exceptionName, lastException.getClass().getSimpleName(), "Exception mismatch");
+            Assertions.assertEquals(message, lastException.getMessage());
+        }
+    }
+
     @When("[MonitoringLocation] Create Monitoring Location with name {string}")
     public void monitoringLocationCreateMonitoringLocation(String location) {
-        lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder()
-            .setLocation(location)
-            .setGeoLocation(GeoLocation.newBuilder()
-                .setLatitude(1.0)
-                .setLongitude(2.0)
-            ).setTenantId(backgroundHelper.getTenantId())
-            .setAddress("address")
-            .build()
-        );
+        try {
+            lastMonitoringLocation = backgroundHelper.getMonitoringLocationStub().createLocation(MonitoringLocationCreateDTO.newBuilder()
+                .setLocation(location)
+                .setGeoLocation(GeoLocation.newBuilder()
+                    .setLatitude(1.0)
+                    .setLongitude(2.0)
+                ).setTenantId(backgroundHelper.getTenantId())
+                .setAddress("address")
+                .build()
+            );
+        } catch (Exception e) {
+            lastException = e;
+        }
     }
 
     @Then("[MonitoringLocation] Monitoring Location is created")

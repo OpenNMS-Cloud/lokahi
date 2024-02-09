@@ -85,7 +85,7 @@ import { useWelcomeStore } from '@/store/Views/welcomeStore'
 
 const welcomeStore = useWelcomeStore()
 defineProps({
-    visible: { type: Boolean, default: false }
+  visible: { type: Boolean, default: false }
 })
 </script>
 <style lang="scss" scoped>

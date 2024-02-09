@@ -212,7 +212,7 @@ class MonitoringLocationGrpcServiceTest {
 
         ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
         verify(getResponseObserver).onError(throwableCaptor.capture());
-        assertEquals("NOT_FOUND: test exception", throwableCaptor.getValue().getMessage());
+        assertEquals("INVALID_ARGUMENT: test exception", throwableCaptor.getValue().getMessage());
     }
 
     @Test
@@ -254,6 +254,6 @@ class MonitoringLocationGrpcServiceTest {
 
         ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
         verify(deleteResponseObserver).onError(throwableCaptor.capture());
-        assertEquals("NOT_FOUND: test exception", throwableCaptor.getValue().getMessage());
+        assertEquals("INVALID_ARGUMENT: test exception", throwableCaptor.getValue().getMessage());
     }
 }

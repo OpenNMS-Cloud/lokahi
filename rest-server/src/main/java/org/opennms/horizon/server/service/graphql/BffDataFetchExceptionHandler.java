@@ -76,7 +76,8 @@ public class BffDataFetchExceptionHandler implements DataFetcherExceptionHandler
 
     private Throwable handleException(Throwable e) {
         if (e instanceof StatusRuntimeException statusRuntimeException
-            && statusRuntimeException.getStatus().getCode().equals(Status.Code.NOT_FOUND)) {
+            && (statusRuntimeException.getStatus().getCode().equals(Status.Code.NOT_FOUND)
+            || statusRuntimeException.getStatus().getCode().equals(Status.Code.INVALID_ARGUMENT))) {
             return new GraphQLException(e.getMessage(), e);
         } else if (e instanceof GraphQLException) {
             return e;

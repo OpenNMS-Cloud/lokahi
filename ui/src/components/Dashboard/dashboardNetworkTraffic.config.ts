@@ -1,4 +1,4 @@
-import { humanFileSizeFromBits } from "../utils"
+import { humanFileSizeFromBits } from '../utils'
 
 export const optionsGraph: any = {
   fill: true,

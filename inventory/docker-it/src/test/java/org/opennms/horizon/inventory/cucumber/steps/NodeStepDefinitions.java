@@ -8,6 +8,7 @@ import io.cucumber.java.en.Then;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.RetryUtils;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaTestHelper;
@@ -16,11 +17,13 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 public class NodeStepDefinitions {
@@ -30,6 +33,8 @@ public class NodeStepDefinitions {
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
     private String nodeTopic;
+
+    private Exception lastException;
 
     public NodeStepDefinitions(RetryUtils retryUtils, KafkaTestHelper kafkaTestHelper, InventoryBackgroundHelper backgroundHelper) {
         this.retryUtils = retryUtils;
@@ -74,12 +79,55 @@ public class NodeStepDefinitions {
      */
 
     @Given("a new node with label {string}, ip address {string} in location named {string}")
-    public void aNewNodeWithLabelIpAddressAndLocation(String label, String ipAddress, String location) {
-        deleteAllNodes();
+    public void aNewNodeWithLabelIpAddressAndLocationWithoutClear(String label, String ipAddress, String location) {
+        aNewNodeWithLabelIpAddressAndLocation(label, ipAddress, location, true);
+    }
 
+    @Given("a new node with label {string}, ip address {string} in location named {string} without clear all")
+    public void aNewNodeWithLabelIpAddressAndLocationClear(String label, String ipAddress, String location) {
+        aNewNodeWithLabelIpAddressAndLocation(label, ipAddress, location, false);
+    }
+
+    private void aNewNodeWithLabelIpAddressAndLocation(String label, String ipAddress, String location, boolean isClear) {
+        if (isClear) {
+            deleteAllNodes();
+        }
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label)
             .setManagementIp(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
+    }
+
+    @Given("update node {string} with alias {string} exception {string}")
+    public void updateNodeWithAliasException (String label, String alias, String expectException) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        var nodes = nodeServiceBlockingStub.listNodes(Empty.newBuilder().build());
+        var filterNodes = nodes.getNodesList().stream().filter(n -> label.equals(n.getNodeLabel())).toList();
+        Assert.assertEquals(1, filterNodes.size());
+        var node = filterNodes.get(0);
+        lastException = null;
+        NodeDTO updatedNode = null;
+        try {
+            var nodeId = nodeServiceBlockingStub.updateNode(NodeUpdateDTO.newBuilder().setId(node.getId()).setNodeAlias(alias)
+                .setTenantId(node.getTenantId()).build());
+            updatedNode = nodeServiceBlockingStub.getNodeById(nodeId);
+        } catch (Exception e) {
+            lastException = e;
+        }
+        if ("false".equalsIgnoreCase(expectException)) {
+            Assertions.assertNull(lastException);
+            Assertions.assertNotNull(updatedNode);
+            Assertions.assertEquals(alias, updatedNode.getNodeAlias());
+        }
+    }
+
+    @Then("[Node] Verify exception {string} thrown with message {string}")
+    public void verifyException(String exceptionName, String message) {
+        if (lastException == null) {
+            fail("No exception caught");
+        } else {
+            assertEquals(exceptionName, lastException.getClass().getSimpleName());
+            assertEquals(message, lastException.getMessage());
+        }
     }
 
     /*

@@ -2,10 +2,9 @@ import Discovery from '@/containers/Discovery.vue'
 import mount from 'tests/mountWithPiniaVillus'
 import router from '@/router'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
-import { useDiscoveryQueries } from '@/store/Queries/discoveryQueries'
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
 
 let wrapper: any
+
 describe('DiscoveryPage', () => {
   beforeAll(() => {
     wrapper = mount({
@@ -16,6 +15,7 @@ describe('DiscoveryPage', () => {
       stubActions: false
     })
   })
+
   afterAll(() => {
     wrapper.unmount()
   })
@@ -62,6 +62,7 @@ describe('DiscoveryPage', () => {
     const store = useDiscoveryStore()
     store.selectedDiscovery.meta = undefined as any
     store.setMetaSelectedDiscoveryValue('communityStrings', 'public')
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     expect(store.selectedDiscovery.meta.communityStrings).toBe('public')
   })
@@ -78,6 +79,7 @@ describe('DiscoveryPage', () => {
     expect(store.selectedDiscovery.locations).toBeFalsy()
 
     store.applyDefaultLocation(locationsSingle, defaultLocation)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(store.selectedDiscovery.locations![0].location).toBe('Default')
   })
 })

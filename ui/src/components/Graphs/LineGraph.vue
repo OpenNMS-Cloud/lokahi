@@ -86,7 +86,7 @@ const options = computed<ChartOptions<any>>(() => ({
           return ''
         }
       }
-    },
+    }
   },
   scales: {
     y: {
@@ -95,7 +95,7 @@ const options = computed<ChartOptions<any>>(() => ({
         text: props.graph.label
       } as TitleOptions,
       ticks: {
-        callback: (value: any, index: any) => (formatAxisBasedOnType(value)),
+        callback: (value: any) => (formatAxisBasedOnType(value)),
         maxTicksLimit: 8,
         color: colorFromFeatherVar.value
       },

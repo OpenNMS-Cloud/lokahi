@@ -30,6 +30,7 @@ interface WelcomeStoreState {
   downloaded: boolean
   firstDiscovery: Record<string, string>
   firstDiscoveryErrors: Record<string, string>
+  // eslint-disable-next-line @typescript-eslint/ban-types
   firstDiscoveryValidation: yup.ObjectSchema<{}>,
   firstLocation: { id: number, location: string }
   invalidForm: boolean
@@ -122,7 +123,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       }, 650)
     },
     buildItemStatus({ title, condition, status }: { title: string, status: string, condition: boolean }) {
-
       const successStatus = condition ? this.getSuccessStatus() : this.getFailureStatus()
 
       return {
@@ -135,9 +135,11 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       const { getLocationsForWelcome } = useWelcomeQueries()
       const locations = await getLocationsForWelcome()
       const existingDefault = locations?.find((def: { location: string }) => def.location === 'default')
+
       if (!existingDefault) {
         const locationMutations = useLocationMutations()
         const { data } = await locationMutations.createLocation({ location: 'default' })
+
         if (data?.location && data?.id) {
           this.firstLocation = { location: data.location, id: data.id }
         }
@@ -178,7 +180,6 @@ export const useWelcomeStore = defineStore('welcomeStore', {
       this.minionErrorTimeout = window.setTimeout(() => {
         this.minionStatusCopy = 'Please wait while we detect your Minion. This can sometimes take more than 10 minutes.'
       }, 600000)
-
     },
     async getFirstNode() {
       const defaultLatency = 0

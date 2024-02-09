@@ -1,6 +1,6 @@
 import mount from '../mountWithPiniaVillus'
 import InventoryTabContent from '@/components/Inventory/InventoryTabContent.vue'
-import { InventoryItem, InventoryNode, MonitoredStates, TimeUnit } from '@/types'
+import { InventoryItem, MonitoredStates } from '@/types'
 
 const tabContent: InventoryItem[] = [
   {
@@ -35,6 +35,7 @@ describe('InventoryTabContent.vue', () => {
       }
     })
   })
+
   afterAll(() => {
     if (wrapper && wrapper.unmount){
       wrapper.unmount()
@@ -42,6 +43,7 @@ describe('InventoryTabContent.vue', () => {
   })
 
   const tabComponents = ['heading', 'text-anchor-list']
+
   it.each(tabComponents)('should have "%s" components', (cmp) => {
     expect(wrapper.get(`[data-test="${cmp}"]`).exists()).toBe(true)
   })

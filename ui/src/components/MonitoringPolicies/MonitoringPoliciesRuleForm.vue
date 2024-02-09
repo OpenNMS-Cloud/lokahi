@@ -193,15 +193,20 @@ const eventTypeOptions = [
   { id: EventType.Internal, name: 'Internal' }
 ]
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const selectComponentType = (type: ManagedObjectType) => (store.selectedRule!.componentType = type)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const selectThresholdMetric = (metric: string) => (store.selectedRule!.thresholdMetricName = metric)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const selectEventType = (eventType: EventType) => (store.selectedRule!.eventType = eventType)
 const populateForm = async (rule: PolicyRule) => await store.displayRuleForm(rule)
 
 const selectDetectionMethod = async (method: DetectionMethod) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   store.selectedRule!.detectionMethod = method
   await store.resetDefaultConditions()
 }
+
 const disableSaveRuleBtn = computed(
   () => store.selectedPolicy?.isDefault || !store.selectedRule?.name || !store.selectedRule?.alertConditions?.length
 )
@@ -212,7 +217,7 @@ const countAlertsAndOpenDeleteModal = async () => {
 }
 
 const deleteMsg = computed(() => 
-`Deleting rule ${store.selectedRule?.name} removes ${store.numOfAlertsForRule} associated alerts. Do you wish to proceed?`
+  `Deleting rule ${store.selectedRule?.name} removes ${store.numOfAlertsForRule} associated alerts. Do you wish to proceed?`
 )
 </script>
 

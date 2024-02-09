@@ -29,6 +29,7 @@
 package org.opennms.horizon.inventory.mapper.discovery;
 
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -46,6 +47,12 @@ public interface PassiveDiscoveryMapper extends DateTimeMapper {
     @Mapping(source = "portsList", target = "snmpPorts")
     @Mapping(source = "communitiesList", target = "snmpCommunities")
     PassiveDiscovery dtoToModel(PassiveDiscoveryUpsertDTO dto);
+
+    @AfterMapping
+    default void trimName(@MappingTarget PassiveDiscovery passiveDiscovery) {
+        var trimmedName = passiveDiscovery.getName().trim();
+        passiveDiscovery.setName(trimmedName);
+    }
 
     @Mapping(source = "snmpPorts", target = "portsList")
     @Mapping(source = "createTime", target = "createTimeMsec")

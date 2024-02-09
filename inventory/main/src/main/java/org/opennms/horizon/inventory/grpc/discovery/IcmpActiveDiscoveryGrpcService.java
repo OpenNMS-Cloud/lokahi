@@ -42,6 +42,7 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -62,7 +63,6 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
     private final TenantLookup tenantLookup;
     private final IcmpActiveDiscoveryService discoveryService;
     private final ScannerTaskSetService scannerTaskSetService;
-    private final MonitoringLocationService monitoringLocationService;
     private static final Integer MAX_RANGE_OF_IP_ADDRESSES_PER_DISCOVERY = 65536;
 
     @Override
@@ -77,12 +77,12 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                 try {
                     var activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenantId);
 
-                    validateActiveDiscovery(request, tenantId);
+                    validateActiveDiscovery(request);
 
                     responseObserver.onNext(activeDiscoveryConfig);
                     responseObserver.onCompleted();
                     scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(), Long.valueOf(request.getLocationId()), tenantId, activeDiscoveryConfig.getId());
-                } catch (LocationNotFoundException | IllegalArgumentException e) {
+                } catch (InventoryRuntimeException | IllegalArgumentException e) {
                     log.error("Exception while validating active discovery", e);
                     responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
                 } catch (Exception e) {
@@ -123,19 +123,20 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
             var activeDiscovery = discoveryService.getDiscoveryById(request.getId(), tenant.get());
             IcmpActiveDiscoveryDTO activeDiscoveryConfig;
             try {
-                validateActiveDiscovery(request, tenant.get());
-            } catch (LocationNotFoundException | IllegalArgumentException e) {
+                validateActiveDiscovery(request);
+
+                if (activeDiscovery.isEmpty()) {
+                    activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
+                } else {
+                    var icmpDiscovery = activeDiscovery.get();
+                    // Discovery task need to be run always whenever there is an update, so first we need to remove current task
+                    scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
+                    activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
+                }
+            } catch (InventoryRuntimeException | IllegalArgumentException e) {
                 log.error("Exception while validating active discovery", e);
                 responseObserver.onError(StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
                 return;
-            }
-            if (activeDiscovery.isEmpty()) {
-                activeDiscoveryConfig = discoveryService.createActiveDiscovery(request, tenant.get());
-            } else {
-                var icmpDiscovery = activeDiscovery.get();
-                // Discovery task need to be run always whenever there is an update, so first we need to remove current task
-                scannerTaskSetService.removeDiscoveryScanTask(Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
-                activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
             }
 
             scannerTaskSetService.sendDiscoveryScannerTask(request.getIpAddressesList(),
@@ -147,11 +148,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
         }
     }
 
-    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
-        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
-        if (location.isEmpty()) {
-            throw new LocationNotFoundException("Invalid location");
-        }
+    private void validateActiveDiscovery(IcmpActiveDiscoveryCreateDTO request) {
         var ipList = request.getIpAddressesList();
         for (var ipAddressEntry : ipList) {
             ipAddressEntry = ipAddressEntry.trim();

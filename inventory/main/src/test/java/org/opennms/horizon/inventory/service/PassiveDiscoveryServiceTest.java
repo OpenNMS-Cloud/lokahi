@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -135,10 +134,25 @@ public class PassiveDiscoveryServiceTest {
         final String locationId = "11";
 
         PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
-            .setLocationId(locationId).build();
+            .setLocationId(locationId)
+            .setName("not blank").build();
         var exception = assertThrows(LocationNotFoundException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
 
-        Assertions.assertEquals("Location not found", exception.getMessage());
+        Assertions.assertEquals("Location not found with location 11", exception.getMessage());
+    }
+
+    @Test
+    void testCreateDiscoveryDuplicateName() {
+        final String tenantId = "test_tenant";
+        final String name = "duplicate";
+        var discovery = new PassiveDiscovery();
+        discovery.setId(1L);
+        when(passiveDiscoveryRepository.findByTenantIdAndName(tenantId, name)).thenReturn(List.of(discovery));
+
+        PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder().setName(name).build();
+        var exception = assertThrows(InventoryRuntimeException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
+
+        Assertions.assertEquals("Duplicate passive discovery with name duplicate", exception.getMessage());
     }
 
     @Test

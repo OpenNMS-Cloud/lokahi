@@ -12,7 +12,7 @@ describe('Dashboard EmptyState component', () => {
       props: {
         texts: dashboardTexts.NetworkTraffic,
         redirectLink: 'Inventory'
-      },
+      }
     })
   })
   afterAll(() => {

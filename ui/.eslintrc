@@ -18,17 +18,18 @@
   },
   "plugins": [
     "vue",
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "@stylistic"
   ],
   "rules": {
-    "vue/script-setup-uses-vars": "error",
-    "indent": ["error", 2, {"SwitchCase": 1}],
-      "semi": ["error", "never"],
-      "quotes": ["error", "single"],
-      "vue/html-quotes": [ "error", "double", { "avoidEscape": false } ],
-      "@typescript-eslint/no-explicit-any": "off",
-      "vue/multi-word-component-names": "off",
-      "comma-dangle": ["error", "never"]
+    "@stylistic/comma-dangle": ["error", "never"],
+    "@stylistic/indent": ["error", 2, { "SwitchCase": 1 }],
+    "@stylistic/quotes": ["error", "single"],
+    "@stylistic/semi": ["error", "never"],
+    "@typescript-eslint/no-explicit-any": "off",
+    "vue/html-quotes": ["error", "double", { "avoidEscape": false }],
+    "vue/multi-word-component-names": "off",
+    "vue/script-setup-uses-vars": "error"
   },
   "globals": {
     "defineProps": "readonly",

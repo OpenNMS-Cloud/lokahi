@@ -56,6 +56,7 @@ import { useMapStore } from '@/store/Views/mapStore'
 import useSpinner from '@/composables/useSpinner'
 import { Node } from '@/types/graphql'
 import useTheme from '@/composables/useTheme'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Map as LeafletMap, divIcon, MarkerCluster as Cluster } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -64,6 +65,7 @@ import { render, createVNode } from 'vue'
 import MapPin from './MapPin.vue'
 
 globalThis.L = L
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { onThemeChange, isDark } = useTheme()
 const map = ref()
 const route = useRoute()
@@ -84,10 +86,12 @@ const bounds = computed(() => {
   const coordinatedMap = getNodeCoordinateMap.value
   return mapStore.nodesWithCoordinates.map((node: Node) => coordinatedMap.get(node?.id))
 })
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const nodeLabelAlarmServerityMap = computed(() => mapStore.getDeviceAlarmSeverityMap())
 
 const lightDarkFilter = computed(() => isDark.value ? 'invert(1) hue-rotate(180deg) grayscale(0.3)' : '')
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getHighestSeverity = (severitites: string[]) => {
   let highestSeverity = 'NORMAL'
   for (const severity of severitites) {
@@ -98,6 +102,7 @@ const getHighestSeverity = (severitites: string[]) => {
   return highestSeverity
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onClusterUncluster = (t: any) => {
   nodeClusterCoords.value = {}
   t.target.refreshClusters()

@@ -1,3 +1,30 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
 package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.google.protobuf.BoolValue;
@@ -17,7 +44,6 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
-import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 
@@ -26,7 +52,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +69,6 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
 
     private IcmpActiveDiscoveryCreateDTO testIcmpActiveDiscoveryCreateDTO;
 
-    private MonitoringLocationService mockMonitoringLocationService;
 
     private IcmpActiveDiscoveryGrpcService target;
 
@@ -53,10 +77,8 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
         mockTenantLookup = Mockito.mock(TenantLookup.class);
         mockIcmpActiveDiscoveryService = Mockito.mock(IcmpActiveDiscoveryService.class);
         mockScannerTaskSetService = Mockito.mock(ScannerTaskSetService.class);
-        mockMonitoringLocationService = mock(MonitoringLocationService.class);
 
         MonitoringLocationDTO location = MonitoringLocationDTO.newBuilder().setLocation(TEST_LOCATION).setId(TEST_LOCATION_ID).setTenantId(TEST_TENANT_ID).build();
-        when(mockMonitoringLocationService.findByLocationIdAndTenantId(TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(Optional.of(location));
 
         testIcmpActiveDiscoveryCreateDTO =
             IcmpActiveDiscoveryCreateDTO.newBuilder()
@@ -65,7 +87,7 @@ public class IcmpActiveDiscoveryGrpcServiceTest {
                 .build();
 
         target = new IcmpActiveDiscoveryGrpcService(mockTenantLookup, mockIcmpActiveDiscoveryService,
-            mockScannerTaskSetService, mockMonitoringLocationService);
+            mockScannerTaskSetService);
     }
 
     @Test

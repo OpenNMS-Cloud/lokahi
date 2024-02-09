@@ -31,8 +31,10 @@ package org.opennms.horizon.alertservice.service;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.AlertType;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
+import org.opennms.horizon.alerts.proto.PolicyRuleProto;
 import org.opennms.horizon.alertservice.db.entity.AlertCondition;
 import org.opennms.horizon.alertservice.db.entity.AlertDefinition;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
@@ -57,6 +59,7 @@ import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -80,13 +83,33 @@ public class MonitorPolicyService {
     private final TagRepository tagRepository;
     private final TagOperationProducer tagOperationProducer;
 
+    private void validatePolicyName(MonitorPolicyProto request, String tenantId) {
+        if (StringUtils.isBlank(request.getName())) {
+            throw new IllegalArgumentException("Policy name is Blank");
+        }
+        if (repository.findByNameAndTenantId(request.getName(), tenantId).isPresent()) {
+            throw new IllegalArgumentException("Duplicate monitoring policy with name " + request.getName());
+        }
+    }
 
+    private void validateRuleName(MonitorPolicyProto request) {
+        var duplicatedRules = request.getRulesList().stream().collect(Collectors.groupingBy(PolicyRuleProto::getName))
+            .entrySet().stream().filter(e -> e.getValue().size() > 1).toList();
+        if (!duplicatedRules.isEmpty()) {
+            throw new IllegalArgumentException("Duplicate monitoring rule with name " +
+                duplicatedRules.stream().map(Map.Entry::getKey).collect(Collectors.joining(", ")));
+        }
+        if (request.getRulesList().stream().anyMatch(rule -> StringUtils.isBlank(rule.getName()))) {
+            throw new IllegalArgumentException("Rule name is blank");
+        }
+
+    }
     @Transactional
     public MonitorPolicyProto createPolicy(MonitorPolicyProto request, String tenantId) {
         if (tenantId.isEmpty()) {
             throw new IllegalArgumentException("Missing tenantId");
         }
-
+        validateRuleName(request);
         if (request.hasField(MonitorPolicyProto.getDescriptor().findFieldByNumber(MonitorPolicyProto.ID_FIELD_NUMBER))) {
             Optional<MonitorPolicy> policy;
             if (DEFAULT_POLICY.equals(request.getName())) {
@@ -98,7 +121,11 @@ public class MonitorPolicyService {
                 String message = String.format("policy not found by id %s for tenant %s", request.getId(), tenantId);
                 log.warn(message);
                 throw new IllegalArgumentException(message);
+            } else if (!policy.get().getName().equals(request.getName())) {
+                validatePolicyName(request, tenantId);
             }
+        } else if (!DEFAULT_POLICY.equals(request.getName())) {
+            validatePolicyName(request, tenantId);
         }
 
         MonitorPolicy policy = policyMapper.map(request);

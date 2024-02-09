@@ -11,6 +11,7 @@ export const useSearchStore = defineStore('searchStore', {
       searchResults: []
     },
   actions: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars 
     async search(searchStr: string) {
       // todo: add graphQL query
       const responses = [] as SearchResultResponse[]

@@ -134,23 +134,24 @@ import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
 
 defineProps({
-    visible: { type: Boolean, default: false }
+  visible: { type: Boolean, default: false }
 })
 
 const icons = markRaw({
-    DownloadIcon,
-    InformationIcon,
-    CopyIcon,
-    CheckIcon
+  DownloadIcon,
+  InformationIcon,
+  CopyIcon,
+  CheckIcon
 })
 
 const localDownloadHandler = () => {
-    welcomeStore.downloadClick();
+  welcomeStore.downloadClick()
 }
 
 const welcomeStore = useWelcomeStore()
-const { isDark } = useTheme();
+const { isDark } = useTheme()
 </script>
+
 <style lang="scss" scoped>
 @import '@featherds/styles/themes/variables';
 @import '@featherds/styles/mixins/typography';

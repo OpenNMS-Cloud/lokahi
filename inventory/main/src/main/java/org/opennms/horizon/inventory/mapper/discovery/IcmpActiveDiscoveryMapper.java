@@ -28,6 +28,7 @@
 
 package org.opennms.horizon.inventory.mapper.discovery;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -53,6 +54,12 @@ public interface IcmpActiveDiscoveryMapper {
     @Mapping(target = "snmpConfig.portsList", source = "snmpPorts",
         nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     IcmpActiveDiscoveryDTO modelToDto(IcmpActiveDiscovery discovery);
+
+    @AfterMapping
+    default void trimName(@MappingTarget IcmpActiveDiscovery icmpActiveDiscovery) {
+        var trimmedName = icmpActiveDiscovery.getName().trim();
+        icmpActiveDiscovery.setName(trimmedName);
+    }
 
     @Mapping(target = "ipAddressEntries", source = "ipAddressesList")
     @Mapping(target = "snmpCommunityStrings", source = "snmpConfig.readCommunityList",

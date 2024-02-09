@@ -19,3 +19,10 @@ Feature: Node
     Then verify that a new node is created with label "node-label", ip address "127.0.0.1" and location "Default"
     Then fetch a list of nodes by node label with search term "INVALID-SEARCH-TERM"
     Then verify the list of nodes is empty
+
+  Scenario: Update existing node alias
+    Given a new node with label "node1", ip address "127.0.0.1" in location named "Default"
+    Given a new node with label "node2", ip address "127.0.0.2" in location named "Default" without clear all
+    Given update node "node1" with alias "alias1" exception "false"
+    Given update node "node2" with alias "alias1" exception "true"
+    Then [Node] Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate node alias with name alias1"

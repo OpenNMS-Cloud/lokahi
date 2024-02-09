@@ -30,6 +30,7 @@ describe('Node Status Store', () => {
     await store.fetchExporters(1)
 
     expect(queries.fetchExporters).toHaveBeenCalledOnce()
+
     expect(queries.fetchExporters).toHaveBeenCalledWith({
       exporter: [
         {

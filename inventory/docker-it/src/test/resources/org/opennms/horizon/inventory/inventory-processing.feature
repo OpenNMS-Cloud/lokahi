@@ -35,8 +35,6 @@ Feature: Inventory Processing
     Given add a new device with label "test-label-2" and ip address "192.168.20.1" and location named "MINION-2"
     Then verify that a new node is created with location named "MINION-2" and ip address "192.168.20.1"
     Then verify Monitoring location is created with location "MINION-2"
-
-  Scenario: Add a device with existing ip address for a given location and verify that creation fails
     Then verify adding existing device with label "test-label-2" and ip address "192.168.20.1" and location "MINION-2" will fail
 
 

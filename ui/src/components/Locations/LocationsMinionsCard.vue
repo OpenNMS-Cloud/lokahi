@@ -85,6 +85,7 @@ const latencyThreshold = (latency: number) => {
 
 let statusPill = reactive({} as Pill)
 let latencyPill = reactive({} as Pill)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let ipPill = reactive({} as Pill)
 
 const minion = computed(() => {

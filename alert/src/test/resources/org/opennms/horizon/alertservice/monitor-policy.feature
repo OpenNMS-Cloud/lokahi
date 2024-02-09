@@ -39,6 +39,23 @@ Feature: Monitor policy gRPC Functionality
     Then List policy should contain 1
     Then Verify monitoring policy for tenant "test-tenant" is sent to Kafka
 
+  Scenario: Create duplicate monitor policy name
+    Given Tenant id "test-tenant"
+    Given A monitoring policy named "test-policy" with tag "tag1", notifying by email
+    Given The policy has a rule named "new-rule" with component type "NODE" and trap definitions
+      | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
+      | SNMP Cold Start    | 1     | 3        | MINUTE        | MAJOR    |                  |
+    And The policy is created in the tenant
+    Then Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate monitoring policy with name test-policy"
+
+  Scenario: Create duplicate monitor rule name
+    Given Tenant id "test-tenant"
+    Given A monitoring policy named "duplicate-rule-policy" with tag "tag1", notifying by email
+    Given The policy has a simple rule named "rule1" with component type "NODE"
+    Given The policy has a simple rule named "rule1" with component type "NODE"
+    And The policy is created in the tenant
+    Then Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate monitoring rule with name rule1"
+
   Scenario: Delete a monitor policy
     Given Tenant id "test-tenant1"
     Given A monitoring policy named "test-policy1" with tag "tag1", notifying by email

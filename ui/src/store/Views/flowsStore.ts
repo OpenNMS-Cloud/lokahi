@@ -177,6 +177,6 @@ export const useFlowsStore = defineStore('flowsStore', {
           }))
         this.filters.isExportersLoading = false
       }, 500)
-    },
+    }
   }
 })

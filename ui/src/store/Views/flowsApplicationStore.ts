@@ -46,26 +46,26 @@ export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
       const applicationsLineData = await flowsQueries.getApplicationsSeries(requestData)
 
       if (applicationsLineData.value?.findApplicationSeries) {
-        //Get Inbound Data
+        // Get Inbound Data
         this.lineInboundData =
           flowsAppDataToChartJSDirection(
             applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[],
             'INGRESS'
           ) || []
 
-        //Get Outbound Data
+        // Get Outbound Data
         this.lineOutboundData =
           flowsAppDataToChartJSDirection(
             applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[],
             'EGRESS'
           ) || []
 
-        //Get Total Data
+        // Get Total Data
         this.lineTotalData =
           flowsAppDataToChartJSTotal(applicationsLineData.value?.findApplicationSeries as FlowsApplicationData[]) || []
       }
 
-      //Get Total App Flows
+      // Get Total App Flows
       this.totalFlows = applicationsLineData.value?.findApplicationSeries?.length || 0
     },
     createApplicationTableChartData() {
@@ -104,8 +104,7 @@ export const useFlowsApplicationStore = defineStore('flowsApplicationStore', {
         const data = this.getLineChartDataForSelectedTraffic()
         const datasetArr = {
           type: 'line',
-          datasets: data?.map((element: any, index: number) => {
-
+          datasets: data?.map((element: any) => {
             const mappedData = [
               ...element.data.map((data: any) => {
                 return {

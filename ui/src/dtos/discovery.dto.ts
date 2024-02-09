@@ -3,16 +3,23 @@ import { validationErrorsToStringRecord } from '@/services/validationService'
 import { DiscoveryAzureMeta, DiscoverySNMPMeta, DiscoveryTrapMeta, NewOrUpdatedDiscovery, ServerDiscoveries } from '@/types/discovery'
 import * as yup from 'yup'
 
-
 export const splitStringOnSemiCommaOrDot = (inString?: string) => {
   return inString?.split(/[;,]+/) ?? []
 }
-
   
 export const discoveryFromClientToServer = (discovery: NewOrUpdatedDiscovery) => {
-  if (discovery.type === DiscoveryType.Azure) return discoveryFromAzureClientToServer(discovery)
-  if (discovery.type === DiscoveryType.ICMP) return discoveryFromActiveClientToServer(discovery)
-  if (discovery.type === DiscoveryType.SyslogSNMPTraps) return discoveryFromTrapClientToServer(discovery)
+  if (discovery.type === DiscoveryType.Azure) {
+    return discoveryFromAzureClientToServer(discovery)
+  }
+
+  if (discovery.type === DiscoveryType.ICMP) {
+    return discoveryFromActiveClientToServer(discovery)
+  }
+
+  if (discovery.type === DiscoveryType.SyslogSNMPTraps) {
+    return discoveryFromTrapClientToServer(discovery)
+  }
+
   return {}
 }
 
@@ -62,8 +69,10 @@ export const sortDiscoveriesByName = (a: {name?:string}, b: {name?:string}) => {
   if (a.name > b.name) ret = 1
   return ret
 }
+
 export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations: Array<{id: number}>) => {
   let combined: Array<NewOrUpdatedDiscovery> = []
+
   dataIn.listActiveDiscovery?.forEach((d) => {
     combined.push({
       id:d.details?.id,
@@ -100,6 +109,7 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
   combined = combined.sort(sortDiscoveriesByName) 
   return combined
 }
+
 const activeDiscoveryValidation = yup.object().shape({
   name: yup.string().required('Please enter a name.'),
   locationId:yup.string().required('Location required.'),
@@ -120,7 +130,7 @@ const activeDiscoveryValidation = yup.object().shape({
 
         return true
       })
-    ),
+  ),
   snmpConfig: yup.object({
     communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
     udpPorts: yup.array().of(yup.number())
@@ -150,19 +160,20 @@ const validatorMap: Record<string,yup.Schema> = {
   [DiscoveryType.ICMP]: activeDiscoveryValidation,
   [DiscoveryType.SyslogSNMPTraps]: passiveDiscoveryValidation
 }
-export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDiscovery) => {
 
+export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDiscovery) => {
   const type = selectedDiscovery.type ?? ''
   const validatorToUse = validatorMap[type] ?? {validate: () => ({})}
 
   let isValid = true
   let validationErrors = {}
   const convertedDiscovery = discoveryFromClientToServer(selectedDiscovery)
+
   try {
     await validatorToUse.validate(convertedDiscovery, { abortEarly: false })
-  }catch(e){
+  } catch(e) {
     validationErrors = validationErrorsToStringRecord(e as yup.ValidationError)
     isValid = false
   }
-  return {isValid,validationErrors}
+  return { isValid, validationErrors }
 }

@@ -34,6 +34,7 @@ import { useTagStore } from '@/store/Components/tagStore'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { BadgeTypes } from '../Common/commonTypes'
 import TextBadge from '../Common/TextBadge.vue'
+
 defineProps({
   tabContent: {
     type: Object as PropType<InventoryItem[]>,
@@ -45,16 +46,15 @@ defineProps({
   }
 })
 
-
-
 const tagStore = useTagStore()
 const inventoryStore = useInventoryStore()
-
 const isTagManagerReset = computed(() => inventoryStore.isTagManagerReset)
-watch(isTagManagerReset, (isReset) => {
-  if (isReset) resetState()
-})
 
+watch(isTagManagerReset, (isReset) => {
+  if (isReset) {
+    resetState()
+  }
+})
 
 const resetState = () => {
   tagStore.selectAllTags(false)
@@ -68,15 +68,16 @@ const openModalForDeletingTags = (node: NewInventoryNode) => {
   tagStore.openModal()
 }
 
-
 const metricsAsTextBadges = (metrics?: RawMetric) => {
   const badges = []
+
   if (metrics?.value?.[1]){
-    badges.push({type: BadgeTypes.success,label:metrics.value?.[1] + 'ms'})
-    badges.push({type: BadgeTypes.success,label:'Up'})
-  }else {
-    badges.push({type: BadgeTypes.error,label:'Down'})
+    badges.push({ type: BadgeTypes.success,label:metrics.value?.[1] + 'ms' })
+    badges.push({ type: BadgeTypes.success,label:'Up' })
+  } else {
+    badges.push({ type: BadgeTypes.error,label:'Down' })
   }
+
   return badges
 }
 
@@ -119,7 +120,6 @@ const metricsAsTextBadges = (metrics?: RawMetric) => {
       min-width: 438px;
     }
 
-
     .node-header {
       margin-bottom: var(variables.$spacing-s);
       display: flex;
@@ -135,17 +135,13 @@ const metricsAsTextBadges = (metrics?: RawMetric) => {
       letter-spacing: 0.28px;
     }
   }
-
-
 }
-
 
 .node-content {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   gap: 2rem;
-
 }
 
 .node-footer {
@@ -153,6 +149,7 @@ const metricsAsTextBadges = (metrics?: RawMetric) => {
   justify-content: space-between;
   margin-top: 40px;
 }
+
 .text-badge-row {
   display:flex;
 }

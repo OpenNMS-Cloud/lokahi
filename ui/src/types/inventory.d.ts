@@ -32,6 +32,7 @@ interface NewInventoryNode {
   tags: [{id:number, name: string}],
   nodeAlias: string
 }
+
 interface RawMetric {
   metric: {
     __name__:string,
@@ -53,18 +54,16 @@ interface RawMetrics {
   }
 }
 
-
 export interface InventoryItem extends NewInventoryNode{
-    metrics?: RawMetric
-}
-export interface InventoryPage {
-    nodes: Array<InventoryItem>;
+  metrics?: RawMetric
 }
 
+export interface InventoryPage {
+  nodes: Array<InventoryItem>;
+}
 
 export const enum MonitoredStates {
   MONITORED = 'MONITORED',
   UNMONITORED = 'UNMONITORED',
   DETECTED = 'DETECTED'
 }
-

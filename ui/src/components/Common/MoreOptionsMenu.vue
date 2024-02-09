@@ -24,6 +24,7 @@
     </template>
     <FeatherDropdownItem
       v-for="item in items"
+      :key="item.label"
       data-test="dropdownItem"
       @click="item.handler"
     >

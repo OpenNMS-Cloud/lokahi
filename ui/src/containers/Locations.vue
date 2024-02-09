@@ -59,7 +59,7 @@
     </div>
   </div>
   <LocationsInstructions
-    :instructionsType='instructionsType'
+    :instructionsType="instructionsType"
     :isOpen="showInstructions"
     @drawerClosed="() => (showInstructions = false)"
   />

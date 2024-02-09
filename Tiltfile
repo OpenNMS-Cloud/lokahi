@@ -425,7 +425,7 @@ k8s_yaml(
 
 k8s_yaml(
     helm(
-        'charts/lokahi-minion',
+        'charts/lokahi-minion-dev',
         values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
     )
 )

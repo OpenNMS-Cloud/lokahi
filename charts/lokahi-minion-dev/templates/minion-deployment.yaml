@@ -1,3 +1,4 @@
+{{- if .Values.OpenNMS.minion.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,11 +20,6 @@ spec:
         linkerd.io/inject: enabled
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minion.serviceName }}"
     spec:
-      #hostAliases:
-      #- ip: "192.168.1.4"
-      #  hostnames:
-      #  - "{{ .Values.hostname }}"
-      #  - "minion.{{ .Values.hostname }}"
       serviceAccountName: {{ .Values.OpenNMS.minion.serviceName }}-sa
       {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
@@ -45,17 +41,29 @@ spec:
                 - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
-        - name: minion-secrets
+        - name: minion-config-volume
+          configMap:
+            name: minion-config
+        - name: maven-volume
+          emptyDir: {}
+        {{- if .Values.OpenNMS.minion.addDefaultLocation }}
+        - name: scripts
+          configMap:
+            name: minion-scripts
+        - name: certificate-secrets
           secret:
-            defaultMode: 420
-            secretName: minion-app-secrets
-        #- name: maven-volume
-        #  emptyDir: {}
+            secretName: root-ca-certificate
+        - name: minion-certificate-manager-secrets
+          secret:
+            secretName: client-root-ca-certificate
+        - name: certificate
+          emptyDir: {}
+        {{- end }}
         {{- if .Values.OpenNMS.minion.extraVolumes }}
           {{ toYaml .Values.OpenNMS.minion.extraVolumes | nindent 8 }}
         {{- end }}
       initContainers:
-        {{- if eq (include "onOpenShift" .) "false" }}
+        {{- if eq (include "onOpenShift" .) "true" }}
         - name: init-sysctl
           image: busybox
           command:
@@ -65,6 +73,33 @@ spec:
           securityContext:
             privileged: true
         {{- end }}
+        {{- if .Values.OpenNMS.minion.addDefaultLocation }}
+        # This container is a development time helper which generates client certificate, key and signs it with
+        # `Client CA` certificate which is running in cluster. It's a bit hacky, since it pulls CA private key
+        # into minion. Please do not use this in production.
+        # Remarks - working directory for this container is /cert which is emptyDir. This empty dir is later mounted
+        # into minion container itself under /opt/karaf/certs/.
+        - image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.minion) | quote }}
+          imagePullPolicy: "IfNotPresent"
+          name: get-cert
+          command:
+            - bash
+            - /scripts/init-create-test-location.sh
+          env:
+            - name: INGRESS_HOST_PORT
+              value: "{{ .Values.hostname }}:{{ .Values.port }}"
+          securityContext:
+            privileged: false
+            runAsUser: 10001
+            runAsGroup: 10001
+          volumeMounts:
+            - name: certificate
+              mountPath: "/cert"
+            - name: minion-certificate-manager-secrets
+              mountPath: "/run/secrets/mtls"
+            - name: scripts
+              mountPath: /scripts
+        {{- end }}
         {{- if .Values.OpenNMS.minion.extraInitContainers }}
           {{ toYaml .Values.OpenNMS.minion.extraInitContainers | nindent 8 }}
         {{- end }}
@@ -73,29 +108,21 @@ spec:
           image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.minion) | quote }}
           imagePullPolicy: {{ .Values.OpenNMS.minion.imagePullPolicy }}
           env:
-            {{- if .Values.OpenNMS.minion.id }}
-            - name: MINION_ID
-              value: "{{ .Values.OpenNMS.minion.id }}"
-            {{- end }}
-            - name: GRPC_CLIENT_KEYSTORE_PASSWORD
-              value: "{{ .Values.OpenNMS.minion.grpcClientKeystorePassword }}"
-            - name: MINION_GATEWAY_HOST
-            {{- if .Values.OpenNMS.minion.gatewayHost }}
-              value: "{{ .Values.OpenNMS.minion.gatewayHost }}" # we're inside the cluster, so we need to talk to the internal service name
-            {{- else }}
-              value: "minion.{{ .Values.hostname }}" 
-            {{- end}}
-            - name: GRPC_CLIENT_OVERRIDE_AUTHORITY
-              value: "minion.{{ .Values.hostname }}" # but the TLS certificate will have the external name, so expect that
-            {{- if .Values.OpenNMS.minion.customCertificateAuthority }}
-            - name: GRPC_CLIENT_TRUSTSTORE
-              value: "/opt/karaf/certs/CA.cert"
-            {{- end}}
             - name: JAVA_TOOL_OPTIONS
               value: "-Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y" # FIXME: Permanent debug port, enable only for dev mode
             {{- if .Values.OpenNMS.minion.logLevel }}
             - name: KARAF_OPTS
               value: -Dkaraf.log.console={{ .Values.OpenNMS.minion.logLevel }}
+            {{- end }}
+            {{- if .Values.OpenNMS.minion.addDefaultLocation }}
+            - name: GRPC_CLIENT_KEYSTORE_PASSWORD
+              value: "changeme"
+            - name: MINION_GATEWAY_HOST
+              value: "ingress-nginx-controller" # we're inside the cluster, so we need to talk to the internal service name
+            - name: GRPC_CLIENT_OVERRIDE_AUTHORITY
+              value: "minion.{{ .Values.hostname }}" # but the TLS certificate will have the external name, so expect that
+            - name: GRPC_CLIENT_TRUSTSTORE
+              value: "/run/secrets/certificates/tls.crt"
             {{- end }}
             {{- if .Values.OpenNMS.global.openTelemetry.otlpTracesEndpoint }}
             - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
@@ -120,7 +147,7 @@ spec:
               containerPort: {{ .Values.OpenNMS.minion.port }}
             - name: snmp-traps
               protocol: UDP
-              containerPort: {{ .Values.OpenNMS.minion.trapsListenerPort }}
+              containerPort: {{ .Values.OpenNMS.minion.TrapsListenerPort }}
             - name: ssh
               containerPort: {{ .Values.OpenNMS.minion.sshPort }}
             - name: netflow5
@@ -130,16 +157,20 @@ spec:
               protocol: UDP
               containerPort: {{ .Values.OpenNMS.minion.netflow9ListenerPort }}
           volumeMounts:
-            - name: minion-secrets
+            - name: maven-volume
+              mountPath: /.m2
+            {{- if .Values.OpenNMS.minion.addDefaultLocation }}
+            - name: certificate-secrets
+              mountPath: "/run/secrets/certificates"
+              readOnly: true
+            - name: minion-certificate-manager-secrets
+              mountPath: "/run/secrets/mtls"
+              readOnly: true
+            - name: certificate
               subPath: "minion.p12"
               mountPath: "/opt/karaf/minion.p12"
-            {{- if .Values.OpenNMS.minion.customCertificateAuthority }}
-            - name: minion-secrets
-              subPath: "CA.cert"
-              mountPath: "/opt/karaf/certs/CA.cert"
-            {{- end}}
-            #- name: maven-volume
-            #  mountPath: /.m2
+              readOnly: true
+            {{- end }}
             {{- if .Values.OpenNMS.minion.extraMounts }}
               {{ toYaml .Values.OpenNMS.minion.extraMounts | nindent 12 }}
             {{- end }}
@@ -159,3 +190,4 @@ spec:
             initialDelaySeconds: 25
             periodSeconds: 5
             failureThreshold: 10
+{{- end }}

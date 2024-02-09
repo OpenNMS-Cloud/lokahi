@@ -95,7 +95,12 @@ const onAddressChange = (newAddress: any) => {
 const locationStore = useLocationStore()
 
 const form = useForm()
-const nameV = string().required('Location name is required.')
+const nameV = string().transform((value: string) => {
+  if (typeof value === 'string') {
+    formInputs.location = value.trim()
+    return value.trim()
+  }
+}).required('Location name is required.')
 
 const saveIsFetching = computed(() => locationStore.saveIsFetching)
 const onSubmit = async () => {

@@ -43,36 +43,24 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdList;
-import org.opennms.horizon.inventory.dto.NodeIdQuery;
-import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
-import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
-import org.opennms.horizon.inventory.dto.TagNameQuery;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -94,6 +82,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private Logger LOG = DEFAULT_LOGGER;
 
     private final NodeService nodeService;
+    private final IcmpActiveDiscoveryService activeDiscoveryService;
     private final IpInterfaceService ipInterfaceService;
     private final NodeMapper nodeMapper;
     private final TenantLookup tenantLookup;
@@ -419,5 +408,25 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         for(Map.Entry<Long, List<NodeDTO>> entry: locationNodes.entrySet()) {
             scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
+    }
+
+
+    @Override
+    public void getDiscoveriesByNodeId(Int64Value request, StreamObserver<ActiveDiscoveryList> responseObserver) {
+
+//        List<Long> discoveryIds = new ArrayList<>();
+//        Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
+//            .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
+//            .orElseThrow();
+//        node.ifPresentOrElse(nodeDTO -> {
+//            nodeDTO.getDiscoveryIdsList().stream().map(did -> {
+//                discoveryIds.add(did);
+//            });
+//        });
+//
+//
+//        responseObserver.onNext(ActiveDiscoveryList.newBuilder().(discoveryList).build());
+//        responseObserver.onCompleted();
+
     }
 }

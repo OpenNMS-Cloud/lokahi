@@ -41,14 +41,14 @@
         </div>
 
         <FeatherInput
-          v-model="store.selectedPolicy.name"
+          v-model.trim="store.selectedPolicy.name"
           label="New Policy Name"
           v-focus
           data-test="policy-name-input"
           :readonly="store.selectedPolicy.isDefault"
         />
         <FeatherTextarea
-          v-model="store.selectedPolicy.memo"
+          v-model.trim="store.selectedPolicy.memo"
           label="Memo"
           :maxlength="100"
           :disabled="store.selectedPolicy.isDefault"

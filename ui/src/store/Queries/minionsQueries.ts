@@ -48,24 +48,25 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
       cachePolicy: 'network-only'
     })
 
-  const addMetricsToMinions = (allMinions: Minion[]) => {
-    minionsList.value = []
-
-    allMinions.forEach(async (minion) => {
+  const addMetricsToMinions = async (allMinions: Minion[]) => {
+    const updatedMinionsList = []
+    for (const minion of allMinions) {
       const { data } = await fetchMinionMetrics(minion.systemId as string)
       const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
-
+        
       if (result) {
         const [, val] = result
-
-        minionsList.value.push({
+        updatedMinionsList.push({
           ...minion,
           latency: {
             value: val
           }
         })
-      } else minionsList.value.push(minion)
-    })
+      } else {
+        updatedMinionsList.push(minion)
+      }
+    } 
+    minionsList.value = updatedMinionsList
   }
 
   const findMinionsByLocationId = async (locationId?: number) => {

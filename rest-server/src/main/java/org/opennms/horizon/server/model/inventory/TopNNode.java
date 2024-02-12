@@ -37,6 +37,7 @@ import java.util.Comparator;
 @Setter
 public class TopNNode {
     private String nodeLabel;
+    private String nodeAlias;
     private String location;
     private double avgResponseTime;
     private double reachability;
@@ -44,6 +45,7 @@ public class TopNNode {
     public static Comparator<TopNNode> getComparator(String fieldName, boolean sortByAscending) {
         Comparator<TopNNode> comparator = switch (fieldName) {
             case "nodeLabel" -> Comparator.comparing(TopNNode::getNodeLabel);
+            case "nodeAlias" -> Comparator.comparing(TopNNode::getNodeAlias);
             case "location" -> Comparator.comparing(TopNNode::getLocation);
             case "avgResponseTime" -> Comparator.comparingDouble(TopNNode::getAvgResponseTime);
             default -> Comparator.comparingDouble(TopNNode::getReachability);

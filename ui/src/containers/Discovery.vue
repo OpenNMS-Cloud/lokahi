@@ -90,6 +90,7 @@
             >
             <ButtonWithSpinner
               text
+              v-if="discoveryStore.selectedDiscovery.name"
               :disabled="isOverallDisabled"
               :click="discoveryStore.saveSelectedDiscovery"
               :isFetching="discoveryStore.loading"
@@ -105,7 +106,7 @@
           :modelValue="discoveryStore.selectedDiscovery.name"
           :error="discoveryStore.validationErrors.name"
           :disabled="isOverallDisabled"
-          @update:model-value="(name: any) => discoveryStore.setSelectedDiscoveryValue('name', name)"
+          @update:model-value="(name: any) => discoveryStore.setSelectedDiscoveryValue('name', name.trim())"
         />
 
         <div class="auto-with-chips">
@@ -238,6 +239,7 @@
 
             <ButtonWithSpinner
               primary
+              v-if="discoveryStore.selectedDiscovery.name"
               :disabled="isOverallDisabled"
               :click="discoveryStore.saveSelectedDiscovery"
               :isFetching="discoveryStore.loading"

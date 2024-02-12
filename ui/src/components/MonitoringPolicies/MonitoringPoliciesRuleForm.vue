@@ -39,7 +39,7 @@
           <div class="col">
             <div class="subtitle">New Rule Name</div>
             <FeatherInput
-              v-model="store.selectedRule.name"
+              v-model.trim="store.selectedRule.name"
               label=""
               hideLabel
               v-focus

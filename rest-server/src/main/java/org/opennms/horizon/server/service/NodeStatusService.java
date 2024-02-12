@@ -237,6 +237,7 @@ public class NodeStatusService {
         return result.map(tuple -> {
             var topNNode = new TopNNode();
             topNNode.setNodeLabel(nodeDTO.getNodeLabel());
+            topNNode.setNodeAlias(nodeDTO.getNodeAlias());
             topNNode.setLocation(nodeDTO.getLocation());
             // Round to 2 points after decimal
             topNNode.setReachability(Math.round(tuple.getT1().getReachability() * 100.0) / 100.0);

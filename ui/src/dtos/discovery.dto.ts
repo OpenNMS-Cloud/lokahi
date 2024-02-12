@@ -111,8 +111,8 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
 }
 
 const activeDiscoveryValidation = yup.object().shape({
-  name: yup.string().required('Please enter a name.'),
-  locationId:yup.string().required('Location required.'),
+  name: yup.string().trim().required('Please enter a name.'),
+  locationId:yup.string().trim().required('Location required.'),
   ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an IP address.')
     .test('validate-ip',
       (ip, ctx) => {
@@ -138,8 +138,8 @@ const activeDiscoveryValidation = yup.object().shape({
 }).required()
 
 const passiveDiscoveryValidation = yup.object().shape({
-  name: yup.string().required('Please enter a name.'),
-  locationId:yup.string().required('Location required.'),
+  name: yup.string().trim().required('Please enter a name.'),
+  locationId:yup.string().trim().required('Location required.'),
   snmpConfig: yup.object({
     communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
     udpPorts: yup.array().of(yup.number())
@@ -147,12 +147,12 @@ const passiveDiscoveryValidation = yup.object().shape({
 }).required()
 
 const azureDiscoveryValidation = yup.object().shape({
-  name: yup.string().required('Please enter a name.'),
-  locationId:yup.string().required('Location required.'),
-  clientId: yup.string().required('Client ID is required.'),
-  subscriptionId: yup.string().required('Client subscription ID is required.'),
-  directoryId: yup.string().required('Directory ID is required.'),
-  clientSecret: yup.string().required('Client secret is required.')
+  name: yup.string().trim().required('Please enter a name.'),
+  locationId:yup.string().trim().required('Location required.'),
+  clientId: yup.string().trim().required('Client ID is required.'),
+  subscriptionId: yup.string().trim().required('Client subscription ID is required.'),
+  directoryId: yup.string().trim().required('Directory ID is required.'),
+  clientSecret: yup.string().trim().required('Client secret is required.')
 }).required()
 
 const validatorMap: Record<string,yup.Schema> = {

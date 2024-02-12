@@ -44,3 +44,10 @@ Feature: Monitoring Location
     Given [MonitoringLocation] Create Grpc Connection for Inventory
     Given [MonitoringLocation] Create Monitoring Location with name "xxx-LOC-xxx"
     Then [MonitoringLocation] Get Monitoring Location by name "yyy-LOC-yyy" Not Found
+
+  Scenario: Duplicate Location Name
+    Given [MonitoringLocation] Grpc TenantId "duplicate-test-tenant"
+    Given [MonitoringLocation] Create Grpc Connection for Inventory
+    Given [MonitoringLocation] Create Monitoring Location with name "duplicate-test"
+    Given [MonitoringLocation] Create Monitoring Location with name "duplicate-test"
+    Then [MonitoringLocation] verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate Location found with name duplicate-test"

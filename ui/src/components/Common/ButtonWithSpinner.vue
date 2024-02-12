@@ -20,6 +20,7 @@ import { PropType } from 'vue'
 import { FeatherSpinner } from '@featherds/progress'
 
 defineProps({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   click: { type: Function as PropType<(...payload: any[]) => void>, default: () => {} },
   primary: { type: Boolean, default: false },
   secondary: { type: Boolean, default: false },

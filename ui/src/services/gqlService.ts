@@ -82,7 +82,7 @@ const errorNotificationPlugin = definePlugin(({ afterQuery }) => {
     }
 
     const notificationMsg = () => {
-      const errorObj = errorsMsgs.filter(({ err }) => hasError(err))?.[0];
+      const errorObj = errorsMsgs.filter(({ err }) => hasError(err))?.[0]
 
       return (errorObj?.msg || 'An unknown error has occurred.') + traceDetails
     }

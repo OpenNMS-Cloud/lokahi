@@ -40,8 +40,6 @@ export interface DiscoverySNMPV3AuthPrivacy extends DiscoverySNMPV3Auth {
   usePrivacyAsKey?: boolean;
 }
 
-
-
 export interface DiscoveryAzureMeta {
   clientId?: string;
   clientSecret?: string;
@@ -49,7 +47,7 @@ export interface DiscoveryAzureMeta {
   directoryId?: string;
 }
 
-export type DiscoveryMeta = DiscoverySNMPMeta | DiscoveryTrapMeta | DiscoveryAzureMeta;
+export type DiscoveryMeta = DiscoverySNMPMeta | DiscoveryTrapMeta | DiscoveryAzureMeta
 
 export interface NewOrUpdatedDiscovery {
   id?: number;
@@ -61,9 +59,22 @@ export interface NewOrUpdatedDiscovery {
 }
 
 export interface DiscoveryStoreErrors {
-  name?:string,tags?:string,locations?:string,locationId?:string,
-    ip?:string,communityString?:string,updPort?:string,clientId?:string,clientSubscription?:string,subscriptionId?:string,directoryId?:string, clientSecret?: string, password?: string, username?: string,context?: string, privacy?: string
-  
+  name?: string,
+  tags?: string,
+  locations?: string,
+  locationId?: string,
+  ip?: string,
+  communityString?: string,
+  updPort?: string,
+  clientId?: string,
+  clientSubscription?: string,
+  subscriptionId?: string,
+  directoryId?: string,
+  clientSecret?: string,
+  password?: string,
+  username?: string,
+  context?: string,
+  privacy?: string
 }
 
 export interface DiscoveryStore {
@@ -103,20 +114,20 @@ export interface ServerDiscovery {
       readCommunities:Array<string>,
     }}
 }
-export interface PassiveServerDiscovery {
 
+export interface PassiveServerDiscovery {
   id?: any; 
   locationId?: string | undefined;
-   name?: string | undefined; 
-   snmpCommunities?: string[] | undefined; 
-   snmpPorts?: number[] | undefined; toggle: boolean; 
-   tags?: Array<Tag>;
+  name?: string | undefined; 
+  snmpCommunities?: string[] | undefined; 
+  snmpPorts?: number[] | undefined; toggle: boolean; 
+  tags?: Array<Tag>;
 }
+
 export interface ServerDiscoveries {
   listActiveDiscovery?:Array<ServerDiscovery>;
   passiveDiscoveries?:Array<PassiveServerDiscovery>;
 }
-
 
 export interface IcmpActiveDiscoveryPlusTags extends IcmpActiveDiscovery {
   tags: Array<Tag>

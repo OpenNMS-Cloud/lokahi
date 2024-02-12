@@ -32,6 +32,7 @@ export const useInventoryStore = defineStore('inventoryStore', {
     },
     async filterNodesByTags() {
       const {getNodesByTags} = useInventoryQueries()
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const tags = this.tagsSelected.map((tag) => tag.name!)
       const nodes = await getNodesByTags(tags)
       const b = InventoryMapper.fromServer(nodes.value?.findAllNodesByTags as Array<NewInventoryNode>, nodes.value?.allMetrics as RawMetrics)

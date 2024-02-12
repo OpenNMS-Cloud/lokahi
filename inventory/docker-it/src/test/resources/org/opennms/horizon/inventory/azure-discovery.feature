@@ -9,17 +9,22 @@ Feature: Azure Active Discovery
 
   Scenario: Create azure active discovery without tenant id
     Given Clear tenant id
-    Given Azure Test Active Discovery for location named "Adventure"
+    Given Azure Test Active Discovery "azureDiscovery1" subscription "test-subscription-id" for location named "Adventure"
     When A GRPC request to create azure active discovery with exception expected
     Then verify exception "StatusRuntimeException" thrown with message "UNAUTHENTICATED: Invalid access token"
 
   Scenario: Create new azure active discovery
-    Given Azure Test Active Discovery for location named "Adventure"
+    Given Azure Test Active Discovery "azureDiscovery2" subscription "test-subscription-id" for location named "Adventure"
     When A GRPC request to create azure active discovery
     And A GRPC request to get tags for azure active discovery
     Then The response should assert for relevant fields
 
   Scenario: Create duplicate azure active discovery
-    Given Azure Test Active Discovery for location named "Adventure"
+    Given Azure Test Active Discovery "azureDiscovery3" subscription "test-subscription-id" for location named "Adventure"
     When A GRPC request to create azure active discovery with exception expected
-    Then verify exception "StatusRuntimeException" thrown with message "INTERNAL: Azure Discovery already exists with the provided subscription, directory and client ID"
+    Then verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Azure Discovery already exists with the provided subscription, directory and client ID"
+
+  Scenario: Create duplicate azure active discovery name
+    Given Azure Test Active Discovery "azureDiscovery2" subscription "test-subscription-id-1" for location named "Adventure"
+    When A GRPC request to create azure active discovery with exception expected
+    Then verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate active discovery with name azureDiscovery2"

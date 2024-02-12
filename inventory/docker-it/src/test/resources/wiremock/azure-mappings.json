@@ -25,6 +25,19 @@
           "Content-Type": "application/json"
         }
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/subscriptions/test-subscription-id-1?api-version=2018-01-01"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"subscriptionId\":\"test-subscription-id-1\",\"state\":\"Enabled\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }

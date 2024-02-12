@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -36,6 +36,7 @@ import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.discovery.AzureActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.active.AzureActiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.AzureActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
@@ -53,12 +54,13 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class AzureActiveDiscoveryService {
+public class AzureActiveDiscoveryService implements ActiveDiscoveryValidationService {
     private static final String SUB_ENABLED_STATE = "Enabled";
 
     private final AzureHttpClient client;
     private final AzureActiveDiscoveryMapper mapper;
     private final AzureActiveDiscoveryRepository repository;
+    private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final ScannerTaskSetService scannerTaskSetService;
     private final MonitoringLocationService monitoringLocationService;
     private final TagService tagService;
@@ -85,6 +87,9 @@ public class AzureActiveDiscoveryService {
 
     private void validateDiscovery(String tenantId, AzureActiveDiscoveryCreateDTO request) {
         validateAlreadyExists(tenantId, request);
+        validateActiveDiscoveryName(request.getName(), tenantId);
+        validateLocation(request.getLocationId(), tenantId);
+
         AzureOAuthToken token;
         try {
             token = client.login(request.getDirectoryId(), request.getClientId(),
@@ -97,10 +102,6 @@ public class AzureActiveDiscoveryService {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
         } catch (Exception e) {
             throw new InventoryRuntimeException("Failed to login with azure credentials", e);
-        }
-
-        if (monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId).isEmpty()) {
-            throw new LocationNotFoundException("Location not found.");
         }
 
         AzureSubscription subscription;
@@ -131,5 +132,15 @@ public class AzureActiveDiscoveryService {
         if (azureDiscoveryOpt.isPresent()) {
             throw new InventoryRuntimeException("Azure Discovery already exists with the provided subscription, directory and client ID");
         }
+    }
+
+    @Override
+    public ActiveDiscoveryRepository getActiveDiscoveryRepository() {
+        return activeDiscoveryRepository;
+    }
+
+    @Override
+    public MonitoringLocationService getMonitoringLocationService() {
+        return monitoringLocationService;
     }
 }

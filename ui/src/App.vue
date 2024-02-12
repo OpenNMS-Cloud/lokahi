@@ -22,6 +22,7 @@ const welcomeStore = useWelcomeStore()
 
 onMounted(async () => {
   const welcomeOverride = sessionStorage.getItem('welcomeOverride')
+
   if (welcomeOverride !== 'true') {
     await welcomeStore.init()
   } else {

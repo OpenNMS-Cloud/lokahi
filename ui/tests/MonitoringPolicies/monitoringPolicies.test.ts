@@ -89,11 +89,13 @@ describe('Monitoring Policies', () => {
     const store = useMonitoringPoliciesStore()
     const saveRuleBtn = wrapper.get('[data-test="save-rule-btn"]')
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(store.selectedPolicy!.rules?.length).toBe(0)
     await wrapper.get('[data-test="rule-name-input"] .feather-input').setValue('Rule1')
     await saveRuleBtn.trigger('click')
 
     expect(store.saveRule).toHaveBeenCalledTimes(1)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(store.selectedPolicy!.rules?.length).toBe(1)
   })
 
@@ -121,7 +123,9 @@ describe('Monitoring Policies', () => {
     const editPolicyBtn = wrapper.get('[data-test="policy-edit-btn"]')
     await editPolicyBtn.trigger('click')
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(store.selectedPolicy!.id).toBe(1)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(store.selectedPolicy!.name).toBe('Policy1')
   })
 

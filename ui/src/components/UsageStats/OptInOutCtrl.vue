@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import Settings from "@featherds/icon/action/Settings"
+import Settings from '@featherds/icon/action/Settings'
 import useModal from '@/composables/useModal'
 // import { useUsageStatsMutations } from '@/store/Mutations/usageStatsMutations'
 // import { useUsageStatsQueries } from '@/store/Queries/usageStatsQueries'
@@ -57,7 +57,8 @@ const state = useStorage<{ showModalOnLoad: boolean } >('first-load', {
   showModalOnLoad: true
 })
 
-const opt = (choice: boolean = false) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const opt = (choice = false) => {
   state.value.showModalOnLoad = false
 
   // usageStatsMutations.toggleUsageStats({ 

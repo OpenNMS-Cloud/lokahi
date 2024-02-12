@@ -8,7 +8,7 @@ export enum ThresholdLevels {
   ABOVE = 'ABOVE',
   EQUAL_TO = 'EQUAL_TO',
   BELOW = 'BELOW',
-  NOT_EQUAL_TO = 'NOT_EQUAL_TO',
+  NOT_EQUAL_TO = 'NOT_EQUAL_TO'
 }
 
 export enum Unknowns {

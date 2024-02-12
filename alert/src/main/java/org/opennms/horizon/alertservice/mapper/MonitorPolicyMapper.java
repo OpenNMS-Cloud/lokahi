@@ -28,10 +28,12 @@
 
 package org.opennms.horizon.alertservice.mapper;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
@@ -53,6 +55,12 @@ public interface MonitorPolicyMapper {
         @Mapping(target = "tags", source = "tagsList")
     })
     MonitorPolicy map(MonitorPolicyProto proto);
+
+    @AfterMapping
+    default void trimName(@MappingTarget MonitorPolicy monitorPolicy) {
+        var name = monitorPolicy.getName().trim();
+        monitorPolicy.setName(name);
+    }
 
     default String map(Tag tag) {
         if(tag != null) {

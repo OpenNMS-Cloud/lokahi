@@ -95,6 +95,7 @@ const props = defineProps<{
   alert: IAlert
 }>()
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const pillColor = { style: props.alert.severity! }
 
 const alertSelectedHandler = (databaseId: number) => {

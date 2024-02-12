@@ -55,6 +55,7 @@ import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.Node;
@@ -141,7 +142,11 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             responseObserver.onNext(Int64Value.of(nodeId));
             responseObserver.onCompleted();
         } catch (Exception e) {
-            responseObserver.onError(e);
+            Status status = Status.newBuilder()
+                .setCode(e instanceof InventoryRuntimeException ? Code.INVALID_ARGUMENT_VALUE : Code.INTERNAL_VALUE)
+                .setMessage(e.getMessage())
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
 

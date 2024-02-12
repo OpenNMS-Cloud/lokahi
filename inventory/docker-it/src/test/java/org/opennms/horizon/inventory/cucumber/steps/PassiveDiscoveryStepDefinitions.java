@@ -114,6 +114,7 @@ public class PassiveDiscoveryStepDefinitions {
     @Given("Passive Discovery fields to persist for location named {string}")
     public void passiveDiscoveryFieldsToPersist(String location) {
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
+            .setName("not blank")
             .setLocationId(backgroundHelper.findLocationId(location))
             .addCommunities("public")
             .addPorts(161)
@@ -125,6 +126,7 @@ public class PassiveDiscoveryStepDefinitions {
     public void passiveDiscoveryFieldsToUpdate(String location) {
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
             .setId(fetchedId)
+            .setName("updated name")
             .setLocationId(backgroundHelper.findLocationId(location))
             .addCommunities("other")
             .addPorts(161)

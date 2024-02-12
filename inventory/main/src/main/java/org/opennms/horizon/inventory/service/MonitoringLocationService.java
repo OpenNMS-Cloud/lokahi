@@ -29,7 +29,9 @@
 package org.opennms.horizon.inventory.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.MonitoringLocationMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -89,6 +91,15 @@ public class MonitoringLocationService {
         if (dto.hasField(MonitoringLocationDTO.getDescriptor().findFieldByNumber(MonitoringLocationDTO.ID_FIELD_NUMBER))
             && modelRepo.findByIdAndTenantId(dto.getId(), dto.getTenantId()).isEmpty()) {
             throw new LocationNotFoundException("Location not found with ID " + dto.getId());
+        }
+        if (dto.hasField(MonitoringLocationDTO.getDescriptor().findFieldByNumber(MonitoringLocationDTO.LOCATION_FIELD_NUMBER))) {
+            if (StringUtils.isBlank(dto.getLocation())) {
+                throw new InventoryRuntimeException("Location is Blank");
+            }
+            var location = modelRepo.findByLocationAndTenantId(dto.getLocation().trim(), dto.getTenantId());
+            if (location.isPresent() && location.get().getId() != dto.getId()) {
+                throw new InventoryRuntimeException("Duplicate Location found with name " + dto.getLocation());
+            }
         }
 
         MonitoringLocation model = mapper.dtoToModel(dto);

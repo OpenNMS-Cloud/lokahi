@@ -83,7 +83,7 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             } catch (InventoryRuntimeException e) {
                 Status status = Status.newBuilder()
-                    .setCode(Code.INTERNAL_VALUE)
+                    .setCode(Code.INVALID_ARGUMENT_VALUE)
                     .setMessage(e.getMessage())
                     .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));

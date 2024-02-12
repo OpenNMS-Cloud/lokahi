@@ -24,7 +24,7 @@ const useWidgets = () => {
     widget: string,
     element: HTMLElement,
     props: { [x: string]: string } = {},
-    directory: string = 'Widgets',
+    directory = 'Widgets',
     styles?: { height: string }
   ) => {
     // async import a component from a given path

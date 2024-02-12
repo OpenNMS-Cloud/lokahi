@@ -20,12 +20,15 @@
 <script lang='ts' setup>
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import { PropType } from 'vue'
-const slots = useSlots();
+
+const slots = useSlots()
+
 defineOptions({ inheritAttrs: false })
+
 defineProps({
-    title: { type: String, default: '' },
-    open: { type: Boolean, default: false },
-    headerClicked: { type: Function as PropType<() => void>, default: () => ({}) }
+  title: { type: String, default: '' },
+  open: { type: Boolean, default: false },
+  headerClicked: { type: Function as PropType<() => void>, default: () => ({}) }
 })
 
 </script>

@@ -133,7 +133,7 @@ const discoveryTypeList = [
         title: 'SNMP Traps',
         icon: AddNote,
         subtitle:
-          "Identify devices through events, flows, and indirectly by evaluating other devices' configuration settings.",
+          'Identify devices through events, flows, and indirectly by evaluating other devices\' configuration settings.',
         value: DiscoveryType.SyslogSNMPTraps
       }
     ]

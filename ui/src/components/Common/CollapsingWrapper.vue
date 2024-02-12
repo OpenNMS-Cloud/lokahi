@@ -9,9 +9,8 @@
 <script setup lang="ts">
 
 defineProps({
-    open: { type: Boolean, default: false },
+  open: { type: Boolean, default: false }
 })
-
 </script>
 
 <style lang="scss" scoped>

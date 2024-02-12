@@ -39,7 +39,9 @@ import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,14 +53,19 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class IcmpActiveDiscoveryService {
+public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationService {
 
     private final IcmpActiveDiscoveryRepository repository;
+    private final ActiveDiscoveryRepository activeDiscoveryRepository;
+    private final MonitoringLocationService monitoringLocationService;
     private final IcmpActiveDiscoveryMapper mapper;
     private final TagService tagService;
 
     @Transactional
     public IcmpActiveDiscoveryDTO createActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
+        validateActiveDiscoveryName(request.getName(), tenantId);
+        validateLocation(request.getLocationId(), tenantId);
+
         IcmpActiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);
         discovery.setCreateTime(LocalDateTime.now());
@@ -80,6 +87,11 @@ public class IcmpActiveDiscoveryService {
                 throw new IllegalArgumentException("Discovery with Id" + request.getId() + " doesn't exist");
             }
             var discovery = optionalDiscovery.get();
+            validateActiveDiscoveryName(request.getName(), discovery.getId(), tenantId);
+
+            if (!String.valueOf(discovery.getLocationId()).equals(request.getLocationId())) {
+                validateLocation(request.getLocationId(), tenantId);
+            }
             mapper.updateFromDto(request, discovery);
             discovery.setCreateTime(LocalDateTime.now());
             repository.save(discovery);
@@ -127,5 +139,15 @@ public class IcmpActiveDiscoveryService {
     public Optional<IcmpActiveDiscoveryDTO> getDiscoveryById(long id, String tenantId) {
         var optional = repository.findByIdAndTenantId(id, tenantId);
         return optional.map(mapper::modelToDto);
+    }
+
+    @Override
+    public ActiveDiscoveryRepository getActiveDiscoveryRepository() {
+        return activeDiscoveryRepository;
+    }
+
+    @Override
+    public MonitoringLocationService getMonitoringLocationService() {
+        return monitoringLocationService;
     }
 }

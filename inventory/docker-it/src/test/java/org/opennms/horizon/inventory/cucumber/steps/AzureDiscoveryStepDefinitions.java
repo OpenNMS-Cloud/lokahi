@@ -86,16 +86,18 @@ public class AzureDiscoveryStepDefinitions {
      * SCENARIO GIVEN
      * *********************************************************************************
      */
-    @Given("Azure Test Active Discovery for location named {string}")
-    public void generatedTestActiveDiscovery(String location) {
+    @Given("Azure Test Active Discovery {string} subscription {string} for location named {string}")
+    public void generatedTestActiveDiscovery(String name,
+                                             String subscriptionId,
+                                             String location) {
         tagCreateDto1 = TagCreateDTO.newBuilder()
             .setName("test-tag-name-1").build();
         createDiscoveryDto = AzureActiveDiscoveryCreateDTO.newBuilder()
             .setLocationId(backgroundHelper.findLocationId(location))
-            .setName("test-azure-discovery-name")
+            .setName(name)
             .setClientId("test-client-id")
             .setClientSecret("test-client-secret")
-            .setSubscriptionId("test-subscription-id")
+            .setSubscriptionId(subscriptionId)
             .setDirectoryId("test-directory-id")
             .addAllTags(List.of(tagCreateDto1))
             .build();
@@ -156,7 +158,6 @@ public class AzureDiscoveryStepDefinitions {
         TagDTO tagDTO = tagList.getTags(0);
         assertEquals(tagCreateDto1.getName(), tagDTO.getName());
     }
-
 
     @Then("verify exception {string} thrown with message {string}")
     public void verifyException(String exceptionName, String message) {

@@ -201,7 +201,14 @@ public class NodeService {
         var node = nodeRepository.findByIdAndTenantId(request.getId(), tenantId)
             .orElseThrow(() -> new InventoryRuntimeException("Node with ID " + request.getId() + " not found"));
 
-        node.setNodeAlias(request.getNodeAlias());
+        if (request.hasNodeAlias()) {
+            String alias = request.getNodeAlias().trim();
+            if (!StringUtils.isBlank(alias) &&
+                nodeRepository.findByNodeAliasAndTenantId(alias, tenantId).stream().anyMatch(n -> request.getId() != n.getId())) {
+                throw new InventoryRuntimeException("Duplicate node alias with name " + alias);
+            }
+            node.setNodeAlias(request.getNodeAlias());
+        }
         return nodeRepository.save(node).getId();
     }
 

@@ -43,9 +43,11 @@ import {format as fnsFormat} from 'date-fns'
 const nodeStatusStore = useNodeStatusStore()
 
 // Pagination
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updatePageSize = (v: number) => { pageSize.value = v }
   
 const nodeData = computed(() => {

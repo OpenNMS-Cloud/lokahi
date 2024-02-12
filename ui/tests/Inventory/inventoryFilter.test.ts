@@ -20,7 +20,7 @@ describe('InventoryFilter.vue', () => {
 
   describe('Required components', () => {
     const requiredComponents = [
-      'tag-manager-ctrl',
+      'tag-manager-ctrl'
     ]
 
     it.each(requiredComponents)('should have "%s" component', (item) => {

@@ -82,6 +82,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -559,5 +560,68 @@ public class NodeServiceTest {
         var exception = Assert.assertThrows(InventoryRuntimeException.class,
             () -> nodeService.updateNode(otherNodeUpdateRequest, otherNodeUpdateRequest.getTenantId()));
         assertEquals("Node with ID " + otherNodeUpdateRequest.getId() + " not found", exception.getMessage());
+    }
+
+    @Test
+    void testNodeUpdateDuplicateAlias() {
+        // prepare
+        var updateNodeAlias = "BBB";
+        var testNode = new Node();
+        testNode.setTenantId("onms");
+        testNode.setId(42);
+        testNode.setNodeAlias("AAA");
+        when(mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
+            .thenReturn(Optional.of(testNode));
+
+        Node node2 = new Node();
+        node2.setId(99);
+        node2.setNodeAlias(updateNodeAlias);
+        List<Node> nodes = Arrays.asList(testNode, node2);
+        when(mockNodeRepository.findByNodeAliasAndTenantId(updateNodeAlias, testNode.getTenantId()))
+            .thenReturn(nodes);
+
+        // test
+        var nodeUpdateRequest = NodeUpdateDTO.newBuilder()
+            .setId(testNode.getId())
+            .setTenantId(testNode.getTenantId())
+            .setNodeAlias(updateNodeAlias)
+            .build();
+
+        var exception = Assert.assertThrows(InventoryRuntimeException.class,
+            () -> nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId()));
+
+        // verify
+        assertEquals("Duplicate node alias with name " + updateNodeAlias, exception.getMessage());
+    }
+
+    @Test
+    void testNodeUpdateAliasToEmpty() {
+        // prepare
+        String updateNodeAlias = "";
+        var testNode = new Node();
+        testNode.setTenantId("onms");
+        testNode.setId(42);
+        testNode.setNodeAlias("AAA");
+        var updatedNode = new Node();
+        updatedNode.setTenantId(testNode.getTenantId());
+        updatedNode.setId(testNode.getId());
+        updatedNode.setNodeAlias(updateNodeAlias);
+        when(mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
+            .thenReturn(Optional.of(testNode));
+        when(mockNodeRepository.save(any(Node.class)))
+            .thenReturn(updatedNode);
+
+        // test
+        var nodeUpdateRequest = NodeUpdateDTO.newBuilder()
+            .setId(testNode.getId())
+            .setTenantId(testNode.getTenantId())
+            .setNodeAlias(updateNodeAlias)
+            .build();
+
+        long updatedNodeId =  nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId());
+
+        // verify
+        verify(mockNodeRepository, times(0)).findByNodeAliasAndTenantId(any(), any());
+        assertEquals(testNode.getId(), updatedNodeId);
     }
 }

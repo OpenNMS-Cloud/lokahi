@@ -12,8 +12,10 @@ const mockCanvas = {
   offsetWidth: 100,
   offsetHeight: 100,
   toDataURL: () => '',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getContext: (...p: any) => {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
       drawImage: (...p: any) => {}
     } as CanvasRenderingContext2D
   }
@@ -34,10 +36,12 @@ vi.mock('jspdf', () => {
         }
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     addImage() {}
     getImageProperties() {
       return { width: 100, height: 100 }
     }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     save() {}
   }
 

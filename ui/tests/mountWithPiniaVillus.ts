@@ -43,7 +43,7 @@ const wrapper = (mountingOption: Record<string, any>): any => {
         [VILLUS_CLIENT as unknown as string]: createClient({
           url: 'https://test/graphql'
         }),
-        ...provide,
+        ...provide
       },
       directives: { ...directives }
     },

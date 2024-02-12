@@ -28,8 +28,10 @@
 
 package org.opennms.horizon.inventory.mapper;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -43,4 +45,10 @@ public interface MonitoringLocationMapper {
     @Mapping(target = "geoLocation.latitude", source = "latitude")
     @Mapping(target = "geoLocation.longitude", source = "longitude")
     MonitoringLocationDTO modelToDTO(MonitoringLocation model);
+
+    @AfterMapping
+    default void trimLocationName(@MappingTarget MonitoringLocation monitoringLocation) {
+        var location = monitoringLocation.getLocation().trim();
+        monitoringLocation.setLocation(location);
+    }
 }

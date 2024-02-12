@@ -271,7 +271,6 @@ install_helm_chart () {
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
-      -g \
       --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
       --set OpenNMS.global.image.tag=${IMAGE_TAG} \
       --wait --timeout "${TIMEOUT}"; then

@@ -82,7 +82,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private Logger LOG = DEFAULT_LOGGER;
 
     private final NodeService nodeService;
-    private final IcmpActiveDiscoveryService activeDiscoveryService;
     private final IpInterfaceService ipInterfaceService;
     private final NodeMapper nodeMapper;
     private final TenantLookup tenantLookup;
@@ -414,19 +413,27 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void getDiscoveriesByNodeId(Int64Value request, StreamObserver<ActiveDiscoveryList> responseObserver) {
 
-//        List<Long> discoveryIds = new ArrayList<>();
-//        Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
-//            .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
-//            .orElseThrow();
-//        node.ifPresentOrElse(nodeDTO -> {
-//            nodeDTO.getDiscoveryIdsList().stream().map(did -> {
-//                discoveryIds.add(did);
-//            });
-//        });
-//
-//
-//        responseObserver.onNext(ActiveDiscoveryList.newBuilder().(discoveryList).build());
-//        responseObserver.onCompleted();
-
+        Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
+            .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
+            .orElseThrow();
+        node.ifPresentOrElse(nodeDTO -> {
+            try {
+                List<ActiveDiscoveryDTO> discoveries = nodeService.getActiveDiscoveriesByIdList(nodeDTO.getTenantId(), nodeDTO.getDiscoveryIdsList());
+                responseObserver.onNext(ActiveDiscoveryList.newBuilder().addAllActiveDiscoveries(discoveries).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+            Status status = Status.newBuilder()
+                .setCode(Code.NOT_FOUND_VALUE)
+                .setMessage("Node not found")
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
     }
 }

@@ -38,6 +38,7 @@ import java.util.Optional;
 @Repository
 public interface ActiveDiscoveryRepository extends JpaRepository<ActiveDiscovery, Long> {
     List<ActiveDiscovery> findByTenantIdOrderById(String tenantId);
+    List<ActiveDiscovery> findByTenantIdAndIdIn(String tenantId, List<Long> ids);
     Optional<ActiveDiscovery> findByTenantIdAndId(String tenantId, long id);
     List<ActiveDiscovery> findByNameAndTenantId(String name, String tenantId);
 }

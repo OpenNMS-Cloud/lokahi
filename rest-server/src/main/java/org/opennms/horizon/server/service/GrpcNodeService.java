@@ -39,8 +39,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryList;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.mapper.discovery.ActiveDiscoveryMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
@@ -97,6 +99,11 @@ public class GrpcNodeService {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
     }
 
+    @GraphQLQuery(name = "findDiscoveriesByNodeId")
+    public Mono<ActiveDiscoveryList> findDiscoveriesByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)));
+    }
+
     @GraphQLMutation
     public Mono<Node> addNode(NodeCreate node, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.createNewNode(mapper.nodeCreateToProto(node), headerUtil.getAuthHeader(env))));
@@ -131,7 +138,7 @@ public class GrpcNodeService {
     }
 
     @GraphQLMutation
-    public Mono<Boolean> discoveryByNodeIds(List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Boolean> getDiscoveryByNodeIds(List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.startScanByNodeIds(ids, headerUtil.getAuthHeader(env)));
     }
 

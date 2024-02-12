@@ -201,7 +201,7 @@ install_helm_chart () {
 
   install_nginx
 
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/citus \
+  if ! time helm upgrade -i citus ./../charts/dependencies/citus \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
@@ -211,7 +211,7 @@ install_helm_chart () {
     helm_debug
   fi
   
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/cortex \
+  if ! time helm upgrade -i cortex ./../charts/dependencies/cortex \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
@@ -221,7 +221,15 @@ install_helm_chart () {
     helm_debug
   fi
 
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/grafana \
+  if ! time helm upgrade -i grafana ./../charts/dependencies/grafana \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i kafka ./../charts/dependencies/kafka \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
@@ -231,7 +239,15 @@ install_helm_chart () {
     helm_debug
   fi
 
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/kafka \
+  if ! time helm upgrade -i keycloak ./../charts/dependencies/keycloak \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i mailserver ./../charts/dependencies/mailserver \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
@@ -241,27 +257,7 @@ install_helm_chart () {
     helm_debug
   fi
 
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/keycloak \
-      -f ./tmp/install-local-lokahi-values.yaml \
-      --namespace $NAMESPACE \
-      --create-namespace \
-      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
-      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
-      --wait --timeout "${TIMEOUT}"; then
-    helm_debug
-  fi
-
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/mailserver \
-      -f ./tmp/install-local-lokahi-values.yaml \
-      --namespace $NAMESPACE \
-      --create-namespace \
-      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
-      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
-      --wait --timeout "${TIMEOUT}"; then
-    helm_debug
-  fi
-
-  if ! time helm upgrade -i lokahi ./../charts/dependencies/prometheus \
+  if ! time helm upgrade -i prometheus ./../charts/dependencies/prometheus \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
@@ -275,13 +271,14 @@ install_helm_chart () {
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \
+      -g \
       --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
       --set OpenNMS.global.image.tag=${IMAGE_TAG} \
       --wait --timeout "${TIMEOUT}"; then
     helm_debug
   fi
 
-  if ! time helm upgrade -i lokahi ./../charts/lokahi-minion-dev \
+  if ! time helm upgrade -i lokahiminion ./../charts/lokahi-minion-dev \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \

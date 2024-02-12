@@ -129,8 +129,11 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     @Query(value = "SELECT a.* " +
         "FROM Alert a " +
         "WHERE a.tenant_id = :tenantId " +
-        "AND a.last_event_time between :start and :end " +
-        "AND a.node_id = :nodeId ",nativeQuery = true)
-    Page<Alert>  findAlertsByNodeId(@Param("tenantId") String tenantId,@Param("nodeId") long nodeId ,@Param("start") Date start, @Param("end") Date end,Pageable pageable );
+        "AND a.node_id = :nodeId " ,
+        countQuery = "SELECT count(a) " +
+            "FROM Alert a " +
+            "WHERE a.tenant_id = :tenantId " +
+            "AND a.node_id = :nodeId ", nativeQuery = true)
+    Page<Alert>  findAlertsByNodeId(@Param("tenantId") String tenantId,@Param("nodeId") long nodeId ,Pageable pageable );
 
 }

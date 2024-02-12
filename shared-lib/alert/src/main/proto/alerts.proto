@@ -224,7 +224,6 @@ message AlertRequestByNode {
     int32 page = 3;
     string sort_by = 5;
     bool sort_ascending = 6;
-    repeated Filter filters = 7;
 }
 
 service AlertService {

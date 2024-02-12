@@ -351,19 +351,13 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         String sortBy = !request.getSortBy().isEmpty() ? request.getSortBy() : SORT_BY_DEFAULT;
         boolean sortAscending = request.getSortAscending();
 
-        // Create a PageRequest object based on the page size, next page, filter, and sort parameters
         Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
 
-        // Get Filters
-        List<Date> timeRange = new ArrayList<>();
-        List<Severity> severities = new ArrayList<>();
-        List<String> filterNodeIds = new ArrayList<>();
-        getFilterOptions(request, timeRange, severities, filterNodeIds);
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
         try {
             Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage;
-            alertPage = alertRepository.findAlertsByNodeId(tenantId,nodeId,timeRange.get(0), timeRange.get(1),pageRequest);
+            alertPage = alertRepository.findAlertsByNodeId(tenantId,nodeId,pageRequest);
 
             List<Alert> alerts = alertPage.getContent().stream()
                 .map(alert -> Alert.newBuilder(alertMapper.toProto(alert)).build())
@@ -417,35 +411,7 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         }
     }
 
-    private void getFilterOptions(AlertRequestByNode request, List<Date> timeRange, List<Severity> severities, List<String> nodeIds) {
-        Optional<String> lookupTenantId = tenantLookup.lookupTenantId(Context.current());
-        request.getFiltersList().forEach(filter -> {
-            if (filter.hasSeverity()) {
-                severities.add(Severity.valueOf(filter.getSeverity().name()));
-            }
-            if (filter.hasTimeRange()) {
-                timeRange.add(convertTimestampToDate(filter.getTimeRange().getStartTime()));
-                timeRange.add(convertTimestampToDate(filter.getTimeRange().getEndTime()));
-            }
-            if (filter.hasNodeLabel()) {
-                List<Node> nodes = lookupTenantId
-                    .map(tenantId -> nodeRepository.findAllByNodeLabelAndTenantId(filter.getNodeLabel(), tenantId))
-                    .orElseThrow();
 
-                for (Node node : nodes) {
-                    nodeIds.add(String.valueOf(node.getId()));
-                }
-            }
-        });
-
-        if (timeRange.isEmpty()) {
-            getDefaultTimeRange(timeRange);
-        }
-
-        if (severities.isEmpty()) {
-            getAllSeverities(severities);
-        }
-    }
     private static void getAllSeverities(List<Severity> severities) {
         severities.addAll(Arrays.asList(Severity.values()));
     }

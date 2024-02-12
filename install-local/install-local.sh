@@ -247,7 +247,7 @@ install_helm_chart () {
     helm_debug
   fi
 
-  if ! time helm upgrade -i mailserver ./../charts/dependencies/mailserver \
+  if ! time helm upgrade -i mailserver ./../charts/dependencies/mail-server \
       -f ./tmp/install-local-lokahi-values.yaml \
       --namespace $NAMESPACE \
       --create-namespace \

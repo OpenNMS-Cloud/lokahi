@@ -176,6 +176,37 @@ public class AlertsClient {
         request.addFilters(Filter.newBuilder().setTimeRange(filterBuilder.build()).build());
     }
 
+    private static void getTimeRangeFilterByNode(TimeRange timeRange, AlertRequestByNode.Builder request) {
+        TimeRangeFilter.Builder filterBuilder = TimeRangeFilter.newBuilder();
+        Timestamp.Builder startTimeBuilder = Timestamp.newBuilder();
+        Timestamp.Builder endTimeBuilder = Timestamp.newBuilder();
+
+        switch (timeRange) {
+            case TODAY:
+                startTimeBuilder.setSeconds(getStartTime(TimeRange.TODAY));
+                endTimeBuilder.setSeconds(getEndTime());
+                break;
+            case SEVEN_DAYS:
+                startTimeBuilder.setSeconds(getStartTime(TimeRange.SEVEN_DAYS));
+                endTimeBuilder.setSeconds(getEndTime());
+                break;
+            case LAST_24_HOURS:
+                startTimeBuilder.setSeconds(getStartTime(TimeRange.LAST_24_HOURS));
+                endTimeBuilder.setSeconds(getEndTime());
+                break;
+            case ALL:
+                startTimeBuilder.setSeconds(0);
+                endTimeBuilder.setSeconds(System.currentTimeMillis() / 1000);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid time range: " + timeRange);
+        }
+
+        filterBuilder.setStartTime(startTimeBuilder.build());
+        filterBuilder.setEndTime(endTimeBuilder.build());
+
+        request.addFilters(Filter.newBuilder().setTimeRange(filterBuilder.build()).build());
+    }
     private static void getSeverity(List<String> severityFilters, ListAlertsRequest.Builder request) {
         if (severityFilters == null || severityFilters.isEmpty()) {
             return;
@@ -184,7 +215,14 @@ public class AlertsClient {
             .map(Severity::valueOf)
             .forEach(severity -> request.addFilters(Filter.newBuilder().setSeverity(severity).build()));
     }
-
+    private static void getSeverityByNode(List<String> severityFilters, AlertRequestByNode.Builder request) {
+        if (severityFilters == null || severityFilters.isEmpty()) {
+            return;
+        }
+        severityFilters.stream()
+            .map(Severity::valueOf)
+            .forEach(severity -> request.addFilters(Filter.newBuilder().setSeverity(severity).build()));
+    }
     private static Metadata getMetadata(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
@@ -298,17 +336,19 @@ public class AlertsClient {
         return alertsCountMapper.protoToAlertCount(alertCountProto);
     }
     @SuppressWarnings("squid:S107")
-    public ListAlertsResponse getRecentAlertsByNode(long nodeId,int pageSize, int page, String sortBy, boolean sortAscending,String accessToken) {
+    public ListAlertsResponse getAlertsByNode(int pageSize, int page, List<String> severityFilters, TimeRange timeRange, String sortBy, boolean sortAscending, long nodeId, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
 
         final var request = AlertRequestByNode.newBuilder();
-         request.setPageSize(pageSize)
+        getTimeRangeFilterByNode(timeRange, request);
+        getSeverityByNode(severityFilters, request);
+        request.setPageSize(pageSize)
             .setPage(page)
             .setSortBy(sortBy)
-            .setNodeId(nodeId)
             .setSortAscending(sortAscending)
+            .setNodeId(nodeId)
             .build();
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getRecentAlertsByNode(request.build());
+        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getAlertsByNode(request.build());
 
     }
 }

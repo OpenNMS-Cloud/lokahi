@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -74,6 +75,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -339,25 +342,47 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     }
 
     @Override
-    public void getRecentAlertsByNode(AlertRequestByNode request, StreamObserver<ListAlertsResponse> responseObserver) {
-       try {
+    @Transactional
+    public void getAlertsByNode(AlertRequestByNode request, StreamObserver<ListAlertsResponse> responseObserver) {
 
+        int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
+        int page = request.getPage();
+        long nodeId = request.getNodeId();
+        String sortBy = !request.getSortBy().isEmpty() ? request.getSortBy() : SORT_BY_DEFAULT;
+        boolean sortAscending = request.getSortAscending();
 
-           String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-           List<org.opennms.horizon.alertservice.db.entity.Alert> alerts = alertRepository.findByNodeIdAndTenantId(request.getNodeId(), tenantId);
+        // Create a PageRequest object based on the page size, next page, filter, and sort parameters
+        Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
 
-           List<Alert> protoList = getEnrichAlertProto2nd(alerts);
+        // Get Filters
+        List<Date> timeRange = new ArrayList<>();
+        List<Severity> severities = new ArrayList<>();
+        List<String> filterNodeIds = new ArrayList<>();
+        getFilterOptions(request, timeRange, severities, filterNodeIds);
+        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+        try {
+            Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage;
+            alertPage = alertRepository.findAlertsByNodeId(tenantId,nodeId,timeRange.get(0), timeRange.get(1),pageRequest);
+
+            List<Alert> alerts = alertPage.getContent().stream()
+                .map(alert -> Alert.newBuilder(alertMapper.toProto(alert)).build())
+                .collect(Collectors.toList());
 
            ListAlertsResponse.Builder responseBuilder = ListAlertsResponse.newBuilder()
-               .addAllAlerts(protoList);
+               .addAllAlerts(alerts);
 
-
-           // Build the final ListAlertsResponse object and send it to the client using the responseObserver
-           ListAlertsResponse response = responseBuilder.build();
+            if (alertPage.hasNext()) {
+                responseBuilder.setNextPage(alertPage.nextPageable().getPageNumber());
+            }
+            responseBuilder.setLastPage(alertPage.getTotalPages() - 1);
+            responseBuilder.setTotalAlerts(alertPage.getTotalElements());
+            ListAlertsResponse response = responseBuilder.build();
            responseObserver.onNext(response);
            responseObserver.onCompleted();
        }
        catch (Exception e) {
+           LOG.error("Noinstance available! " + e.getMessage());
 
        }
 }
@@ -392,6 +417,35 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         }
     }
 
+    private void getFilterOptions(AlertRequestByNode request, List<Date> timeRange, List<Severity> severities, List<String> nodeIds) {
+        Optional<String> lookupTenantId = tenantLookup.lookupTenantId(Context.current());
+        request.getFiltersList().forEach(filter -> {
+            if (filter.hasSeverity()) {
+                severities.add(Severity.valueOf(filter.getSeverity().name()));
+            }
+            if (filter.hasTimeRange()) {
+                timeRange.add(convertTimestampToDate(filter.getTimeRange().getStartTime()));
+                timeRange.add(convertTimestampToDate(filter.getTimeRange().getEndTime()));
+            }
+            if (filter.hasNodeLabel()) {
+                List<Node> nodes = lookupTenantId
+                    .map(tenantId -> nodeRepository.findAllByNodeLabelAndTenantId(filter.getNodeLabel(), tenantId))
+                    .orElseThrow();
+
+                for (Node node : nodes) {
+                    nodeIds.add(String.valueOf(node.getId()));
+                }
+            }
+        });
+
+        if (timeRange.isEmpty()) {
+            getDefaultTimeRange(timeRange);
+        }
+
+        if (severities.isEmpty()) {
+            getAllSeverities(severities);
+        }
+    }
     private static void getAllSeverities(List<Severity> severities) {
         severities.addAll(Arrays.asList(Severity.values()));
     }
@@ -408,15 +462,5 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     private static Date convertTimestampToDate(Timestamp timestamp) {
         Instant instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
         return Date.from(instant);
-    }
-
-    private List<Alert> getEnrichAlertProto2nd(List<org.opennms.horizon.alertservice.db.entity.Alert> dbAlertList) {
-        List<Alert> protoList = new ArrayList<Alert>();
-
-        for(org.opennms.horizon.alertservice.db.entity.Alert alert : dbAlertList) {
-            var alertBuilder = Alert.newBuilder(alertMapper.toProto(alert));
-            protoList.add(alertBuilder.build());
-        }
-        return protoList;
     }
 }

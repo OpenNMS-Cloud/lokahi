@@ -59,6 +59,8 @@
             <column name="managed_object_type" type="text"/>
 
             <column name="managed_object_instance" type="text"/>
+            <column name="node_id" type="bigint"/>
+
         </createTable>
 
         <addPrimaryKey columnNames="tenant_id, alert_id"

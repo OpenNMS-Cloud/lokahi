@@ -305,6 +305,7 @@ public class AlertEventProcessor {
         alert.setCounter(1L);
         alert.setDescription(event.getDescription());
         alert.setLogMessage(event.getLogMessage());
+        alert.setNodeId(event.getNodeId());
 
         if (event.getNodeId() > 0) {
             alert.setManagedObjectType(ManagedObjectType.NODE);
@@ -315,7 +316,6 @@ public class AlertEventProcessor {
         if (event.getNodeId() > 0) {
             alert.setManagedObjectType(ManagedObjectType.NODE);
             alert.setManagedObjectInstance(Long.toString(event.getNodeId()));
-            alert.setNodeId(event.getNodeId());
         } else {
             alert.setManagedObjectType(ManagedObjectType.UNDEFINED);
         }

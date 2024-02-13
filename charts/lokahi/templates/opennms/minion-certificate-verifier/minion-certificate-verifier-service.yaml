@@ -8,8 +8,10 @@ metadata:
 spec:
   type: {{ .Values.OpenNMS.minionCertificateVerifier.serviceType }}
   ports:
-    - port: {{ .Values.OpenNMS.minionCertificateVerifier.ports 0 "containerPort" }}
+{{- range .Values.OpenNMS.minionCertificateVerifier.ports }}
+    - port: {{ .containerPort }}
       protocol: TCP
-      name: http
+      name: {{ .name }}
+{{- end }}
   selector:
     app: {{ .Values.OpenNMS.minionCertificateVerifier.serviceName }}

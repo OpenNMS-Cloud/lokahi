@@ -39,7 +39,11 @@ spec:
               service:
                 name: {{ .Values.OpenNMS.api.serviceName }}
                 port:
-                  number: {{ .Values.OpenNMS.api.ports 1 "containerPort" }}
+                  number: {{- range .Values.OpenNMS.api.ports }}
+                    {{- if eq .name "grpc" }}
+                      {{ .containerPort }}
+                    {{- end }}
+                  {{- end }}
           - path: {{ .Values.grafana.path }}
             pathType: Prefix
             backend:

@@ -9,9 +9,11 @@ metadata:
 spec:
   type: {{ .Values.OpenNMS.minionCertificateManager.serviceType }}
   ports:
-    - port: {{ .Values.OpenNMS.minionCertificateManager.ports 0 "containerPort" }}
+{{- range .Values.OpenNMS.minionCertificateManager.ports }}
+    - port: {{ .containerPort }}
       protocol: TCP
-      name: grpc
+      name: {{ .name }}
+{{- end }}
   selector:
     app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
 {{- end }}

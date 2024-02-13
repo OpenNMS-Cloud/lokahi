@@ -376,17 +376,21 @@ ingress:
     requests:
       cpu: 100m
       memory: 90Mi
-
-ingress-nginx:
-  nodePort: 30990
-  port: 8990
-  serviceType: NodePort
-  serviceAdmissionType: ClusterIP
-  appProtocol: https
-  ports: 
-    - name: https-webhook
+  controllerService:
+  type: ClusterIP
+  ports:
+    - appProtocol: https
+      name: https-webhook
       port: 443
       targetPort: webhook
+  controllerServiceNodePort:
+    type: NodePort
+    ports:
+      - name: grpc
+        protocol: TCP
+        nodePort: 30990
+        port: 8990
+
 
 customErrors:
   image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4

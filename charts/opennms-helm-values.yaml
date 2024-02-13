@@ -33,7 +33,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
       - name: grpc
@@ -50,7 +50,7 @@ OpenNMS:
     corsAllowed: true
     playgroundGuiEnabled: true
     introspectionEnabled: true
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
       - name: grpc
@@ -75,7 +75,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
   minion:
@@ -142,7 +142,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: grpc
         containerPort: 8990
     serviceType: ClusterIP
@@ -154,7 +154,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
     serviceType: ClusterIP
@@ -166,7 +166,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
       - name: grpc
@@ -180,7 +180,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
       - name: grpc
@@ -194,7 +194,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
       - name: grpc
@@ -208,7 +208,7 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
-    ports: 
+    ports:
       - name: http
         containerPort: 8080
       - name: grpc
@@ -231,7 +231,7 @@ prometheus:
     requests:
       cpu: 100m
       memory: 100Mi
-  scrape: "true"  
+  scrape: "true"
   prometheusPort: "8080"
   prometheusPath: "/actuator/prometheus"
 kafka:
@@ -242,20 +242,25 @@ ingress:
   httpsPort: 443
   webhookPort: 8443
   grpcPort: 8990
+  controllerService:
+  type: ClusterIP
+  ports:
+    - appProtocol: https
+      name: https-webhook
+      port: 443
+      targetPort: webhook
   resources:
     requests:
       cpu: 100m
       memory: 90Mi
+  controllerServiceNodePort:
+    type: NodePort
+    ports:
+      - name: grpc
+        protocol: TCP
+        nodePort: 30990
+        port: 8990
 
-ingress-nginx:
-  nodePort: 30990
-  port: 8990
-  serviceType: NodePort
-  ports: 
-    - name: https-webhook
-      port: 443
-      targetPort: webhook
-      
 customErrors:
   port: 8080
   httpPort: 80

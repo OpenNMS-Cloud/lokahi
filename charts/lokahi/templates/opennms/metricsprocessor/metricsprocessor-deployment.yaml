@@ -69,8 +69,12 @@ spec:
               name: spring-boot-env
           {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.metricsProcessor | indent 10 }}
           ports:
-            - name: {{ .Values.OpenNMS.metricsProcessor.ports.name }}
-              containerPort: {{ .Values.OpenNMS.metricsProcessor.ports 0 "containerPort" }}
+            {{- if .Values.OpenNMS.metricsProcessor.ports }}
+            {{- range .Values.OpenNMS.metricsProcessor.ports }}
+              - name: {{ .name }}
+                containerPort: {{ .containerPort }}
+            {{- end }}
+            {{- end }}
           volumeMounts:
             - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
               mountPath: {{ .Values.OpenNMS.global.springBoot.mountPath }}

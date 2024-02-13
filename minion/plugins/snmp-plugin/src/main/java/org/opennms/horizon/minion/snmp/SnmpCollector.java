@@ -179,7 +179,11 @@ public class SnmpCollector implements ServiceCollector {
 
     static SnmpAgentConfig mapAgent(SnmpConfiguration agent, String ipAddress) throws Exception {
         SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(ipAddress), SnmpAgentConfig.DEFAULTS);
-        agentConfig.setVersion(agent.getVersion().getNumber());
+        if (agent.getVersion().getNumber() > 0) {
+            agentConfig.setVersion(agent.getVersion().getNumber());
+        } else {
+            agentConfig.setVersion(SnmpAgentConfig.DEFAULT_VERSION);
+        }
         if (agent.hasConfig()) {
             SnmpV3Configuration v3config = agent.getConfig();
             agentOption(v3config.hasSecurityLevel(), agentConfig::setSecurityLevel, v3config::getSecurityLevel);

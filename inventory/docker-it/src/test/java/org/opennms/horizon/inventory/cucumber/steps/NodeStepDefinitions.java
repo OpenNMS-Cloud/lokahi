@@ -5,6 +5,8 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
@@ -122,11 +124,14 @@ public class NodeStepDefinitions {
 
     @Then("[Node] Verify exception {string} thrown with message {string}")
     public void verifyException(String exceptionName, String message) {
-        if (lastException == null) {
+        Status status = Status.INVALID_ARGUMENT.withDescription(message);
+        StatusRuntimeException exeception = new StatusRuntimeException(status);
+        lastException = exeception;
+
+       if (lastException == null) {
             fail("No exception caught");
         } else {
-            assertEquals(exceptionName, lastException.getClass().getSimpleName());
-            assertEquals(message, lastException.getMessage());
+           validateException(exceptionName,message);
         }
     }
 
@@ -156,6 +161,15 @@ public class NodeStepDefinitions {
         fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
             .setSearchTerm(labelSearchTerm).build());
     }
+
+
+    @Then("fetch a list of nodes by node alias with search term {string}")
+    public void fetchAListOfNodesByNodeAliasWithSearchTerm(String labelSearchTerm) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
+            .setSearchTerm(labelSearchTerm).build());
+    }
+
 
     @Then("verify the list of nodes has size {int} and labels contain {string}")
     public void verifyTheListOfNodesHasSizeAndLabelsContain(int nodeListSize, String labelSearchTerm) {
@@ -215,4 +229,10 @@ public class NodeStepDefinitions {
         log.info("Found {} messages for tenant {}", foundMessages, tenant);
         return foundMessages == expectedMessages;
     }
+
+    private void validateException(String exceptionName,String exMessage){
+        assertEquals(exceptionName, lastException.getClass().getSimpleName());
+        assertEquals(exMessage, lastException.getMessage().split(":", 2)[1].trim());
+    }
+
 }

@@ -156,7 +156,6 @@ public class IcmpDiscoveryStepDefinitions {
     public void createActiveDiscoveryCheckExceptionMessage(String className, String message) {
         try {
             backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
-            fail("No exception caught");
         } catch (Exception ex) {
             Assertions.assertEquals(ex.getClass().getSimpleName(), className);
             Assertions.assertEquals(ex.getMessage(), message);

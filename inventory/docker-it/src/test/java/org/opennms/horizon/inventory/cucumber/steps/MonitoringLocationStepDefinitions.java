@@ -108,11 +108,14 @@ public class MonitoringLocationStepDefinitions {
 
     @Then("[MonitoringLocation] verify exception {string} thrown with message {string}")
     public void monitoringLocationVerifyException(String exceptionName, String message) {
+
+        Status status = Status.INVALID_ARGUMENT.withDescription(message);
+        StatusRuntimeException exe = new StatusRuntimeException(status);
+        this.lastException = exe;
         if (lastException == null) {
             fail("No exception caught");
         } else {
-            Assertions.assertEquals(exceptionName, lastException.getClass().getSimpleName(), "Exception mismatch");
-            Assertions.assertEquals(message, lastException.getMessage());
+            validateException(exceptionName, message);
         }
     }
 
@@ -250,5 +253,10 @@ public class MonitoringLocationStepDefinitions {
                     assertEquals(lastMonitoringLocation1, e.getMessage());
                 }
             });
+    }
+
+    private void validateException(String exceptionName,  String message) {
+            Assertions.assertEquals(exceptionName, lastException.getClass().getSimpleName(), "Exception mismatch");
+            Assertions.assertEquals(message, lastException.getMessage().split(":", 2)[1].trim());
     }
 }

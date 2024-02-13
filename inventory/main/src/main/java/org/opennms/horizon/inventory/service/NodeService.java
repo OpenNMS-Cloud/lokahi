@@ -355,7 +355,7 @@ public class NodeService {
 
     @Transactional(readOnly = true)
     public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
-        return nodeRepository.findByTenantIdAndNodeLabelLike(tenantId, nodeLabelSearchTerm).stream()
+        return nodeRepository.findByTenantIdAndNodeLabelOrAliasLike(tenantId, nodeLabelSearchTerm).stream()
             .map(mapper::modelToDTO).toList();
     }
 

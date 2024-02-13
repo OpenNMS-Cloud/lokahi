@@ -3,7 +3,7 @@ import { TimeRange } from '@/types/graphql'
 import { useAlertsQueries } from '../Queries/alertsQueries'
 import { useAlertsMutations } from '../Mutations/alertsMutations'
 import { Alert } from '@/types/graphql'
-import { AlertsFilters } from '@/types/alerts'
+import { AlertsFilters,Pagination } from '@/types/alerts'
 import { cloneDeep } from 'lodash'
 
 const alertsFilterDefault: AlertsFilters = {
@@ -14,9 +14,9 @@ const alertsFilterDefault: AlertsFilters = {
   sortBy: 'lastEventTime'
 }
 
-const alertsPaginationDefault = {
+const alertsPaginationDefault:Pagination = {
   page: 1, // FE pagination component has base 1 (first page)
-  pageSize: 10,
+  pageSize: 10, 
   total: 0
 }
 
@@ -26,7 +26,7 @@ export const useAlertsStore = defineStore('alertsStore', () => {
   const alertsPagination = ref(cloneDeep(alertsPaginationDefault))
   const alertsSelected = ref([] as number[] | undefined)
   const isAlertsListEmpty = ref(true)
-
+  
   const alertsQueries = useAlertsQueries()
   const alertsMutations = useAlertsMutations()
 
@@ -46,13 +46,13 @@ export const useAlertsStore = defineStore('alertsStore', () => {
     await alertsQueries.fetchAlerts(alertsFilter.value, alertsPagination.value)
 
     alertsList.value = alertsQueries.fetchAlertsData
-
     isAlertsListEmpty.value = Boolean(alertsList.value.alerts?.length <= 0)
-
-    alertsPagination.value = {
-      ...alertsPagination.value,
-      total: alertsList.value.totalAlerts
+    watch(alertsList, (newAlertsList,oldAlertsList) => {
+      const newTotalAlerts = newAlertsList.totalAlerts
+      if (newTotalAlerts !== alertsPagination.value.total) {
+        alertsPagination.value.total = newTotalAlerts
     }
+   }, { immediate: true })
   }
 
   const resetPaginationAndFetchAlerts = () => {
@@ -94,12 +94,12 @@ export const useAlertsStore = defineStore('alertsStore', () => {
   }
 
   const setPage = (page: number): void => {
-    if (page !== Number(alertsPagination.value.page)) {
+        if (page !== Number(alertsPagination.value.page)) {
       alertsPagination.value = {
         ...alertsPagination.value,
         page
       }
-    }
+        }
 
     fetchAlerts()
   }

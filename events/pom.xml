@@ -28,7 +28,6 @@
     <modules>
         <module>main</module>
         <module>persistence</module>
-        <module>conf</module>
         <module>traps</module>
         <module>consumer</module>
         <module>grpc</module>

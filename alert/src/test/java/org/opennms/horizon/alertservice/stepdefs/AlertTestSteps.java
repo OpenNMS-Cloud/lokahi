@@ -48,6 +48,7 @@ import org.opennms.horizon.alerts.proto.Filter;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alerts.proto.Severity;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.alerts.proto.TimeRangeFilter;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.RetryUtils;
@@ -95,7 +96,6 @@ public class AlertTestSteps {
     public void listAlertsForTenant(List<String> expectedJson) throws InterruptedException {
         listAlertsForTenant(tenantSteps.getTenantId(), (int) Duration.ofSeconds(5).toMillis(), expectedJson);
     }
-
     @Then("List alerts for the tenant, with timeout {int}ms, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenant(int timeout, List<String> expectedJson) throws InterruptedException {
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, expectedJson);
@@ -268,6 +268,18 @@ public class AlertTestSteps {
         var countAlertsResponse = clientUtils.getAlertServiceStub()
             .countAlerts(listAlertsRequest);
         assertEquals(expected, countAlertsResponse.getCount());
+    }
+
+    @Then("List alerts for the node")
+    public void listAlertsForNode() throws InterruptedException {
+        var requestBuilder =  AlertRequestByNode.newBuilder()
+            .setSortBy("id")
+            .setNodeId(1L)
+            .setPageSize(10)
+            .setPage(0)
+            .setSortAscending(true);
+        clientUtils.getAlertServiceStub()
+            .getAlertsByNode(requestBuilder.build());
     }
 
 //========================================

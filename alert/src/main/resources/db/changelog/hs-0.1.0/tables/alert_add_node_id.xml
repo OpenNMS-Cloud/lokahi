@@ -6,7 +6,7 @@
 
     <changeSet id="hs-0.1.0-alert-add-node-id" author="musaid">
         <addColumn tableName="alert">
-            <column name="node_id" type="bigint" defaultValue="0"/>
+            <column name="node_id" type="bigint" />
         </addColumn>
     </changeSet>
 

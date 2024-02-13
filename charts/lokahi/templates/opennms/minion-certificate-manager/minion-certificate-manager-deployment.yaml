@@ -49,9 +49,9 @@ spec:
         - name: minion-certificate-manager-secrets
           secret:
             secretName: {{ .Values.OpenNMS.minionCertificateManager.mtlsSecretName }}
-        - name: spring-boot-app-config-volume
+        - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
           configMap:
-            name: spring-boot-app-config
+            name: {{ .Values.OpenNMS.global.springBoot.configMapName }}
         - name: rocksdb
           persistentVolumeClaim:
             claimName: minion-certificate-manager-pvc
@@ -67,25 +67,27 @@ spec:
             - name: KEYCLOAK_REALM
               value: "{{ .Values.keycloak.realmName }}"
             - name: GRPC_SERVER_PORT
-              value: "8990"
+              value: "{{ .Values.OpenNMS.minionCertificateManager.ports 0 "containerPort" }}"
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
             {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.minionCertificateManager) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          ports:
-            - name: grpc
-              containerPort: 8990
+          ports:  
+           {{- range $port := .Values.OpenNMS.inventory.ports }}
+           - name: {{ $port.name }}
+             containerPort: {{ $port.containerPort }}
+           {{- end }}
           volumeMounts:
             - name: certificate-secrets
-              mountPath: "/run/secrets/certificates"
+              mountPath: "/run/secrets/certificates" 
               readOnly: true
-            - name: minion-certificate-manager-secrets
+            - name: minion-certificate-manager-secrets 
               mountPath: "/run/secrets/mtls"
               readOnly: true
-            - name: spring-boot-app-config-volume
-              mountPath: "/app/config"
+            - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
+              mountPath: {{ .Values.OpenNMS.global.springBoot.mountPath }}
             - name: rocksdb
               mountPath: "/app/rocks-db"
           resources:

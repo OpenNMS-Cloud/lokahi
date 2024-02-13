@@ -28,5 +28,5 @@ spec:
               service:
                 name: {{ .Values.OpenNMS.minionGateway.serviceName }}
                 port:
-                  number: 8990
+                  number: {{ .Values.OpenNMS.minionGateway.ports.grpc.containerPort }}
 {{- end }}

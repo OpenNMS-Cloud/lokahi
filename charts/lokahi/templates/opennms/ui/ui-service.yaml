@@ -12,4 +12,4 @@ spec:
       name: http
   selector:
     app: {{ .Values.OpenNMS.ui.serviceName }}
-  type: NodePort
+  type: {{ .Values.OpenNMS.ui.serviceType }}

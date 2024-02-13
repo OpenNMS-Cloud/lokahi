@@ -40,9 +40,9 @@ spec:
                 - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
-        - name: spring-boot-app-config-volume
+        - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
           configMap:
-            name: spring-boot-app-config
+            name: {{ .Values.OpenNMS.global.springBoot.configMapName }}
       {{- if .Values.citus.enabled }}
       initContainers:
         - name: wait-for-db
@@ -89,19 +89,19 @@ spec:
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          ports:
-            - name: http
-              containerPort: 8080
-            - name: grpc
-              containerPort: 6565
+          ports:  
+           {{- range $port := .Values.OpenNMS.dataChoices.ports }}
+           - name: {{ $port.name }}
+             containerPort: {{ $port.containerPort }}
+           {{- end }}
           volumeMounts:
-            - name: spring-boot-app-config-volume
-              mountPath: "/app/config"
+            - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
+              mountPath: {{ .Values.OpenNMS.global.springBoot.mountPath }}
           livenessProbe:
             httpGet:
-              path: "/actuator/health/liveness"
-              port: http
-              scheme: HTTP
+              path: "{{ .Values.livenessProbe.path }}"
+              port: {{ .Values.livenessProbe.port }}
+              scheme: {{ .Values.livenessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2
@@ -109,9 +109,9 @@ spec:
             failureThreshold: 150
           readinessProbe:
             httpGet:
-              path: "/actuator/health/readiness"
-              port: http
-              scheme: HTTP
+              path: "{{ .Values.readinessProbe.path }}"
+              port: {{ .Values.readinessProbe.port }}
+              scheme: {{ .Values.readinessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2

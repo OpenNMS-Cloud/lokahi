@@ -70,9 +70,9 @@ spec:
               mountPath: /var/cache/nginx
           livenessProbe:
             httpGet:
-              path: "/healthz"
-              port: http
-              scheme: HTTP
+              path: {{ .Values.livenessProbe.healthzpath}}
+              port: {{ .Values.livenessProbe.port }}
+              scheme: {{ .Values.livenessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2
@@ -80,9 +80,9 @@ spec:
             failureThreshold: 150
           readinessProbe:
             httpGet:
-              path: "/healthz"
-              port: http
-              scheme: HTTP
+              path: {{ .Values.readinessProbe.healthzpath}}
+              port: {{ .Values.readinessProbe.port }}
+              scheme: {{ .Values.readinessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2

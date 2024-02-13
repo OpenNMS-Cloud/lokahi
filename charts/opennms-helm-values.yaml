@@ -1,0 +1,271 @@
+ostname: onmshs.local
+port: 1443
+protocol: https
+tls:
+  enabled: True
+  certificateGeneration: false
+  cert:
+    Name: opennms-ui-certificate
+keycloak:
+  adminPassword: admin
+  port: 8080
+  httpsPort: 8443
+
+mailServer:
+  enabled: true
+
+citus:
+  enabled: true
+
+OpenNMS:
+  global:
+    springBoot:
+      configMapName: spring-boot-app-config
+      configMapVolumeName: spring-boot-app-config-volume
+      mountPath: "/app/config"
+    openTelemetry:
+      otlpTracesEndpoint: "http://tempo:4317"
+  alert:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+  api:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    corsAllowed: true
+    playgroundGuiEnabled: true
+    introspectionEnabled: true
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 9090
+    serviceType: NodePort
+  ui:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ingressAnnotations:
+      nginx.ingress.kubernetes.io/configuration-snippet: ~
+    serviceType: NodePort
+  metricsProcessor:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+  minion:
+    enabled: true
+    addDefaultLocation: true
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minionGateway:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ingressAnnotations:
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        # This adds the tenant-id and location to the response headers sent to the client so we can use them in
+        # logging. This is bit circuitous, and it is unnecessary to send these to the client, but this was a way I
+        # could figure out how to get the tenant and minion information in the logs using $sent_http_x_tenant_id
+        # and $sent_http_x_location once these response headers are added. They also seem to need to be in the
+        # location block to work.
+        # Note: The response headers are prefixed with "x-", although the headers from the auth service are not.
+        # Note: I am being a little naughty and depending an internal implementation detail of ingress-nginx by
+        # using the authHeader* variables. These are created by ingress-nginx from the auth-response-headers
+        # annotation. The naming of the authHeader* variables is sensitive to the order of the headers in the
+        # nginx.ingress.kubernetes.io/auth-response-headers annotation.
+        add_header x-tenant-id "$authHeader0" always;
+        add_header x-location "$authHeader1" always;
+        set $dummy_val "$opentelemetry_context_traceparent"; # workaround for https://github.com/kubernetes/ingress-nginx/issues/9811
+        grpc_set_header 'traceparent' $opentelemetry_context_traceparent; # This doesn't get sent downstream normally. :(
+        opentelemetry_attribute "user" "$authHeader0";
+        opentelemetry_attribute "location" "$authHeader1";
+    env:
+      DEBUG_SPAN_FULL_MESSAGE: "true"
+      DEBUG_SPAN_CONTENT: "true"
+    ports:
+      http:
+        containerPort: 8080
+      grpc:
+        containerPort: 8990
+      internalGrpc:
+        containerPort: 8991
+      igClient:
+        containerPort: 10800
+      igDiscovery:
+        containerPort: 47500
+      igSpi:
+        containerPort: 47100
+
+  minionCertificateManager:
+    enabled: true
+    caSecretName: root-ca-certificate
+    mtlsSecretName: client-root-ca-certificate
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: grpc
+        containerPort: 8990
+    serviceType: ClusterIP
+  minionCertificateVerifier:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+    serviceType: ClusterIP
+  inventory:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+  notification:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+  events:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+  dataChoices:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+grafana:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  autoAssignOrgRole: Admin  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#auto_assign_org_role
+prometheus:
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  scrape: "true"  
+  prometheusPort: "8080"
+  prometheusPath: "/actuator/prometheus"
+kafka:
+  localPort: 24092
+
+ingress:
+  httpPort: 80
+  httpsPort: 443
+  webhookPort: 8443
+  grpcPort: 8990
+  resources:
+    requests:
+      cpu: 100m
+      memory: 90Mi
+
+ingress-nginx:
+  nodePort: 30990
+  port: 8990
+  serviceType: NodePort
+  ports: 
+    - name: https-webhook
+      port: 443
+      targetPort: webhook
+      
+customErrors:
+  port: 8080
+  httpPort: 80
+
+livenessProbe:
+  path: "/actuator/health/liveness"
+  port: "http"
+  scheme: "HTTP"
+
+readinessProbe:
+  path: "/actuator/health/readiness"
+  port: "http"
+  scheme: "HTTP"

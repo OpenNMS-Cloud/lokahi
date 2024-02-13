@@ -8,22 +8,22 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 8080
+    - port: {{ .Values.OpenNMS.minionGateway.ports.http.containerPort }}
       protocol: TCP
       name: http
-    - port: 8990
+    - port: {{ .Values.OpenNMS.minionGateway.ports.grpc.containerPort }}
       protocol: TCP
       name: grpc
-    - port: {{ .Values.OpenNMS.minionGateway.internalGrpcPort }}
+    - port: {{ .Values.OpenNMS.minionGateway.ports.internalGrpc.containerPort }}
       protocol: TCP
       name: internal-grpc
-    - port: 10800
+    - port: {{ .Values.OpenNMS.minionGateway.ports.igClient.containerPort }}
       protocol: TCP
       name: ig-client
-    - port: 47500
+    - port: {{ .Values.OpenNMS.minionGateway.ports.igDiscovery.containerPort }}
       protocol: TCP
       name: ig-discovery
-    - port: 47100
+    - port: {{ .Values.OpenNMS.minionGateway.ports.igSpi.containerPort }}
       protocol: TCP
       name: ig-spi
   selector:

@@ -39,7 +39,7 @@ spec:
               service:
                 name: {{ .Values.OpenNMS.api.serviceName }}
                 port:
-                  number: 9090
+                  number: {{ .Values.OpenNMS.api.ports 1 "containerPort" }}
           - path: {{ .Values.grafana.path }}
             pathType: Prefix
             backend:

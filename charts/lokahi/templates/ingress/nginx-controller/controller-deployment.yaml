@@ -63,7 +63,7 @@ spec:
         - --publish-status-address=localhost
         - --http-port={{ .Values.ingress.httpPort }}
         - --https-port={{ .Values.ingress.httpsPort }}
-        - --validating-webhook=:8443
+        - --validating-webhook=:{{ .Values.ingress.webhookPort }}
         - --validating-webhook-certificate=/usr/local/certificates/cert
         - --validating-webhook-key=/usr/local/certificates/key
         env:
@@ -87,9 +87,9 @@ spec:
         livenessProbe:
           failureThreshold: 5
           httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
+            path: {{ .Values.livenessProbe.healthzpath }}
+            port: {{ .Values.livenessProbe.ingressPort }}
+            scheme: {{ .Values.livenessProbe.scheme }}
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
@@ -104,26 +104,26 @@ spec:
           hostPort: {{ .Values.ingress.httpsPort }}
           name: https
           protocol: TCP
-        - containerPort: 8443
+        - containerPort: {{ .Values.ingress.webhookPort }}
           name: webhook
           protocol: TCP
-        - containerPort: 8990
+        - containerPort: {{ .Values.ingress.grpcPort }}
           name: grpc
           protocol: TCP
         readinessProbe:
           failureThreshold: 3
           httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
+            path: {{ .Values.readinessProbe.healthzpath }}
+            port: {{ .Values.readinessProbe.ingressPort }}
+            scheme: {{ .Values.readinessProbe.scheme }}
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         resources:
           requests:
-            cpu: 100m
-            memory: 90Mi
+            cpu: {{ .Values.ingress.resources.requests.cpu }}
+            memory: {{ .Values.ingress.resources.requests.memory }}
         securityContext:
           allowPrivilegeEscalation: true
           capabilities:

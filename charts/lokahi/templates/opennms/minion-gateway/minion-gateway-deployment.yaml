@@ -18,9 +18,9 @@ spec:
         app: {{ .Values.OpenNMS.minionGateway.serviceName }}
         ignite-cluster: core
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/scrape: "{{ .Values.prometheus.scrape }}"
+        prometheus.io/port: "{{ .Values.prometheus.prometheusPort }}"
+        prometheus.io/path: "{{ .Values.prometheus.prometheusPath }}"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minionGateway.serviceName }}"
@@ -51,9 +51,9 @@ spec:
             name: minion-gateway-ignite-config
         - name: ignite-volume
           emptyDir: {}
-        - name: spring-boot-app-config-volume
+        - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
           configMap:
-            name: spring-boot-app-config
+            name: {{ .Values.OpenNMS.global.springBoot.configMapName }}
       containers:
         - name: {{ .Values.OpenNMS.minionGateway.serviceName }}
           image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.minionGateway) | quote }}
@@ -90,29 +90,29 @@ spec:
           {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.minionGateway | indent 10 }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.OpenNMS.minionGateway.ports.http.containerPort }}
             - name: grpc
-              containerPort: 8990
+              containerPort: {{ .Values.OpenNMS.minionGateway.ports.grpc.containerPort }}
             - name: internal-grpc
-              containerPort: {{ .Values.OpenNMS.minionGateway.internalGrpcPort }}
+              containerPort: {{ .Values.OpenNMS.minionGateway.ports.internalGrpc.containerPort }}
             - name: ig-client
-              containerPort: 10800
+              containerPort: {{ .Values.OpenNMS.minionGateway.ports.igClient.containerPort }}
             - name: ig-discovery
-              containerPort: 47500
+              containerPort: {{ .Values.OpenNMS.minionGateway.ports.igDiscovery.containerPort }}
             - name: ig-spi
-              containerPort: 47100
+              containerPort: {{ .Values.OpenNMS.minionGateway.ports.igSpi.containerPort }}
           volumeMounts:
             - name: minion-gateway-ignite-config-volume
               mountPath: "/app/resources/ignite"
             - name: ignite-volume
               mountPath: /ignite
-            - name: spring-boot-app-config-volume
-              mountPath: "/app/config"
+            - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
+              mountPath: {{ .Values.OpenNMS.global.springBoot.mountPath }}
           livenessProbe:
             httpGet:
-              path: "/actuator/health/liveness"
-              port: http
-              scheme: HTTP
+              path: "{{ .Values.livenessProbe.path }}"
+              port: {{ .Values.livenessProbe.port }}
+              scheme: {{ .Values.livenessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2
@@ -120,9 +120,9 @@ spec:
             failureThreshold: 150
           readinessProbe:
             httpGet:
-              path: "/actuator/health/readiness"
-              port: http
-              scheme: HTTP
+              path: "{{ .Values.readinessProbe.path }}"
+              port: {{ .Values.readinessProbe.port }}
+              scheme: {{ .Values.readinessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2

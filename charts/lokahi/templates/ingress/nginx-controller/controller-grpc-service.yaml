@@ -12,12 +12,12 @@ metadata:
   name: ingress-grpc-nginx-controller
   namespace: {{ .Release.Namespace }}
 spec:
-  type: NodePort
+  type: {{ .Values.ingress-nginx.serviceType }}
   ports:
     - name: grpc
       protocol: TCP
-      nodePort: 30990
-      port: 8990
+      nodePort: {{ .Values.ingress-nginx.nodePort }}
+      port: {{ .Values.ingress-nginx.port }}
   selector:
     app.kubernetes.io/component: controller-{{ .Release.Namespace }}
     app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}

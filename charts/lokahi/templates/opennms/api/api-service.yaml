@@ -7,9 +7,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
-    - port: 9090
+    - port: {{ index .Values.OpenNMS.api.ports 1 "containerPort" }} #Confusion here (it is using grpc port instead of http)
       protocol: TCP
       name: http
   selector:
     app: {{ .Values.OpenNMS.api.serviceName }}
-  type: NodePort
+  type: {{ .Values.OpenNMS.api.serviceType }}

@@ -16,9 +16,9 @@ spec:
         appdomain: opennms
         run: {{ .Values.OpenNMS.metricsProcessor.serviceName }}
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/scrape: "{{ .Values.prometheus.scrape }}"
+        prometheus.io/port: "{{ .Values.prometheus.prometheusPort }}"
+        prometheus.io/path: "{{ .Values.prometheus.prometheusPath }}"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.metricsProcessor.serviceName }}"
@@ -43,9 +43,9 @@ spec:
                 - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
-        - name: spring-boot-app-config-volume
+        - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
           configMap:
-            name: spring-boot-app-config
+            name: {{ .Values.OpenNMS.global.springBoot.configMapName }}
       containers:
         - name: {{ .Values.OpenNMS.metricsProcessor.serviceName }}
           image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.metricsProcessor) | quote }}
@@ -69,16 +69,16 @@ spec:
               name: spring-boot-env
           {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.metricsProcessor | indent 10 }}
           ports:
-            - name: http
-              containerPort: 8080
+            - name: {{ .Values.OpenNMS.metricsProcessor.ports.name }}
+              containerPort: {{ .Values.OpenNMS.metricsProcessor.ports 0 "containerPort" }}
           volumeMounts:
-            - name: spring-boot-app-config-volume
-              mountPath: "/app/config"
+            - name: {{ .Values.OpenNMS.global.springBoot.configMapVolumeName }}
+              mountPath: {{ .Values.OpenNMS.global.springBoot.mountPath }}
           livenessProbe:
             httpGet:
-              path: "/actuator/health/liveness"
-              port: http
-              scheme: HTTP
+              path: "{{ .Values.livenessProbe.path }}"
+              port: {{ .Values.livenessProbe.port }}
+              scheme: {{ .Values.livenessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2
@@ -86,9 +86,9 @@ spec:
             failureThreshold: 150
           readinessProbe:
             httpGet:
-              path: "/actuator/health/readiness"
-              port: http
-              scheme: HTTP
+              path: "{{ .Values.readinessProbe.path }}"
+              port: {{ .Values.readinessProbe.port }}
+              scheme: {{ .Values.readinessProbe.scheme }}
             initialDelaySeconds: 20
             timeoutSeconds: 1
             periodSeconds: 2

@@ -7,6 +7,9 @@ OpenNMS: # we might be able to remove this
       repository: opennms
       tag: latest
     springBoot:
+      configMapName: spring-boot-app-config
+      configMapVolumeName: spring-boot-app-config-volume
+      mountPath: "/app/config"
       env: {}
     kafkaClient:
       bootstrapServers: onms-kafka:9092
@@ -41,6 +44,12 @@ OpenNMS: # we might be able to remove this
     maxFieldOccurrence: 5
     maxQueryDepth: 5
     playgroundGuiEnabled: false
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 9090
+    serviceType: NodePort
   metricsProcessor:
     serviceName: opennms-metrics-processor
     imageShortName: lokahi-metrics-processor
@@ -57,6 +66,9 @@ OpenNMS: # we might be able to remove this
     flowIngestorUrl: SOME-EXTERNAL-FLOW-SERVER:80
     flowTlsEnabled: false
     kafkaSecretName: ~
+    ports: 
+      - name: http
+        containerPort: 8080
   ui:
     path: /
     serviceName: opennms-ui
@@ -83,6 +95,7 @@ OpenNMS: # we might be able to remove this
       nginx.ingress.kubernetes.io/large-client-header-buffers: 4 16k
       nginx.ingress.kubernetes.io/proxy-body-size: 4m
       nginx.ingress.kubernetes.io/proxy-buffer-size: 6k
+    serviceType: NodePort
   minion:
     enabled: false
     serviceName: opennms-minion
@@ -111,7 +124,6 @@ OpenNMS: # we might be able to remove this
     tlsSecretName: opennms-minion-gateway-certificate
     imageShortName: lokahi-minion-gateway
     imagePullPolicy: IfNotPresent #move to global
-    internalGrpcPort: 8991
     replicas: 1
     useKubernetes: "true"
     databaseName: "desenv" #move to global
@@ -138,6 +150,20 @@ OpenNMS: # we might be able to remove this
         client_body_timeout "1200s";
     privateRepoEnabled: false #move to global
     kafkaSecretName: ~ #move to global
+    ports:
+      http:
+        containerPort: 8080
+      grpc:
+        containerPort: 8990
+      internalGrpc:
+        containerPort: 8991
+      igClient:
+        containerPort: 10800
+      igDiscovery:
+        containerPort: 47500
+      igSpi:
+        containerPort: 47100
+
   inventory:
     serviceName: opennms-inventory
     imageShortName: lokahi-inventory
@@ -156,6 +182,13 @@ OpenNMS: # we might be able to remove this
     encryptionKey: ~
     privateRepoEnabled: false
     kafkaSecretName: ~
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+
   alert:
     serviceName: opennms-alert
     imageShortName: lokahi-alert
@@ -173,6 +206,13 @@ OpenNMS: # we might be able to remove this
         memory: 2Gi
     privateRepoEnabled: false
     kafkaSecretName: ~
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
+
   notification:
     serviceName: opennms-notifications
     imageShortName: lokahi-notification
@@ -199,6 +239,12 @@ OpenNMS: # we might be able to remove this
     baseUrl:
       url: "onmshs.local:1443"
       appendTenantId: false
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
   events:
     serviceName: opennms-events
     imageShortName: lokahi-events
@@ -215,6 +261,12 @@ OpenNMS: # we might be able to remove this
         cpu: "1"
         memory: 2Gi
     privateRepoEnabled: false
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
   dataChoices:
     serviceName: opennms-datachoices
     imageShortName: lokahi-datachoices
@@ -231,6 +283,12 @@ OpenNMS: # we might be able to remove this
         cpu: "1"
         memory: 1Gi
     privateRepoEnabled: false
+    ports: 
+      - name: http
+        containerPort: 8080
+      - name: grpc
+        containerPort: 6565
+    serviceType: ClusterIP
   minionCertificateManager:
     enabled: false
     serviceName: opennms-minion-certificate-manager
@@ -248,6 +306,10 @@ OpenNMS: # we might be able to remove this
         cpu: "1"
         memory: 1Gi
     privateRepoEnabled: false
+    ports: 
+      - name: grpc
+        containerPort: 8990
+    serviceType: ClusterIP
   minionCertificateVerifier:
     serviceName: opennms-minion-certificate-verifier
     imageShortName: lokahi-minion-certificate-verifier
@@ -262,6 +324,10 @@ OpenNMS: # we might be able to remove this
         memory: 1Gi
     privateRepoEnabled: false
     certificateManagerUrl: ""
+    ports: 
+      - name: http
+        containerPort: 8080
+    serviceType: ClusterIP
 citus:
   enabled: false
   adminUser: desenv
@@ -301,16 +367,52 @@ ingress:
   defaultEndpointsEnabled: true
   httpPort: 80
   httpsPort: 443
+  webhookPort: 8443
+  grpcPort: 8990
   controllerimage: registry.k8s.io/ingress-nginx/controller:v1.7.0@sha256:7612338342a1e7b8090bef78f2a04fffcadd548ccaabe8a47bf7758ff549a5f7
   secretJobimage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
   webhookPatchJobimage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+  resources:
+    requests:
+      cpu: 100m
+      memory: 90Mi
+
+ingress-nginx:
+  nodePort: 30990
+  port: 8990
+  serviceType: NodePort
+  serviceAdmissionType: ClusterIP
+  appProtocol: https
+  ports: 
+    - name: https-webhook
+      port: 443
+      targetPort: webhook
 
 customErrors:
   image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4
   debug: true
+  port: 8080
+  httpPort: 80
 
 prometheus:
   enabled: true
   path: /prometheus
   serviceName: prometheus
   port: 9090
+  scrape: "true"  
+  prometheusPort: "8080"
+  prometheusPath: "/actuator/prometheus"
+
+livenessProbe:
+  path: "/actuator/health/liveness"
+  healthzpath: "/healthz"
+  port: "http"
+  scheme: "HTTP"
+  ingressPort: 10254
+
+readinessProbe:
+  path: "/actuator/health/readiness"
+  healthzpath: "/healthz"
+  port: "http"
+  scheme: "HTTP"
+  ingressPort: 10254

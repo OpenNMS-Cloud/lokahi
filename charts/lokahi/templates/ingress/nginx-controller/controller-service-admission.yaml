@@ -12,12 +12,12 @@ metadata:
   name: ingress-nginx-controller-admission
   namespace: {{ .Release.Namespace }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.ingress-nginx.serviceAdmissionType }}
   ports:
-    - appProtocol: https
-      name: https-webhook
-      port: 443
-      targetPort: webhook
+    - appProtocol: {{ .Values.ingress-nginx.appProtocol }}
+      name: {{ .Values.ingress-nginx.ports.webhookPort.name }}
+      port: {{ .Values.ingress-nginx.ports 0 "port" }}
+      targetPort: {{ .Values.ingress-nginx.ports.targetPort }}
   selector:
     app.kubernetes.io/name: ingress-nginx-{{ .Release.Namespace }}
     app.kubernetes.io/instance: ingress-nginx-{{ .Release.Namespace }}

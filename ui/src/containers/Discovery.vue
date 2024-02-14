@@ -312,7 +312,7 @@ onMounted(() => {
 })
 
 watchEffect(() => {
-  if (discoveryStore.loadedDiscoveries.length > 0 && route.params.id) {
+  if (discoveryStore.loadedDiscoveries.length > 0 && route?.params?.id) {
     const filteredDiscovery = discoveryStore.loadedDiscoveries.find((item: NewOrUpdatedDiscovery) => item.id === Number(route.params.id))
     discoveryStore.editDiscovery(filteredDiscovery)
   }

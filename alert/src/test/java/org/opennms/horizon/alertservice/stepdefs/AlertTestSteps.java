@@ -49,6 +49,7 @@ import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TimeRangeFilter;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.RetryUtils;
 import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
@@ -64,6 +65,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -258,6 +260,19 @@ public class AlertTestSteps {
         var countAlertsResponse = clientUtils.getAlertServiceStub()
             .countAlerts(listAlertsRequest);
         assertEquals(expected, countAlertsResponse.getCount());
+
+    }
+    @Then("Count alerts for the tenant on node {int} with page {int} pageSize {int}")
+    public void listAlertsForNode(int nodeId,int page ,int pageSize)  {
+        final var requestBuilder =  AlertRequestByNode.newBuilder()
+            .setSortBy("id")
+            .setNodeId(Long.valueOf(nodeId))
+            .setPageSize(pageSize)
+            .setPage(page)
+            .setSortAscending(true);
+        var ListAlertsResponse = clientUtils.getAlertServiceStub()
+            .getAlertsByNode(requestBuilder.build());
+        assertNotNull(ListAlertsResponse.getAlertsList());
 
     }
 

@@ -36,6 +36,7 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.EventType;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.server.mapper.alert.AlertMapper;
 import org.opennms.horizon.server.model.alerts.AlertCount;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
@@ -168,5 +169,19 @@ public class GrpcAlertService {
     @GraphQLQuery(name = "alertCounts")
     public Mono<AlertCount> getAlertCounts(@GraphQLEnvironment ResolutionEnvironment env) {
          return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
+    }
+    @GraphQLQuery(name = "getAlertsByNode")
+    public Mono<ListAlertResponse> getRecentAlertsByNode(@GraphQLArgument(name = "pageSize") Integer pageSize,
+                                                         @GraphQLArgument(name = "page") int page,
+                                                         @GraphQLArgument(name = "sortBy") String sortBy,
+                                                         @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+                                                         @GraphQLArgument(name = "nodeId") long nodeId,
+                                                         @GraphQLEnvironment ResolutionEnvironment env) {
+
+        return Mono
+            .just(alertsClient.getAlertsByNode(
+                pageSize, page, sortBy, sortAscending, nodeId,headerUtil.getAuthHeader(env)
+            ))
+            .map(mapper::protoToAlertResponse);
     }
 }

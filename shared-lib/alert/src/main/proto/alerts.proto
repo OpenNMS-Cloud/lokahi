@@ -217,6 +217,13 @@ message AlertError {
   uint64 alert_id = 1;
   string error = 2;
 }
+message AlertRequestByNode {
+  int64 node_id = 1;
+  int32 page_size = 2;
+  int32 page = 3;
+  string sort_by = 5;
+  bool sort_ascending = 6;
+}
 
 service AlertService {
   rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {};
@@ -227,6 +234,7 @@ service AlertService {
   rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
   rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
   rpc alertCounts(google.protobuf.Empty) returns (AlertCount) {};
+  rpc getAlertsByNode(AlertRequestByNode)  returns (ListAlertsResponse) {};
 }
 
 // Proto for Monitoring policy

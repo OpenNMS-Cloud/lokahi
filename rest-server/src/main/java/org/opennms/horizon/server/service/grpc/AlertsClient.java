@@ -49,6 +49,7 @@ import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
 import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TimeRangeFilter;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
@@ -295,5 +296,18 @@ public class AlertsClient {
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .alertCounts(Empty.getDefaultInstance());
         return alertsCountMapper.protoToAlertCount(alertCountProto);
+    }
+    public ListAlertsResponse getAlertsByNode(int pageSize, int page, String sortBy, boolean sortAscending, long nodeId, String accessToken) {
+        Metadata metadata = getMetadata(accessToken);
+
+        final var request = AlertRequestByNode.newBuilder();
+        request.setPageSize(pageSize)
+            .setPage(page)
+            .setSortBy(sortBy)
+            .setSortAscending(sortAscending)
+            .setNodeId(nodeId)
+            .build();
+        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getAlertsByNode(request.build());
+
     }
 }

@@ -216,5 +216,6 @@ Feature: Alert Service Basic Functionality
       | alerts[0].severity == MINOR |
       | alerts[1].severity == MAJOR |
     Then Count alerts for the tenant, assert response is 2
+    Then Count alerts for the tenant on node 11 with page 0 pageSize 10
     Then Count alerts for the tenant, filtered by severity "MAJOR", assert response is 1
     Then Verify alert topic has 2 messages for the tenant

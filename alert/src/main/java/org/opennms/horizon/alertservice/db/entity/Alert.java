@@ -138,4 +138,7 @@ public class Alert implements Serializable {
     public void incrementCount() {
         counter++;
     }
+
+    @Column(name = "node_id")
+    private Long nodeId;
 }

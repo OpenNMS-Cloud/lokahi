@@ -32,8 +32,6 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
@@ -163,22 +161,12 @@ public class AzureDiscoveryStepDefinitions {
 
     @Then("verify exception {string} thrown with message {string}")
     public void verifyException(String exceptionName, String message) {
-
-        Status status = Status.INVALID_ARGUMENT.withDescription(message);
-        StatusRuntimeException exception = new StatusRuntimeException(status);
-        this.caught = exception;
-
         if (caught == null) {
             fail("No exception caught");
         } else {
-            validateException(exceptionName,message);
+            assertEquals(exceptionName, caught.getClass().getSimpleName(), "Exception mismatch");
+            assertEquals(message, caught.getMessage());
         }
     }
-    private void validateException(String exceptionName,  String message) {
-        assertEquals(exceptionName, caught.getClass().getSimpleName(), "Exception mismatch");
-        assertEquals(message,caught.getMessage().split(":", 2)[1].trim());
-    }
-
-
 
 }

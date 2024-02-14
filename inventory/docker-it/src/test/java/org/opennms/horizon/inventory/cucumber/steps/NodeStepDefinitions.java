@@ -5,8 +5,6 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
@@ -124,14 +122,11 @@ public class NodeStepDefinitions {
 
     @Then("[Node] Verify exception {string} thrown with message {string}")
     public void verifyException(String exceptionName, String message) {
-        Status status = Status.INVALID_ARGUMENT.withDescription(message);
-        StatusRuntimeException exeception = new StatusRuntimeException(status);
-        lastException = exeception;
-
-       if (lastException == null) {
+        if (lastException == null) {
             fail("No exception caught");
         } else {
-           validateException(exceptionName,message);
+            assertEquals(exceptionName, lastException.getClass().getSimpleName());
+            assertEquals(message, lastException.getMessage());
         }
     }
 
@@ -229,10 +224,4 @@ public class NodeStepDefinitions {
         log.info("Found {} messages for tenant {}", foundMessages, tenant);
         return foundMessages == expectedMessages;
     }
-
-    private void validateException(String exceptionName,String exMessage){
-        assertEquals(exceptionName, lastException.getClass().getSimpleName());
-        assertEquals(exMessage, lastException.getMessage().split(":", 2)[1].trim());
-    }
-
 }

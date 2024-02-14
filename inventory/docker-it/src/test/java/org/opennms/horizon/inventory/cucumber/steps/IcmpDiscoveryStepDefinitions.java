@@ -34,6 +34,8 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -72,7 +74,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class IcmpDiscoveryStepDefinitions {
@@ -154,11 +156,16 @@ public class IcmpDiscoveryStepDefinitions {
 
     @Then("create Active Discovery check exception {string} message {string}")
     public void createActiveDiscoveryCheckExceptionMessage(String className, String message) {
-        try {
-            backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
-        } catch (Exception ex) {
-            Assertions.assertEquals(ex.getClass().getSimpleName(), className);
-            Assertions.assertEquals(ex.getMessage(), message);
+        Status status = Status.INVALID_ARGUMENT.withDescription(message);
+        StatusRuntimeException exception = new StatusRuntimeException(status);
+        backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
+
+        if (exception == null) {
+            fail("No exception caught");
+        } else {
+            Assertions.assertEquals(exception.getClass().getSimpleName(), className);
+            Assertions.assertEquals(exception.getMessage().split(":", 2)[1].trim(), message);
+
         }
     }
 

@@ -3,15 +3,33 @@
     <section class="node-component-header">
       <h3 data-test="heading" class="node-label">Discoveries</h3>
     </section>
-    <section class="node-component-content">
-      <div>MAD-002-azure-discovery-2</div>
+    <section class="node-component-content" v-if="discoveryStore.loadedDiscoveries.length > 0">
+      <ul>
+        <li v-for="discovery in discoveryStore.loadedDiscoveries">
+          <p @click="handleRoute(discovery)">{{ discovery.name }}</p>
+        </li>
+      </ul>
+    </section>
+    <section class="node-component-content" v-if="discoveryStore.loadedDiscoveries.length === 0">
+    No Monitoring Policy
     </section>
   </div> 
 </template>
 
 <script lang="ts" setup>
+import { useDiscoveryStore } from '@/store/Views/discoveryStore';
+import { NewOrUpdatedDiscovery } from '@/types/discovery';
 
-
+const discoveryStore = useDiscoveryStore()
+const router = useRouter()
+onMounted(() => discoveryStore.init())
+onUnmounted(() => discoveryStore.$reset())
+const handleRoute = (discovery: NewOrUpdatedDiscovery) => {
+  discoveryStore.editDiscovery(discovery)
+  router.push({
+    path: `/discovery-selected/${discovery.id}`
+  })
+}
 </script>
 
 <style lang="scss" scoped>
@@ -36,10 +54,28 @@
 }
  
 .node-component-content {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 2rem;
+  > ul {
+    > li {
+      padding: 5px 0px;
+      p {
+        overflow: hidden;
+        color: var(--open-source-dark-blue-900-secondary, #273180);
+        font-kerning: none;
+        font-feature-settings: 'calt' off;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        /* Open Source/Caption Text */
+        font-family: Inter;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 16px; /* 133.333% */
+
+        cursor: pointer;
+      }
+    }
+  }
 }
 
 </style>

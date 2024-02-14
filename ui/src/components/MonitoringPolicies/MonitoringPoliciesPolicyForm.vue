@@ -120,6 +120,7 @@ import { TagSelectItem } from '@/types'
 import ContentCopy from '@featherds/icon/action/ContentCopy'
 import Delete from '@featherds/icon/action/Delete'
 import useModal from '@/composables/useModal'
+import { MonitorPolicy } from '@/types/graphql'
 
 const { openModal, closeModal, isVisible } = useModal()
 const store = useMonitoringPoliciesStore()
@@ -136,6 +137,15 @@ const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: string) => ({ name: tag, id: tag })))
+const route = useRoute()
+
+watchEffect(() => {
+  if (store.monitoringPolicies.length > 0 && route.params.id) {
+    const filteredPolicy = store.monitoringPolicies.find((item: Policy) => item.id === Number(route.params.id))
+    
+    populateForm(filteredPolicy as Policy)
+  }
+})
 
 const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   if (policy?.id) {

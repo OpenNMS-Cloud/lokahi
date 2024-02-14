@@ -30,8 +30,18 @@ const router = createRouter({
       component: () => import('@/containers/Discovery.vue')
     },
     {
+      path: '/discovery-selected/:id',
+      name: 'Discovery Selected',
+      component: () => import('@/containers/Discovery.vue')
+    },
+    {
       path: '/monitoring-policies',
       name: 'Monitoring Policies',
+      component: () => import('@/containers/MonitoringPolicies.vue')
+    },
+    {
+      path: '/monitoring-policies-selected/:id',
+      name: 'Monitoring Policies Selected',
       component: () => import('@/containers/MonitoringPolicies.vue')
     },
     {

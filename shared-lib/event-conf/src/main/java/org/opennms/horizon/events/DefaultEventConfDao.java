@@ -71,7 +71,11 @@ public class DefaultEventConfDao implements EventConfDao {
                 return ueis;
             }
         });
+    }
 
+    @Override
+    public Map<String, Event> getAllEventsByUEI() {
+        return events.getAllEventsByUei();
     }
 
     @PostConstruct

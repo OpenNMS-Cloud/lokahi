@@ -32,6 +32,9 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.conf.xml.Event;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,5 +54,49 @@ public class EventConfTest {
         assertNotNull(event);
         assertEquals(uei, event.getUei());
         assertEquals("Normal", event.getSeverity());
+        var events = eventConfDao.getAllEventsByUEI();
+        System.out.printf("size of events = %d ", events.size());
+        events.forEach((eventUEI, eventConf) -> {
+            String eventUei = eventConf.getUei();
+            var enterpriseIds = eventConf.getMaskElementValues("id");
+            if (enterpriseIds != null && enterpriseIds.size() == 1) {
+               String enterpriseId = enterpriseIds.get(0);
+            }
+            String vendor = extractVendorFromUei(eventUei);
+            if (eventConf.getAlertData() != null) {
+                String reductionKey = eventConf.getAlertData().getReductionKey();
+                String clearKey = eventConf.getAlertData().getClearKey();
+                
+            }
+        });
+    }
+
+    private String extractVendorFromUei(String eventUei) {
+
+        if (eventUei.contains("vendor")) {
+            Pattern pattern = Pattern.compile("/vendor(s?)/([^/]+)/");
+            Matcher matcher = pattern.matcher(eventUei);
+            if (matcher.find()) {
+                // Extract word immediately after "vendor" or "vendors" within slashes
+                return matcher.group(2);
+            } else {
+                throw new IllegalArgumentException("No match found for " + eventUei);
+            }
+        } else if (eventUei.contains("trap")){
+            Pattern pattern = Pattern.compile("/traps/([^/]+)/");
+            Matcher matcher = pattern.matcher(eventUei);
+            if (matcher.find()) {
+                // Extract word immediately after "traps" within slashes
+                return matcher.group(1);
+            } else {
+                Pattern patternForTraps = Pattern.compile("uei\\.opennms\\.org/(.*?)/traps/");
+                Matcher matcherForTraps = patternForTraps.matcher(eventUei);
+                if (matcherForTraps.find()) {
+                    // Extract the string between "uei.opennms.org" and "/traps/"
+                    return matcherForTraps.group(1);
+                }
+            }
+        }
+        return null;
     }
 }

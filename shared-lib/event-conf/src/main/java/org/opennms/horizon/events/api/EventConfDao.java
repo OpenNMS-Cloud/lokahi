@@ -31,10 +31,19 @@ package org.opennms.horizon.events.api;
 import org.opennms.horizon.events.conf.xml.Event;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EventConfDao {
 
     Event findByEvent(org.opennms.horizon.events.xml.Event matchingEvent);
 
     List<String> getEventUEIs();
+
+    /**
+     * This may exclude some events which have duplicate event ueis
+     *      We should extend this later to include all events
+     * @return map of events by uei
+     */
+    Map<String, Event> getAllEventsByUEI();
+
 }

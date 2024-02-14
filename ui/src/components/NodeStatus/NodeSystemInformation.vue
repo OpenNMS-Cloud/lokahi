@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main-section">
     <section class="node-component-header">
       <h3 data-test="heading" class="node-label">System Information</h3>
     </section>
@@ -23,7 +23,9 @@
         </tr>
         <tr>
           <td>System Description</td>
-          <td class="value">{{ nodeData.node.systemDescr || 'Linux Ubuntu' }}</td>
+        </tr>
+        <tr>
+          <td>{{ nodeData.node.systemDescr || 'Linux Ubuntu' }}</td>
         </tr>
       </table>
     </section>
@@ -48,13 +50,18 @@ const nodeData = computed(() => {
 @use '@/styles/mediaQueriesMixins';
 @use '@featherds/styles/mixins/typography';
 
-.node-component-header {
+.main-section { 
+  padding: 0 var(variables.$spacing-l) var(variables.$spacing-l) var(variables.$spacing-l);
+  .node-component-header {
   margin-bottom: var(variables.$spacing-s);
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
+  .node-label{
+    color: var(variables.$secondary);
+  }
 }
 
 .node-component-label {
@@ -72,10 +79,15 @@ const nodeData = computed(() => {
 
 .simple-table {
   width: 100%;
-
   td.value {
     text-align: right;
-    font-weight: bold;
   }
+  td.value, tr:last-child td{
+    font-weight: 700;
+    color: var(variables.$secondary);
+    padding-top: var(variables.$spacing-m);
+  }
+ }
 }
+
 </style>

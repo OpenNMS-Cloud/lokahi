@@ -61,12 +61,12 @@ spec:
       containers:
         - name: {{ .Values.OpenNMS.dataChoices.serviceName }}
           image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.dataChoices) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.dataChoices.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.OpenNMS.global.imagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://{{ .Values.OpenNMS.dataChoices.databaseHost }}:5432/{{ .Values.OpenNMS.dataChoices.databaseName }}?currentSchema={{ .Values.OpenNMS.dataChoices.databaseSchemaName }}"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.global.databaseHost }}:5432/{{ .Values.OpenNMS.global.databaseName }}?currentSchema={{ .Values.OpenNMS.dataChoices.databaseSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -124,7 +124,7 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.dataChoices.resources.requests.cpu }}"
               memory: "{{ .Values.OpenNMS.dataChoices.resources.requests.memory }}"
-      {{- if .Values.OpenNMS.dataChoices.privateRepoEnabled }}
+      {{- if .Values.OpenNMS.global.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

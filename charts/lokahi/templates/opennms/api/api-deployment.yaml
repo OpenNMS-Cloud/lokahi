@@ -53,7 +53,7 @@ spec:
       containers:
         - name: {{ .Values.OpenNMS.api.serviceName }}
           image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.api) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.api.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.OpenNMS.global.imagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
@@ -165,7 +165,7 @@ spec:
             requests:
               cpu: "{{ .Values.OpenNMS.api.resources.requests.cpu }}"
               memory: "{{ .Values.OpenNMS.api.resources.requests.memory }}"
-      {{- if .Values.OpenNMS.api.privateRepoEnabled }}
+      {{- if .Values.OpenNMS.global.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

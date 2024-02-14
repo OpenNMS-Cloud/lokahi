@@ -3,6 +3,7 @@ port: 443 #set depending on tls.enabled and the ingress ports, do not change
 protocol: https #set depending on tls.enabled, do not change
 OpenNMS: # we might be able to remove this
   global:
+    imagePullPolicy: IfNotPresent
     image:
       repository: opennms
       tag: latest
@@ -14,10 +15,9 @@ OpenNMS: # we might be able to remove this
     # Manually set an ID for Minion
     id: ""
     customCertificateAuthority: false
-    grpcClientKeystorePassword: ""
+    grpcClientKeystorePassword: "aa223e92-987f-49dd-b166-edf5c2a03fbc"
     serviceName: opennms-minion
     imageShortName: lokahi-minion
-    imagePullPolicy: IfNotPresent
     replicas: 1
     port: 8181
     sshPort: 8101
@@ -25,8 +25,17 @@ OpenNMS: # we might be able to remove this
     netflow5ListenerPort: 8877
     netflow9ListenerPort: 4729
     netflowListenerPort: 9999
+    serviceType: ClusterIP
+    roleName: role-endpoints
+    volumes:
+      minionSecrets:
+        name: minion-secrets
+        defaultMode: 420
+        secretName: minion-app-secrets
     # If we are running inside the cluster, we need to set this value to the internal nginx controller service name
     gatewayHost: ""
+    gatewayHostDefault: "minion.onmshs.local"
+    grpcClientTruststore: "/opt/karaf/certs/CA.cert"
     resources:
       limits:
         cpu: "2"

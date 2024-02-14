@@ -1,4 +1,4 @@
-ostname: onmshs.local
+hostname: onmshs.local
 port: 1443
 protocol: https
 tls:
@@ -19,6 +19,10 @@ citus:
 
 OpenNMS:
   global:
+    imagePullPolicy: IfNotPresent
+    databaseName: "desenv"
+    databaseHost: "postgres"
+    privateRepoEnabled: false
     springBoot:
       configMapName: spring-boot-app-config
       configMapVolumeName: spring-boot-app-config-volume

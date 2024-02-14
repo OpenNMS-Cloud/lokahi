@@ -6,7 +6,7 @@ metadata:
     app: {{ .Values.OpenNMS.minion.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.OpenNMS.minion.serviceType }}
   ports:
     - port: {{ .Values.OpenNMS.minion.sshPort }}
       protocol: TCP

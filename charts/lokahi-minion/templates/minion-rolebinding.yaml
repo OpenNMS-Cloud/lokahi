@@ -11,5 +11,5 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: role-endpoints
+  name: {{ .Values.opennms.minion.roleName }}
   apiGroup: rbac.authorization.k8s.io

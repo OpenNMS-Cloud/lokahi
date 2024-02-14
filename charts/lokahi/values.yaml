@@ -3,6 +3,10 @@ port: 443 #set depending on tls.enabled and the ingress ports, do not change
 protocol: https #set depending on tls.enabled, do not change
 OpenNMS: # we might be able to remove this
   global:
+    imagePullPolicy: IfNotPresent
+    databaseName: "desenv"
+    databaseHost: "postgres"
+    privateRepoEnabled: false
     image:
       repository: opennms
       tag: latest
@@ -15,14 +19,13 @@ OpenNMS: # we might be able to remove this
       bootstrapServers: onms-kafka:9092
     enableJsonLogging: false
     openTelemetry:
-      otlpTracesEndpoint: null
+      otlpTracesEndpoint: "http://tempo:4317"
       env:
         OTEL_PROPAGATORS: tracecontext,baggage,jaeger
   api:
     path: /api
     serviceName: opennms-rest-server
     imageShortName: lokahi-rest-server
-    imagePullPolicy: IfNotPresent
     replicas: 1
     resources:
       limits:
@@ -31,7 +34,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 2Gi
-    privateRepoEnabled: false
     flowsUrl: SOME-EXTERNAL-FLOW-SERVER:80
     flowsTlsEnabled: false
     certificateManagerUrl: ""
@@ -53,7 +55,6 @@ OpenNMS: # we might be able to remove this
   metricsProcessor:
     serviceName: opennms-metrics-processor
     imageShortName: lokahi-metrics-processor
-    imagePullPolicy: IfNotPresent
     replicas: 1
     resources:
       limits:
@@ -62,7 +63,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 2Gi
-    privateRepoEnabled: false
     flowIngestorUrl: SOME-EXTERNAL-FLOW-SERVER:80
     flowTlsEnabled: false
     kafkaSecretName: ~
@@ -74,7 +74,6 @@ OpenNMS: # we might be able to remove this
     serviceName: opennms-ui
     tlsSecretName: opennms-ui-certificate
     imageShortName: lokahi-ui
-    imagePullPolicy: IfNotPresent
     replicas: 1
     port: 8080
     resources:
@@ -84,7 +83,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: 100m
         memory: 256Mi
-    privateRepoEnabled: false
     ingressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         add_header X-Content-Type-Options "nosniff";
@@ -100,7 +98,6 @@ OpenNMS: # we might be able to remove this
     enabled: false
     serviceName: opennms-minion
     imageShortName: lokahi-minion
-    imagePullPolicy: IfNotPresent
     replicas: 1
     port: 8181
     sshPort: 8101
@@ -123,12 +120,9 @@ OpenNMS: # we might be able to remove this
     serviceName: opennms-minion-gateway
     tlsSecretName: opennms-minion-gateway-certificate
     imageShortName: lokahi-minion-gateway
-    imagePullPolicy: IfNotPresent #move to global
     replicas: 1
     useKubernetes: "true"
-    databaseName: "desenv" #move to global
     databaseSchemaName: "minion_gateway"
-    databaseHost: "postgres" #move to global and add ability to override
     resources:
       limits:
         cpu: "2"
@@ -138,17 +132,16 @@ OpenNMS: # we might be able to remove this
         memory: 2Gi
     ingressAnnotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0" # To avoid HTTP 413 and "client intended to send too large chunked body: X bytes while sending request to upstream"
-      nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate
+      nginx.ingress.kubernetes.io/auth-tls-secret: lokahi/client-root-ca-certificate
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
       nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.default.svc.cluster.local:8080/certificate/debug"
+      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.lokahi.svc.cluster.local:8080/certificate/debug"
       nginx.ingress.kubernetes.io/auth-response-headers: "tenant-id, location-id"
       nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
       nginx.ingress.kubernetes.io/server-snippet: |
         grpc_read_timeout "1200s";
         grpc_send_timeout "1200s";
         client_body_timeout "1200s";
-    privateRepoEnabled: false #move to global
     kafkaSecretName: ~ #move to global
     ports:
       http:
@@ -167,11 +160,8 @@ OpenNMS: # we might be able to remove this
   inventory:
     serviceName: opennms-inventory
     imageShortName: lokahi-inventory
-    imagePullPolicy: IfNotPresent
     replicas: 1
-    databaseName: "desenv"
     databaseSchemaName: "inventory"
-    databaseHost: "postgres"
     resources:
       limits:
         cpu: "2"
@@ -180,7 +170,6 @@ OpenNMS: # we might be able to remove this
         cpu: "1"
         memory: 2Gi
     encryptionKey: ~
-    privateRepoEnabled: false
     kafkaSecretName: ~
     ports: 
       - name: http
@@ -192,11 +181,8 @@ OpenNMS: # we might be able to remove this
   alert:
     serviceName: opennms-alert
     imageShortName: lokahi-alert
-    imagePullPolicy: IfNotPresent
     replicas: 1
-    databaseName: "desenv"
     databaseSchemaName: "alert"
-    databaseHost: "postgres"
     resources:
       limits:
         cpu: "2"
@@ -204,7 +190,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 2Gi
-    privateRepoEnabled: false
     kafkaSecretName: ~
     ports: 
       - name: http
@@ -216,11 +201,8 @@ OpenNMS: # we might be able to remove this
   notification:
     serviceName: opennms-notifications
     imageShortName: lokahi-notification
-    imagePullPolicy: IfNotPresent
     replicas: 1
-    databaseName: "desenv"
     databaseSchemaName: "notification"
-    databaseHost: "postgres"
     resources:
       limits:
         cpu: "2"
@@ -228,7 +210,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 2Gi
-    privateRepoEnabled: false
     kafkaSecretName: ~
     retry:
       delay: 1000
@@ -248,11 +229,8 @@ OpenNMS: # we might be able to remove this
   events:
     serviceName: opennms-events
     imageShortName: lokahi-events
-    imagePullPolicy: IfNotPresent
     replicas: 1
-    databaseName: "desenv"
     databaseSchemaName: "events"
-    databaseHost: "postgres"
     resources:
       limits:
         cpu: "2"
@@ -260,7 +238,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 2Gi
-    privateRepoEnabled: false
     ports: 
       - name: http
         containerPort: 8080
@@ -270,11 +247,8 @@ OpenNMS: # we might be able to remove this
   dataChoices:
     serviceName: opennms-datachoices
     imageShortName: lokahi-datachoices
-    imagePullPolicy: IfNotPresent
     replicas: 1
-    databaseName: "desenv"
     databaseSchemaName: "datachoices"
-    databaseHost: "postgres"
     resources:
       limits:
         cpu: "1"
@@ -282,7 +256,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 1Gi
-    privateRepoEnabled: false
     ports: 
       - name: http
         containerPort: 8080
@@ -295,7 +268,6 @@ OpenNMS: # we might be able to remove this
     caSecretName: ""
     mtlsSecretName: opennms-minion-certificate
     imageShortName: lokahi-minion-certificate-manager
-    imagePullPolicy: IfNotPresent
     replicas: 1
     volumeSize: 1Gi
     resources:
@@ -305,7 +277,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 1Gi
-    privateRepoEnabled: false
     ports: 
       - name: grpc
         containerPort: 8990
@@ -313,7 +284,6 @@ OpenNMS: # we might be able to remove this
   minionCertificateVerifier:
     serviceName: opennms-minion-certificate-verifier
     imageShortName: lokahi-minion-certificate-verifier
-    imagePullPolicy: IfNotPresent
     replicas: 1
     resources:
       limits:
@@ -322,7 +292,6 @@ OpenNMS: # we might be able to remove this
       requests:
         cpu: "1"
         memory: 1Gi
-    privateRepoEnabled: false
     certificateManagerUrl: ""
     ports: 
       - name: http

@@ -270,18 +270,19 @@ public class AlertTestSteps {
         assertEquals(expected, countAlertsResponse.getCount());
     }
 
-    @Then("List alerts for the node")
-    public void listAlertsForNode() throws InterruptedException {
-        var requestBuilder =  AlertRequestByNode.newBuilder()
+    @Then("Count alerts for the tenant on node {int} with page {int} pageSize {int}")
+    public void listAlertsForNode(int nodeId,int page ,int pageSize)  {
+        final var requestBuilder =  AlertRequestByNode.newBuilder()
             .setSortBy("id")
-            .setNodeId(1L)
-            .setPageSize(10)
-            .setPage(0)
+            .setNodeId(Long.valueOf(nodeId))
+            .setPageSize(pageSize)
+            .setPage(page)
             .setSortAscending(true);
-        clientUtils.getAlertServiceStub()
+        var ListAlertsResponse = clientUtils.getAlertServiceStub()
             .getAlertsByNode(requestBuilder.build());
-    }
+         log.info("count" + ListAlertsResponse.getAlertsCount());
 
+    }
 //========================================
 // Internals
 //----------------------------------------

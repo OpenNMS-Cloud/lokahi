@@ -140,5 +140,5 @@ public class Alert implements Serializable {
     }
 
     @Column(name = "node_id")
-    private long nodeId;
+    private Long nodeId;
 }

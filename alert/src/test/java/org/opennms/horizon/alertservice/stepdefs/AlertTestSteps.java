@@ -65,6 +65,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -280,7 +281,7 @@ public class AlertTestSteps {
             .setSortAscending(true);
         var ListAlertsResponse = clientUtils.getAlertServiceStub()
             .getAlertsByNode(requestBuilder.build());
-         log.info("count" + ListAlertsResponse.getAlertsCount());
+        assertNotNull(ListAlertsResponse.getAlertsList());
 
     }
 //========================================

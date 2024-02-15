@@ -21,7 +21,12 @@ import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+
 
 @Slf4j
 public class NodeStepDefinitions {
@@ -113,8 +118,8 @@ public class NodeStepDefinitions {
         }
         if ("false".equalsIgnoreCase(expectException)) {
             Assertions.assertNull(lastException);
-            Assertions.assertNotNull(updatedNode);
-            Assertions.assertEquals(alias, updatedNode.getNodeAlias());
+            assertNotNull(updatedNode);
+            assertEquals(alias, updatedNode.getNodeAlias());
         }
     }
 
@@ -164,9 +169,6 @@ public class NodeStepDefinitions {
 
         assertNotNull(fetchedNodeList);
         Assertions.assertTrue(fetchedNodeList.getNodesCount() > 0);
-
-
-
     }
 
 
@@ -193,7 +195,7 @@ public class NodeStepDefinitions {
             10000,
             false);
 
-        Assert.assertTrue("Verify node topic has the right number of message(s)", success);
+        assertTrue("Verify node topic has the right number of message(s)", success);
     }
 
     /*

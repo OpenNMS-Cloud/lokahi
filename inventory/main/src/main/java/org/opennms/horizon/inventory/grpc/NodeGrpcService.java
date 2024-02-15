@@ -392,7 +392,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             responseObserver.onNext(Int64Value.of(val));
             responseObserver.onCompleted();
         } catch (Exception e) {
-            LOG.error("Error while count nodes ");
+            LOG.error("Error while node count",e);
         }
     }
     private Status createTenantIdMissingStatus() {

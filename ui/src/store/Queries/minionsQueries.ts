@@ -53,7 +53,7 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
     for (const minion of allMinions) {
       const { data } = await fetchMinionMetrics(minion.systemId as string)
       const result = data.value?.minionLatency?.data?.result?.[0]?.values?.[0]
-        
+
       if (result) {
         const [, val] = result
         updatedMinionsList.push({
@@ -65,7 +65,7 @@ export const useMinionsQueries = defineStore('minionsQueries', () => {
       } else {
         updatedMinionsList.push(minion)
       }
-    } 
+    }
     minionsList.value = updatedMinionsList
   }
 

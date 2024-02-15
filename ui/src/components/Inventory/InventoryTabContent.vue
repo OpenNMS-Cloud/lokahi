@@ -79,11 +79,11 @@ const openModalForDeletingTags = (node: NewInventoryNode) => {
 const metricsAsTextBadges = (metrics?: RawMetric) => {
   const badges = []
 
-  if (metrics?.value?.[1]){
-    badges.push({ type: BadgeTypes.success,label:metrics.value?.[1] + 'ms' })
-    badges.push({ type: BadgeTypes.success,label:'Up' })
+  if (metrics?.value?.[1]) {
+    badges.push({ type: BadgeTypes.success, label: metrics.value?.[1] + 'ms' })
+    badges.push({ type: BadgeTypes.success, label: 'Up' })
   } else {
-    badges.push({ type: BadgeTypes.error,label:'Down' })
+    badges.push({ type: BadgeTypes.error, label: 'Down' })
   }
 
   return badges

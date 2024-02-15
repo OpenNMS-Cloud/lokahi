@@ -1,4 +1,4 @@
- 
+
 <template>
     <div :class="['collapse-box', open ? 'collapse-box-open' : 'collapse-box-closed']" data-test="collapsing-card-wrapper">
         <div class="collapse-box-header" @click="headerClicked" v-bind="$attrs">

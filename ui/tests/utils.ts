@@ -11,4 +11,4 @@ export const buildFetchList = (items: Record<string, any>) => {
 
     return Promise.resolve({ json: () => Promise.resolve({ data: items[foundKey] ?? {} }), ok: true }) as any
   }
-} 
+}

@@ -145,7 +145,7 @@ const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   openModal()
 }
 
-const deleteMsg = computed(() => 
+const deleteMsg = computed(() =>
   `Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
 )
 </script>

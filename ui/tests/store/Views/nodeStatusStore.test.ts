@@ -20,10 +20,10 @@ describe('Node Status Store', () => {
 
     const capturedNowInMs = new Date().getTime()
     const testDate = new Date(capturedNowInMs)
-    
+
     global.Date = vitest.fn().mockImplementation(() => testDate) as any
     global.Date.now = vitest.fn().mockImplementation(() => capturedNowInMs)
-    
+
     const endTime = Date.now()
     const startTime = endTime - 1000 * 60 * 60 * 24 * 7 // endTime - 7 days
 

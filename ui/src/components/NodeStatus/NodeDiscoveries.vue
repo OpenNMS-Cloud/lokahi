@@ -6,7 +6,7 @@
     <section class="node-component-content">
       <div>MAD-002-azure-discovery-2</div>
     </section>
-  </div> 
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -34,7 +34,7 @@
   line-height: 20px;
   letter-spacing: 0.28px;
 }
- 
+
 .node-component-content {
   display: flex;
   flex-direction: row;

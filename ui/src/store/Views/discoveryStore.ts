@@ -8,8 +8,8 @@ import { MonitoringLocation } from '@/types/graphql'
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
   state: () => ({
-    discoveryFormActive:false,
-    deleteModalOpen:false,
+    discoveryFormActive: false,
+    deleteModalOpen: false,
     foundLocations: [],
     foundTags: [],
     loading: false,
@@ -17,54 +17,57 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     locationError: '',
     locationSearch: '',
     instructionsType: InstructionsType.Active,
-    helpActive:false,
+    helpActive: false,
     newDiscoveryModalActive: false,
     selectedDiscovery: {},
     snmpV3Enabled: false,
     soloTypeEditor: true,
     discoveryTypePageActive: false,
-    tagError:'',
+    tagError: '',
     tagSearch: '',
-    validationErrors:{},
+    validationErrors: {},
     validateOnKeyUp: false
   } as DiscoveryStore),
+
   actions: {
-    async init(){
+    async init() {
       this.loading = true
       const discoveryQueries = useDiscoveryQueries()
       const latestDiscoveries = await discoveryQueries.getDiscoveries()
       await discoveryQueries.getLocations()
-      if (latestDiscoveries.data && !latestDiscoveries.error){
-        this.loadedDiscoveries = discoveryFromServerToClient(latestDiscoveries.data,discoveryQueries.locations)
+
+      if (latestDiscoveries.data && !latestDiscoveries.error) {
+        this.loadedDiscoveries = discoveryFromServerToClient(latestDiscoveries.data, discoveryQueries.locations)
       }
-      for (const loadedDiscovery of this.loadedDiscoveries){
-        if ([DiscoveryType.ICMP,DiscoveryType.Azure].includes(loadedDiscovery.type as DiscoveryType) && loadedDiscovery.id){
+      for (const loadedDiscovery of this.loadedDiscoveries) {
+        if ([DiscoveryType.ICMP, DiscoveryType.Azure].includes(loadedDiscovery.type as DiscoveryType) && loadedDiscovery.id) {
           await discoveryQueries.getTagsByActiveDiscoveryId(loadedDiscovery.id)
           loadedDiscovery.tags = discoveryQueries.tagsByActiveDiscoveryId
         }
-        if ([DiscoveryType.SyslogSNMPTraps].includes(loadedDiscovery.type as DiscoveryType) && loadedDiscovery.id){
+
+        if ([DiscoveryType.SyslogSNMPTraps].includes(loadedDiscovery.type as DiscoveryType) && loadedDiscovery.id) {
           await discoveryQueries.getTagsByPassiveDiscoveryId(loadedDiscovery.id)
           loadedDiscovery.tags = discoveryQueries.tagsByPassiveDiscoveryId
         }
       }
       this.loading = false
     },
-    activateHelp(type: string){
+    activateHelp(type: string) {
       this.instructionsType = type
       this.helpActive = true
     },
-    disableHelp(){
+    disableHelp() {
       this.helpActive = false
     },
-    clearLocationAuto(){
+    clearLocationAuto() {
       this.foundLocations = []
       this.locationSearch = ''
     },
-    clearTagAuto(){
+    clearTagAuto() {
       this.foundTags = []
       this.tagSearch = ''
     },
-    backToDiscovery(){
+    backToDiscovery() {
       this.newDiscoveryModalActive = false
       this.discoveryFormActive = false
       this.validateOnKeyUp = false
@@ -72,17 +75,17 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.validationErrors = {}
       this.selectedDiscovery = {}
     },
-    closeNewModal(){
+    closeNewModal() {
       this.newDiscoveryModalActive = false
     },
-    backToTypePage(){
+    backToTypePage() {
       this.discoveryFormActive = false
       this.validateOnKeyUp = false
       this.validationErrors = {}
       this.discoveryTypePageActive = true
     },
-    startNewDiscovery(){
-      if (this.soloTypeEditor){
+    startNewDiscovery() {
+      if (this.soloTypeEditor) {
         this.discoveryTypePageActive = true
         this.discoveryFormActive = false
       } else {
@@ -90,7 +93,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       }
       this.setupDefaultDiscovery()
     },
-    setupDefaultDiscovery(){
+    setupDefaultDiscovery() {
       const discoveryQueries = useDiscoveryQueries()
       this.selectedDiscovery = {
         name: undefined,
@@ -98,7 +101,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         tags: [],
         locations: [],
         type: undefined,
-        meta:{
+        meta: {
           clientId: '',
           clientSecret: '',
           subscriptionId: '',
@@ -109,25 +112,25 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       }
       const defaultLocation = discoveryQueries.locations.find((d) => d.location === 'default')
       this.applyDefaultLocation(discoveryQueries.locations, defaultLocation)
-      this.selectedDiscovery.tags = [{name:'default'}]
+      this.selectedDiscovery.tags = [{name: 'default'}]
     },
     applyDefaultLocation(locations: MonitoringLocation[], locationToApply: MonitoringLocation | undefined) {
       if (locationToApply && locations.length === 1) {
         this.selectedDiscovery.locations = [locationToApply]
       }
     },
-    closeDeleteModal(){
+    closeDeleteModal() {
       this.deleteModalOpen = false
     },
-    openDeleteModal(){
+    openDeleteModal() {
       this.deleteModalOpen = true
     },
-    editDiscovery(item: any){
+    editDiscovery(item: any) {
       this.discoveryFormActive = true
       this.discoveryTypePageActive = false
       this.selectedDiscovery = {...item}
     },
-    async searchForLocation(searchVal: string){
+    async searchForLocation(searchVal: string) {
       const discoveryQueries = useDiscoveryQueries()
       this.locationSearch = searchVal
       await discoveryQueries.getLocations()
@@ -139,87 +142,87 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.locations = foundLocation ? [foundLocation] : undefined
       this.foundLocations = []
       this.locationSearch = ''
-      if (this.validateOnKeyUp){
+      if (this.validateOnKeyUp) {
         this.validateDiscovery()
       }
     },
-    removeLocation(location: any){
+    removeLocation(location: any) {
       this.selectedDiscovery.locations = this.selectedDiscovery.locations?.filter((d) => d.id !== location.id)
     },
-    removeTag(tag: any){
+    removeTag(tag: any) {
       this.selectedDiscovery.tags = this.selectedDiscovery.tags?.filter((d) => d.id !== tag.id)
     },
     tagSelected(tag: any) {
       const discoveryQueries = useDiscoveryQueries()
       let foundTag = discoveryQueries.tagsSearched.find((d) => d.name === tag) as any
-      if (!foundTag){
+      if (!foundTag) {
         foundTag = {name: tag}
       }
 
       const tagIsAlreadySelected = this.selectedDiscovery.tags?.find((t) => t.name === tag)
       if (!tagIsAlreadySelected) this.selectedDiscovery.tags?.push(foundTag)
-      
+
       this.foundTags = []
       this.tagSearch = ''
-      if (this.validateOnKeyUp){
+      if (this.validateOnKeyUp) {
         this.validateDiscovery()
       }
     },
-    setMetaSelectedDiscoveryValue(key:string,value:any){
-      if (!this.selectedDiscovery.meta){
+    setMetaSelectedDiscoveryValue(key: string, value: any) {
+      if (!this.selectedDiscovery.meta) {
         this.selectedDiscovery.meta = {}
       }
-      (this.selectedDiscovery as Record<string,any>).meta[key] = value
-      if (this.validateOnKeyUp){
+      (this.selectedDiscovery as Record<string, any>).meta[key] = value
+      if (this.validateOnKeyUp) {
         this.validateDiscovery()
       }
     },
-    setSelectedDiscoveryValue(key:string,value:any){
-      (this.selectedDiscovery as Record<string,any>)[key] = value
-      if (this.validateOnKeyUp){
+    setSelectedDiscoveryValue(key: string, value: any) {
+      (this.selectedDiscovery as Record<string, any>)[key] = value
+      if (this.validateOnKeyUp) {
         this.validateDiscovery()
       }
     },
-    activateForm(key: string, value: any){
-      this.setSelectedDiscoveryValue(key,value)
+    activateForm(key: string, value: any) {
+      this.setSelectedDiscoveryValue(key, value)
       this.discoveryTypePageActive = false
       this.discoveryFormActive = true
     },
-    async searchForTags(searchVal: string){
+    async searchForTags(searchVal: string) {
       const discoveryQueries = useDiscoveryQueries()
       this.tagSearch = searchVal
       await discoveryQueries.searchTags(searchVal)
       this.foundTags = discoveryQueries.tagsSearched.map((b) => b?.name ?? '')
     },
-    async toggleDiscovery(clickedToggle: NewOrUpdatedDiscovery){
+    async toggleDiscovery(clickedToggle: NewOrUpdatedDiscovery) {
       const discoveryMutations = useDiscoveryMutations()
       const meta = clickedToggle?.meta as DiscoveryTrapMeta
       const toggleObject = {toggle: !meta.toggle?.toggle || false, id: meta.toggle?.id || clickedToggle.id}
       this.loading = true
-      await discoveryMutations.togglePassiveDiscovery({toggle:toggleObject})
+      await discoveryMutations.togglePassiveDiscovery({toggle: toggleObject})
       await this.init()
       this.loading = false
     },
-    async cancelUpdate(){
+    async cancelUpdate() {
       this.selectedDiscovery = {}
       this.discoveryFormActive = false
       this.discoveryTypePageActive = false
     },
-    async deleteDiscovery(){
+    async deleteDiscovery() {
       const discoveryMutations = useDiscoveryMutations()
       this.loading = true
-      if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
-        await discoveryMutations.deletePassiveDiscovery({id:this.selectedDiscovery.id})
-      }else if(this.selectedDiscovery.type === DiscoveryType.ICMP){
-        await discoveryMutations.deleteActiveIcmpDiscovery({id:this.selectedDiscovery.id})
+      if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps) {
+        await discoveryMutations.deletePassiveDiscovery({id: this.selectedDiscovery.id})
+      } else if (this.selectedDiscovery.type === DiscoveryType.ICMP) {
+        await discoveryMutations.deleteActiveIcmpDiscovery({id: this.selectedDiscovery.id})
       }
       this.backToDiscovery()
       this.closeDeleteModal()
       await this.init()
       this.loading = false
     },
-    async validateDiscovery(){
-      const {isValid,validationErrors} = await clientToServerValidation(this.selectedDiscovery)
+    async validateDiscovery() {
+      const {isValid, validationErrors} = await clientToServerValidation(this.selectedDiscovery)
       this.validationErrors = validationErrors
       return isValid
     },
@@ -229,18 +232,18 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       const isValid = await this.validateDiscovery()
 
       if (isValid) {
-        if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
-          await discoveryMutations.upsertPassiveDiscovery({passiveDiscovery:discoveryFromClientToServer(this.selectedDiscovery)})
+        if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps) {
+          await discoveryMutations.upsertPassiveDiscovery({passiveDiscovery: discoveryFromClientToServer(this.selectedDiscovery)})
         } else if (this.selectedDiscovery.type === DiscoveryType.Azure) {
           await discoveryMutations.addAzureCreds({ discovery: discoveryFromClientToServer(this.selectedDiscovery)})
         } else {
-          await discoveryMutations.createOrUpdateDiscovery({request:discoveryFromClientToServer(this.selectedDiscovery)})
+          await discoveryMutations.createOrUpdateDiscovery({request: discoveryFromClientToServer(this.selectedDiscovery)})
         }
         await this.init()
 
         if (
-          !discoveryMutations.passiveDiscoveryError && 
-          !discoveryMutations.createOrUpdateDiscoveryError && 
+          !discoveryMutations.passiveDiscoveryError &&
+          !discoveryMutations.createOrUpdateDiscoveryError &&
           !discoveryMutations.azureError) {
           this.newDiscoveryModalActive = true
         }

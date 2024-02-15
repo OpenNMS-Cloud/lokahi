@@ -5,7 +5,7 @@ let wrapper: any
 
 describe('ItemPreview', () => {
   beforeAll(() => {
-    wrapper = mount(ItemPreview, { 
+    wrapper = mount(ItemPreview, {
       shallow: true,
       props: {
         loading: false,

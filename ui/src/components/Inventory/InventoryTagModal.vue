@@ -52,15 +52,15 @@ const tagsForDeletion = ref([] as Tag[])
 const nodeIdForDeletingTags = ref()
 const tagStore = useTagStore()
 
-const { 
-  isAutoCompleteOpen, 
+const {
+  isAutoCompleteOpen,
   closeAutocomplete,
-  wrapperClicked, 
+  wrapperClicked,
   onFocusLost,
-  itemClicked, 
-  textChanged, 
-  inputValue 
-} = 
+  itemClicked,
+  textChanged,
+  inputValue
+} =
   useAtomicAutocomplete(tagQueries.getTagsSearch, () => tagQueries.tagsSearched.length, tagStore.addFilteredTag)
 
 const modal = ref<ModalPrimary>({
@@ -79,7 +79,7 @@ watchEffect(() => {
     nodeIdForDeletingTags.value = props.node.id
     tagStore.setFilteredTags(props.node.tags)
     modal.value.title = props.node.nodeLabel || ''
-  } else if (!props.visible){
+  } else if (!props.visible) {
     inputValue.value = ''
   }
 })
@@ -111,4 +111,4 @@ watchEffect(() => {
   margin-bottom: var(--feather-spacing-s);
 }
 </style>
-  
+

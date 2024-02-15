@@ -48,9 +48,9 @@ const nodeMutations = useNodeMutations()
 
 const router = useRouter()
 const props = defineProps({
-  node: {type:Object as PropType<InventoryItem>, default: () => ({})},
-  className:{type: String, default: ''},
-  ['data-test']:{type: String, default: ''}
+  node: { type: Object as PropType<InventoryItem>, default: () => ({}) },
+  className: { type: String, default: '' },
+  ['data-test']: { type: String, default: '' }
 })
 
 const onLineChart = () => {

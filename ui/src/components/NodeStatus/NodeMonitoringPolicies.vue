@@ -7,7 +7,7 @@
       <div>MP-001-snmp/icmp</div>
       <div>MP-002-azure-policy-1</div>
     </section>
-  </div> 
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -35,7 +35,7 @@
   line-height: 20px;
   letter-spacing: 0.28px;
 }
- 
+
 .node-component-content {
   display: flex;
   flex-direction: row;

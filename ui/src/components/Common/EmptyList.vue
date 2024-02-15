@@ -1,4 +1,4 @@
-<!-- 
+<!--
   To display a message if the list is empty, and an action (optional)
 
   Component props structure:

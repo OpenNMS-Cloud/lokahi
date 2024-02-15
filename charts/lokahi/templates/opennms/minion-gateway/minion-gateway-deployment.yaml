@@ -72,7 +72,7 @@ spec:
                   name: postgres
                   key: minionGatewayPwd
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://{{ .Values.OpenNMS.minionGateway.databaseHost }}:5432/{{ .Values.OpenNMS.global.databaseName }}?currentSchema={{ .Values.OpenNMS.minionGateway.databaseSchemaName }}"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.global.databaseHost }}:5432/{{ .Values.OpenNMS.global.databaseName }}?currentSchema={{ .Values.OpenNMS.minionGateway.databaseSchemaName }}"
             - name: IGNITE_USE_KUBERNETES
               value: "{{ .Values.OpenNMS.minionGateway.useKubernetes }}"
             - name: IGNITE_KUBERNETES_SERVICE_NAME

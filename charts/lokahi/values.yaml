@@ -218,7 +218,7 @@ OpenNMS: # we might be able to remove this
       max: 10
     acsConnectionSecretName: {} # the ACS connection string is expected in the 'connection-string' key
     baseUrl:
-      url: "onmshs.local:1443"
+      url: "onmshs.local:443"
       appendTenantId: false
     ports: 
       - name: http

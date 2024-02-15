@@ -18,12 +18,12 @@ spec:
       annotations:
         linkerd.io/inject: enabled
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minion.serviceName }}"
-    spec:
-      hostAliases:
-      - ip: "172.16.8.101"
-        hostnames:
-        - "{{ .Values.hostname }}"
-        - "{{ .Values.OpenNMS.minion.gatewayHostDefault }}"
+    #spec:
+    #  hostAliases:
+    #  - ip: "172.16.8.101"
+    #    hostnames:
+    #    - "{{ .Values.hostname }}"
+    #    - "{{ .Values.OpenNMS.minion.gatewayHostDefault }}"
       serviceAccountName: {{ .Values.OpenNMS.minion.serviceName }}-sa
       {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
@@ -45,10 +45,10 @@ spec:
                 - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
-        - name: {{ .Values.opennms.minion.volumes.minionSecrets.name }}
+        - name: {{ .Values.OpenNMS.minion.volumes.minionSecrets.name }}
           secret:
-            defaultMode: {{ .Values.opennms.minion.volumes.minionSecrets.defaultMode }}
-            secretName: {{ .Values.opennms.minion.volumes.minionSecrets.secretName }}
+            defaultMode: {{ .Values.OpenNMS.minion.volumes.minionSecrets.defaultMode }}
+            secretName: {{ .Values.OpenNMS.minion.volumes.minionSecrets.secretName }}
         #- name: maven-volume
         #  emptyDir: {}
         {{- if .Values.OpenNMS.minion.extraVolumes }}

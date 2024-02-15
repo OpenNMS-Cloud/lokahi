@@ -84,6 +84,7 @@ OpenNMS:
         containerPort: 8080
   minion:
     enabled: true
+    roleName: role-endpoints
     addDefaultLocation: true
     resources:
       limits:
@@ -92,6 +93,37 @@ OpenNMS:
       requests:
         cpu: '0'
         memory: '0'
+    # Manually set an ID for Minion
+    id: ""
+    customCertificateAuthority: false
+    grpcClientKeystorePassword: "a9bc3e45-8a9d-47c7-8349-beade6ef09fb"
+    serviceName: opennms-minion
+    imageShortName: lokahi-minion
+    replicas: 1
+    port: 8181
+    sshPort: 8101
+    trapsListenerPort: 1162
+    netflow5ListenerPort: 8877
+    netflow9ListenerPort: 4729
+    netflowListenerPort: 9999
+    serviceType: ClusterIP
+    volumes:
+      minionSecrets:
+        name: minion-secrets
+        defaultMode: 420
+        secretName: minion-app-secrets
+    # If we are running inside the cluster, we need to set this value to the internal nginx controller service name
+    gatewayHost: ""
+    gatewayHostDefault: "minion.onmshs.local"
+    grpcClientTruststore: "/opt/karaf/certs/CA.cert"
+    extraVolumes: []
+    extraMounts: []
+    extraInitContainers: []
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot
+
   minionGateway:
     resources:
       limits:

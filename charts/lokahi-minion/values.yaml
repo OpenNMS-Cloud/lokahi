@@ -15,7 +15,7 @@ OpenNMS: # we might be able to remove this
     # Manually set an ID for Minion
     id: ""
     customCertificateAuthority: false
-    grpcClientKeystorePassword: "aa223e92-987f-49dd-b166-edf5c2a03fbc"
+    grpcClientKeystorePassword: "a9bc3e45-8a9d-47c7-8349-beade6ef09fb"
     serviceName: opennms-minion
     imageShortName: lokahi-minion
     replicas: 1

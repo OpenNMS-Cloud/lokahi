@@ -21,9 +21,7 @@ import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class NodeStepDefinitions {
@@ -163,6 +161,12 @@ public class NodeStepDefinitions {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
             .setSearchTerm(labelSearchTerm).build());
+
+        assertNotNull(fetchedNodeList);
+        Assertions.assertTrue(fetchedNodeList.getNodesCount() > 0);
+
+
+
     }
 
 

@@ -19,3 +19,4 @@ Feature: Node
     Then verify that a new node is created with label "node-label", ip address "127.0.0.1" and location "Default"
     Then fetch a list of nodes by node label with search term "INVALID-SEARCH-TERM"
     Then verify the list of nodes is empty
+    Then count the list of nodes

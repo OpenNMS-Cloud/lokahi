@@ -122,6 +122,12 @@ public class NodeStepDefinitions {
     public void verifyTheListOfNodesIsEmpty() {
         assertEquals(0, fetchedNodeList.getNodesCount());
     }
+    @Then("count the list of nodes")
+    public void countTheListOfNodes() {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        Int64Value count= nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build());
+        assertEquals(1, count.getValue());
+    }
 
     @Then("verify node topic has {int} messages with tenant {string}")
     public void verifyNodeTopicContainsTenant(int expectedMessages, String tenant) throws InterruptedException {

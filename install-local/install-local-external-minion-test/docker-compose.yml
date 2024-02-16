@@ -8,7 +8,7 @@ services:
     # https://hub.docker.com/r/opennms/lokahi-minion/tags for recent
     # tags.
     extra_hosts:
-      minion.onmshs: 10.0.0.55
+      minion.onmshs: 172.16.8.101
     environment:
       TZ: 'America/New_York'
       MINION_ID: 'minion-b'

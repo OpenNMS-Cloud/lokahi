@@ -18,7 +18,7 @@ spec:
       annotations:
         linkerd.io/inject: enabled
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minion.serviceName }}"
-    #spec:
+    spec:
     #  hostAliases:
     #  - ip: "172.16.8.101"
     #    hostnames:

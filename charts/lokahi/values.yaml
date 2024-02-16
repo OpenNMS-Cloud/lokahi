@@ -19,7 +19,7 @@ OpenNMS: # we might be able to remove this
       bootstrapServers: onms-kafka:9092
     enableJsonLogging: false
     openTelemetry:
-      otlpTracesEndpoint: "http://tempo:4317"
+      otlpTracesEndpoint: ""
       env:
         OTEL_PROPAGATORS: tracecontext,baggage,jaeger
   api:

@@ -28,7 +28,7 @@ OpenNMS:
       configMapVolumeName: spring-boot-app-config-volume
       mountPath: "/app/config"
     openTelemetry:
-      otlpTracesEndpoint: "http://tempo:4317"
+      otlpTracesEndpoint: ""
   alert:
     resources:
       limits:
@@ -96,7 +96,7 @@ OpenNMS:
     # Manually set an ID for Minion
     id: ""
     customCertificateAuthority: false
-    grpcClientKeystorePassword: "a9bc3e45-8a9d-47c7-8349-beade6ef09fb"
+    grpcClientKeystorePassword: ""
     serviceName: opennms-minion
     imageShortName: lokahi-minion
     replicas: 1

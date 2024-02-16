@@ -1,4 +1,4 @@
-hostname: onmshs.local
+hostname: onmshs
 port: 443 #set depending on tls.enabled and the ingress ports, do not change
 protocol: https #set depending on tls.enabled, do not change
 OpenNMS: # we might be able to remove this
@@ -15,7 +15,7 @@ OpenNMS: # we might be able to remove this
     # Manually set an ID for Minion
     id: ""
     customCertificateAuthority: false
-    grpcClientKeystorePassword: "a9bc3e45-8a9d-47c7-8349-beade6ef09fb"
+    grpcClientKeystorePassword: ""
     serviceName: opennms-minion
     imageShortName: lokahi-minion
     replicas: 1

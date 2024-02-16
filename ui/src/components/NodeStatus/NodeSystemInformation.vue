@@ -1,31 +1,33 @@
 <template>
-  <div>
-    <section class="node-component-header">
-      <h3 data-test="heading" class="node-label">System Information</h3>
+  <div class="main-section">
+    <section class="node-component-header">  
+      <div class="feather-row">
+        <h3 data-test="heading" class="node-label">System Information</h3>
+      </div>
     </section>
     <section class="node-component-content">
-      <table class="simple-table">
-        <tr>
-          <td>Monitoring Location</td>
-          <td class="value">{{ nodeData.node.location?.location || 'Default' }}</td>
-        </tr>
-        <tr>
-          <td>System Name</td>
-          <td class="value">{{ nodeData.node.systemName || 'server-123' }}</td>
-        </tr>
-        <tr>
-          <td>System Location</td>
-          <td class="value">{{ nodeData.node.systemLocation || 'Somewhere' }}</td>
-        </tr>
-        <tr>
-          <td>Contact</td>
-          <td class="value">{{ nodeData.node.systemContact || 'someone@opennms.com' }}</td>
-        </tr>
-        <tr>
-          <td>System Description</td>
-          <td class="value">{{ nodeData.node.systemDescr || 'Linux Ubuntu' }}</td>
-        </tr>
-      </table>
+      <div class="feather-row">
+        <div class="feather-col-6 ">Monitoring Location</div>
+        <div class="feather-col-6 column-value">{{ nodeData.node.location?.location || '' }}</div>
+      </div>   
+      <div class="feather-row">
+        <div class="feather-col-6 ">System Name</div>
+        <div class="feather-col-6 column-value">{{ nodeData.node.systemName  || '' }}</div>
+      </div>  
+      <div class="feather-row">
+        <div class="feather-col-6 ">System Location</div>
+        <div class="feather-col-6 column-value">{{ nodeData.node.systemLocation || '' }}</div>
+      </div>  
+      <div class="feather-row">
+        <div class="feather-col-6 ">Contact</div>
+        <div class="feather-col-6 column-value">{{ nodeData.node.systemContact || '' }}</div>
+      </div>   
+        <div class="feather-row">
+        <div class="feather-col-6 ">System Description</div>
+      </div>   
+      <div class="feather-row">
+        <div class="feather-col-12 column-value">{{ nodeData.node.systemDescr || '' }}</div>
+      </div>
     </section>
   </div> 
 </template>
@@ -48,34 +50,30 @@ const nodeData = computed(() => {
 @use '@/styles/mediaQueriesMixins';
 @use '@featherds/styles/mixins/typography';
 
-.node-component-header {
-  margin-bottom: var(variables.$spacing-s);
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.node-component-label {
-  margin: 0;
-  line-height: 20px;
-  letter-spacing: 0.28px;
-}
- 
-.node-component-content {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.simple-table {
-  width: 100%;
-
-  td.value {
-    text-align: right;
-    font-weight: bold;
+.main-section { 
+  padding: 0 var(variables.$spacing-l) var(variables.$spacing-l) var(variables.$spacing-l);
+  .node-component-header {
+    margin-bottom: var(variables.$spacing-s);
+ }
+ .node-component-content {
+    .feather-row {
+      min-height: 2.5rem;
+      line-height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .column-value {
+        font-weight: var(variables.$font-semibold);
+        color: var(variables.$primary-text-on-surface);
+      }
+    
+      .feather-col-6.column-value {
+        text-align: right;
+      }
+      .feather-col-12.column-value {
+        text-align: left;
+      }
+    }
   }
 }
 </style>

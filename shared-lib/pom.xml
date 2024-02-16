@@ -45,6 +45,7 @@
         <module>minion-certificate-manager-api</module>
         <module>lokahi-common-tag</module>
         <module>spring-boot-logback-json</module>
+        <module>event-conf</module>
     </modules>
 
     <build>

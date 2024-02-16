@@ -41,8 +41,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.lokahi.events</groupId>
-            <artifactId>conf</artifactId>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>event-conf</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

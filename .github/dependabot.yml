@@ -1,0 +1,60 @@
+version: 2
+updates:
+
+  - package-ecosystem: "npm"
+    directory: "/ui"
+    target-branch: "develop"
+    reviewers:
+      - "synqotik"
+    labels:
+      - "dependency update"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    schedule:
+      interval: "weekly"
+    groups:
+      eslint:
+        patterns:
+          - "*eslint*"
+        update-types:
+          - "minor"
+          - "patch"
+      feather:
+        patterns:
+          - "@featherds/*"
+        update-types:
+          - "minor"
+          - "patch"
+      graphql:
+        patterns:
+          - "@graphql*"
+        update-types:
+          - "minor"
+          - "patch"
+      leaflet:
+        patterns:
+          - "*leaflet*"
+        update-types:
+          - "minor"
+          - "patch"
+      vue:
+        patterns:
+          - "*vite*"
+          - "*vue*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "develop"
+    reviewers:
+      - "cgorantla"
+    labels:
+      - "dependency update"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    schedule:
+      interval: "weekly"

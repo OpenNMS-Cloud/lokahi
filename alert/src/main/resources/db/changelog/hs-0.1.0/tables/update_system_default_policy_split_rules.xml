@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="hs-0.1.0-split-default-policy-rules-for-system-tenant" author="pbouffard">
+        <insert tableName="policy_rule">
+            <column name="tenant_id" value="system-tenant"/>
+            <column name="rule_name" value="default_rule_snmp"/>
+            <column name="component_type" value="SNMP_INTERFACE"/>
+            <column name="policy_id" valueComputed="(select id from monitoring_policy where tenant_id = 'system-tenant'
+            and policy_name = 'default_policy')"/>
+            <column name="detection_method" value="EVENT"/>
+            <column name="event_type" value="SNMP_TRAP"/>
+        </insert>
+
+        <sql>
+            update alert_condition
+            set rule_id = (select pr.id from policy_rule pr where pr.tenant_id = 'system-tenant' and pr.rule_name = 'default_rule_snmp')
+            from alert_definition
+            where
+                alert_condition.id = alert_definition.alert_condition_id and
+                alert_definition.uei like '%traps%' and
+                alert_condition.tenant_id = 'system-tenant';
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>

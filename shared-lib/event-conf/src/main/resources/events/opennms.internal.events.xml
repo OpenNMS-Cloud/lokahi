@@ -136,7 +136,7 @@
             OpenNMS user %parm[user]% has logged in from %parm[ip]%.
         </logmsg>
       <severity>Normal</severity>
-      <!-- <alarm-data reduction-key="%uei%:%parm[user]%" alarm-type="3" auto-clean="true"/> -->
+      <!-- <alert-data reduction-key="%uei%:%parm[user]%" alert-type="3" auto-clean="true"/> -->
    </event>
    <event>
       <uei>uei.opennms.org/internal/authentication/failure</uei>
@@ -148,7 +148,7 @@
             the message '%parm[exceptionMessage]%'.
         </logmsg>
       <severity>Minor</severity>
-      <!-- <alarm-data reduction-key="%uei%:%parm[exceptionName]%:%parm[user]%" alarm-type="3" auto-clean="true"/> -->
+      <!-- <alert-data reduction-key="%uei%:%parm[exceptionName]%:%parm[user]%" alert-type="3" auto-clean="true"/> -->
    </event>
    <event>
       <uei>uei.opennms.org/internal/authentication/loggedOut</uei>
@@ -158,7 +158,7 @@
             OpenNMS user '%parm[user]%' logged out of the WebUI.
         </logmsg>
       <severity>Normal</severity>
-      <!-- <alarm-data reduction-key="%uei%:%parm[user]%" alarm-type="3" auto-clean="true"/> -->
+      <!-- <alert-data reduction-key="%uei%:%parm[user]%" alert-type="3" auto-clean="true"/> -->
    </event>
    <event>
       <uei>uei.opennms.org/internal/authentication/sessionRemoved</uei>
@@ -171,7 +171,7 @@
             due to a session timeout.
         </logmsg>
       <severity>Normal</severity>
-      <!-- <alarm-data reduction-key="%uei%:%parm[user]%" alarm-type="3" auto-clean="true"/> -->
+      <!-- <alert-data reduction-key="%uei%:%parm[user]%" alert-type="3" auto-clean="true"/> -->
    </event>
    <event>
       <uei>uei.opennms.org/internal/kscReportUpdated</uei>
@@ -200,7 +200,7 @@
       <descr>&lt;p>Maintenance contract of %nodelabel% will expire in less then %parm[#4]% days.&lt;/p></descr>
       <logmsg dest="logndisplay">&lt;p>Maintenance contract %parm[#3]% of %nodelabel% will expire at %parm[#2]%.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1"/>
    </event>
    <event>
       <uei>uei.opennms.org/internal/monitoringSystemAdded</uei>
@@ -242,7 +242,7 @@
       <event-label>Clock Skew detected</event-label>
        <descr>Clock skew (%parm[delta]% ms) detected for flow exporter (maxClockSkew = %parm[maxClockSkew]% secs)</descr>
       <logmsg dest="logndisplay">Clock skew for exporter with interface '%interface%' in location '%parm[monitoringSystemLocation]%' detected by '%parm[monitoringSystemId]%'.</logmsg>
-      <alarm-data reduction-key="%uei%:%parm[monitoringSystemLocation]%:%interface%" alarm-type="3" auto-clean="true" />
+      <alert-data reduction-key="%uei%:%parm[monitoringSystemLocation]%:%interface%" alert-type="3" auto-clean="true" />
       <severity>Warning</severity>
    </event>
    <event>

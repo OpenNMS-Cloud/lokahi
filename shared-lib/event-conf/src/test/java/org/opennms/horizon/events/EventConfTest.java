@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.conf.xml.Event;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,19 +57,29 @@ public class EventConfTest {
         assertEquals("Normal", event.getSeverity());
         var events = eventConfDao.getAllEventsByUEI();
         System.out.printf("size of events = %d ", events.size());
+        AtomicInteger countOfEventsWithVendor = new AtomicInteger(0);
+        AtomicInteger sizeOfEventsWithAlarmData = new AtomicInteger(0);
         events.forEach((eventUEI, eventConf) -> {
             String eventUei = eventConf.getUei();
+            String enterpriseId = null;
             var enterpriseIds = eventConf.getMaskElementValues("id");
             if (enterpriseIds != null && enterpriseIds.size() == 1) {
-               String enterpriseId = enterpriseIds.get(0);
+                enterpriseId = enterpriseIds.get(0);
+                //System.out.println("Enterprise id = " + enterpriseId);
             }
             String vendor = extractVendorFromUei(eventUei);
             if (eventConf.getAlertData() != null) {
                 String reductionKey = eventConf.getAlertData().getReductionKey();
                 String clearKey = eventConf.getAlertData().getClearKey();
-                
+                Integer alerttype = eventConf.getAlertData().getAlertType();
+                sizeOfEventsWithAlarmData.incrementAndGet();
+            }
+            if (vendor != null & enterpriseId != null) {
+                 countOfEventsWithVendor.incrementAndGet();
             }
         });
+        System.out.printf("size of events with vendor = %d \n", countOfEventsWithVendor.get());
+        System.out.printf("size of events with alarmdata = %d \n", sizeOfEventsWithAlarmData.get());
     }
 
     private String extractVendorFromUei(String eventUei) {

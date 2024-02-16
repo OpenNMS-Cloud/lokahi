@@ -1547,7 +1547,7 @@ call as malicious with the local call manager.&lt;/p>&lt;table>
 			ccmMaliCallTime=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1610,7 +1610,7 @@ quality problem using the Quality Report Tool.&lt;/p>&lt;table>
 			ccmQualityRprtTime=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1685,7 +1685,7 @@ open TLS connection for the indicated device.&lt;/p>&lt;table>
 			ccmTLSConnFailTime=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3708,7 +3708,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3760,7 +3760,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3812,7 +3812,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3864,7 +3864,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3916,7 +3916,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3972,7 +3972,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4020,7 +4020,7 @@ by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
 			ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31112,7 +31112,7 @@ ciscoNetRegFreeAddrLowThreshold notification.&lt;/p>&lt;table>
 			cnrDHCPScopeFreeAddrUnits=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31160,7 +31160,7 @@ ciscoNetRegFreeAddrHighThreshold notification.&lt;/p>&lt;table>
 			cnrDHCPScopeFreeAddrUnits=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31197,7 +31197,7 @@ host from which this notification has been sent.&lt;/p>&lt;table>
 			cnrNotifServerType=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegServerStop:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegServerStop:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31234,7 +31234,7 @@ host from which this notification has been sent.&lt;/p>&lt;table>
 			cnrNotifServerType=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31261,7 +31261,7 @@ requests until this problem has cleared.&lt;/p>&lt;table>&lt;/table></descr>
 			ciscoNetRegDNSQueueTooBig trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31308,7 +31308,7 @@ ciscoNetRegOtherServerNotResp notification.&lt;/p>&lt;table>
 			cnrNotifServerType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31359,7 +31359,7 @@ the client or server detected this condition.&lt;/p>&lt;table>
 			cnrNotifDupIpAddressDetectedBy=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31398,7 +31398,7 @@ with which other server a conflict was detected.&lt;/p>&lt;table>
 			cnrNotifServer=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31453,7 +31453,7 @@ ciscoNetRegOtherServerResp notification.&lt;/p>&lt;table>
 			cnrNotifServerType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegOtherServerNotResponding:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegOtherServerNotResponding:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31487,7 +31487,7 @@ by the cnrNotifServer object.&lt;/p>&lt;table>
 			cnrNotifServer=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31559,7 +31559,7 @@ selection-tag, then the value is the selection tag list.&lt;/p>&lt;table>
 			cnrNotifDHCPThresholdValue=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31629,7 +31629,7 @@ selection-tag, then the value is the selection tag list.&lt;/p>&lt;table>
 			cnrNotifDHCPThresholdValue=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegFreeAddrLowThreshold:%dpname%:%nodeid%:%interface%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegFreeAddrLowThreshold:%dpname%:%nodeid%:%interface%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31677,7 +31677,7 @@ cnrNotifRelatedServerType object.&lt;/p>&lt;table>
 			cnrNotifRelatedServerType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31731,7 +31731,7 @@ being sent.&lt;/p>&lt;table>
 			cnrNotifRelatedServerType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegOtherServerNotResp:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegOtherServerNotResp:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31763,7 +31763,7 @@ given by the cnrNotifServer object.&lt;/p>&lt;table>
 			cnrNotifServer=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31795,7 +31795,7 @@ object.&lt;/p>&lt;table>
 			cnrNotifServer=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegHaDnsPartnerDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegHaDnsPartnerDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31844,7 +31844,7 @@ the zone is given by cnrNotifZoneName.&lt;/p>&lt;table>
 			cnrNotifDnsRemoteServersList=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31893,7 +31893,7 @@ the zone is given by cnrNotifZoneName object.&lt;/p>&lt;table>
 			cnrNotifDnsRemoteServersList=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegMastersNotResp:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegMastersNotResp:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31939,7 +31939,7 @@ the zone is given by cnrNotifZoneName object.&lt;/p>&lt;table>
 			cnrNotifDnsRemoteServersList=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -31981,7 +31981,7 @@ forwarders is given by the cnrRemoteServersList object.&lt;/p>&lt;table>
 			cnrNotifDnsRemoteServersList=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32024,7 +32024,7 @@ forwarders is given by the cnrRemoteServersList object.&lt;/p>&lt;table>
 			cnrNotifDnsRemoteServersList=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegDnsForwardersNotResp:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoNetRegDnsForwardersNotResp:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32062,7 +32062,7 @@ cnrNotifServer object.&lt;/p>&lt;table>
 			cnrNotifZoneName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32092,7 +32092,7 @@ cnrNotifServer object.&lt;/p>&lt;table>
                 ifDescr=%parm[#1]%&lt;/p>
             </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/cisco/traps/ciscoSmeInterfaceDelete:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/cisco/traps/ciscoSmeInterfaceDelete:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32122,7 +32122,7 @@ cnrNotifServer object.&lt;/p>&lt;table>
                 ifDescr=%parm[#1]%&lt;/p>
             </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32170,7 +32170,7 @@ cnrNotifServer object.&lt;/p>&lt;table>
                 cSmeClusterMasterInetAddr=%parm[#3]%&lt;/p>
             </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32213,7 +32213,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32256,7 +32256,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32299,7 +32299,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32342,7 +32342,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32385,7 +32385,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32428,7 +32428,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32471,7 +32471,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32510,7 +32510,7 @@ slbVirtualServerState indicates the new state.&lt;/p>&lt;table>
 			slbVirtualServerState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVirtualStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32560,7 +32560,7 @@ slbRealServerState indicates the new state.&lt;/p>&lt;table>
 			slbRealState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbRealStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbRealStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32606,7 +32606,7 @@ slbRealServerState indicates the new state.&lt;/p>&lt;table>
 			slbRealState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32643,7 +32643,7 @@ has been enabled or disabled on the Load Balancer.&lt;/p>&lt;table>
 			slbSaspEnabled=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32680,7 +32680,7 @@ has been enabled or disabled on the Load Balancer.&lt;/p>&lt;table>
 			slbSaspEnabled=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32713,7 +32713,7 @@ has been enabled or disabled on the Load Balancer.&lt;/p>&lt;table>
 			slbSaspEnabled=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspStateChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspStateChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32757,7 +32757,7 @@ to a new state.&lt;/p>&lt;table>
 			slbSaspAgentState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%::%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspAgentStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%::%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbSaspAgentStateChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32797,7 +32797,7 @@ to a new state.&lt;/p>&lt;table>
 			slbSaspAgentState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%::%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%::%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32854,7 +32854,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32911,7 +32911,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -32968,7 +32968,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33025,7 +33025,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33082,7 +33082,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33139,7 +33139,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33196,7 +33196,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33249,7 +33249,7 @@ server state is changed.&lt;/p>&lt;table>
 			slbVServerPolicyMap=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33329,7 +33329,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33409,7 +33409,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33489,7 +33489,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33569,7 +33569,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33649,7 +33649,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33729,7 +33729,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33809,7 +33809,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33885,7 +33885,7 @@ changes.&lt;/p>&lt;table>
 			slbVServerProtocol=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/ciscoSlbVServerVIPStateChange:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -33970,7 +33970,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34055,7 +34055,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34140,7 +34140,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34225,7 +34225,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34310,7 +34310,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34395,7 +34395,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34480,7 +34480,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34561,7 +34561,7 @@ identified by slbVirtualServerName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbVirtualServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34666,7 +34666,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34771,7 +34771,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34876,7 +34876,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -34981,7 +34981,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35086,7 +35086,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35191,7 +35191,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35296,7 +35296,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35401,7 +35401,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35506,7 +35506,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35611,7 +35611,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35716,7 +35716,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35821,7 +35821,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -35926,7 +35926,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36031,7 +36031,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36136,7 +36136,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36241,7 +36241,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36346,7 +36346,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36451,7 +36451,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36552,7 +36552,7 @@ slbRealServerFarmName.&lt;/p>&lt;table>
 			slbName=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/ciscoSlbRealServerStateChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%:%parm[#4]%:%parm[#5]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36585,7 +36585,7 @@ in that minute.&lt;/p>&lt;table>
 			cshMonSocketOverusageCount=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36620,7 +36620,7 @@ minute.&lt;/p>&lt;table>
 			cshMonSocketOverusageCount=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" clear-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/cshMonSocketOveruse:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" clear-key="uei.opennms.org/vendor/cisco/enhancedSlb/traps/cshMonSocketOveruse:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36668,7 +36668,7 @@ of a stack port has changed.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/cswStackPortChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/cswStackPortChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36716,7 +36716,7 @@ of a stack port has changed.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackPortChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackPortChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36764,7 +36764,7 @@ of a stack port has changed.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackPortChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackPortChange:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36808,7 +36808,7 @@ of a stack port has changed.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36839,7 +36839,7 @@ object to indicate the new master ID.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36886,7 +36886,7 @@ cswSwitchState object will indicate the type of mismatch.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36923,7 +36923,7 @@ ring has changed.&lt;/p>&lt;table>
 			cswRingRedundant=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/cswStackRingRedundant:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/cswStackRingRedundant:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36960,7 +36960,7 @@ ring has changed.&lt;/p>&lt;table>
 			cswRingRedundant=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackRingRedundant:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackRingRedundant:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -36993,7 +36993,7 @@ ring has changed.&lt;/p>&lt;table>
 			cswRingRedundant=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackRingRedundant:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/cisco/traps/cswStackRingRedundant:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37023,7 +37023,7 @@ stack.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/cswStackMemberRemoved:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/cswStackMemberRemoved:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37053,7 +37053,7 @@ from the stack.&lt;/p>&lt;table>
 			cswSwitchNumCurrent=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37151,7 +37151,7 @@ of cesServerFarmRserverPort.&lt;/p>&lt;table>
 			cesRserverIpAddress=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRealServerStateDown:dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRealServerStateDown:dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37254,7 +37254,7 @@ of cesServerFarmRserverPort.&lt;/p>&lt;table>
 			cesRserverIpAddress=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37374,7 +37374,7 @@ change is not due to probe failure.&lt;/p>&lt;table>
 			cesProbeName=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRealServerStateChangeDown:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRealServerStateChangeDown:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37510,7 +37510,7 @@ change is not due to probe failure.&lt;/p>&lt;table>
 			cesProbeName=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37626,7 +37626,7 @@ change is not due to probe failure.&lt;/p>&lt;table>
 			cesProbeName=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37707,7 +37707,7 @@ identified in cesRserverTable changes state to
 			cesRserverIpAddress=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRealServerStateDown:dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRealServerStateDown:dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37788,7 +37788,7 @@ identified in cesRserverTable changes to
 			cesRserverIpAddress=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -37891,7 +37891,7 @@ change is not due to probe failure.&lt;/p>&lt;table>
 			cesProbeName=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRserverStateChangeDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/enhancedSlb/traps/cesRserverStateChangeDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38011,7 +38011,7 @@ change is not due to probe failure.&lt;/p>&lt;table>
 			cesProbeName=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38110,7 +38110,7 @@ change is not due to probe failure.&lt;/p>&lt;table>
 			cesProbeName=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38143,7 +38143,7 @@ in that minute.&lt;/p>&lt;table>
 			cshMonSocketOverusageCount=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38178,7 +38178,7 @@ minute.&lt;/p>&lt;table>
 			cshMonSocketOverusageCount=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/slbHealthMon/traps/cshMonSocketOveruse:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/slbHealthMon/traps/cshMonSocketOveruse:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38208,7 +38208,7 @@ when a virtual context is added.&lt;/p>&lt;table>
 			cmNotifVirtContextName=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38238,7 +38238,7 @@ when a virtual context is removed/deleted.&lt;/p>&lt;table>
 			cmNotifVirtContextName=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -38795,7 +38795,7 @@ link.&lt;/p>&lt;table>
          <decode varbindvalue="233" varbinddecodedstring="aviciOpticalEther"/>
          <decode varbindvalue="234" varbinddecodedstring="atmbond"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -39351,7 +39351,7 @@ information of the communication link.&lt;/p>&lt;table>
          <decode varbindvalue="233" varbinddecodedstring="aviciOpticalEther"/>
          <decode varbindvalue="234" varbinddecodedstring="atmbond"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/ciscoIfExtensionMIB/traps/cieLinkDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/ciscoIfExtensionMIB/traps/cieLinkDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -40442,6 +40442,6 @@ specified by cieDelayedLinkUpDownDelay.&lt;/p>&lt;table>
          <decode varbindvalue="267" varbinddecodedstring="domainIdsInvalid"/>
          <decode varbindvalue="268" varbinddecodedstring="fabricNameInvalid"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

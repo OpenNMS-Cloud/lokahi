@@ -44,7 +44,7 @@ configured time interval.&lt;/p>&lt;table>
 			ciscoIpMRouteHeartBeatCount=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -103,7 +103,7 @@ event only.&lt;/p>&lt;table>
 			ciscoMvpnGenOperStatusChange=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -162,7 +162,7 @@ event only.&lt;/p>&lt;table>
 			ciscoMvpnGenOperStatusChange=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -221,7 +221,7 @@ event only.&lt;/p>&lt;table>
 			ciscoMvpnGenOperStatusChange=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -280,7 +280,7 @@ event only.&lt;/p>&lt;table>
 			ciscoMvpnGenOperStatusChange=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -335,7 +335,7 @@ event only.&lt;/p>&lt;table>
 			ciscoMvpnGenOperStatusChange=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -376,7 +376,7 @@ was involved in the generation of this notification.&lt;/p>&lt;table>
 			pimInterfaceStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[names-all]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/ciscoPimMib/traps/ciscoPimInterfaceDown:%nodeid%:%dpname%:%parm[names-all]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[names-all]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/ciscoPimMib/traps/ciscoPimInterfaceDown:%nodeid%:%dpname%:%parm[names-all]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -417,7 +417,7 @@ was involved in the generation of this notification.&lt;/p>&lt;table>
 			pimInterfaceStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[names-all]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[names-all]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -479,7 +479,7 @@ exists, enable this notification with utmost care.&lt;/p>&lt;table>
 			cpimRPMappingChangeType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -541,7 +541,7 @@ exists, enable this notification with utmost care.&lt;/p>&lt;table>
 			cpimRPMappingChangeType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -603,7 +603,7 @@ exists, enable this notification with utmost care.&lt;/p>&lt;table>
 			cpimRPMappingChangeType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -665,7 +665,7 @@ exists, enable this notification with utmost care.&lt;/p>&lt;table>
 			cpimRPMappingChangeType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -723,7 +723,7 @@ exists, enable this notification with utmost care.&lt;/p>&lt;table>
 			cpimRPMappingChangeType=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -811,7 +811,7 @@ packet.&lt;/p>&lt;table>
 			cpimInvalidRegisterMsgsRcvd=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -899,6 +899,6 @@ packet.&lt;/p>&lt;table>
 			cpimInvalidJoinPruneMsgsRcvd=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

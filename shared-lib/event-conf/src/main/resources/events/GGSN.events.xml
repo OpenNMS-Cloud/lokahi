@@ -79,7 +79,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -161,7 +161,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -243,7 +243,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -325,7 +325,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -407,7 +407,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -489,7 +489,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -567,7 +567,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -645,7 +645,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -723,7 +723,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -801,7 +801,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -875,7 +875,7 @@ the nature of the problem.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -954,7 +954,7 @@ of the change.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1033,7 +1033,7 @@ of the change.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1112,7 +1112,7 @@ of the change.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1191,7 +1191,7 @@ of the change.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1266,7 +1266,7 @@ of the change.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1338,6 +1338,6 @@ of the change.&lt;/p>&lt;table>
 			ggsnAlarmDescription=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="ggsnAlarmsClear:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]" auto-clean="false"/>
+      <alert-data reduction-key="ggsnAlarmsClear:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="ggsnAlarms:%dpname%:%nodeid%:%parm[#1]" auto-clean="false"/>
    </event>
 </events>

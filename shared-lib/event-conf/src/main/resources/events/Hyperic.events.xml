@@ -11,6 +11,6 @@
       &lt;p>Hyperic HQ Alert: %parm[action.longReason]% &lt;/p>
     </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%parm[platform.id]%:%parm[resource.id]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%parm[platform.id]%:%parm[resource.id]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

@@ -28,7 +28,7 @@ threshold. The error message is &lt;strong>%parm[#8]%&lt;/strong>.
                         %parm[#6]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -59,7 +59,7 @@ The error message is &lt;strong>%parm[#7]%&lt;/strong>.
                         %parm[#6]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -90,7 +90,7 @@ The error message is &lt;strong>%parm[#7]%&lt;/strong>.
                         %parm[#6]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -121,7 +121,7 @@ The log file %parm[#7]% contains entries matching the pattern &quot;%parm[#8]%&q
                         in log file %parm[#7]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -152,7 +152,7 @@ The error message is &lt;strong>%parm[#7]%&lt;/strong>.
                         %parm[#6]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -182,7 +182,7 @@ The error message is &lt;strong>%parm[#7]%&lt;/strong>.
                         %parm[#6]%&lt;/p>
                 </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="2" clear-key="uei.opennms.org/standard/netsnmp/traps/procTableAlertRising:%dpname%:%nodeid%:%parm[#6]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="2" clear-key="uei.opennms.org/standard/netsnmp/traps/procTableAlertRising:%dpname%:%nodeid%:%parm[#6]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -214,7 +214,7 @@ The error message is &lt;strong>%parm[#8]%&lt;/strong>.
                         %parm[#6]% (%parm[#7]% percent full)&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -244,7 +244,7 @@ The filesystem is now %parm[#7]% percent full.
                         Net-SNMP Event: A dskTable falling alert has generated for filesystem %parm[#6]%. It is now %parm[#7]% percent full&lt;/p>
                 </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#6]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>

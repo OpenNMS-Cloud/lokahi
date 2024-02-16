@@ -51,7 +51,7 @@
 			accessRequestResult=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -158,7 +158,7 @@
 			callConnectedFrom=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -357,7 +357,7 @@
 			cAMissingFileName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -391,7 +391,7 @@
 			certDecryptErrorFileName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -430,7 +430,7 @@
 			certExpiredExpiredTime=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -474,7 +474,7 @@
 			certExpiringExpiresIn=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -508,7 +508,7 @@
 			certFormatFileName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -542,7 +542,7 @@
 			certMissingFileName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -576,7 +576,7 @@
 			certNoPrivateKeyFileName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -615,7 +615,7 @@
 			certNotYetValidStartTime=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -649,7 +649,7 @@
 			cRLMissingFileName=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -683,7 +683,7 @@
 			directoryFailedReason=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -722,7 +722,7 @@
 			dosSIPPolicyTrapMissive=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -761,7 +761,7 @@
 			dosTransportPolicyTrapMissive=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -800,7 +800,7 @@
 			dosUrlPolicyTrapMissive=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -839,7 +839,7 @@
 			fileTransferAntiVirusFailFilename=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -883,7 +883,7 @@
 			iMContentScanTrapAction=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -917,7 +917,7 @@
 			licenseExpiringExpires=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -956,7 +956,7 @@
 			mediaVerificationFailFailure=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1034,7 +1034,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1112,7 +1112,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1190,7 +1190,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1268,7 +1268,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1346,7 +1346,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1424,7 +1424,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1502,7 +1502,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1580,7 +1580,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1658,7 +1658,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1736,7 +1736,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1814,7 +1814,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1892,7 +1892,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1970,7 +1970,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2048,7 +2048,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2126,7 +2126,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2204,7 +2204,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2282,7 +2282,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2360,7 +2360,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2438,7 +2438,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2516,7 +2516,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2594,7 +2594,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2672,7 +2672,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2750,7 +2750,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2828,7 +2828,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2906,7 +2906,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2984,7 +2984,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3062,7 +3062,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3140,7 +3140,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3218,7 +3218,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3296,7 +3296,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3374,7 +3374,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3452,7 +3452,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3530,7 +3530,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3608,7 +3608,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3686,7 +3686,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3764,7 +3764,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3842,7 +3842,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3920,7 +3920,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3998,7 +3998,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4076,7 +4076,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4154,7 +4154,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4232,7 +4232,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4310,7 +4310,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4388,7 +4388,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4466,7 +4466,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4544,7 +4544,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4622,7 +4622,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4700,7 +4700,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4778,7 +4778,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4856,7 +4856,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4934,7 +4934,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5012,7 +5012,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5090,7 +5090,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5168,7 +5168,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5246,7 +5246,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5324,7 +5324,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5402,7 +5402,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5480,7 +5480,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5558,7 +5558,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5636,7 +5636,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5714,7 +5714,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5792,7 +5792,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5870,7 +5870,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5948,7 +5948,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6026,7 +6026,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6104,7 +6104,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6182,7 +6182,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6260,7 +6260,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6338,7 +6338,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6416,7 +6416,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6494,7 +6494,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6572,7 +6572,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6650,7 +6650,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6728,7 +6728,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6806,7 +6806,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6884,7 +6884,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6962,7 +6962,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7040,7 +7040,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7118,7 +7118,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7196,7 +7196,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7274,7 +7274,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7352,7 +7352,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7430,7 +7430,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7508,7 +7508,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7586,7 +7586,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7664,7 +7664,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7742,7 +7742,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7820,7 +7820,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7898,7 +7898,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7976,7 +7976,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8054,7 +8054,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8132,7 +8132,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8210,7 +8210,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8288,7 +8288,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8366,7 +8366,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8444,7 +8444,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8522,7 +8522,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8600,7 +8600,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8678,7 +8678,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8756,7 +8756,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8834,7 +8834,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8912,7 +8912,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8990,7 +8990,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9068,7 +9068,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9146,7 +9146,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9224,7 +9224,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9302,7 +9302,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9380,7 +9380,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9458,7 +9458,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9536,7 +9536,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9614,7 +9614,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9692,7 +9692,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9770,7 +9770,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9848,7 +9848,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9926,7 +9926,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10004,7 +10004,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10082,7 +10082,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10160,7 +10160,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10238,7 +10238,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10316,7 +10316,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10394,7 +10394,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10472,7 +10472,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10550,7 +10550,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10628,7 +10628,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10706,7 +10706,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10784,7 +10784,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10862,7 +10862,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10940,7 +10940,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11010,7 +11010,7 @@
 			monitorAlertValue=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11093,7 +11093,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11192,7 +11192,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11242,7 +11242,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11292,7 +11292,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11342,7 +11342,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11392,7 +11392,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11442,7 +11442,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11492,7 +11492,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11542,7 +11542,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11592,7 +11592,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11642,7 +11642,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11692,7 +11692,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11742,7 +11742,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11792,7 +11792,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11842,7 +11842,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11888,7 +11888,7 @@
 			processDownProcess=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11955,7 +11955,7 @@
 			recordCompleteFileName=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12059,7 +12059,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12163,7 +12163,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12267,7 +12267,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12371,7 +12371,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12475,7 +12475,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12579,7 +12579,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12683,7 +12683,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12787,7 +12787,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12887,7 +12887,7 @@
 			sensorEventDescription=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12936,7 +12936,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -12984,7 +12984,7 @@
 			sipServerEventState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -13032,7 +13032,7 @@
 			sipServerEventState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -13080,7 +13080,7 @@
 			sipServerEventState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -13128,7 +13128,7 @@
 			sipServerEventState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendors/Covergence/CXC-MIB/sipServerEvent:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -13200,7 +13200,7 @@
 			storageDeviceFullDiskFree=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <!--
       The following definitions are to work around a bug that
@@ -13258,7 +13258,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -13311,7 +13311,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -13364,7 +13364,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13417,7 +13417,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13470,7 +13470,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13523,7 +13523,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13576,7 +13576,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13629,7 +13629,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13682,7 +13682,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13735,7 +13735,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13788,7 +13788,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13841,7 +13841,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13894,7 +13894,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -13947,7 +13947,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14000,7 +14000,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14053,7 +14053,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14106,7 +14106,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14159,7 +14159,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14212,7 +14212,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14265,7 +14265,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14318,7 +14318,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14371,7 +14371,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14424,7 +14424,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14477,7 +14477,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14542,7 +14542,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -14599,7 +14599,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14652,7 +14652,7 @@
 			sIPCallFailAction=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14676,7 +14676,7 @@
 			systemHalt trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14727,7 +14727,7 @@
 			webServiceAvailablityChangeOldState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14778,7 +14778,7 @@
 			webServiceAvailablityChangeOldState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14829,6 +14829,6 @@
 			webServiceAvailablityChangeOldState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/Covergence/CXC-MIB/webServiceAvailablityChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
 </events>

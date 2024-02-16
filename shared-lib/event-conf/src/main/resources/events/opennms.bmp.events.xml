@@ -6,9 +6,9 @@
                 Reason: %parm[type]%. Error: %parm[error]%.&lt;/p></descr>
       <logmsg dest="logndisplay">Router has lost the BGP session to Peer %parm[address]% at AS%parm[as]% (Router ID: %parm[id]%).</logmsg>
       <severity>Minor</severity>
-       <alarm-data reduction-key="uei.opennms.org/bmp/peerDown:%nodeid%:%interface%:%parm[as]%:%parm[id]%"
-                   alarm-type="1" auto-clean="false">
-       </alarm-data>
+       <alert-data reduction-key="uei.opennms.org/bmp/peerDown:%nodeid%:%interface%:%parm[as]%:%parm[id]%"
+                   alert-type="1" auto-clean="false">
+       </alert-data>
    </event>
    <event>
       <uei>uei.opennms.org/bmp/peerUp</uei>
@@ -16,8 +16,8 @@
        <descr>&lt;p>BGP session to Peer %parm[address]% at AS%parm[as]% established (Router ID: %parm[id]%).&lt;/p></descr>
        <logmsg dest="logndisplay">Router has established the BGP session to Peer %parm[address]% at AS%parm[as]% (Router ID: %parm[id]%).</logmsg>
        <severity>Normal</severity>
-      <alarm-data reduction-key="uei.opennms.org/bmp/peerUp:%nodeid%:%interface%:%parm[as]%:%parm[id]%"
+      <alert-data reduction-key="uei.opennms.org/bmp/peerUp:%nodeid%:%interface%:%parm[as]%:%parm[id]%"
                   clear-key="uei.opennms.org/bmp/peerDown:%nodeid%:%interface%:%parm[as]%:%parm[id]%"
-                  alarm-type="2" auto-clean="false"/>
+                  alert-type="2" auto-clean="false"/>
    </event>
 </events>

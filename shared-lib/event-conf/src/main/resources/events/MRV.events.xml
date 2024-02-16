@@ -46,7 +46,7 @@ invalid password was used in the current protocol session.&lt;/p>&lt;table>
 			nbsTrapHostIpAddress=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -105,7 +105,7 @@ wrong access attempt is occured.&lt;/p>&lt;table>
 			nbsTrapHostIpAddress=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -135,7 +135,7 @@ state of the device is changed.&lt;/p>&lt;table>
 			nbsTrapRCMredundancyState=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -169,7 +169,7 @@ mode of the device is changed.&lt;/p>&lt;table>
 			nbsDevSNMPAccessMode=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -203,7 +203,7 @@ is rejected due to SNMP Access Mode of the Device.&lt;/p>&lt;table>
 			nbsDevSNMPAccessMode=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -233,7 +233,7 @@ power supply unit changes it's state from notActive to active&lt;/p>&lt;table>
 			nbsDevPSIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/powerSupplyDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/powerSupplyDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -263,7 +263,7 @@ power supply unit changes it's state from active to notActive&lt;/p>&lt;table>
 			nbsDevPSIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -299,7 +299,7 @@ table.&lt;/p>&lt;table>
 			nbMacScrRunPortLockingMAC=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -340,7 +340,7 @@ for the Port is exceeded.&lt;/p>&lt;table>
 			nbVlansRunPortMacLimitActionDescription=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -370,7 +370,7 @@ Link status was changed on the GER Module.&lt;/p>&lt;table>
 			nbsStackSlotSpecNumber=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -400,7 +400,7 @@ power supply unit changes it's state from notActive to active&lt;/p>&lt;table>
 			oaLdDevPSIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/powerSupplyDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/powerSupplyDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -430,7 +430,7 @@ power supply unit changes it's state from active to notActive&lt;/p>&lt;table>
 			oaLdDevPSIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -460,7 +460,7 @@ Fan unit changes it's state from notActive or fail to active&lt;/p>&lt;table>
 			oaLdDevFANIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/fanDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/fanDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -490,7 +490,7 @@ Fan unit changes it's state from active to notActive or fail&lt;/p>&lt;table>
 			oaLdDevFANIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -520,7 +520,7 @@ a card is inserted into the chassis&lt;/p>&lt;table>
 			oaLdCardIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/configChangeOut:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/configChangeOut:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -563,7 +563,7 @@ a transponder card changes it's Access receive indication&lt;/p>&lt;table>
 			oaLdCardOptAccRx=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderAccessRx:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderAccessRx:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -602,7 +602,7 @@ a transponder card changes it's Access receive indication&lt;/p>&lt;table>
 			oaLdCardOptAccRx=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -645,7 +645,7 @@ a transponder card changes it's WDM receive indication&lt;/p>&lt;table>
 			oaLdCardOptDwdmRx=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderWdmRx:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderWdmRx:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -684,7 +684,7 @@ a transponder card changes it's WDM receive indication&lt;/p>&lt;table>
 			oaLdCardOptDwdmRx=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -714,7 +714,7 @@ a card is taken out of the chassis&lt;/p>&lt;table>
 			oaLdCardIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -759,7 +759,7 @@ a transponder card changes it's LoopBack state&lt;/p>&lt;table>
 			oaLdCardLoopBack=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderCardLoopBack:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderCardLoopBack:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -800,7 +800,7 @@ a transponder card changes it's LoopBack state&lt;/p>&lt;table>
 			oaLdCardLoopBack=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderCardLoopBack:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/transponderCardLoopBack:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -826,7 +826,7 @@ from Secondary to Primary&lt;/p>&lt;table>&lt;/table></descr>
 			switchPrimary trap received&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/switchSecondary:%nodeid%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/switchSecondary:%nodeid%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -890,7 +890,7 @@ on redundant card the Primary fiber Receive status is changed&lt;/p>&lt;table>
 			oaLdRedOptPrimaryRx=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/redundantCardSecondaryRx:%nodeid%:%parm[#1]%"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/redundantCardSecondaryRx:%nodeid%:%parm[#1]%"/>
    </event>
    <event>
       <mask>
@@ -976,7 +976,7 @@ the link status of a port at the card is changed&lt;/p>&lt;table>
 			oaLdCardPortsLink=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/cardPortsLink:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/cardPortsLink:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1020,7 +1020,7 @@ the link status of a port at the card is changed&lt;/p>&lt;table>
 			oaLdCardPortsLink=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1065,7 +1065,7 @@ exceeds the value defined in oaVdslMaxOKBerValue.&lt;/p>&lt;table>
 			oaVdslBerMinValueToReport=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1095,7 +1095,7 @@ VDSL Link changes it's state to UP.&lt;/p>&lt;table>
 			ifIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/vdslPortLinkDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/vdslPortLinkDown:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1125,7 +1125,7 @@ VDSL Link changes it's state to DOWN.&lt;/p>&lt;table>
 			ifIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1166,7 +1166,7 @@ to specific sub-trunk.&lt;/p>&lt;table>
 			oaVoiceSubTrunkIndex=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1207,7 +1207,7 @@ to specific sub-trunk.&lt;/p>&lt;table>
 			oaVoiceSubTrunkIndex=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/oaVoiceBrokenRtpConnection:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/oaVoiceBrokenRtpConnection:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1275,7 +1275,7 @@ not present.&lt;/p>&lt;table>
 			oaATerTxUserDataStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendors/MRV/oaATerTxUserDataStatusAlarm:%nodeid%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendors/MRV/oaATerTxUserDataStatusAlarm:%nodeid%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1308,7 +1308,7 @@ not present.&lt;/p>&lt;table>
 			oaATerTxUserDataStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1340,7 +1340,7 @@ APD current = arg[0] / 100uA&lt;/p>&lt;table>
 			oaATerRxAPDCurrent=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1372,7 +1372,7 @@ temperature = arg[0] / 100 degrees C&lt;/p>&lt;table>
 			oaATerRxTemperature=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1404,6 +1404,6 @@ temperature = arg[0] / 100 degrees C&lt;/p>&lt;table>
 			oaATerTxTemperature=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

@@ -34,7 +34,7 @@ object in this MIB has changed to 'operational(3)'.&lt;/p>&lt;table>
 			sysOperationalStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/operationalStatusNotOperational:%dpname%:%nodeid%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/operationalStatusNotOperational:%dpname%:%nodeid%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -71,7 +71,7 @@ in this MIB has changed to 'warning(4)'.&lt;/p>&lt;table>
 			sysOperationalStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/pcube/traps/operationalStatusNotOperational:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/pcube/traps/operationalStatusNotOperational:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -108,7 +108,7 @@ this MIB has changed to 'failure(5)'.&lt;/p>&lt;table>
 			sysOperationalStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/pcube/traps/operationalStatusNotOperational:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/pcube/traps/operationalStatusNotOperational:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -134,7 +134,7 @@ due to a fatal event.&lt;/p>&lt;table>&lt;/table></descr>
 			systemResetTrap trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -170,7 +170,7 @@ MIB has changed to the 'on(3)' state
 			pchassisTempAlarm=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -206,7 +206,7 @@ MIB has changed to the 'off(2)' state
 			pchassisTempAlarm=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/chassisTempAlarmOnTrap:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/chassisTempAlarmOnTrap:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -242,7 +242,7 @@ MIB has changed to the 'on(3)' state
 			pchassisVoltageAlarm=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -277,7 +277,7 @@ MIB has changed to the 'on(3)' state.&lt;/p>&lt;table>
 			pchassisFansAlarm=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -312,7 +312,7 @@ in this MIB has changed to the 'on(3)' state.&lt;/p>&lt;table>
 			pchassisPowerSupplyAlarm=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -417,7 +417,7 @@ object in this MIB has changed to 'up(2)'.&lt;/p>&lt;table>
 			rdrFormatterDestConnectionStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/rdrConnectionDownTrap:%dpname%:%nodeid%:%parm[#1]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/rdrConnectionDownTrap:%dpname%:%nodeid%:%parm[#1]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -457,7 +457,7 @@ object in this MIB has changed to 'down(3)'.&lt;/p>&lt;table>
 			rdrFormatterDestConnectionStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -636,7 +636,7 @@ has changed to 'bypass(2)'.&lt;/p>&lt;table>
 			linkOperMode=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="linkMode:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="linkMode:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -673,7 +673,7 @@ in this MIB has changed to 'forwarding(3)'.&lt;/p>&lt;table>
 			linkOperMode=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="linkMode:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="linkMode:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -710,7 +710,7 @@ in this MIB has changed to 'cutoff(4)'.&lt;/p>&lt;table>
 			linkOperMode=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="linkMode:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="linkMode:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -869,7 +869,7 @@ object in this MIB has changed to 'sniffing(5)'.&lt;/p>&lt;table>
 			linkOperMode=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="linkMode:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="linkMode:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1009,7 +1009,7 @@ manager is broken.&lt;/p>&lt;table>
 			pmoduleIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1040,7 +1040,7 @@ is up and working.&lt;/p>&lt;table>
 			pmoduleIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/moduleSmConnectionDownTrap:%dpname%:%nodeid%:%parm[#1]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/pcube/traps/moduleSmConnectionDownTrap:%dpname%:%nodeid%:%parm[#1]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1079,7 +1079,7 @@ that the moduleOperStatus has changed its value.&lt;/p>&lt;table>
 			pmoduleOperStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1127,7 +1127,7 @@ down was released.&lt;/p>&lt;table>
 			pportOperStatus=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1377,7 +1377,7 @@ describing the problem.&lt;/p>&lt;table>
 			pcubeSeEventGenericString1=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>

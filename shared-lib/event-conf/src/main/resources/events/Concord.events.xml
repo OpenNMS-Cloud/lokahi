@@ -63,7 +63,7 @@ Diagnostic Monitor. No action is required.&lt;/p>&lt;table>
 	nhElementId=%parm[#8]%&lt;/p>
 	</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#8]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#8]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -120,7 +120,7 @@ Diagnostic Monitor.&lt;/p>&lt;table>
 	nhdServerName=%parm[#6]%&lt;/p>
 	</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -177,7 +177,7 @@ Diagnostic Monitor.&lt;/p>&lt;table>
 	nhdServerName=%parm[#6]%&lt;/p>
 	</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -234,7 +234,7 @@ Diagnostic Monitor.&lt;/p>&lt;table>
 	nhdServerName=%parm[#6]%&lt;/p>
 	</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#6]%:%parm[#3]:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -319,7 +319,7 @@ exceptions for an element.&lt;/p>&lt;table>
 	nhdServerIPv6=%parm[#12]%&lt;/p>
 	</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#5]%:%parm[#8]%:%parm[#3]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#5]%:%parm[#8]%:%parm[#3]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -602,7 +602,7 @@ sends detailed information about an alarm.&lt;/p>&lt;table>
          <decode varbindvalue="4" varbinddecodedstring="major"/>
          <decode varbindvalue="5" varbinddecodedstring="critical"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#2]%:%parm[#22]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#2]%:%parm[#22]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -894,7 +894,7 @@ the corresponding alarm no longer exist.&lt;/p>&lt;table>
          <decode varbindvalue="4" varbinddecodedstring="major"/>
          <decode varbindvalue="5" varbinddecodedstring="critical"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#2]%:%parm[#24]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Concord/traps/nhLiveAlarm:%nodeid%:%dpname%:%parm[#2]%:%parm[#24]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#2]%:%parm[#24]%" alert-type="2" clear-key="uei.opennms.org/vendor/Concord/traps/nhLiveAlarm:%nodeid%:%dpname%:%parm[#2]%:%parm[#24]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1060,7 +1060,7 @@ and exceptions sent before this time will NOT be cleared automatically. All trap
 	nhServerIPv6=%parm[#6]%&lt;/p>
 	</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>

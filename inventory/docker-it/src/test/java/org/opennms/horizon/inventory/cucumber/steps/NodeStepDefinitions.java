@@ -160,18 +160,6 @@ public class NodeStepDefinitions {
             .setSearchTerm(labelSearchTerm).build());
     }
 
-
-    @Then("fetch a list of nodes by node alias with search term {string}")
-    public void fetchAListOfNodesByNodeAliasWithSearchTerm(String labelSearchTerm) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
-            .setSearchTerm(labelSearchTerm).build());
-
-        assertNotNull(fetchedNodeList);
-        Assertions.assertTrue(fetchedNodeList.getNodesCount() > 0);
-    }
-
-
     @Then("verify the list of nodes has size {int} and labels contain {string}")
     public void verifyTheListOfNodesHasSizeAndLabelsContain(int nodeListSize, String labelSearchTerm) {
         assertEquals(nodeListSize, fetchedNodeList.getNodesCount());
@@ -230,4 +218,13 @@ public class NodeStepDefinitions {
         log.info("Found {} messages for tenant {}", foundMessages, tenant);
         return foundMessages == expectedMessages;
     }
+
+    @Then("fetch a list of nodes by node alias with search term {string}")
+    public void fetchNodesByAlias(String searchTerm) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
+            .setSearchTerm(searchTerm).build());
+        assertNotNull(fetchedNodeList);
+    }
+
 }

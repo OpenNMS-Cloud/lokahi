@@ -43,6 +43,7 @@ import java.util.Optional;
 @Repository
 public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByTenantId(String tenantId);
+    List<Node> findByTenantIdAndDiscoveryIdsContains(String tenantId, long discoveryId );
     Optional<Node> findByIdAndTenantId(long id, String tenantID);
     List<Node> findByNodeLabel(String label);
     List<Node> findByTenantIdAndMonitoredStateEquals(String tenantId, MonitoredState monitoredState);

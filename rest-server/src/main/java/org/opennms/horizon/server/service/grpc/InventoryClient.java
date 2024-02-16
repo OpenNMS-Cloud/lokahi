@@ -151,6 +151,7 @@ public class InventoryClient {
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         var result = icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
             .deleteActiveDiscovery(Int64Value.of(discoveryId));
+
         return result.getValue();
     }
 

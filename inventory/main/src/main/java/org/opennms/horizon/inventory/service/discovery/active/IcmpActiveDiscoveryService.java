@@ -37,8 +37,10 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
@@ -56,6 +58,7 @@ import java.util.Optional;
 public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationService {
 
     private final IcmpActiveDiscoveryRepository repository;
+    private final NodeRepository nodeRepository;
     private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final MonitoringLocationService monitoringLocationService;
     private final IcmpActiveDiscoveryMapper mapper;
@@ -122,6 +125,10 @@ public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationServ
                     .addAllTagIds(tags.stream().map(Tag::getId).map(Int64Value::of).toList())
                 .build());
             repository.deleteById(icmpActiveDiscovery.getId());
+            // updating nodes containing discovery id
+            List<Node> nodeList = nodeRepository.findByTenantIdAndDiscoveryIdsContains(tenantId, id);
+            nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+            nodeRepository.saveAll(nodeList);
             return true;
         } catch (Exception e) {
             log.error("Exception while deleting active discovery with id {}", id, e);

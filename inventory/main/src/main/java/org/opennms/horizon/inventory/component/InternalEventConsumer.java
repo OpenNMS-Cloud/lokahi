@@ -96,6 +96,7 @@ public class InternalEventConsumer {
                     .setMonitoredState(MonitoredState.DETECTED);
                 var passiveDiscovery = passiveDiscoveryService.getPassiveDiscovery(Long.parseLong(locationId), tenantId);
                 if (passiveDiscovery != null) {
+                    nodeCreateBuilder.addDiscoveryIds(passiveDiscovery.getId());
                     var list = ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
                         .setPassiveDiscoveryId(passiveDiscovery.getId()).build()).build();
                     var tagList = tagService.getTagsByEntityId(tenantId, list);

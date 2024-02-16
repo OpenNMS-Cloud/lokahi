@@ -99,8 +99,8 @@ public class GrpcNodeService {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
     }
 
-    @GraphQLQuery(name = "findDiscoveriesByNodeId")
-    public Mono<ActiveDiscoveryList> findDiscoveriesByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    @GraphQLQuery(name = "getDiscoveriesByNodeId")
+    public Mono<ActiveDiscoveryList> getDiscoveriesByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)));
     }
 

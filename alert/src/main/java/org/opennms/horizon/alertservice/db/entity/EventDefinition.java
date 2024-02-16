@@ -63,4 +63,10 @@ public class EventDefinition implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
+
+    @Column(name = "vendor")
+    private String vendor;
+
+    @Column(name = "enterprise_id")
+    private String enterpriseId;
 }

@@ -3,6 +3,9 @@
     <li v-if="node.monitoredState === 'MONITORED'" @click="onLineChart" data-test="line-chart" class="pointer">
       <Icon :icon="lineChartIcon" />
     </li>
+    <li @click="onNodeStatus" data-test="node-status" class="pointer">
+      <Icon :icon="infoIcon" />
+    </li>
     <li @click="onWarning" data-test="warning" class="pointer">
       <Icon :icon="warningIcon" />
     </li>
@@ -28,6 +31,7 @@
 <script lang="ts" setup>
 import Warning from '@featherds/icon/notification/Warning'
 import Delete from '@featherds/icon/action/Delete'
+import Info from '@featherds/icon/action/Info'
 import GraphIcon from '@/components/Common/GraphIcon.vue'
 import { IIcon, InventoryItem } from '@/types'
 import { ModalPrimary } from '@/types/modal'
@@ -62,6 +66,19 @@ const lineChartIcon: IIcon = {
   cursorHover: true
 }
 
+const onNodeStatus = () => {
+  router.push({
+    name: 'Node Status',
+    params: { id: props.node.id }
+  })
+}
+const infoIcon: IIcon = {
+  image: markRaw(Info),
+  tooltip: 'Node Status',
+  size: 1.5,
+  cursorHover: true
+}
+
 const onWarning = () => {
   router.push({
     name: 'Node',
@@ -70,7 +87,7 @@ const onWarning = () => {
 }
 const warningIcon: IIcon = {
   image: markRaw(Warning),
-  tooltip: 'Events/Alerts',
+  tooltip: 'Node Details',
   size: 1.5,
   cursorHover: true
 }

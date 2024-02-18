@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import NodeDetails from '@/containers/NodeDetails.vue'
 import NodeStatus from '@/containers/NodeStatus.vue'
 
 const router = createRouter({
@@ -50,8 +51,14 @@ const router = createRouter({
       component: () => import('@/containers/Locations.vue')
     },
     {
+      // older node page
       path: '/node/:id',
       name: 'Node',
+      component: NodeDetails
+    },
+    {
+      path: '/node-status/:id',
+      name: 'Node Status',
       component: NodeStatus
     },
     {

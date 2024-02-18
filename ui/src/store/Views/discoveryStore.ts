@@ -227,7 +227,8 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       const discoveryMutations = useDiscoveryMutations()
       this.loading = true
       const isValid = await this.validateDiscovery()
-      if (isValid){
+
+      if (isValid) {
         if (this.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps){
           await discoveryMutations.upsertPassiveDiscovery({passiveDiscovery:discoveryFromClientToServer(this.selectedDiscovery)})
         } else if (this.selectedDiscovery.type === DiscoveryType.Azure) {
@@ -245,21 +246,21 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         }
 
         this.validateOnKeyUp = false
-      }else {
+      } else {
         if (toRaw(this.validationErrors).name) {
           this.setSelectedDiscoveryValue('name', '')
         }
         if (toRaw(this.validationErrors).clientId) {
-          this.setMetaSelectedDiscoveryValue('clientId', '');
+          this.setMetaSelectedDiscoveryValue('clientId', '')
         }
         if (toRaw(this.validationErrors).clientSecret) {
-          this.setMetaSelectedDiscoveryValue('clientSecret', '');
+          this.setMetaSelectedDiscoveryValue('clientSecret', '')
         }
         if (toRaw(this.validationErrors).directoryId) {
-          this.setMetaSelectedDiscoveryValue('directoryId', '');
+          this.setMetaSelectedDiscoveryValue('directoryId', '')
         }
         if (toRaw(this.validationErrors).subscriptionId) {
-          this.setMetaSelectedDiscoveryValue('subscriptionId', '');
+          this.setMetaSelectedDiscoveryValue('subscriptionId', '')
         }
         this.validateOnKeyUp = true
       }

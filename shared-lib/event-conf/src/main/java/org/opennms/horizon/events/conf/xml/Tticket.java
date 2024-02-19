@@ -1,36 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.conf.xml;
-
-
-import org.opennms.horizon.events.util.ConfigUtils;
-import org.opennms.horizon.events.util.ValidateUsing;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -39,12 +28,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlValue;
 import java.io.Serializable;
 import java.util.Objects;
+import org.opennms.horizon.events.util.ConfigUtils;
+import org.opennms.horizon.events.util.ValidateUsing;
 
 /**
  * The trouble ticket info with state on/off determining if
  *  action is taken on the trouble ticket
  */
-@XmlRootElement(name="tticket")
+@XmlRootElement(name = "tticket")
 @XmlAccessorType(XmlAccessType.NONE)
 @ValidateUsing("eventconf.xsd")
 public class Tticket implements Serializable {
@@ -53,7 +44,7 @@ public class Tticket implements Serializable {
     @XmlValue
     private String m_content;
 
-    @XmlAttribute(name="state", required=false)
+    @XmlAttribute(name = "state", required = false)
     private StateType m_state;
 
     public String getContent() {
@@ -65,7 +56,7 @@ public class Tticket implements Serializable {
     }
 
     public StateType getState() {
-        return m_state == null? StateType.ON : m_state; // Default state is "on" according to the XSD
+        return m_state == null ? StateType.ON : m_state; // Default state is "on" according to the XSD
     }
 
     public void setState(final StateType state) {
@@ -84,10 +75,8 @@ public class Tticket implements Serializable {
         }
         if (obj instanceof Tticket) {
             final Tticket that = (Tticket) obj;
-            return Objects.equals(this.m_content, that.m_content) &&
-                    Objects.equals(this.m_state, that.m_state);
+            return Objects.equals(this.m_content, that.m_content) && Objects.equals(this.m_state, that.m_state);
         }
         return false;
     }
-
 }

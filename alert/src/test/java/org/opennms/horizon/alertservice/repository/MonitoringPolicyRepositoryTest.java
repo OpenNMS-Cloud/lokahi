@@ -1,33 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.repository;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -46,10 +42,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -77,16 +69,22 @@ class MonitoringPolicyRepositoryTest {
     private static final String WARM_START_TRAP_NAME = "SNMP Warm Start";
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
-        .withDatabaseName("alerts").withUsername("alerts")
-        .withPassword("password").withExposedPorts(5432);
+            .withDatabaseName("alerts")
+            .withUsername("alerts")
+            .withPassword("password")
+            .withExposedPorts(5432);
+
     static {
         postgres.start();
     }
 
     @DynamicPropertySource
     static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url",
-            () -> String.format("jdbc:postgresql://localhost:%d/%s", postgres.getFirstMappedPort(), postgres.getDatabaseName()));
+        registry.add(
+                "spring.datasource.url",
+                () -> String.format(
+                        "jdbc:postgresql://localhost:%d/%s",
+                        postgres.getFirstMappedPort(), postgres.getDatabaseName()));
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
     }
@@ -105,7 +103,7 @@ class MonitoringPolicyRepositoryTest {
         Assertions.assertNotNull(policyCreated1);
         policy.getTags().forEach(tag -> {
             var optional = tagRepository.findByTenantIdAndName(policyCreated1.getTenantId(), tag.getName());
-            if(optional.isPresent()) {
+            if (optional.isPresent()) {
                 tag = optional.get();
             }
             tag.getPolicies().add(policyCreated1);
@@ -119,13 +117,12 @@ class MonitoringPolicyRepositoryTest {
         Assertions.assertNotEquals(policyCreated1.getId(), policyCreated2.getId());
         policy2.getTags().forEach(tag -> {
             var optional = tagRepository.findByTenantIdAndName(policyCreated2.getTenantId(), tag.getName());
-            if(optional.isPresent()) {
+            if (optional.isPresent()) {
                 tag = optional.get();
             }
             tag.getPolicies().add(policyCreated2);
             tagRepository.save(tag);
         });
-
 
         var optionalDefaultTag = tagRepository.findByTenantIdAndName("opennms-prime", "Default");
         Assertions.assertTrue(optionalDefaultTag.isPresent());
@@ -135,37 +132,40 @@ class MonitoringPolicyRepositoryTest {
 
     MonitorPolicy createNewPolicy(MonitorPolicyMapper monitorPolicyMapper) {
         AlertEventDefinitionProto coldStartTrap = eventDefinitionRepository
-            .findByEventTypeAndName(EventType.SNMP_TRAP, COLD_START_TRAP_NAME)
-            .map(eventDefinitionMapper::entityToProto).orElseThrow();
+                .findByEventTypeAndName(EventType.SNMP_TRAP, COLD_START_TRAP_NAME)
+                .map(eventDefinitionMapper::entityToProto)
+                .orElseThrow();
         AlertEventDefinitionProto warmStartTrap = eventDefinitionRepository
-            .findByEventTypeAndName(EventType.SNMP_TRAP, WARM_START_TRAP_NAME)
-            .map(eventDefinitionMapper::entityToProto).orElseThrow();
+                .findByEventTypeAndName(EventType.SNMP_TRAP, WARM_START_TRAP_NAME)
+                .map(eventDefinitionMapper::entityToProto)
+                .orElseThrow();
         AlertConditionProto coldReboot = AlertConditionProto.newBuilder()
-            .setTriggerEvent(coldStartTrap)
-            .setCount(1)
-            .setSeverity(Severity.CRITICAL)
-            .build();
+                .setTriggerEvent(coldStartTrap)
+                .setCount(1)
+                .setSeverity(Severity.CRITICAL)
+                .build();
         AlertConditionProto warmReboot = AlertConditionProto.newBuilder()
-            .setTriggerEvent(warmStartTrap)
-            .setCount(1)
-            .setSeverity(Severity.MAJOR)
-            .build();
+                .setTriggerEvent(warmStartTrap)
+                .setCount(1)
+                .setSeverity(Severity.MAJOR)
+                .build();
         PolicyRuleProto defaultRule = PolicyRuleProto.newBuilder()
-            .setName("default")
-            .setComponentType(ManagedObjectType.NODE)
-            .addAllSnmpEvents(List.of(coldReboot, warmReboot))
-            .build();
+                .setName("default")
+                .setComponentType(ManagedObjectType.NODE)
+                .addAllSnmpEvents(List.of(coldReboot, warmReboot))
+                .build();
         MonitorPolicyProto defaultPolicy = MonitorPolicyProto.newBuilder()
-            .setName("default_policy")
-            .setMemo("Default SNMP event monitoring policy")
-            .setNotifyByEmail(true)
-            .setNotifyByPagerDuty(true)
-            .setNotifyByWebhooks(true)
-            .addRules(defaultRule)
-            .addTags("Default")
-            .addTags("Example")
-            .setNotifyInstruction("This is default policy notification") //todo: changed to something from environment
-            .build();
+                .setName("default_policy")
+                .setMemo("Default SNMP event monitoring policy")
+                .setNotifyByEmail(true)
+                .setNotifyByPagerDuty(true)
+                .setNotifyByWebhooks(true)
+                .addRules(defaultRule)
+                .addTags("Default")
+                .addTags("Example")
+                .setNotifyInstruction(
+                        "This is default policy notification") // todo: changed to something from environment
+                .build();
         MonitorPolicy policy = monitorPolicyMapper.map(defaultPolicy);
         String tenantId = "opennms-prime";
         policy.setTenantId(tenantId);
@@ -177,7 +177,7 @@ class MonitoringPolicyRepositoryTest {
                 e.setRule(r);
             });
         });
-        policy.getTags().forEach( tag -> {
+        policy.getTags().forEach(tag -> {
             tag.setTenantId(tenantId);
         });
         return policy;

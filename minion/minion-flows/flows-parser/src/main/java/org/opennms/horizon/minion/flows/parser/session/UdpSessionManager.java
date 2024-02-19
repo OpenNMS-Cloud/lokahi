@@ -1,33 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.session;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
@@ -43,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
+import lombok.Getter;
 import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 import org.opennms.horizon.minion.flows.parser.state.ExporterState;
@@ -51,16 +46,11 @@ import org.opennms.horizon.minion.flows.parser.state.OptionState;
 import org.opennms.horizon.minion.flows.parser.state.ParserState;
 import org.opennms.horizon.minion.flows.parser.state.TemplateState;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
-
-import lombok.Getter;
-
-
 public class UdpSessionManager {
     @VisibleForTesting
     @Getter
     final ConcurrentMap<TemplateKey, TimeWrapper<TemplateOptions>> templates = Maps.newConcurrentMap();
+
     private final Map<DomainKey, SequenceNumberTracker> sequenceNumbers = Maps.newConcurrentMap();
     private final Duration timeout;
     private final Supplier<SequenceNumberTracker> sequenceNumberTracker;
@@ -94,20 +84,22 @@ public class UdpSessionManager {
     public Object dumpInternalState() {
         final ParserState.Builder parser = ParserState.builder();
 
-        final Map<DomainKey, List<Map.Entry<TemplateKey, TimeWrapper<TemplateOptions>>>> sessions = this.templates.entrySet().stream()
-                .collect(Collectors.groupingBy(e -> e.getKey().observationDomainId));
+        final Map<DomainKey, List<Map.Entry<TemplateKey, TimeWrapper<TemplateOptions>>>> sessions =
+                this.templates.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().observationDomainId));
 
         for (final var entry : sessions.entrySet()) {
-            final String key = String.format("%s#%s",
-                    entry.getKey().sessionKey.getDescription(),
-                    entry.getKey().observationDomainId);
+            final String key = String.format(
+                    "%s#%s", entry.getKey().sessionKey.getDescription(), entry.getKey().observationDomainId);
 
             final ExporterState.Builder exporter = ExporterState.builder(key);
 
             entry.getValue().forEach(e -> {
-                exporter.withTemplate(TemplateState.builder(e.getKey().templateId).withInsertionTime(e.getValue().time));
-                e.getValue().wrapped.options.forEach((selectors, values) ->
-                        exporter.withOptions(OptionState.builder(e.getKey().templateId)
+                exporter.withTemplate(
+                        TemplateState.builder(e.getKey().templateId).withInsertionTime(e.getValue().time));
+                e.getValue()
+                        .wrapped
+                        .options
+                        .forEach((selectors, values) -> exporter.withOptions(OptionState.builder(e.getKey().templateId)
                                 .withInsertionTime(values.time)
                                 .withSelectors(selectors)
                                 .withValues(values.wrapped)));
@@ -129,8 +121,7 @@ public class UdpSessionManager {
         public final SessionKey sessionKey;
         public final long observationDomainId;
 
-        private DomainKey(final SessionKey sessionKey,
-                          final long observationDomainId) {
+        private DomainKey(final SessionKey sessionKey, final long observationDomainId) {
             this.sessionKey = Objects.requireNonNull(sessionKey);
             this.observationDomainId = observationDomainId;
         }
@@ -145,8 +136,8 @@ public class UdpSessionManager {
             }
 
             final DomainKey that = (DomainKey) o;
-            return Objects.equals(this.observationDomainId, that.observationDomainId) &&
-                   Objects.equals(this.sessionKey, that.sessionKey);
+            return Objects.equals(this.observationDomainId, that.observationDomainId)
+                    && Objects.equals(this.sessionKey, that.sessionKey);
         }
 
         @Override
@@ -159,9 +150,7 @@ public class UdpSessionManager {
         public final DomainKey observationDomainId;
         public final int templateId;
 
-        TemplateKey(final SessionKey sessionKey,
-                    final long observationDomainId,
-                    final int templateId) {
+        TemplateKey(final SessionKey sessionKey, final long observationDomainId, final int templateId) {
             this.observationDomainId = new DomainKey(sessionKey, observationDomainId);
             this.templateId = templateId;
         }
@@ -176,8 +165,8 @@ public class UdpSessionManager {
             }
 
             final TemplateKey that = (TemplateKey) o;
-            return Objects.equals(this.observationDomainId, that.observationDomainId) &&
-                    Objects.equals(this.templateId, that.templateId);
+            return Objects.equals(this.observationDomainId, that.observationDomainId)
+                    && Objects.equals(this.templateId, that.templateId);
         }
 
         @Override
@@ -186,7 +175,7 @@ public class UdpSessionManager {
         }
     }
 
-    public final static class TimeWrapper<T> {
+    public static final class TimeWrapper<T> {
         public final Instant time;
         public final T wrapped;
 
@@ -242,16 +231,23 @@ public class UdpSessionManager {
         @Override
         public void removeAllTemplate(final long observationDomainId, final Template.Type type) {
             final DomainKey domainKey = new DomainKey(this.sessionKey, observationDomainId);
-            UdpSessionManager.this.removeTemplateIf(e -> domainKey.equals(e.getKey().observationDomainId) && e.getValue().wrapped.template.type == type);
+            UdpSessionManager.this.removeTemplateIf(e ->
+                    domainKey.equals(e.getKey().observationDomainId) && e.getValue().wrapped.template.type == type);
         }
 
         @Override
-        public void addOptions(final long observationDomainId,
-                               final int templateId,
-                               final Collection<Value<?>> scopes,
-                               final List<Value<?>> values) {
+        public void addOptions(
+                final long observationDomainId,
+                final int templateId,
+                final Collection<Value<?>> scopes,
+                final List<Value<?>> values) {
             final TemplateKey key = new TemplateKey(this.sessionKey, observationDomainId, templateId);
-            UdpSessionManager.this.templates.get(key).wrapped.options.put(new HashSet<>(scopes), new TimeWrapper<>(values));
+            UdpSessionManager.this
+                    .templates
+                    .get(key)
+                    .wrapped
+                    .options
+                    .put(new HashSet<>(scopes), new TimeWrapper<>(values));
         }
 
         @Override
@@ -267,7 +263,8 @@ public class UdpSessionManager {
         @Override
         public boolean verifySequenceNumber(final long observationDomainId, final long sequenceNumber) {
             final DomainKey key = new DomainKey(this.sessionKey, observationDomainId);
-            final SequenceNumberTracker tracker = UdpSessionManager.this.sequenceNumbers.computeIfAbsent(key, (k) -> UdpSessionManager.this.sequenceNumberTracker.get());
+            final SequenceNumberTracker tracker = UdpSessionManager.this.sequenceNumbers.computeIfAbsent(
+                    key, (k) -> UdpSessionManager.this.sequenceNumberTracker.get());
             return tracker.verify(sequenceNumber);
         }
 
@@ -284,7 +281,8 @@ public class UdpSessionManager {
 
             @Override
             public Template lookupTemplate(final int templateId) throws MissingTemplateException {
-                final TimeWrapper<TemplateOptions> templateOptions = UdpSessionManager.this.templates.get(key(templateId));
+                final TimeWrapper<TemplateOptions> templateOptions =
+                        UdpSessionManager.this.templates.get(key(templateId));
                 if (templateOptions != null) {
                     return templateOptions.wrapped.template;
                 } else {
@@ -298,9 +296,12 @@ public class UdpSessionManager {
 
                 final Set<String> scoped = values.stream().map(Value::getName).collect(Collectors.toSet());
 
-                for (final var e : UdpSessionManager.this.templates.entrySet().stream().filter(e -> Objects.equals(e.getKey().observationDomainId.sessionKey,
-                    UdpSession.this.sessionKey) && Objects.equals(e.getKey().observationDomainId.observationDomainId, this.observationDomainId))
-                    .collect(Collectors.toList())) {
+                for (final var e : UdpSessionManager.this.templates.entrySet().stream()
+                        .filter(e -> Objects.equals(
+                                        e.getKey().observationDomainId.sessionKey, UdpSession.this.sessionKey)
+                                && Objects.equals(
+                                        e.getKey().observationDomainId.observationDomainId, this.observationDomainId))
+                        .collect(Collectors.toList())) {
 
                     final Template template = e.getValue().wrapped.template;
 
@@ -310,7 +311,8 @@ public class UdpSessionManager {
                                 .filter(s -> template.scopeNames.contains(s.getName()))
                                 .collect(Collectors.toSet());
 
-                        final TimeWrapper<List<Value<?>>> optionValues = e.getValue().wrapped.options.get(scopeValues);
+                        final TimeWrapper<List<Value<?>>> optionValues =
+                                e.getValue().wrapped.options.get(scopeValues);
                         if (optionValues != null) {
                             for (final Value<?> value : optionValues.wrapped) {
                                 options.put(value.getName(), value);

@@ -1,35 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.component;
 
 import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.proto.Event;
@@ -52,9 +47,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -85,26 +77,39 @@ public class InternalEventConsumer {
                 var locationId = event.getLocationId();
                 var optionalNode = nodeService.getNode(event.getIpAddress(), Long.parseLong(locationId), tenantId);
                 if (optionalNode.isPresent()) {
-                    log.warn("Node already exists with the Ip Address {} at location {} for tenant {}",
-                        event.getIpAddress(), event.getLocationId(), event.getTenantId());
+                    log.warn(
+                            "Node already exists with the Ip Address {} at location {} for tenant {}",
+                            event.getIpAddress(),
+                            event.getLocationId(),
+                            event.getTenantId());
                     return;
                 }
                 NodeCreateDTO.Builder nodeCreateBuilder = NodeCreateDTO.newBuilder()
-                    .setLocationId(locationId)
-                    .setManagementIp(event.getIpAddress())
-                    .setLabel(event.getIpAddress())
-                    .setMonitoredState(MonitoredState.DETECTED);
-                var passiveDiscovery = passiveDiscoveryService.getPassiveDiscovery(Long.parseLong(locationId), tenantId);
+                        .setLocationId(locationId)
+                        .setManagementIp(event.getIpAddress())
+                        .setLabel(event.getIpAddress())
+                        .setMonitoredState(MonitoredState.DETECTED);
+                var passiveDiscovery =
+                        passiveDiscoveryService.getPassiveDiscovery(Long.parseLong(locationId), tenantId);
                 if (passiveDiscovery != null) {
-                    var list = ListTagsByEntityIdParamsDTO.newBuilder().setEntityId(TagEntityIdDTO.newBuilder()
-                        .setPassiveDiscoveryId(passiveDiscovery.getId()).build()).build();
+                    var list = ListTagsByEntityIdParamsDTO.newBuilder()
+                            .setEntityId(TagEntityIdDTO.newBuilder()
+                                    .setPassiveDiscoveryId(passiveDiscovery.getId())
+                                    .build())
+                            .build();
                     var tagList = tagService.getTagsByEntityId(tenantId, list);
                     List<TagCreateDTO> tags = tagList.stream()
-                        .map(tag -> TagCreateDTO.newBuilder().setName(tag.getName()).build())
-                        .toList();
+                            .map(tag -> TagCreateDTO.newBuilder()
+                                    .setName(tag.getName())
+                                    .build())
+                            .toList();
                     nodeCreateBuilder.addAllTags(tags);
                 }
-                log.debug("Create new node from event with tenantId={}; locationId={}; interface={}", event.getIpAddress(), locationId, tenantId);
+                log.debug(
+                        "Create new node from event with tenantId={}; locationId={}; interface={}",
+                        event.getIpAddress(),
+                        locationId,
+                        tenantId);
                 Node node = nodeService.createNode(nodeCreateBuilder.build(), ScanType.DISCOVERY_SCAN, tenantId);
                 nodeService.updateNodeMonitoredState(node.getId(), node.getTenantId());
                 passiveDiscoveryService.sendNodeScan(node, passiveDiscovery);

@@ -1,34 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.notifications.service;
 
 import io.opentelemetry.api.trace.Span;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,8 +37,6 @@ import org.opennms.horizon.notifications.model.MonitoringPolicy;
 import org.opennms.horizon.notifications.repository.MonitoringPolicyRepository;
 import org.opennms.horizon.notifications.tenant.WithTenant;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @Slf4j
@@ -61,26 +53,32 @@ public class NotificationService {
 
     private final MonitoringPolicyRepository monitoringPolicyRepository;
 
-    @WithTenant(tenantIdArg = 0, tenantIdArgInternalMethod = "getTenantId", tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
+    @WithTenant(
+            tenantIdArg = 0,
+            tenantIdArgInternalMethod = "getTenantId",
+            tenantIdArgInternalClass = "org.opennms.horizon.alerts.proto.Alert")
     public void postNotification(Alert alert) {
         Span span = Span.current();
         span.setAttribute("user", alert.getTenantId());
         span.setAttribute("alertId", alert.getDatabaseId());
 
         if (alert.getMonitoringPolicyIdList().isEmpty()) {
-            log.info("Alert has no associated monitoring policies, dropping alert[id: {}, tenant: {}]",
-                alert.getDatabaseId(), alert.getTenantId());
+            log.info(
+                    "Alert has no associated monitoring policies, dropping alert[id: {}, tenant: {}]",
+                    alert.getDatabaseId(),
+                    alert.getTenantId());
             return;
         }
 
         List<MonitoringPolicy> dbPolicies = monitoringPolicyRepository.findByTenantIdAndIdIn(
-            alert.getTenantId(),
-            alert.getMonitoringPolicyIdList()
-        );
+                alert.getTenantId(), alert.getMonitoringPolicyIdList());
 
         if (dbPolicies.isEmpty()) {
-            log.warn("Associated policies {} not found, dropping alert[id: {}, tenant: {}]",
-                alert.getMonitoringPolicyIdList(), alert.getDatabaseId(), alert.getTenantId());
+            log.warn(
+                    "Associated policies {} not found, dropping alert[id: {}, tenant: {}]",
+                    alert.getMonitoringPolicyIdList(),
+                    alert.getDatabaseId(),
+                    alert.getTenantId());
             return;
         }
 
@@ -95,8 +93,12 @@ public class NotificationService {
                 notifyEmail = true;
             }
         }
-        log.info("Alert[id: {}] monitoring policy ids: {}, notifyPagerDuty: {}, notifyEmail: {}",
-            alert.getDatabaseId(), alert.getMonitoringPolicyIdList(), notifyPagerDuty, notifyEmail);
+        log.info(
+                "Alert[id: {}] monitoring policy ids: {}, notifyPagerDuty: {}, notifyEmail: {}",
+                alert.getDatabaseId(),
+                alert.getMonitoringPolicyIdList(),
+                notifyPagerDuty,
+                notifyEmail);
 
         if (notifyPagerDuty) {
             postPagerDutyNotification(alert);
@@ -107,33 +109,43 @@ public class NotificationService {
     }
 
     private void postPagerDutyNotification(Alert alert) {
-        log.info("Sending alert[id: {}, tenant: {}] to PagerDuty",
-            alert.getDatabaseId(), alert.getTenantId());
+        log.info("Sending alert[id: {}, tenant: {}] to PagerDuty", alert.getDatabaseId(), alert.getTenantId());
         try {
             pagerDutyAPI.postNotification(alert);
         } catch (NotificationException e) {
-            log.warn("Unable to send alert[id: {}, tenant: {}] to PagerDuty:",
-                alert.getDatabaseId(), alert.getTenantId(), e);
+            log.warn(
+                    "Unable to send alert[id: {}, tenant: {}] to PagerDuty:",
+                    alert.getDatabaseId(),
+                    alert.getTenantId(),
+                    e);
         }
     }
 
     private void postEmailNotification(Alert alert) {
         try {
             List<String> addresses = keyCloakAPI.getTenantEmailAddresses(alert.getTenantId());
-            log.info("Emailing alert[id: {}, tenant: {}] to {} addresses",
-                alert.getDatabaseId(), alert.getTenantId(), addresses.size());
+            log.info(
+                    "Emailing alert[id: {}, tenant: {}] to {} addresses",
+                    alert.getDatabaseId(),
+                    alert.getTenantId(),
+                    addresses.size());
 
             for (String emailAddress : addresses) {
-                String subject = String.format("%s alert: %s",
-                    StringUtils.capitalize(alert.getSeverity().getValueDescriptor().getName()),
-                    alert.getNodeName());
+                String subject = String.format(
+                        "%s alert: %s",
+                        StringUtils.capitalize(
+                                alert.getSeverity().getValueDescriptor().getName()),
+                        alert.getNodeName());
                 String htmlBody = velocity.populateTemplate(emailAddress, alert);
 
                 emailAPI.sendEmail(emailAddress, subject, htmlBody);
             }
         } catch (NotificationException e) {
-            log.warn("Unable to send alert[id: {}, tenant: {}] to Email:",
-                alert.getDatabaseId(), alert.getTenantId(), e);
+            log.warn(
+                    "Unable to send alert[id: {}, tenant: {}] to Email:",
+                    alert.getDatabaseId(),
+                    alert.getTenantId(),
+                    e);
         }
     }
 

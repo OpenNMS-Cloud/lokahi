@@ -1,6 +1,29 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.taskset.service;
 
 import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+import javax.annotation.PostConstruct;
 import lombok.Setter;
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.taskset.service.contract.TaskSetServiceGrpc;
@@ -11,9 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 
 /**
  * API Endpoints exposed to other services to perform operations on Task Sets, such as adding and removing Tasks from
@@ -44,9 +64,9 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
     @Setter // Testability
     private TaskSetGrpcServiceUpdateProcessorFactory taskSetGrpcServiceUpdateProcessorFactory;
 
-//========================================
-// Lifecycle
-//----------------------------------------
+    // ========================================
+    // Lifecycle
+    // ----------------------------------------
 
     @PostConstruct
     public void start() throws IOException {
@@ -54,9 +74,9 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
         LOG.info("Initiated TaskSet GRPC Service");
     }
 
-//========================================
-// Service API
-//----------------------------------------
+    // ========================================
+    // Service API
+    // ----------------------------------------
 
     /**
      * Update the requested task set with the given list of task updates.  Note that removals are processed first followed
@@ -70,15 +90,15 @@ public class TaskSetGrpcService extends TaskSetServiceGrpc.TaskSetServiceImplBas
         TaskSetGrpcServiceUpdateProcessor updateProcessor = taskSetGrpcServiceUpdateProcessorFactory.create(request);
 
         try {
-            taskSetStorage.atomicUpdateTaskSetForLocation(request.getTenantId(), request.getLocationId(), updateProcessor);
+            taskSetStorage.atomicUpdateTaskSetForLocation(
+                    request.getTenantId(), request.getLocationId(), updateProcessor);
         } catch (RuntimeException rtExc) {
             // Log exceptions here that might otherwise get swallowed
             LOG.warn("error applying task set updates", rtExc);
             throw rtExc;
         }
 
-        UpdateTasksResponse response =
-            UpdateTasksResponse.newBuilder()
+        UpdateTasksResponse response = UpdateTasksResponse.newBuilder()
                 .setNumNew(updateProcessor.getNumNew())
                 .setNumReplaced(updateProcessor.getNumReplaced())
                 .setNumRemoved(updateProcessor.getNumRemoved())

@@ -1,34 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.azure;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.google.protobuf.Any;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,18 +52,8 @@ import org.opennms.horizon.shared.azure.http.dto.metrics.AzureTimeseries;
 import org.opennms.horizon.shared.azure.http.dto.metrics.AzureValue;
 import org.opennms.taskset.contract.MonitorType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class AzureCollectorTest {
-    final private AzureHttpClient client = mock(AzureHttpClient.class);
+    private final AzureHttpClient client = mock(AzureHttpClient.class);
 
     final String clientId = "clientId";
 
@@ -85,7 +77,7 @@ public class AzureCollectorTest {
         token.setAccessToken("token");
         when(client.login(directoryId, clientId, clientSecret, timeout, rety)).thenReturn(token);
         when(client.login(directoryId, failClientId, clientSecret, timeout, rety))
-            .thenThrow(new AzureHttpException("Fail login"));
+                .thenThrow(new AzureHttpException("Fail login"));
 
         AzureInstanceView view = new AzureInstanceView();
         AzureStatus status = new AzureStatus();
@@ -100,27 +92,51 @@ public class AzureCollectorTest {
         vmAgent.setStatuses(readyStatuses);
         view.setVmAgent(vmAgent);
 
-        when(client.getInstanceView(token, subscriptionId, resourceGroup, resourceName, timeout, rety)).thenReturn(view);
+        when(client.getInstanceView(token, subscriptionId, resourceGroup, resourceName, timeout, rety))
+                .thenReturn(view);
         // empty instance view to simulate not ready
         when(client.getInstanceView(token, subscriptionId, resourceGroup, resourceNameNotReady, timeout, rety))
-            .thenReturn(new AzureInstanceView());
+                .thenReturn(new AzureInstanceView());
 
+        when(client.getMetrics(
+                        eq(token),
+                        eq(subscriptionId),
+                        eq(resourceGroup),
+                        eq(resourceName),
+                        any(),
+                        eq(timeout),
+                        eq(rety)))
+                .thenReturn(generateMetrics(Arrays.asList("Network In Total", "Network Out Total")));
 
-        when(client.getMetrics(eq(token), eq(subscriptionId), eq(resourceGroup), eq(resourceName), any(),
-            eq(timeout), eq(rety))).thenReturn(generateMetrics(Arrays.asList("Network In Total", "Network Out Total")));
+        when(client.getNetworkInterfaceMetrics(
+                        eq(token),
+                        eq(subscriptionId),
+                        eq(resourceGroup),
+                        eq(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName() + "/" + "interface"),
+                        any(),
+                        eq(timeout),
+                        eq(rety)))
+                .thenReturn(generateMetrics(Arrays.asList("BytesReceivedRate", "BytesSentRate")));
 
+        when(client.getNetworkInterfaceMetrics(
+                        eq(token),
+                        eq(subscriptionId),
+                        eq(resourceGroup),
+                        eq(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName() + "/publicIp"),
+                        any(),
+                        eq(timeout),
+                        eq(rety)))
+                .thenReturn(generateMetrics(Arrays.asList("ByteCount")));
 
-        when(client.getNetworkInterfaceMetrics(eq(token), eq(subscriptionId), eq(resourceGroup),
-            eq(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName() + "/" + "interface"), any(),
-            eq(timeout), eq(rety))).thenReturn(generateMetrics(Arrays.asList("BytesReceivedRate", "BytesSentRate")));
-
-        when(client.getNetworkInterfaceMetrics(eq(token), eq(subscriptionId), eq(resourceGroup),
-            eq(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName() + "/publicIp"), any(),
-            eq(timeout), eq(rety))).thenReturn(generateMetrics(Arrays.asList("ByteCount")));
-
-        when(client.getNetworkInterfaceMetrics(eq(token), eq(subscriptionId), eq(resourceGroup),
-            eq(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName() + "/publicIpException"), any(),
-            eq(timeout), eq(rety))).thenThrow(new AzureHttpException("testing"));
+        when(client.getNetworkInterfaceMetrics(
+                        eq(token),
+                        eq(subscriptionId),
+                        eq(resourceGroup),
+                        eq(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName() + "/publicIpException"),
+                        any(),
+                        eq(timeout),
+                        eq(rety)))
+                .thenThrow(new AzureHttpException("testing"));
     }
 
     private AzureMetrics generateMetrics(List<String> metricsNames) {
@@ -146,21 +162,29 @@ public class AzureCollectorTest {
     @Test
     public void testCollect() {
         var collectorRequest = AzureCollectorRequest.newBuilder()
-            .setClientId(clientId)
-            .setClientSecret(clientSecret)
-            .setSubscriptionId(subscriptionId)
-            .setDirectoryId(directoryId)
-            .setResourceGroup(resourceGroup)
-            .setResource(resourceName)
-            .setTimeoutMs(timeout)
-            .setRetries(rety)
-            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName()).setResource("interface").build())
-            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName()).setResource("publicIp").build())
-            .addCollectorResources(AzureCollectorResourcesRequest.newBuilder().setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName()).setResource("publicIpException").build())
-            .build();
+                .setClientId(clientId)
+                .setClientSecret(clientSecret)
+                .setSubscriptionId(subscriptionId)
+                .setDirectoryId(directoryId)
+                .setResourceGroup(resourceGroup)
+                .setResource(resourceName)
+                .setTimeoutMs(timeout)
+                .setRetries(rety)
+                .addCollectorResources(AzureCollectorResourcesRequest.newBuilder()
+                        .setType(AzureHttpClient.ResourcesType.NETWORK_INTERFACES.getMetricName())
+                        .setResource("interface")
+                        .build())
+                .addCollectorResources(AzureCollectorResourcesRequest.newBuilder()
+                        .setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName())
+                        .setResource("publicIp")
+                        .build())
+                .addCollectorResources(AzureCollectorResourcesRequest.newBuilder()
+                        .setType(AzureHttpClient.ResourcesType.PUBLIC_IP_ADDRESSES.getMetricName())
+                        .setResource("publicIpException")
+                        .build())
+                .build();
         var config = Any.pack(collectorRequest);
-        CollectionRequest request = CollectorRequestImpl.builder()
-            .build();
+        CollectionRequest request = CollectorRequestImpl.builder().build();
 
         AzureCollector collector = new AzureCollector(client);
 
@@ -172,26 +196,37 @@ public class AzureCollectorTest {
         Assert.assertEquals("azure-node-0", response.getIpAddress());
         Assert.assertEquals(MonitorType.AZURE, response.getMonitorType());
         Assert.assertEquals(5, results.getResultsCount());
-        Assert.assertEquals(2, results.getResultsList().stream().filter(r -> r.getResourceName().equals("resourceName")).count());
-        Assert.assertEquals(2, results.getResultsList().stream().filter(r -> r.getResourceName().equals("interface")).count());
-        Assert.assertEquals(1, results.getResultsList().stream().filter(r -> r.getResourceName().equals("publicIp")).count());
+        Assert.assertEquals(
+                2,
+                results.getResultsList().stream()
+                        .filter(r -> r.getResourceName().equals("resourceName"))
+                        .count());
+        Assert.assertEquals(
+                2,
+                results.getResultsList().stream()
+                        .filter(r -> r.getResourceName().equals("interface"))
+                        .count());
+        Assert.assertEquals(
+                1,
+                results.getResultsList().stream()
+                        .filter(r -> r.getResourceName().equals("publicIp"))
+                        .count());
     }
 
     @Test
     public void testNotReadyCollect() {
         var collectorRequest = AzureCollectorRequest.newBuilder()
-            .setClientId(clientId)
-            .setClientSecret(clientSecret)
-            .setSubscriptionId(subscriptionId)
-            .setDirectoryId(directoryId)
-            .setResourceGroup(resourceGroup)
-            .setResource(resourceNameNotReady)
-            .setTimeoutMs(timeout)
-            .setRetries(rety)
-            .build();
+                .setClientId(clientId)
+                .setClientSecret(clientSecret)
+                .setSubscriptionId(subscriptionId)
+                .setDirectoryId(directoryId)
+                .setResourceGroup(resourceGroup)
+                .setResource(resourceNameNotReady)
+                .setTimeoutMs(timeout)
+                .setRetries(rety)
+                .build();
         var config = Any.pack(collectorRequest);
-        CollectionRequest request = CollectorRequestImpl.builder()
-            .build();
+        CollectionRequest request = CollectorRequestImpl.builder().build();
 
         AzureCollector collector = new AzureCollector(client);
 
@@ -207,16 +242,15 @@ public class AzureCollectorTest {
     @Test
     public void testFailLogin() {
         var collectorRequest = AzureCollectorRequest.newBuilder()
-            .setClientId(failClientId)
-            .setClientSecret(clientSecret)
-            .setSubscriptionId(subscriptionId)
-            .setDirectoryId(directoryId)
-            .setTimeoutMs(timeout)
-            .setRetries(rety)
-            .build();
+                .setClientId(failClientId)
+                .setClientSecret(clientSecret)
+                .setSubscriptionId(subscriptionId)
+                .setDirectoryId(directoryId)
+                .setTimeoutMs(timeout)
+                .setRetries(rety)
+                .build();
         var config = Any.pack(collectorRequest);
-        CollectionRequest request = CollectorRequestImpl.builder()
-            .build();
+        CollectionRequest request = CollectorRequestImpl.builder().build();
 
         AzureCollector collector = new AzureCollector(client);
 

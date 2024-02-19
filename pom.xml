@@ -1,38 +1,56 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.opennms.lokahi</groupId>
-        <artifactId>lokahi-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
-        <relativePath>parent-pom</relativePath>
-    </parent>
-
-    <name>OpenNMS Lokahi :: Lokahi Top-Level</name>
-    <description>
-        Top-level POM for all Lokahi modules
-    </description>
-
+  <parent>
     <groupId>org.opennms.lokahi</groupId>
-    <artifactId>lokahi-toplevel</artifactId>
+    <artifactId>lokahi-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <relativePath>parent-pom</relativePath>
+  </parent>
 
-    <modules>
-        <module>alert</module>
-        <module>datachoices</module>
-        <module>events</module>
-        <module>inventory</module>
-        <module>metrics-processor</module>
-        <module>minion-certificate-manager</module>
-        <module>minion-certificate-verifier</module>
-        <module>minion-gateway-grpc-proxy</module>
-        <module>minion-gateway</module>
-        <module>minion</module>
-        <module>notifications</module>
-        <module>rest-server</module>
-        <module>shared-lib</module>
-    </modules>
+  <groupId>org.opennms.lokahi</groupId>
+  <artifactId>lokahi-toplevel</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>OpenNMS Lokahi :: Lokahi Top-Level</name>
+  <description>Top-level POM for all Lokahi modules</description>
+
+  <modules>
+    <module>alert</module>
+    <module>datachoices</module>
+    <module>events</module>
+    <module>inventory</module>
+    <module>metrics-processor</module>
+    <module>minion-certificate-manager</module>
+    <module>minion-certificate-verifier</module>
+    <module>minion-gateway-grpc-proxy</module>
+    <module>minion-gateway</module>
+    <module>minion</module>
+    <module>notifications</module>
+    <module>rest-server</module>
+    <module>shared-lib</module>
+  </modules>
 </project>
-

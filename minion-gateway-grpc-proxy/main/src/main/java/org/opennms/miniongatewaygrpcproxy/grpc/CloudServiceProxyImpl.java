@@ -1,31 +1,24 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.miniongatewaygrpcproxy.grpc;
 
 import com.google.protobuf.Empty;
@@ -34,6 +27,8 @@ import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
+import java.util.function.Function;
+import javax.annotation.PostConstruct;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -45,9 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.function.Function;
-
 @Component
 public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase {
 
@@ -56,7 +48,6 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(CloudServiceProxyImpl.class);
 
     private Logger LOG = DEFAULT_LOGGER;
-
 
     private Metadata.Key TENANT_ID_METADATA_KEY;
     private Metadata.Key LOCATION_METADATA_KEY;
@@ -82,10 +73,9 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
     private Channel channel;
     private CloudServiceGrpc.CloudServiceStub cloudServiceStub;
 
-
-//========================================
-// Lifecycle
-//----------------------------------------
+    // ========================================
+    // Lifecycle
+    // ----------------------------------------
 
     @PostConstruct
     public void init() {
@@ -93,8 +83,8 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
         LOCATION_METADATA_KEY = Metadata.Key.of("location", Metadata.ASCII_STRING_MARSHALLER);
 
         NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(downstreamHost, downstreamPort)
-            .keepAliveWithoutCalls(true)
-            .maxInboundMessageSize(maxMessageSize);
+                .keepAliveWithoutCalls(true)
+                .maxInboundMessageSize(maxMessageSize);
 
         if (tlsEnabled) {
             throw new RuntimeException("TLS NOT YET IMPLEMENTED");
@@ -110,9 +100,9 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
         cloudServiceStub = CloudServiceGrpc.newStub(channel);
     }
 
-//========================================
-// GRPC Request
-//----------------------------------------
+    // ========================================
+    // GRPC Request
+    // ----------------------------------------
 
     @Override
     public StreamObserver<RpcResponseProto> cloudToMinionRPC(StreamObserver<RpcRequestProto> responseObserver) {
@@ -122,13 +112,19 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
     @Override
     public void cloudToMinionMessages(Identity request, StreamObserver<CloudToMinionMessage> responseObserver) {
         // "return null" in the lambda to conform to the common code's return handling
-        commonProcessCall((stub) -> { stub.cloudToMinionMessages(request, responseObserver); return null; });
+        commonProcessCall((stub) -> {
+            stub.cloudToMinionMessages(request, responseObserver);
+            return null;
+        });
     }
 
     @Override
     public void minionToCloudRPC(RpcRequestProto request, StreamObserver<RpcResponseProto> responseObserver) {
         // "return null" in the lambda to conform to the common code's return handling
-        commonProcessCall((stub) -> { stub.minionToCloudRPC(request, responseObserver); return null; });
+        commonProcessCall((stub) -> {
+            stub.minionToCloudRPC(request, responseObserver);
+            return null;
+        });
     }
 
     @Override
@@ -136,9 +132,9 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
         return commonProcessCall((stub) -> stub.minionToCloudMessages(responseObserver));
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private <T> T commonProcessCall(Function<CloudServiceGrpc.CloudServiceStub, T> call) {
         Metadata inboundHeaders = GrpcHeaderCaptureInterceptor.INBOUND_HEADERS_CONTEXT_KEY.get();
@@ -149,12 +145,7 @@ public class CloudServiceProxyImpl extends CloudServiceGrpc.CloudServiceImplBase
         metadata.put(LOCATION_METADATA_KEY, "MINION-LOCATION-GRPC_PROXY");
 
         CloudServiceGrpc.CloudServiceStub stubWithInterceptors =
-            cloudServiceStub
-                .withInterceptors(
-                    MetadataUtils.newAttachHeadersInterceptor(
-                        metadata
-                    )
-                );
+                cloudServiceStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
 
         T result = call.apply(stubWithInterceptors);
 

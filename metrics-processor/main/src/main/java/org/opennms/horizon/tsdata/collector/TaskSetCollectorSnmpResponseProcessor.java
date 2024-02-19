@@ -1,34 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.tsdata.collector;
 
 import com.google.protobuf.Any;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.opennms.horizon.snmp.api.SnmpResponseMetric;
 import org.opennms.horizon.snmp.api.SnmpResultMetric;
 import org.opennms.horizon.snmp.api.SnmpValueType;
@@ -41,13 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Component
 public class TaskSetCollectorSnmpResponseProcessor {
 
@@ -55,13 +47,14 @@ public class TaskSetCollectorSnmpResponseProcessor {
 
     private final CortexTSS cortexTSS;
     private final TenantMetricsTracker tenantMetricsTracker;
-    
+
     public TaskSetCollectorSnmpResponseProcessor(CortexTSS cortexTSS, TenantMetricsTracker tenantMetricsTracker) {
         this.cortexTSS = cortexTSS;
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processSnmpCollectorResponse(String tenantId, String location, TaskResult taskResult) throws IOException {
+    public void processSnmpCollectorResponse(String tenantId, String location, TaskResult taskResult)
+            throws IOException {
         var response = taskResult.getCollectorResponse();
         Any collectorMetric = response.getResult();
         Map<String, String> labels = new HashMap<>();
@@ -77,43 +70,46 @@ public class TaskSetCollectorSnmpResponseProcessor {
             try {
                 PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
                 builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(MetricNameConstants.METRIC_NAME_LABEL)
-                    .setValue(CortexTSS.sanitizeMetricName(snmpResult.getAlias())));
+                        .setName(MetricNameConstants.METRIC_NAME_LABEL)
+                        .setValue(CortexTSS.sanitizeMetricName(snmpResult.getAlias())));
 
                 labels.forEach((name, value) -> builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(CortexTSS.sanitizeLabelName(name))
-                    .setValue(CortexTSS.sanitizeLabelValue(value))));
+                        .setName(CortexTSS.sanitizeLabelName(name))
+                        .setValue(CortexTSS.sanitizeLabelValue(value))));
 
-                builder.addLabels(PrometheusTypes.Label.newBuilder().setName("if_name")
-                    .setValue(snmpResult.getIfName()));
+                builder.addLabels(
+                        PrometheusTypes.Label.newBuilder().setName("if_name").setValue(snmpResult.getIfName()));
 
                 if (snmpResult.hasIpAddress()) {
-                    builder.addLabels(PrometheusTypes.Label.newBuilder().setName("ip_address")
-                        .setValue(snmpResult.getIpAddress()));
+                    builder.addLabels(PrometheusTypes.Label.newBuilder()
+                            .setName("ip_address")
+                            .setValue(snmpResult.getIpAddress()));
                     // TODO: Remove instance from ip_address
-                    builder.addLabels(PrometheusTypes.Label.newBuilder().setName("instance")
-                        .setValue(snmpResult.getIpAddress()));
+                    builder.addLabels(PrometheusTypes.Label.newBuilder()
+                            .setName("instance")
+                            .setValue(snmpResult.getIpAddress()));
                 }
 
                 int type = snmpResult.getValue().getTypeValue();
                 switch (type) {
                     case SnmpValueType.INT32_VALUE:
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(response.getTimestamp())
-                            .setValue(snmpResult.getValue().getSint64()));
+                                .setTimestamp(response.getTimestamp())
+                                .setValue(snmpResult.getValue().getSint64()));
                         break;
                     case SnmpValueType.COUNTER32_VALUE:
                     case SnmpValueType.TIMETICKS_VALUE:
                     case SnmpValueType.GAUGE32_VALUE:
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(response.getTimestamp())
-                            .setValue(snmpResult.getValue().getUint64()));
+                                .setTimestamp(response.getTimestamp())
+                                .setValue(snmpResult.getValue().getUint64()));
                         break;
                     case SnmpValueType.COUNTER64_VALUE:
-                        double metric = new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
+                        double metric =
+                                new BigInteger(snmpResult.getValue().getBytes().toByteArray()).doubleValue();
                         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                            .setTimestamp(response.getTimestamp())
-                            .setValue(metric));
+                                .setTimestamp(response.getTimestamp())
+                                .setValue(metric));
                         break;
                 }
                 tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());

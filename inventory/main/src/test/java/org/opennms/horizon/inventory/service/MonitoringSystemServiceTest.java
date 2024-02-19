@@ -1,33 +1,37 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Random;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,19 +45,6 @@ import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.MonitoringSystem;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.MonitoringSystemRepository;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Random;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 class MonitoringSystemServiceTest {
     private MonitoringLocationRepository mockLocationRepo;
@@ -71,12 +62,13 @@ class MonitoringSystemServiceTest {
     private final String tenantId = "test-tenant";
 
     @BeforeEach
-    public void setUP(){
+    public void setUP() {
         mockLocationRepo = mock(MonitoringLocationRepository.class);
         mockMonitoringSystemRepo = mock(MonitoringSystemRepository.class);
         mockConfigUpdateService = mock(ConfigUpdateService.class);
         MonitoringSystemMapper mapper = Mappers.getMapper(MonitoringSystemMapper.class);
-        service = new MonitoringSystemService(mockMonitoringSystemRepo, mockLocationRepo, mapper, mockConfigUpdateService);
+        service = new MonitoringSystemService(
+                mockMonitoringSystemRepo, mockLocationRepo, mapper, mockConfigUpdateService);
         testLocation = new MonitoringLocation();
         testLocation.setId(locationId);
         testLocation.setLocation("Location " + locationId);
@@ -88,13 +80,10 @@ class MonitoringSystemServiceTest {
         testMonitoringSystem.setLabel(systemId);
         testMonitoringSystem.setMonitoringLocation(testLocation);
         testMonitoringSystem.setMonitoringLocationId(locationId);
-        heartbeatMessage =
-            TenantLocationSpecificHeartbeatMessage.newBuilder()
+        heartbeatMessage = TenantLocationSpecificHeartbeatMessage.newBuilder()
                 .setTenantId(tenantId)
                 .setLocationId(String.valueOf(locationId))
-                .setIdentity(Identity.newBuilder()
-                    .setSystemId(systemId)
-                )
+                .setIdentity(Identity.newBuilder().setSystemId(systemId))
                 .build();
     }
 
@@ -106,7 +95,9 @@ class MonitoringSystemServiceTest {
 
     @Test
     void testFindByTenantId() {
-        doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByTenantId(tenantId);
+        doReturn(Collections.singletonList(testMonitoringSystem))
+                .when(mockMonitoringSystemRepo)
+                .findByTenantId(tenantId);
         service.findByTenantId(tenantId);
         verify(mockMonitoringSystemRepo).findByTenantId(tenantId);
     }
@@ -114,8 +105,12 @@ class MonitoringSystemServiceTest {
     @Test
     void testFindByMonitoringLocationIdAndTenantId() {
         long locationId = 1L;
-        doReturn(Collections.singletonList(testMonitoringSystem)).when(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
-        doReturn(Optional.of(new MonitoringLocation())).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
+        doReturn(Collections.singletonList(testMonitoringSystem))
+                .when(mockMonitoringSystemRepo)
+                .findByMonitoringLocationIdAndTenantId(locationId, tenantId);
+        doReturn(Optional.of(new MonitoringLocation()))
+                .when(mockLocationRepo)
+                .findByIdAndTenantId(locationId, tenantId);
         service.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
         verify(mockMonitoringSystemRepo).findByMonitoringLocationIdAndTenantId(locationId, tenantId);
         verify(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
@@ -124,9 +119,8 @@ class MonitoringSystemServiceTest {
     @Test
     void testFindByMonitoringLocationIdAndTenantIdLocationNotFound() {
         long locationId = 1L;
-        var exception = Assert.assertThrows(LocationNotFoundException.class, ()-> {
+        var exception = Assert.assertThrows(LocationNotFoundException.class, () -> {
             service.findByMonitoringLocationIdAndTenantId(locationId, tenantId);
-
         });
         assertThat(exception.getMessage()).isEqualTo("Location not found for id: " + locationId);
         verify(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
@@ -134,32 +128,38 @@ class MonitoringSystemServiceTest {
 
     @Test
     void testReceiveMsgMonitorSystemExist() throws LocationNotFoundException {
-        doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).
-            findByMonitoringLocationIdAndSystemIdAndTenantId(locationId, systemId, tenantId);
+        doReturn(Optional.of(testMonitoringSystem))
+                .when(mockMonitoringSystemRepo)
+                .findByMonitoringLocationIdAndSystemIdAndTenantId(locationId, systemId, tenantId);
         doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
-        verify(mockMonitoringSystemRepo).findByMonitoringLocationIdAndSystemIdAndTenantId(testLocation.getId(), systemId, tenantId);
+        verify(mockMonitoringSystemRepo)
+                .findByMonitoringLocationIdAndSystemIdAndTenantId(testLocation.getId(), systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(testMonitoringSystem);
         verifyNoMoreInteractions(mockConfigUpdateService);
     }
 
     @Test
     void testCreateNewMonitorSystemWithLocationExist() throws LocationNotFoundException {
-        doReturn(Optional.empty()).when(mockMonitoringSystemRepo).findByMonitoringLocationIdAndSystemIdAndTenantId(locationId, systemId, tenantId);
+        doReturn(Optional.empty())
+                .when(mockMonitoringSystemRepo)
+                .findByMonitoringLocationIdAndSystemIdAndTenantId(locationId, systemId, tenantId);
         doReturn(Optional.of(testLocation)).when(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
         service.addMonitoringSystemFromHeartbeat(heartbeatMessage);
-        verify(mockMonitoringSystemRepo).findByMonitoringLocationIdAndSystemIdAndTenantId(testLocation.getId(), systemId, tenantId);
+        verify(mockMonitoringSystemRepo)
+                .findByMonitoringLocationIdAndSystemIdAndTenantId(testLocation.getId(), systemId, tenantId);
         verify(mockMonitoringSystemRepo).save(any(MonitoringSystem.class));
         verify(mockLocationRepo).findByIdAndTenantId(locationId, tenantId);
     }
 
     @Test
     void testFindBySystemIdWithStatus() {
-        doReturn(Optional.of(testMonitoringSystem)).when(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
+        doReturn(Optional.of(testMonitoringSystem))
+                .when(mockMonitoringSystemRepo)
+                .findBySystemIdAndTenantId(systemId, tenantId);
         var result = service.findBySystemId(systemId, tenantId);
         assertThat(result).isPresent();
         assertThat(result.get().getStatus()).isTrue();
         verify(mockMonitoringSystemRepo).findBySystemIdAndTenantId(systemId, tenantId);
     }
-
 }

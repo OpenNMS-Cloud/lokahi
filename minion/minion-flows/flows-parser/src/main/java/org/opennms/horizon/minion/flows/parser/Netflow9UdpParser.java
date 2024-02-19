@@ -1,33 +1,35 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser;
 
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
+import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
+
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import io.netty.buffer.ByteBuf;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.Dispatchable;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
@@ -42,28 +44,16 @@ import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-
-import io.netty.buffer.ByteBuf;
-
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
-import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
-
-
 public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispatchable {
 
     private final Netflow9MessageBuilder messageBuilder = new Netflow9MessageBuilder();
 
-    public Netflow9UdpParser(final String name,
-                             final AsyncDispatcher<FlowDocument> dispatcher,
-                             final IpcIdentity identity,
-                             final DnsResolver dnsResolver,
-                             final MetricRegistry metricRegistry) {
+    public Netflow9UdpParser(
+            final String name,
+            final AsyncDispatcher<FlowDocument> dispatcher,
+            final IpcIdentity identity,
+            final DnsResolver dnsResolver,
+            final MetricRegistry metricRegistry) {
         super(Protocol.NETFLOW9, name, dispatcher, identity, dnsResolver, metricRegistry);
     }
 
@@ -87,7 +77,8 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
     }
 
     @Override
-    protected UdpSessionManager.SessionKey buildSessionKey(final InetSocketAddress remoteAddress, final InetSocketAddress localAddress) {
+    protected UdpSessionManager.SessionKey buildSessionKey(
+            final InetSocketAddress remoteAddress, final InetSocketAddress localAddress) {
         return new SessionKey(remoteAddress.getAddress(), localAddress);
     }
 
@@ -105,8 +96,8 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final SessionKey that = (SessionKey) o;
-            return Objects.equal(this.localAddress, that.localAddress) &&
-                Objects.equal(this.remoteAddress, that.remoteAddress);
+            return Objects.equal(this.localAddress, that.localAddress)
+                    && Objects.equal(this.remoteAddress, that.remoteAddress);
         }
 
         @Override
@@ -117,9 +108,9 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                .add("remoteAddress", remoteAddress)
-                .add("localAddress", localAddress)
-                .toString();
+                    .add("remoteAddress", remoteAddress)
+                    .add("localAddress", localAddress)
+                    .toString();
         }
 
         @Override

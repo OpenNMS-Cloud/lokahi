@@ -1,46 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.listeners;
-
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-
-import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -58,6 +40,14 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.SocketUtils;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TcpListener implements Listener {
     private static final Logger LOG = LoggerFactory.getLogger(TcpListener.class);
@@ -77,16 +67,11 @@ public class TcpListener implements Listener {
 
     private final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    public TcpListener(final String name,
-                       final TcpParser parser,
-                       final MetricRegistry metrics) {
+    public TcpListener(final String name, final TcpParser parser, final MetricRegistry metrics) {
         this(name, 0, parser, metrics);
     }
 
-    public TcpListener(final String name,
-                       final int port,
-                       final TcpParser parser,
-                       final MetricRegistry metrics) {
+    public TcpListener(final String name, final int port, final TcpParser parser, final MetricRegistry metrics) {
         this.name = Objects.requireNonNull(name);
         if (port != 0) {
             this.port = port;
@@ -102,87 +87,88 @@ public class TcpListener implements Listener {
 
         this.parser.start(this.bossGroup);
 
-        final InetSocketAddress address = this.host != null
-            ? SocketUtils.socketAddress(this.host, this.port)
-            : new InetSocketAddress(this.port);
+        final InetSocketAddress address =
+                this.host != null ? SocketUtils.socketAddress(this.host, this.port) : new InetSocketAddress(this.port);
 
         this.socketFuture = new ServerBootstrap()
-            .group(this.bossGroup, this.workerGroup)
-            .channel(NioServerSocketChannel.class)
-            .option(ChannelOption.SO_REUSEADDR, true)
-            .option(ChannelOption.SO_BACKLOG, 128)
-            .childOption(ChannelOption.SO_KEEPALIVE, true)
-            .childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                protected void initChannel(final SocketChannel ch) {
-                    final TcpParser.Handler session = TcpListener.this.parser.accept(ch.remoteAddress(), ch.localAddress());
-                    ch.pipeline()
-                        .addFirst(new ChannelInboundHandlerAdapter() {
-                            @Override
-                            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                                packetsReceived.mark();
-                                super.channelRead(ctx, msg);
-                            }
-                        })
-                        .addLast(new ByteToMessageDecoder() {
-                            @Override
-                            protected void decode(final ChannelHandlerContext ctx,
-                                                  final ByteBuf in,
-                                                  final List<Object> out) throws Exception {
-                                session.parse(in).ifPresent(out::add);
-                            }
-
-                            @Override
-                            public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                super.channelActive(ctx);
-                                session.active();
-                            }
-
-                            @Override
-                            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                                super.channelInactive(ctx);
-                                session.inactive();
-                            }
-                        })
-                        .addLast(new SimpleChannelInboundHandler<CompletableFuture<?>>() {
-                            @Override
-                            protected void channelRead0(final ChannelHandlerContext ctx,
-                                                        final CompletableFuture<?> future) {
-                                future.handle((result, ex) -> {
-                                    if (ex != null) {
-                                        ctx.fireExceptionCaught(ex);
+                .group(this.bossGroup, this.workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(final SocketChannel ch) {
+                        final TcpParser.Handler session =
+                                TcpListener.this.parser.accept(ch.remoteAddress(), ch.localAddress());
+                        ch.pipeline()
+                                .addFirst(new ChannelInboundHandlerAdapter() {
+                                    @Override
+                                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                                        packetsReceived.mark();
+                                        super.channelRead(ctx, msg);
                                     }
-                                    return result;
+                                })
+                                .addLast(new ByteToMessageDecoder() {
+                                    @Override
+                                    protected void decode(
+                                            final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out)
+                                            throws Exception {
+                                        session.parse(in).ifPresent(out::add);
+                                    }
+
+                                    @Override
+                                    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                        super.channelActive(ctx);
+                                        session.active();
+                                    }
+
+                                    @Override
+                                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                                        super.channelInactive(ctx);
+                                        session.inactive();
+                                    }
+                                })
+                                .addLast(new SimpleChannelInboundHandler<CompletableFuture<?>>() {
+                                    @Override
+                                    protected void channelRead0(
+                                            final ChannelHandlerContext ctx, final CompletableFuture<?> future) {
+                                        future.handle((result, ex) -> {
+                                            if (ex != null) {
+                                                ctx.fireExceptionCaught(ex);
+                                            }
+                                            return result;
+                                        });
+                                    }
+                                })
+                                .addLast(new ChannelInboundHandlerAdapter() {
+                                    @Override
+                                    public void exceptionCaught(
+                                            final ChannelHandlerContext ctx, final Throwable cause) {
+                                        LOG.warn("Invalid packet: {}", cause.getMessage());
+                                        LOG.debug("", cause);
+
+                                        session.inactive();
+
+                                        ctx.close();
+                                    }
                                 });
-                            }
-                        })
-                        .addLast(new ChannelInboundHandlerAdapter() {
-                            @Override
-                            public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
-                                LOG.warn("Invalid packet: {}", cause.getMessage());
-                                LOG.debug("", cause);
+                    }
 
-                                session.inactive();
+                    @Override
+                    public void channelActive(final ChannelHandlerContext ctx) throws Exception {
+                        TcpListener.this.channels.add(ctx.channel());
+                        super.channelActive(ctx);
+                    }
 
-                                ctx.close();
-                            }
-                        });
-                }
-
-                @Override
-                public void channelActive(final ChannelHandlerContext ctx) throws Exception {
-                    TcpListener.this.channels.add(ctx.channel());
-                    super.channelActive(ctx);
-                }
-
-                @Override
-                public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
-                    TcpListener.this.channels.remove(ctx.channel());
-                    super.channelInactive(ctx);
-                }
-            })
-            .bind(address)
-            .sync();
+                    @Override
+                    public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
+                        TcpListener.this.channels.remove(ctx.channel());
+                        super.channelInactive(ctx);
+                    }
+                })
+                .bind(address)
+                .sync();
     }
 
     public void stop() {

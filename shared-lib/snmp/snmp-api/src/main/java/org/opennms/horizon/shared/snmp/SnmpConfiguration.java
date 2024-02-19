@@ -1,33 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp;
-
 
 /**
  * Represents a base class for SnmpConfiguration of agents, ranges and defaults
@@ -35,7 +27,7 @@ package org.opennms.horizon.shared.snmp;
  * @author brozow
  */
 public class SnmpConfiguration {
-	
+
     public static final int DEFAULT_TIMEOUT = 3000;
     public static final int DEFAULT_PORT = 161;
     public static final int VERSION1 = 1;
@@ -63,7 +55,7 @@ public class SnmpConfiguration {
     public static final String DEFAULT_CONTEXT_ENGINE_ID = null;
 
     public static final SnmpConfiguration DEFAULTS;
-    
+
     static {
         DEFAULTS = new SnmpConfiguration(null);
         DEFAULTS.setTimeout(DEFAULT_TIMEOUT);
@@ -106,11 +98,11 @@ public class SnmpConfiguration {
     private String m_contextName;
     private String m_enterpriseId;
     private Long m_ttl;
-    
+
     public SnmpConfiguration() {
         this(DEFAULTS);
     }
-    
+
     public SnmpConfiguration(SnmpConfiguration config) {
         if (config != null) {
             setAuthPassPhrase(config.getAuthPassPhrase());
@@ -130,7 +122,7 @@ public class SnmpConfiguration {
             setContextName(config.getContextName());
             setContextEngineId(config.getContextEngineId());
             setEnterpriseId(config.getEnterpriseId());
-            setEngineId(config.getEngineId());            
+            setEngineId(config.getEngineId());
         }
     }
 
@@ -146,7 +138,6 @@ public class SnmpConfiguration {
         return m_timeout;
     }
 
-
     public final void setTimeout(int timeout) {
         m_timeout = timeout;
     }
@@ -154,7 +145,7 @@ public class SnmpConfiguration {
     public final int getVersion() {
         return m_version;
     }
-    
+
     public final void setVersion(int version) {
         m_version = version;
     }
@@ -162,7 +153,7 @@ public class SnmpConfiguration {
     public final String getVersionAsString() {
         return versionToString(getVersion());
     }
-    
+
     public final void setVersionAsString(String version) {
         setVersion(stringToVersion(version));
     }
@@ -241,17 +232,17 @@ public class SnmpConfiguration {
 
     public static String versionToString(int version) {
         switch (version) {
-        case VERSION1 :
-            return "v1";
-        case VERSION2C :
-            return "v2c";
-        case VERSION3 :
-            return "v3";
-        default :
-            return "unknown";
+            case VERSION1:
+                return "v1";
+            case VERSION2C:
+                return "v2c";
+            case VERSION3:
+                return "v3";
+            default:
+                return "unknown";
         }
     }
-    
+
     public static int stringToVersion(String version) {
         if ("v1".equalsIgnoreCase(version)) {
             return VERSION1;
@@ -296,40 +287,40 @@ public class SnmpConfiguration {
     public final void setPrivPassPhrase(String privPassPhrase) {
         m_privPassPhrase = privPassPhrase;
     }
-    
+
     public final String getEngineId() {
-    	return m_engineId;
+        return m_engineId;
     }
-    
+
     public final void setEngineId(final String engineId) {
-    	m_engineId = engineId;
+        m_engineId = engineId;
     }
-    
+
     public final String getContextEngineId() {
-    	return m_contextEngineId;
+        return m_contextEngineId;
     }
-    
+
     public final void setContextEngineId(final String contextEngineId) {
-    	m_contextEngineId = contextEngineId;
+        m_contextEngineId = contextEngineId;
     }
-    
+
     public final String getContextName() {
-    	return m_contextName;
+        return m_contextName;
     }
-    
+
     public void setContextName(final String contextName) {
-    	m_contextName = contextName;
+        m_contextName = contextName;
     }
-    
+
     public final String getEnterpriseId() {
-    	return m_enterpriseId;
+        return m_enterpriseId;
     }
-    
+
     public void setEnterpriseId(final String enterpriseId) {
-    	m_enterpriseId = enterpriseId;
+        m_enterpriseId = enterpriseId;
     }
-    
+
     public boolean isVersion3() {
-    	return getVersion() == VERSION3;
+        return getVersion() == VERSION3;
     }
 }

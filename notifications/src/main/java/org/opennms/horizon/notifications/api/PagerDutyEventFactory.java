@@ -1,36 +1,32 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.notifications.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.alerts.proto.Alert;
@@ -45,10 +41,6 @@ import org.opennms.horizon.notifications.exceptions.NotificationConfigUninitiali
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-
 @RequiredArgsConstructor
 @Service
 public class PagerDutyEventFactory {
@@ -60,8 +52,8 @@ public class PagerDutyEventFactory {
     @Value("${horizon.pagerduty.client}")
     String client;
 
-
-    public PagerDutyEventDTO createEvent(Alert alert) throws NotificationConfigUninitializedException, JsonProcessingException, InvalidProtocolBufferException {
+    public PagerDutyEventDTO createEvent(Alert alert)
+            throws NotificationConfigUninitializedException, JsonProcessingException, InvalidProtocolBufferException {
         PagerDutyEventDTO event = new PagerDutyEventDTO();
         PagerDutyPayloadDTO payload = new PagerDutyPayloadDTO();
 
@@ -71,9 +63,9 @@ public class PagerDutyEventFactory {
 
         // Source: unique location of affected system
         payload.setSource(JsonFormat.printer()
-            .omittingInsignificantWhitespace()
-            .sortingMapKeys()
-            .print(alert.getManagedObject()));
+                .omittingInsignificantWhitespace()
+                .sortingMapKeys()
+                .print(alert.getManagedObject()));
         // Component: component responsible for the event
         payload.setComponent(alert.getManagedObject().getType().name());
         // Group: logical grouping
@@ -98,7 +90,8 @@ public class PagerDutyEventFactory {
 
         payload.setCustomDetails(new HashMap<>());
         // Put the whole alert in the payload
-        payload.getCustomDetails().put("alert", JsonFormat.printer().includingDefaultValueFields().print(alert));
+        payload.getCustomDetails()
+                .put("alert", JsonFormat.printer().includingDefaultValueFields().print(alert));
 
         event.setPayload(payload);
         return event;
@@ -119,8 +112,13 @@ public class PagerDutyEventFactory {
     private String getEventSummary(Alert alert) {
         String logMessage = alert.getLogMessage().trim();
         return Strings.isBlank(logMessage)
-            ? String.format("Node Name: %s, Description: %s, Started: %s, Policy Name: %s, Rule Name: %s",
-            alert.getNodeName(), alert.getDescription(), DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli((alert.getFirstEventTimeMs()))),
-            alert.getPolicyNameList(), alert.getRuleNameList()) : logMessage;
+                ? String.format(
+                        "Node Name: %s, Description: %s, Started: %s, Policy Name: %s, Rule Name: %s",
+                        alert.getNodeName(),
+                        alert.getDescription(),
+                        DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli((alert.getFirstEventTimeMs()))),
+                        alert.getPolicyNameList(),
+                        alert.getRuleNameList())
+                : logMessage;
     }
 }

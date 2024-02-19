@@ -1,33 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2005-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.snmp;
 
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 import lombok.Setter;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
@@ -35,11 +32,6 @@ import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.regex.Pattern;
 
 /**
  * <p>Abstract SnmpMonitorStrategy class.</p>
@@ -67,24 +59,24 @@ public class SnmpMonitorUtils {
     public static final String NOT_EQUAL = "!=";
     /** Constant <code>MATCHES="~"</code> */
     public static final String MATCHES = "~";
-    
+
     protected static boolean hex = false;
 
     // Wrap InetAddress static calls in a test-friendly injectable
     @Setter
-    private FunctionWithException<String, InetAddress, UnknownHostException> inetLookupOperation = InetAddress::getByName;
+    private FunctionWithException<String, InetAddress, UnknownHostException> inetLookupOperation =
+            InetAddress::getByName;
 
-
-    public SnmpAgentConfig getAgentConfig(MonitoredService svc, SnmpMonitorRequest snmpMonitorRequest) throws UnknownHostException {
+    public SnmpAgentConfig getAgentConfig(MonitoredService svc, SnmpMonitorRequest snmpMonitorRequest)
+            throws UnknownHostException {
         // return getKeyedInstance(parameters, "agent", () -> { return new SnmpAgentConfig(svc.getAddress()); });
         return new SnmpAgentConfig(inetLookupOperation.call(snmpMonitorRequest.getHost()));
     }
 
     public static String getStringValue(SnmpValue result) {
         // TODO: what is hex ?
-    	if (hex)
-    		return result.toHexString();
-    	return result.toString();
+        if (hex) return result.toHexString();
+        return result.toString();
     }
 
     /**
@@ -99,17 +91,17 @@ public class SnmpMonitorUtils {
     public static boolean meetsCriteria(SnmpValue result, String operator, String operand) {
 
         Boolean retVal = null;
-        
+
         retVal = isCriteriaNull(result, operator, operand);
-        
+
         if (retVal == null) {
-        	String value = getStringValue(result);
+            String value = getStringValue(result);
             retVal = checkStringCriteria(operator, operand, value);
-            
+
             if (retVal == null) {
-                
+
                 BigInteger val = BigInteger.valueOf(result.toLong());
-                
+
                 BigInteger intOperand = new BigInteger(operand);
                 if (LESS_THAN.equals(operator)) {
                     return val.compareTo(intOperand) < 0;
@@ -126,7 +118,7 @@ public class SnmpMonitorUtils {
         } else if (retVal.booleanValue()) {
             return true;
         }
-        
+
         return retVal.booleanValue();
     }
 
@@ -138,23 +130,21 @@ public class SnmpMonitorUtils {
      */
     private static Boolean checkStringCriteria(final String operator, String operand, String value) {
         Boolean retVal = null;
-        
+
         if (value == null) {
             value = "";
         } else if (value.startsWith(".")) {
             value = value.substring(1);
         }
-        
+
         // Bug 2178 -- if this is a regex match, a leading "." in the operand
         // should not be stripped
         if (operand.startsWith(".") && !MATCHES.equals(operator)) {
             operand = operand.substring(1);
         }
-        
-        if (EQUALS.equals(operator))
-            retVal = Boolean.valueOf(operand.equals(value));
-        else if (NOT_EQUAL.equals(operator))
-            retVal = Boolean.valueOf(!operand.equals(value));
+
+        if (EQUALS.equals(operator)) retVal = Boolean.valueOf(operand.equals(value));
+        else if (NOT_EQUAL.equals(operator)) retVal = Boolean.valueOf(!operand.equals(value));
         else if (MATCHES.equals(operator))
             retVal = Boolean.valueOf(Pattern.compile(operand).matcher(value).find());
         return retVal;
@@ -167,9 +157,8 @@ public class SnmpMonitorUtils {
      * @return
      */
     private static Boolean isCriteriaNull(Object result, String operator, String operand) {
-        
-        if (result == null)
-            return Boolean.FALSE;
+
+        if (result == null) return Boolean.FALSE;
         if (operator == null || operand == null) {
             return Boolean.TRUE;
         } else {
@@ -177,14 +166,13 @@ public class SnmpMonitorUtils {
         }
     }
 
-//========================================
-// Workarounds
-//----------------------------------------
+    // ========================================
+    // Workarounds
+    // ----------------------------------------
 
     // TODO
     @FunctionalInterface
     public interface FunctionWithException<ARG, RET, EXC extends Exception> {
         RET call(ARG arg) throws EXC;
     }
-
 }

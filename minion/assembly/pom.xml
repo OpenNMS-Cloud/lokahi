@@ -1,141 +1,159 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>minion</artifactId>
-        <groupId>org.opennms.lokahi.minion</groupId>
-        <version>0.1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opennms.lokahi.minion</groupId>
+    <artifactId>minion</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>assembly</artifactId>
+  <artifactId>assembly</artifactId>
+  <packaging>karaf-assembly</packaging>
 
-    <name>OpenNMS Lokahi :: Minion :: Assembly</name>
-    <packaging>karaf-assembly</packaging>
+  <name>OpenNMS Lokahi :: Minion :: Assembly</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>framework</artifactId>
-            <version>${karaf.version}</version>
-            <type>kar</type>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>framework</artifactId>
+      <version>${karaf.version}</version>
+      <type>kar</type>
+    </dependency>
 
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>framework</artifactId>
-            <version>${karaf.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-            <scope>runtime</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>framework</artifactId>
+      <version>${karaf.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>enterprise</artifactId>
-            <version>${karaf.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-            <scope>runtime</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>enterprise</artifactId>
+      <version>${karaf.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>standard</artifactId>
-            <version>${karaf.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>spring</artifactId>
-            <version>${karaf.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>standard</artifactId>
+      <version>${karaf.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>spring</artifactId>
+      <version>${karaf.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
 
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>minion-features</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-            <version>${project.version}</version>
-        </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>minion-features</artifactId>
+      <version>${project.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
 
-        <dependency>
-            <groupId>org.apache.aries.jax.rs</groupId>
-            <artifactId>org.apache.aries.jax.rs.features</artifactId>
-            <version>${aries.jax.rs.whiteboard.version}</version>
-            <type>xml</type>
-        </dependency>
-    </dependencies>
+    <dependency>
+      <groupId>org.apache.aries.jax.rs</groupId>
+      <artifactId>org.apache.aries.jax.rs.features</artifactId>
+      <version>${aries.jax.rs.whiteboard.version}</version>
+      <type>xml</type>
+    </dependency>
+  </dependencies>
 
-    <build>
-        <!-- include custom resources in the distribution -->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/filtered-resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-        </resources>
+  <build>
+    <!-- include custom resources in the distribution -->
+    <resources>
+      <resource>
+        <filtering>false</filtering>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/filtered-resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
+    </resources>
 
-        <plugins>
-            <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-maven-plugin</artifactId>
-                <version>${karaf.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <installedFeatures>
-                        <feature>wrapper</feature>
-                        <feature>aries-blueprint</feature>
-                        <feature>shell-compat</feature>
-                    </installedFeatures>
-                    <installedBundles>
-                        <bundle>mvn:org.apache.cxf.karaf/cxf-karaf-commands/${cxf.version}</bundle>
-                    </installedBundles>
-                    <startupFeatures>
-                        <feature>eventadmin</feature>
-                    </startupFeatures>
-                    <bootFeatures>
-                        <feature>wrap</feature>
-                        <feature>shell</feature>
-                        <feature>feature</feature>
-                        <feature>jaas</feature>
-                        <feature>ssh</feature>
-                        <feature>management</feature>
-                        <feature>bundle</feature>
-                        <feature>config</feature>
-                        <feature>deployer</feature>
-                        <feature>diagnostic</feature>
-                        <feature>feature</feature>
-                        <feature>instance</feature>
-                        <feature>kar</feature>
-                        <feature>log</feature>
-                        <feature>package</feature>
-                        <feature>service</feature>
-                        <feature>system</feature>
-                        <feature>scr</feature>
-                        <feature>minion-ng</feature>
-                        <feature>flows</feature>
-                    </bootFeatures>
-                    <libraries>
-                    </libraries>
-                    <framework />
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${karaf.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <installedFeatures>
+            <feature>wrapper</feature>
+            <feature>aries-blueprint</feature>
+            <feature>shell-compat</feature>
+          </installedFeatures>
+          <installedBundles>
+            <bundle>mvn:org.apache.cxf.karaf/cxf-karaf-commands/${cxf.version}</bundle>
+          </installedBundles>
+          <startupFeatures>
+            <feature>eventadmin</feature>
+          </startupFeatures>
+          <bootFeatures>
+            <feature>wrap</feature>
+            <feature>shell</feature>
+            <feature>feature</feature>
+            <feature>jaas</feature>
+            <feature>ssh</feature>
+            <feature>management</feature>
+            <feature>bundle</feature>
+            <feature>config</feature>
+            <feature>deployer</feature>
+            <feature>diagnostic</feature>
+            <feature>feature</feature>
+            <feature>instance</feature>
+            <feature>kar</feature>
+            <feature>log</feature>
+            <feature>package</feature>
+            <feature>service</feature>
+            <feature>system</feature>
+            <feature>scr</feature>
+            <feature>minion-ng</feature>
+            <feature>flows</feature>
+          </bootFeatures>
+          <libraries></libraries>
+          <framework></framework>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

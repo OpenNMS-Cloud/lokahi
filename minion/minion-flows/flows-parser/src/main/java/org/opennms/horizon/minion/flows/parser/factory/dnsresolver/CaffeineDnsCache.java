@@ -1,51 +1,40 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
- *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
- *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
- *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
 /*
- * Copyright 2016 The Netty Project
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * The Netty Project licenses this file to you under the Apache License,
- * version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at:
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
 package org.opennms.horizon.minion.flows.parser.factory.dnsresolver;
 
 import static io.netty.util.internal.ObjectUtil.checkNotNull;
 import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import io.netty.channel.EventLoop;
+import io.netty.handler.codec.dns.DnsPtrRecord;
+import io.netty.handler.codec.dns.DnsRecord;
+import io.netty.resolver.dns.DnsCacheEntry;
+import io.netty.util.internal.StringUtil;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,19 +43,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
-
-import io.netty.channel.EventLoop;
-import io.netty.handler.codec.dns.DnsPtrRecord;
-import io.netty.handler.codec.dns.DnsRecord;
-import io.netty.resolver.dns.DnsCacheEntry;
-import io.netty.util.internal.StringUtil;
 
 /**
  * DNS cache implementation largely copied from Netty's
@@ -107,7 +83,8 @@ public class CaffeineDnsCache implements ExtendedDnsCache {
     public CaffeineDnsCache(int minTtl, int maxTtl, int negativeTtl, long maxSize) {
         this.minTtl = Math.min(MAX_SUPPORTED_TTL_SECS, checkPositiveOrZero(minTtl, "minTtl"));
         this.maxTtl = Math.min(MAX_SUPPORTED_TTL_SECS, checkPositiveOrZero(maxTtl, "maxTtl"));
-        Preconditions.checkArgument(minTtl <= maxTtl, "minTtl: " + minTtl + ", maxTtl: " + maxTtl + " (expected: 0 <= minTtl <= maxTtl)");
+        Preconditions.checkArgument(
+                minTtl <= maxTtl, "minTtl: " + minTtl + ", maxTtl: " + maxTtl + " (expected: 0 <= minTtl <= maxTtl)");
         this.negativeTtl = checkPositiveOrZero(negativeTtl, "negativeTtl");
         this.maxSize = checkPositiveOrZero(maxSize, "maxSize");
 
@@ -172,7 +149,7 @@ public class CaffeineDnsCache implements ExtendedDnsCache {
         if (!emptyAdditionals(additionals)) {
             return Collections.<DnsCacheEntry>emptyList();
         }
-        final Collection<? extends  DnsCacheEntry> cachedEntries = resolveCache.get(ensureTrailingDot(hostname));
+        final Collection<? extends DnsCacheEntry> cachedEntries = resolveCache.get(ensureTrailingDot(hostname));
         if (cachedEntries == null) {
             cacheMisses.mark();
             return null;
@@ -186,8 +163,8 @@ public class CaffeineDnsCache implements ExtendedDnsCache {
      * Positive caching for normal lookups.
      */
     @Override
-    public DnsCacheEntry cache(String hostname, DnsRecord[] additionals,
-                               InetAddress address, long originalTtl, EventLoop loop) {
+    public DnsCacheEntry cache(
+            String hostname, DnsRecord[] additionals, InetAddress address, long originalTtl, EventLoop loop) {
         checkNotNull(hostname, "hostname");
         checkNotNull(address, "address");
         checkNotNull(loop, "loop");
@@ -211,7 +188,8 @@ public class CaffeineDnsCache implements ExtendedDnsCache {
         if (maxTtl == 0) {
             return e;
         }
-        resolveCache.cache(ensureTrailingDot(hostname), e, Math.max(minTtl, (int) Math.min(maxTtl, ptrRecord.timeToLive())));
+        resolveCache.cache(
+                ensureTrailingDot(hostname), e, Math.max(minTtl, (int) Math.min(maxTtl, ptrRecord.timeToLive())));
         return e;
     }
 
@@ -345,10 +323,10 @@ public class CaffeineDnsCache implements ExtendedDnsCache {
             if (this == o) return true;
             if (!(o instanceof DefaultExtendedDnsCacheEntry)) return false;
             DefaultExtendedDnsCacheEntry that = (DefaultExtendedDnsCacheEntry) o;
-            return Objects.equals(hostname, that.hostname) &&
-                    Objects.equals(hostnameFromPtrRecord, that.hostnameFromPtrRecord) &&
-                    Objects.equals(address, that.address) &&
-                    Objects.equals(cause, that.cause);
+            return Objects.equals(hostname, that.hostname)
+                    && Objects.equals(hostnameFromPtrRecord, that.hostnameFromPtrRecord)
+                    && Objects.equals(address, that.address)
+                    && Objects.equals(cause, that.cause);
         }
 
         @Override

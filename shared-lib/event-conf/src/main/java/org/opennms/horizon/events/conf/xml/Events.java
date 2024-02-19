@@ -1,40 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.conf.xml;
-
-
-import org.opennms.horizon.events.util.JaxbUtils;
-import org.opennms.horizon.events.util.ValidateUsing;
-import org.opennms.horizon.events.util.ConfigUtils;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -67,11 +52,17 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.opennms.horizon.events.util.ConfigUtils;
+import org.opennms.horizon.events.util.JaxbUtils;
+import org.opennms.horizon.events.util.ValidateUsing;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
-@XmlRootElement(name="events")
+@XmlRootElement(name = "events")
 @XmlAccessorType(XmlAccessType.NONE)
 @ValidateUsing("eventconf.xsd")
-@XmlType(propOrder={})
+@XmlType(propOrder = {})
 public class Events implements Serializable {
     private static final DefaultResourceLoader RESOURCE_LOADER = new DefaultResourceLoader();
 
@@ -88,13 +79,13 @@ public class Events implements Serializable {
     /**
      * Global settings for this configuration
      */
-    @XmlElement(name="global", required=false)
+    @XmlElement(name = "global", required = false)
     private Global m_global;
 
-    @XmlElement(name="event", required=false)
+    @XmlElement(name = "event", required = false)
     private List<Event> m_events = new ArrayList<>();
 
-    @XmlElement(name="event-file", required=false)
+    @XmlElement(name = "event-file", required = false)
     private List<String> m_eventFiles = new ArrayList<>();
 
     @XmlTransient
@@ -174,9 +165,11 @@ public class Events implements Serializable {
                 return baseRef.createRelative(relative);
             }
         } catch (final IOException e) {
-            throw new RuntimeException("Resource location has a relative path, however the configResource does not reference a file, so the relative path cannot be resolved.  The location is: " + relative, null);
+            throw new RuntimeException(
+                    "Resource location has a relative path, however the configResource does not reference a file, so the relative path cannot be resolved.  The location is: "
+                            + relative,
+                    null);
         }
-
     }
 
     public Map<String, Long> loadEventFiles(final Resource configResource) throws IOException {
@@ -185,12 +178,13 @@ public class Events implements Serializable {
         return lastModifiedEventFiles;
     }
 
-    public void loadEventFilesIfModified(final Resource configResource, final Map<String, Long> lastModifiedEventFiles) throws IOException {
+    public void loadEventFilesIfModified(final Resource configResource, final Map<String, Long> lastModifiedEventFiles)
+            throws IOException {
         // Remove any event files that we're previously loaded, and no
         // longer appear in the list of event files
-        for(Iterator<Entry<String, Events>> it = m_loadedEventFiles.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Entry<String, Events>> it = m_loadedEventFiles.entrySet().iterator(); it.hasNext(); ) {
             final String eventFile = it.next().getKey();
-            if(!m_eventFiles.contains(eventFile)) {
+            if (!m_eventFiles.contains(eventFile)) {
                 // The event file was previously loaded and has been removed
                 // from the list of event files
                 it.remove();
@@ -198,7 +192,7 @@ public class Events implements Serializable {
         }
 
         // Conditionally load or reload the event files
-        for(final String eventFile : m_eventFiles) {
+        for (final String eventFile : m_eventFiles) {
             final Resource eventResource = getRelative(configResource, eventFile);
             final long lastModified = eventResource.lastModified();
 
@@ -209,7 +203,7 @@ public class Events implements Serializable {
                 shouldLoadFile = false;
                 // If we opt out to load a particular file, it must
                 // be already loaded
-                assert(m_loadedEventFiles.containsKey(eventFile));
+                assert (m_loadedEventFiles.containsKey(eventFile));
             }
 
             // Skip any files that don't need to be loaded
@@ -221,28 +215,36 @@ public class Events implements Serializable {
 
             final Events events = JaxbUtils.unmarshal(Events.class, eventResource);
             if (events.getEvents().isEmpty()) {
-                throw new IllegalStateException("Uh oh! An event file "+eventResource.getFile()+" with no events has been laoded!");
+                throw new IllegalStateException(
+                        "Uh oh! An event file " + eventResource.getFile() + " with no events has been laoded!");
             }
             if (events.getGlobal() != null) {
-                throw new IOException("The event resource " + eventResource + " included from the root event configuration file cannot have a 'global' element", null);
+                throw new IOException(
+                        "The event resource " + eventResource
+                                + " included from the root event configuration file cannot have a 'global' element",
+                        null);
             }
             if (!events.getEventFiles().isEmpty()) {
-                throw new IOException("The event resource " + eventResource + " included from the root event configuration file cannot include other configuration files: " + StringUtils.collectionToCommaDelimitedString(events.getEventFiles()), null);
+                throw new IOException(
+                        "The event resource " + eventResource
+                                + " included from the root event configuration file cannot include other configuration files: "
+                                + StringUtils.collectionToCommaDelimitedString(events.getEventFiles()),
+                        null);
             }
 
             m_loadedEventFiles.put(eventFile, events);
         }
 
-		// Re-order the loaded event files to match the order specified in the root configuration
-		final Map<String, Events> orderedAndLoadedEventFiles = new LinkedHashMap<>();
-		for (String eventFile : m_eventFiles) {
-			final Events loadedEvents = m_loadedEventFiles.get(eventFile);
-			if (loadedEvents != null) {
-				orderedAndLoadedEventFiles.put(eventFile, loadedEvents);
-			}
-		}
-		m_loadedEventFiles = orderedAndLoadedEventFiles;
-	}
+        // Re-order the loaded event files to match the order specified in the root configuration
+        final Map<String, Events> orderedAndLoadedEventFiles = new LinkedHashMap<>();
+        for (String eventFile : m_eventFiles) {
+            final Events loadedEvents = m_loadedEventFiles.get(eventFile);
+            if (loadedEvents != null) {
+                orderedAndLoadedEventFiles.put(eventFile, loadedEvents);
+            }
+        }
+        m_loadedEventFiles = orderedAndLoadedEventFiles;
+    }
 
     public boolean isSecureTag(final String tag) {
         return m_global == null ? false : m_global.isSecureTag(tag);
@@ -254,12 +256,12 @@ public class Events implements Serializable {
         m_partitionedEvents = new LinkedHashMap<String, List<Event>>();
         m_nullPartitionedEvents = new ArrayList<Event>();
 
-        for(final Event event : m_events) {
+        for (final Event event : m_events) {
             final List<String> keys = partition.group(event);
             if (keys == null) {
                 m_nullPartitionedEvents.add(event);
             } else {
-                for(final String key : keys) {
+                for (final String key : keys) {
                     List<Event> events = m_partitionedEvents.computeIfAbsent(key, k -> new ArrayList<Event>());
                     events.add(event);
                 }
@@ -269,8 +271,6 @@ public class Events implements Serializable {
         m_partitionedEvents.values().stream().forEach(l -> Collections.sort(l));
         Collections.sort(m_nullPartitionedEvents);
     }
-
-
 
     public Event findFirstMatchingEvent(final org.opennms.horizon.events.xml.Event matchingEvent) {
         // Atempt to match the event definition by UEI
@@ -310,13 +310,13 @@ public class Events implements Serializable {
     }
 
     public Event findFirstMatchingEvent(final EventCriteria criteria) {
-        for(final Event event : m_events) {
+        for (final Event event : m_events) {
             if (criteria.matches(event)) {
                 return event;
             }
         }
 
-        for(final Entry<String, Events> loadedEvents : m_loadedEventFiles.entrySet()) {
+        for (final Entry<String, Events> loadedEvents : m_loadedEventFiles.entrySet()) {
             final Events events = loadedEvents.getValue();
             final Event result = events.findFirstMatchingEvent(criteria);
             if (result != null) {
@@ -324,22 +324,19 @@ public class Events implements Serializable {
             }
         }
 
-
         return null;
-
     }
 
     public <T> T forEachEvent(final T initial, final EventCallback<T> callback) {
         T result = initial;
-        for(final Event event : m_events) {
+        for (final Event event : m_events) {
             result = callback.process(result, event);
         }
 
-        for(final Entry<String, Events> loadedEvents : m_loadedEventFiles.entrySet()) {
+        for (final Entry<String, Events> loadedEvents : m_loadedEventFiles.entrySet()) {
             final Events events = loadedEvents.getValue();
             result = events.forEachEvent(result, callback);
         }
-
 
         return result;
     }
@@ -372,7 +369,8 @@ public class Events implements Serializable {
     // Recurse through the configuration and return Event Definitions with priority > 0
     private List<Event> getPrioritizedEvents() {
         List<Event> prioritizedEvents = new ArrayList<Event>();
-        prioritizedEvents.addAll(m_events.stream().filter(e -> e.getPriority() > 0).collect(Collectors.toList()));
+        prioritizedEvents.addAll(
+                m_events.stream().filter(e -> e.getPriority() > 0).collect(Collectors.toList()));
         for (final Events eventsFile : m_loadedEventFiles.values()) {
             prioritizedEvents.addAll(eventsFile.getPrioritizedEvents());
         }
@@ -433,7 +431,8 @@ public class Events implements Serializable {
         // 2) Remove event definition from the index if they are matched
         // by any of the known UEI matchers.
         if (matchers.size() >= 1) {
-            events: for(Iterator<Entry<String, Event>> it = m_eventsByUei.entrySet().iterator(); it.hasNext(); ) {
+            events:
+            for (Iterator<Entry<String, Event>> it = m_eventsByUei.entrySet().iterator(); it.hasNext(); ) {
                 final Entry<String, Event> entry = it.next();
                 for (EventMatcher matcher : matchers) {
                     // Build an event instance
@@ -475,10 +474,13 @@ public class Events implements Serializable {
             try {
                 file = resource.getFile();
             } catch (final IOException e) {
-                throw new RuntimeException("Event resource '" + resource + "' is not a file resource and cannot be saved.  Nested exception: " + e, e);
+                throw new RuntimeException(
+                        "Event resource '" + resource
+                                + "' is not a file resource and cannot be saved.  Nested exception: " + e,
+                        e);
             }
             try (final OutputStream fos = new FileOutputStream(file);
-                    final Writer fileWriter = new OutputStreamWriter(fos, StandardCharsets.UTF_8);) {
+                    final Writer fileWriter = new OutputStreamWriter(fos, StandardCharsets.UTF_8); ) {
                 fileWriter.write(stringWriter.toString());
             } catch (final Exception e) {
                 throw new RuntimeException("Event file '" + file + "' could not be opened.  Nested exception: " + e, e);
@@ -487,13 +489,12 @@ public class Events implements Serializable {
     }
 
     public void save(final Resource resource) {
-        for(final Entry<String, Events> entry : m_loadedEventFiles.entrySet()) {
+        for (final Entry<String, Events> entry : m_loadedEventFiles.entrySet()) {
             final String eventFile = entry.getKey();
             final Events events = entry.getValue();
 
             final Resource eventResource = getRelative(resource, eventFile);
             events.save(eventResource);
-
         }
 
         saveEvents(resource);
@@ -511,9 +512,9 @@ public class Events implements Serializable {
         }
         if (obj instanceof Events) {
             final Events that = (Events) obj;
-            return Objects.equals(this.m_global, that.m_global) &&
-                    Objects.equals(this.m_events, that.m_events) &&
-                    Objects.equals(this.m_eventFiles, that.m_eventFiles);
+            return Objects.equals(this.m_global, that.m_global)
+                    && Objects.equals(this.m_events, that.m_events)
+                    && Objects.equals(this.m_eventFiles, that.m_eventFiles);
         }
         return false;
     }

@@ -1,36 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.conf.xml;
 
 import com.google.common.base.MoreObjects;
-import org.opennms.horizon.events.util.ValidateUsing;
-
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -40,28 +31,29 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.opennms.horizon.events.util.ValidateUsing;
 
 /**
  * The Mask for event configuration: The mask contains one
  *  or more 'maskelements' which uniquely identify an event.
  */
-@XmlRootElement(name="mask")
+@XmlRootElement(name = "mask")
 @XmlAccessorType(XmlAccessType.NONE)
 @ValidateUsing("eventconf.xsd")
-@XmlType(propOrder={"m_maskElements", "m_varbinds"})
+@XmlType(propOrder = {"m_maskElements", "m_varbinds"})
 public class Mask implements Serializable {
     private static final long serialVersionUID = 2L;
 
     /**
      * The mask element
      */
-    @XmlElement(name="maskelement", required=true)
+    @XmlElement(name = "maskelement", required = true)
     private List<Maskelement> m_maskElements = new ArrayList<>();
 
     /**
      * The varbind element
      */
-    @XmlElement(name="varbind")
+    @XmlElement(name = "varbind")
     private List<Varbind> m_varbinds = new ArrayList<>();
 
     public List<Maskelement> getMaskelements() {
@@ -112,21 +104,21 @@ public class Mask implements Serializable {
         }
         if (obj instanceof Mask) {
             final Mask that = (Mask) obj;
-            return Objects.equals(this.m_maskElements, that.m_maskElements) &&
-                    Objects.equals(this.m_varbinds, that.m_varbinds);
+            return Objects.equals(this.m_maskElements, that.m_maskElements)
+                    && Objects.equals(this.m_varbinds, that.m_varbinds);
         }
         return false;
     }
 
     public EventMatcher constructMatcher() {
-        final EventMatcher[] matchers = new EventMatcher[m_maskElements.size()+m_varbinds.size()];
+        final EventMatcher[] matchers = new EventMatcher[m_maskElements.size() + m_varbinds.size()];
         int index = 0;
-        for(final Maskelement maskElement : m_maskElements) {
+        for (final Maskelement maskElement : m_maskElements) {
             matchers[index] = maskElement.constructMatcher();
             index++;
         }
 
-        for(final Varbind varbind : m_varbinds) {
+        for (final Varbind varbind : m_varbinds) {
             matchers[index] = varbind.constructMatcher();
             index++;
         }
@@ -135,7 +127,7 @@ public class Mask implements Serializable {
     }
 
     public Maskelement getMaskElement(final String mename) {
-        for(final Maskelement element : m_maskElements) {
+        for (final Maskelement element : m_maskElements) {
             if (mename.equals(element.getMename())) {
                 return element;
             }

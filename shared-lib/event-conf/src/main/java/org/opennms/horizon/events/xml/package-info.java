@@ -25,14 +25,10 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
 @XmlSchema(
-    namespace = "http://xmlns.opennms.org/xsd/event",
-    elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
-    xmlns={
-        @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/event")
-    }
-)
+        namespace = "http://xmlns.opennms.org/xsd/event",
+        elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
+        xmlns = {@XmlNs(prefix = "", namespaceURI = "http://xmlns.opennms.org/xsd/event")})
 package org.opennms.horizon.events.xml;
 
 import jakarta.xml.bind.annotation.XmlNs;

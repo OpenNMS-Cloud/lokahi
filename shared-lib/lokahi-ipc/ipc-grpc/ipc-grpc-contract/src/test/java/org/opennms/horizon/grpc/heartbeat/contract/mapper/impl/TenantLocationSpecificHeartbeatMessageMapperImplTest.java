@@ -1,19 +1,39 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.grpc.heartbeat.contract.mapper.impl;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TenantLocationSpecificHeartbeatMessageMapperImplTest {
 
@@ -29,26 +49,19 @@ public class TenantLocationSpecificHeartbeatMessageMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-        HeartbeatMessage testHeartbeatMessage =
-            HeartbeatMessage.newBuilder()
-                .setIdentity(
-                    Identity.newBuilder()
-                        .setSystemId("x-system-id-x")
-                        .build()
-                )
-                .setTimestamp(
-                    Timestamp.newBuilder()
+        HeartbeatMessage testHeartbeatMessage = HeartbeatMessage.newBuilder()
+                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x").build())
+                .setTimestamp(Timestamp.newBuilder()
                         .setSeconds(123123)
                         .setNanos(456456)
-                        .build()
-                )
+                        .build())
                 .build();
 
         //
         // Execute
         //
         TenantLocationSpecificHeartbeatMessage mappedResult =
-            target.mapBareToTenanted("x-tenant-id-x", "x-location-x", testHeartbeatMessage);
+                target.mapBareToTenanted("x-tenant-id-x", "x-location-x", testHeartbeatMessage);
 
         //
         // Verify the Results
@@ -68,17 +81,15 @@ public class TenantLocationSpecificHeartbeatMessageMapperImplTest {
         // Setup Test Data and Interactions
         //
         TenantLocationSpecificHeartbeatMessage tenantLocationSpecificHeartbeatMessage =
-            TenantLocationSpecificHeartbeatMessage.newBuilder()
-                .setTenantId("x-tenant-id-x")
-                .setLocationId("x-location-x")
-                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x"))
-                .setTimestamp(
-                    Timestamp.newBuilder()
-                        .setSeconds(123123)
-                        .setNanos(456456)
-                        .build()
-                )
-                .build();
+                TenantLocationSpecificHeartbeatMessage.newBuilder()
+                        .setTenantId("x-tenant-id-x")
+                        .setLocationId("x-location-x")
+                        .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x"))
+                        .setTimestamp(Timestamp.newBuilder()
+                                .setSeconds(123123)
+                                .setNanos(456456)
+                                .build())
+                        .build();
 
         //
         // Execute
@@ -102,12 +113,12 @@ public class TenantLocationSpecificHeartbeatMessageMapperImplTest {
     @Test
     public void testDefinitionsMatch() {
         verifyAllFieldsExceptTenantIdAndLocationMatch(
-            HeartbeatMessage.getDefaultInstance(), TenantLocationSpecificHeartbeatMessage.getDefaultInstance());
+                HeartbeatMessage.getDefaultInstance(), TenantLocationSpecificHeartbeatMessage.getDefaultInstance());
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     /**
      * Verify all of the fields in the given message have been set to help ensure completeness of the test.
@@ -129,13 +140,14 @@ public class TenantLocationSpecificHeartbeatMessageMapperImplTest {
             if (fieldDescriptor.isRepeated()) {
                 if (repeatedMustNotBeEmpty) {
                     assertTrue(
-                        ( message.getRepeatedFieldCount(fieldDescriptor) > 0 ),
-                        "message " + typeDescriptor.getFullName() + " has 0 repeated field values for field " + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")"
-                        );
+                            (message.getRepeatedFieldCount(fieldDescriptor) > 0),
+                            "message " + typeDescriptor.getFullName() + " has 0 repeated field values for field "
+                                    + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")");
                 }
             } else {
                 if (!message.hasField(fieldDescriptor)) {
-                    fail("message " + typeDescriptor.getFullName() + " is missing field " + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")");
+                    fail("message " + typeDescriptor.getFullName() + " is missing field " + fieldDescriptor.getName()
+                            + " (" + fieldDescriptor.getNumber() + ")");
                 }
             }
         }
@@ -147,14 +159,17 @@ public class TenantLocationSpecificHeartbeatMessageMapperImplTest {
      * @param messageWithoutTenant
      * @param messageWithTenant
      */
-    private void verifyAllFieldsExceptTenantIdAndLocationMatch(Message messageWithoutTenant, Message messageWithTenant) {
+    private void verifyAllFieldsExceptTenantIdAndLocationMatch(
+            Message messageWithoutTenant, Message messageWithTenant) {
         Descriptors.Descriptor withoutTenantTypeDescriptor = messageWithoutTenant.getDescriptorForType();
         Descriptors.Descriptor withTenantTypeDescriptor = messageWithTenant.getDescriptorForType();
 
-        Set<String> withoutTenantTypeFields =
-            withoutTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
-        Set<String> withTenantTypeFields =
-            withTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
+        Set<String> withoutTenantTypeFields = withoutTenantTypeDescriptor.getFields().stream()
+                .map(Descriptors.FieldDescriptor::getName)
+                .collect(Collectors.toSet());
+        Set<String> withTenantTypeFields = withTenantTypeDescriptor.getFields().stream()
+                .map(Descriptors.FieldDescriptor::getName)
+                .collect(Collectors.toSet());
 
         withTenantTypeFields.remove("tenant_id");
         withTenantTypeFields.remove("location_id");

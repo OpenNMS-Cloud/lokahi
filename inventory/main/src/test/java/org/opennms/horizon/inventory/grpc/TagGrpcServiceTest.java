@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.grpc;
 
 import com.google.protobuf.BoolValue;
@@ -5,6 +26,9 @@ import com.google.rpc.Code;
 import io.grpc.Context;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -20,10 +44,6 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.TagService;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 public class TagGrpcServiceTest {
 
@@ -48,33 +68,22 @@ public class TagGrpcServiceTest {
         mockTenantLookup = Mockito.mock(TenantLookup.class);
         mockNodeService = Mockito.mock(NodeService.class);
 
-        testTagCreateDTO =
-            TagCreateDTO.newBuilder()
-                .setName("x-tag-x")
-                .build();
+        testTagCreateDTO = TagCreateDTO.newBuilder().setName("x-tag-x").build();
 
         testTagCreateListDTO =
-            TagCreateListDTO.newBuilder()
-                .addTags(testTagCreateDTO)
-                .build();
+                TagCreateListDTO.newBuilder().addTags(testTagCreateDTO).build();
 
-        testTagRemoveListDTO =
-            TagRemoveListDTO.newBuilder()
+        testTagRemoveListDTO = TagRemoveListDTO.newBuilder()
                 .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(2929).build())
                 .build();
 
-        testListTagsByEntityIdParamsDTO =
-            ListTagsByEntityIdParamsDTO.newBuilder()
+        testListTagsByEntityIdParamsDTO = ListTagsByEntityIdParamsDTO.newBuilder()
                 .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(3131).build())
                 .build();
 
-        testListAllTagsParamsDTO =
-            ListAllTagsParamsDTO.newBuilder()
-                .build();
+        testListAllTagsParamsDTO = ListAllTagsParamsDTO.newBuilder().build();
 
-        testDeleteTagsDTO =
-            DeleteTagsDTO.newBuilder()
-                .build();
+        testDeleteTagsDTO = DeleteTagsDTO.newBuilder().build();
 
         target = new TagGrpcService(mockTagService, mockTenantLookup, mockNodeService);
     }
@@ -84,15 +93,13 @@ public class TagGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testTag =
-            TagDTO.newBuilder()
-                .setName("x-tag-x")
-                .build();
+        var testTag = TagDTO.newBuilder().setName("x-tag-x").build();
         List<TagDTO> testTagList = List.of(testTag);
 
         prepareCommonTenantLookup();
         StreamObserver<TagListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.addTags(TEST_TENANT_ID, testTagCreateListDTO)).thenReturn(testTagList);
+        Mockito.when(mockTagService.addTags(TEST_TENANT_ID, testTagCreateListDTO))
+                .thenReturn(testTagList);
 
         //
         // Execute
@@ -102,11 +109,8 @@ public class TagGrpcServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockStreamObserver).onNext(
-            Mockito.argThat(
-                (argument) -> Objects.equals(testTagList, argument.getTagsList())
-            )
-        );
+        Mockito.verify(mockStreamObserver)
+                .onNext(Mockito.argThat((argument) -> Objects.equals(testTagList, argument.getTagsList())));
         Mockito.verify(mockStreamObserver).onCompleted();
     }
 
@@ -118,7 +122,8 @@ public class TagGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<TagListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.addTags(TEST_TENANT_ID, testTagCreateListDTO)).thenThrow(testException);
+        Mockito.when(mockTagService.addTags(TEST_TENANT_ID, testTagCreateListDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -157,15 +162,13 @@ public class TagGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testTag =
-            TagDTO.newBuilder()
-                .setName("x-tag-x")
-                .build();
+        var testTag = TagDTO.newBuilder().setName("x-tag-x").build();
         List<TagDTO> testTagList = List.of(testTag);
 
         prepareCommonTenantLookup();
         StreamObserver<BoolValue> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.addTags(TEST_TENANT_ID, testTagCreateListDTO)).thenReturn(testTagList);
+        Mockito.when(mockTagService.addTags(TEST_TENANT_ID, testTagCreateListDTO))
+                .thenReturn(testTagList);
 
         //
         // Execute
@@ -227,15 +230,13 @@ public class TagGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testTag =
-            TagDTO.newBuilder()
-                .setName("x-tag-x")
-                .build();
+        var testTag = TagDTO.newBuilder().setName("x-tag-x").build();
         List<TagDTO> testTagList = List.of(testTag);
 
         prepareCommonTenantLookup();
         StreamObserver<TagListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.getTagsByEntityId(TEST_TENANT_ID, testListTagsByEntityIdParamsDTO)).thenReturn(testTagList);
+        Mockito.when(mockTagService.getTagsByEntityId(TEST_TENANT_ID, testListTagsByEntityIdParamsDTO))
+                .thenReturn(testTagList);
 
         //
         // Execute
@@ -245,11 +246,8 @@ public class TagGrpcServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockStreamObserver).onNext(
-            Mockito.argThat(
-                (argument) -> Objects.equals(testTagList, argument.getTagsList())
-            )
-        );
+        Mockito.verify(mockStreamObserver)
+                .onNext(Mockito.argThat((argument) -> Objects.equals(testTagList, argument.getTagsList())));
         Mockito.verify(mockStreamObserver).onCompleted();
     }
 
@@ -261,7 +259,8 @@ public class TagGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<TagListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.getTagsByEntityId(TEST_TENANT_ID, testListTagsByEntityIdParamsDTO)).thenThrow(testException);
+        Mockito.when(mockTagService.getTagsByEntityId(TEST_TENANT_ID, testListTagsByEntityIdParamsDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -300,15 +299,13 @@ public class TagGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testTag =
-            TagDTO.newBuilder()
-                .setName("x-tag-x")
-                .build();
+        var testTag = TagDTO.newBuilder().setName("x-tag-x").build();
         List<TagDTO> testTagList = List.of(testTag);
 
         prepareCommonTenantLookup();
         StreamObserver<TagListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.getTags(TEST_TENANT_ID, testListAllTagsParamsDTO)).thenReturn(testTagList);
+        Mockito.when(mockTagService.getTags(TEST_TENANT_ID, testListAllTagsParamsDTO))
+                .thenReturn(testTagList);
 
         //
         // Execute
@@ -318,11 +315,8 @@ public class TagGrpcServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockStreamObserver).onNext(
-            Mockito.argThat(
-                (argument) -> Objects.equals(testTagList, argument.getTagsList())
-            )
-        );
+        Mockito.verify(mockStreamObserver)
+                .onNext(Mockito.argThat((argument) -> Objects.equals(testTagList, argument.getTagsList())));
         Mockito.verify(mockStreamObserver).onCompleted();
     }
 
@@ -334,7 +328,8 @@ public class TagGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<TagListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockTagService.getTags(TEST_TENANT_ID, testListAllTagsParamsDTO)).thenThrow(testException);
+        Mockito.when(mockTagService.getTags(TEST_TENANT_ID, testListAllTagsParamsDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -373,10 +368,7 @@ public class TagGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testTag =
-            TagDTO.newBuilder()
-                .setName("x-tag-x")
-                .build();
+        var testTag = TagDTO.newBuilder().setName("x-tag-x").build();
         List<TagDTO> testTagList = List.of(testTag);
 
         prepareCommonTenantLookup();
@@ -437,25 +429,23 @@ public class TagGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
-
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void prepareCommonTenantLookup() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class)))
+                .thenReturn(Optional.of(TEST_TENANT_ID));
     }
 
     private void prepareTenantLookupOnMissingTenant() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class)))
+                .thenReturn(Optional.empty());
     }
 
     private ArgumentMatcher<Exception> prepareStatusExceptionMatcher(int expectedCode, String expectedMessage) {
-        return argument ->
-            (
-                (argument instanceof StatusRuntimeException) &&
-                (((StatusRuntimeException) argument).getStatus().getCode().value() == expectedCode)  &&
-                argument.getMessage().contains(expectedMessage)
-            );
+        return argument -> ((argument instanceof StatusRuntimeException)
+                && (((StatusRuntimeException) argument).getStatus().getCode().value() == expectedCode)
+                && argument.getMessage().contains(expectedMessage));
     }
 }

@@ -1,35 +1,38 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.service.taskset.TaskUtils;
@@ -46,41 +49,32 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class TrapConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(TrapConfigService.class);
-    public final static String TRAPS_CONFIG  = "traps-config";
+    public static final String TRAPS_CONFIG = "traps-config";
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final MonitoringLocationService monitoringLocationService;
     private final TaskSetPublisher taskSetPublisher;
 
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("trap-config-update-scheduler-%d")
-        .build();
+            .setNameFormat("trap-config-update-scheduler-%d")
+            .build();
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
 
     @EventListener(ApplicationReadyEvent.class)
     public void scheduleConfigUpdate() {
         // This is work around for Minion not to have timeout for CloudToMinion Stream.
         // Keep sending Trap config every 15 mins.
-        // https://opennms.atlassian.net/browse/LOK-2059 
+        // https://opennms.atlassian.net/browse/LOK-2059
         executorService.scheduleAtFixedRate(this::sendTrapConfigToMinionAfterStartup, 900, 900, TimeUnit.SECONDS);
     }
+
     public void sendTrapConfigToMinionAfterStartup() {
         List<MonitoringLocationDTO> allLocations = monitoringLocationService.findAll();
 
-        for(MonitoringLocationDTO dto : allLocations) {
+        for (MonitoringLocationDTO dto : allLocations) {
             sendTrapConfigToMinion(dto.getTenantId(), dto.getId());
         }
     }
@@ -93,39 +87,41 @@ public class TrapConfigService {
 
     private TrapConfig mapBeanToProto(TrapConfigBean config) {
         return TrapConfig.newBuilder()
-            .setSnmpTrapAddress(config.getSnmpTrapAddress())
-            .setSnmpTrapPort(config.getSnmpTrapPort())
-            .setNewSuspectOnTrap(config.getNewSuspectOnTrap())
-            .setIncludeRawMessage(config.isIncludeRawMessage())
-//            .setUseAddressFromVarbind(config.shouldUseAddressFromVarbind())
-            .setListenerConfig(ListenerConfig.newBuilder()
-                .setBatchIntervalMs(config.getBatchIntervalMs())
-                .setBatchSize(config.getBatchSize())
-                .setQueueSize(config.getQueueSize())
-                .setNumThreads(config.getNumThreads()))
-            .addAllSnmpV3User(mapSnmpV3Users(config))
-            .build();
+                .setSnmpTrapAddress(config.getSnmpTrapAddress())
+                .setSnmpTrapPort(config.getSnmpTrapPort())
+                .setNewSuspectOnTrap(config.getNewSuspectOnTrap())
+                .setIncludeRawMessage(config.isIncludeRawMessage())
+                //            .setUseAddressFromVarbind(config.shouldUseAddressFromVarbind())
+                .setListenerConfig(ListenerConfig.newBuilder()
+                        .setBatchIntervalMs(config.getBatchIntervalMs())
+                        .setBatchSize(config.getBatchSize())
+                        .setQueueSize(config.getQueueSize())
+                        .setNumThreads(config.getNumThreads()))
+                .addAllSnmpV3User(mapSnmpV3Users(config))
+                .build();
     }
 
     private List<SnmpV3User> mapSnmpV3Users(TrapConfigBean config) {
-        return config.getSnmpV3Users().stream().map(snmpV3User -> {
-            return SnmpV3User.newBuilder()
-                .setEngineId(snmpV3User.getEngineId())
-                .setAuthPassphrase(snmpV3User.getAuthPassphrase())
-                .setAuthProtocol(snmpV3User.getAuthProtocol())
-                .setPrivacyPassphrase(snmpV3User.getPrivacyPassphrase())
-                .setPrivacyProtocol(snmpV3User.getPrivacyProtocol())
-                .build();
-        }).collect(Collectors.toList());
+        return config.getSnmpV3Users().stream()
+                .map(snmpV3User -> {
+                    return SnmpV3User.newBuilder()
+                            .setEngineId(snmpV3User.getEngineId())
+                            .setAuthPassphrase(snmpV3User.getAuthPassphrase())
+                            .setAuthProtocol(snmpV3User.getAuthProtocol())
+                            .setPrivacyPassphrase(snmpV3User.getPrivacyPassphrase())
+                            .setPrivacyProtocol(snmpV3User.getPrivacyProtocol())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     private void publishTrapConfig(String tenantId, Long locationId, TrapConfig trapConfig) {
         TaskDefinition taskDefinition = TaskDefinition.newBuilder()
-            .setId(TaskUtils.identityForConfig(TRAPS_CONFIG, locationId))
-            .setPluginName("trapd.listener.config")
-            .setType(TaskType.LISTENER)
-            .setConfiguration(Any.pack(trapConfig))
-            .build();
+                .setId(TaskUtils.identityForConfig(TRAPS_CONFIG, locationId))
+                .setPluginName("trapd.listener.config")
+                .setType(TaskType.LISTENER)
+                .setConfiguration(Any.pack(trapConfig))
+                .build();
         var taskList = new ArrayList<TaskDefinition>();
         taskList.add(taskDefinition);
 

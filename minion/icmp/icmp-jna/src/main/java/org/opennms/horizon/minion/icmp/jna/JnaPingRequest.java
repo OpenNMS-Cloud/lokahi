@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2007-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.icmp.jna;
 
 import java.net.Inet4Address;
@@ -35,11 +28,10 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.horizon.shared.icmp.EchoPacket;
 import org.opennms.horizon.shared.icmp.LogPrefixPreservingPingResponseCallback;
 import org.opennms.horizon.shared.icmp.PingResponseCallback;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.protocols.rt.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +45,8 @@ import org.slf4j.LoggerFactory;
  */
 public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest, JnaPingReply>, EchoPacket {
 
-	
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JnaPingRequest.class);
-	
+    private static final Logger LOG = LoggerFactory.getLogger(JnaPingRequest.class);
+
     private static final AtomicLong s_nextTid = new AtomicLong(1);
 
     public static final long getNextTID() {
@@ -71,49 +61,66 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
     /**
      * The callback to use when this object is ready to do something
      */
-	private final PingResponseCallback m_callback;
-    
+    private final PingResponseCallback m_callback;
+
     /**
      * How many retries
      */
-	private final int m_retries;
-    
+    private final int m_retries;
+
     /**
      * how long to wait for a response
      */
-	private final long m_timeout;
+    private final long m_timeout;
 
     /**
      * The ICMP packet size including the header
      */
-	
-	private final int m_packetsize;
-	
+    private final int m_packetsize;
+
     /**
      * The expiration time of this request
      */
-	private long m_expiration = -1L;
-    
+    private long m_expiration = -1L;
+
     /**
      * The thread logger associated with this request.
      */
-    
-    
-	private final AtomicBoolean m_processed = new AtomicBoolean(false);
-	
-    public JnaPingRequest(final JnaPingRequestId id, final long timeout, final int retries, final int packetsize, final PingResponseCallback cb) {
+    private final AtomicBoolean m_processed = new AtomicBoolean(false);
+
+    public JnaPingRequest(
+            final JnaPingRequestId id,
+            final long timeout,
+            final int retries,
+            final int packetsize,
+            final PingResponseCallback cb) {
         m_id = id;
         m_retries = retries;
         m_packetsize = packetsize;
         m_timeout = timeout;
         m_callback = new LogPrefixPreservingPingResponseCallback(cb);
     }
-	
-    public JnaPingRequest(final InetAddress addr, final int identifier, final int sequenceId, final long threadId, final long timeout, final int retries, final int packetsize, final PingResponseCallback cb) {
+
+    public JnaPingRequest(
+            final InetAddress addr,
+            final int identifier,
+            final int sequenceId,
+            final long threadId,
+            final long timeout,
+            final int retries,
+            final int packetsize,
+            final PingResponseCallback cb) {
         this(new JnaPingRequestId(addr, identifier, sequenceId, threadId), timeout, retries, packetsize, cb);
     }
-    
-    public JnaPingRequest(final InetAddress addr, final int identifier, final int sequenceId, final long timeout, final int retries, final int packetsize, final PingResponseCallback cb) {
+
+    public JnaPingRequest(
+            final InetAddress addr,
+            final int identifier,
+            final int sequenceId,
+            final long timeout,
+            final int retries,
+            final int packetsize,
+            final PingResponseCallback cb) {
         this(addr, identifier, sequenceId, getNextTID(), timeout, retries, packetsize, cb);
     }
 
@@ -134,7 +141,7 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
             JnaPingRequest returnval = null;
             if (this.isExpired()) {
                 if (m_retries > 0) {
-                    returnval = new JnaPingRequest(m_id, m_timeout, (m_retries - 1),m_packetsize, m_callback);
+                    returnval = new JnaPingRequest(m_id, m_timeout, (m_retries - 1), m_packetsize, m_callback);
                     LOG.debug("{}: Retrying Ping Request {}", System.currentTimeMillis(), returnval);
                 } else {
                     LOG.debug("{}: Ping Request Timed out {}", System.currentTimeMillis(), this);
@@ -146,7 +153,7 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
             setProcessed(true);
         }
     }
-    
+
     /**
      * <p>isExpired</p>
      *
@@ -191,7 +198,7 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
             setProcessed(true);
         }
     }
-    
+
     private void setProcessed(final boolean processed) {
         m_processed.set(processed);
     }
@@ -209,9 +216,9 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
     public void send(final V4Pinger v4, final V6Pinger v6) {
         InetAddress addr = getAddress();
         if (addr instanceof Inet4Address && v4 != null) {
-            send(v4, (Inet4Address)addr);
+            send(v4, (Inet4Address) addr);
         } else if (addr instanceof Inet6Address && v6 != null) {
-            send(v6, (Inet6Address)addr);
+            send(v6, (Inet6Address) addr);
         } else {
             LOG.error("Cannot ping " + InetAddressUtils.str(addr) + ": No pinger found that can handle this address");
         }
@@ -223,9 +230,9 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
 
     public void send(final V6Pinger v6, final Inet6Address addr6) {
         try {
-            //throw new IllegalStateException("The m_request field should be set here!!!");
+            // throw new IllegalStateException("The m_request field should be set here!!!");
             LOG.debug("{}: Sending Ping Request: {}", System.currentTimeMillis(), this);
-        
+
             m_expiration = System.currentTimeMillis() + m_timeout;
             v6.ping(addr6, m_id.getIdentifier(), m_id.getSequenceNumber(), m_id.getThreadId(), 1, 0, m_packetsize);
         } catch (final Throwable t) {
@@ -235,7 +242,7 @@ public class JnaPingRequest implements Request<JnaPingRequestId, JnaPingRequest,
 
     public void send(final V4Pinger v4, final Inet4Address addr4) {
         try {
-            //throw new IllegalStateException("The m_request field should be set here!!!");
+            // throw new IllegalStateException("The m_request field should be set here!!!");
             LOG.debug("{}: Sending Ping Request: {}", System.currentTimeMillis(), this);
             m_expiration = System.currentTimeMillis() + m_timeout;
             v4.ping(addr4, m_id.getIdentifier(), m_id.getSequenceNumber(), m_id.getThreadId(), 1, 0, m_packetsize);

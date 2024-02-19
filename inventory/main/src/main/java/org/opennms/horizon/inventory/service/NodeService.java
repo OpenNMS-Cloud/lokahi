@@ -1,34 +1,38 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.net.InetAddress;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -67,27 +71,14 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.InetAddress;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.stream.Collectors;
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NodeService {
     private static final String DEFAULT_TAG = "default";
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("delete-node-task-publish-%d")
-        .build();
+            .setNameFormat("delete-node-task-publish-%d")
+            .build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
@@ -105,10 +96,7 @@ public class NodeService {
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
         List<Node> all = nodeRepository.findByTenantId(tenantId);
-        return all
-            .stream()
-            .map(mapper::modelToDTO)
-            .toList();
+        return all.stream().map(mapper::modelToDTO).toList();
     }
 
     @Transactional(readOnly = true)
@@ -118,8 +106,9 @@ public class NodeService {
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByMonitoredState(String tenantId, MonitoredState monitoredState) {
-        return nodeRepository.findByTenantIdAndMonitoredStateEquals(tenantId, monitoredState)
-            .stream().map(mapper::modelToDTO).toList();
+        return nodeRepository.findByTenantIdAndMonitoredStateEquals(tenantId, monitoredState).stream()
+                .map(mapper::modelToDTO)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -128,14 +117,17 @@ public class NodeService {
         if (list.isEmpty()) {
             return Optional.empty();
         }
-        var listOfNodesOnLocation = list.stream().filter(node -> node.getMonitoringLocation().getLocation().equals(location)).toList();
+        var listOfNodesOnLocation = list.stream()
+                .filter(node -> node.getMonitoringLocation().getLocation().equals(location))
+                .toList();
         if (listOfNodesOnLocation.isEmpty()) {
             return Optional.empty();
         }
-        return listOfNodesOnLocation.stream().filter(node ->
-            node.getIpInterfaces().stream().anyMatch(ipInterface -> ipInterface.getSnmpPrimary() &&
-                ipInterface.getIpAddress().equals(primaryIpAddress))).findFirst();
-
+        return listOfNodesOnLocation.stream()
+                .filter(node -> node.getIpInterfaces().stream()
+                        .anyMatch(ipInterface -> ipInterface.getSnmpPrimary()
+                                && ipInterface.getIpAddress().equals(primaryIpAddress)))
+                .findFirst();
     }
 
     private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
@@ -150,14 +142,17 @@ public class NodeService {
         }
     }
 
-    private MonitoringLocation findMonitoringLocation(NodeCreateDTO request, String tenantId) throws LocationNotFoundException {
-        Optional<MonitoringLocation> found = monitoringLocationRepository.findByIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
+    private MonitoringLocation findMonitoringLocation(NodeCreateDTO request, String tenantId)
+            throws LocationNotFoundException {
+        Optional<MonitoringLocation> found =
+                monitoringLocationRepository.findByIdAndTenantId(Long.parseLong(request.getLocationId()), tenantId);
 
-        return found.orElseThrow(() -> new LocationNotFoundException("Location not found with ID " + request.getLocationId()));
+        return found.orElseThrow(
+                () -> new LocationNotFoundException("Location not found with ID " + request.getLocationId()));
     }
 
-    private Node saveNode(NodeCreateDTO request, MonitoringLocation monitoringLocation,
-                          ScanType scanType, String tenantId) {
+    private Node saveNode(
+            NodeCreateDTO request, MonitoringLocation monitoringLocation, ScanType scanType, String tenantId) {
 
         Node node = new Node();
 
@@ -175,36 +170,48 @@ public class NodeService {
     }
 
     @Transactional
-    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId) throws EntityExistException, LocationNotFoundException {
-        if (request.hasManagementIp()) { //Do we really want to create a node without managed IP?
-            Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository
-                .findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(request.getManagementIp()), Long.parseLong(request.getLocationId()), tenantId, scanType);
+    public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId)
+            throws EntityExistException, LocationNotFoundException {
+        if (request.hasManagementIp()) { // Do we really want to create a node without managed IP?
+            Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(
+                    InetAddressUtils.getInetAddress(request.getManagementIp()),
+                    Long.parseLong(request.getLocationId()),
+                    tenantId,
+                    scanType);
             if (ipInterfaceOpt.isPresent()) {
                 IpInterface ipInterface = ipInterfaceOpt.get();
-                log.error("IP address {} already exists in the system and belong to device {}", request.getManagementIp(), ipInterface.getNode().getNodeLabel());
-                throw new EntityExistException("IP address " + request.getManagementIp() + " already exists in the system and belong to device " + ipInterface.getNode().getNodeLabel());
+                log.error(
+                        "IP address {} already exists in the system and belong to device {}",
+                        request.getManagementIp(),
+                        ipInterface.getNode().getNodeLabel());
+                throw new EntityExistException("IP address " + request.getManagementIp()
+                        + " already exists in the system and belong to device "
+                        + ipInterface.getNode().getNodeLabel());
             }
         }
         MonitoringLocation monitoringLocation = findMonitoringLocation(request, tenantId);
         Node node = saveNode(request, monitoringLocation, scanType, tenantId);
         saveIpInterfaces(request, node, tenantId);
-        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node.getId()))
-            .addAllTags(request.getTagsList())
-            .build());
+        tagService.addTags(
+                tenantId,
+                TagCreateListDTO.newBuilder()
+                        .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(node.getId()))
+                        .addAllTags(request.getTagsList())
+                        .build());
         return node;
     }
 
     @Transactional
     public Long updateNode(NodeUpdateDTO request, String tenantId) {
-        var node = nodeRepository.findByIdAndTenantId(request.getId(), tenantId)
-            .orElseThrow(() -> new InventoryRuntimeException("Node with ID " + request.getId() + " not found"));
+        var node = nodeRepository
+                .findByIdAndTenantId(request.getId(), tenantId)
+                .orElseThrow(() -> new InventoryRuntimeException("Node with ID " + request.getId() + " not found"));
 
         if (request.hasNodeAlias()) {
             String alias = request.getNodeAlias().trim();
-            if (!StringUtils.isBlank(alias) &&
-                nodeRepository.findByNodeAliasAndTenantId(alias, tenantId).stream().anyMatch(n -> request.getId() != n.getId())) {
+            if (!StringUtils.isBlank(alias)
+                    && nodeRepository.findByNodeAliasAndTenantId(alias, tenantId).stream()
+                            .anyMatch(n -> request.getId() != n.getId())) {
                 throw new InventoryRuntimeException("Duplicate node alias with name " + alias);
             }
             node.setNodeAlias(request.getNodeAlias());
@@ -218,8 +225,10 @@ public class NodeService {
         if (nodeList.isEmpty()) {
             return new HashMap<>();
         }
-        return nodeList.stream().collect(Collectors.groupingBy(node -> node.getMonitoringLocation().getId(),
-            Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
+        return nodeList.stream()
+                .collect(Collectors.groupingBy(
+                        node -> node.getMonitoringLocation().getId(),
+                        Collectors.mapping(mapper::modelToDTO, Collectors.toList())));
     }
 
     @Transactional
@@ -246,29 +255,33 @@ public class NodeService {
             ipInterface.getMonitoredServices().forEach((ms) -> {
                 String serviceName = ms.getMonitoredServiceType().getServiceName();
                 var monitorType = MonitorType.valueOf(serviceName);
-                var monitorTask = monitorTaskSetService.getMonitorTask(monitorType, ipInterface, node.getId(),
-                    ms.getId(), null);
+                var monitorTask =
+                        monitorTaskSetService.getMonitorTask(monitorType, ipInterface, node.getId(), ms.getId(), null);
                 Optional.ofNullable(monitorTask).ifPresent(tasks::add);
-                var collectorTask = collectorTaskSetService.getCollectorTask(monitorType, ipInterface, node.getId(), null);
+                var collectorTask =
+                        collectorTaskSetService.getCollectorTask(monitorType, ipInterface, node.getId(), null);
                 Optional.ofNullable(collectorTask).ifPresent(tasks::add);
             });
         });
         return tasks;
     }
-    
+
     public void updateNodeMonitoredState(long nodeId, String tenantId) {
 
         // See HS-1812, Always match "default" tag.
         final var monitored = tagRepository.findByTenantIdAndNodeId(tenantId, nodeId).stream()
-            .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
+                .anyMatch(tag -> !tag.getMonitorPolicyIds().isEmpty() || DEFAULT_TAG.equals(tag.getName()));
 
         var optional = nodeRepository.findByIdAndTenantId(nodeId, tenantId);
         if (optional.isEmpty()) {
             throw new InventoryRuntimeException("Node not found for id: " + nodeId);
         }
         var node = optional.get();
-        final var monitoredState = monitored ? MonitoredState.MONITORED
-            : (node.getMonitoredState() == MonitoredState.DETECTED ? MonitoredState.DETECTED : MonitoredState.UNMONITORED);
+        final var monitoredState = monitored
+                ? MonitoredState.MONITORED
+                : (node.getMonitoredState() == MonitoredState.DETECTED
+                        ? MonitoredState.DETECTED
+                        : MonitoredState.UNMONITORED);
 
         if (node.getMonitoredState() != monitoredState) {
             node.setMonitoredState(monitoredState);
@@ -277,9 +290,9 @@ public class NodeService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<NodeDTO> getNode(String  ipAddress, long locationId, String tenantId) {
-        var optionalIpAddress = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(InetAddressUtils.getInetAddress(ipAddress),
-            locationId, tenantId, ScanType.DISCOVERY_SCAN);
+    public Optional<NodeDTO> getNode(String ipAddress, long locationId, String tenantId) {
+        var optionalIpAddress = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(
+                InetAddressUtils.getInetAddress(ipAddress), locationId, tenantId, ScanType.DISCOVERY_SCAN);
         return optionalIpAddress.map(IpInterface::getNode).map(mapper::modelToDTO);
     }
 
@@ -289,11 +302,13 @@ public class NodeService {
         if (StringUtils.isNotEmpty(nodeInfo.getSystemName())) {
             Boolean validIpAddress = isValidInetAddress(node.getNodeLabel());
             if (validIpAddress) {
-                //Overwrite node label with System name if label is an IP Address.
+                // Overwrite node label with System name if label is an IP Address.
                 node.setNodeLabel(nodeInfo.getSystemName());
             } else {
-                log.debug("Node already has a nodeLabel - keeping the existing value: node-label={}; system-name={}",
-                    node.getNodeLabel(), nodeInfo.getSystemName());
+                log.debug(
+                        "Node already has a nodeLabel - keeping the existing value: node-label={}; system-name={}",
+                        node.getNodeLabel(),
+                        nodeInfo.getSystemName());
             }
         }
 
@@ -304,7 +319,7 @@ public class NodeService {
         try {
             InetAddressUtils.addr(ipAddress);
             return true;
-        } catch (IllegalArgumentException  e) {
+        } catch (IllegalArgumentException e) {
             return false;
         }
     }
@@ -314,11 +329,11 @@ public class NodeService {
         for (Tag tag : node.getTags()) {
             tag.getNodes().remove(node);
             tagOpList.add(TagOperationProto.newBuilder()
-                .setTagName(tag.getName())
-                .setTenantId(tag.getTenantId())
-                .setOperation(Operation.REMOVE_TAG)
-                .addNodeId(node.getId())
-                .build());
+                    .setTagName(tag.getName())
+                    .setTenantId(tag.getTenantId())
+                    .setOperation(Operation.REMOVE_TAG)
+                    .addNodeId(node.getId())
+                    .build());
         }
         tagPublisher.publishTagUpdate(tagOpList);
     }
@@ -338,13 +353,11 @@ public class NodeService {
         try {
             var snmpConf = icmpDiscoveryDTO.getSnmpConfig();
             snmpConf.getReadCommunityList().forEach(readCommunity -> {
-                var builder = SnmpConfiguration.newBuilder()
-                    .setReadCommunity(readCommunity);
+                var builder = SnmpConfiguration.newBuilder().setReadCommunity(readCommunity);
                 snmpConfigs.add(builder.build());
             });
             snmpConf.getPortsList().forEach(port -> {
-                var builder = SnmpConfiguration.newBuilder()
-                    .setPort(port);
+                var builder = SnmpConfiguration.newBuilder().setPort(port);
                 snmpConfigs.add(builder.build());
             });
             scannerTaskSetService.sendNodeScannerTask(nodeDTO, locationId, snmpConfigs);
@@ -356,13 +369,14 @@ public class NodeService {
     @Transactional(readOnly = true)
     public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
         return nodeRepository.findByTenantIdAndNodeLabelLike(tenantId, nodeLabelSearchTerm).stream()
-            .map(mapper::modelToDTO).toList();
+                .map(mapper::modelToDTO)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<NodeDTO> listNodesByTags(String tenantId, List<String> tags) {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
-            .map(mapper::modelToDTO).toList();
+                .map(mapper::modelToDTO)
+                .toList();
     }
-
 }

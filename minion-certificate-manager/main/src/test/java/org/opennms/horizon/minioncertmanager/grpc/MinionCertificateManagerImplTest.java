@@ -1,37 +1,46 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minioncertmanager.grpc;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.grpc.Status;
 import io.grpc.StatusException;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.cert.X509Certificate;
+import java.util.function.BiConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,30 +59,12 @@ import org.opennms.horizon.minioncertmanager.proto.IsCertificateValidResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.rocksdb.RocksDBException;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.cert.X509Certificate;
-import java.util.function.BiConsumer;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-
 @ExtendWith(MockitoExtension.class)
 class MinionCertificateManagerImplTest {
 
     @Mock
     private PKCS12Generator pkcs12Generator;
+
     @Mock
     private X509Certificate certificate;
 
@@ -85,6 +76,7 @@ class MinionCertificateManagerImplTest {
 
     @TempDir()
     private File tempDir;
+
     private MinionCertificateManagerImpl minionCertificateManager;
 
     @BeforeEach
@@ -92,12 +84,16 @@ class MinionCertificateManagerImplTest {
         CaCertificateGenerator.generate(tempDir, "OU=openNMS Test CA,C=CA", 3600);
 
         minionCertificateManager = new MinionCertificateManagerImpl(
-            new File(tempDir, "ca.key"), new File(tempDir, "ca.crt"),
-            pkcs12Generator, serialNumberRepository, inventoryClient
-        );
+                new File(tempDir, "ca.key"),
+                new File(tempDir, "ca.crt"),
+                pkcs12Generator,
+                serialNumberRepository,
+                inventoryClient);
 
         lenient().when(certificate.getSerialNumber()).thenReturn(BigInteger.ONE);
-        lenient().when(pkcs12Generator.generate(any(), any(), any(), any(), any(), any(), any())).thenReturn(certificate);
+        lenient()
+                .when(pkcs12Generator.generate(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(certificate);
     }
 
     @Test
@@ -120,8 +116,10 @@ class MinionCertificateManagerImplTest {
     void requestCertificateWithValidDataProducesData() {
         String tenantId = "foo faz";
         Long location = 1010L;
-        when(inventoryClient.getLocationById(location, tenantId)).thenReturn(
-            MonitoringLocationDTO.newBuilder().setLocation(String.valueOf(location)).build());
+        when(inventoryClient.getLocationById(location, tenantId))
+                .thenReturn(MonitoringLocationDTO.newBuilder()
+                        .setLocation(String.valueOf(location))
+                        .build());
         createCertificate(tenantId, location, (response, error) -> {
             // validation of file existence - we still fail, but mocks should be called
             assertNull(response);
@@ -129,7 +127,7 @@ class MinionCertificateManagerImplTest {
             try {
                 verify(pkcs12Generator).generate(eq(location), eq(tenantId), any(), any(), any(), any(), any());
                 verify(serialNumberRepository, times(1))
-                    .addCertificate(eq(tenantId), eq(String.valueOf(location)), any(X509Certificate.class));
+                        .addCertificate(eq(tenantId), eq(String.valueOf(location)), any(X509Certificate.class));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -146,8 +144,12 @@ class MinionCertificateManagerImplTest {
             assertNull(response);
             assertNotNull(error);
             StatusException statusRuntimeException = (StatusException) error;
-            assertEquals(Status.INVALID_ARGUMENT.getCode().value(), statusRuntimeException.getStatus().getCode().value());
-            assertEquals(MinionCertificateManagerImpl.INVALID_LOCATION, statusRuntimeException.getStatus().getDescription());
+            assertEquals(
+                    Status.INVALID_ARGUMENT.getCode().value(),
+                    statusRuntimeException.getStatus().getCode().value());
+            assertEquals(
+                    MinionCertificateManagerImpl.INVALID_LOCATION,
+                    statusRuntimeException.getStatus().getDescription());
         });
     }
 
@@ -162,12 +164,18 @@ class MinionCertificateManagerImplTest {
     void testRevokeCertificate() throws RocksDBException, IOException {
         String tenantId = "foo faz";
         long location = 1010L;
-        when(inventoryClient.getLocationById(location, tenantId)).thenReturn(
-            MonitoringLocationDTO.newBuilder().setLocation(String.valueOf(location)).build());
+        when(inventoryClient.getLocationById(location, tenantId))
+                .thenReturn(MonitoringLocationDTO.newBuilder()
+                        .setLocation(String.valueOf(location))
+                        .build());
         StreamObserver<EmptyResponse> observer = mock(StreamObserver.class);
-        minionCertificateManager.revokeMinionCert(MinionCertificateRequest.newBuilder().setLocationId(location).setTenantId(tenantId).build(), observer);
-        verify(serialNumberRepository, times(1))
-            .revoke(tenantId, String.valueOf(location));
+        minionCertificateManager.revokeMinionCert(
+                MinionCertificateRequest.newBuilder()
+                        .setLocationId(location)
+                        .setTenantId(tenantId)
+                        .build(),
+                observer);
+        verify(serialNumberRepository, times(1)).revoke(tenantId, String.valueOf(location));
         verify(observer, times(1)).onCompleted();
     }
 
@@ -176,16 +184,18 @@ class MinionCertificateManagerImplTest {
         String serial = "123456";
 
         StreamObserver<IsCertificateValidResponse> observer = mock(StreamObserver.class);
-        minionCertificateManager.isCertValid( IsCertificateValidRequest.newBuilder().setSerialNumber(serial).build(), observer);
+        minionCertificateManager.isCertValid(
+                IsCertificateValidRequest.newBuilder().setSerialNumber(serial).build(), observer);
         verify(serialNumberRepository, times(1)).getBySerial(serial);
         verify(observer, times(1)).onCompleted();
     }
 
-    private void createCertificate(String tenantId, Long locationId, BiConsumer<GetMinionCertificateResponse, Throwable> callback) {
+    private void createCertificate(
+            String tenantId, Long locationId, BiConsumer<GetMinionCertificateResponse, Throwable> callback) {
         MinionCertificateRequest request = MinionCertificateRequest.newBuilder()
-            .setTenantId(tenantId)
-            .setLocationId(locationId)
-            .build();
+                .setTenantId(tenantId)
+                .setLocationId(locationId)
+                .build();
 
         minionCertificateManager.getMinionCert(request, new StreamObserver<>() {
             @Override
@@ -199,9 +209,7 @@ class MinionCertificateManagerImplTest {
             }
 
             @Override
-            public void onCompleted() {
-
-            }
+            public void onCompleted() {}
         });
     }
 }

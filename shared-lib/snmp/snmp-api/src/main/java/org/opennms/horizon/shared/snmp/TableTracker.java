@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp;
 
 import java.util.ArrayList;
@@ -34,7 +27,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.opennms.horizon.shared.snmp.proxy.WalkRequest;
 import org.opennms.horizon.shared.snmp.proxy.WalkResponse;
 import org.slf4j.Logger;
@@ -42,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class TableTracker extends CollectionTracker implements RowCallback, RowResultFactory {
 
-	private static final transient Logger LOG = LoggerFactory.getLogger(TableTracker.class);
+    private static final transient Logger LOG = LoggerFactory.getLogger(TableTracker.class);
 
     private final SnmpTableResult m_tableResult;
 
@@ -51,7 +43,7 @@ public class TableTracker extends CollectionTracker implements RowCallback, RowR
     public TableTracker(SnmpObjId... ids) {
         this(null, ids);
     }
-    
+
     public TableTracker(RowCallback rc, SnmpObjId... ids) {
         this(rc, 2, 0, ids);
     }
@@ -67,14 +59,14 @@ public class TableTracker extends CollectionTracker implements RowCallback, RowR
 
     @Override
     public void setMaxRepetitions(int maxRepetitions) {
-        for(ColumnTracker child : m_columnTrackers) {
+        for (ColumnTracker child : m_columnTrackers) {
             child.setMaxRepetitions(maxRepetitions);
         }
     }
 
     @Override
     public void setMaxRetries(final int maxRetries) {
-        for(final ColumnTracker child : m_columnTrackers) {
+        for (final ColumnTracker child : m_columnTrackers) {
             child.setMaxRetries(maxRetries);
         }
     }
@@ -109,24 +101,24 @@ public class TableTracker extends CollectionTracker implements RowCallback, RowR
         return new CombinedColumnResponseProcessor(processors);
     }
 
-        @Override
+    @Override
     public void storeResult(SnmpResult res) {
-        //System.err.println(String.format("storeResult: %s", res));
-    	LOG.debug("storeResult: {}", res);
+        // System.err.println(String.format("storeResult: %s", res));
+        LOG.debug("storeResult: {}", res);
         m_tableResult.storeResult(res);
     }
-    
-        @Override
+
+    @Override
     public void rowCompleted(SnmpRowResult row) {
         // the default implementation just forwards this to the super class
         // like the defaults for other CollectionTrackers except this does it
         // from the rowCompleted method rather than from storeResult
-        for(SnmpResult result : row.getResults()) {
+        for (SnmpResult result : row.getResults()) {
             super.storeResult(result);
         }
     }
 
-        @Override
+    @Override
     public SnmpRowResult createRowResult(int columnCount, SnmpInstId instance) {
         return m_tableResult.createRowResult(columnCount, instance);
     }
@@ -138,29 +130,29 @@ public class TableTracker extends CollectionTracker implements RowCallback, RowR
         Collections.sort(sortedTrackerList, new Comparator<ColumnTracker>() {
             @Override
             public int compare(ColumnTracker o1, ColumnTracker o2) {
-            	SnmpInstId lhs = o1.getLastInstance();
-				SnmpInstId rhs = o2.getLastInstance();
-				if (lhs == rhs) return 0;
-				if (lhs == null) return -1;
-				if (rhs == null) return 1;
-				return lhs.compareTo(rhs);
+                SnmpInstId lhs = o1.getLastInstance();
+                SnmpInstId rhs = o2.getLastInstance();
+                if (lhs == rhs) return 0;
+                if (lhs == null) return -1;
+                if (rhs == null) return 1;
+                return lhs.compareTo(rhs);
             }
         });
-        
-        for(Iterator<ColumnTracker> it = sortedTrackerList.iterator(); it.hasNext() && trackers.size() < maxVarsPerPdu; ) {
-        
+
+        for (Iterator<ColumnTracker> it = sortedTrackerList.iterator();
+                it.hasNext() && trackers.size() < maxVarsPerPdu; ) {
+
             ColumnTracker tracker = it.next();
-            
+
             if (!tracker.isFinished()) {
                 trackers.add(tracker);
             }
-
         }
 
         return trackers;
     }
 
-    static private class CombinedColumnResponseProcessor implements ResponseProcessor {
+    private static class CombinedColumnResponseProcessor implements ResponseProcessor {
         private final List<ResponseProcessor> m_processors;
         private int m_currentIndex = 0;
 
@@ -171,35 +163,33 @@ public class TableTracker extends CollectionTracker implements RowCallback, RowR
         @Override
         public void processResponse(SnmpObjId responseObjId, SnmpValue val) {
             try {
-            ResponseProcessor rp = m_processors.get(m_currentIndex);
-            
-            if (++m_currentIndex == m_processors.size()) {
-                m_currentIndex = 0;
-            }
+                ResponseProcessor rp = m_processors.get(m_currentIndex);
 
-            rp.processResponse(responseObjId, val);
+                if (++m_currentIndex == m_processors.size()) {
+                    m_currentIndex = 0;
+                }
+
+                rp.processResponse(responseObjId, val);
             } catch (Exception e) {
                 LOG.warn("Failed to process response", e);
             }
-
         }
 
         @Override
         public boolean processErrors(int errorStatus, int errorIndex) throws SnmpException {
-            
+
             /*
              * errorIndex is varBind index (1 based array of vars)
-             * 
-             * 
+             *
+             *
              */
-            
+
             int columnIndex = (errorIndex - 1) % m_processors.size();
-            
+
             ResponseProcessor rp = m_processors.get(columnIndex);
 
             return rp.processErrors(errorStatus, 1);
         }
-
     }
 
     @Override
@@ -216,18 +206,12 @@ public class TableTracker extends CollectionTracker implements RowCallback, RowR
     @Override
     public void handleWalkResponses(List<WalkResponse> responses) {
         // Store each result
-        responses.stream()
-            .flatMap(res -> res.getResults().stream())
-            .forEach(this::storeResult);
+        responses.stream().flatMap(res -> res.getResults().stream()).forEach(this::storeResult);
         // Mark all of the base columns as completed
-        m_columnTrackers.stream()
-            .map(ColumnTracker::getBase)
-            .forEach(m_tableResult::columnFinished);
+        m_columnTrackers.stream().map(ColumnTracker::getBase).forEach(m_tableResult::columnFinished);
         // Mark all of the column trackers as completed
-        m_columnTrackers.stream()
-            .forEach(t -> t.setFinished(true));
+        m_columnTrackers.stream().forEach(t -> t.setFinished(true));
         // Mark the table as completed
         m_tableResult.tableFinished();
-            
     }
 }

@@ -1,33 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.tsdata.monitor;
 
+import java.io.IOException;
+import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import org.opennms.horizon.tenantmetrics.TenantMetricsTracker;
 import org.opennms.horizon.timeseries.cortex.CortexTSS;
@@ -39,10 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.Map;
 
 @Component
 public class TaskSetMonitorResultProcessor {
@@ -59,33 +51,38 @@ public class TaskSetMonitorResultProcessor {
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processMonitorResponse(String tenantId, String locationId, TaskResult taskResult, MonitorResponse monitorResponse) throws IOException {
-        LOG.info("Have monitor response: tenantId={}; locationId={}; systemId={}; taskId={}",
-            tenantId, locationId, taskResult.getIdentity().getSystemId(), taskResult.getId());
-
-        String[] labelValues =
-            {
-                monitorResponse.getIpAddress(),
+    public void processMonitorResponse(
+            String tenantId, String locationId, TaskResult taskResult, MonitorResponse monitorResponse)
+            throws IOException {
+        LOG.info(
+                "Have monitor response: tenantId={}; locationId={}; systemId={}; taskId={}",
+                tenantId,
                 locationId,
                 taskResult.getIdentity().getSystemId(),
-                monitorResponse.getMonitorType().name(),
-                String.valueOf(monitorResponse.getNodeId())
-            };
+                taskResult.getId());
+
+        String[] labelValues = {
+            monitorResponse.getIpAddress(),
+            locationId,
+            taskResult.getIdentity().getSystemId(),
+            monitorResponse.getMonitorType().name(),
+            String.valueOf(monitorResponse.getNodeId())
+        };
 
         PrometheusTypes.TimeSeries.Builder builder = PrometheusTypes.TimeSeries.newBuilder();
 
         addLabels(monitorResponse, labelValues, builder);
 
         builder.addLabels(PrometheusTypes.Label.newBuilder()
-            .setName(MetricNameConstants.METRIC_NAME_LABEL)
-            .setValue(CortexTSS.sanitizeMetricName(MetricNameConstants.METRICS_NAME_RESPONSE)));
+                .setName(MetricNameConstants.METRIC_NAME_LABEL)
+                .setValue(CortexTSS.sanitizeMetricName(MetricNameConstants.METRICS_NAME_RESPONSE)));
 
         long timestamp = Optional.of(monitorResponse.getTimestamp())
-            .filter(ts -> ts > 0)
-            .orElse(Instant.now().toEpochMilli());
+                .filter(ts -> ts > 0)
+                .orElse(Instant.now().toEpochMilli());
         builder.addSamples(PrometheusTypes.Sample.newBuilder()
-            .setTimestamp(timestamp)
-            .setValue(monitorResponse.getResponseTimeMs()));
+                .setTimestamp(timestamp)
+                .setValue(monitorResponse.getResponseTimeMs()));
 
         cortexTSS.store(tenantId, builder);
         tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
@@ -95,10 +92,16 @@ public class TaskSetMonitorResultProcessor {
         }
     }
 
-//========================================
-// Internals
-//----------------------------------------
-    private void processMetricMaps(Map.Entry<String, Double> entry, MonitorResponse response, long timestamp, String[] labelValues, String tenantId) throws IOException {
+    // ========================================
+    // Internals
+    // ----------------------------------------
+    private void processMetricMaps(
+            Map.Entry<String, Double> entry,
+            MonitorResponse response,
+            long timestamp,
+            String[] labelValues,
+            String tenantId)
+            throws IOException {
         prometheus.PrometheusTypes.TimeSeries.Builder builder = prometheus.PrometheusTypes.TimeSeries.newBuilder();
         String key = entry.getKey();
         Double value = entry.getValue();
@@ -106,12 +109,11 @@ public class TaskSetMonitorResultProcessor {
         addLabels(response, labelValues, builder);
 
         builder.addLabels(PrometheusTypes.Label.newBuilder()
-            .setName(MetricNameConstants.METRIC_NAME_LABEL)
-            .setValue(CortexTSS.sanitizeMetricName(MetricNameConstants.METRICS_NAME_PREFIX_MONITOR + key)));
+                .setName(MetricNameConstants.METRIC_NAME_LABEL)
+                .setValue(CortexTSS.sanitizeMetricName(MetricNameConstants.METRICS_NAME_PREFIX_MONITOR + key)));
 
-        builder.addSamples(PrometheusTypes.Sample.newBuilder()
-            .setTimestamp(timestamp)
-            .setValue(value));
+        builder.addSamples(
+                PrometheusTypes.Sample.newBuilder().setTimestamp(timestamp).setValue(value));
 
         cortexTSS.store(tenantId, builder);
         tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
@@ -119,10 +121,11 @@ public class TaskSetMonitorResultProcessor {
 
     private void addLabels(MonitorResponse response, String[] labelValues, PrometheusTypes.TimeSeries.Builder builder) {
         for (int i = 0; i < MetricNameConstants.MONITOR_METRICS_LABEL_NAMES.length; i++) {
-            if (!"node_id".equals(MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i]) || !"ECHO".equals(response.getMonitorType().name())) {
+            if (!"node_id".equals(MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i])
+                    || !"ECHO".equals(response.getMonitorType().name())) {
                 builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(CortexTSS.sanitizeLabelName(MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i]))
-                    .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
+                        .setName(CortexTSS.sanitizeLabelName(MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i]))
+                        .setValue(CortexTSS.sanitizeLabelValue(labelValues[i])));
             }
         }
     }

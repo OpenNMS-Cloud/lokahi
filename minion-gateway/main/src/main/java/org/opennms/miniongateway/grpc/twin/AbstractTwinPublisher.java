@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.twin;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,7 +59,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     protected final ObjectMapper objectMapper = new ObjectMapper();
 
     public AbstractTwinPublisher(Ignite ignite) {
-        //TODO: Should probably pass a var args of classes from the impl ctor?
+        // TODO: Should probably pass a var args of classes from the impl ctor?
         configureProtobufJson(TaskSet.class);
 
         twinTrackerMap = ignite.cache(TWIN_TRACKER_CACHE_NAME);
@@ -119,7 +112,7 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
 
     protected TwinResponseProto mapTwinResponse(TwinUpdate twinUpdate) {
         TwinResponseProto.Builder builder = TwinResponseProto.newBuilder();
-        if(!Strings.isNullOrEmpty(twinUpdate.getSessionId())) {
+        if (!Strings.isNullOrEmpty(twinUpdate.getSessionId())) {
             builder.setSessionId(twinUpdate.getSessionId());
         }
         builder.setConsumerKey(twinUpdate.getKey());
@@ -138,7 +131,8 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
     private synchronized TwinUpdate getResponseFromUpdatedObj(byte[] updatedObj, SessionKey sessionKey) {
         TwinTracker twinTracker = getTwinTracker(sessionKey.key, sessionKey.tenantId, sessionKey.locationId);
         if (twinTracker == null || !Arrays.equals(twinTracker.getObj(), updatedObj)) {
-            TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.locationId, updatedObj);
+            TwinUpdate twinUpdate =
+                    new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.locationId, updatedObj);
             if (twinTracker == null) {
                 twinTracker = new TwinTracker(updatedObj);
             } else {
@@ -232,8 +226,9 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SessionKey that = (SessionKey) o;
-            return Objects.equals(key, that.key) && Objects.equals(tenantId, that.tenantId) &&
-                Objects.equals(locationId, that.locationId);
+            return Objects.equals(key, that.key)
+                    && Objects.equals(tenantId, that.tenantId)
+                    && Objects.equals(locationId, that.locationId);
         }
 
         @Override
@@ -243,24 +238,23 @@ public abstract class AbstractTwinPublisher implements TwinPublisher, TwinProvid
 
         @Override
         public String toString() {
-            return "SessionKey{" +
-                    "key='" + key + '\'' +
-                    ", tenant-id='" + tenantId + '\'' +
-                    ", location='" + locationId + '\'' +
-                    '}';
+            return "SessionKey{" + "key='"
+                    + key + '\'' + ", tenant-id='"
+                    + tenantId + '\'' + ", location='"
+                    + locationId + '\'' + '}';
         }
     }
 
-
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void configureProtobufJson(Class<? extends Message>... protobufClasses) {
         SimpleModule simpleModule = new SimpleModule();
 
-        Arrays.stream(protobufClasses).forEach(clazz -> simpleModule.addSerializer(new ProtoBufJsonSerializer<>(clazz)));
-//        simpleModule.addSerializer(new ProtoBufJsonSerializer<>(TaskSet.class));
+        Arrays.stream(protobufClasses)
+                .forEach(clazz -> simpleModule.addSerializer(new ProtoBufJsonSerializer<>(clazz)));
+        //        simpleModule.addSerializer(new ProtoBufJsonSerializer<>(TaskSet.class));
 
         objectMapper.registerModule(simpleModule);
     }

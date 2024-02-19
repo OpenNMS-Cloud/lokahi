@@ -1,33 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.grpc.queue;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ColumnFamilyOptions;
@@ -47,27 +41,21 @@ import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
-
-
 public class RocksDbStore implements SwappingSendQueueFactory.StoreManager {
 
-    private final static DBOptions DB_OPTIONS = new DBOptions()
-        .setCreateIfMissing(true)
-        .setMaxBackgroundJobs(Math.max(Runtime.getRuntime().availableProcessors(), 3))
-        ;
+    private static final DBOptions DB_OPTIONS = new DBOptions()
+            .setCreateIfMissing(true)
+            .setMaxBackgroundJobs(Math.max(Runtime.getRuntime().availableProcessors(), 3));
 
-    private final static ColumnFamilyOptions CF_OPTIONS = new ColumnFamilyOptions()
-        .setEnableBlobFiles(true)
-        .setEnableBlobGarbageCollection(true)
-        .setMinBlobSize(16L * 1024L)
-        .setBlobFileSize(64L * 1024L * 1024L)
-        .setTargetFileSizeBase(64L * 1024L * 1024L)
-        .setCompressionType(CompressionType.SNAPPY_COMPRESSION)
-        .setBlobCompressionType(CompressionType.SNAPPY_COMPRESSION)
-        .setEnableBlobGarbageCollection(true)
-        ;
+    private static final ColumnFamilyOptions CF_OPTIONS = new ColumnFamilyOptions()
+            .setEnableBlobFiles(true)
+            .setEnableBlobGarbageCollection(true)
+            .setMinBlobSize(16L * 1024L)
+            .setBlobFileSize(64L * 1024L * 1024L)
+            .setTargetFileSizeBase(64L * 1024L * 1024L)
+            .setCompressionType(CompressionType.SNAPPY_COMPRESSION)
+            .setBlobCompressionType(CompressionType.SNAPPY_COMPRESSION)
+            .setEnableBlobGarbageCollection(true);
 
     private final RocksDB db;
 
@@ -84,8 +72,8 @@ public class RocksDbStore implements SwappingSendQueueFactory.StoreManager {
         // descriptors build from these names to the open call, which will fill a list of handles co-indexed with the
         // requested descriptors. That's some wired 90' C list management shit.
         final var cfDescs = RocksDB.listColumnFamilies(new Options(), path.toString()).stream()
-                                   .map(columnFamilyName -> new ColumnFamilyDescriptor(columnFamilyName, CF_OPTIONS))
-                                   .collect(Collectors.toList());
+                .map(columnFamilyName -> new ColumnFamilyDescriptor(columnFamilyName, CF_OPTIONS))
+                .collect(Collectors.toList());
 
         if (cfDescs.stream().noneMatch(desc -> Arrays.equals(desc.getName(), RocksDB.DEFAULT_COLUMN_FAMILY))) {
             cfDescs.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY));
@@ -93,11 +81,10 @@ public class RocksDbStore implements SwappingSendQueueFactory.StoreManager {
 
         final var cfHandles = Lists.<ColumnFamilyHandle>newArrayListWithCapacity(cfDescs.size());
 
-        this.db = RocksDB.open(DB_OPTIONS, path.toString(),
-                               cfDescs, cfHandles);
+        this.db = RocksDB.open(DB_OPTIONS, path.toString(), cfDescs, cfHandles);
 
         this.cfHandles = Streams.zip(cfDescs.stream(), cfHandles.stream(), Map::entry)
-                                .collect(Collectors.toMap(e -> new Prefix(e.getKey().getName()), Map.Entry::getValue));
+                .collect(Collectors.toMap(e -> new Prefix(e.getKey().getName()), Map.Entry::getValue));
     }
 
     public synchronized SwappingSendQueueFactory.Store getStore(final Prefix prefix) throws IOException {
@@ -160,7 +147,6 @@ public class RocksDbStore implements SwappingSendQueueFactory.StoreManager {
         }
 
         @Override
-        public void close() {
-        }
+        public void close() {}
     }
 }

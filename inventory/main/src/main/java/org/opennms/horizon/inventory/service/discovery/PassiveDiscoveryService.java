@@ -1,33 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service.discovery;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.dto.MonitoredState;
@@ -55,11 +52,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 public class PassiveDiscoveryService {
@@ -83,11 +75,12 @@ public class PassiveDiscoveryService {
         discovery.setCreateTime(LocalDateTime.now());
         discovery = repository.save(discovery);
 
-        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setPassiveDiscoveryId(discovery.getId()))
-            .addAllTags(request.getTagsList())
-            .build());
+        tagService.addTags(
+                tenantId,
+                TagCreateListDTO.newBuilder()
+                        .addEntityIds(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(discovery.getId()))
+                        .addAllTags(request.getTagsList())
+                        .build());
 
         sendNodeScan(discovery);
 
@@ -111,11 +104,12 @@ public class PassiveDiscoveryService {
         mapper.updateFromDto(request, discovery);
         discovery = repository.save(discovery);
 
-        tagService.updateTags(tenantId, TagCreateListDTO.newBuilder()
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setPassiveDiscoveryId(discovery.getId()))
-            .addAllTags(request.getTagsList())
-            .build());
+        tagService.updateTags(
+                tenantId,
+                TagCreateListDTO.newBuilder()
+                        .addEntityIds(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(discovery.getId()))
+                        .addAllTags(request.getTagsList())
+                        .build());
 
         sendNodeScan(discovery);
 
@@ -128,7 +122,10 @@ public class PassiveDiscoveryService {
     }
 
     public PassiveDiscoveryDTO getPassiveDiscovery(long locationId, String tenantId) {
-       return repository.findByTenantIdAndLocationId(tenantId, locationId).map(mapper::modelToDto).orElse(null);
+        return repository
+                .findByTenantIdAndLocationId(tenantId, locationId)
+                .map(mapper::modelToDto)
+                .orElse(null);
     }
 
     public PassiveDiscoveryDTO toggleDiscovery(String tenantId, PassiveDiscoveryToggleDTO request) {
@@ -151,14 +148,17 @@ public class PassiveDiscoveryService {
         if (StringUtils.isBlank(dto.getName())) {
             throw new InventoryRuntimeException("Discovery name is blank");
         }
-        if (repository.findByTenantIdAndName(tenantId, dto.getName().trim()).stream().anyMatch(d -> d.getId() != dto.getId())) {
+        if (repository.findByTenantIdAndName(tenantId, dto.getName().trim()).stream()
+                .anyMatch(d -> d.getId() != dto.getId())) {
             throw new InventoryRuntimeException("Duplicate passive discovery with name " + dto.getName());
         }
-        var location = monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(dto.getLocationId()), tenantId);
+        var location =
+                monitoringLocationService.findByLocationIdAndTenantId(Long.parseLong(dto.getLocationId()), tenantId);
         if (location.isEmpty()) {
             throw new LocationNotFoundException("Location not found with location " + dto.getLocationId());
         }
-        Optional<PassiveDiscovery> discoveryOpt = repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(dto.getLocationId()));
+        Optional<PassiveDiscovery> discoveryOpt =
+                repository.findByTenantIdAndLocationId(tenantId, Long.valueOf(dto.getLocationId()));
         if (discoveryOpt.isPresent()) {
             PassiveDiscovery discovery = discoveryOpt.get();
 
@@ -172,8 +172,9 @@ public class PassiveDiscoveryService {
         List<Integer> snmpPorts = dto.getPortsList();
         for (Integer port : snmpPorts) {
             if (port < Constants.SNMP_PORT_MIN || port > Constants.SNMP_PORT_MAX) {
-                String message = String.format("SNMP port is not in range [%d,%d] with value: %d",
-                    Constants.SNMP_PORT_MIN, Constants.SNMP_PORT_MAX, port);
+                String message = String.format(
+                        "SNMP port is not in range [%d,%d] with value: %d",
+                        Constants.SNMP_PORT_MIN, Constants.SNMP_PORT_MAX, port);
                 throw new InventoryRuntimeException(message);
             }
         }
@@ -181,15 +182,15 @@ public class PassiveDiscoveryService {
 
     public void validateCommunityStrings(PassiveDiscoveryUpsertDTO passiveDiscovery) throws InventoryRuntimeException {
         String snmpCommunities = "";
-        for (String snmpCommunity: passiveDiscovery.getCommunitiesList()){
-            snmpCommunities += snmpCommunity.replace(",","") + " ";
+        for (String snmpCommunity : passiveDiscovery.getCommunitiesList()) {
+            snmpCommunities += snmpCommunity.replace(",", "") + " ";
         }
         if (snmpCommunities.length() > 128) {
             throw new InventoryRuntimeException("Snmp communities string is too long");
         }
-        for (byte b: snmpCommunities.getBytes()){
+        for (byte b : snmpCommunities.getBytes()) {
             char c = (char) b;
-            if (c > 127){
+            if (c > 127) {
                 throw new InventoryRuntimeException("All characters must be 7bit ascii");
             }
         }
@@ -203,8 +204,7 @@ public class PassiveDiscoveryService {
             String tenantId = discovery.getTenantId();
             Long locationId = discovery.getLocationId();
 
-            List<Node> detectedNodes = nodeRepository
-                .findByTenantIdAndLocationId(tenantId, locationId);
+            List<Node> detectedNodes = nodeRepository.findByTenantIdAndLocationId(tenantId, locationId);
 
             if (!CollectionUtils.isEmpty(detectedNodes)) {
                 for (Node node : detectedNodes) {
@@ -218,7 +218,9 @@ public class PassiveDiscoveryService {
 
     public void sendNodeScan(Node node, PassiveDiscoveryDTO passiveDiscovery) {
         if (node.getMonitoredState() != MonitoredState.DETECTED) {
-            log.info("Node is not in monitored state DETECTED, so not sending node scan for node {}", node.getNodeLabel());
+            log.info(
+                    "Node is not in monitored state DETECTED, so not sending node scan for node {}",
+                    node.getNodeLabel());
             return;
         }
         MonitoringLocation monitoringLocation = node.getMonitoringLocation();
@@ -239,13 +241,11 @@ public class PassiveDiscoveryService {
         List<SnmpConfiguration> snmpConfigs = new ArrayList<>();
 
         discovery.getCommunitiesList().forEach(readCommunity -> {
-            var builder = SnmpConfiguration.newBuilder()
-                .setReadCommunity(readCommunity);
+            var builder = SnmpConfiguration.newBuilder().setReadCommunity(readCommunity);
             snmpConfigs.add(builder.build());
         });
         discovery.getPortsList().forEach(port -> {
-            var builder = SnmpConfiguration.newBuilder()
-                .setPort(port);
+            var builder = SnmpConfiguration.newBuilder().setPort(port);
             snmpConfigs.add(builder.build());
         });
         scannerTaskSetService.sendNodeScannerTask(node, Long.parseLong(discovery.getLocationId()), snmpConfigs);

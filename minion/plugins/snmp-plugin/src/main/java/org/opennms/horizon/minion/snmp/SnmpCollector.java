@@ -1,36 +1,37 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.snmp;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 import org.opennms.horizon.minion.plugin.api.CollectionRequest;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.ServiceCollector;
@@ -51,22 +52,13 @@ import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
-
 public class SnmpCollector implements ServiceCollector {
 
     private final Logger LOG = LoggerFactory.getLogger(SnmpCollector.class);
     private final SnmpHelper snmpHelper;
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("snmp-collector-result-processor-%d")
-        .build();
+            .setNameFormat("snmp-collector-result-processor-%d")
+            .build();
     private final ExecutorService executorService = Executors.newCachedThreadPool(threadFactory);
 
     private static final ExecutorService REAPER_EXECUTOR = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -75,7 +67,6 @@ public class SnmpCollector implements ServiceCollector {
             return new Thread(r, "SNMP-Proxy-RPC-Session-Reaper");
         }
     });
-
 
     public SnmpCollector(SnmpHelper snmpHelper) {
         this.snmpHelper = snmpHelper;
@@ -101,16 +92,16 @@ public class SnmpCollector implements ServiceCollector {
             snmpCollectionSet.addDefaultTrackers();
 
             for (SnmpInterfaceElement element : snmpRequest.getSnmpInterfaceList()) {
-                var interfaceMetricsTracker = new InterfaceMetricsTracker(element.getIfIndex(),
-                    element.getIfName(), element.getIpAddress(), builder);
+                var interfaceMetricsTracker = new InterfaceMetricsTracker(
+                        element.getIfIndex(), element.getIfName(), element.getIpAddress(), builder);
                 snmpCollectionSet.getTrackers().add(interfaceMetricsTracker);
             }
 
             AggregateTracker aggregate = new AggregateTracker(snmpCollectionSet.getTrackers());
 
             long nodeId = request.getNodeId();
-            try (final SnmpWalker walker = snmpHelper.createWalker(mapAgent(snmpRequest.getAgentConfig(), ipAddress),
-                "Snmp-Collector", aggregate)) {
+            try (final SnmpWalker walker = snmpHelper.createWalker(
+                    mapAgent(snmpRequest.getAgentConfig(), ipAddress), "Snmp-Collector", aggregate)) {
                 walker.setCallback(new SnmpWalkCallback() {
                     @Override
                     public void complete(SnmpWalker tracker, Throwable t) {
@@ -137,7 +128,8 @@ public class SnmpCollector implements ServiceCollector {
                 walker.start();
                 walker.waitFor();
             }
-            result = future.thenApplyAsync(snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId), executorService);
+            result = future.thenApplyAsync(
+                    snmpResults -> mapSnmpValuesToResponse(snmpResults, ipAddress, nodeId), executorService);
         } catch (InvalidProtocolBufferException pbe) {
             LOG.debug("Error while mapping Snmp results to proto ", pbe);
             var response = generateFailureResponse(request);
@@ -152,33 +144,36 @@ public class SnmpCollector implements ServiceCollector {
             result.complete(response);
         }
         return result;
-
     }
 
     private ServiceCollectorResponseImpl generateFailureResponse(CollectionRequest request) {
         return ServiceCollectorResponseImpl.builder()
-            .nodeId(request.getNodeId())
-            .monitorType(MonitorType.SNMP)
-            .status(false)
-            .ipAddress(request.getIpAddress()).build();
+                .nodeId(request.getNodeId())
+                .monitorType(MonitorType.SNMP)
+                .status(false)
+                .ipAddress(request.getIpAddress())
+                .build();
     }
 
+    private ServiceCollectorResponseImpl mapSnmpValuesToResponse(
+            List<SnmpResultMetric> snmpResults, String ipAddress, long nodeId) {
 
-    private ServiceCollectorResponseImpl mapSnmpValuesToResponse(List<SnmpResultMetric> snmpResults, String ipAddress, long nodeId) {
-
-        var response = SnmpResponseMetric.newBuilder().addAllResults(snmpResults).build();
+        var response =
+                SnmpResponseMetric.newBuilder().addAllResults(snmpResults).build();
         LOG.debug("SNMP Collector Results {}", snmpResults);
-        return ServiceCollectorResponseImpl.builder().results(response)
-            .nodeId(nodeId)
-            .monitorType(MonitorType.SNMP)
-            .status(true)
-            .timeStamp(System.currentTimeMillis())
-            .ipAddress(ipAddress).build();
+        return ServiceCollectorResponseImpl.builder()
+                .results(response)
+                .nodeId(nodeId)
+                .monitorType(MonitorType.SNMP)
+                .status(true)
+                .timeStamp(System.currentTimeMillis())
+                .ipAddress(ipAddress)
+                .build();
     }
-
 
     static SnmpAgentConfig mapAgent(SnmpConfiguration agent, String ipAddress) throws Exception {
-        SnmpAgentConfig agentConfig = new SnmpAgentConfig(InetAddressUtils.getInetAddress(ipAddress), SnmpAgentConfig.DEFAULTS);
+        SnmpAgentConfig agentConfig =
+                new SnmpAgentConfig(InetAddressUtils.getInetAddress(ipAddress), SnmpAgentConfig.DEFAULTS);
         if (agent.getVersion().getNumber() > 0) {
             agentConfig.setVersion(agent.getVersion().getNumber());
         } else {
@@ -197,7 +192,10 @@ public class SnmpCollector implements ServiceCollector {
             agentOption(v3config.hasContextEngineId(), agentConfig::setContextEngineId, v3config::getContextEngineId);
             agentOption(v3config.hasEngineId(), agentConfig::setEngineId, v3config::getEngineId);
         }
-        agentOption(agent.hasProxyForAddress(), agentConfig::setProxyFor, () -> InetAddress.getByName(agent.getProxyForAddress()));
+        agentOption(
+                agent.hasProxyForAddress(),
+                agentConfig::setProxyFor,
+                () -> InetAddress.getByName(agent.getProxyForAddress()));
         agentOption(agent.hasPort(), agentConfig::setPort, agent::getPort);
         agentOption(agent.hasTimeout(), agentConfig::setTimeout, agent::getTimeout);
         agentOption(agent.hasRetries(), agentConfig::setRetries, agent::getRetries);
@@ -215,6 +213,4 @@ public class SnmpCollector implements ServiceCollector {
             setter.accept(getter.call());
         }
     }
-
-
 }

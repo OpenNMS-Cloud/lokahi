@@ -1,34 +1,37 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
 import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.time.Instant;
+import java.util.List;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,23 +49,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.time.Instant;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLPassiveDiscoveryServiceTest {
     @MockBean
     private InventoryClient mockClient;
+
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
+
     private GraphQLWebTestClient webClient;
     private String accessToken;
     private PassiveDiscoveryDTO passiveDiscoveryDTO;
@@ -73,14 +67,14 @@ class GraphQLPassiveDiscoveryServiceTest {
         accessToken = webClient.getAccessToken();
 
         passiveDiscoveryDTO = PassiveDiscoveryDTO.newBuilder()
-            .setId(1L)
-            .setName("passive-discovery-name")
-            .setLocationId("Default")
-            .setToggle(true)
-            .addAllPorts(List.of(161))
-            .addAllCommunities(List.of("public"))
-            .setCreateTimeMsec(Instant.now().toEpochMilli())
-            .build();
+                .setId(1L)
+                .setName("passive-discovery-name")
+                .setLocationId("Default")
+                .setToggle(true)
+                .addAllPorts(List.of(161))
+                .addAllCommunities(List.of("public"))
+                .setCreateTimeMsec(Instant.now().toEpochMilli())
+                .build();
 
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -93,58 +87,65 @@ class GraphQLPassiveDiscoveryServiceTest {
 
     @Test
     void testCreatePassiveDiscovery() throws JSONException {
-        doReturn(passiveDiscoveryDTO).when(mockClient).upsertPassiveDiscovery(any(PassiveDiscoveryUpsertDTO.class), eq(accessToken));
+        doReturn(passiveDiscoveryDTO)
+                .when(mockClient)
+                .upsertPassiveDiscovery(any(PassiveDiscoveryUpsertDTO.class), eq(accessToken));
 
-        String request = "mutation { " +
-            "    upsertPassiveDiscovery( " +
-            "        discovery: { " +
-            "            name: \"passive-discovery-name\", " +
-            "            locationId: \"Default\", " +
-            "            snmpPorts: [ 161 ], " +
-            "            snmpCommunities: [ \"public\" ], " +
-            "            tags: [ " +
-            "                { " +
-            "                    name:\"tag-1\" " +
-            "                } " +
-            "            ] " +
-            "        } " +
-            "    ) { " +
-            "        id, " +
-            "        name, " +
-            "        locationId, " +
-            "        toggle, " +
-            "        snmpPorts, " +
-            "        snmpCommunities, " +
-            "        createTimeMsec " +
-            "    } " +
-            "}";
+        String request = "mutation { " + "    upsertPassiveDiscovery( "
+                + "        discovery: { "
+                + "            name: \"passive-discovery-name\", "
+                + "            locationId: \"Default\", "
+                + "            snmpPorts: [ 161 ], "
+                + "            snmpCommunities: [ \"public\" ], "
+                + "            tags: [ "
+                + "                { "
+                + "                    name:\"tag-1\" "
+                + "                } "
+                + "            ] "
+                + "        } "
+                + "    ) { "
+                + "        id, "
+                + "        name, "
+                + "        locationId, "
+                + "        toggle, "
+                + "        snmpPorts, "
+                + "        snmpCommunities, "
+                + "        createTimeMsec "
+                + "    } "
+                + "}";
 
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.upsertPassiveDiscovery.id").isEqualTo(passiveDiscoveryDTO.getId())
-            .jsonPath("$.data.upsertPassiveDiscovery.name").isEqualTo(passiveDiscoveryDTO.getName())
-            .jsonPath("$.data.upsertPassiveDiscovery.toggle").isEqualTo(passiveDiscoveryDTO.getToggle())
-            .jsonPath("$.data.upsertPassiveDiscovery.createTimeMsec").isEqualTo(passiveDiscoveryDTO.getCreateTimeMsec());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.upsertPassiveDiscovery.id")
+                .isEqualTo(passiveDiscoveryDTO.getId())
+                .jsonPath("$.data.upsertPassiveDiscovery.name")
+                .isEqualTo(passiveDiscoveryDTO.getName())
+                .jsonPath("$.data.upsertPassiveDiscovery.toggle")
+                .isEqualTo(passiveDiscoveryDTO.getToggle())
+                .jsonPath("$.data.upsertPassiveDiscovery.createTimeMsec")
+                .isEqualTo(passiveDiscoveryDTO.getCreateTimeMsec());
         verify(mockClient).upsertPassiveDiscovery(any(PassiveDiscoveryUpsertDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
-    
+
     @Test
     void testTogglePassiveDiscovery() throws JSONException {
-        doReturn(passiveDiscoveryDTO).when(mockClient).createPassiveDiscoveryToggle((any(PassiveDiscoveryToggleDTO.class)), eq(accessToken));
+        doReturn(passiveDiscoveryDTO)
+                .when(mockClient)
+                .createPassiveDiscoveryToggle((any(PassiveDiscoveryToggleDTO.class)), eq(accessToken));
 
-        String request =
-            "mutation {"
+        String request = "mutation {"
                 + "  togglePassiveDiscovery(toggle: { id: 1, toggle: true }) {"
                 + "    toggle"
                 + "  }"
                 + "}";
 
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.togglePassiveDiscovery.toggle").isEqualTo(passiveDiscoveryDTO.getToggle());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.togglePassiveDiscovery.toggle")
+                .isEqualTo(passiveDiscoveryDTO.getToggle());
 
         verify(mockClient).createPassiveDiscoveryToggle(any(PassiveDiscoveryToggleDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
@@ -152,28 +153,34 @@ class GraphQLPassiveDiscoveryServiceTest {
 
     @Test
     void testGetPassiveDiscovery() throws JSONException {
-        doReturn(PassiveDiscoveryListDTO.newBuilder().addDiscoveries(passiveDiscoveryDTO).build())
-            .when(mockClient).listPassiveDiscoveries(eq(accessToken));
+        doReturn(PassiveDiscoveryListDTO.newBuilder()
+                        .addDiscoveries(passiveDiscoveryDTO)
+                        .build())
+                .when(mockClient)
+                .listPassiveDiscoveries(eq(accessToken));
 
-        String request = "query { " +
-            "    passiveDiscoveries { " +
-            "        id, " +
-            "        name, " +
-            "        locationId, " +
-            "        toggle, " +
-            "        snmpPorts, " +
-            "        snmpCommunities, " +
-            "        createTimeMsec " +
-            "    } " +
-            "}";
+        String request = "query { " + "    passiveDiscoveries { "
+                + "        id, "
+                + "        name, "
+                + "        locationId, "
+                + "        toggle, "
+                + "        snmpPorts, "
+                + "        snmpCommunities, "
+                + "        createTimeMsec "
+                + "    } "
+                + "}";
 
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.passiveDiscoveries[0].id").isEqualTo(passiveDiscoveryDTO.getId())
-            .jsonPath("$.data.passiveDiscoveries[0].name").isEqualTo(passiveDiscoveryDTO.getName())
-            .jsonPath("$.data.passiveDiscoveries[0].toggle").isEqualTo(passiveDiscoveryDTO.getToggle())
-            .jsonPath("$.data.passiveDiscoveries[0].createTimeMsec").isEqualTo(passiveDiscoveryDTO.getCreateTimeMsec());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.passiveDiscoveries[0].id")
+                .isEqualTo(passiveDiscoveryDTO.getId())
+                .jsonPath("$.data.passiveDiscoveries[0].name")
+                .isEqualTo(passiveDiscoveryDTO.getName())
+                .jsonPath("$.data.passiveDiscoveries[0].toggle")
+                .isEqualTo(passiveDiscoveryDTO.getToggle())
+                .jsonPath("$.data.passiveDiscoveries[0].createTimeMsec")
+                .isEqualTo(passiveDiscoveryDTO.getCreateTimeMsec());
         verify(mockClient).listPassiveDiscoveries(eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }

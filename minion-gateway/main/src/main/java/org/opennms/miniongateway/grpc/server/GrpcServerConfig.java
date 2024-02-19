@@ -1,11 +1,34 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.server;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.opentelemetry.api.OpenTelemetry;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-
 import org.opennms.horizon.shared.grpc.common.GrpcIpcServer;
 import org.opennms.horizon.shared.grpc.common.LocationServerInterceptor;
 import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
@@ -33,11 +56,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.api.OpenTelemetry;
-
 @Configuration
 public class GrpcServerConfig {
     @Value("${debug.span.full.message:false}")
@@ -63,22 +81,20 @@ public class GrpcServerConfig {
 
     @Bean
     public MinionRpcStreamConnectionManager minionRpcStreamConnectionManager(
-        @Autowired MinionManager minionManager,
-        @Autowired RpcConnectionTracker rpcConnectionTracker,
-        @Autowired RpcRequestTracker rpcRequestTracker,
-        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
-        @Autowired LocationServerInterceptor locationServerInterceptor
-        ) {
+            @Autowired MinionManager minionManager,
+            @Autowired RpcConnectionTracker rpcConnectionTracker,
+            @Autowired RpcRequestTracker rpcRequestTracker,
+            @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+            @Autowired LocationServerInterceptor locationServerInterceptor) {
         ScheduledExecutorService responseHandlerExecutor = Executors.newSingleThreadScheduledExecutor();
 
         return new MinionRpcStreamConnectionManagerImpl(
-            rpcConnectionTracker,
-            rpcRequestTracker,
-            minionManager,
-            responseHandlerExecutor,
-            tenantIDGrpcServerInterceptor,
-            locationServerInterceptor
-        );
+                rpcConnectionTracker,
+                rpcRequestTracker,
+                minionManager,
+                responseHandlerExecutor,
+                tenantIDGrpcServerInterceptor,
+                locationServerInterceptor);
     }
 
     @Bean("minionToCloudRPCProcessor")
@@ -88,17 +104,22 @@ public class GrpcServerConfig {
 
     @Bean("cloudToMinionMessageProcessor")
     public TaskSetTwinMessageProcessor stubCloudToMinionMessageProcessor(
-        TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
-        LocationServerInterceptor locationServerInterceptor,
-        List<OutgoingMessageFactory> outgoingMessageFactoryList) {
-        return new TaskSetTwinMessageProcessor(tenantIDGrpcServerInterceptor, locationServerInterceptor, outgoingMessageFactoryList, debugSpanFullMessage, debugSpanContent);
+            TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+            LocationServerInterceptor locationServerInterceptor,
+            List<OutgoingMessageFactory> outgoingMessageFactoryList) {
+        return new TaskSetTwinMessageProcessor(
+                tenantIDGrpcServerInterceptor,
+                locationServerInterceptor,
+                outgoingMessageFactoryList,
+                debugSpanFullMessage,
+                debugSpanContent);
     }
 
     @Bean
     public RpcRequestTimeoutManager requestTimeoutManager() {
         ThreadFactory timerThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("rpc-timeout-tracker-%d")
-            .build();
+                .setNameFormat("rpc-timeout-tracker-%d")
+                .build();
 
         // RPC timeout executor thread retrieves elements from delay queue used to timeout rpc requests.
         ExecutorService rpcTimeoutExecutor = Executors.newFixedThreadPool(3, timerThreadFactory);
@@ -112,25 +133,30 @@ public class GrpcServerConfig {
 
     @Bean
     public OpennmsGrpcServer opennmsServer(
-        @Autowired @Qualifier("externalGrpcIpcServer") GrpcIpcServer serverBuilder,
-        @Autowired MinionManager minionManager,
-        @Autowired RpcConnectionTracker rpcConnectionTracker,
-        @Autowired RpcRequestTracker rpcRequestTracker,
-        @Autowired MinionRpcStreamConnectionManager minionRpcStreamConnectionManager,
-        @Autowired @Qualifier("minionToCloudRPCProcessor") IncomingRpcHandlerAdapter incomingRpcHandlerAdapter,
-        @Autowired @Qualifier("cloudToMinionMessageProcessor") OutgoingMessageHandler cloudToMinionMessageProcessor,
-        @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
-        @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
-        @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
-        @Autowired FlowKafkaForwarder flowKafkaForwarder,
-        @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager,
-        @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
-        @Autowired LocationServerInterceptor locationServerInterceptor,
-        @Autowired MeterRegistry meterRegistry,
-        @Autowired OpenTelemetry openTelemetry
-        ) throws Exception {
+            @Autowired @Qualifier("externalGrpcIpcServer") GrpcIpcServer serverBuilder,
+            @Autowired MinionManager minionManager,
+            @Autowired RpcConnectionTracker rpcConnectionTracker,
+            @Autowired RpcRequestTracker rpcRequestTracker,
+            @Autowired MinionRpcStreamConnectionManager minionRpcStreamConnectionManager,
+            @Autowired @Qualifier("minionToCloudRPCProcessor") IncomingRpcHandlerAdapter incomingRpcHandlerAdapter,
+            @Autowired @Qualifier("cloudToMinionMessageProcessor") OutgoingMessageHandler cloudToMinionMessageProcessor,
+            @Autowired TaskResultsKafkaForwarder taskResultsKafkaForwarder,
+            @Autowired HeartbeatKafkaForwarder heartbeatKafkaForwarder,
+            @Autowired TrapsKafkaForwarder trapsKafkaForwarder,
+            @Autowired FlowKafkaForwarder flowKafkaForwarder,
+            @Autowired RpcRequestTimeoutManager rpcRequestTimeoutManager,
+            @Autowired TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
+            @Autowired LocationServerInterceptor locationServerInterceptor,
+            @Autowired MeterRegistry meterRegistry,
+            @Autowired OpenTelemetry openTelemetry)
+            throws Exception {
 
-        OpennmsGrpcServer server = new OpennmsGrpcServer(serverBuilder, meterRegistry, openTelemetry.getTracer(getClass().getName()), debugSpanFullMessage, debugSpanContent);
+        OpennmsGrpcServer server = new OpennmsGrpcServer(
+                serverBuilder,
+                meterRegistry,
+                openTelemetry.getTracer(getClass().getName()),
+                debugSpanFullMessage,
+                debugSpanContent);
 
         server.setRpcConnectionTracker(rpcConnectionTracker);
         server.setRpcRequestTracker(rpcRequestTracker);
@@ -149,6 +175,4 @@ public class GrpcServerConfig {
         server.start();
         return server;
     }
-
-
 }

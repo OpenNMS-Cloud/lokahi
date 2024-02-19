@@ -5,7 +5,7 @@
     </section>
     <section class="node-component-content" v-if="discoveryStore.loadedDiscoveries.length > 0">
       <ul>
-        <li v-for="discovery in discoveryStore.loadedDiscoveries">
+        <li v-for="discovery in discoveryStore.loadedDiscoveries" :key="discovery.id">
           <p @click="handleRoute(discovery)">{{ discovery.name }}</p>
         </li>
       </ul>
@@ -17,8 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useDiscoveryStore } from '@/store/Views/discoveryStore';
-import { NewOrUpdatedDiscovery } from '@/types/discovery';
+import { useDiscoveryStore } from '@/store/Views/discoveryStore'
+import { NewOrUpdatedDiscovery } from '@/types/discovery'
 
 const discoveryStore = useDiscoveryStore()
 const router = useRouter()
@@ -27,7 +27,7 @@ onUnmounted(() => discoveryStore.$reset())
 const handleRoute = (discovery: NewOrUpdatedDiscovery) => {
   discoveryStore.editDiscovery(discovery)
   router.push({
-    path: `/discovery-selected/${discovery.id}`
+    path: `/discovery/${discovery.id}`
   })
 }
 </script>
@@ -58,20 +58,7 @@ const handleRoute = (discovery: NewOrUpdatedDiscovery) => {
     > li {
       padding: 5px 0px;
       p {
-        overflow: hidden;
-        color: var(--open-source-dark-blue-900-secondary, #273180);
-        font-kerning: none;
-        font-feature-settings: 'calt' off;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        /* Open Source/Caption Text */
-        font-family: Inter;
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 16px; /* 133.333% */
-
+        color: var(variables.$primary);
         cursor: pointer;
       }
     }

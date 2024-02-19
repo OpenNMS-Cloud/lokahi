@@ -308,7 +308,7 @@ const isICMPOrPassive = computed(
 const typeVisible = false
 const route = useRoute()
 onMounted(() => {
-  discoveryStore.init();
+  discoveryStore.init()
 })
 
 watchEffect(() => {

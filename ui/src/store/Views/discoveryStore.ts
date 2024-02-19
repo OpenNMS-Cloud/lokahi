@@ -250,16 +250,16 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
           this.setSelectedDiscoveryValue('name', '')
         }
         if (toRaw(this.validationErrors).clientId) {
-          this.setMetaSelectedDiscoveryValue('clientId', '');
+          this.setMetaSelectedDiscoveryValue('clientId', '')
         }
         if (toRaw(this.validationErrors).clientSecret) {
-          this.setMetaSelectedDiscoveryValue('clientSecret', '');
+          this.setMetaSelectedDiscoveryValue('clientSecret', '')
         }
         if (toRaw(this.validationErrors).directoryId) {
-          this.setMetaSelectedDiscoveryValue('directoryId', '');
+          this.setMetaSelectedDiscoveryValue('directoryId', '')
         }
         if (toRaw(this.validationErrors).subscriptionId) {
-          this.setMetaSelectedDiscoveryValue('subscriptionId', '');
+          this.setMetaSelectedDiscoveryValue('subscriptionId', '')
         }
         this.validateOnKeyUp = true
       }

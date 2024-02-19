@@ -120,7 +120,6 @@ import { TagSelectItem } from '@/types'
 import ContentCopy from '@featherds/icon/action/ContentCopy'
 import Delete from '@featherds/icon/action/Delete'
 import useModal from '@/composables/useModal'
-import { MonitorPolicy } from '@/types/graphql'
 
 const { openModal, closeModal, isVisible } = useModal()
 const store = useMonitoringPoliciesStore()

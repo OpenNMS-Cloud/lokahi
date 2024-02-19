@@ -5,8 +5,8 @@
     </section>
     <section v-if="store.monitoringPolicies.length > 0" class="node-component-content">
       <ul>
-        <li v-for="policy in store.monitoringPolicies">
-          <p @click="handleRoute(policy)" href="">{{ policy.name }}</p>
+        <li v-for="policy in store.monitoringPolicies" :key="policy.id">
+          <p class="overline-mixin" @click="handleRoute(policy)">{{ policy.name }}</p>
         </li>
       </ul>
     </section>
@@ -18,14 +18,14 @@
 
 <script lang="ts" setup>
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { NewOrUpdatedDiscovery } from '@/types/discovery';
+import { NewOrUpdatedDiscovery } from '@/types/discovery'
 const store = useMonitoringPoliciesStore()
 const router = useRouter()
 onMounted(() => store.getMonitoringPolicies())
 onUnmounted(() => store.$reset())
 const handleRoute = (policy: NewOrUpdatedDiscovery ) => {
   router.push({
-    path: `/monitoring-policies-selected/${policy.id}`
+    path: `/monitoring-policies/${policy.id}`
   })
 }
 </script>
@@ -56,20 +56,7 @@ const handleRoute = (policy: NewOrUpdatedDiscovery ) => {
     > li {
       padding: 5px 0px;
       p {
-        overflow: hidden;
-        color: var(--open-source-dark-blue-900-secondary, #273180);
-        font-kerning: none;
-        font-feature-settings: 'calt' off;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        /* Open Source/Caption Text */
-        font-family: Inter;
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 16px; /* 133.333% */
-
+        color: var(variables.$primary);
         cursor: pointer;
       }
     }

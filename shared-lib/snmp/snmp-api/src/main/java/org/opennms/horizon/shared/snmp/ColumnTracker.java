@@ -1,36 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp;
 
 import java.util.Collections;
 import java.util.List;
-
 import org.opennms.horizon.shared.snmp.proxy.WalkRequest;
 import org.opennms.horizon.shared.snmp.proxy.WalkResponse;
 import org.slf4j.Logger;
@@ -38,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class ColumnTracker extends CollectionTracker {
     private static final transient Logger LOG = LoggerFactory.getLogger(ColumnTracker.class);
-    
+
     private SnmpObjId m_base;
     private SnmpObjId m_last;
     private int m_maxRepetitions;
@@ -52,7 +44,7 @@ public class ColumnTracker extends CollectionTracker {
     public ColumnTracker(SnmpObjId base, int maxRepititions, int maxRetries) {
         this(null, base, maxRepititions, maxRetries);
     }
-    
+
     public ColumnTracker(CollectionTracker parent, SnmpObjId base) {
         this(parent, base, 2, 0);
     }
@@ -69,14 +61,14 @@ public class ColumnTracker extends CollectionTracker {
         return m_base;
     }
 
-        @Override
+    @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("base", m_base)
-            .append("last oid", m_last)
-            .append("max repetitions", m_maxRepetitions)
-            .append("finished?", isFinished())
-            .toString();
+                .append("base", m_base)
+                .append("last oid", m_last)
+                .append("max repetitions", m_maxRepetitions)
+                .append("finished?", isFinished())
+                .toString();
     }
 
     @Override
@@ -89,7 +81,7 @@ public class ColumnTracker extends CollectionTracker {
         pduBuilder.addOid(m_last);
         pduBuilder.setNonRepeaters(0);
         pduBuilder.setMaxRepetitions(getMaxRepetitions());
-        
+
         ResponseProcessor rp = new ResponseProcessor() {
             @Override
             public void processResponse(SnmpObjId responseObjId, SnmpValue val) {
@@ -104,9 +96,12 @@ public class ColumnTracker extends CollectionTracker {
                 // and should stop processing
                 // See NMS-10621 for details
                 if (!responseObjId.isSuccessorOf(m_last)) {
-                    LOG.info("Received varBind: {} = {} after requesting an OID following: {}. "
-                            + "The received varBind is not a successor! Marking tracker as finished.",
-                            responseObjId, val, m_last);
+                    LOG.info(
+                            "Received varBind: {} = {} after requesting an OID following: {}. "
+                                    + "The received varBind is not a successor! Marking tracker as finished.",
+                            responseObjId,
+                            val,
+                            m_last);
                     setFinished(true);
                     return;
                 }
@@ -118,31 +113,34 @@ public class ColumnTracker extends CollectionTracker {
                         storeResult(new SnmpResult(m_base, inst, val));
                     }
                 }
-                
+
                 if (!m_base.isPrefixOf(m_last)) {
                     setFinished(true);
                 }
-                
             }
 
             @Override
             public boolean processErrors(int errorStatus, int errorIndex) throws SnmpException {
                 if (m_retries == null) m_retries = getMaxRetries();
-                //LOG.trace("processErrors: errorStatus={}, errorIndex={}, retries={}", errorStatus, errorIndex, m_retries);
+                // LOG.trace("processErrors: errorStatus={}, errorIndex={}, retries={}", errorStatus, errorIndex,
+                // m_retries);
 
                 final ErrorStatus status = ErrorStatus.fromStatus(errorStatus);
                 if (status == ErrorStatus.TOO_BIG) {
-                    throw new SnmpException("Unable to handle tooBigError for next oid request after "+m_last);
+                    throw new SnmpException("Unable to handle tooBigError for next oid request after " + m_last);
                 } else if (status == ErrorStatus.GEN_ERR) {
-                    reportGenErr("Received genErr requesting next oid after "+m_last+". Marking column is finished.");
+                    reportGenErr(
+                            "Received genErr requesting next oid after " + m_last + ". Marking column is finished.");
                     errorOccurred();
                     return true;
                 } else if (status == ErrorStatus.NO_SUCH_NAME) {
-                    reportNoSuchNameErr("Received noSuchName requesting next oid after "+m_last+". Marking column is finished.");
+                    reportNoSuchNameErr("Received noSuchName requesting next oid after " + m_last
+                            + ". Marking column is finished.");
                     errorOccurred();
                     return true;
                 } else if (status.isFatal()) {
-                    final ErrorStatusException ex = new ErrorStatusException(status, "Unexpected error processing next oid after "+m_last+". Aborting!");
+                    final ErrorStatusException ex = new ErrorStatusException(
+                            status, "Unexpected error processing next oid after " + m_last + ". Aborting!");
                     reportFatalErr(ex);
                     throw ex;
                 } else if (status != ErrorStatus.NO_ERROR) {
@@ -151,7 +149,8 @@ public class ColumnTracker extends CollectionTracker {
 
                 if (status.retry()) {
                     if (m_retries-- <= 0) {
-                        final ErrorStatusException ex = new ErrorStatusException(status, "Non-fatal error met maximum number of retries. Aborting!");
+                        final ErrorStatusException ex = new ErrorStatusException(
+                                status, "Non-fatal error met maximum number of retries. Aborting!");
                         reportFatalErr(ex);
                         throw ex;
                     }
@@ -163,7 +162,7 @@ public class ColumnTracker extends CollectionTracker {
                 return status.retry();
             }
         };
-        
+
         return rp;
     }
 
@@ -179,7 +178,7 @@ public class ColumnTracker extends CollectionTracker {
     public int getMaxRetries() {
         return m_maxRetries;
     }
-    
+
     @Override
     public void setMaxRetries(final int maxRetries) {
         LOG.debug("setMaxRetries({})", maxRetries);
@@ -213,12 +212,12 @@ public class ColumnTracker extends CollectionTracker {
     public void handleWalkResponses(List<WalkResponse> responses) {
         // Store the result
         responses.stream()
-            .flatMap(res -> res.getResults().stream())
-            .filter(res -> {
-                SnmpObjId responseOid = SnmpObjId.get(res.getBase(), res.getInstance());
-                return m_base.isPrefixOf(responseOid) && !m_base.equals(responseOid);
-            })
-            .forEach(this::storeResult);
+                .flatMap(res -> res.getResults().stream())
+                .filter(res -> {
+                    SnmpObjId responseOid = SnmpObjId.get(res.getBase(), res.getInstance());
+                    return m_base.isPrefixOf(responseOid) && !m_base.equals(responseOid);
+                })
+                .forEach(this::storeResult);
         setFinished(true);
     }
 }

@@ -1,33 +1,27 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.server.config;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.web.BffGraphQLController;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,8 +42,6 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Slf4j
 @Configuration
 @EnableWebFluxSecurity
@@ -58,27 +50,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(
-        @Value(BffGraphQLController.GRAPHQL_ENDPOINT) String graphQLEndpoint,
-        ServerHttpSecurity http,
-        CorsConfigurationSource corsConfigurationSource,
-        ReactiveJwtDecoder jwtDecoder
-    ) {
+            @Value(BffGraphQLController.GRAPHQL_ENDPOINT) String graphQLEndpoint,
+            ServerHttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource,
+            ReactiveJwtDecoder jwtDecoder) {
         http
-            // Disabled because by-default, it is not configured to work with
-            // OAuth2
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .cors(corsSpec -> corsSpec.configurationSource(corsConfigurationSource))
-            .authorizeExchange((authorize) -> authorize
-                .pathMatchers(graphQLEndpoint).hasAuthority(USER_ROLE_AUTHORITY)
-                .anyExchange().permitAll()
-            )
-            .oauth2ResourceServer(configurer ->
-                configurer.jwt(jwtSpec ->
-                    jwtSpec
-                        .jwtDecoder(jwtDecoder)
-                        .jwtAuthenticationConverter(grantedAuthoritiesExtractor())
-                )
-            );
+                // Disabled because by-default, it is not configured to work with
+                // OAuth2
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(corsSpec -> corsSpec.configurationSource(corsConfigurationSource))
+                .authorizeExchange((authorize) -> authorize
+                        .pathMatchers(graphQLEndpoint)
+                        .hasAuthority(USER_ROLE_AUTHORITY)
+                        .anyExchange()
+                        .permitAll())
+                .oauth2ResourceServer(configurer -> configurer.jwt(jwtSpec ->
+                        jwtSpec.jwtDecoder(jwtDecoder).jwtAuthenticationConverter(grantedAuthoritiesExtractor())));
 
         return http.build();
     }
@@ -89,24 +76,18 @@ public class SecurityConfig {
         // aside from their tenant membership, so we'll assume a simple role
         // for now.
         authConverter.setJwtGrantedAuthoritiesConverter(
-            jwt -> List.of(new SimpleGrantedAuthority(USER_ROLE_AUTHORITY))
-        );
+                jwt -> List.of(new SimpleGrantedAuthority(USER_ROLE_AUTHORITY)));
         return new ReactiveJwtAuthenticationConverterAdapter(authConverter);
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
-        @Value(BffGraphQLController.GRAPHQL_ENDPOINT) String graphQLEndpoint,
-        BffProperties bffProperties
-    ) {
+            @Value(BffGraphQLController.GRAPHQL_ENDPOINT) String graphQLEndpoint, BffProperties bffProperties) {
         var source = new UrlBasedCorsConfigurationSource();
 
         if (bffProperties.isCorsAllowed()) {
             log.info("Allowing all CORS requests");
-            source.registerCorsConfiguration(
-                graphQLEndpoint,
-                new CorsConfiguration().applyPermitDefaultValues()
-            );
+            source.registerCorsConfiguration(graphQLEndpoint, new CorsConfiguration().applyPermitDefaultValues());
         }
         return source;
     }

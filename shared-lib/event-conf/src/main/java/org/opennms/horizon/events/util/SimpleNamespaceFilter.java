@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.util;
 
 import org.slf4j.Logger;
@@ -46,10 +39,11 @@ public class SimpleNamespaceFilter extends XMLFilterImpl {
     public SimpleNamespaceFilter(final String namespaceUri, final boolean addNamespace) {
         super();
 
-        LOG.trace("SimpleNamespaceFilter initalized with namespace {} ({})", namespaceUri, Boolean.valueOf(addNamespace));
+        LOG.trace(
+                "SimpleNamespaceFilter initalized with namespace {} ({})", namespaceUri, Boolean.valueOf(addNamespace));
         if (addNamespace) {
             this.m_namespaceUri = namespaceUri.intern();
-        } else { 
+        } else {
             this.m_namespaceUri = "".intern();
         }
         this.m_addNamespace = addNamespace;
@@ -62,36 +56,58 @@ public class SimpleNamespaceFilter extends XMLFilterImpl {
             startControlledPrefixMapping();
         }
     }
+
     @Override
-    public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) throws SAXException {
+    public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
+            throws SAXException {
         if (m_addNamespace) {
-            LOG.trace("start: uri = {}, new uri = {}, localName = {}, qName = {}, attributes = {}", uri, m_namespaceUri, localName, qName, attributes);
+            LOG.trace(
+                    "start: uri = {}, new uri = {}, localName = {}, qName = {}, attributes = {}",
+                    uri,
+                    m_namespaceUri,
+                    localName,
+                    qName,
+                    attributes);
 
             final String type = attributes.getValue("http://www.w3.org/2001/XMLSchema-instance", "type");
 
             // we found an xsi:type annotation, ignore to avoid, eg:
-            // org.xml.sax.SAXParseException: cvc-elt.4.2: Cannot resolve 'events' to a type definition for element 'events'.
+            // org.xml.sax.SAXParseException: cvc-elt.4.2: Cannot resolve 'events' to a type definition for element
+            // 'events'.
             if (type != null) {
                 final AttributesImpl att = new AttributesImpl();
                 for (int i = 0; i < attributes.getLength(); i++) {
-                    if (!attributes.getLocalName(i).equals("type") || !attributes.getURI(i).equals("http://www.w3.org/2001/XMLSchema-instance")) {
-                        att.addAttribute(attributes.getURI(i), attributes.getLocalName(i), attributes.getQName(i), attributes.getType(i), attributes.getValue(i));
+                    if (!attributes.getLocalName(i).equals("type")
+                            || !attributes.getURI(i).equals("http://www.w3.org/2001/XMLSchema-instance")) {
+                        att.addAttribute(
+                                attributes.getURI(i),
+                                attributes.getLocalName(i),
+                                attributes.getQName(i),
+                                attributes.getType(i),
+                                attributes.getValue(i));
                     }
                 }
                 super.startElement(m_namespaceUri, localName, qName, att);
             } else {
                 super.startElement(m_namespaceUri, localName, qName, attributes);
             }
-        }  else {
-            LOG.trace("start: uri = {}, new uri = {}, localName = {}, qName = {}, attributes = {}", uri, uri, localName, qName, attributes);
+        } else {
+            LOG.trace(
+                    "start: uri = {}, new uri = {}, localName = {}, qName = {}, attributes = {}",
+                    uri,
+                    uri,
+                    localName,
+                    qName,
+                    attributes);
             super.startElement(uri, localName, qName, attributes);
         }
     }
 
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
-        if(m_addNamespace) {
-            LOG.trace("end:   uri = {}, new uri = {}, localName = {}, qName = {}", uri, m_namespaceUri, localName, qName);
+        if (m_addNamespace) {
+            LOG.trace(
+                    "end:   uri = {}, new uri = {}, localName = {}, qName = {}", uri, m_namespaceUri, localName, qName);
             super.endElement(m_namespaceUri, localName, qName);
         } else {
             LOG.trace("end:   uri = {}, new uri = {}, localName = {}, qName = {}", uri, uri, localName, qName);
@@ -107,20 +123,19 @@ public class SimpleNamespaceFilter extends XMLFilterImpl {
         } else {
             super.startPrefixMapping(prefix, url);
         }
-
     }
 
     private void startControlledPrefixMapping() throws SAXException {
         LOG.trace("startControlledPrefixMapping");
         if (m_addNamespace && !m_addedNamespace) {
-            //We should add namespace since it is set and has not yet been done.
+            // We should add namespace since it is set and has not yet been done.
             super.startPrefixMapping("".intern(), m_namespaceUri);
 
-            //Make sure we don't do it twice
+            // Make sure we don't do it twice
             m_addedNamespace = true;
         }
     }
-    
+
     @Override
     public String toString() {
         return "SimpleNamespaceFilter[namespaceUri=" + m_namespaceUri + ",addNamespace=" + m_addNamespace + "]";

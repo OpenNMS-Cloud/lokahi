@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2007-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.snmp;
 
 import java.math.BigInteger;
@@ -41,14 +34,14 @@ import org.opennms.horizon.shared.utils.IPAddress;
  * @author brozow
  */
 public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAddress> {
-    
+
     private final IPAddress m_begin;
     private final IPAddress m_end;
-    
+
     public IPAddressRange(String singleton) {
         this(singleton, singleton);
     }
-    
+
     public IPAddressRange(IPAddress singleton) {
         this(singleton, singleton);
     }
@@ -62,7 +55,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public IPAddressRange(String begin, String end) {
         this(new IPAddress(begin), new IPAddress(end));
     }
-    
+
     /**
      * <p>Constructor for IPAddressRange.</p>
      *
@@ -71,12 +64,13 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
      */
     public IPAddressRange(IPAddress begin, IPAddress end) {
         if (begin.isGreaterThan(end)) {
-            throw new IllegalArgumentException(String.format("beginning of range (%s) must come before end of range (%s)", begin, end));
+            throw new IllegalArgumentException(
+                    String.format("beginning of range (%s) must come before end of range (%s)", begin, end));
         }
         m_begin = begin;
         m_end = end;
     }
-    
+
     /**
      * <p>getBegin</p>
      *
@@ -85,7 +79,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public IPAddress getBegin() {
         return m_begin;
     }
-    
+
     /**
      * <p>getEnd</p>
      *
@@ -94,7 +88,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public IPAddress getEnd() {
         return m_end;
     }
-    
+
     /**
      * <p>size</p>
      *
@@ -120,7 +114,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
         }
         return addr.isGreaterThanOrEqualTo(m_begin) && addr.isLessThanOrEqualTo(m_end);
     }
-    
+
     /**
      * <p>contains</p>
      *
@@ -130,7 +124,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public boolean contains(String addr) {
         return contains(new IPAddress(addr));
     }
-    
+
     /**
      * <p>contains</p>
      *
@@ -140,7 +134,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public boolean contains(IPAddressRange range) {
         return this.contains(range.getBegin()) && this.contains(range.getEnd());
     }
-    
+
     /**
      * <p>overlaps</p>
      *
@@ -148,10 +142,12 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
      * @return a boolean.
      */
     public boolean overlaps(IPAddressRange range) {
-        return this.contains(range.getBegin()) || this.contains(range.getEnd())
-        || range.contains(this.getBegin()) || range.contains(this.getEnd());
+        return this.contains(range.getBegin())
+                || this.contains(range.getEnd())
+                || range.contains(this.getBegin())
+                || range.contains(this.getEnd());
     }
-    
+
     /**
      * <p>comesBefore</p>
      *
@@ -161,7 +157,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public boolean comesBefore(IPAddress addr) {
         return m_end.isLessThan(addr);
     }
-    
+
     /**
      * <p>comesBefore</p>
      *
@@ -171,7 +167,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public boolean comesBefore(IPAddressRange range) {
         return comesBefore(range.getBegin());
     }
-    
+
     /**
      * <p>comesAfter</p>
      *
@@ -181,7 +177,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public boolean comesAfter(IPAddress addr) {
         return m_begin.isGreaterThan(addr);
     }
-    
+
     /**
      * <p>comesAfter</p>
      *
@@ -191,7 +187,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public boolean comesAfter(IPAddressRange range) {
         return comesAfter(range.getEnd());
     }
-    
+
     /**
      * <p>adjoins</p>
      *
@@ -209,7 +205,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     private boolean comesImmediatelyBefore(IPAddressRange range) {
         return this.comesBefore(range) && getEnd().isPredecessorOf(range.getBegin());
     }
-    
+
     /**
      * <p>iterator</p>
      *
@@ -219,9 +215,9 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
     public Iterator<IPAddress> iterator() {
         return new IPAddressRangeIterator(this);
     }
-    
+
     private static class IPAddressRangeIterator implements Iterator<IPAddress> {
-        
+
         private final IPAddressRange m_range;
         private IPAddress m_next;
 
@@ -240,7 +236,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
             if (m_next == null) {
                 throw new NoSuchElementException("Already returned the last element");
             }
-            
+
             final IPAddress next = m_next;
             m_next = next.incr();
             if (!m_range.contains(m_next)) {
@@ -253,13 +249,12 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
         public void remove() {
             throw new UnsupportedOperationException("IPAddressRangeIterator.remove() is not yet implemented");
         }
-        
     }
-    
+
     @Override
     public int compareTo(IPAddressRange r) {
         if (this.comesBefore(r)) {
-            // this is less than 
+            // this is less than
             return -1;
         } else if (this.comesAfter(r)) {
             // this is greater than
@@ -269,7 +264,7 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
             return 0;
         }
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
@@ -306,14 +301,14 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
         if (!combinable(range)) {
             throw new IllegalArgumentException(String.format("Range %s is not combinable with range %s", this, range));
         }
-        return new IPAddressRange(IPAddress.min(range.getBegin(), getBegin()),IPAddress.max(getEnd(), range.getEnd()));
+        return new IPAddressRange(IPAddress.min(range.getBegin(), getBegin()), IPAddress.max(getEnd(), range.getEnd()));
     }
 
     public IPAddressRange[] remove(IPAddressRange range) {
         if (range.contains(this)) {
             return new IPAddressRange[0];
         } else if (!overlaps(range)) {
-            return new IPAddressRange[] { this };
+            return new IPAddressRange[] {this};
         } else {
             List<IPAddressRange> ranges = new ArrayList<IPAddressRange>(2);
             if (getBegin().isLessThan(range.getBegin())) {
@@ -323,8 +318,6 @@ public class IPAddressRange implements Comparable<IPAddressRange>, Iterable<IPAd
                 ranges.add(new IPAddressRange(range.getEnd().incr(), getEnd()));
             }
             return ranges.toArray(new IPAddressRange[ranges.size()]);
-            
         }
     }
-
 }

@@ -1,33 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.session;
 
+import com.google.common.collect.Maps;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,16 +36,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-
-import com.google.common.collect.Maps;
-
 import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
 import org.opennms.horizon.minion.flows.parser.state.ExporterState;
 import org.opennms.horizon.minion.flows.parser.state.OptionState;
 import org.opennms.horizon.minion.flows.parser.state.TemplateState;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public class TcpSession implements Session {
     private final class Resolver implements Session.Resolver {
@@ -79,11 +69,14 @@ public class TcpSession implements Session {
 
             final Set<String> scoped = values.stream().map(Value::getName).collect(Collectors.toSet());
 
-            for (final Map.Entry<TemplateKey, Map<Set<Value<?>>, List<Value<?>>>> e : TcpSession.this.options.entrySet().stream()
-                .filter(e -> e.getKey().observationDomainId == this.observationDomainId).collect(Collectors.toList())) {
+            for (final Map.Entry<TemplateKey, Map<Set<Value<?>>, List<Value<?>>>> e :
+                    TcpSession.this.options.entrySet().stream()
+                            .filter(e -> e.getKey().observationDomainId == this.observationDomainId)
+                            .collect(Collectors.toList())) {
                 final Template template = TcpSession.this.templates.get(e.getKey());
 
-                final Set<String> scopes = template.scopes.stream().map(Scope::getName).collect(Collectors.toSet());
+                final Set<String> scopes =
+                        template.scopes.stream().map(Scope::getName).collect(Collectors.toSet());
 
                 if (scoped.containsAll(scopes)) {
                     // Found option template where scoped fields is subset of actual data fields
@@ -102,12 +95,11 @@ public class TcpSession implements Session {
         }
     }
 
-    private final static class TemplateKey {
+    private static final class TemplateKey {
         public final long observationDomainId;
         public final int templateId;
 
-        TemplateKey(final long observationDomainId,
-                    final int templateId) {
+        TemplateKey(final long observationDomainId, final int templateId) {
             this.observationDomainId = observationDomainId;
             this.templateId = templateId;
         }
@@ -119,8 +111,7 @@ public class TcpSession implements Session {
             if (o.getClass() != TemplateKey.class) return false;
 
             final TemplateKey that = (TemplateKey) o;
-            return this.observationDomainId == that.observationDomainId &&
-                    this.templateId == that.templateId;
+            return this.observationDomainId == that.observationDomainId && this.templateId == that.templateId;
         }
 
         @Override
@@ -153,14 +144,17 @@ public class TcpSession implements Session {
 
     @Override
     public void removeAllTemplate(final long observationDomainId, final Template.Type type) {
-        this.templates.entrySet().removeIf(e -> e.getKey().observationDomainId == observationDomainId && e.getValue().type == type);
+        this.templates
+                .entrySet()
+                .removeIf(e -> e.getKey().observationDomainId == observationDomainId && e.getValue().type == type);
     }
 
     @Override
-    public void addOptions(final long observationDomainId,
-                           final int templateId,
-                           final Collection<Value<?>> scopes,
-                           final List<Value<?>> values) {
+    public void addOptions(
+            final long observationDomainId,
+            final int templateId,
+            final Collection<Value<?>> scopes,
+            final List<Value<?>> values) {
         final TemplateKey key = new TemplateKey(observationDomainId, templateId);
         this.options.computeIfAbsent(key, (k) -> new HashMap<>()).put(new HashSet<>(scopes), values);
     }
@@ -177,31 +171,33 @@ public class TcpSession implements Session {
 
     @Override
     public boolean verifySequenceNumber(long observationDomainId, final long sequenceNumber) {
-        final SequenceNumberTracker tracker = this.sequenceNumbers.computeIfAbsent(observationDomainId, (k) -> this.sequenceNumberTracker.get());
+        final SequenceNumberTracker tracker =
+                this.sequenceNumbers.computeIfAbsent(observationDomainId, (k) -> this.sequenceNumberTracker.get());
         return tracker.verify(sequenceNumber);
     }
 
     public Stream<ExporterState> dumpInternalState() {
         return this.templates.keySet().stream()
-                             .mapToLong(key -> key.observationDomainId)
-                             .distinct()
-                             .mapToObj(domain -> {
-                                 final String key = String.format("%s#%s", InetAddressUtils.str(this.remoteAddress), domain);
+                .mapToLong(key -> key.observationDomainId)
+                .distinct()
+                .mapToObj(domain -> {
+                    final String key = String.format("%s#%s", InetAddressUtils.str(this.remoteAddress), domain);
 
-                                 final ExporterState.Builder exporter = ExporterState.builder(key);
+                    final ExporterState.Builder exporter = ExporterState.builder(key);
 
-                                 this.templates.entrySet().stream()
-                                               .filter(e -> Objects.equals(e.getKey().observationDomainId, domain))
-                                               .forEach(e -> exporter.withTemplate(TemplateState.builder(e.getKey().templateId)));
+                    this.templates.entrySet().stream()
+                            .filter(e -> Objects.equals(e.getKey().observationDomainId, domain))
+                            .forEach(e -> exporter.withTemplate(TemplateState.builder(e.getKey().templateId)));
 
-                                 this.options.entrySet().stream()
-                                             .filter(e -> Objects.equals(e.getKey().observationDomainId, domain))
-                                             .forEach(e -> e.getValue().forEach((selectors, values) ->
-                                                                                        exporter.withOptions(OptionState.builder(e.getKey().templateId)
-                                                                                                                        .withSelectors(selectors)
-                                                                                                                        .withValues(values))));
+                    this.options.entrySet().stream()
+                            .filter(e -> Objects.equals(e.getKey().observationDomainId, domain))
+                            .forEach(e -> e.getValue()
+                                    .forEach((selectors, values) ->
+                                            exporter.withOptions(OptionState.builder(e.getKey().templateId)
+                                                    .withSelectors(selectors)
+                                                    .withValues(values))));
 
-                                 return exporter.build();
-                             });
+                    return exporter.build();
+                });
     }
 }

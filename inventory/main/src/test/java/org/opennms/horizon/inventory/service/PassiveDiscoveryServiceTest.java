@@ -1,33 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,18 +44,6 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.PassiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 
 public class PassiveDiscoveryServiceTest {
     PassiveDiscoveryService passiveDiscoveryService;
@@ -70,29 +61,35 @@ public class PassiveDiscoveryServiceTest {
         tagService = mock(TagService.class);
         nodeRepository = mock(NodeRepository.class);
         monitoringLocationService = mock(MonitoringLocationService.class);
-        passiveDiscoveryService = new PassiveDiscoveryService(passiveDiscoveryMapper,
-            passiveDiscoveryRepository, tagService, nodeRepository, scannerTaskSetService, monitoringLocationService);
+        passiveDiscoveryService = new PassiveDiscoveryService(
+                passiveDiscoveryMapper,
+                passiveDiscoveryRepository,
+                tagService,
+                nodeRepository,
+                scannerTaskSetService,
+                monitoringLocationService);
     }
 
     @Test
     public void validateCommunityStrings() {
         // No exception should be thrown..
-        PassiveDiscoveryUpsertDTO valid = PassiveDiscoveryUpsertDTO
-            .newBuilder().addCommunities("1.2.3.4").build();
+        PassiveDiscoveryUpsertDTO valid =
+                PassiveDiscoveryUpsertDTO.newBuilder().addCommunities("1.2.3.4").build();
         passiveDiscoveryService.validateCommunityStrings(valid);
     }
 
     @Test
     public void validateCommunityStringsLength() {
-            Exception exception = assertThrows(InventoryRuntimeException.class, () -> {
+        Exception exception = assertThrows(InventoryRuntimeException.class, () -> {
             List<String> communities = new ArrayList<>();
-            communities.add("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
-            PassiveDiscoveryUpsertDTO tooLong = PassiveDiscoveryUpsertDTO
-                .newBuilder().addAllCommunities(communities)
-                .build();
+            communities.add(
+                    "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+            PassiveDiscoveryUpsertDTO tooLong = PassiveDiscoveryUpsertDTO.newBuilder()
+                    .addAllCommunities(communities)
+                    .build();
             passiveDiscoveryService.validateCommunityStrings(tooLong);
-            });
-            assertTrue(exception.getMessage().equals("Snmp communities string is too long"));
+        });
+        assertTrue(exception.getMessage().equals("Snmp communities string is too long"));
     }
 
     @Test
@@ -100,9 +97,9 @@ public class PassiveDiscoveryServiceTest {
         Exception exception = assertThrows(InventoryRuntimeException.class, () -> {
             List<String> communities = new ArrayList<>();
             communities.add("ÿ");
-            PassiveDiscoveryUpsertDTO invalidChars = PassiveDiscoveryUpsertDTO
-                .newBuilder().addAllCommunities(communities)
-                .build();
+            PassiveDiscoveryUpsertDTO invalidChars = PassiveDiscoveryUpsertDTO.newBuilder()
+                    .addAllCommunities(communities)
+                    .build();
             passiveDiscoveryService.validateCommunityStrings(invalidChars);
         });
         assertTrue(exception.getMessage().equals("All characters must be 7bit ascii"));
@@ -111,18 +108,18 @@ public class PassiveDiscoveryServiceTest {
     @Test
     public void validatePorts() {
         // No exception should be thrown..
-        PassiveDiscoveryUpsertDTO valid = PassiveDiscoveryUpsertDTO
-            .newBuilder().addPorts(12345).build();
+        PassiveDiscoveryUpsertDTO valid =
+                PassiveDiscoveryUpsertDTO.newBuilder().addPorts(12345).build();
         passiveDiscoveryService.validateSnmpPorts(valid);
     }
+
     @Test
     public void validatePortsRange() {
         Exception exception = assertThrows(InventoryRuntimeException.class, () -> {
-            PassiveDiscoveryUpsertDTO invalid = PassiveDiscoveryUpsertDTO
-                .newBuilder()
-                .addPorts(Constants.SNMP_PORT_MAX+1)
-                .addPorts(0)
-                .build();
+            PassiveDiscoveryUpsertDTO invalid = PassiveDiscoveryUpsertDTO.newBuilder()
+                    .addPorts(Constants.SNMP_PORT_MAX + 1)
+                    .addPorts(0)
+                    .build();
             passiveDiscoveryService.validateSnmpPorts(invalid);
         });
         assertTrue(exception.getMessage().contains("SNMP port is not in range"));
@@ -134,9 +131,11 @@ public class PassiveDiscoveryServiceTest {
         final String locationId = "11";
 
         PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
-            .setLocationId(locationId)
-            .setName("not blank").build();
-        var exception = assertThrows(LocationNotFoundException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
+                .setLocationId(locationId)
+                .setName("not blank")
+                .build();
+        var exception = assertThrows(
+                LocationNotFoundException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
 
         Assertions.assertEquals("Location not found with location 11", exception.getMessage());
     }
@@ -149,8 +148,10 @@ public class PassiveDiscoveryServiceTest {
         discovery.setId(1L);
         when(passiveDiscoveryRepository.findByTenantIdAndName(tenantId, name)).thenReturn(List.of(discovery));
 
-        PassiveDiscoveryUpsertDTO upsertDTO = PassiveDiscoveryUpsertDTO.newBuilder().setName(name).build();
-        var exception = assertThrows(InventoryRuntimeException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
+        PassiveDiscoveryUpsertDTO upsertDTO =
+                PassiveDiscoveryUpsertDTO.newBuilder().setName(name).build();
+        var exception = assertThrows(
+                InventoryRuntimeException.class, () -> passiveDiscoveryService.createDiscovery(tenantId, upsertDTO));
 
         Assertions.assertEquals("Duplicate passive discovery with name duplicate", exception.getMessage());
     }
@@ -160,7 +161,8 @@ public class PassiveDiscoveryServiceTest {
         String tenantId = "test_tenant";
         long discoveryId = 10L;
         PassiveDiscovery passiveDiscovery = mock(PassiveDiscovery.class);
-        when(passiveDiscoveryRepository.findByTenantIdAndId(tenantId, discoveryId)).thenReturn(Optional.of(passiveDiscovery));
+        when(passiveDiscoveryRepository.findByTenantIdAndId(tenantId, discoveryId))
+                .thenReturn(Optional.of(passiveDiscovery));
 
         passiveDiscoveryService.deleteDiscovery(tenantId, discoveryId);
 
@@ -172,10 +174,11 @@ public class PassiveDiscoveryServiceTest {
         String tenantId = "test_tenant";
         long discoveryId = 10L;
 
-        when(passiveDiscoveryRepository.findByTenantIdAndId(tenantId, discoveryId)).thenReturn(Optional.empty());
+        when(passiveDiscoveryRepository.findByTenantIdAndId(tenantId, discoveryId))
+                .thenReturn(Optional.empty());
 
-        var exception = assertThrows(InventoryRuntimeException.class,
-            () -> passiveDiscoveryService.deleteDiscovery(tenantId, discoveryId));
+        var exception = assertThrows(
+                InventoryRuntimeException.class, () -> passiveDiscoveryService.deleteDiscovery(tenantId, discoveryId));
 
         Assertions.assertEquals("Discovery not found.", exception.getMessage());
     }

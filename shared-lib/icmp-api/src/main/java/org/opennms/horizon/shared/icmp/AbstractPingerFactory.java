@@ -1,40 +1,31 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2002-2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.icmp;
-
-import java.util.concurrent.Callable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>PingerFactory class.</p>
@@ -46,7 +37,8 @@ import com.google.common.cache.CacheBuilder;
 public abstract class AbstractPingerFactory implements PingerFactory {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPingerFactory.class);
 
-    protected static final Cache<Integer, Pinger> m_pingers = CacheBuilder.newBuilder().build();
+    protected static final Cache<Integer, Pinger> m_pingers =
+            CacheBuilder.newBuilder().build();
 
     public abstract Class<? extends Pinger> getPingerClass();
 
@@ -55,13 +47,17 @@ public abstract class AbstractPingerFactory implements PingerFactory {
     }
 
     public Pinger getInstance(final int tc, final boolean allowFragmentation) {
-        final int isFrag = allowFragmentation? FRAG_TRUE : FRAG_FALSE;
+        final int isFrag = allowFragmentation ? FRAG_TRUE : FRAG_FALSE;
         final Class<? extends Pinger> clazz;
 
         try {
             clazz = getPingerClass();
         } catch (final RuntimeException e) {
-            IllegalArgumentException ex = new IllegalArgumentException("Unable to find class named " + System.getProperty("org.opennms.netmgt.icmp.pingerClass", "org.opennms.netmgt.icmp.jni6.Jni6Pinger"), e);
+            IllegalArgumentException ex = new IllegalArgumentException(
+                    "Unable to find class named "
+                            + System.getProperty(
+                                    "org.opennms.netmgt.icmp.pingerClass", "org.opennms.netmgt.icmp.jni6.Jni6Pinger"),
+                    e);
             LOG.error(ex.getLocalizedMessage(), ex);
             throw ex;
         }
@@ -80,9 +76,13 @@ public abstract class AbstractPingerFactory implements PingerFactory {
             if (e.getCause() instanceof InstantiationException) {
                 ex = new IllegalArgumentException("Error trying to create pinger of type " + clazz, e.getCause());
             } else if (e.getCause() instanceof IllegalAccessException) {
-                ex = new IllegalArgumentException("Unable to create pinger of type " + clazz + ".  It does not appear to have a public constructor", e);
+                ex = new IllegalArgumentException(
+                        "Unable to create pinger of type " + clazz
+                                + ".  It does not appear to have a public constructor",
+                        e);
             } else {
-                ex = new IllegalArgumentException("Unexpected exception thrown while trying to create pinger of type " + clazz, e);
+                ex = new IllegalArgumentException(
+                        "Unexpected exception thrown while trying to create pinger of type " + clazz, e);
             }
             LOG.error(ex.getLocalizedMessage(), ex);
             throw ex;
@@ -90,7 +90,7 @@ public abstract class AbstractPingerFactory implements PingerFactory {
     }
 
     public void setInstance(final int tc, final boolean allowFragmentation, final Pinger pinger) {
-        final int isFrag = allowFragmentation? FRAG_TRUE : FRAG_FALSE;
+        final int isFrag = allowFragmentation ? FRAG_TRUE : FRAG_FALSE;
         m_pingers.put((tc + 1) * isFrag, pinger);
     }
 

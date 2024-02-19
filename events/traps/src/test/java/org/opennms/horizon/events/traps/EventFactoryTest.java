@@ -1,5 +1,32 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.traps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+
+import java.net.InetAddress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,17 +36,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.conf.xml.LogDestType;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
+import org.opennms.horizon.events.xml.Event;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.shared.snmp.SnmpHelper;
-import  org.opennms.horizon.events.xml.Event;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 public class EventFactoryTest {
@@ -39,12 +58,7 @@ public class EventFactoryTest {
     @Test
     public void testEventWithNoConfig() throws Exception {
         Event e = eventFactory.createEventFrom(
-            TrapDTO.newBuilder().build(),
-            "systemId",
-            "location",
-            InetAddress.getByName("127.0.0.1"),
-            "tid"
-        );
+                TrapDTO.newBuilder().build(), "systemId", "location", InetAddress.getByName("127.0.0.1"), "tid");
 
         assertEquals("uei.opennms.org/default/trap", e.getUei());
         assertNull(e.getDescr());
@@ -65,12 +79,7 @@ public class EventFactoryTest {
 
         Mockito.when(eventConfDao.findByEvent(any())).thenReturn(eventConf);
         Event e = eventFactory.createEventFrom(
-            TrapDTO.newBuilder().build(),
-            "systemId",
-            "location",
-            InetAddress.getByName("127.0.0.1"),
-            "tid"
-        );
+                TrapDTO.newBuilder().build(), "systemId", "location", InetAddress.getByName("127.0.0.1"), "tid");
 
         assertEquals("uei.opennms.org/generic/traps/realone", e.getUei());
         assertEquals("A real event configuration", e.getDescr());
@@ -78,6 +87,4 @@ public class EventFactoryTest {
         assertEquals(LogDestType.LOGNDISPLAY.name(), e.getLogmsg().getDest());
         assertTrue(e.getLogmsg().getNotify());
     }
-
-
 }

@@ -1,48 +1,39 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.shared.grpc.traps.contract.mapper.impl;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TenantLocationSpecificTrapLogDTOMapperImplTest {
 
@@ -56,14 +47,8 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
         target = new TenantLocationSpecificTrapLogDTOMapperImpl();
 
         // Don't need to fully hydrate these; they do not get mapped
-        testIdentity =
-            Identity.newBuilder()
-                .setSystemId("x-system-id-x")
-                .build();
-        testTrapDTO =
-            TrapDTO.newBuilder()
-                .setAgentAddress("x-agent-address-x")
-                .build();
+        testIdentity = Identity.newBuilder().setSystemId("x-system-id-x").build();
+        testTrapDTO = TrapDTO.newBuilder().setAgentAddress("x-agent-address-x").build();
     }
 
     @Test
@@ -71,8 +56,7 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-        TrapLogDTO testTrapLogDTO =
-            TrapLogDTO.newBuilder()
+        TrapLogDTO testTrapLogDTO = TrapLogDTO.newBuilder()
                 .setIdentity(testIdentity)
                 .setTrapAddress("x-trap-address-x")
                 .addTrapDTO(testTrapDTO)
@@ -82,7 +66,7 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
         // Execute
         //
         TenantLocationSpecificTrapLogDTO mappedResult =
-            target.mapBareToTenanted("x-tenant-id-x", "x-location-x", testTrapLogDTO);
+                target.mapBareToTenanted("x-tenant-id-x", "x-location-x", testTrapLogDTO);
 
         //
         // Verify the Results
@@ -102,19 +86,20 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
         // Setup Test Data and Interactions
         //
         TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO =
-            TenantLocationSpecificTrapLogDTO.newBuilder()
-                .setTenantId("x-tenant-id-x")
-                .setLocationId("x-location-x")
-                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x").build())
-                .setTrapAddress("x-trap-address-x")
-                .addTrapDTO(testTrapDTO)
-                .build();
+                TenantLocationSpecificTrapLogDTO.newBuilder()
+                        .setTenantId("x-tenant-id-x")
+                        .setLocationId("x-location-x")
+                        .setIdentity(Identity.newBuilder()
+                                .setSystemId("x-system-id-x")
+                                .build())
+                        .setTrapAddress("x-trap-address-x")
+                        .addTrapDTO(testTrapDTO)
+                        .build();
 
         //
         // Execute
         //
-        TrapLogDTO trapLogDTO =
-            target.mapTenantedToBare(tenantLocationSpecificTrapLogDTO);
+        TrapLogDTO trapLogDTO = target.mapTenantedToBare(tenantLocationSpecificTrapLogDTO);
 
         //
         // Verify the Results
@@ -132,12 +117,12 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
     @Test
     public void testDefinitionsMatch() {
         verifyAllFieldsExceptTenantIdAndLocationMatch(
-            TrapLogDTO.getDefaultInstance(), TenantLocationSpecificTrapLogDTO.getDefaultInstance());
+                TrapLogDTO.getDefaultInstance(), TenantLocationSpecificTrapLogDTO.getDefaultInstance());
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     /**
      * Verify all of the fields in the given message have been set to help ensure completeness of the test.
@@ -159,13 +144,14 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
             if (fieldDescriptor.isRepeated()) {
                 if (repeatedMustNotBeEmpty) {
                     assertTrue(
-                        ( message.getRepeatedFieldCount(fieldDescriptor) > 0 ),
-                        "message " + typeDescriptor.getFullName() + " has 0 repeated field values for field " + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")"
-                        );
+                            (message.getRepeatedFieldCount(fieldDescriptor) > 0),
+                            "message " + typeDescriptor.getFullName() + " has 0 repeated field values for field "
+                                    + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")");
                 }
             } else {
                 if (!message.hasField(fieldDescriptor)) {
-                    fail("message " + typeDescriptor.getFullName() + " is missing field " + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")");
+                    fail("message " + typeDescriptor.getFullName() + " is missing field " + fieldDescriptor.getName()
+                            + " (" + fieldDescriptor.getNumber() + ")");
                 }
             }
         }
@@ -177,19 +163,21 @@ public class TenantLocationSpecificTrapLogDTOMapperImplTest {
      * @param messageWithoutTenant
      * @param messageWithTenant
      */
-    private void verifyAllFieldsExceptTenantIdAndLocationMatch(Message messageWithoutTenant, Message messageWithTenant) {
+    private void verifyAllFieldsExceptTenantIdAndLocationMatch(
+            Message messageWithoutTenant, Message messageWithTenant) {
         Descriptors.Descriptor withoutTenantTypeDescriptor = messageWithoutTenant.getDescriptorForType();
         Descriptors.Descriptor withTenantTypeDescriptor = messageWithTenant.getDescriptorForType();
 
-        Set<String> withoutTenantTypeFields =
-            withoutTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
-        Set<String> withTenantTypeFields =
-            withTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
+        Set<String> withoutTenantTypeFields = withoutTenantTypeDescriptor.getFields().stream()
+                .map(Descriptors.FieldDescriptor::getName)
+                .collect(Collectors.toSet());
+        Set<String> withTenantTypeFields = withTenantTypeDescriptor.getFields().stream()
+                .map(Descriptors.FieldDescriptor::getName)
+                .collect(Collectors.toSet());
 
         withTenantTypeFields.remove("tenant_id");
         withTenantTypeFields.remove("location_id");
 
         assertEquals(withTenantTypeFields, withoutTenantTypeFields);
     }
-
 }

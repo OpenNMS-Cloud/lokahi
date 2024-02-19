@@ -1,33 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.ipc.sink.common;
 
+import com.google.protobuf.Message;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -35,18 +29,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumer;
 import org.opennms.horizon.shared.ipc.sink.api.MessageConsumerManager;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.logging.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.protobuf.Message;
-
 
 public abstract class AbstractMessageConsumerManager implements MessageConsumerManager {
 
@@ -55,11 +44,15 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
     public static final String SINK_INITIAL_SLEEP_TIME = "org.opennms.core.ipc.sink.initialSleepTime";
 
     private final AtomicLong threadCounter = new AtomicLong();
-    private final ThreadFactory threadFactory = (runnable) -> new Thread(runnable, "consumer-starter-" + threadCounter.incrementAndGet());
+    private final ThreadFactory threadFactory =
+            (runnable) -> new Thread(runnable, "consumer-starter-" + threadCounter.incrementAndGet());
 
     protected final ExecutorService startupExecutor = Executors.newCachedThreadPool(threadFactory);
 
-    private final Map<SinkModule<? extends Message, ? extends Message>, MessageConsumer<? extends Message, ? extends Message>> consumerByModule = new ConcurrentHashMap<>();
+    private final Map<
+                    SinkModule<? extends Message, ? extends Message>,
+                    MessageConsumer<? extends Message, ? extends Message>>
+            consumerByModule = new ConcurrentHashMap<>();
 
     protected abstract <S extends Message, T extends Message> void startConsumingForModule(SinkModule<S, T> module);
 
@@ -75,16 +68,18 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
             int initialSleep = Integer.parseInt(initialSleepString);
             if (initialSleep > 0) {
                 // TODO: async timer instead of sleep in runnable?
-                startupFuture = CompletableFuture.runAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(initialSleep);
-                        } catch (InterruptedException e) {
-                            LOG.warn(e.getMessage(), e);
-                        }
-                    }
-                }, startupExecutor);
+                startupFuture = CompletableFuture.runAsync(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(initialSleep);
+                                } catch (InterruptedException e) {
+                                    LOG.warn(e.getMessage(), e);
+                                }
+                            }
+                        },
+                        startupExecutor);
             }
         } catch (NumberFormatException e) {
             LOG.warn("Invalid value for system property {}: {}", SINK_INITIAL_SLEEP_TIME, initialSleepString);
@@ -117,17 +112,22 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
 
             consumerByModule.put(module, consumer);
 
-            waitForStartup.thenRunAsync(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        LOG.info("Starting to consume messages for module: {}", module.getId());
-                        startConsumingForModule(module);
-                    } catch (Exception e) {
-                        LOG.error("Unexpected exception while trying to start consumer for module: {}", module.getId(), e);
-                    }
-                }
-            }, startupExecutor);
+            waitForStartup.thenRunAsync(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                LOG.info("Starting to consume messages for module: {}", module.getId());
+                                startConsumingForModule(module);
+                            } catch (Exception e) {
+                                LOG.error(
+                                        "Unexpected exception while trying to start consumer for module: {}",
+                                        module.getId(),
+                                        e);
+                            }
+                        }
+                    },
+                    startupExecutor);
         }
     }
 
@@ -136,7 +136,11 @@ public abstract class AbstractMessageConsumerManager implements MessageConsumerM
         final int defaultValue = Runtime.getRuntime().availableProcessors() * 2;
         final int configured = module.getNumConsumerThreads();
         if (configured <= 0) {
-            LOG.warn("Number of consumer threads for module {} was {}. Value must be > 0. Falling back to {}", module.getId(), configured, defaultValue);
+            LOG.warn(
+                    "Number of consumer threads for module {} was {}. Value must be > 0. Falling back to {}",
+                    module.getId(),
+                    configured,
+                    defaultValue);
             return defaultValue;
         }
         return configured;

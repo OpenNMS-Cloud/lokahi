@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.grpc.discovery;
 
 import com.google.protobuf.BoolValue;
@@ -7,6 +28,9 @@ import com.google.rpc.Code;
 import io.grpc.Context;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -19,10 +43,6 @@ import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.PassiveDiscoveryService;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 public class PassiveDiscoveryGrpcServiceTest {
 
@@ -42,25 +62,20 @@ public class PassiveDiscoveryGrpcServiceTest {
         mockTenantLookup = Mockito.mock(TenantLookup.class);
         mockIcmpActiveDiscoveryService = Mockito.mock(PassiveDiscoveryService.class);
 
-        testNewPassiveDiscoveryUpsertDTO =
-            PassiveDiscoveryUpsertDTO.newBuilder()
+        testNewPassiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
                 .setName("x-passive-discovery-upsert-x")
                 .build();
 
-        testExistingPassiveDiscoveryUpsertDTO =
-            PassiveDiscoveryUpsertDTO.newBuilder()
+        testExistingPassiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
                 .setName("x-passive-discovery-upsert-x")
                 .setId(1313)
                 .build();
 
         testPassiveDiscoveryToggleDTO =
-            PassiveDiscoveryToggleDTO.newBuilder()
-                .setId(1717)
-                .build();
+                PassiveDiscoveryToggleDTO.newBuilder().setId(1717).build();
 
         target = new PassiveDiscoveryGrpcService(mockTenantLookup, mockIcmpActiveDiscoveryService);
     }
-
 
     @Test
     void testCreateNewDiscovery() {
@@ -68,13 +83,12 @@ public class PassiveDiscoveryGrpcServiceTest {
         // Setup Test Data and Interactions
         //
         var testDiscovery =
-            PassiveDiscoveryDTO.newBuilder()
-                .setName("x-active-discovery-x")
-                .build();
+                PassiveDiscoveryDTO.newBuilder().setName("x-active-discovery-x").build();
 
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, testNewPassiveDiscoveryUpsertDTO)).thenReturn(testDiscovery);
+        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, testNewPassiveDiscoveryUpsertDTO))
+                .thenReturn(testDiscovery);
 
         //
         // Execute
@@ -94,13 +108,13 @@ public class PassiveDiscoveryGrpcServiceTest {
         // Setup Test Data and Interactions
         //
         var testDiscovery =
-            PassiveDiscoveryDTO.newBuilder()
-                .setName("x-active-discovery-x")
-                .build();
+                PassiveDiscoveryDTO.newBuilder().setName("x-active-discovery-x").build();
 
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.updateDiscovery(TEST_TENANT_ID, testExistingPassiveDiscoveryUpsertDTO)).thenReturn(testDiscovery);
+        Mockito.when(mockIcmpActiveDiscoveryService.updateDiscovery(
+                        TEST_TENANT_ID, testExistingPassiveDiscoveryUpsertDTO))
+                .thenReturn(testDiscovery);
 
         //
         // Execute
@@ -120,10 +134,13 @@ public class PassiveDiscoveryGrpcServiceTest {
         // Setup Test Data and Interactions
         //
         var testException = new LocationNotFoundException("x-test-exception-x");
-        var discoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder().setName("xxx-discovery-xxx").build();
+        var discoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
+                .setName("xxx-discovery-xxx")
+                .build();
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, discoveryUpsertDTO)).thenThrow(testException);
+        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, discoveryUpsertDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -143,10 +160,13 @@ public class PassiveDiscoveryGrpcServiceTest {
         // Setup Test Data and Interactions
         //
         var testException = new InventoryRuntimeException("x-test-exception-x");
-        var discoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder().setName("xxx-discovery-xxx").build();
+        var discoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
+                .setName("xxx-discovery-xxx")
+                .build();
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, discoveryUpsertDTO)).thenThrow(testException);
+        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, discoveryUpsertDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -168,7 +188,8 @@ public class PassiveDiscoveryGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, testNewPassiveDiscoveryUpsertDTO)).thenThrow(testException);
+        Mockito.when(mockIcmpActiveDiscoveryService.createDiscovery(TEST_TENANT_ID, testNewPassiveDiscoveryUpsertDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -207,14 +228,14 @@ public class PassiveDiscoveryGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testResultList =
-            List.of(
-                PassiveDiscoveryDTO.newBuilder().setName("x-passive-discovery-x").build()
-            );
+        var testResultList = List.of(PassiveDiscoveryDTO.newBuilder()
+                .setName("x-passive-discovery-x")
+                .build());
 
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.getPassiveDiscoveries(TEST_TENANT_ID)).thenReturn(testResultList);
+        Mockito.when(mockIcmpActiveDiscoveryService.getPassiveDiscoveries(TEST_TENANT_ID))
+                .thenReturn(testResultList);
 
         //
         // Execute
@@ -224,11 +245,8 @@ public class PassiveDiscoveryGrpcServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockStreamObserver).onNext(
-            Mockito.argThat(
-                (argument) -> Objects.equals(testResultList, argument.getDiscoveriesList())
-            )
-        );
+        Mockito.verify(mockStreamObserver)
+                .onNext(Mockito.argThat((argument) -> Objects.equals(testResultList, argument.getDiscoveriesList())));
         Mockito.verify(mockStreamObserver).onCompleted();
     }
 
@@ -240,7 +258,8 @@ public class PassiveDiscoveryGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryListDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.getPassiveDiscoveries(TEST_TENANT_ID)).thenThrow(testException);
+        Mockito.when(mockIcmpActiveDiscoveryService.getPassiveDiscoveries(TEST_TENANT_ID))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -279,11 +298,14 @@ public class PassiveDiscoveryGrpcServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testResult = PassiveDiscoveryDTO.newBuilder().setName("x-passive-discovery-x").build();
+        var testResult = PassiveDiscoveryDTO.newBuilder()
+                .setName("x-passive-discovery-x")
+                .build();
 
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.toggleDiscovery(TEST_TENANT_ID, testPassiveDiscoveryToggleDTO)).thenReturn(testResult);
+        Mockito.when(mockIcmpActiveDiscoveryService.toggleDiscovery(TEST_TENANT_ID, testPassiveDiscoveryToggleDTO))
+                .thenReturn(testResult);
 
         //
         // Execute
@@ -305,7 +327,8 @@ public class PassiveDiscoveryGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<PassiveDiscoveryDTO> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockIcmpActiveDiscoveryService.toggleDiscovery(TEST_TENANT_ID, testPassiveDiscoveryToggleDTO)).thenThrow(testException);
+        Mockito.when(mockIcmpActiveDiscoveryService.toggleDiscovery(TEST_TENANT_ID, testPassiveDiscoveryToggleDTO))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -381,6 +404,7 @@ public class PassiveDiscoveryGrpcServiceTest {
         var matcher = prepareStatusExceptionMatcher(Code.NOT_FOUND_VALUE, "x-test-exception-x");
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
+
     @Test
     void testDeleteDiscoveryException() {
         //
@@ -423,24 +447,23 @@ public class PassiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void prepareCommonTenantLookup() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class)))
+                .thenReturn(Optional.of(TEST_TENANT_ID));
     }
 
     private void prepareTenantLookupOnMissingTenant() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class)))
+                .thenReturn(Optional.empty());
     }
 
     private ArgumentMatcher<Exception> prepareStatusExceptionMatcher(int expectedCode, String expectedMessage) {
-        return argument ->
-            (
-                (argument instanceof StatusRuntimeException) &&
-                (((StatusRuntimeException) argument).getStatus().getCode().value() == expectedCode)  &&
-                argument.getMessage().contains(expectedMessage)
-            );
+        return argument -> ((argument instanceof StatusRuntimeException)
+                && (((StatusRuntimeException) argument).getStatus().getCode().value() == expectedCode)
+                && argument.getMessage().contains(expectedMessage));
     }
 }

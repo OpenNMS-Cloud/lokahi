@@ -1,33 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.session;
 
+import com.google.common.base.Preconditions;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,8 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import com.google.common.base.Preconditions;
-
 public final class Template implements Iterable<Field> {
 
     public enum Type {
@@ -46,17 +38,14 @@ public final class Template implements Iterable<Field> {
         OPTIONS_TEMPLATE,
     }
 
-    public final int id; //uint16
+    public final int id; // uint16
     public final Type type;
 
     public final List<Scope> scopes;
     public final List<Field> fields;
     public final Set<String> scopeNames;
 
-    private Template(final int id,
-                     final Type type,
-                     final List<Scope> scopes,
-                     final List<Field> fields) {
+    private Template(final int id, final Type type, final List<Scope> scopes, final List<Field> fields) {
         this.id = id;
         this.type = Objects.requireNonNull(type);
         this.scopes = Objects.requireNonNull(scopes);
@@ -86,8 +75,7 @@ public final class Template implements Iterable<Field> {
         private final List<Scope> scopes = new LinkedList();
         private final List<Field> fields = new LinkedList();
 
-        private Builder(final int id,
-                        final Type type) {
+        private Builder(final int id, final Type type) {
             this.id = id;
             this.type = Objects.requireNonNull(type);
         }

@@ -1,33 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service.taskset.response;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.proto.Event;
@@ -42,9 +37,6 @@ import org.opennms.horizon.shared.events.EventConstants;
 import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -70,7 +62,8 @@ public class MonitorResponseService {
             return;
         }
         var monitoredService = optionalService.get();
-        var optionalServiceState = serviceStateRepository.findByTenantIdAndMonitoredServiceId(tenantId, monitorServiceId);
+        var optionalServiceState =
+                serviceStateRepository.findByTenantIdAndMonitoredServiceId(tenantId, monitorServiceId);
         var previousState = Boolean.TRUE;
         Boolean statusFromMonitor = "Up".equalsIgnoreCase(monitorResponse.getStatus()) ? Boolean.TRUE : Boolean.FALSE;
         if (optionalServiceState.isPresent()) {
@@ -92,7 +85,8 @@ public class MonitorResponseService {
         }
     }
 
-    private void triggerEvent(String tenantId, String locationId, MonitorResponse monitorResponse, boolean statusFromMonitor) {
+    private void triggerEvent(
+            String tenantId, String locationId, MonitorResponse monitorResponse, boolean statusFromMonitor) {
         var eventBuilder = Event.newBuilder();
         if (statusFromMonitor) {
             eventBuilder.setUei(EventConstants.SERVICE_RESTORED_EVENT_UEI);
@@ -105,14 +99,18 @@ public class MonitorResponseService {
         eventBuilder.setProducedTimeMs(monitorResponse.getTimestamp());
         eventBuilder.setDescription(monitorResponse.getReason());
         eventBuilder.setLocationId(locationId);
-        monitoringLocationRepository.findByIdAndTenantId(Long.parseLong(locationId), tenantId)
-            .ifPresent(l ->eventBuilder.setLocationName(l.getLocation()));
-        var serviceNameParam = EventParameter.newBuilder().setName("serviceName")
-            .setValue(monitorResponse.getMonitorType().name()).build();
-        var serviceIdParam = EventParameter.newBuilder().setName("serviceId")
-            .setValue(String.valueOf(monitorResponse.getMonitorServiceId())).build();
-        eventBuilder.addParameters(serviceNameParam)
-            .addParameters(serviceIdParam);
+        monitoringLocationRepository
+                .findByIdAndTenantId(Long.parseLong(locationId), tenantId)
+                .ifPresent(l -> eventBuilder.setLocationName(l.getLocation()));
+        var serviceNameParam = EventParameter.newBuilder()
+                .setName("serviceName")
+                .setValue(monitorResponse.getMonitorType().name())
+                .build();
+        var serviceIdParam = EventParameter.newBuilder()
+                .setName("serviceId")
+                .setValue(String.valueOf(monitorResponse.getMonitorServiceId()))
+                .build();
+        eventBuilder.addParameters(serviceNameParam).addParameters(serviceIdParam);
         var eventLog = EventLog.newBuilder().setTenantId(tenantId).addEvents(eventBuilder.build());
         eventProducer.sendEvent(eventLog.build());
     }

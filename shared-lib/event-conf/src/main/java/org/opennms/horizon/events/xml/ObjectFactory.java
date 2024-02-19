@@ -1,247 +1,235 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.xml;
 
+import jakarta.xml.bind.annotation.XmlRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.xml.bind.annotation.XmlRegistry;
-
-
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the org.opennms.xmlns.xsd.event package. 
- * <p>An ObjectFactory allows you to programmatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the org.opennms.xmlns.xsd.event package.
+ * <p>An ObjectFactory allows you to programmatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(ObjectFactory.class);
 
-
+    private static final Logger LOG = LoggerFactory.getLogger(ObjectFactory.class);
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.opennms.xmlns.xsd.event
-     * 
+     *
      */
     public ObjectFactory() {
-    	LOG.debug("ObjectFactory initialized");
+        LOG.debug("ObjectFactory initialized");
     }
 
     /**
      * Create an instance of {@link AlertData }
-     * 
+     *
      */
     public AlertData createAlertData() {
-    	LOG.debug("createAlertData");
+        LOG.debug("createAlertData");
         return new AlertData();
     }
 
     /**
      * Create an instance of {@link Value }
-     * 
+     *
      */
     public Value createValue() {
-    	LOG.debug("createValue");
+        LOG.debug("createValue");
         return new Value();
     }
 
     /**
      * Create an instance of {@link Events }
-     * 
+     *
      */
     public Events createEvents() {
-    	LOG.debug("createEvents");
+        LOG.debug("createEvents");
         return new Events();
     }
 
     /**
      * Create an instance of {@link Maskelement }
-     * 
+     *
      */
     public Maskelement createMaskelement() {
-    	LOG.debug("createMaskelement");
+        LOG.debug("createMaskelement");
         return new Maskelement();
     }
 
     /**
      * Create an instance of {@link Log }
-     * 
+     *
      */
     public Log createLog() {
-    	LOG.debug("createLog");
+        LOG.debug("createLog");
         return new Log();
     }
 
     /**
      * Create an instance of {@link Forward }
-     * 
+     *
      */
     public Forward createForward() {
-    	LOG.debug("createForward");
+        LOG.debug("createForward");
         return new Forward();
     }
 
     /**
      * Create an instance of {@link Parms }
-     * 
+     *
      */
     @Deprecated
     public Parms createParms() {
-    	LOG.debug("createParms");
+        LOG.debug("createParms");
         return new Parms();
     }
 
     /**
      * Create an instance of {@link Event }
-     * 
+     *
      */
     public Event createEvent() {
-    	LOG.debug("createEvent");
+        LOG.debug("createEvent");
         return new Event();
     }
 
     /**
      * Create an instance of {@link Header }
-     * 
+     *
      */
     public Header createHeader() {
-    	LOG.debug("createHeader");
+        LOG.debug("createHeader");
         return new Header();
     }
 
     /**
      * Create an instance of {@link Logmsg }
-     * 
+     *
      */
     public Logmsg createLogmsg() {
-    	LOG.debug("createLogmsg");
+        LOG.debug("createLogmsg");
         return new Logmsg();
     }
 
     /**
      * Create an instance of {@link Mask }
-     * 
+     *
      */
     public Mask createMask() {
-    	LOG.debug("createMask");
+        LOG.debug("createMask");
         return new Mask();
     }
 
     /**
      * Create an instance of {@link Operaction }
-     * 
+     *
      */
     public Operaction createOperaction() {
-    	LOG.debug("createOperaction");
+        LOG.debug("createOperaction");
         return new Operaction();
     }
 
     /**
      * Create an instance of {@link Autoacknowledge }
-     * 
+     *
      */
     public Autoacknowledge createAutoacknowledge() {
-    	LOG.debug("createAutoacknowledge");
+        LOG.debug("createAutoacknowledge");
         return new Autoacknowledge();
     }
 
     /**
      * Create an instance of {@link Parm }
-     * 
+     *
      */
     public Parm createParm() {
-    	LOG.debug("createParm");
+        LOG.debug("createParm");
         return new Parm();
     }
 
     /**
      * Create an instance of {@link Snmp }
-     * 
+     *
      */
     public Snmp createSnmp() {
-    	LOG.debug("createSnmp");
+        LOG.debug("createSnmp");
         return new Snmp();
     }
 
     /**
      * Create an instance of {@link Script }
-     * 
+     *
      */
     public Script createScript() {
-    	LOG.debug("createScript");
+        LOG.debug("createScript");
         return new Script();
     }
 
     /**
      * Create an instance of {@link EventReceipt }
-     * 
+     *
      */
     public EventReceipt createEventReceipt() {
-    	LOG.debug("createEventReceipt");
+        LOG.debug("createEventReceipt");
         return new EventReceipt();
     }
 
     /**
      * Create an instance of {@link Correlation }
-     * 
+     *
      */
     public Correlation createCorrelation() {
-    	LOG.debug("createCorrelation");
+        LOG.debug("createCorrelation");
         return new Correlation();
     }
 
     /**
      * Create an instance of {@link Autoaction }
-     * 
+     *
      */
     public Autoaction createAutoaction() {
-    	LOG.debug("createAutoaction");
+        LOG.debug("createAutoaction");
         return new Autoaction();
     }
 
     /**
      * Create an instance of {@link Tticket }
-     * 
+     *
      */
     public Tticket createTticket() {
-    	LOG.debug("createTticket");
+        LOG.debug("createTticket");
         return new Tticket();
     }
-
 }

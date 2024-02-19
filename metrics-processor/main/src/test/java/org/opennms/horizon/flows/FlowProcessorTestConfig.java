@@ -1,37 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows;
 
+import com.codahale.metrics.MetricRegistry;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -61,15 +54,14 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
-import com.codahale.metrics.MetricRegistry;
-
 // TODO: remove grey box tests and this custom test-only application wiring
 @TestConfiguration
 @EnableKafka
 public class FlowProcessorTestConfig {
 
     @Bean
-    public Pipeline createPipeLine(MetricRegistry metricRegistry, DocumentEnricherImpl documentEnricher, FlowRepository flowRepository) {
+    public Pipeline createPipeLine(
+            MetricRegistry metricRegistry, DocumentEnricherImpl documentEnricher, FlowRepository flowRepository) {
         var pipeLine = new PipelineImpl(metricRegistry, documentEnricher);
         var properties = new HashMap<>();
         properties.put(PipelineImpl.REPOSITORY_ID, "DataPlatform");
@@ -78,11 +70,13 @@ public class FlowProcessorTestConfig {
     }
 
     @Bean
-    public DocumentEnricherImpl createDocumentEnricher(InventoryClient inventoryClient,
-                                                       ClassificationEngine classificationEngine,
-                                                       FlowDocumentClassificationRequestMapperImpl flowDocumentClassificationRequestMapper) {
+    public DocumentEnricherImpl createDocumentEnricher(
+            InventoryClient inventoryClient,
+            ClassificationEngine classificationEngine,
+            FlowDocumentClassificationRequestMapperImpl flowDocumentClassificationRequestMapper) {
 
-        return new DocumentEnricherImpl(inventoryClient, classificationEngine, flowDocumentClassificationRequestMapper, 1);
+        return new DocumentEnricherImpl(
+                inventoryClient, classificationEngine, flowDocumentClassificationRequestMapper, 1);
     }
 
     @Bean
@@ -92,8 +86,7 @@ public class FlowProcessorTestConfig {
 
     @Bean
     public ClassificationEngine createClassificationEngine() throws InterruptedException, IOException {
-        final var rules = CsvImporter.parseCSV(
-            FlowProcessor.class.getResourceAsStream("/pre-defined-rules.csv"), true);
+        final var rules = CsvImporter.parseCSV(FlowProcessor.class.getResourceAsStream("/pre-defined-rules.csv"), true);
 
         return new DefaultClassificationEngine(ClassificationRuleProvider.forList(rules), FilterService.NOOP);
     }
@@ -126,16 +119,20 @@ public class FlowProcessorTestConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group-id");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArrayDeserializer.class);
+        props.put(
+                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                org.apache.kafka.common.serialization.StringDeserializer.class);
+        props.put(
+                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                org.apache.kafka.common.serialization.ByteArrayDeserializer.class);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, byte[]> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, byte[]> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, byte[]> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
-
 }

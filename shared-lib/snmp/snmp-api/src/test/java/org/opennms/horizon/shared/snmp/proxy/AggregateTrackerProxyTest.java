@@ -1,43 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp.proxy;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
-import static org.hamcrest.Matchers.contains;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,15 +43,13 @@ import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpResult;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 
-import com.google.common.collect.Lists;
-
 public class AggregateTrackerProxyTest {
     private GatheringTracker gatherer = new GatheringTracker();
     private SnmpObjId[] baseOids = new SnmpObjId[] {
-            SnmpObjId.get(".1.3.6.1.2.1"),
-            SnmpObjId.get(".1.3.6.1.2.2"),
-            SnmpObjId.get(".1.3.6.1.2.3"),
-            SnmpObjId.get(".1.3.6.1.2.4")
+        SnmpObjId.get(".1.3.6.1.2.1"),
+        SnmpObjId.get(".1.3.6.1.2.2"),
+        SnmpObjId.get(".1.3.6.1.2.3"),
+        SnmpObjId.get(".1.3.6.1.2.4")
     };
     private ColumnTracker[] columnTrackers;
     private SingleInstanceTracker singleInstanceTracker;
@@ -69,13 +60,12 @@ public class AggregateTrackerProxyTest {
     public void setUp() {
         // Create a hierarchy of aggregated trackers
         columnTrackers = new ColumnTracker[] {
-                new ColumnTracker(baseOids[0]),
-                new ColumnTracker(baseOids[1]),
-                new ColumnTracker(baseOids[2]),
+            new ColumnTracker(baseOids[0]), new ColumnTracker(baseOids[1]), new ColumnTracker(baseOids[2]),
         };
         singleInstanceTracker = new SingleInstanceTracker(baseOids[3], SnmpInstId.INST_ZERO);
         childAggregateTracker = new AggregateTracker(columnTrackers);
-        parentAggregateTracker = new AggregateTracker(Lists.newArrayList(childAggregateTracker, singleInstanceTracker), gatherer);
+        parentAggregateTracker =
+                new AggregateTracker(Lists.newArrayList(childAggregateTracker, singleInstanceTracker), gatherer);
 
         // Verify the generated requests
         List<WalkRequest> expectedRequests = new ArrayList<>();
@@ -116,19 +106,14 @@ public class AggregateTrackerProxyTest {
         // Build responses
         SnmpValue value = mock(SnmpValue.class);
         List<WalkResponse> responses = Lists.newArrayList(
-                new WalkResponse(Collections.singletonList(
-                        new SnmpResult(baseOids[0], SnmpInstId.INST_ZERO, value)),
-                        "0-0"),
-                new WalkResponse(Collections.singletonList(
-                        new SnmpResult(baseOids[1], SnmpInstId.INST_ZERO, value)),
-                        "0-1"),
-                new WalkResponse(Collections.singletonList(
-                        new SnmpResult(baseOids[2], SnmpInstId.INST_ZERO, value)),
-                        "0-2"),
-                new WalkResponse(Collections.singletonList(
-                        new SnmpResult(baseOids[3], SnmpInstId.INST_ZERO, value)),
-                        "1")
-                );
+                new WalkResponse(
+                        Collections.singletonList(new SnmpResult(baseOids[0], SnmpInstId.INST_ZERO, value)), "0-0"),
+                new WalkResponse(
+                        Collections.singletonList(new SnmpResult(baseOids[1], SnmpInstId.INST_ZERO, value)), "0-1"),
+                new WalkResponse(
+                        Collections.singletonList(new SnmpResult(baseOids[2], SnmpInstId.INST_ZERO, value)), "0-2"),
+                new WalkResponse(
+                        Collections.singletonList(new SnmpResult(baseOids[3], SnmpInstId.INST_ZERO, value)), "1"));
 
         // Resolve the walker
         parentAggregateTracker.handleWalkResponses(responses);

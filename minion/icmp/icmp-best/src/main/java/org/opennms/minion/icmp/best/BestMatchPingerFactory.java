@@ -1,43 +1,35 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.minion.icmp.best;
 
 import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-
-import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.opennms.horizon.minion.icmp.jna.JnaPinger;
 import org.opennms.horizon.shared.icmp.AbstractPingerFactory;
 import org.opennms.horizon.shared.icmp.NullPinger;
 import org.opennms.horizon.shared.icmp.Pinger;
-import org.opennms.horizon.minion.icmp.jna.JnaPinger;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.minion.icmp.jni.JniPinger;
 import org.opennms.minion.icmp.jni6.Jni6Pinger;
 import org.slf4j.Logger;
@@ -45,7 +37,8 @@ import org.slf4j.LoggerFactory;
 
 public class BestMatchPingerFactory extends AbstractPingerFactory {
     private static Logger LOG = LoggerFactory.getLogger(BestMatchPingerFactory.class);
-    private static InetAddress LOOPBACK = InetAddressUtils.getLocalLoopbackAddress().orElse(addr("127.0.0.1"));
+    private static InetAddress LOOPBACK =
+            InetAddressUtils.getLocalLoopbackAddress().orElse(addr("127.0.0.1"));
 
     Class<? extends Pinger> m_pingerClass = null;
 
@@ -91,7 +84,7 @@ public class BestMatchPingerFactory extends AbstractPingerFactory {
         final long timeout = Long.valueOf(System.getProperty("org.opennms.netmgt.icmp.best.timeout", "500"), 10);
 
         // try the found loopback, fall back to 127.0.0.1 or ::1 as a last resort
-        for (final InetAddress tryme : new InetAddress[] { LOOPBACK, addr("127.0.0.1"), addr("::1") }) {
+        for (final InetAddress tryme : new InetAddress[] {LOOPBACK, addr("127.0.0.1"), addr("::1")}) {
             try {
                 final Number result = pinger.ping(tryme, timeout, 0);
                 if (result == null) {
@@ -120,12 +113,17 @@ public class BestMatchPingerFactory extends AbstractPingerFactory {
         final String pingerClassStr = System.getProperty("org.opennms.netmgt.icmp.pingerClass");
         if (pingerClassStr != null) {
             try {
-                final Class<? extends Pinger> pingerClass = Class.forName(pingerClassStr).asSubclass(Pinger.class);
+                final Class<? extends Pinger> pingerClass =
+                        Class.forName(pingerClassStr).asSubclass(Pinger.class);
                 LOG.warn("Not scanning for best pinger because explicit pinger class has been set: {}", pingerClassStr);
                 return pingerClass;
             } catch (final Throwable t) {
-                LOG.error("org.opennms.netmgt.icmp.pingerClass is set ({}), but it failed to initialize! Erroring out.", pingerClassStr, t);
-                throw new IllegalStateException("Unable to initialize pinger class set in org.opennms.netmgt.icmp.pingerClass", t);
+                LOG.error(
+                        "org.opennms.netmgt.icmp.pingerClass is set ({}), but it failed to initialize! Erroring out.",
+                        pingerClassStr,
+                        t);
+                throw new IllegalStateException(
+                        "Unable to initialize pinger class set in org.opennms.netmgt.icmp.pingerClass", t);
             }
         }
 
@@ -133,7 +131,8 @@ public class BestMatchPingerFactory extends AbstractPingerFactory {
         Class<? extends Pinger> pinger = NullPinger.class;
 
         LOG.info("Searching for best available pinger...");
-        for (final Class<? extends Pinger> pingerClass : Arrays.asList(JniPinger.class, Jni6Pinger.class, JnaPinger.class)) {
+        for (final Class<? extends Pinger> pingerClass :
+                Arrays.asList(JniPinger.class, Jni6Pinger.class, JnaPinger.class)) {
             final PingerMatch tried = tryPinger(pingerClass);
             if (tried.compareTo(match) > 0) {
                 match = tried;

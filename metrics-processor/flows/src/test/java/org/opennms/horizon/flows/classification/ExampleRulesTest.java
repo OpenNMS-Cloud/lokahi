@@ -1,44 +1,37 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2018-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification;
 
-import org.junit.Test;
-import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
-import org.opennms.horizon.flows.classification.internal.decision.Tree;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
+import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
+import org.opennms.horizon.flows.classification.internal.decision.Tree;
 
 public class ExampleRulesTest {
 
@@ -49,7 +42,8 @@ public class ExampleRulesTest {
 
     public void testRuleSet(String resource) throws InterruptedException, IOException {
         var rules = ClassificationEngineBenchmark.getRules(resource);
-        var classificationEngine = new DefaultClassificationEngine(() -> rules, org.mockito.Mockito.mock(FilterService.class));
+        var classificationEngine =
+                new DefaultClassificationEngine(() -> rules, org.mockito.Mockito.mock(FilterService.class));
 
         // create classifiers for brute force classification
         var classifiers = rules.stream()
@@ -101,7 +95,7 @@ public class ExampleRulesTest {
             @Override
             public Void visit(Tree.Leaf.WithClassifiers leaf) {
                 if (leaf.classifiers().stream().anyMatch(c -> c.result.name.equals("Skype_Lync_Application_Sharing"))) {
-//                if (leaf.classifiers.size() >= 3) {
+                    //                if (leaf.classifiers.size() >= 3) {
                     System.out.println(steps.stream().map(s -> "(" + s + ")").collect(Collectors.joining(", ")));
                     leaf.classifiers().forEach(c -> System.out.println("  " + c));
                 }
@@ -112,11 +106,16 @@ public class ExampleRulesTest {
         classificationEngine.getTree().accept(visitor);
 
         // check
-        RandomClassificationEngineTest.streamOfclassificationRequests(rules, 123456l).limit(1000000).forEach(cr -> {
-            var byEngine = Optional.ofNullable(classificationEngine.classify(cr));
-            var byBruteForce = classifiers.stream().map(c -> c.classify(cr)).filter(s -> s != null).findFirst().map(r -> r.name);
-            assertThat("classification request: " + cr, byEngine, is(byBruteForce));
-        });
+        RandomClassificationEngineTest.streamOfclassificationRequests(rules, 123456l)
+                .limit(1000000)
+                .forEach(cr -> {
+                    var byEngine = Optional.ofNullable(classificationEngine.classify(cr));
+                    var byBruteForce = classifiers.stream()
+                            .map(c -> c.classify(cr))
+                            .filter(s -> s != null)
+                            .findFirst()
+                            .map(r -> r.name);
+                    assertThat("classification request: " + cr, byEngine, is(byBruteForce));
+                });
     }
-
 }

@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2005-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.grpc;
 
 import java.util.ArrayList;
@@ -41,36 +34,40 @@ import java.util.Properties;
  * @version $Id: $
  */
 public abstract class PropertiesUtils {
-	
-	private static final String PLACEHOLDER_SUFFIX = "}";
+
+    private static final String PLACEHOLDER_SUFFIX = "}";
     private static final String PLACEHOLDER_PREFIX = "${";
 
     public static interface SymbolTable {
-		public String getSymbolValue(String symbol);
-	}
-	
-	private static class PropertyBasedSymbolTable implements SymbolTable {
-		Properties m_properties;
-		PropertyBasedSymbolTable(Properties properties) {
-			m_properties = properties;
-		}
-                @Override
-		public String getSymbolValue(String symbol) {
-			return m_properties.getProperty(symbol);
-		}
-	}
-    
+        public String getSymbolValue(String symbol);
+    }
+
+    private static class PropertyBasedSymbolTable implements SymbolTable {
+        Properties m_properties;
+
+        PropertyBasedSymbolTable(Properties properties) {
+            m_properties = properties;
+        }
+
+        @Override
+        public String getSymbolValue(String symbol) {
+            return m_properties.getProperty(symbol);
+        }
+    }
+
     private static class MapBasedSymbolTable implements SymbolTable {
-        Map<String,String> m_map;
-        MapBasedSymbolTable(Map<String,String> properties) {
+        Map<String, String> m_map;
+
+        MapBasedSymbolTable(Map<String, String> properties) {
             m_map = properties;
         }
+
         @Override
         public String getSymbolValue(String symbol) {
             return m_map.get(symbol);
         }
     }
-    
+
     /**
      * This recursively substitutes occurrences ${property.name} in initialString with the value of
      * the property property.name taken from the supplied properties object. If
@@ -84,7 +81,12 @@ public abstract class PropertiesUtils {
         String workingString = initialString;
         for (Properties properties : propertiesArray) {
             if (properties != null)
-                workingString = substitute(workingString, new PropertyBasedSymbolTable(properties), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, new ArrayList<String>());
+                workingString = substitute(
+                        workingString,
+                        new PropertyBasedSymbolTable(properties),
+                        PLACEHOLDER_PREFIX,
+                        PLACEHOLDER_SUFFIX,
+                        new ArrayList<String>());
         }
         return workingString;
     }
@@ -99,15 +101,20 @@ public abstract class PropertiesUtils {
      * @param mapArray a {@link Map} object.
      */
     @SafeVarargs
-    public static String substitute(final String initialString, final Map<String,Object>... mapArray) {
-        for (final Map<String,Object> properties : mapArray) {
-            final Map<String,String> convertedProperties = new HashMap<String,String>();
-            for (final Map.Entry<String,Object> entry : properties.entrySet()) {
+    public static String substitute(final String initialString, final Map<String, Object>... mapArray) {
+        for (final Map<String, Object> properties : mapArray) {
+            final Map<String, String> convertedProperties = new HashMap<String, String>();
+            for (final Map.Entry<String, Object> entry : properties.entrySet()) {
                 final Object value = entry.getValue();
-                convertedProperties.put(entry.getKey(), value == null? null : value.toString());
+                convertedProperties.put(entry.getKey(), value == null ? null : value.toString());
             }
             if (properties != null) {
-                return substitute(initialString, new MapBasedSymbolTable(convertedProperties), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, new ArrayList<String>());
+                return substitute(
+                        initialString,
+                        new MapBasedSymbolTable(convertedProperties),
+                        PLACEHOLDER_PREFIX,
+                        PLACEHOLDER_SUFFIX,
+                        new ArrayList<String>());
             }
         }
         return initialString;
@@ -123,9 +130,9 @@ public abstract class PropertiesUtils {
      * @return a {@link String} object.
      */
     public static String substitute(String initialString, Properties properties, String prefix, String suffix) {
-        return substitute(initialString, new PropertyBasedSymbolTable(properties), prefix, suffix, new ArrayList<String>());
+        return substitute(
+                initialString, new PropertyBasedSymbolTable(properties), prefix, suffix, new ArrayList<String>());
     }
-
 
     /**
      * <p>substitute</p>
@@ -137,37 +144,43 @@ public abstract class PropertiesUtils {
     public static String substitute(String initialString, SymbolTable... symbolsArray) {
         String workingString = initialString;
         for (SymbolTable symbols : symbolsArray) {
-            workingString = substitute(workingString, symbols, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, new ArrayList<String>());
+            workingString =
+                    substitute(workingString, symbols, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, new ArrayList<String>());
         }
         return workingString;
     }
 
-    private static String substitute(String initialString,
-            SymbolTable symTable, String placeholderPrefix,
-            String placeholderSuffix, List<String> list) {
+    private static String substitute(
+            String initialString,
+            SymbolTable symTable,
+            String placeholderPrefix,
+            String placeholderSuffix,
+            List<String> list) {
         if (initialString == null) return null;
-        
+
         final StringBuilder result = new StringBuilder(initialString);
-        
+
         int startIndex = 0;
-        
+
         while (startIndex >= 0) {
             int beginIndex = result.indexOf(placeholderPrefix, startIndex);
-            int endIndex = (beginIndex < 0 ? -1 : result.indexOf(placeholderSuffix, beginIndex+placeholderPrefix.length()));
+            int endIndex =
+                    (beginIndex < 0 ? -1 : result.indexOf(placeholderSuffix, beginIndex + placeholderPrefix.length()));
             if (endIndex >= 0) {
-                String symbol = result.substring(beginIndex+placeholderPrefix.length(), endIndex);
+                String symbol = result.substring(beginIndex + placeholderPrefix.length(), endIndex);
                 if (list.contains(symbol))
-                    throw new IllegalStateException("recursive loop involving symbol "+placeholderPrefix+symbol+placeholderSuffix);
+                    throw new IllegalStateException(
+                            "recursive loop involving symbol " + placeholderPrefix + symbol + placeholderSuffix);
                 String symbolVal = symTable.getSymbolValue(symbol);
                 if (symbolVal != null) {
                     list.add(symbol);
                     String substVal = substitute(symbolVal, symTable, placeholderPrefix, placeholderSuffix, list);
-                    list.remove(list.size()-1);
-                    result.replace(beginIndex, endIndex+1, substVal);
+                    list.remove(list.size() - 1);
+                    result.replace(beginIndex, endIndex + 1, substVal);
                     startIndex = beginIndex + substVal.length();
-                    
+
                 } else {
-                    startIndex = endIndex+1;
+                    startIndex = endIndex + 1;
                 }
             } else {
                 startIndex = -1;
@@ -190,7 +203,7 @@ public abstract class PropertiesUtils {
     public static String getProperty(Properties props, String name, String defaultVal) {
         return props.getProperty(name) == null ? defaultVal : props.getProperty(name);
     }
-    
+
     /**
      * Get a boolean valued property, returning default value if it is not set
      * or is set to an invalid value.
@@ -249,6 +262,4 @@ public abstract class PropertiesUtils {
         }
         return defaultVal;
     }
-    
-
 }

@@ -1,38 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2005-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.util;
 
 import com.google.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -42,6 +31,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import javax.swing.filechooser.FileSystemView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class StringUtils {
 
@@ -164,15 +156,15 @@ public abstract class StringUtils {
         }
 
         private static boolean isWhitespace(char aChar) {
-            switch(aChar) {
-            case ' ':
-            case '\t':
-            case '\n':
-            case '\r':
-            case '\f':
-                return true;
-            default:
-                return false;
+            switch (aChar) {
+                case ' ':
+                case '\t':
+                case '\n':
+                case '\r':
+                case '\f':
+                    return true;
+                default:
+                    return false;
             }
         }
     }
@@ -190,33 +182,31 @@ public abstract class StringUtils {
     }
 
     public static boolean isLocalWindowsPath(final String path) {
-    	if (File.separatorChar != '\\') return false;
-    	if (path.length() < 3) return false;
+        if (File.separatorChar != '\\') return false;
+        if (path.length() < 3) return false;
 
-    	final char colon = path.charAt(1);
-    	final char slash = path.charAt(2);
-    	
-    	if (colon != ':') return false;
-    	if (slash != '\\' && slash != '/') return false;
+        final char colon = path.charAt(1);
+        final char slash = path.charAt(2);
 
-    	final String drive = path.substring(0, 3);
-    	if (HEADLESS) {
-    		return WINDOWS_DRIVE.matcher(drive).matches();
-    	} else {
-    		final File file = new File(drive);
-        	return FileSystemView.getFileSystemView().isFileSystemRoot(file);
-    	}
+        if (colon != ':') return false;
+        if (slash != '\\' && slash != '/') return false;
+
+        final String drive = path.substring(0, 3);
+        if (HEADLESS) {
+            return WINDOWS_DRIVE.matcher(drive).matches();
+        } else {
+            final File file = new File(drive);
+            return FileSystemView.getFileSystemView().isFileSystemRoot(file);
+        }
     }
 
-    
     public static String iso8601LocalOffsetString(Date d) {
         return iso8601OffsetString(d, ZoneId.systemDefault(), null);
     }
-    
+
     public static String iso8601OffsetString(Date d, ZoneId zone, ChronoUnit truncateTo) {
-        ZonedDateTime zdt = ((d).toInstant())
-                .atZone(zone);
-        if(truncateTo != null) {
+        ZonedDateTime zdt = ((d).toInstant()).atZone(zone);
+        if (truncateTo != null) {
             zdt = zdt.truncatedTo(truncateTo);
         }
         return zdt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -273,7 +263,7 @@ public abstract class StringUtils {
             return true;
         }
 
-        // "Trim" the whitespace characters off the end of A 
+        // "Trim" the whitespace characters off the end of A
         while ((i < alen) && (a.charAt(alen - 1) <= ' ')) {
             alen--;
         }
@@ -288,7 +278,7 @@ public abstract class StringUtils {
     }
 
     public static boolean isEmpty(final String text) {
-        return text == null || text.trim().length() == 0;
+        return text == null || text.trim().isEmpty();
     }
 
     public static boolean hasText(final String text) {
@@ -298,14 +288,14 @@ public abstract class StringUtils {
     /**
      * <p>NMS-9091: This method calls {@link Date#toString()} but then calls
      * {@link Date#setTime(long)} so that internally, the {@link Date#cdate}
-     * field is deallocated. This saves significant heap space for {@link Date} 
+     * field is deallocated. This saves significant heap space for {@link Date}
      * instances that are stored in long-lived collections.</p>
-     * 
+     *
      * <ul>
      * <li>java.util.Date with only fastTime: 24 bytes</li>
      * <li>java.util.Date with fastTime and cdate: 120 bytes</li>
      * </ul>
-     * 
+     *
      * @param date
      * @return Value of date.toString()
      */
@@ -324,7 +314,7 @@ public abstract class StringUtils {
      * This is a quick and dirty parser for String representations
      * of decimal integers. It should be up to 2X faster than
      * {@link Integer#parseInt(String)}.
-     * 
+     *
      * @param value Positive or negative decimal string value
      * @return Integer representing the string value
      */
@@ -399,7 +389,7 @@ public abstract class StringUtils {
         int unit = si ? 1000 : 1024;
         if (bytes < unit) return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
@@ -421,7 +411,7 @@ public abstract class StringUtils {
     }
 
     public static Integer parseInt(String value, Integer defaultValue) {
-        if(Strings.isNullOrEmpty(value)) {
+        if (Strings.isNullOrEmpty(value)) {
             return defaultValue;
         }
         try {
@@ -443,7 +433,7 @@ public abstract class StringUtils {
     }
 
     public static Double parseDouble(String value, Double defaultValue) {
-        if(Strings.isNullOrEmpty(value)) {
+        if (Strings.isNullOrEmpty(value)) {
             return defaultValue;
         }
         try {
@@ -452,5 +442,4 @@ public abstract class StringUtils {
             return defaultValue;
         }
     }
-
 }

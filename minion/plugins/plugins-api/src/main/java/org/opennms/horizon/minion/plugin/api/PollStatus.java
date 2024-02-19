@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2002-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.plugin.api;
 
 import java.io.Serializable;
@@ -37,7 +30,6 @@ import java.util.Map;
 /**
  * Represents the status of a node, interface or services
  */
-
 public class PollStatus implements Serializable {
     private static final long serialVersionUID = 3L;
 
@@ -49,11 +41,11 @@ public class PollStatus implements Serializable {
      * Status of the pollable object.
      */
     private int m_statusCode;
-    
+
     private String m_reason;
 
     private final Map<String, Number> m_properties = Collections.synchronizedMap(new LinkedHashMap<String, Number>());
-    
+
     /**
      * <P>
      * The constant that defines a service that is up but is most likely
@@ -85,12 +77,7 @@ public class PollStatus implements Serializable {
      */
     public static final int SERVICE_UNKNOWN = 0;
 
-    private static final String[] s_statusNames = {
-        "Unknown",
-        "Up",
-        "Down",
-        "Unresponsive"
-    };
+    private static final String[] s_statusNames = {"Unknown", "Up", "Down", "Unresponsive"};
 
     private static int decodeStatusName(final String statusName) {
         for (int statusCode = 0; statusCode < s_statusNames.length; statusCode++) {
@@ -307,7 +294,7 @@ public class PollStatus implements Serializable {
     @Override
     public boolean equals(final Object o) {
         if (o instanceof PollStatus) {
-            return m_statusCode == ((PollStatus)o).m_statusCode;
+            return m_statusCode == ((PollStatus) o).m_statusCode;
         }
         return false;
     }
@@ -327,7 +314,7 @@ public class PollStatus implements Serializable {
      *
      * @return a boolean.
      */
-//    @Transient
+    //    @Transient
     public boolean isUp() {
         return !isDown();
     }
@@ -337,7 +324,7 @@ public class PollStatus implements Serializable {
      *
      * @return a boolean.
      */
-//    @Transient
+    //    @Transient
     public boolean isAvailable() {
         return this.m_statusCode == SERVICE_AVAILABLE;
     }
@@ -347,7 +334,7 @@ public class PollStatus implements Serializable {
      *
      * @return a boolean.
      */
-//    @Transient
+    //    @Transient
     public boolean isUnresponsive() {
         return this.m_statusCode == SERVICE_UNRESPONSIVE;
     }
@@ -357,7 +344,7 @@ public class PollStatus implements Serializable {
      *
      * @return a boolean.
      */
-//    @Transient
+    //    @Transient
     public boolean isUnavailable() {
         return this.m_statusCode == SERVICE_UNAVAILABLE;
     }
@@ -367,7 +354,7 @@ public class PollStatus implements Serializable {
      *
      * @return a boolean.
      */
-//    @Transient
+    //    @Transient
     public boolean isDown() {
         return this.m_statusCode == SERVICE_UNAVAILABLE;
     }
@@ -377,7 +364,7 @@ public class PollStatus implements Serializable {
      *
      * @return a boolean.
      */
-//    @Transient
+    //    @Transient
     public boolean isUnknown() {
         return this.m_statusCode == SERVICE_UNKNOWN;
     }
@@ -397,8 +384,8 @@ public class PollStatus implements Serializable {
      *
      * @return a {@link Date} object.
      */
-//    @XmlAttribute(name="time")
-//    @Column(name="statusTime", nullable=false)
+    //    @XmlAttribute(name="time")
+    //    @Column(name="statusTime", nullable=false)
     public Date getTimestamp() {
         return m_timestamp;
     }
@@ -417,8 +404,8 @@ public class PollStatus implements Serializable {
      *
      * @return a {@link String} object.
      */
-//    @XmlAttribute(name="reason")
-//    @Column(name="statusReason", length=255, nullable=true)
+    //    @XmlAttribute(name="reason")
+    //    @Column(name="statusReason", length=255, nullable=true)
     public String getReason() {
         return m_reason;
     }
@@ -437,13 +424,12 @@ public class PollStatus implements Serializable {
      *
      * @return a {@link Double} object.
      */
-//    @XmlAttribute(name="response-time")
-//    @XmlJavaTypeAdapter(DoubleXmlAdapter.class)
-//    @Column(name="responseTime", nullable=true)
+    //    @XmlAttribute(name="response-time")
+    //    @XmlJavaTypeAdapter(DoubleXmlAdapter.class)
+    //    @Column(name="responseTime", nullable=true)
     public Double getResponseTime() {
         Number val = getProperty(PROPERTY_RESPONSE_TIME);
         return (val == null ? null : val.doubleValue());
-    	
     }
 
     /* stores the individual item for compatibility with database schema, as well as the new property map */
@@ -465,34 +451,34 @@ public class PollStatus implements Serializable {
      *
      * @return a {@link Map} object.
      */
-//    @XmlElement(name="properties")
-//    @XmlJavaTypeAdapter(PollStatusPropertyXmlAdapter.class)
-//    @Transient
+    //    @XmlElement(name="properties")
+    //    @XmlJavaTypeAdapter(PollStatusPropertyXmlAdapter.class)
+    //    @Transient
     public Map<String, Number> getProperties() {
         return Collections.unmodifiableMap(m_properties);
     }
-    
+
     /**
      * <p>setProperties</p>
      *
      * @param p a {@link Map} object.
      */
     public void setProperties(Map<String, Number> p) {
-        synchronized(m_properties) {
+        synchronized (m_properties) {
             m_properties.clear();
             m_properties.putAll(p);
         }
     }
-    
+
     /**
      * <p>getProperty</p>
      *
      * @param key a {@link String} object.
      * @return a {@link Number} object.
      */
-//    @Transient
+    //    @Transient
     public Number getProperty(final String key) {
-        synchronized(m_properties) {
+        synchronized (m_properties) {
             return m_properties.get(key);
         }
     }
@@ -504,7 +490,7 @@ public class PollStatus implements Serializable {
      * @param value a {@link Number} object.
      */
     public void setProperty(final String key, final Number value) {
-        synchronized(m_properties) {
+        synchronized (m_properties) {
             m_properties.put(key, value);
         }
     }
@@ -514,8 +500,8 @@ public class PollStatus implements Serializable {
      *
      * @return a int.
      */
-//    @XmlAttribute(name="code")
-//    @Column(name="statusCode", nullable=false)
+    //    @XmlAttribute(name="code")
+    //    @Column(name="statusCode", nullable=false)
     public int getStatusCode() {
         return m_statusCode;
     }
@@ -529,8 +515,8 @@ public class PollStatus implements Serializable {
      *
      * @return a {@link String} object.
      */
-//    @XmlAttribute(name="name")
-//    @Transient
+    //    @XmlAttribute(name="name")
+    //    @Transient
     public String getStatusName() {
         return s_statusNames[m_statusCode];
     }

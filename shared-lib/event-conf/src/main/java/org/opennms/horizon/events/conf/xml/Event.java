@@ -1,38 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.conf.xml;
 
 import com.google.common.base.MoreObjects;
-import org.opennms.horizon.events.util.ValidateUsing;
-import org.opennms.horizon.events.conf.xml.EventOrdering.EventOrderIndex;
-import org.opennms.horizon.events.util.ConfigUtils;
-
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -45,143 +34,146 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.opennms.horizon.events.conf.xml.EventOrdering.EventOrderIndex;
+import org.opennms.horizon.events.util.ConfigUtils;
+import org.opennms.horizon.events.util.ValidateUsing;
 
-@XmlRootElement(name="event")
+@XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.NONE)
 @ValidateUsing("eventconf.xsd")
-@XmlType(propOrder={})
+@XmlType(propOrder = {})
 public class Event implements Serializable, Comparable<Event> {
     private static final long serialVersionUID = 2L;
 
     /**
      * The event mask which helps to uniquely identify an event
      */
-    @XmlElement(name="mask",required=false)
+    @XmlElement(name = "mask", required = false)
     private Mask m_mask;
 
     /**
      * The Universal Event Identifier
      */
-    @XmlElement(name="uei", required=true)
+    @XmlElement(name = "uei", required = true)
     private String m_uei;
 
     /**
      * The Priority of the Event definition. Higher number has higher priority.
      */
-    @XmlElement(name="priority", required=false)
+    @XmlElement(name = "priority", required = false)
     private Integer m_priority;
 
     /**
      * A human readable name used to identify an event in the web ui
      */
-    @XmlElement(name="event-label", required=true)
+    @XmlElement(name = "event-label", required = true)
     private String m_eventLabel;
 
     /**
      * The SNMP information from the trap
      */
-    @XmlElement(name="snmp", required=false)
+    @XmlElement(name = "snmp", required = false)
     private Snmp m_snmp;
 
     /**
      * The event description
      */
-    @XmlElement(name="descr", required=true)
+    @XmlElement(name = "descr", required = true)
     private String m_descr;
 
     /**
      * The event logmsg
      */
-    @XmlElement(name="logmsg", required=true)
+    @XmlElement(name = "logmsg", required = true)
     private Logmsg m_logmsg;
 
     /**
      * The event severity
      */
-    @XmlElement(name="severity", required=true)
+    @XmlElement(name = "severity", required = true)
     private String m_severity;
 
     /**
      * The event correlation information
      */
-    @XmlElement(name="correlation", required=false)
+    @XmlElement(name = "correlation", required = false)
     private Correlation m_correlation;
 
     /**
      * The operator instruction for this event
      */
-    @XmlElement(name="operinstruct", required=false)
+    @XmlElement(name = "operinstruct", required = false)
     private String m_operinstruct;
 
     /**
      * The automatic action to occur when this event occurs
      */
-    @XmlElement(name="autoaction", required=false)
+    @XmlElement(name = "autoaction", required = false)
     private List<Autoaction> m_autoactions = new ArrayList<>();
 
     /**
      * The varbind decoding tag used to decode value into a string
      */
-    @XmlElement(name="varbindsdecode", required=false)
+    @XmlElement(name = "varbindsdecode", required = false)
     private List<Varbindsdecode> m_varbindsdecodes = new ArrayList<>();
 
     /**
      * The varbind decoding tag used to decode value into a string
      */
-    @XmlElement(name="parameter", required=false)
+    @XmlElement(name = "parameter", required = false)
     private List<Parameter> m_parameters = new ArrayList<>();
 
     /**
      * The operator action to be taken when this event occurs
      */
-    @XmlElement(name="operaction", required=false)
+    @XmlElement(name = "operaction", required = false)
     private List<Operaction> m_operactions = new ArrayList<>();
 
     /**
      * The autoacknowledge information for the user
      */
-    @XmlElement(name="autoacknowledge", required=false)
+    @XmlElement(name = "autoacknowledge", required = false)
     private Autoacknowledge m_autoacknowledge;
 
     /**
      * A logical group with which to associate this event
      */
-    @XmlElement(name="loggroup", required=false)
+    @XmlElement(name = "loggroup", required = false)
     private List<String> m_loggroups = new ArrayList<>();
 
     /**
      * The trouble ticket info
      */
-    @XmlElement(name="tticket", required=false)
+    @XmlElement(name = "tticket", required = false)
     private Tticket m_tticket;
 
     /**
      * The forwarding information for this event
      */
-    @XmlElement(name="forward", required=false)
+    @XmlElement(name = "forward", required = false)
     private List<Forward> m_forwards = new ArrayList<>();
 
     /**
      * The script information for this event
      */
-    @XmlElement(name="script", required=false)
+    @XmlElement(name = "script", required = false)
     private List<Script> m_scripts = new ArrayList<>();
 
     /**
      * The text to be displayed on a 'mouseOver' event
      *  when this event is displayed in the event browser.
      */
-    @XmlElement(name="mouseovertext", required=false)
+    @XmlElement(name = "mouseovertext", required = false)
     private String m_mouseovertext;
 
     /**
      * Data used to create an event.
      */
-    @XmlElement(name="alert-data", required=false)
+    @XmlElement(name = "alert-data", required = false)
     private AlertData m_alertData;
 
-    @XmlElementWrapper(name="filters", required=false)
-    @XmlElement(name="filter", required=true)
+    @XmlElementWrapper(name = "filters", required = false)
+    @XmlElement(name = "filter", required = true)
     private List<Filter> m_filters;
 
     @XmlTransient
@@ -433,7 +425,7 @@ public class Event implements Serializable, Comparable<Event> {
     }
 
     public List<Filter> getFilters() {
-        return m_filters == null? Collections.emptyList() : m_filters;
+        return m_filters == null ? Collections.emptyList() : m_filters;
     }
 
     public void setFilters(final List<Filter> filters) {
@@ -458,28 +450,29 @@ public class Event implements Serializable, Comparable<Event> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(m_mask,
-                            m_uei,
-                            m_eventLabel,
-                            m_snmp,
-                            m_descr,
-                            m_logmsg,
-                            m_severity,
-                            m_correlation,
-                            m_operinstruct,
-                            m_autoactions,
-                            m_varbindsdecodes,
-                            m_parameters,
-                            m_operactions,
-                            m_autoacknowledge,
-                            m_loggroups,
-                            m_tticket,
-                            m_forwards,
-                            m_scripts,
-                            m_mouseovertext,
-            m_alertData,
-                            m_filters,
-                            m_matcher);
+        return Objects.hash(
+                m_mask,
+                m_uei,
+                m_eventLabel,
+                m_snmp,
+                m_descr,
+                m_logmsg,
+                m_severity,
+                m_correlation,
+                m_operinstruct,
+                m_autoactions,
+                m_varbindsdecodes,
+                m_parameters,
+                m_operactions,
+                m_autoacknowledge,
+                m_loggroups,
+                m_tticket,
+                m_forwards,
+                m_scripts,
+                m_mouseovertext,
+                m_alertData,
+                m_filters,
+                m_matcher);
     }
 
     @Override
@@ -489,28 +482,28 @@ public class Event implements Serializable, Comparable<Event> {
         }
         if (obj instanceof Event) {
             final Event that = (Event) obj;
-            return Objects.equals(this.m_mask, that.m_mask) &&
-                    Objects.equals(this.m_uei, that.m_uei) &&
-                    Objects.equals(this.m_eventLabel, that.m_eventLabel) &&
-                    Objects.equals(this.m_snmp, that.m_snmp) &&
-                    Objects.equals(this.m_descr, that.m_descr) &&
-                    Objects.equals(this.m_logmsg, that.m_logmsg) &&
-                    Objects.equals(this.m_severity, that.m_severity) &&
-                    Objects.equals(this.m_correlation, that.m_correlation) &&
-                    Objects.equals(this.m_operinstruct, that.m_operinstruct) &&
-                    Objects.equals(this.m_autoactions, that.m_autoactions) &&
-                    Objects.equals(this.m_varbindsdecodes, that.m_varbindsdecodes) &&
-                    Objects.equals(this.m_parameters, that.m_parameters) &&
-                    Objects.equals(this.m_operactions, that.m_operactions) &&
-                    Objects.equals(this.m_autoacknowledge, that.m_autoacknowledge) &&
-                    Objects.equals(this.m_loggroups, that.m_loggroups) &&
-                    Objects.equals(this.m_tticket, that.m_tticket) &&
-                    Objects.equals(this.m_forwards, that.m_forwards) &&
-                    Objects.equals(this.m_scripts, that.m_scripts) &&
-                    Objects.equals(this.m_mouseovertext, that.m_mouseovertext) &&
-                    Objects.equals(this.m_alertData, that.m_alertData) &&
-                    Objects.equals(this.m_filters, that.m_filters) &&
-                    Objects.equals(this.m_matcher, that.m_matcher);
+            return Objects.equals(this.m_mask, that.m_mask)
+                    && Objects.equals(this.m_uei, that.m_uei)
+                    && Objects.equals(this.m_eventLabel, that.m_eventLabel)
+                    && Objects.equals(this.m_snmp, that.m_snmp)
+                    && Objects.equals(this.m_descr, that.m_descr)
+                    && Objects.equals(this.m_logmsg, that.m_logmsg)
+                    && Objects.equals(this.m_severity, that.m_severity)
+                    && Objects.equals(this.m_correlation, that.m_correlation)
+                    && Objects.equals(this.m_operinstruct, that.m_operinstruct)
+                    && Objects.equals(this.m_autoactions, that.m_autoactions)
+                    && Objects.equals(this.m_varbindsdecodes, that.m_varbindsdecodes)
+                    && Objects.equals(this.m_parameters, that.m_parameters)
+                    && Objects.equals(this.m_operactions, that.m_operactions)
+                    && Objects.equals(this.m_autoacknowledge, that.m_autoacknowledge)
+                    && Objects.equals(this.m_loggroups, that.m_loggroups)
+                    && Objects.equals(this.m_tticket, that.m_tticket)
+                    && Objects.equals(this.m_forwards, that.m_forwards)
+                    && Objects.equals(this.m_scripts, that.m_scripts)
+                    && Objects.equals(this.m_mouseovertext, that.m_mouseovertext)
+                    && Objects.equals(this.m_alertData, that.m_alertData)
+                    && Objects.equals(this.m_filters, that.m_filters)
+                    && Objects.equals(this.m_matcher, that.m_matcher);
         }
         return false;
     }
@@ -565,5 +558,4 @@ public class Event implements Serializable, Comparable<Event> {
                 .add("mask", m_mask)
                 .toString();
     }
-
 }

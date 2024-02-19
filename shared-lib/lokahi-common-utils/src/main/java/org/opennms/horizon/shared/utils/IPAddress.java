@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.utils;
 
 import java.math.BigInteger;
@@ -101,12 +94,7 @@ public class IPAddress implements Comparable<IPAddress> {
             final byte[] bytes = m_inetAddress.getAddress();
             final int[] hextets = new int[8];
             for (int i = 0; i < hextets.length; i++) {
-                hextets[i] = fromBytes(
-                    (byte) 0,
-                    (byte) 0,
-                    bytes[2 * i],
-                    bytes[2 * i + 1]
-                );
+                hextets[i] = fromBytes((byte) 0, (byte) 0, bytes[2 * i], bytes[2 * i + 1]);
             }
             compressLongestRunOfZeroes(hextets);
             return hextetsToIPv6String(hextets);
@@ -140,8 +128,8 @@ public class IPAddress implements Comparable<IPAddress> {
         final byte[] b = new byte[current.length];
 
         int carry = 1;
-        for(int i = current.length-1; i >= 0; i--) {
-            b[i] = (byte)(current[i] + carry);
+        for (int i = current.length - 1; i >= 0; i--) {
+            b[i] = (byte) (current[i] + carry);
             // if overflow we need to carry to the next byte
             carry = b[i] == 0 ? carry : 0;
         }
@@ -164,10 +152,10 @@ public class IPAddress implements Comparable<IPAddress> {
         final byte[] b = new byte[current.length];
 
         int borrow = 1;
-        for(int i = current.length-1; i >= 0; i--) {
-            b[i] = (byte)(current[i] - borrow);
+        for (int i = current.length - 1; i >= 0; i--) {
+            b[i] = (byte) (current[i] - borrow);
             // if underflow then we need to borrow from the next byte
-            borrow = b[i] == (byte)0xff ? borrow : 0;
+            borrow = b[i] == (byte) 0xff ? borrow : 0;
         }
 
         if (borrow > 0) {
@@ -176,7 +164,6 @@ public class IPAddress implements Comparable<IPAddress> {
         }
 
         return new IPAddress(b);
-
     }
 
     /**
@@ -260,18 +247,20 @@ public class IPAddress implements Comparable<IPAddress> {
                 // CGLIB bytecode manipulation to generate InetAddress classes. This will
                 // occur during REST calls. {@see org.opennms.web.rest.NodeRestServiceTest}
                 //
-                throw new IllegalArgumentException("InetAddress instance violates contract by returning a null address from getAddress()");
+                throw new IllegalArgumentException(
+                        "InetAddress instance violates contract by returning a null address from getAddress()");
             } else if (addr instanceof Inet4Address) {
                 return toIpAddrString(address);
             } else if (addr instanceof Inet6Address) {
-                final Inet6Address addr6 = (Inet6Address)addr;
+                final Inet6Address addr6 = (Inet6Address) addr;
                 final StringBuilder sb = new StringBuilder(toIpAddrString(address));
                 if (addr6.getScopeId() != 0) {
                     sb.append("%").append(addr6.getScopeId());
                 }
                 return sb.toString();
             } else {
-                throw new IllegalArgumentException("Unknown type of InetAddress: " + addr.getClass().getName());
+                throw new IllegalArgumentException(
+                        "Unknown type of InetAddress: " + addr.getClass().getName());
             }
         }
     }
@@ -280,24 +269,10 @@ public class IPAddress implements Comparable<IPAddress> {
         if (addr.length == 4) {
             return getInetAddress(addr).getHostAddress();
         } else if (addr.length == 16) {
-            return String.format("%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-                                 addr[0],
-                                 addr[1],
-                                 addr[2],
-                                 addr[3],
-                                 addr[4],
-                                 addr[5],
-                                 addr[6],
-                                 addr[7],
-                                 addr[8],
-                                 addr[9],
-                                 addr[10],
-                                 addr[11],
-                                 addr[12],
-                                 addr[13],
-                                 addr[14],
-                                 addr[15]
-                    );
+            return String.format(
+                    "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+                    addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], addr[6], addr[7], addr[8], addr[9], addr[10],
+                    addr[11], addr[12], addr[13], addr[14], addr[15]);
         } else {
             throw new IllegalArgumentException("IP address has an illegal number of bytes: " + addr.length);
         }
@@ -311,14 +286,14 @@ public class IPAddress implements Comparable<IPAddress> {
         try {
             return InetAddress.getByAddress(ipAddrOctets);
         } catch (final UnknownHostException e) {
-            throw new IllegalArgumentException("Invalid IPAddress " + Arrays.toString(ipAddrOctets) + " with length " + ipAddrOctets.length);
+            throw new IllegalArgumentException(
+                    "Invalid IPAddress " + Arrays.toString(ipAddrOctets) + " with length " + ipAddrOctets.length);
         }
-
     }
 
     private InetAddress getInetAddress(final String dottedNotation) {
         try {
-            return dottedNotation == null? null : InetAddress.getByName(dottedNotation);
+            return dottedNotation == null ? null : InetAddress.getByName(dottedNotation);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Invalid IPAddress " + dottedNotation);
         }
@@ -362,7 +337,7 @@ public class IPAddress implements Comparable<IPAddress> {
      * <p>From: <a href="https://code.google.com/p/guava-libraries/source/browse/guava/src/com/google/common/primitives/Ints.java">Guava</a>.</p>
      */
     public static int fromBytes(final byte b1, final byte b2, final byte b3, final byte b4) {
-      return b1 << 24 | (b2 & 0xFF) << 16 | (b3 & 0xFF) << 8 | (b4 & 0xFF);
+        return b1 << 24 | (b2 & 0xFF) << 16 | (b3 & 0xFF) << 8 | (b4 & 0xFF);
     }
 
     /**
@@ -437,6 +412,6 @@ public class IPAddress implements Comparable<IPAddress> {
     }
 
     private int unsignedByteToInt(final byte b) {
-        return b < 0 ? ((int)b)+256 : ((int)b);
+        return b < 0 ? ((int) b) + 256 : ((int) b);
     }
 }

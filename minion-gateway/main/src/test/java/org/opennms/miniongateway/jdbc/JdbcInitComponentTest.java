@@ -1,47 +1,37 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.miniongateway.jdbc;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import javax.sql.DataSource;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class JdbcInitComponentTest {
 
@@ -84,18 +74,17 @@ public class JdbcInitComponentTest {
         //
         SQLException testException = new SQLException("x-test-sql-exception-x");
         Mockito.when(mockDataSource.getConnection())
-            .thenThrow(testException)
-            .thenThrow(testException)
-            .thenThrow(testException)
-            .thenReturn(mockConnection);
+                .thenThrow(testException)
+                .thenThrow(testException)
+                .thenThrow(testException)
+                .thenReturn(mockConnection);
 
         //
         // Execute
         //
         List<Long> delayPeriods = new LinkedList<>();
         target.setTimestampClockSource(
-            prepareClockSource(1_000_000_000L, 1_000_000_000L, 2_000_000_000L, 3_000_000_000L, 4_000_000_000L)
-        );
+                prepareClockSource(1_000_000_000L, 1_000_000_000L, 2_000_000_000L, 3_000_000_000L, 4_000_000_000L));
         target.setDelayOperation(delay -> delayPeriods.add(delay));
         target.setTimeout(JdbcInitComponent.DEFAULT_TIMEOUT);
         target.init();
@@ -115,18 +104,16 @@ public class JdbcInitComponentTest {
         //
         SQLException testException = new SQLException("x-test-sql-exception-x");
         Mockito.when(mockDataSource.getConnection())
-            .thenThrow(testException)
-            .thenThrow(testException)
-            .thenThrow(testException)
-            .thenThrow(testException);
+                .thenThrow(testException)
+                .thenThrow(testException)
+                .thenThrow(testException)
+                .thenThrow(testException);
 
         //
         // Execute
         //
         List<Long> delayPeriods = new LinkedList<>();
-        target.setTimestampClockSource(
-            prepareClockSource(1_000_000_000L, 1_000_000_000L)
-        );
+        target.setTimestampClockSource(prepareClockSource(1_000_000_000L, 1_000_000_000L));
         target.setDelayOperation(delay -> delayPeriods.add(delay));
         target.setTimeout(4_000);
 
@@ -146,23 +133,23 @@ public class JdbcInitComponentTest {
         assertEquals(4, delayPeriods.size());
     }
 
-//========================================
-//
-//----------------------------------------
+    // ========================================
+    //
+    // ----------------------------------------
 
     private Supplier<Long> prepareClockSource(long defaultTickLength, long... ticks) {
         return new Supplier<Long>() {
             private int cur = 0;
+
             @Override
             public Long get() {
                 if (cur >= ticks.length) {
                     cur++;
-                    return ticks[ticks.length - 1] + ( defaultTickLength * ( cur - ticks.length ) );
+                    return ticks[ticks.length - 1] + (defaultTickLength * (cur - ticks.length));
                 }
 
                 return ticks[cur++];
             }
         };
     }
-
 }

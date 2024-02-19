@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2007-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.minion.icmp.jni6;
 
 import java.io.IOException;
@@ -33,7 +26,6 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
-
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.protocols.icmp.ICMPEchoPacket;
 import org.opennms.protocols.icmp.IcmpSocket;
@@ -42,8 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class Ping {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(Ping.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(Ping.class);
 
     public static class Stuff implements Runnable {
         private ICMPv6Socket m_socket;
@@ -67,8 +59,7 @@ public abstract class Ping {
                         continue;
                     }
 
-                    if (reply.isEchoReply()
-                            && reply.getThreadId() == m_icmpId) {
+                    if (reply.isEchoReply() && reply.getThreadId() == m_icmpId) {
                         double rtt = reply.elapsedTime(TimeUnit.MILLISECONDS);
                         System.out.println(pkt.getData().length
                                 + " bytes from "
@@ -94,8 +85,7 @@ public abstract class Ping {
     public static void main(String[] argv) {
         if (argv.length != 1) {
             System.err.println("incorrect number of command-line arguments.");
-            System.err.println("usage: java -cp ... "
-                    + IcmpSocket.class.getName() + " <host>");
+            System.err.println("usage: java -cp ... " + IcmpSocket.class.getName() + " <host>");
             System.exit(1);
         }
 
@@ -107,22 +97,25 @@ public abstract class Ping {
         try {
             m_socket = new ICMPv6Socket(icmpId);
         } catch (UnsatisfiedLinkError e) {
-            LOG.error("UnsatisfiedLinkError while creating an "
-                + "IcmpSocket.  Most likely failed to load "
-                + "libjicmp.so.  Try setting the property "
-                + "'opennms.library.jicmp' to point at the "
-                + "full path name of the libjicmp.so shared "
-                + "library "
-                + "(e.g. 'java -Dopennms.library.jicmp=/some/path/libjicmp.so ...')", e);
+            LOG.error(
+                    "UnsatisfiedLinkError while creating an "
+                            + "IcmpSocket.  Most likely failed to load "
+                            + "libjicmp.so.  Try setting the property "
+                            + "'opennms.library.jicmp' to point at the "
+                            + "full path name of the libjicmp.so shared "
+                            + "library "
+                            + "(e.g. 'java -Dopennms.library.jicmp=/some/path/libjicmp.so ...')",
+                    e);
             System.exit(1);
         } catch (NoClassDefFoundError e) {
-            LOG.error("NoClassDefFoundError while creating an "
-                + "IcmpSocket.  Most likely failed to load "
-                + "libjicmp.so.", e);
+            LOG.error(
+                    "NoClassDefFoundError while creating an "
+                            + "IcmpSocket.  Most likely failed to load "
+                            + "libjicmp.so.",
+                    e);
             System.exit(1);
         } catch (IOException e) {
-            LOG.error("IOException while creating an "
-                + "IcmpSocket.", e);
+            LOG.error("IOException while creating an " + "IcmpSocket.", e);
             System.exit(1);
         }
 
@@ -130,8 +123,7 @@ public abstract class Ping {
         try {
             addr = InetAddress.getByName(host);
         } catch (java.net.UnknownHostException e) {
-            LOG.error("UnknownHostException when looking up "
-                + host + ".", e);
+            LOG.error("UnknownHostException when looking up " + host + ".", e);
             System.exit(1);
         }
 
@@ -149,8 +141,7 @@ public abstract class Ping {
 
             // convert it to a datagram to be sent
             byte[] buf = pingPkt.toBytes();
-            DatagramPacket sendPkt =
-                new DatagramPacket(buf, buf.length, addr, 0);
+            DatagramPacket sendPkt = new DatagramPacket(buf, buf.length, addr, 0);
             buf = null;
             pingPkt = null;
 
@@ -167,5 +158,4 @@ public abstract class Ping {
             }
         }
     }
-
 }

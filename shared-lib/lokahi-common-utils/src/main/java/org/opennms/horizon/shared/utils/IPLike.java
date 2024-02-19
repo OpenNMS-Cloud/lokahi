@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2008-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.utils;
 
 import java.net.InetAddress;
@@ -47,8 +40,7 @@ public abstract class IPLike {
         public final String[] fields;
         public final String scope;
 
-        private IPv6Address(final String[] fields,
-                            final String scope) {
+        private IPv6Address(final String[] fields, final String scope) {
             this.fields = fields;
             this.scope = scope;
         }
@@ -73,7 +65,7 @@ public abstract class IPLike {
     }
 
     public static boolean matches(final InetAddress address, final String pattern) {
-    	return matches(InetAddressUtils.str(address), pattern);
+        return matches(InetAddressUtils.str(address), pattern);
     }
 
     private static AddressType classifyAddress(final String address) {
@@ -99,9 +91,7 @@ public abstract class IPLike {
         // Split address in fields
         final String[] fields = addressAndScope[0].split("\\:", 0);
 
-        final String scope = addressAndScope.length == 2
-                             ? addressAndScope[1]
-                             : null;
+        final String scope = addressAndScope.length == 2 ? addressAndScope[1] : null;
 
         return new IPv6Address(fields, scope);
     }
@@ -145,7 +135,8 @@ public abstract class IPLike {
                         return false;
                     } else {
                         // Assume that scope identifiers are always decimal
-                        if (!matchNumericListOrRange(parsedAddress.scope, parsedPattern.scope, new DecimalRangeMatcher())) {
+                        if (!matchNumericListOrRange(
+                                parsedAddress.scope, parsedPattern.scope, new DecimalRangeMatcher())) {
                             return false;
                         }
                     }
@@ -158,7 +149,8 @@ public abstract class IPLike {
                 break;
             }
 
-            default: throw new IllegalStateException();
+            default:
+                throw new IllegalStateException();
         }
 
         if (addressFields.length != expectedFieldCount) {
@@ -193,8 +185,9 @@ public abstract class IPLike {
      * @param patterns a {@link String} object.
      * @return a boolean.
      */
-    public static boolean matchNumericListOrRange(final String value, final String patterns, final RangeMatcher matcher) {
-    	final String[] patternList = patterns.split(",", 0);
+    public static boolean matchNumericListOrRange(
+            final String value, final String patterns, final RangeMatcher matcher) {
+        final String[] patternList = patterns.split(",", 0);
         for (final String element : patternList) {
             if (matcher.match(value, element)) {
                 return true;
@@ -211,12 +204,12 @@ public abstract class IPLike {
      * @return a boolean.
      */
     public static boolean matchRange(final String value, final String pattern) {
-    	final int dashCount = countChar('-', pattern);
+        final int dashCount = countChar('-', pattern);
 
         if ("*".equals(pattern)) {
             return true;
         } else if (dashCount == 0) {
-            return Long.parseLong(pattern, 10) ==  Long.parseLong(value, 10);
+            return Long.parseLong(pattern, 10) == Long.parseLong(value, 10);
         } else if (dashCount > 1) {
             return false;
         } else if (dashCount == 1) {
@@ -237,17 +230,17 @@ public abstract class IPLike {
      * @return a boolean.
      */
     public static boolean matchRangeHex(final String value, final String pattern) {
-    	final int dashCount = countChar('-', pattern);
+        final int dashCount = countChar('-', pattern);
 
         if ("*".equals(pattern)) {
             return true;
         } else if (dashCount == 0) {
             // Convert values to hex integers and compare
-            return Long.parseLong(pattern, 16) ==  Long.parseLong(value, 16);
+            return Long.parseLong(pattern, 16) == Long.parseLong(value, 16);
         } else if (dashCount > 1) {
             return false;
         } else if (dashCount == 1) {
-        	final String[] ar = pattern.split("-");
+            final String[] ar = pattern.split("-");
             final long rangeBegin = Long.parseLong(ar[0], 16);
             final long rangeEnd = Long.parseLong(ar[1], 16);
             final long ip = Long.parseLong(value, 16);
@@ -267,14 +260,13 @@ public abstract class IPLike {
 
         int charCount = 0;
         int charIndex = 0;
-        for (int i=0; i<stingIn.length(); i++) {
+        for (int i = 0; i < stingIn.length(); i++) {
             charIndex = stingIn.indexOf(charIn, i);
             if (charIndex != -1) {
                 charCount++;
-                i = charIndex +1;
+                i = charIndex + 1;
             }
         }
         return charCount;
     }
-
 }

@@ -1,33 +1,34 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.traps;
 
+import static org.opennms.horizon.events.EventConstants.OID_SNMP_IFINDEX_STRING;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.opennms.horizon.events.api.EventBuilder;
 import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.events.conf.xml.Event;
@@ -49,15 +50,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import static org.opennms.horizon.events.EventConstants.OID_SNMP_IFINDEX_STRING;
-import static org.opennms.horizon.shared.utils.InetAddressUtils.str;
-
 @Component
 public class EventFactory {
 
@@ -70,20 +62,21 @@ public class EventFactory {
     private final InventoryClient inventoryClient;
 
     public EventFactory(
-        @Autowired EventConfDao eventConfDao,
-        @Autowired SnmpHelper snmpHelper,
-        @Autowired InventoryClient inventoryClient) {
+            @Autowired EventConfDao eventConfDao,
+            @Autowired SnmpHelper snmpHelper,
+            @Autowired InventoryClient inventoryClient) {
 
         this.eventConfDao = eventConfDao;
         this.snmpHelper = snmpHelper;
         this.inventoryClient = inventoryClient;
     }
 
-    public org.opennms.horizon.events.xml.Event createEventFrom(final TrapDTO trapDTO,
-                                                                final String systemId,
-                                                                final String locationId,
-                                                                final InetAddress trapAddress,
-                                                                String tenantId) {
+    public org.opennms.horizon.events.xml.Event createEventFrom(
+            final TrapDTO trapDTO,
+            final String systemId,
+            final String locationId,
+            final InetAddress trapAddress,
+            String tenantId) {
         LOG.info("{} trap - trapInterface: {}", trapDTO.getVersion(), trapDTO.getAgentAddress());
 
         // Set event data
@@ -107,8 +100,11 @@ public class EventFactory {
         // Handle var bindings
         for (SnmpResult eachResult : trapDTO.getSnmpResultsList()) {
             final SnmpObjId name = SnmpObjId.get(eachResult.getBase());
-            final SnmpValue value = snmpHelper.getValueFactory().getValue(eachResult.getValue().getTypeValue(),
-                eachResult.getValue().getValue().toByteArray());
+            final SnmpValue value = snmpHelper
+                    .getValueFactory()
+                    .getValue(
+                            eachResult.getValue().getTypeValue(),
+                            eachResult.getValue().getValue().toByteArray());
             SyntaxToEvent.processSyntax(name.toString(), value).ifPresent(eventBuilder::addParam);
             if (OID_SNMP_IFINDEX.isPrefixOf(name)) {
                 eventBuilder.setIfIndex(value.toInt());
@@ -116,8 +112,7 @@ public class EventFactory {
         }
 
         // Resolve Node id and set, if known by OpenNMS
-        resolveNodeId(tenantId, locationId, trapAddress)
-            .ifPresent(eventBuilder::setNodeid);
+        resolveNodeId(tenantId, locationId, trapAddress).ifPresent(eventBuilder::setNodeid);
 
         // Note: Filling in Location instead of SystemId. Do we really need to know about system id ?
         if (systemId != null) {
@@ -147,7 +142,8 @@ public class EventFactory {
             String description = econf.getDescr();
             if (description != null && !description.isBlank()) {
                 // A quasi-temporary solution to clean up event descriptions inherited from Horizon.
-                event.setDescr(description.replace("<p>", "").replace("</p>", "").replace("&lt;p>", ""));
+                event.setDescr(
+                        description.replace("<p>", "").replace("</p>", "").replace("&lt;p>", ""));
             }
 
             Logmsg econfLogMsg = econf.getLogmsg();
@@ -207,7 +203,12 @@ public class EventFactory {
         try {
             return Optional.of(inventoryClient.getNodeIdFromQuery(tenantId, trapIpAddress, locationId));
         } catch (Exception e) {
-            LOG.warn("Failed to find node id for tenantId={}; locationId={}, trap address = {}, reason = {}", tenantId, locationId, trapIpAddress, e.getMessage());
+            LOG.warn(
+                    "Failed to find node id for tenantId={}; locationId={}, trap address = {}, reason = {}",
+                    tenantId,
+                    locationId,
+                    trapIpAddress,
+                    e.getMessage());
             return Optional.empty();
         }
     }

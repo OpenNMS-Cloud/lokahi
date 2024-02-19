@@ -1,42 +1,34 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2009-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.minion.icmp.jni;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
 import org.opennms.protocols.icmp.ICMPEchoPacket;
 import org.opennms.protocols.icmp.IcmpSocket;
 import org.opennms.protocols.rt.Messenger;
 import org.opennms.protocols.rt.ReplyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.DatagramPacket;
 
 /**
  * JniIcmpMessenger
@@ -52,7 +44,7 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
 
     /**
      * <p>Constructor for JniIcmpMessenger.</p>
-     * @param pingerId 
+     * @param pingerId
      *
      * @throws java.io.IOException if any.
      */
@@ -71,7 +63,8 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
 
                 if (reply.isEchoReply() && reply.getIdentifier() == pingerId) {
                     // Remove this so we don't send a lot of time in this method when we should be processing packets
-                    // LogUtils.debugf(this, "Found an echo packet addr = %s, port = %d, length = %d, created reply %s", packet.getAddress(), packet.getPort(), packet.getLength(), reply);
+                    // LogUtils.debugf(this, "Found an echo packet addr = %s, port = %d, length = %d, created reply %s",
+                    // packet.getAddress(), packet.getPort(), packet.getLength(), reply);
                     callback.handleReply(reply);
                 }
             } catch (IOException e) {
@@ -83,7 +76,6 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
             } catch (Throwable e) {
                 LOG.error("Unexpected Exception processing reply packet!", e);
             }
-
         }
     }
 
@@ -100,7 +92,7 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
     /** {@inheritDoc} */
     @Override
     public void start(final ReplyHandler<JniPingResponse> callback) {
-        final Thread socketReader = new Thread("JNI-ICMP-"+m_pingerId+"-Socket-Reader") {
+        final Thread socketReader = new Thread("JNI-ICMP-" + m_pingerId + "-Socket-Reader") {
             @Override
             public void run() {
                 try {
@@ -139,8 +131,7 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
         // Construct a new packet
         //
         ICMPEchoPacket pkt = new ICMPEchoPacket(packet.getData());
-        if (pkt.getReceivedTime() == 0)
-            pkt.setReceivedTime();
+        if (pkt.getReceivedTime() == 0) pkt.setReceivedTime();
 
         // Construct and return the new reply
         //
@@ -156,5 +147,4 @@ public class JniIcmpMessenger implements Messenger<JniPingRequest, JniPingRespon
             m_socket.dontFragment();
         }
     }
-
 }

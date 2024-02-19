@@ -1,34 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.traps.listener;
 
 import com.google.protobuf.ByteString;
+import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapIdentity;
 import org.opennms.horizon.minion.plugin.api.Listener;
@@ -53,17 +52,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.PDU;
 
-import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class TrapListener implements TrapNotificationListener, Listener {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrapListener.class);
-
 
     private final MessageDispatcherFactory messageDispatcherFactory;
 
@@ -79,10 +70,11 @@ public class TrapListener implements TrapNotificationListener, Listener {
 
     public static final TrapdInstrumentation trapdInstrumentation = new TrapdInstrumentation();
 
-    public TrapListener(TrapConfig trapsBaseConfig,
-                        MessageDispatcherFactory messageDispatcherFactory,
-                        IpcIdentity identity,
-                        SnmpHelper snmpHelper) {
+    public TrapListener(
+            TrapConfig trapsBaseConfig,
+            MessageDispatcherFactory messageDispatcherFactory,
+            IpcIdentity identity,
+            SnmpHelper snmpHelper) {
         this.trapsBaseConfig = trapsBaseConfig;
         this.messageDispatcherFactory = messageDispatcherFactory;
         this.identity = identity;
@@ -94,17 +86,23 @@ public class TrapListener implements TrapNotificationListener, Listener {
 
         try {
             TrapDTO trapDTO = transformTrapInfo(trapInformation);
-	        LOG.info("Received Trap {}", trapDTO);
-            
+            LOG.info("Received Trap {}", trapDTO);
+
             try {
                 getMessageDispatcher().send(trapDTO);
             } catch (final Exception ex) {
-                LOG.error("An error occured while forwarding trap {} for further processing. The trap will be dropped.", trapInformation, ex);
+                LOG.error(
+                        "An error occured while forwarding trap {} for further processing. The trap will be dropped.",
+                        trapInformation,
+                        ex);
                 // This trap will never reach the sink consumer
                 trapdInstrumentation.incErrorCount();
             }
         } catch (Exception ex) {
-            LOG.error("Received trap {} is not valid and cannot be processed. The trap will be dropped.", trapInformation, ex);
+            LOG.error(
+                    "Received trap {} is not valid and cannot be processed. The trap will be dropped.",
+                    trapInformation,
+                    ex);
             // This trap will never reach the sink consumer
             trapdInstrumentation.incErrorCount();
         }
@@ -119,8 +117,12 @@ public class TrapListener implements TrapNotificationListener, Listener {
         final int snmpTrapPort = trapsBaseConfig.getSnmpTrapPort();
         final InetAddress address = getInetAddress(trapsBaseConfig);
         try {
-            LOG.info("Listening on {}:{}", address == null ? "[all interfaces]" : InetAddressUtils.str(address), snmpTrapPort);
-            snmpHelper.registerForTraps(this, address, snmpTrapPort, transformFromProto(trapsBaseConfig.getSnmpV3UserList()));
+            LOG.info(
+                    "Listening on {}:{}",
+                    address == null ? "[all interfaces]" : InetAddressUtils.str(address),
+                    snmpTrapPort);
+            snmpHelper.registerForTraps(
+                    this, address, snmpTrapPort, transformFromProto(trapsBaseConfig.getSnmpV3UserList()));
             registeredForTraps.set(true);
 
             LOG.debug("init: Creating the trap session");
@@ -129,14 +131,24 @@ public class TrapListener implements TrapNotificationListener, Listener {
                 Logging.withPrefix("OpenNMS.Manager", new Runnable() {
                     @Override
                     public void run() {
-                        LOG.error("init: Failed to listen on SNMP trap port {}, perhaps something else is already listening?", snmpTrapPort, e);
+                        LOG.error(
+                                "init: Failed to listen on SNMP trap port {}, perhaps something else is already listening?",
+                                snmpTrapPort,
+                                e);
                     }
                 });
-                LOG.error("init: Failed to listen on SNMP trap port {}, perhaps something else is already listening?", snmpTrapPort, e);
-                throw new UndeclaredThrowableException(e, "Failed to listen on SNMP trap port " + snmpTrapPort + ", perhaps something else is already listening?");
+                LOG.error(
+                        "init: Failed to listen on SNMP trap port {}, perhaps something else is already listening?",
+                        snmpTrapPort,
+                        e);
+                throw new UndeclaredThrowableException(
+                        e,
+                        "Failed to listen on SNMP trap port " + snmpTrapPort
+                                + ", perhaps something else is already listening?");
             } else {
                 LOG.error("init: Failed to initialize SNMP trap socket on port {}", snmpTrapPort, e);
-                throw new UndeclaredThrowableException(e, "Failed to initialize SNMP trap socket on port " + snmpTrapPort);
+                throw new UndeclaredThrowableException(
+                        e, "Failed to initialize SNMP trap socket on port " + snmpTrapPort);
             }
         }
     }
@@ -174,7 +186,6 @@ public class TrapListener implements TrapNotificationListener, Listener {
         }
     }
 
-
     private InetAddress getInetAddress(TrapConfig trapsBaseConfig) {
         if (trapsBaseConfig.getSnmpTrapAddress().equals("*")) {
             return null;
@@ -194,7 +205,6 @@ public class TrapListener implements TrapNotificationListener, Listener {
             LOG.error("Exception while closing dispatcher ", e);
         }
     }
-
 
     private AsyncDispatcher<TrapDTO> getMessageDispatcher() throws IOException {
         if (dispatcher == null) {
@@ -218,30 +228,32 @@ public class TrapListener implements TrapNotificationListener, Listener {
                     oidStr = "." + oidStr;
                 }
                 SnmpResult snmpResult = SnmpResult.newBuilder()
-                    .setBase(oidStr)
-                    .setValue(SnmpValue.newBuilder()
-                        .setTypeValue(varBindDTO.getSnmpValue().getType())
-                        .setValue(ByteString.copyFrom(varBindDTO.getSnmpValue().getBytes())).build())
-                    .build();
+                        .setBase(oidStr)
+                        .setValue(SnmpValue.newBuilder()
+                                .setTypeValue(varBindDTO.getSnmpValue().getType())
+                                .setValue(ByteString.copyFrom(
+                                        varBindDTO.getSnmpValue().getBytes()))
+                                .build())
+                        .build();
                 results.add(snmpResult);
             }
         }
 
         TrapDTO.Builder trapDTOBuilder = TrapDTO.newBuilder()
-            .setTrapAddress(InetAddressUtils.str(trapInfo.getAgentAddress()))
-            .setAgentAddress(InetAddressUtils.str(trapInfo.getAgentAddress()))
-            .setCommunity(trapInfo.getCommunity())
-            .setVersion(trapInfo.getVersion())
-            .setTimestamp(trapInfo.getTimeStamp())
-            .setPduLength(trapInfo.getPduLength())
-            .setCreationTime(trapInfo.getCreationTime())
-            .setTrapIdentity(TrapIdentity.newBuilder()
-                .setEnterpriseId(trapInfo.getTrapIdentity().getEnterpriseId())
-                .setGeneric(trapInfo.getTrapIdentity().getGeneric())
-                .setSpecific(trapInfo.getTrapIdentity().getSpecific())
-                .setTrapOID(trapInfo.getTrapIdentity().getTrapOID())
-                .build())
-            .addAllSnmpResults(results);
+                .setTrapAddress(InetAddressUtils.str(trapInfo.getAgentAddress()))
+                .setAgentAddress(InetAddressUtils.str(trapInfo.getAgentAddress()))
+                .setCommunity(trapInfo.getCommunity())
+                .setVersion(trapInfo.getVersion())
+                .setTimestamp(trapInfo.getTimeStamp())
+                .setPduLength(trapInfo.getPduLength())
+                .setCreationTime(trapInfo.getCreationTime())
+                .setTrapIdentity(TrapIdentity.newBuilder()
+                        .setEnterpriseId(trapInfo.getTrapIdentity().getEnterpriseId())
+                        .setGeneric(trapInfo.getTrapIdentity().getGeneric())
+                        .setSpecific(trapInfo.getTrapIdentity().getSpecific())
+                        .setTrapOID(trapInfo.getTrapIdentity().getTrapOID())
+                        .build())
+                .addAllSnmpResults(results);
 
         // include the raw message, if configured
         if (trapsBaseConfig.getIncludeRawMessage()) {
@@ -253,7 +265,6 @@ public class TrapListener implements TrapNotificationListener, Listener {
         return trapDTOBuilder.build();
     }
 
-
     /**
      * Converts the {@link TrapInformation} to a raw message.
      * This is only supported for Snmp4J {@link TrapInformation} implementations.
@@ -264,10 +275,12 @@ public class TrapListener implements TrapNotificationListener, Listener {
     private static byte[] convertToRawMessage(TrapInformation trapInfo) {
         // Raw message conversion is not implemented for JoeSnmp, as the usage of that strategy is deprecated
         if (!(trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV1TrapInformation)
-            && !(trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV2V3TrapInformation)) {
-            LOG.warn("Unable to convert TrapInformation of type {} to raw message. " +
-                    "Please use {} as snmp strategy to include raw messages",
-                trapInfo.getClass(), Snmp4JStrategy.class);
+                && !(trapInfo instanceof Snmp4JTrapNotifier.Snmp4JV2V3TrapInformation)) {
+            LOG.warn(
+                    "Unable to convert TrapInformation of type {} to raw message. "
+                            + "Please use {} as snmp strategy to include raw messages",
+                    trapInfo.getClass(),
+                    Snmp4JStrategy.class);
             return null;
         }
 

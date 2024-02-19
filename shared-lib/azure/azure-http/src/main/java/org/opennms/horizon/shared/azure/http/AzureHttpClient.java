@@ -1,48 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.azure.http;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import lombok.extern.slf4j.Slf4j;
-import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
-import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
-import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
-import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
-import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
-import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
-import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIpAddresses;
-import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
-import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
-import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -56,11 +37,24 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.opennms.horizon.shared.azure.http.dto.AzureHttpParams;
+import org.opennms.horizon.shared.azure.http.dto.error.AzureHttpError;
+import org.opennms.horizon.shared.azure.http.dto.instanceview.AzureInstanceView;
+import org.opennms.horizon.shared.azure.http.dto.login.AzureOAuthToken;
+import org.opennms.horizon.shared.azure.http.dto.metrics.AzureMetrics;
+import org.opennms.horizon.shared.azure.http.dto.networkinterface.AzureNetworkInterfaces;
+import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.AzurePublicIpAddresses;
+import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
+import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
+import org.opennms.horizon.shared.azure.http.dto.subscription.AzureSubscription;
 
 @Slf4j
 public class AzureHttpClient {
     public enum ResourcesType {
-        PUBLIC_IP_ADDRESSES("publicIPAddresses"), NETWORK_INTERFACES("networkInterfaces"), NODE("node");
+        PUBLIC_IP_ADDRESSES("publicIPAddresses"),
+        NETWORK_INTERFACES("networkInterfaces"),
+        NODE("node");
         private final String metricName;
         private static final Map<String, ResourcesType> metricNameMap = new HashMap<>();
 
@@ -100,11 +94,16 @@ public class AzureHttpClient {
     public static final String SUBSCRIPTION_ENDPOINT = "/subscriptions/%s%s";
     public static final String RESOURCE_GROUPS_ENDPOINT = "/subscriptions/%s/resourceGroups%s";
     public static final String RESOURCES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/resources%s";
-    public static final String NETWORK_INTERFACES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces%s";
-    public static final String PUBLIC_IP_ADDRESSES_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses%s";
-    public static final String INSTANCE_VIEW_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView%s";
-    public static final String METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics%s";
-    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/%s/providers/Microsoft.Insights/metrics%s";
+    public static final String NETWORK_INTERFACES_ENDPOINT =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces%s";
+    public static final String PUBLIC_IP_ADDRESSES_ENDPOINT =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/publicIPAddresses%s";
+    public static final String INSTANCE_VIEW_ENDPOINT =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/InstanceView%s";
+    public static final String METRICS_ENDPOINT =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s/providers/Microsoft.Insights/metrics%s";
+    public static final String NETWORK_INTERFACE_METRICS_ENDPOINT =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/%s/providers/Microsoft.Insights/metrics%s";
 
     /*
      * Headers
@@ -116,7 +115,6 @@ public class AzureHttpClient {
      * Parameters
      */
     private static final String LOGIN_GRANT_TYPE_PARAM = "grant_type=client_credentials";
-
 
     private static final String LOGIN_CLIENT_ID_PARAM = "client_id=";
     private static final String LOGIN_CLIENT_SECRET_PARAM = "client_secret=";
@@ -149,68 +147,93 @@ public class AzureHttpClient {
         this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss'Z'").create();
     }
 
-    public AzureOAuthToken login(String directoryId, String clientId, String clientSecret, long timeoutMs, int retries) throws AzureHttpException {
+    public AzureOAuthToken login(String directoryId, String clientId, String clientSecret, long timeoutMs, int retries)
+            throws AzureHttpException {
         StringBuilder postBody = new StringBuilder();
         postBody.append(LOGIN_GRANT_TYPE_PARAM)
-            .append(PARAMETER_DELIMITER)
-            .append(LOGIN_CLIENT_ID_PARAM).append(Objects.requireNonNull(clientId))
-            .append(PARAMETER_DELIMITER)
-            .append(LOGIN_CLIENT_SECRET_PARAM).append(Objects.requireNonNull(clientSecret))
-            .append(PARAMETER_DELIMITER)
-            .append("resource=").append(params.getBaseManagementUrl()).append("/");
+                .append(PARAMETER_DELIMITER)
+                .append(LOGIN_CLIENT_ID_PARAM)
+                .append(Objects.requireNonNull(clientId))
+                .append(PARAMETER_DELIMITER)
+                .append(LOGIN_CLIENT_SECRET_PARAM)
+                .append(Objects.requireNonNull(clientSecret))
+                .append(PARAMETER_DELIMITER)
+                .append("resource=")
+                .append(params.getBaseManagementUrl())
+                .append("/");
 
         String baseLoginUrl = params.getBaseLoginUrl();
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(OAUTH2_TOKEN_ENDPOINT, baseLoginUrl, directoryId, versionQueryParam);
         HttpRequest request = getHttpRequestBuilder(url, timeoutMs)
-            .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
-            .POST(HttpRequest.BodyPublishers.ofString(postBody.toString()))
-            .build();
+                .header(CONTENT_TYPE_HEADER, APPLICATION_FORM_URLENCODED_VALUE)
+                .POST(HttpRequest.BodyPublishers.ofString(postBody.toString()))
+                .build();
 
-         return performRequest(AzureOAuthToken.class, request, retries);
+        return performRequest(AzureOAuthToken.class, request, retries);
     }
 
-    public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
+    public AzureSubscription getSubscription(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(SUBSCRIPTION_ENDPOINT, subscriptionId, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureSubscription.class);
     }
 
-    public AzureResourceGroups getResourceGroups(AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
+    public AzureResourceGroups getResourceGroups(
+            AzureOAuthToken token, String subscriptionId, long timeoutMs, int retries) throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(RESOURCE_GROUPS_ENDPOINT, subscriptionId, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureResourceGroups.class);
     }
 
-    public AzureResources getResources(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                       long timeoutMs, int retries) throws AzureHttpException {
+    public AzureResources getResources(
+            AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeoutMs, int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(RESOURCES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureResources.class);
     }
 
-    public AzureNetworkInterfaces getNetworkInterfaces(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                                      long timeoutMs, int retries) throws AzureHttpException {
+    public AzureNetworkInterfaces getNetworkInterfaces(
+            AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeoutMs, int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(NETWORK_INTERFACES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureNetworkInterfaces.class);
     }
 
-    public AzurePublicIpAddresses getPublicIpAddresses(AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeoutMs, int retries) throws AzureHttpException {
+    public AzurePublicIpAddresses getPublicIpAddresses(
+            AzureOAuthToken token, String subscriptionId, String resourceGroup, long timeoutMs, int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
         String url = String.format(PUBLIC_IP_ADDRESSES_ENDPOINT, subscriptionId, resourceGroup, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzurePublicIpAddresses.class);
     }
 
-    public AzureInstanceView getInstanceView(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                             String resourceName, long timeoutMs, int retries) throws AzureHttpException {
+    public AzureInstanceView getInstanceView(
+            AzureOAuthToken token,
+            String subscriptionId,
+            String resourceGroup,
+            String resourceName,
+            long timeoutMs,
+            int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + params.getApiVersion();
-        String url = String.format(INSTANCE_VIEW_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
+        String url =
+                String.format(INSTANCE_VIEW_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
         return get(token, url, timeoutMs, retries, AzureInstanceView.class);
     }
 
-    public AzureMetrics getMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                   String resourceName, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
+    public AzureMetrics getMetrics(
+            AzureOAuthToken token,
+            String subscriptionId,
+            String resourceGroup,
+            String resourceName,
+            Map<String, String> params,
+            long timeoutMs,
+            int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
         String url = String.format(METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceName, versionQueryParam);
         url = addUrlParams(url, params);
@@ -229,15 +252,24 @@ public class AzureHttpClient {
      * @return AzureMetrics
      * @throws AzureHttpException
      */
-    public AzureMetrics getNetworkInterfaceMetrics(AzureOAuthToken token, String subscriptionId, String resourceGroup,
-                                                   String resourceUri, Map<String, String> params, long timeoutMs, int retries) throws AzureHttpException {
+    public AzureMetrics getNetworkInterfaceMetrics(
+            AzureOAuthToken token,
+            String subscriptionId,
+            String resourceGroup,
+            String resourceUri,
+            Map<String, String> params,
+            long timeoutMs,
+            int retries)
+            throws AzureHttpException {
         String versionQueryParam = API_VERSION_PARAM + this.params.getMetricsApiVersion();
-        String url = String.format(NETWORK_INTERFACE_METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceUri, versionQueryParam);
+        String url = String.format(
+                NETWORK_INTERFACE_METRICS_ENDPOINT, subscriptionId, resourceGroup, resourceUri, versionQueryParam);
         url = addUrlParams(url, params);
         return get(token, url, timeoutMs, retries, AzureMetrics.class);
     }
 
-    private <T> T get(AzureOAuthToken token, String endpoint, long timeoutMs, int retries, Class<T> clazz) throws AzureHttpException {
+    private <T> T get(AzureOAuthToken token, String endpoint, long timeoutMs, int retries, Class<T> clazz)
+            throws AzureHttpException {
         String url = params.getBaseManagementUrl() + endpoint;
         HttpRequest request = buildGetHttpRequest(token, url, timeoutMs);
 
@@ -262,15 +294,17 @@ public class AzureHttpClient {
                     throw ex;
                 }
                 lastException = ex;
-                log.warn(String.format("Failed to get for endpoint: %s, retry: %d/%d error: %s",
-                    request.uri(), retryCount, retries, lastException));
+                log.warn(String.format(
+                        "Failed to get for endpoint: %s, retry: %d/%d error: %s",
+                        request.uri(), retryCount, retries, lastException));
                 try {
                     Thread.sleep(backoffTime);
                     backoffTime *= EXPONENTIAL_BACKOFF_AMPLIFIER;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    String message = String.format("Failed to wait for exp backoff with time: %d, retry: %d/%d",
-                        backoffTime, retryCount, retries);
+                    String message = String.format(
+                            "Failed to wait for exp backoff with time: %d, retry: %d/%d",
+                            backoffTime, retryCount, retries);
                     throw new AzureHttpException(message, e);
                 }
             }
@@ -278,7 +312,7 @@ public class AzureHttpClient {
         throw lastException;
     }
 
-    private <T> T performSingleRequest(Class<T> clazz, HttpRequest request) throws AzureHttpException{
+    private <T> T performSingleRequest(Class<T> clazz, HttpRequest request) throws AzureHttpException {
         try {
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -287,7 +321,7 @@ public class AzureHttpClient {
             log.info("Response statusCode: {}, body: {}", httpResponse.statusCode(), httpBody);
 
             var statusCode = httpResponse.statusCode();
-            if(statusCode == HttpURLConnection.HTTP_OK){
+            if (statusCode == HttpURLConnection.HTTP_OK) {
                 return gson.fromJson(httpBody, clazz);
             } else {
                 throw toHttpErrorException(httpBody, statusCode);
@@ -296,29 +330,29 @@ public class AzureHttpClient {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            String message = String.format("Failed to get for endpoint: %s, error: %s",
-                request.uri(), e.getMessage());
+            String message = String.format("Failed to get for endpoint: %s, error: %s", request.uri(), e.getMessage());
             throw new AzureHttpException(message, e);
         }
     }
 
-    private AzureHttpException toHttpErrorException(String message, int httpStatusCode){
+    private AzureHttpException toHttpErrorException(String message, int httpStatusCode) {
         AzureHttpError error = gson.fromJson(message, AzureHttpError.class);
         return new AzureHttpException(error, httpStatusCode);
     }
-    private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeoutMs) throws AzureHttpException {
+
+    private HttpRequest buildGetHttpRequest(AzureOAuthToken token, String url, long timeoutMs)
+            throws AzureHttpException {
         if (timeoutMs < MIN_TIMEOUT_MS) {
             throw new AzureHttpException("Timeout must be a positive number > " + MIN_TIMEOUT_MS);
         }
         return getHttpRequestBuilder(url, timeoutMs)
-            .header(AUTH_HEADER, String.format("%s %s", token.getTokenType(), token.getAccessToken()))
-            .GET().build();
+                .header(AUTH_HEADER, String.format("%s %s", token.getTokenType(), token.getAccessToken()))
+                .GET()
+                .build();
     }
 
     private HttpRequest.Builder getHttpRequestBuilder(String url, long timeoutMs) {
-        return HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .timeout(Duration.of(timeoutMs, ChronoUnit.MILLIS));
+        return HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.of(timeoutMs, ChronoUnit.MILLIS));
     }
 
     private String addUrlParams(String url, Map<String, String> params) {

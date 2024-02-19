@@ -1,33 +1,43 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.ipc.grpc.server;
 
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.protobuf.Empty;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import io.grpc.BindableService;
+import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
@@ -43,7 +53,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
 import org.opennms.cloud.grpc.minion.MinionToCloudMessage;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
@@ -72,25 +81,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
 
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.protobuf.Empty;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
-
-import io.grpc.BindableService;
-import io.grpc.Context;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-
 /**
  * OpenNMS GRPC Server runs as OSGI bundle and it runs both RPC/Sink together.
  * gRPC runs in a typical web server/client mode, so gRPC client runs on each minion and gRPC server runs on OpenNMS.
@@ -108,7 +98,6 @@ import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
  * Sink: Sink runs in uni-directional streaming mode. OpenNMS receives sink messages from client and they are dispatched
  * in the consumer threads that are initialized at start.
  */
-
 @SuppressWarnings("rawtypes")
 public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements RpcRequestDispatcher {
 
@@ -119,9 +108,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     private String location;
     private Properties properties;
     private AtomicBoolean closed = new AtomicBoolean(false);
-    private final ThreadFactory sinkConsumerThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("sink-consumer-%d")
-            .build();
+    private final ThreadFactory sinkConsumerThreadFactory =
+            new ThreadFactoryBuilder().setNameFormat("sink-consumer-%d").build();
 
     private RpcConnectionTracker rpcConnectionTracker;
     private RpcRequestTracker rpcRequestTracker;
@@ -144,15 +132,18 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     private MeterRegistry meterRegistry;
 
-//========================================
-// Constructor
-//----------------------------------------
+    // ========================================
+    // Constructor
+    // ----------------------------------------
 
-    public OpennmsGrpcServer(GrpcIpcServer grpcIpcServer, final MeterRegistry meterRegistry, final Tracer tracer, boolean debugSpanFullMessage, boolean debugSpanContent) {
+    public OpennmsGrpcServer(
+            GrpcIpcServer grpcIpcServer,
+            final MeterRegistry meterRegistry,
+            final Tracer tracer,
+            boolean debugSpanFullMessage,
+            boolean debugSpanContent) {
         this.grpcIpcServer = grpcIpcServer;
-        this.interceptors = List.of(
-            new MeteringInterceptorFactory(meterRegistry)
-        );
+        this.interceptors = List.of(new MeteringInterceptorFactory(meterRegistry));
 
         this.meterRegistry = Objects.requireNonNull(meterRegistry);
         this.tracer = tracer;
@@ -160,19 +151,18 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         this.debugSpanContent = debugSpanContent;
     }
 
-//========================================
-// Lifecycle
-//----------------------------------------
+    // ========================================
+    // Lifecycle
+    // ----------------------------------------
 
     public void start() throws IOException {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", RpcClientFactory.LOG_PREFIX)) {
 
             MinionRSTransportAdapter adapter = new MinionRSTransportAdapter(
-                minionRpcStreamConnectionManager::startRpcStreaming,
-                this.outgoingMessageHandler,
-                this.incomingRpcHandler,
-                this::processSinkStreamingCall
-            );
+                    minionRpcStreamConnectionManager::startRpcStreaming,
+                    this.outgoingMessageHandler,
+                    this.incomingRpcHandler,
+                    this::processSinkStreamingCall);
 
             BindableService service = adapter;
             if (!interceptors.isEmpty()) {
@@ -195,9 +185,9 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         LOG.info("OpenNMS gRPC server stopped");
     }
 
-//========================================
-// Getters and Setters
-//----------------------------------------
+    // ========================================
+    // Getters and Setters
+    // ----------------------------------------
 
     public String getLocation() {
         return location;
@@ -254,6 +244,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     public void setTenantIDGrpcServerInterceptor(TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor) {
         this.tenantIDGrpcServerInterceptor = tenantIDGrpcServerInterceptor;
     }
+
     public LocationServerInterceptor getLocationServerInterceptor() {
         return locationServerInterceptor;
     }
@@ -262,13 +253,13 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         this.locationServerInterceptor = locationServerInterceptor;
     }
 
-//========================================
-// Operations
-//----------------------------------------
+    // ========================================
+    // Operations
+    // ----------------------------------------
 
-//========================================
-// Message Consumer Manager
-//----------------------------------------
+    // ========================================
+    // Message Consumer Manager
+    // ----------------------------------------
 
     @Override
     protected <S extends Message, T extends Message> void startConsumingForModule(SinkModule<S, T> module) {
@@ -281,8 +272,9 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         sinkDispatcherById.computeIfAbsent(module.getId(), id -> sinkMessage -> {
             final T message = module.unmarshal(sinkMessage.getContent().toByteArray());
             final var span = tracer.spanBuilder("dispatch " + module.getId())
-                .setAttribute(SemanticAttributes.CODE_NAMESPACE, module.getClass().getName())
-                .startSpan();
+                    .setAttribute(
+                            SemanticAttributes.CODE_NAMESPACE, module.getClass().getName())
+                    .startSpan();
 
             try (var ss = span.makeCurrent()) {
                 dispatch(module, message);
@@ -308,22 +300,22 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
 
     @Override
     public <S extends Message, T extends Message> void dispatch(final SinkModule<S, T> module, final T message) {
-        this.meterRegistry.timer("consumer.dispatch",
-            "module", module.getId())
-            .record(() -> super.dispatch(module, message));
+        this.meterRegistry
+                .timer("consumer.dispatch", "module", module.getId())
+                .record(() -> super.dispatch(module, message));
     }
 
-    //========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private StreamObserver<MinionToCloudMessage> processSinkStreamingCall(StreamObserver<Empty> responseObserver) {
         final var streamSpan = Span.current(); // stash for linking future messages back to the stream
         final AtomicReference<Attributes> attributes = new AtomicReference<>(Attributes.builder()
-            .put("user", tenantIDGrpcServerInterceptor.readCurrentContextTenantId())
-            .put("location", locationServerInterceptor.readCurrentContextLocationId())
-            // we don't have systemId yet -- we grab this from the first heartbeat message we see
-            .build());
+                .put("user", tenantIDGrpcServerInterceptor.readCurrentContextTenantId())
+                .put("location", locationServerInterceptor.readCurrentContextLocationId())
+                // we don't have systemId yet -- we grab this from the first heartbeat message we see
+                .build());
         final var haveSystemId = new AtomicBoolean(false);
 
         streamSpan.setAllAttributes(attributes.get()); // Add attributes to the stream span now
@@ -333,12 +325,12 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
             public void onNext(MinionToCloudMessage message) {
                 // We don't know the message type yet, but will update later if we can
                 final var span = tracer.spanBuilder("MinionToCloudMessage receive unknown")
-                    .setSpanKind(SpanKind.CONSUMER)
-                    .setAllAttributes(attributes.get())
-                    .setAttribute("size", message.getSerializedSize())
-                    .setNoParent() // we don't want each message to be lost in the long-running streaming trace
-                    .addLink(Span.current().getSpanContext()) // but we do want to link to the long-running trace
-                    .startSpan();
+                        .setSpanKind(SpanKind.CONSUMER)
+                        .setAllAttributes(attributes.get())
+                        .setAttribute("size", message.getSerializedSize())
+                        .setNoParent() // we don't want each message to be lost in the long-running streaming trace
+                        .addLink(Span.current().getSpanContext()) // but we do want to link to the long-running trace
+                        .startSpan();
 
                 try (var ss = span.makeCurrent()) {
                     if (message.hasSinkMessage()) {
@@ -347,14 +339,16 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                         span.setAttribute("moduleId", sinkMessage.getModuleId());
                         span.setAttribute("messageId", sinkMessage.getMessageId());
                         if (sinkMessage.hasIdentity()) {
-                            span.setAttribute("identity", sinkMessage.getIdentity().toString());
+                            span.setAttribute(
+                                    "identity", sinkMessage.getIdentity().toString());
                         }
 
                         if (debugSpanFullMessage) {
                             span.setAttribute("message", sinkMessage.toString());
                         }
                         if (debugSpanContent) {
-                            span.setAttribute("content", sinkMessage.getContent().toString());
+                            span.setAttribute(
+                                    "content", sinkMessage.getContent().toString());
                         }
 
                         // We won't have the system ID until we receive the first heartbeat message, so
@@ -365,11 +359,12 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                             try {
                                 var heartbeatMessage = HeartbeatMessage.parseFrom(sinkMessage.getContent());
                                 if (heartbeatMessage.getIdentity() != null) {
-                                    var systemId = heartbeatMessage.getIdentity().getSystemId();
+                                    var systemId =
+                                            heartbeatMessage.getIdentity().getSystemId();
                                     attributes.set(Attributes.builder()
-                                        .putAll(attributes.get())
-                                        .put("systemId", systemId)
-                                        .build());
+                                            .putAll(attributes.get())
+                                            .put("systemId", systemId)
+                                            .build());
                                     streamSpan.setAttribute("systemId", systemId);
                                     span.setAttribute("systemId", systemId);
                                     haveSystemId.set(true);
@@ -384,20 +379,21 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
                             if (sinkModuleExecutor != null) {
                                 // Schedule execution with the ExecutorService, with the current GRPC context active
                                 Context.currentContextExecutor(sinkModuleExecutor)
-                                    .execute(() -> dispatchSinkMessage(sinkMessage));
+                                        .execute(() -> dispatchSinkMessage(sinkMessage));
                             } else {
-                                LOG.error("Ignoring sink message; no module executor registered: module-id={}; identity={}; message-id={}",
-                                    sinkMessage.getModuleId(),
-                                    sinkMessage.getIdentity(),
-                                    sinkMessage.getMessageId()
-                                );
-                                span.setStatus(StatusCode.ERROR, "Ignoring sink message; no module executor registered");
+                                LOG.error(
+                                        "Ignoring sink message; no module executor registered: module-id={}; identity={}; message-id={}",
+                                        sinkMessage.getModuleId(),
+                                        sinkMessage.getIdentity(),
+                                        sinkMessage.getMessageId());
+                                span.setStatus(
+                                        StatusCode.ERROR, "Ignoring sink message; no module executor registered");
                             }
                         } else {
-                            LOG.error("Ignoring sink message with null or empty module-id: identity={}; message-id={}",
-                                sinkMessage.getIdentity(),
-                                sinkMessage.getMessageId()
-                            );
+                            LOG.error(
+                                    "Ignoring sink message with null or empty module-id: identity={}; message-id={}",
+                                    sinkMessage.getIdentity(),
+                                    sinkMessage.getMessageId());
                             span.setStatus(StatusCode.ERROR, "Ignoring sink message with null or empty module-id");
                         }
                     } else {
@@ -417,7 +413,7 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
             @Override
             public void onError(Throwable throwable) {
                 if (throwable instanceof StatusRuntimeException statusRuntimeException
-                    && statusRuntimeException.getStatus().getCode() == Status.Code.CANCELLED) {
+                        && statusRuntimeException.getStatus().getCode() == Status.Code.CANCELLED) {
                     LOG.warn("Got status code CANCELLED in sink streaming");
                 } else {
                     LOG.error("Error in sink streaming", throwable);
@@ -449,8 +445,10 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     @Override
-    public CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String locationId, RpcRequestProto request) {
-        StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByLocationRoundRobin(tenantId, locationId);
+    public CompletableFuture<GatewayRpcResponseProto> dispatch(
+            String tenantId, String locationId, RpcRequestProto request) {
+        StreamObserver<RpcRequestProto> rpcHandler =
+                rpcConnectionTracker.lookupByLocationRoundRobin(tenantId, locationId);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown location " + locationId));
         }
@@ -458,7 +456,8 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
     }
 
     @Override
-    public CompletableFuture<GatewayRpcResponseProto> dispatch(String tenantId, String locationId, String systemId, RpcRequestProto request) {
+    public CompletableFuture<GatewayRpcResponseProto> dispatch(
+            String tenantId, String locationId, String systemId, RpcRequestProto request) {
         StreamObserver<RpcRequestProto> rpcHandler = rpcConnectionTracker.lookupByMinionId(tenantId, systemId);
         if (rpcHandler == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Unknown system id " + systemId));
@@ -466,16 +465,17 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         return dispatch(rpcHandler, locationId, request);
     }
 
-    private CompletableFuture<GatewayRpcResponseProto> dispatch(StreamObserver<RpcRequestProto> rpcHandler, String location, RpcRequestProto request) {
+    private CompletableFuture<GatewayRpcResponseProto> dispatch(
+            StreamObserver<RpcRequestProto> rpcHandler, String location, RpcRequestProto request) {
         final var span = tracer.spanBuilder("CloudToMinionRPC dispatch " + request.getModuleId())
-            .setSpanKind(SpanKind.CLIENT)
-            .addLink(rpcConnectionTracker.getConnectionSpanContext(rpcHandler))
-            .setAllAttributes(rpcConnectionTracker.getConnectionSpanAttributes(rpcHandler))
-            .setAttribute("request_size", request.getSerializedSize())
-            .setAttribute("rpcId", request.getRpcId())
-            .setAttribute("expiration", request.getExpirationTime())
-            .setAttribute("moduleId", request.getModuleId())
-            .startSpan();
+                .setSpanKind(SpanKind.CLIENT)
+                .addLink(rpcConnectionTracker.getConnectionSpanContext(rpcHandler))
+                .setAllAttributes(rpcConnectionTracker.getConnectionSpanAttributes(rpcHandler))
+                .setAttribute("request_size", request.getSerializedSize())
+                .setAttribute("rpcId", request.getRpcId())
+                .setAttribute("expiration", request.getExpirationTime())
+                .setAttribute("moduleId", request.getModuleId())
+                .startSpan();
 
         if (debugSpanFullMessage) {
             span.setAttribute("request", request.toString());
@@ -487,37 +487,39 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
         try (var ss = span.makeCurrent()) {
             CompletableFuture<RpcResponseProto> future = new CompletableFuture<>();
             String rpcId = request.getRpcId();
-            BasicRpcResponseHandler responseHandler = new BasicRpcResponseHandler(request.getExpirationTime(), rpcId, request.getModuleId(), future);
+            BasicRpcResponseHandler responseHandler =
+                    new BasicRpcResponseHandler(request.getExpirationTime(), rpcId, request.getModuleId(), future);
             rpcHandler.onNext(request);
             rpcRequestTracker.addRequest(rpcId, responseHandler);
             rpcRequestTimeoutManager.registerRequestTimeout(responseHandler);
             return future.whenComplete((r, e) -> {
-                rpcRequestTracker.remove(rpcId);
-                if (r != null) {
-                    span.setAttribute("response_size", r.getSerializedSize());
-                    if (debugSpanFullMessage) {
-                        span.setAttribute("response", r.toString());
-                    }
-                    if (debugSpanContent) {
-                        span.setAttribute("response_payload", r.getPayload().toString());
-                    }
-                }
-                if (e != null) {
-                    span.setStatus(StatusCode.ERROR, "Received exception during dispatch future: " + e);
-                    span.recordException(e);
-                }
-                span.end();
-            }).thenApply(response -> {
-                return GatewayRpcResponseProto.newBuilder()
-                    .setRpcId(response.getRpcId())
-                    .setIdentity(MinionIdentity.newBuilder()
-                        .setSystemId(response.getIdentity().getSystemId())
-                        .setLocationId(location)
-                    )
-                    .setModuleId(response.getModuleId())
-                    .setPayload(response.getPayload())
-                    .build();
-            });
+                        rpcRequestTracker.remove(rpcId);
+                        if (r != null) {
+                            span.setAttribute("response_size", r.getSerializedSize());
+                            if (debugSpanFullMessage) {
+                                span.setAttribute("response", r.toString());
+                            }
+                            if (debugSpanContent) {
+                                span.setAttribute(
+                                        "response_payload", r.getPayload().toString());
+                            }
+                        }
+                        if (e != null) {
+                            span.setStatus(StatusCode.ERROR, "Received exception during dispatch future: " + e);
+                            span.recordException(e);
+                        }
+                        span.end();
+                    })
+                    .thenApply(response -> {
+                        return GatewayRpcResponseProto.newBuilder()
+                                .setRpcId(response.getRpcId())
+                                .setIdentity(MinionIdentity.newBuilder()
+                                        .setSystemId(response.getIdentity().getSystemId())
+                                        .setLocationId(location))
+                                .setModuleId(response.getModuleId())
+                                .setPayload(response.getPayload())
+                                .build();
+                    });
         } catch (Throwable throwable) {
             span.setStatus(StatusCode.ERROR, "Received exception during dispatch: " + throwable);
             span.recordException(throwable);
@@ -529,5 +531,4 @@ public class OpennmsGrpcServer extends AbstractMessageConsumerManager implements
             // So, no span.end() here.
         }
     }
-
 }

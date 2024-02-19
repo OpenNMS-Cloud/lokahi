@@ -1,55 +1,46 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.session;
-
-import io.netty.buffer.ByteBuf;
-import org.junit.Assert;
-import org.junit.Test;
-
-import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
-import org.opennms.horizon.minion.flows.parser.IpfixUdpParser;
-import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
-import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
-import org.opennms.horizon.minion.flows.parser.ie.Value;
-import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
-
-import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+
+import io.netty.buffer.ByteBuf;
+import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.junit.Assert;
+import org.junit.Test;
+import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
+import org.opennms.horizon.minion.flows.parser.IpfixUdpParser;
+import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
+import org.opennms.horizon.minion.flows.parser.Netflow9UdpParser;
+import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
 
 public class UdpSessionManagerTest {
 
@@ -81,7 +72,8 @@ public class UdpSessionManagerTest {
             }
 
             @Override
-            public Value<?> parse(Session.Resolver resolver, ByteBuf buffer) throws InvalidPacketException, MissingTemplateException {
+            public Value<?> parse(Session.Resolver resolver, ByteBuf buffer)
+                    throws InvalidPacketException, MissingTemplateException {
                 return new StringValue(name, Optional.empty(), value);
             }
         };
@@ -95,7 +87,8 @@ public class UdpSessionManagerTest {
             }
 
             @Override
-            public Value<?> parse(Session.Resolver resolver, ByteBuf buffer) throws InvalidPacketException, MissingTemplateException {
+            public Value<?> parse(Session.Resolver resolver, ByteBuf buffer)
+                    throws InvalidPacketException, MissingTemplateException {
                 return new StringValue(name, Optional.empty(), value);
             }
         };
@@ -105,20 +98,34 @@ public class UdpSessionManagerTest {
         return new StringValue(name, Optional.empty(), value);
     }
 
-    private void testNetflow9SessionKeys(final InetSocketAddress remote1, final InetSocketAddress local1, final InetSocketAddress remote2, final InetSocketAddress local2, final boolean shouldMatch) {
+    private void testNetflow9SessionKeys(
+            final InetSocketAddress remote1,
+            final InetSocketAddress local1,
+            final InetSocketAddress remote2,
+            final InetSocketAddress local2,
+            final boolean shouldMatch) {
         final UdpSessionManager.SessionKey sessionKey1 = new Netflow9UdpParser.SessionKey(remote1.getAddress(), local1);
         final UdpSessionManager.SessionKey sessionKey2 = new Netflow9UdpParser.SessionKey(remote2.getAddress(), local2);
         testSessionKeys(sessionKey1, sessionKey2, shouldMatch);
     }
 
-    private void testIpFixSessionKeys(final InetSocketAddress remote1, final InetSocketAddress local1, final InetSocketAddress remote2, final InetSocketAddress local2, final boolean shouldMatch) {
+    private void testIpFixSessionKeys(
+            final InetSocketAddress remote1,
+            final InetSocketAddress local1,
+            final InetSocketAddress remote2,
+            final InetSocketAddress local2,
+            final boolean shouldMatch) {
         final UdpSessionManager.SessionKey sessionKey1 = new IpfixUdpParser.SessionKey(remote1, local1);
         final UdpSessionManager.SessionKey sessionKey2 = new IpfixUdpParser.SessionKey(remote2, local2);
         testSessionKeys(sessionKey1, sessionKey2, shouldMatch);
     }
 
-    private void testSessionKeys(final UdpSessionManager.SessionKey sessionKey1, final UdpSessionManager.SessionKey sessionKey2, final boolean shouldMatch) {
-        final UdpSessionManager udpSessionManager = new UdpSessionManager(Duration.ofMinutes(30), () -> new SequenceNumberTracker(32));
+    private void testSessionKeys(
+            final UdpSessionManager.SessionKey sessionKey1,
+            final UdpSessionManager.SessionKey sessionKey2,
+            final boolean shouldMatch) {
+        final UdpSessionManager udpSessionManager =
+                new UdpSessionManager(Duration.ofMinutes(30), () -> new SequenceNumberTracker(32));
         final Session session1 = udpSessionManager.getSession(sessionKey1);
 
         final List<Scope> scopes = new ArrayList<>();
@@ -129,7 +136,10 @@ public class UdpSessionManagerTest {
         fields.add(field("field1", null));
         fields.add(field("field2", null));
 
-        final Template template = Template.builder(100, Template.Type.OPTIONS_TEMPLATE).withFields(fields).withScopes(scopes).build();
+        final Template template = Template.builder(100, Template.Type.OPTIONS_TEMPLATE)
+                .withFields(fields)
+                .withScopes(scopes)
+                .build();
         session1.addTemplate(observationId1, template);
 
         final List<Value<?>> scopesValue = new ArrayList<>();
@@ -152,15 +162,27 @@ public class UdpSessionManagerTest {
         matchingValues.add(value("scope1", "scopeValue1"));
         matchingValues.add(value("scope2", "scopeValue2"));
 
-        Assert.assertEquals(0, session2.getResolver(observationId1).lookupOptions(notMatchingValues).size());
-        Assert.assertEquals(0, session2.getResolver(observationId2).lookupOptions(matchingValues).size());
+        Assert.assertEquals(
+                0,
+                session2.getResolver(observationId1)
+                        .lookupOptions(notMatchingValues)
+                        .size());
+        Assert.assertEquals(
+                0,
+                session2.getResolver(observationId2)
+                        .lookupOptions(matchingValues)
+                        .size());
 
         final List<Value<?>> result = session2.getResolver(observationId1).lookupOptions(matchingValues);
 
         System.out.println("Checking session keys " + sessionKey1 + " and " + sessionKey2);
         Assert.assertEquals(shouldMatch ? 2 : 0, result.size());
-        Assert.assertEquals(shouldMatch, result.contains(new StringValue("additionalField1", Optional.empty(), "additionalValue1")));
-        Assert.assertEquals(shouldMatch, result.contains(new StringValue("additionalField2", Optional.empty(), "additionalValue2")));
+        Assert.assertEquals(
+                shouldMatch,
+                result.contains(new StringValue("additionalField1", Optional.empty(), "additionalValue1")));
+        Assert.assertEquals(
+                shouldMatch,
+                result.contains(new StringValue("additionalField2", Optional.empty(), "additionalValue2")));
     }
 
     /**
@@ -168,9 +190,11 @@ public class UdpSessionManagerTest {
      */
     @Test
     public void optionsRemovalTest() {
-        final UdpSessionManager.SessionKey sessionKey = new Netflow9UdpParser.SessionKey(remoteAddress1.getAddress(), localAddress1);
+        final UdpSessionManager.SessionKey sessionKey =
+                new Netflow9UdpParser.SessionKey(remoteAddress1.getAddress(), localAddress1);
 
-        final UdpSessionManager udpSessionManager = new UdpSessionManager(Duration.ofMinutes(0), () -> new SequenceNumberTracker(32));
+        final UdpSessionManager udpSessionManager =
+                new UdpSessionManager(Duration.ofMinutes(0), () -> new SequenceNumberTracker(32));
         final Session session = udpSessionManager.getSession(sessionKey);
 
         final List<Scope> scopes = new ArrayList<>();
@@ -181,7 +205,10 @@ public class UdpSessionManagerTest {
         fields.add(field("field1", null));
         fields.add(field("field2", null));
 
-        final Template template = Template.builder(100, Template.Type.OPTIONS_TEMPLATE).withFields(fields).withScopes(scopes).build();
+        final Template template = Template.builder(100, Template.Type.OPTIONS_TEMPLATE)
+                .withFields(fields)
+                .withScopes(scopes)
+                .build();
         session.addTemplate(observationId1, template);
 
         final List<Value<?>> scopesValue = new ArrayList<>();
@@ -194,13 +221,27 @@ public class UdpSessionManagerTest {
 
         session.addOptions(observationId1, templateId1, scopesValue, fieldsValue);
 
-        assertThat(udpSessionManager.templates.keySet(), hasItem(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id)));
-        assertThat(udpSessionManager.templates.get(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id)).wrapped.options.entrySet(), not(empty()));
+        assertThat(
+                udpSessionManager.templates.keySet(),
+                hasItem(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id)));
+        assertThat(
+                udpSessionManager
+                        .templates
+                        .get(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id))
+                        .wrapped
+                        .options
+                        .entrySet(),
+                not(empty()));
 
         udpSessionManager.doHousekeeping();
 
-        assertThat(udpSessionManager.templates.keySet(), not(hasItem(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id))));
-        assertThat(udpSessionManager.templates.get(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id)), nullValue());
+        assertThat(
+                udpSessionManager.templates.keySet(),
+                not(hasItem(new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id))));
+        assertThat(
+                udpSessionManager.templates.get(
+                        new UdpSessionManager.TemplateKey(sessionKey, observationId1, template.id)),
+                nullValue());
     }
 
     @Test

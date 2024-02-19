@@ -1,43 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.ie;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
+import org.opennms.horizon.minion.flows.parser.Protocol;
 import org.opennms.horizon.minion.flows.parser.ie.values.NullValue;
 import org.opennms.horizon.minion.flows.parser.ipfix.InformationElementProvider;
-
-import com.google.common.collect.ImmutableMap;
-
-import org.opennms.horizon.minion.flows.parser.Protocol;
 
 public class InformationElementDatabase {
     public static class Key {
@@ -45,9 +35,10 @@ public class InformationElementDatabase {
         private final Optional<Long> enterpriseNumber;
         private final Integer informationElementIdentifier;
 
-        public Key(final Protocol protocol,
-                   final Optional<Long> enterpriseNumber,
-                   final Integer informationElementNumber) {
+        public Key(
+                final Protocol protocol,
+                final Optional<Long> enterpriseNumber,
+                final Integer informationElementNumber) {
             this.protocol = Objects.requireNonNull(protocol);
             this.enterpriseNumber = Objects.requireNonNull(enterpriseNumber);
             this.informationElementIdentifier = Objects.requireNonNull(informationElementNumber);
@@ -58,9 +49,9 @@ public class InformationElementDatabase {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Key that = (Key) o;
-            return Objects.equals(this.protocol, that.protocol) &&
-                    Objects.equals(this.enterpriseNumber, that.enterpriseNumber) &&
-                    Objects.equals(this.informationElementIdentifier, that.informationElementIdentifier);
+            return Objects.equals(this.protocol, that.protocol)
+                    && Objects.equals(this.enterpriseNumber, that.enterpriseNumber)
+                    && Objects.equals(this.informationElementIdentifier, that.informationElementIdentifier);
         }
 
         @Override
@@ -77,28 +68,33 @@ public class InformationElementDatabase {
     public interface Adder {
         void add(final Key key, final InformationElement element);
 
-        default void add(final Protocol protocol,
-                         final Optional<Long> enterpriseNumber,
-                         final int informationElementNumber,
-                         final ValueParserFactory parserFactory,
-                         final String name,
-                         final Optional<Semantics> semantics) {
-            this.add(new Key(protocol, enterpriseNumber, informationElementNumber), parserFactory.parser(name, semantics));
+        default void add(
+                final Protocol protocol,
+                final Optional<Long> enterpriseNumber,
+                final int informationElementNumber,
+                final ValueParserFactory parserFactory,
+                final String name,
+                final Optional<Semantics> semantics) {
+            this.add(
+                    new Key(protocol, enterpriseNumber, informationElementNumber),
+                    parserFactory.parser(name, semantics));
         }
 
-        default void add(final Protocol protocol,
-                         final int informationElementNumber,
-                         final ValueParserFactory parserFactory,
-                         final String name,
-                         final Optional<Semantics> semantics) {
+        default void add(
+                final Protocol protocol,
+                final int informationElementNumber,
+                final ValueParserFactory parserFactory,
+                final String name,
+                final Optional<Semantics> semantics) {
             this.add(protocol, Optional.empty(), informationElementNumber, parserFactory, name, semantics);
         }
 
-        default void add(final Protocol protocol,
-                         final int informationElementNumber,
-                         final ValueParserFactory parserFactory,
-                         final String name,
-                         final Semantics semantics) {
+        default void add(
+                final Protocol protocol,
+                final int informationElementNumber,
+                final ValueParserFactory parserFactory,
+                final String name,
+                final Semantics semantics) {
             this.add(protocol, Optional.empty(), informationElementNumber, parserFactory, name, Optional.of(semantics));
         }
     }
@@ -128,8 +124,10 @@ public class InformationElementDatabase {
         this.elements = adder.build();
     }
 
-    public Optional<InformationElement> lookup(final Protocol protocol, final Optional<Long> enterpriseNumber, final int informationElementIdentifier) {
-        return Optional.ofNullable(this.elements.get(new Key(protocol, enterpriseNumber, informationElementIdentifier)));
+    public Optional<InformationElement> lookup(
+            final Protocol protocol, final Optional<Long> enterpriseNumber, final int informationElementIdentifier) {
+        return Optional.ofNullable(
+                this.elements.get(new Key(protocol, enterpriseNumber, informationElementIdentifier)));
     }
 
     public Optional<InformationElement> lookup(final Protocol protocol, final int informationElementIdentifier) {

@@ -138,7 +138,7 @@ public class GrpcNodeService {
     }
 
     @GraphQLMutation
-    public Mono<Boolean> getDiscoveryByNodeIds(List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Boolean> discoveryByNodeIds(List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(client.startScanByNodeIds(ids, headerUtil.getAuthHeader(env)));
     }
 

@@ -50,7 +50,7 @@ public class EventConfTest {
         assertNotNull(event);
         assertEquals(uei, event.getUei());
         assertEquals("Normal", event.getSeverity());
-/*        var events = eventConfDao.getAllEventsByUEI();
+        var events = eventConfDao.getAllEventsByUEI();
         System.out.printf("size of events = %d ", events.size());
         AtomicInteger countOfEventsWithVendor = new AtomicInteger(0);
         AtomicInteger sizeOfEventsWithAlarmData = new AtomicInteger(0);
@@ -74,7 +74,7 @@ public class EventConfTest {
             }
         });
         System.out.printf("size of events with vendor = %d \n", countOfEventsWithVendor.get());
-        System.out.printf("size of events with alarmdata = %d \n", sizeOfEventsWithAlarmData.get());*/
+        System.out.printf("size of events with alarmdata = %d \n", sizeOfEventsWithAlarmData.get());
     }
 
     private String extractVendorFromUei(String eventUei) {

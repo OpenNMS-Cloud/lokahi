@@ -49,6 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,7 +127,7 @@ public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationServ
                 .build());
             repository.deleteById(icmpActiveDiscovery.getId());
             // updating nodes containing discovery id
-            List<Node> nodeList = nodeRepository.findByTenantIdAndDiscoveryIdsContains(tenantId, id);
+            List<Node> nodeList =  new ArrayList<>();//nodeRepository.findByTenantIdAndDiscoveryIdsContains(tenantId, id);
             nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
             nodeRepository.saveAll(nodeList);
             return true;

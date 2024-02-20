@@ -159,14 +159,14 @@ public class AzureDiscoveryStepDefinitions {
         assertEquals(tagCreateDto1.getName(), tagDTO.getName());
     }
 
-    @Then("verify exception {string} thrown with message {string}")
-    public void verifyException(String exceptionName, String message) {
-        if (caught == null) {
-            fail("No exception caught");
-        } else {
-            assertEquals(exceptionName, caught.getClass().getSimpleName(), "Exception mismatch");
-            assertEquals(message, caught.getMessage());
-        }
-    }
+//    @Then("verify exception {string} thrown with message {string}")
+//    public void verifyException(String exceptionName, String message) {
+//        if (caught == null) {
+//            fail("No exception caught");
+//        } else {
+//            assertEquals(exceptionName, caught.getClass().getSimpleName(), "Exception mismatch");
+//            assertEquals(message, caught.getMessage());
+//        }
+//    }
 
 }

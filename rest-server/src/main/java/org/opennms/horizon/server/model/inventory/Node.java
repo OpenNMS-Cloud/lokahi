@@ -54,4 +54,5 @@ public class Node {
     private String systemLocation;
     private String systemContact;
     private String location;
+    private List<Long> discoveryIds;
 }

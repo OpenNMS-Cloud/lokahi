@@ -51,6 +51,7 @@ import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.inventory.NodeUpdate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
+import org.opennms.horizon.server.model.inventory.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -71,6 +72,7 @@ public class GrpcNodeService {
 
     private final InventoryClient client;
     private final NodeMapper mapper;
+    private final ActiveDiscoveryMapper activeDiscoveryMapper;
     private final ServerHeaderUtil headerUtil;
     private final NodeStatusService nodeStatusService;
 
@@ -100,8 +102,8 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery(name = "getDiscoveriesByNodeId")
-    public Mono<ActiveDiscoveryList> getDiscoveriesByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)));
+    public Flux<ActiveDiscovery> getDiscoveriesByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)).getActiveDiscoveriesList().stream().map(activeDiscoveryMapper::dtoToActiveDiscovery).toList());
     }
 
     @GraphQLMutation

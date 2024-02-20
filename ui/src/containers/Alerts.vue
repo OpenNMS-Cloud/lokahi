@@ -81,7 +81,7 @@
               >
             </div>
             <FeatherPagination
-              v-if="!isAlertsListEmpty && total > 0"
+              v-if="!isAlertsListEmpty"
               v-model="page"
               :pageSize="pageSize"
               :total="total"
@@ -95,7 +95,7 @@
           />
           <div
             class="card-list-bottom"
-            v-if="!isAlertsListEmpty && total > 0"
+            v-if="!isAlertsListEmpty"
           >
             <FeatherPagination
               v-model="page"
@@ -121,19 +121,17 @@ import { fncArgVoid } from '@/types'
 const alertsStore = useAlertsStore()
 
 const alerts = ref([] as IAlert[])
-const total = ref(0)
+const total = ref(1)
 
 watchEffect(() => {
   alerts.value = alertsStore.alertsList?.alerts?.map((a: IAlert) => ({ ...a, isSelected: false })) || []
 })
-watch(() => alertsStore.alertsPagination.total,
-  (updateTotal, oldTotal) => {
-    if(updateTotal!==oldTotal) {
-      total.value = alertsStore.alertsPagination.total
-    }
-  },
-  { immediate:true }
-)
+watch(() => alertsStore?.alertsPagination?.total, (updateTotal) => {
+  if (updateTotal !== total.value) {
+    total.value = updateTotal
+  }
+}, { immediate: true })
+
 const isAlertsListEmpty = computed(() => alertsStore.isAlertsListEmpty)
 const page = alertsStore.alertsPagination.page || 1
 const pageSize = computed(() => alertsStore.alertsPagination.pageSize)

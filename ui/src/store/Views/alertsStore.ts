@@ -47,12 +47,15 @@ export const useAlertsStore = defineStore('alertsStore', () => {
 
     alertsList.value = alertsQueries.fetchAlertsData
     isAlertsListEmpty.value = Boolean(alertsList.value.alerts?.length <= 0)
-    watch(alertsList, (newAlertsList,oldAlertsList) => {
-      const newTotalAlerts = newAlertsList.totalAlerts
+    const updateTotalAlerts = (newTotalAlerts:any) => {
       if (newTotalAlerts !== alertsPagination.value.total) {
         alertsPagination.value.total = newTotalAlerts
+      }
     }
-   }, { immediate: true })
+    watch(alertsList, ({ totalAlerts }) => {
+      updateTotalAlerts(totalAlerts)
+    }, { immediate: true })
+    
   }
 
   const resetPaginationAndFetchAlerts = () => {
@@ -94,13 +97,12 @@ export const useAlertsStore = defineStore('alertsStore', () => {
   }
 
   const setPage = (page: number): void => {
-        if (page !== Number(alertsPagination.value.page)) {
+    if (page !== Number(alertsPagination.value.page)) {
       alertsPagination.value = {
         ...alertsPagination.value,
         page
       }
-        }
-
+    }
     fetchAlerts()
   }
 

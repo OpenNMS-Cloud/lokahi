@@ -5,7 +5,7 @@
         <NodeSystemInformation />
       </div>
       <div class="card">
-        <NodeTags />
+        <NodeTags :nodeTagsContent="tabContent[0]?.tags || []"/>
       </div>
       <div class="card">
         <NodeMonitoringPolicies />
@@ -33,8 +33,15 @@
 </template>
 
 <script lang="ts" setup>
+import { InventoryItem } from '@/types'
+import { PropType } from 'vue'
 
-
+defineProps({
+  tabContent: {
+    type: Object as PropType<InventoryItem[]>,
+    required: true
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -43,18 +50,9 @@
 @use '@/styles/mediaQueriesMixins';
 @use '@featherds/styles/mixins/typography';
 
-/*
-.ctrls {
-  display: flex;
-  justify-content: end;
-  padding: var(variables.$spacing-s) 0;
-  min-width: vars.$min-width-smallest-screen;
-}
-*/
 
 .cards {
   display: flex;
-  //flex-flow: row wrap;
   gap: 1%;
   margin-top: 1em;
 

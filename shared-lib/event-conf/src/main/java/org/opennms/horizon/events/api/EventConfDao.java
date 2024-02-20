@@ -21,10 +21,9 @@
  */
 package org.opennms.horizon.events.api;
 
-import org.opennms.horizon.events.conf.xml.Event;
-
 import java.util.List;
 import java.util.Map;
+import org.opennms.horizon.events.conf.xml.Event;
 
 public interface EventConfDao {
 

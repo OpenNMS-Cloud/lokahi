@@ -22,6 +22,16 @@
 package org.opennms.horizon.alertservice.service;
 
 import io.grpc.Context;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.EventType;
@@ -38,17 +48,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A simple engine that stores alerts in memory and periodically scans the list to performs actions (i.e. delete if older than X).
@@ -89,7 +88,7 @@ public class AlertEngine implements AlertLifecycleListener {
                 TimeUnit.SECONDS.toMillis(5),
                 TimeUnit.SECONDS.toMillis(5));
         alertRepository.findAll().forEach(a -> handleNewOrUpdatedAlert(alertMapper.toProto(a)));
-        //saveAllEventDef();
+        // saveAllEventDef();
     }
 
     private void saveAllEventDef() {
@@ -97,14 +96,14 @@ public class AlertEngine implements AlertLifecycleListener {
             var eventDefinition = new EventDefinition();
             eventDefinition.setEventUei(eventConf.getUei());
             String vendor = extractVendorFromUei(eventConf.getUei());
-            if(vendor != null) {
+            if (vendor != null) {
                 eventDefinition.setVendor(vendor);
             }
             String enterpriseId = null;
             var enterpriseIds = eventConf.getMaskElementValues("id");
             if (enterpriseIds != null && enterpriseIds.size() == 1) {
                 enterpriseId = enterpriseIds.get(0);
-                if(enterpriseId != null) {
+                if (enterpriseId != null) {
                     eventDefinition.setEnterpriseId(enterpriseId);
                 }
             }
@@ -134,7 +133,7 @@ public class AlertEngine implements AlertLifecycleListener {
             } else {
                 throw new IllegalArgumentException("No match found for " + eventUei);
             }
-        } else if (eventUei.contains("trap")){
+        } else if (eventUei.contains("trap")) {
             Pattern pattern = Pattern.compile("/traps/([^/]+)/");
             Matcher matcher = pattern.matcher(eventUei);
             if (matcher.find()) {

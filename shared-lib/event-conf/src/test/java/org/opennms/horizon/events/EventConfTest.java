@@ -21,20 +21,16 @@
  */
 package org.opennms.horizon.events;
 
-
-import org.junit.jupiter.api.Test;
-import org.opennms.horizon.events.api.EventBuilder;
-import org.opennms.horizon.events.conf.xml.Event;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.junit.jupiter.api.Test;
+import org.opennms.horizon.events.api.EventBuilder;
+import org.opennms.horizon.events.conf.xml.Event;
 
 public class EventConfTest {
 
@@ -60,7 +56,7 @@ public class EventConfTest {
             var enterpriseIds = eventConf.getMaskElementValues("id");
             if (enterpriseIds != null && enterpriseIds.size() == 1) {
                 enterpriseId = enterpriseIds.get(0);
-                //System.out.println("Enterprise id = " + enterpriseId);
+                // System.out.println("Enterprise id = " + enterpriseId);
             }
             String vendor = extractVendorFromUei(eventUei);
             if (eventConf.getAlertData() != null) {
@@ -70,7 +66,7 @@ public class EventConfTest {
                 sizeOfEventsWithAlarmData.incrementAndGet();
             }
             if (vendor != null & enterpriseId != null) {
-                 countOfEventsWithVendor.incrementAndGet();
+                countOfEventsWithVendor.incrementAndGet();
             }
         });
         System.out.printf("size of events with vendor = %d \n", countOfEventsWithVendor.get());
@@ -88,7 +84,7 @@ public class EventConfTest {
             } else {
                 throw new IllegalArgumentException("No match found for " + eventUei);
             }
-        } else if (eventUei.contains("trap")){
+        } else if (eventUei.contains("trap")) {
             Pattern pattern = Pattern.compile("/traps/([^/]+)/");
             Matcher matcher = pattern.matcher(eventUei);
             if (matcher.find()) {

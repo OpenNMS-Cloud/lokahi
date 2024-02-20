@@ -17,14 +17,14 @@
           <FeatherIcon
           @click="deleteTag(tag)"
           :icon="CancelIcon"
-          class="pointer" 
-          /> 
+          class="pointer"
+          />
         </FeatherChip>
     </FeatherChipList>
   </section>
-  </div> 
+  </div>
   </template>
-  
+
 <script lang="ts" setup>
 import CancelIcon from '@featherds/icon/navigation/Cancel'
 import { useTagStore } from '@/store/Components/tagStore'
@@ -46,7 +46,7 @@ const nodeStatusStore = useNodeStatusStore()
 const { showSnackbar } = useSnackbar()
 const tagStore = useTagStore()
 
-watchEffect(()=>{
+watchEffect(() => {
   if (props?.nodeTagsContent) {
     tagStore.setFilteredTags(props.nodeTagsContent)
   }
@@ -65,16 +65,16 @@ const deleteTag = async (tag: any) => {
         msg: 'Error deleting tag'
       })
     }
-  } 
+  }
 }
 </script>
-  
+
   <style lang="scss" scoped>
   @use '@featherds/styles/themes/variables';
   @use '@/styles/vars';
   @use '@/styles/mediaQueriesMixins';
   @use '@featherds/styles/mixins/typography';
-  
+
   .node-tag-section {
     margin: 0px 1.5rem 1.5rem 1.5rem;
     .feather-row {
@@ -91,7 +91,7 @@ const deleteTag = async (tag: any) => {
         }
       }
   }
-} 
+}
   .node-component-content {
     .node-tag-content {
       padding-right: var(variables.$spacing-s);

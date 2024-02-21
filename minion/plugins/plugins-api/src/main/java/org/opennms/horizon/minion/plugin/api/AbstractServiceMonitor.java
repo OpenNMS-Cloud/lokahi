@@ -1,24 +1,42 @@
-
-
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.plugin.api;
-
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Supplier;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 public abstract class AbstractServiceMonitor implements ServiceMonitor {
-
 
     @Override
     public String getEffectiveLocation(String location) {
         return location;
     }
 
-    public static Object getKeyedObject(final Map<String, Object> parameterMap, final String key, final Object defaultValue) {
+    public static Object getKeyedObject(
+            final Map<String, Object> parameterMap, final String key, final Object defaultValue) {
         if (key == null) return defaultValue;
 
         final Object value = parameterMap.get(key);
@@ -28,53 +46,57 @@ public abstract class AbstractServiceMonitor implements ServiceMonitor {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getKeyedInstance(final Map<String, Object> parameterMap, final String key, final Supplier<T> defaultValue) {
+    public static <T> T getKeyedInstance(
+            final Map<String, Object> parameterMap, final String key, final Supplier<T> defaultValue) {
         if (key == null) return defaultValue.get();
 
         final Object value = parameterMap.get(key);
         if (value == null) return defaultValue.get();
 
-        return (T)value;
+        return (T) value;
     }
 
-    public static Boolean getKeyedBoolean(final Map<String, Object> parameterMap, final String key, final Boolean defaultValue) {
+    public static Boolean getKeyedBoolean(
+            final Map<String, Object> parameterMap, final String key, final Boolean defaultValue) {
         final Object value = getKeyedObject(parameterMap, key, defaultValue);
         if (value == null) return defaultValue;
 
         if (value instanceof String) {
-            return "true".equalsIgnoreCase((String)value) ? Boolean.TRUE : Boolean.FALSE;
+            return "true".equalsIgnoreCase((String) value) ? Boolean.TRUE : Boolean.FALSE;
         } else if (value instanceof Boolean) {
-            return (Boolean)value;
+            return (Boolean) value;
         }
 
         return defaultValue;
     }
 
-    public static String getKeyedString(final Map<String, Object> parameterMap, final String key, final String defaultValue) {
+    public static String getKeyedString(
+            final Map<String, Object> parameterMap, final String key, final String defaultValue) {
         final Object value = getKeyedObject(parameterMap, key, defaultValue);
         if (value == null) return defaultValue;
 
         if (value instanceof String) {
-            return (String)value;
+            return (String) value;
         }
 
         return value.toString();
     }
 
-    public static Integer getKeyedInteger(final Map<String, Object> parameterMap, final String key, final Integer defaultValue) {
+    public static Integer getKeyedInteger(
+            final Map<String, Object> parameterMap, final String key, final Integer defaultValue) {
         final Object value = getKeyedObject(parameterMap, key, defaultValue);
         if (value == null) return defaultValue;
 
         if (value instanceof String) {
             try {
-                return Integer.valueOf((String)value);
+                return Integer.valueOf((String) value);
             } catch (final NumberFormatException e) {
                 return defaultValue;
             }
         } else if (value instanceof Integer) {
-            return (Integer)value;
+            return (Integer) value;
         } else if (value instanceof Number) {
-            return Integer.valueOf(((Number)value).intValue());
+            return Integer.valueOf(((Number) value).intValue());
         }
 
         return defaultValue;
@@ -86,14 +108,14 @@ public abstract class AbstractServiceMonitor implements ServiceMonitor {
 
         if (value instanceof String) {
             try {
-                return Long.valueOf((String)value);
+                return Long.valueOf((String) value);
             } catch (final NumberFormatException e) {
                 return defaultValue;
             }
         } else if (value instanceof Long) {
-            return (Long)value;
+            return (Long) value;
         } else if (value instanceof Number) {
-            return Long.valueOf(((Number)value).longValue());
+            return Long.valueOf(((Number) value).longValue());
         }
 
         return defaultValue;
@@ -101,7 +123,8 @@ public abstract class AbstractServiceMonitor implements ServiceMonitor {
 
     public static Properties getServiceProperties(final MonitoredService svc) {
         final InetAddress addr = InetAddressUtils.addr(svc.getIpAddr());
-        final boolean requireBrackets = addr != null && addr instanceof Inet6Address && !svc.getIpAddr().startsWith("[");
+        final boolean requireBrackets =
+                addr != null && addr instanceof Inet6Address && !svc.getIpAddr().startsWith("[");
         final Properties properties = new Properties();
         properties.put("ipaddr", requireBrackets ? "[" + svc.getIpAddr() + "]" : svc.getIpAddr());
         properties.put("nodeid", svc.getNodeId());

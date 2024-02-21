@@ -1,12 +1,39 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.server;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
-
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionInfo;
 import org.opennms.horizon.shared.ipc.grpc.server.manager.MinionManager;
@@ -15,15 +42,6 @@ import org.opennms.miniongateway.grpc.server.model.TenantKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-
-import io.grpc.stub.StreamObserver;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanContext;
 
 public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
@@ -48,11 +66,13 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
      * Semaphore per connection that is used to ensure thread-safe sending to each connection.
      */
     private Map<StreamObserver<RpcRequestProto>, Semaphore> semaphoreByConnection = new IdentityHashMap<>();
+
     private Map<StreamObserver<RpcRequestProto>, SpanContext> spanContextByConnection = new IdentityHashMap<>();
     private Map<StreamObserver<RpcRequestProto>, Attributes> spanAttributesByConnection = new IdentityHashMap<>();
 
     @Override
-    public boolean addConnection(String tenantId, String location, String minionId, StreamObserver<RpcRequestProto> connection) {
+    public boolean addConnection(
+            String tenantId, String location, String minionId, StreamObserver<RpcRequestProto> connection) {
         boolean added = false;
         synchronized (lock) {
             TenantKey tenantMinionId = new TenantKey(tenantId, minionId);
@@ -70,18 +90,19 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
                 locationByConnection.put(connection, tenantLocation);
                 minionIdByConnection.put(connection, tenantMinionId);
                 spanContextByConnection.put(connection, Span.current().getSpanContext());
-                spanAttributesByConnection.put(connection,
-                    Attributes.builder()
-                        .put("user", tenantId)
-                        .put("location", location)
-                        .put("systemId", minionId)
-                        .build());
+                spanAttributesByConnection.put(
+                        connection,
+                        Attributes.builder()
+                                .put("user", tenantId)
+                                .put("location", location)
+                                .put("systemId", minionId)
+                                .build());
 
                 semaphoreByConnection.put(connection, new Semaphore(1, true));
 
                 updateIteratorLocked(tenantLocation);
 
-                //minionManager.addMinion(new MinionInfo(tenantId, minionId, location));
+                // minionManager.addMinion(new MinionInfo(tenantId, minionId, location));
 
                 added = true;
             } else {
@@ -183,9 +204,9 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
         }
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void removePossibleExistingMinionConnectionLocked(TenantKey minionId) {
         StreamObserver<RpcRequestProto> obsoleteObserver = connectionByMinionId.remove(minionId);
@@ -199,7 +220,8 @@ public class RpcConnectionTrackerImpl implements RpcConnectionTracker {
 
     private void updateIteratorLocked(TenantKey tenantLocation) {
         Collection<StreamObserver<RpcRequestProto>> streamObservers = connectionListByLocation.get(tenantLocation);
-        Iterator<StreamObserver<RpcRequestProto>> iterator = Iterables.cycle(streamObservers).iterator();
+        Iterator<StreamObserver<RpcRequestProto>> iterator =
+                Iterables.cycle(streamObservers).iterator();
 
         rpcHandlerIteratorMap.put(tenantLocation, iterator);
     }

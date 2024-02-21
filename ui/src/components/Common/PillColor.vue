@@ -1,4 +1,4 @@
-<!-- 
+<!--
   Component props structure:
     item: {
       style: 'CRITICAL',

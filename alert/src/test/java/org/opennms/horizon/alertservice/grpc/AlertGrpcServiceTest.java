@@ -1,32 +1,34 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.grpc;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
@@ -34,6 +36,9 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,19 +63,6 @@ import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
 class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     private AlertServiceGrpc.AlertServiceBlockingStub stub;
     private AlertService mockAlertService;
@@ -85,7 +77,6 @@ class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
 
     protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
 
-
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
         mockAlertService = mock(AlertService.class);
@@ -93,7 +84,13 @@ class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
         mockNodeRepository = mock(NodeRepository.class);
         mockAlertMapper = mock(AlertMapper.class);
         mockLocationRepository = mock(LocationRepository.class);
-        AlertGrpcService grpcService = new AlertGrpcService(mockAlertMapper, mockAlertRepository, mockNodeRepository, mockLocationRepository, mockAlertService, tenantLookup);
+        AlertGrpcService grpcService = new AlertGrpcService(
+                mockAlertMapper,
+                mockAlertRepository,
+                mockNodeRepository,
+                mockLocationRepository,
+                mockAlertService,
+                tenantLookup);
         startServer(grpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
         stub = AlertServiceGrpc.newBlockingStub(channel);
@@ -103,7 +100,7 @@ class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
         alertProto2 = org.opennms.horizon.alerts.proto.Alert.newBuilder().build();
     }
 
-    private Alert generateAlert(String ruleName, String policyName){
+    private Alert generateAlert(String ruleName, String policyName) {
         var alert = new Alert();
         var alertCondition = new AlertCondition();
         var rule = new PolicyRule();
@@ -130,40 +127,57 @@ class AlertGrpcServiceTest extends AbstractGrpcUnitTest {
     void testListAlerts() throws VerificationException {
         Page<org.opennms.horizon.alertservice.db.entity.Alert> page = mock(Page.class);
         doReturn(Arrays.asList(alert1, alert2)).when(page).getContent();
-        doReturn(page).when(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndTenantId(any(), any(), any(), any(), any());
-        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class))).thenReturn(alertProto1, alertProto2);
-        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class))).thenReturn(alertProto1, alertProto2);
+        doReturn(page)
+                .when(mockAlertRepository)
+                .findBySeverityInAndLastEventTimeBetweenAndTenantId(any(), any(), any(), any(), any());
+        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class)))
+                .thenReturn(alertProto1, alertProto2);
+        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class)))
+                .thenReturn(alertProto1, alertProto2);
         ListAlertsResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .listAlerts(ListAlertsRequest.newBuilder().build());
+                .listAlerts(ListAlertsRequest.newBuilder().build());
         assertThat(result.getAlertsList().size()).isEqualTo(2);
         ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndTenantId(any(), any(), any(), pageRequestCaptor.capture(), any());
+        verify(mockAlertRepository)
+                .findBySeverityInAndLastEventTimeBetweenAndTenantId(
+                        any(), any(), any(), pageRequestCaptor.capture(), any());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
         assertThat(pageRequestCaptor.getValue().getPageNumber()).isEqualTo(0);
         assertThat(pageRequestCaptor.getValue().getPageSize()).isEqualTo(10);
-        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("id").getDirection()).isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
+        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("id").getDirection())
+                .isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
     }
 
     @Test
     void testListAlertsWithNodes() throws VerificationException {
         Page<org.opennms.horizon.alertservice.db.entity.Alert> page = mock(Page.class);
         doReturn(Arrays.asList(alert1, alert2)).when(page).getContent();
-        doReturn(page).when(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(any(), any(), any(), any(), any(), any(), any());
+        doReturn(page)
+                .when(mockAlertRepository)
+                .findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(
+                        any(), any(), any(), any(), any(), any(), any());
         doReturn(Arrays.asList(mock(Node.class))).when(mockNodeRepository).findAllByNodeLabelAndTenantId(any(), any());
-        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class))).thenReturn(alertProto1, alertProto2);
-        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class))).thenReturn(alertProto1, alertProto2);
+        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class)))
+                .thenReturn(alertProto1, alertProto2);
+        when(mockAlertMapper.toProto(any(org.opennms.horizon.alertservice.db.entity.Alert.class)))
+                .thenReturn(alertProto1, alertProto2);
         ListAlertsResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .listAlerts(ListAlertsRequest.newBuilder().addFilters(Filter.newBuilder().setNodeLabel("label").build()).build());
+                .listAlerts(ListAlertsRequest.newBuilder()
+                        .addFilters(Filter.newBuilder().setNodeLabel("label").build())
+                        .build());
         assertThat(result.getAlertsList().size()).isEqualTo(2);
         ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(mockAlertRepository).findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(any(), any(), any(), any(), any(), pageRequestCaptor.capture(), any());
+        verify(mockAlertRepository)
+                .findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(
+                        any(), any(), any(), any(), any(), pageRequestCaptor.capture(), any());
         verify(spyInterceptor).verifyAccessToken(authHeader);
         verify(spyInterceptor).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
 
         assertThat(pageRequestCaptor.getValue().getPageNumber()).isEqualTo(0);
         assertThat(pageRequestCaptor.getValue().getPageSize()).isEqualTo(10);
-        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("id").getDirection()).isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
+        assertThat(pageRequestCaptor.getValue().getSort().getOrderFor("id").getDirection())
+                .isEqualTo(org.springframework.data.domain.Sort.Direction.DESC);
     }
 }

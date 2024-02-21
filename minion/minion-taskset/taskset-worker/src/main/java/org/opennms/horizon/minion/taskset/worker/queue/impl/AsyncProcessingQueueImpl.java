@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.queue.impl;
 
 import java.util.concurrent.LinkedBlockingDeque;
@@ -46,18 +67,17 @@ public class AsyncProcessingQueueImpl<T> implements AsyncProcessingQueue<T> {
     private AtomicLong totalDequeued = new AtomicLong(0);
     private boolean noConsumerWarningGiven = false;
 
-
-//========================================
-// Lifecycle
-//----------------------------------------
+    // ========================================
+    // Lifecycle
+    // ----------------------------------------
 
     public void init() {
         messageStore = new LinkedBlockingDeque<>(maxQueueSize);
     }
 
-//========================================
-// AsyncProcessingQueue interface
-//----------------------------------------
+    // ========================================
+    // AsyncProcessingQueue interface
+    // ----------------------------------------
 
     @Override
     public void setConsumer(Consumer<T> consumer) {
@@ -72,14 +92,14 @@ public class AsyncProcessingQueueImpl<T> implements AsyncProcessingQueue<T> {
         triggerDispatch();
     }
 
-//========================================
-// Internal
-//----------------------------------------
+    // ========================================
+    // Internal
+    // ----------------------------------------
 
     private void triggerDispatch() {
         try {
             synchronized (lock) {
-                if (! dispatchActive) {
+                if (!dispatchActive) {
                     dispatchActive = true;
                     this.executor.execute(this::executeDispatch);
                 }
@@ -93,16 +113,17 @@ public class AsyncProcessingQueueImpl<T> implements AsyncProcessingQueue<T> {
         long numDispatched = 0;
 
         // Make sure the consumer is ready and just skip the dispatch if not.
-        if (! checkConsumerReady()) {
+        if (!checkConsumerReady()) {
             return;
         }
 
         // Make sure the consumer is ready
         synchronized (lock) {
             if (consumer == null) {
-                if (! noConsumerWarningGiven) {
+                if (!noConsumerWarningGiven) {
                     noConsumerWarningGiven = true;
-                    log.warn("Have dispatch request when no consumer yet ready on queue - make sure setConsumer() is called before send()");
+                    log.warn(
+                            "Have dispatch request when no consumer yet ready on queue - make sure setConsumer() is called before send()");
                 }
 
                 return;
@@ -113,7 +134,7 @@ public class AsyncProcessingQueueImpl<T> implements AsyncProcessingQueue<T> {
          * Loop until the dispatch is ready to stop, when the queue is empty.  Note the starvation check at the end
          *  of the loop.
          */
-        while (! dispatchReadyToStop()) {
+        while (!dispatchReadyToStop()) {
             T msg = messageStore.remove();
 
             totalDequeued.incrementAndGet();
@@ -136,9 +157,10 @@ public class AsyncProcessingQueueImpl<T> implements AsyncProcessingQueue<T> {
     private boolean checkConsumerReady() {
         synchronized (lock) {
             if (consumer == null) {
-                if (! noConsumerWarningGiven) {
+                if (!noConsumerWarningGiven) {
                     noConsumerWarningGiven = true;
-                    log.warn("Have dispatch request when no consumer yet ready on queue - make sure setConsumer() is called before send()");
+                    log.warn(
+                            "Have dispatch request when no consumer yet ready on queue - make sure setConsumer() is called before send()");
                 }
 
                 return false;
@@ -161,8 +183,7 @@ public class AsyncProcessingQueueImpl<T> implements AsyncProcessingQueue<T> {
          *  race condition on termination of the dispatch
          */
         synchronized (lock) {
-            if ( messageStore.isEmpty() )
-            {
+            if (messageStore.isEmpty()) {
                 result = true;
                 dispatchActive = false;
             }

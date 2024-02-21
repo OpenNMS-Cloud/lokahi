@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2007-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.icmp;
 
 import java.io.IOException;
@@ -48,10 +41,12 @@ public interface Pinger {
      * @param retries The number of times to retry.
      * @param packetsize The size in byte of the ICMP packet.
      * @param sequenceId an ID representing the ping
-     * 
+     *
      * @param cb the {@link org.opennms.netmgt.ping.PingResponseCallback} callback to call upon success or error
      */
-    public void ping(InetAddress host, long timeout, int retries, int packetsize, int sequenceId, PingResponseCallback cb) throws Exception;
+    public void ping(
+            InetAddress host, long timeout, int retries, int packetsize, int sequenceId, PingResponseCallback cb)
+            throws Exception;
 
     /**
      * This method is used to ping a remote host to test for ICMP support.  Calls
@@ -61,10 +56,11 @@ public interface Pinger {
      * @param timeout The time to wait between each retry.
      * @param retries The number of times to retry.
      * @param sequenceId an ID representing the ping
-     * 
+     *
      * @param cb the {@link org.opennms.netmgt.ping.PingResponseCallback} callback to call upon success or error
      */
-    public void ping(InetAddress host, long timeout, int retries, int sequenceId, PingResponseCallback cb) throws Exception;
+    public void ping(InetAddress host, long timeout, int retries, int sequenceId, PingResponseCallback cb)
+            throws Exception;
 
     /**
      * This method is used to ping a remote host to test for ICMP support. If
@@ -78,7 +74,6 @@ public interface Pinger {
      * @return The response time in microseconds if the host is reachable and has responded with an echo reply, otherwise a null value.
      */
     public Number ping(InetAddress host, long timeout, int retries, int packetsize) throws Exception;
-    
 
     /**
      * This method is used to ping a remote host to test for ICMP support. If
@@ -91,72 +86,72 @@ public interface Pinger {
      * @return The response time in microseconds if the host is reachable and has responded with an echo reply, otherwise a null value.
      */
     public Number ping(InetAddress host, long timeout, int retries) throws Exception;
-    
 
-	/**
-	 * Ping a remote host, using the default number of retries and timeouts.
-	 *
+    /**
+     * Ping a remote host, using the default number of retries and timeouts.
+     *
      * @param host The {@link java.net.InetAddress} address to poll.
      * @return The response time in microseconds if the host is reachable and has responded with an echo reply, otherwise a null value.
-	 * @throws IOException if any.
-	 * @throws InterruptedException if any.
-	 * @throws java.lang.Exception if any.
-	 */
-	public Number ping(InetAddress host) throws Exception;
+     * @throws IOException if any.
+     * @throws InterruptedException if any.
+     * @throws java.lang.Exception if any.
+     */
+    public Number ping(InetAddress host) throws Exception;
 
-        /**
-         * Ping a remote host, sending 1 or more packets at the given interval, and then
-         * return the response times as a list.
-         *
-         * @param host The {@link java.net.InetAddress} address to poll.
-         * @param count The number of packets to send.
-         * @param timeout The time to wait between each retry.
-         * @param pingInterval The interval at which packets will be sent.
-         * @param size The size of the packet to send.
-         * @return a {@link java.util.List} of response times in microseconds.
-         *     If, for a given ping request, the host is reachable and has responded with an
-         *     echo reply, it will contain a number, otherwise a null value.
-         */
-        public List<Number> parallelPing(InetAddress host, int count, long timeout, long pingInterval, int size) throws Exception;
-        
-        /**
-         * Ping a remote host, sending 1 or more packets at the given interval, and then
-         * return the response times as a list.
-         *
-         * @param host The {@link java.net.InetAddress} address to poll.
-         * @param count The number of packets to send.
-         * @param timeout The time to wait between each retry.
-         * @param pingInterval The interval at which packets will be sent.
-         * @return a {@link java.util.List} of response times in microseconds.
-         *     If, for a given ping request, the host is reachable and has responded with an
-         *     echo reply, it will contain a number, otherwise a null value.
-         */
-        public List<Number> parallelPing(InetAddress host, int count, long timeout, long pingInterval) throws Exception;
-        
-	public void setAllowFragmentation(final boolean allow) throws Exception;
+    /**
+     * Ping a remote host, sending 1 or more packets at the given interval, and then
+     * return the response times as a list.
+     *
+     * @param host The {@link java.net.InetAddress} address to poll.
+     * @param count The number of packets to send.
+     * @param timeout The time to wait between each retry.
+     * @param pingInterval The interval at which packets will be sent.
+     * @param size The size of the packet to send.
+     * @return a {@link java.util.List} of response times in microseconds.
+     *     If, for a given ping request, the host is reachable and has responded with an
+     *     echo reply, it will contain a number, otherwise a null value.
+     */
+    public List<Number> parallelPing(InetAddress host, int count, long timeout, long pingInterval, int size)
+            throws Exception;
 
-	public void setTrafficClass(final int tc) throws Exception;
+    /**
+     * Ping a remote host, sending 1 or more packets at the given interval, and then
+     * return the response times as a list.
+     *
+     * @param host The {@link java.net.InetAddress} address to poll.
+     * @param count The number of packets to send.
+     * @param timeout The time to wait between each retry.
+     * @param pingInterval The interval at which packets will be sent.
+     * @return a {@link java.util.List} of response times in microseconds.
+     *     If, for a given ping request, the host is reachable and has responded with an
+     *     echo reply, it will contain a number, otherwise a null value.
+     */
+    public List<Number> parallelPing(InetAddress host, int count, long timeout, long pingInterval) throws Exception;
 
-	/**
-	 * Initialize IPv4 in this Pinger implementation.  If unable to do so, implementations should throw an exception.
-	 * @throws Exception
-	 */
-	public void initialize4() throws Exception;
+    public void setAllowFragmentation(final boolean allow) throws Exception;
 
-	/**
-	 * Initialize IPv6 in this Pinger implementation.  If unable to do so, implementations should throw an exception.
-	 * @throws Exception
-	 */
-	public void initialize6() throws Exception;
-	
-	/**
-	 * Whether or not IPv4 is initialized and available for this implementation.
-	 */
-	public boolean isV4Available();
-	
-	/**
-	 * Whether or not IPv6 is initialized and available for this implementation.
-	 * @return
-	 */
-	public boolean isV6Available();
+    public void setTrafficClass(final int tc) throws Exception;
+
+    /**
+     * Initialize IPv4 in this Pinger implementation.  If unable to do so, implementations should throw an exception.
+     * @throws Exception
+     */
+    public void initialize4() throws Exception;
+
+    /**
+     * Initialize IPv6 in this Pinger implementation.  If unable to do so, implementations should throw an exception.
+     * @throws Exception
+     */
+    public void initialize6() throws Exception;
+
+    /**
+     * Whether or not IPv4 is initialized and available for this implementation.
+     */
+    public boolean isV4Available();
+
+    /**
+     * Whether or not IPv6 is initialized and available for this implementation.
+     * @return
+     */
+    public boolean isV6Available();
 }

@@ -42,5 +42,5 @@ const props = defineProps<{
 const deleteAndCloseModal = async () => {
   await props.deleteHandler()
   props.closeModal()
-} 
+}
 </script>

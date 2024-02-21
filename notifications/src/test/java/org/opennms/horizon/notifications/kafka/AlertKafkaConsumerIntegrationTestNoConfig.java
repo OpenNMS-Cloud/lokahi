@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.notifications.kafka;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -5,10 +26,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -46,16 +67,16 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EmbeddedKafka(topics = {
-    "${horizon.kafka.alerts.topic}",
-})
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = NotificationsApplication.class)
-@TestPropertySource(properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", locations = "classpath:application.yml")
+@EmbeddedKafka(
+        topics = {
+            "${horizon.kafka.alerts.topic}",
+        })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = NotificationsApplication.class)
+@TestPropertySource(
+        properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
+        locations = "classpath:application.yml")
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 @ActiveProfiles("test")
 class AlertKafkaConsumerIntegrationTestNoConfig {
@@ -92,8 +113,8 @@ class AlertKafkaConsumerIntegrationTestNoConfig {
     void setUp() {
         Map<String, Object> producerConfig = new HashMap<>(KafkaTestUtils.producerProps(embeddedKafkaBroker));
 
-        DefaultKafkaProducerFactory<String, byte[]> kafkaProducerFactory
-            = new DefaultKafkaProducerFactory<>(producerConfig, new StringSerializer(), new ByteArraySerializer());
+        DefaultKafkaProducerFactory<String, byte[]> kafkaProducerFactory =
+                new DefaultKafkaProducerFactory<>(producerConfig, new StringSerializer(), new ByteArraySerializer());
         kafkaProducer = kafkaProducerFactory.createProducer();
     }
 
@@ -102,28 +123,26 @@ class AlertKafkaConsumerIntegrationTestNoConfig {
         int id = 1234;
         String tenantId = GrpcTestBase.defaultTenant;
         Alert alert = Alert.newBuilder()
-            .setSeverity(Severity.MINOR)
-            .setLogMessage("hello")
-            .setDatabaseId(1234)
-            .setTenantId(GrpcTestBase.defaultTenant)
-            .build();
-        var producerRecord = new ProducerRecord<String,byte[]>(alertsTopic, alert.toByteArray());
+                .setSeverity(Severity.MINOR)
+                .setLogMessage("hello")
+                .setDatabaseId(1234)
+                .setTenantId(GrpcTestBase.defaultTenant)
+                .build();
+        var producerRecord = new ProducerRecord<String, byte[]>(alertsTopic, alert.toByteArray());
 
         kafkaProducer.send(producerRecord);
         kafkaProducer.flush();
 
-        verify(alertKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1))
-            .consume(alertCaptor.capture());
+        verify(alertKafkaConsumer, timeout(KAFKA_TIMEOUT).times(1)).consume(alertCaptor.capture());
 
         Alert capturedAlert = Alert.parseFrom(alertCaptor.getValue());
         assertEquals(id, capturedAlert.getDatabaseId());
 
         // This is the call to the PagerDuty API, we won't get this far, as we will get an exception when we try
         // to get the token, as the config table hasn't been setup.
-        verify(restTemplate, timeout(HTTP_TIMEOUT).times(0)).exchange(any(URI.class),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            any(Class.class));
+        verify(restTemplate, timeout(HTTP_TIMEOUT).times(0))
+                .exchange(
+                        any(URI.class), ArgumentMatchers.eq(HttpMethod.POST), any(HttpEntity.class), any(Class.class));
     }
 
     @AfterAll

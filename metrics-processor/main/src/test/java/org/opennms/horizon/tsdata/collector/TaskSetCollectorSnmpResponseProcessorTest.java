@@ -1,36 +1,35 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.tsdata.collector;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -47,14 +46,6 @@ import org.opennms.taskset.contract.Identity;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
 import prometheus.PrometheusTypes;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class TaskSetCollectorSnmpResponseProcessorTest {
 
@@ -75,13 +66,8 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
 
         prepareCollectorResponseTestData();
 
-        testLabelValues = new String[] {
-            "x-instance-x",
-            "x-location-x",
-            "x-system-id-x",
-            MonitorType.SNMP.name(),
-            "131313"
-        };
+        testLabelValues =
+                new String[] {"x-instance-x", "x-location-x", "x-system-id-x", MonitorType.SNMP.name(), "131313"};
 
         target = new TaskSetCollectorSnmpResponseProcessor(mockCortexTSS, mockTenantMetricsTracker);
     }
@@ -96,106 +82,97 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         //
         // Verify the Results
         //
-        var int32ResultStoreMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(3200320032.0, MonitorType.SNMP, "x_int32_alias_x");
+        var int32ResultStoreMatcher =
+                new PrometheusTimeSeriersBuilderArgumentMatcher(3200320032.0, MonitorType.SNMP, "x_int32_alias_x");
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(int32ResultStoreMatcher));
 
-        var counter32ResultStoreMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(640001.0, MonitorType.SNMP, "x_counter32_alias_x");
+        var counter32ResultStoreMatcher =
+                new PrometheusTimeSeriersBuilderArgumentMatcher(640001.0, MonitorType.SNMP, "x_counter32_alias_x");
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(counter32ResultStoreMatcher));
 
-        var timeticksResultStoreMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(640002.0, MonitorType.SNMP, "x_timeticks_alias_x");
+        var timeticksResultStoreMatcher =
+                new PrometheusTimeSeriersBuilderArgumentMatcher(640002.0, MonitorType.SNMP, "x_timeticks_alias_x");
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeticksResultStoreMatcher));
 
-        var gauge32ResultStoreMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(640003.0, MonitorType.SNMP, "x_gauge32_alias_x");
+        var gauge32ResultStoreMatcher =
+                new PrometheusTimeSeriersBuilderArgumentMatcher(640003.0, MonitorType.SNMP, "x_gauge32_alias_x");
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(gauge32ResultStoreMatcher));
 
-        var counter64ResultStoreMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(640004.0, MonitorType.SNMP, "x_counter64_alias_x");
+        var counter64ResultStoreMatcher =
+                new PrometheusTimeSeriersBuilderArgumentMatcher(640004.0, MonitorType.SNMP, "x_counter64_alias_x");
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(counter64ResultStoreMatcher));
 
         Mockito.verifyNoMoreInteractions(mockCortexTSS);
     }
 
-
     @Test
     void testCollectorTimestamps() throws IOException {
         var snmpResult = SnmpResultMetric.newBuilder()
-            .setAlias("x_int32_alias_x")
-            .setValue(SnmpValueMetric.newBuilder().setType(SnmpValueType.INT32).setSint64(3200320032L)
-                    .build()).build();
-        SnmpResponseMetric snmpResponse =
-            SnmpResponseMetric.newBuilder()
-                .addResults(snmpResult)
+                .setAlias("x_int32_alias_x")
+                .setValue(SnmpValueMetric.newBuilder()
+                        .setType(SnmpValueType.INT32)
+                        .setSint64(3200320032L)
+                        .build())
                 .build();
+        SnmpResponseMetric snmpResponse =
+                SnmpResponseMetric.newBuilder().addResults(snmpResult).build();
         Instant timestamp = Instant.parse("2023-01-01T00:00:00Z");
         CollectorResponse collectorResponse = CollectorResponse.newBuilder()
-            .setResult(Any.pack(snmpResponse))
-            .setTimestamp(timestamp.toEpochMilli())
-                .setMonitorType(MonitorType.SNMP).build();
-        TaskResult taskResult = TaskResult.newBuilder().setCollectorResponse(collectorResponse).build();
+                .setResult(Any.pack(snmpResponse))
+                .setTimestamp(timestamp.toEpochMilli())
+                .setMonitorType(MonitorType.SNMP)
+                .build();
+        TaskResult taskResult =
+                TaskResult.newBuilder().setCollectorResponse(collectorResponse).build();
         target.processSnmpCollectorResponse("x-tenant-id-x", "x-location-x", taskResult);
         var timeSeriesTimeStampMatcher = new PrometheusTimeStampMatcher(timestamp.toEpochMilli());
         Mockito.verify(mockCortexTSS).store(Mockito.eq("x-tenant-id-x"), Mockito.argThat(timeSeriesTimeStampMatcher));
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void prepareCollectorResponseTestData() {
-        var int32Result =
-            SnmpResultMetric.newBuilder()
+        var int32Result = SnmpResultMetric.newBuilder()
                 .setAlias("x_int32_alias_x")
-                .setValue(
-                    SnmpValueMetric.newBuilder()
+                .setValue(SnmpValueMetric.newBuilder()
                         .setType(SnmpValueType.INT32)
                         .setSint64(3200320032L)
-                        .build()
-                    )
+                        .build())
                 .build();
 
-        var counter32Result =
-            SnmpResultMetric.newBuilder()
+        var counter32Result = SnmpResultMetric.newBuilder()
                 .setAlias("x_counter32_alias_x")
-                .setValue(
-                    SnmpValueMetric.newBuilder()
+                .setValue(SnmpValueMetric.newBuilder()
                         .setType(SnmpValueType.COUNTER32)
                         .setUint64(640001L)
-                        .build()
-                    )
+                        .build())
                 .build();
 
-        var timeticksResult =
-            SnmpResultMetric.newBuilder()
+        var timeticksResult = SnmpResultMetric.newBuilder()
                 .setAlias("x_timeticks_alias_x")
-                .setValue(
-                    SnmpValueMetric.newBuilder()
+                .setValue(SnmpValueMetric.newBuilder()
                         .setType(SnmpValueType.TIMETICKS)
                         .setUint64(640002L)
-                        .build()
-                );
+                        .build());
 
-        var gauge32Result =
-            SnmpResultMetric.newBuilder()
+        var gauge32Result = SnmpResultMetric.newBuilder()
                 .setAlias("x_gauge32_alias_x")
-                .setValue(
-                    SnmpValueMetric.newBuilder()
+                .setValue(SnmpValueMetric.newBuilder()
                         .setType(SnmpValueType.GAUGE32)
                         .setUint64(640003L)
-                        .build()
-                );
+                        .build());
 
-
-        var counter64Result =
-            SnmpResultMetric.newBuilder()
+        var counter64Result = SnmpResultMetric.newBuilder()
                 .setAlias("x_counter64_alias_x")
-                .setValue(
-                    SnmpValueMetric.newBuilder()
+                .setValue(SnmpValueMetric.newBuilder()
                         .setType(SnmpValueType.COUNTER64)
-                        .setBytes(ByteString.copyFrom(BigInteger.valueOf(640004L).toByteArray()))
-                        .build()
-                );
+                        .setBytes(
+                                ByteString.copyFrom(BigInteger.valueOf(640004L).toByteArray()))
+                        .build());
 
-        SnmpResponseMetric snmpResponseMetricAllTypes =
-            SnmpResponseMetric.newBuilder()
+        SnmpResponseMetric snmpResponseMetricAllTypes = SnmpResponseMetric.newBuilder()
                 .addResults(int32Result)
                 .addResults(counter32Result)
                 .addResults(timeticksResult)
@@ -203,8 +180,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
                 .addResults(counter64Result)
                 .build();
 
-        testCollectorResponseAllResultTypes =
-            CollectorResponse.newBuilder()
+        testCollectorResponseAllResultTypes = CollectorResponse.newBuilder()
                 .setIpAddress("x-instance-x")
                 .setNodeId(131313)
                 .setMonitorType(MonitorType.SNMP)
@@ -212,33 +188,29 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
                 .build();
 
         testTaskResult = TaskResult.newBuilder()
-            .setIdentity(
-                Identity.newBuilder()
-                    .setSystemId("x-system-id-x")
-                    .build()
-            )
-            .setCollectorResponse(testCollectorResponseAllResultTypes)
-            .build();
-
-        SnmpResponseMetric snmpResponseMetric1Type =
-            SnmpResponseMetric.newBuilder()
-                .addResults(int32Result)
+                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x").build())
+                .setCollectorResponse(testCollectorResponseAllResultTypes)
                 .build();
 
-        testCollectorResponse1ResultType =
-            CollectorResponse.newBuilder()
+        SnmpResponseMetric snmpResponseMetric1Type =
+                SnmpResponseMetric.newBuilder().addResults(int32Result).build();
+
+        testCollectorResponse1ResultType = CollectorResponse.newBuilder()
                 .setIpAddress("x-ip-address-x")
                 .setNodeId(131313)
                 .setResult(Any.pack(snmpResponseMetric1Type))
                 .build();
     }
-    private static class PrometheusTimeSeriersBuilderArgumentMatcher implements ArgumentMatcher<List<PrometheusTypes.TimeSeries>> {
+
+    private static class PrometheusTimeSeriersBuilderArgumentMatcher
+            implements ArgumentMatcher<List<PrometheusTypes.TimeSeries>> {
 
         private final double metricValue;
         private final MonitorType monitorType;
         private final String metricName;
 
-        public PrometheusTimeSeriersBuilderArgumentMatcher(double metricValue, MonitorType monitorType, String metricName) {
+        public PrometheusTimeSeriersBuilderArgumentMatcher(
+                double metricValue, MonitorType monitorType, String metricName) {
             this.metricValue = metricValue;
             this.monitorType = monitorType;
             this.metricName = metricName;
@@ -246,12 +218,13 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
 
         @Override
         public boolean matches(List<PrometheusTypes.TimeSeries> timeseriesList) {
-            var optional = timeseriesList.stream().filter(ts ->
-                ts.getLabelsList().stream().anyMatch(label ->
-                    label.getName().equals(MetricNameConstants.METRIC_NAME_LABEL) && label.getValue().equals(metricName))).findAny();
+            var optional = timeseriesList.stream()
+                    .filter(ts -> ts.getLabelsList().stream()
+                            .anyMatch(label -> label.getName().equals(MetricNameConstants.METRIC_NAME_LABEL)
+                                    && label.getValue().equals(metricName)))
+                    .findAny();
             var timeSeries = optional.orElseThrow();
-            return (labelMatches(timeSeries)) &&
-                (sampleMatches(timeSeries));
+            return (labelMatches(timeSeries)) && (sampleMatches(timeSeries));
         }
 
         private boolean labelMatches(PrometheusTypes.TimeSeries timeseriesBuilder) {
@@ -261,13 +234,11 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
                     labelMap.put(label.getName(), label.getValue());
                 }
 
-                return (
-                    (Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL))) &&
-                    (Objects.equals("x-location-x", labelMap.get("location"))) &&
-                    (Objects.equals("x-system-id-x", labelMap.get("system_id"))) &&
-                    (Objects.equals(monitorType.name(), labelMap.get("monitor"))) &&
-                    (Objects.equals("131313", labelMap.get("node_id")))
-                );
+                return ((Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL)))
+                        && (Objects.equals("x-location-x", labelMap.get("location")))
+                        && (Objects.equals("x-system-id-x", labelMap.get("system_id")))
+                        && (Objects.equals(monitorType.name(), labelMap.get("monitor")))
+                        && (Objects.equals("131313", labelMap.get("node_id"))));
             }
 
             return false;
@@ -289,6 +260,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
     private class PrometheusTimeSeriesTimeStampMatcher implements ArgumentMatcher<PrometheusTypes.TimeSeries.Builder> {
 
         private long timeStamp;
+
         public PrometheusTimeSeriesTimeStampMatcher(long timeStamp) {
             this.timeStamp = timeStamp;
         }
@@ -302,6 +274,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
     private class PrometheusTimeStampMatcher implements ArgumentMatcher<List<PrometheusTypes.TimeSeries>> {
 
         private long timeStamp;
+
         public PrometheusTimeStampMatcher(long timeStamp) {
             this.timeStamp = timeStamp;
         }

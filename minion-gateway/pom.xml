@@ -1,66 +1,84 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.opennms.lokahi</groupId>
-        <artifactId>lokahi-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../parent-pom</relativePath>
-    </parent>
-
-    <name>OpenNMS Lokahi :: Minion Gateway</name>
-    <description>
-        Gateway which serves gRPC connections from Minions and routes traffic to and from Minions.
-    </description>
-
-    <groupId>org.opennms.lokahi.minion.gateway</groupId>
-    <artifactId>minion-gateway</artifactId>
+  <parent>
+    <groupId>org.opennms.lokahi</groupId>
+    <artifactId>lokahi-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <relativePath>../parent-pom</relativePath>
+  </parent>
 
-    <properties>
-        <application.docker.image.name>opennms/lokahi-minion-gateway</application.docker.image.name>
-        <docker.it.network>rest-server-it-network</docker.it.network>
-        <sonar.projectKey>opennms_lokahi_minion-gateway</sonar.projectKey>
-    </properties>
+  <groupId>org.opennms.lokahi.minion.gateway</groupId>
+  <artifactId>minion-gateway</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <modules>
-        <module>ignite-detector</module>
-        <module>task-set-service</module>
-        <module>ipc-grpc-server</module>
-        <module>rpc-request-server</module>
-        <module>main</module>
+  <name>OpenNMS Lokahi :: Minion Gateway</name>
+  <description>Gateway which serves gRPC connections from Minions and routes traffic to and from Minions.</description>
 
-        <module>docker-it</module>
-    </modules>
+  <modules>
+    <module>ignite-detector</module>
+    <module>task-set-service</module>
+    <module>ipc-grpc-server</module>
+    <module>rpc-request-server</module>
+    <module>main</module>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                            </path>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok-mapstruct-binding</artifactId>
-                                <version>${lombok.binding.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+    <module>docker-it</module>
+  </modules>
+
+  <properties>
+    <application.docker.image.name>opennms/lokahi-minion-gateway</application.docker.image.name>
+    <docker.it.network>rest-server-it-network</docker.it.network>
+    <sonar.projectKey>opennms_lokahi_minion-gateway</sonar.projectKey>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+              </path>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-mapstruct-binding</artifactId>
+                <version>${lombok.binding.version}</version>
+              </path>
+            </annotationProcessorPaths>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

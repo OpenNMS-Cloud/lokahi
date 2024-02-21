@@ -151,7 +151,7 @@ onClickOutside(contextMenu, () => closeContextMenu())
 const displayTooltip = (show = false) => {
   if (!show) { // hide
     cancelTooltipDebounce.value = true
-    showTooltip.value= false
+    showTooltip.value = false
   } else { // show
     cancelTooltipDebounce.value = false
 
@@ -195,7 +195,7 @@ const tooltipPos = computed(() => {
   }
   let pos = defaultPos
 
-  switch(selectedView.value) {
+  switch (selectedView.value) {
     case ViewType.circle:
       additionalOffset = {
         ...additionalOffset,
@@ -270,11 +270,11 @@ const eventHandlers: EventHandlers = {
   },
   'node:dragend': (node) => {
     // get node's position for tooltip
-    if(selectedView.value === ViewType.d3) {
+    if (selectedView.value === ViewType.d3) {
       const nodeId = Object.keys(node)[0]
       const {x: nodeX, y: nodeY} = Object.values(node)[0]
       d3Nodes.value.forEach(d3Node => {
-        if(d3Node.id === nodeId) {
+        if (d3Node.id === nodeId) {
           d3Node.x = nodeX
           d3Node.y = nodeY
         }

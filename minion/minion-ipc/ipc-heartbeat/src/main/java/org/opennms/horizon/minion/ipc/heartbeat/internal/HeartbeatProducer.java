@@ -1,35 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.ipc.heartbeat.internal;
 
-
 import com.google.protobuf.Timestamp;
+import java.util.Timer;
+import java.util.TimerTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -37,9 +31,6 @@ import org.opennms.horizon.grpc.heartbeat.contract.HeartbeatMessage;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,31 +44,41 @@ public class HeartbeatProducer {
     private SyncDispatcher<HeartbeatMessage> dispatcher;
     private Timer timer = new Timer();
 
-
     public void init() {
 
         dispatcher = messageDispatcherFactory.createSyncDispatcher(new HeartbeatModule());
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    log.info("Sending heartbeat from Minion with id: {}", identity.getId());
+        timer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            log.info("Sending heartbeat from Minion with id: {}", identity.getId());
 
-                    long millis = System.currentTimeMillis();
-                    HeartbeatMessage heartbeatMessage = HeartbeatMessage.newBuilder()
-                        .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
-                        .setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)))
-                        .build();
-                    dispatcher.send(heartbeatMessage);
-                } catch (Throwable t) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("An error occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t);
-                    } else {
-                        log.debug("An error {} occurred while sending the heartbeat. Will try again in {} ms", PERIOD_MS, t.getMessage());
+                            long millis = System.currentTimeMillis();
+                            HeartbeatMessage heartbeatMessage = HeartbeatMessage.newBuilder()
+                                    .setIdentity(Identity.newBuilder().setSystemId(identity.getId()))
+                                    .setTimestamp(Timestamp.newBuilder()
+                                            .setSeconds(millis / 1000)
+                                            .setNanos((int) ((millis % 1000) * 1000000)))
+                                    .build();
+                            dispatcher.send(heartbeatMessage);
+                        } catch (Throwable t) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(
+                                        "An error occurred while sending the heartbeat. Will try again in {} ms",
+                                        PERIOD_MS,
+                                        t);
+                            } else {
+                                log.debug(
+                                        "An error {} occurred while sending the heartbeat. Will try again in {} ms",
+                                        PERIOD_MS,
+                                        t.getMessage());
+                            }
+                        }
                     }
-                }
-            }
-        }, 0, PERIOD_MS);
+                },
+                0,
+                PERIOD_MS);
     }
 
     /**

@@ -1,50 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.listeners;
-
-import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Future;
-
-import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;
-import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -60,14 +40,23 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.SocketUtils;
+import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import org.opennms.horizon.minion.flows.listeners.utils.BufferUtils;
+import org.opennms.horizon.minion.flows.listeners.utils.NettyEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UdpListener implements Listener {
     private static final Logger LOG = LoggerFactory.getLogger(UdpListener.class);
 
-    public static final RateLimitedLog RATE_LIMITED_LOG = RateLimitedLog
-        .withRateLimit(LOG)
-        .maxRate(5).every(Duration.ofSeconds(30))
-        .build();
+    public static final RateLimitedLog RATE_LIMITED_LOG = RateLimitedLog.withRateLimit(LOG)
+            .maxRate(5)
+            .every(Duration.ofSeconds(30))
+            .build();
 
     private final String name;
     private final List<UdpParser> parsers;
@@ -96,35 +85,37 @@ public class UdpListener implements Listener {
         if (this.parsers.isEmpty()) {
             throw new IllegalArgumentException("At least 1 parsers must be defined");
         }
-        if (this.parsers.size() > 1 && this.parsers.stream().filter(p -> p instanceof Dispatchable).count() != this.parsers.size()) {
+        if (this.parsers.size() > 1
+                && this.parsers.stream().filter(p -> p instanceof Dispatchable).count() != this.parsers.size()) {
             throw new IllegalArgumentException("If more than 1 parser is defined, all parsers must be Dispatchable");
         }
 
         packetsReceived = metrics.meter(MetricRegistry.name("listeners", name, "packetsReceived"));
     }
     // check
-    
+
     public void start() throws InterruptedException {
         // Netty defaults to 2 * num cores when the number of threads is set to 0
-        this.bossGroup = new NioEventLoopGroup(0, new ThreadFactoryBuilder()
-            .setNameFormat("telemetryd-nio-" + name + "-%d")
-            .build());
+        this.bossGroup = new NioEventLoopGroup(
+                0,
+                new ThreadFactoryBuilder()
+                        .setNameFormat("telemetryd-nio-" + name + "-%d")
+                        .build());
 
         this.parsers.forEach(parser -> parser.start(this.bossGroup));
 
-        final InetSocketAddress address = this.host != null
-            ? SocketUtils.socketAddress(this.host, this.port)
-            : new InetSocketAddress(this.port);
+        final InetSocketAddress address =
+                this.host != null ? SocketUtils.socketAddress(this.host, this.port) : new InetSocketAddress(this.port);
 
         this.socketFuture = new Bootstrap()
-            .group(this.bossGroup)
-            .channel(NioDatagramChannel.class)
-            .option(ChannelOption.SO_REUSEADDR, true)
-            .option(ChannelOption.SO_RCVBUF, Integer.MAX_VALUE)
-            .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(this.maxPacketSize))
-            .handler(new DefaultChannelInitializer())
-            .bind(address)
-            .sync();
+                .group(this.bossGroup)
+                .channel(NioDatagramChannel.class)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .option(ChannelOption.SO_RCVBUF, Integer.MAX_VALUE)
+                .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(this.maxPacketSize))
+                .handler(new DefaultChannelInitializer())
+                .bind(address)
+                .sync();
         LOG.info("Udp Flow Listener started at {}:{}", address.getHostName(), address.getPort());
     }
 
@@ -199,7 +190,8 @@ public class UdpListener implements Listener {
                 // Otherwise dispatch
                 ch.pipeline().addLast(new SimpleChannelInboundHandler<DatagramPacket>() {
                     @Override
-                    protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) throws Exception {
+                    protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg)
+                            throws Exception {
                         for (final Parser parser : parsers) {
                             if (BufferUtils.peek(msg.content(), ((Dispatchable) parser)::handles)) {
                                 new SingleDatagramPacketParserHandler((UdpParser) parser).channelRead0(ctx, msg);
@@ -241,17 +233,14 @@ public class UdpListener implements Listener {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
-            parser.parse(
-                ReferenceCountUtil.retain(msg.content()),
-                msg.sender(), msg.recipient()
-            ).handle((result, ex) -> {
-                ReferenceCountUtil.release(msg.content());
-                if (ex != null) {
-                    ctx.fireExceptionCaught(ex);
-                }
-                return result;
-            });
+            parser.parse(ReferenceCountUtil.retain(msg.content()), msg.sender(), msg.recipient())
+                    .handle((result, ex) -> {
+                        ReferenceCountUtil.release(msg.content());
+                        if (ex != null) {
+                            ctx.fireExceptionCaught(ex);
+                        }
+                        return result;
+                    });
         }
     }
-
 }

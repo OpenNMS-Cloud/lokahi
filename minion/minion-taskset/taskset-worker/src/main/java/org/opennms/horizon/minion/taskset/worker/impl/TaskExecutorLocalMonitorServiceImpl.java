@@ -1,5 +1,29 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorManager;
@@ -12,10 +36,6 @@ import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Local implementation of the service to execute a Monitor workflow.  This class runs "locally" only, so it is never
@@ -33,22 +53,24 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     private OpennmsScheduler scheduler;
     private TaskExecutionResultProcessor resultProcessor;
     private MonitorRegistry monitorRegistry;
-    private ServiceMonitor monitor=null;
+    private ServiceMonitor monitor = null;
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
-    public TaskExecutorLocalMonitorServiceImpl(OpennmsScheduler scheduler, TaskDefinition taskDefinition,
-        TaskExecutionResultProcessor resultProcessor,
-        MonitorRegistry monitorRegistry) {
+    public TaskExecutorLocalMonitorServiceImpl(
+            OpennmsScheduler scheduler,
+            TaskDefinition taskDefinition,
+            TaskExecutionResultProcessor resultProcessor,
+            MonitorRegistry monitorRegistry) {
         this.taskDefinition = taskDefinition;
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
         this.monitorRegistry = monitorRegistry;
     }
 
-//========================================
-// API
-//----------------------------------------
+    // ========================================
+    // API
+    // ----------------------------------------
 
     @Override
     public void start() throws Exception {
@@ -59,7 +81,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             if (whenSpec.matches("^\\d+$")) {
                 long period = Long.parseLong(taskDefinition.getSchedule());
 
-                scheduler.schedulePeriodically(taskDefinition.getId(), period, TimeUnit.MILLISECONDS, this::executeSerializedIteration);
+                scheduler.schedulePeriodically(
+                        taskDefinition.getId(), period, TimeUnit.MILLISECONDS, this::executeSerializedIteration);
             } else {
                 // Not a number, REQUIRED to be a CRON expression
                 scheduler.scheduleTaskOnCron(taskDefinition.getId(), whenSpec, this::executeSerializedIteration);
@@ -80,10 +103,9 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         scheduler.cancelTask(taskDefinition.getId());
     }
 
-
-//========================================
-// Processing
-//----------------------------------------
+    // ========================================
+    // Processing
+    // ----------------------------------------
 
     private void executeSerializedIteration() {
         // Verify it's not already active
@@ -93,7 +115,9 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
                 executeIteration();
             }
         } else {
-            log.debug("Skipping iteration of task as prior iteration is still active: workflow-uuid={}", taskDefinition.getId());
+            log.debug(
+                    "Skipping iteration of task as prior iteration is still active: workflow-uuid={}",
+                    taskDefinition.getId());
         }
     }
 
@@ -108,17 +132,19 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             if (monitor != null) {
                 // TBD888: populate host, or stop?
                 MonitoredService monitoredService = configureMonitoredService(taskDefinition);
-                CompletableFuture<ServiceMonitorResponse> future = monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                CompletableFuture<ServiceMonitorResponse> future =
+                        monitor.poll(monitoredService, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
-                log.info("Skipping service monitor execution; monitor not found: monitor=" + taskDefinition.getPluginName());
+                log.info("Skipping service monitor execution; monitor not found: monitor="
+                        + taskDefinition.getPluginName());
             }
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
             if (log.isDebugEnabled()) {
                 log.debug("error executing workflow {}", taskDefinition.getId(), exc);
             } else {
-                log.warn("error executing workflow {} , message = {}" ,taskDefinition.getId(), exc.getMessage());
+                log.warn("error executing workflow {} , message = {}", taskDefinition.getId(), exc.getMessage());
             }
         }
     }
@@ -130,19 +156,21 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         if (exc == null) {
             resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse);
         } else {
-            if(log.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 log.debug("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
             } else {
-                log.warn("error executing workflow; workflow-uuid= {}, message = {}", taskDefinition.getId(), exc.getMessage());
+                log.warn(
+                        "error executing workflow; workflow-uuid= {}, message = {}",
+                        taskDefinition.getId(),
+                        exc.getMessage());
             }
         }
     }
 
-    private MonitoredService configureMonitoredService(TaskDefinition taskDefinition)  {
-        return new GeneralMonitoredService("TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD",
-            null, taskDefinition.getMonitorServiceId());
+    private MonitoredService configureMonitoredService(TaskDefinition taskDefinition) {
+        return new GeneralMonitoredService(
+                "TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD", null, taskDefinition.getMonitorServiceId());
     }
-
 
     private ServiceMonitor lookupMonitor(TaskDefinition taskDefinition) {
         String pluginName = taskDefinition.getPluginName();

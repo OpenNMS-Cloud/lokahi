@@ -1,47 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2012-2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- ******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.dockerit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opennms.horizon.minion.flows.shell.SendFlowCmd;
-import org.opennms.horizon.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
-import org.opennms.horizon.testtool.miniongateway.wiremock.client.RetryUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -51,6 +32,16 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.opennms.horizon.minion.flows.shell.SendFlowCmd;
+import org.opennms.horizon.testtool.miniongateway.wiremock.client.MinionGatewayWiremockTestSteps;
+import org.opennms.horizon.testtool.miniongateway.wiremock.client.RetryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MinionTestSteps {
 
@@ -77,19 +68,18 @@ public class MinionTestSteps {
     private Response rememberedRestAssuredResponse;
     private JsonPath parsedJsonResponse;
 
-//========================================
-// Constructor
-//========================================
+    // ========================================
+    // Constructor
+    // ========================================
 
     public MinionTestSteps(MinionGatewayWiremockTestSteps minionGatewayWiremockTestSteps, RetryUtils retryUtils) {
         this.minionGatewayWiremockTestSteps = minionGatewayWiremockTestSteps;
         this.retryUtils = retryUtils;
     }
 
-
-//========================================
-// Gherkin Rules
-//========================================
+    // ========================================
+    // Gherkin Rules
+    // ========================================
 
     @Given("Application Base URL in system property {string}")
     public void applicationBaseURLInSystemProperty(String systemProperty) {
@@ -111,21 +101,20 @@ public class MinionTestSteps {
         log.info("Using netflow5ListenerPort {}", netflow5ListenerPort);
     }
 
-
     @Then("Send GET request to application at path {string}")
     public void sendGETRequestToApplicationAtPath(String path) throws Exception {
         commonSendGetRequestToApplication(path);
     }
 
     @Then("Send GET request to application at path {string} until success with timeout {int}ms")
-    public void sendGETRequestToApplicationAtPathUntilSuccessWithTimeoutMs(String path, int timeout) throws InterruptedException {
+    public void sendGETRequestToApplicationAtPathUntilSuccessWithTimeoutMs(String path, int timeout)
+            throws InterruptedException {
         retryUtils.retry(
-            () -> retryableSendGetRequestToApplication(path),
-            (response) -> (response != null) && isSuccessHttpStatusCode(response.getStatusCode()),
-            100,
-            timeout,
-            null
-        );
+                () -> retryableSendGetRequestToApplication(path),
+                (response) -> (response != null) && isSuccessHttpStatusCode(response.getStatusCode()),
+                100,
+                timeout,
+                null);
     }
 
     @Then("Remember response body for later comparison")
@@ -134,14 +123,14 @@ public class MinionTestSteps {
     }
 
     @Then("Send GET request to application at path {string} until response changes with timeout {int}ms")
-    public void sendGETRequestToApplicationAtPathUntilResponseChangesWithTimeoutMs(String path, int timeoutMs) throws InterruptedException {
+    public void sendGETRequestToApplicationAtPathUntilResponseChangesWithTimeoutMs(String path, int timeoutMs)
+            throws InterruptedException {
         retryUtils.retry(
-            () -> retryableSendGetRequestToApplication(path),
-            (newResponse) -> checkResponseChanged((Response) newResponse),
-            5,
-            timeoutMs,
-            false
-        );
+                () -> retryableSendGetRequestToApplication(path),
+                (newResponse) -> checkResponseChanged((Response) newResponse),
+                5,
+                timeoutMs,
+                false);
     }
 
     @Then("^parse the JSON response$")
@@ -165,9 +154,9 @@ public class MinionTestSteps {
         cmd.execute();
     }
 
-//========================================
-// Utility Rules
-//----------------------------------------
+    // ========================================
+    // Utility Rules
+    // ----------------------------------------
 
     @Then("^DEBUG dump the response body$")
     public void debugDumpTheResponseBody() {
@@ -179,9 +168,9 @@ public class MinionTestSteps {
         Thread.sleep(ms);
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private boolean isSuccessHttpStatusCode(int code) {
         return (((code) >= 200) && (code <= 299));
@@ -189,10 +178,9 @@ public class MinionTestSteps {
 
     private RestAssuredConfig createRestAssuredTestConfig() {
         return RestAssuredConfig.config()
-            .httpClient(HttpClientConfig.httpClientConfig()
-                .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-                .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-            );
+                .httpClient(HttpClientConfig.httpClientConfig()
+                        .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
+                        .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT));
     }
 
     private void verifyJsonPathExpressionMatch(JsonPath jsonPath, String pathExpression) {
@@ -233,16 +221,9 @@ public class MinionTestSteps {
 
         RestAssuredConfig restAssuredConfig = this.createRestAssuredTestConfig();
 
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
+        RequestSpecification requestSpecification = RestAssured.given().config(restAssuredConfig);
 
-        restAssuredResponse =
-            requestSpecification
-                .get(requestUrl)
-                .thenReturn()
-        ;
+        restAssuredResponse = requestSpecification.get(requestUrl).thenReturn();
     }
 
     private boolean checkResponseChanged(Response newResponse) {
@@ -259,12 +240,20 @@ public class MinionTestSteps {
         }
 
         if (newResponse.getStatusCode() != rememberedRestAssuredResponse.getStatusCode()) {
-            log.info("STATUS CODE CHANGE: {} -> {}", rememberedRestAssuredResponse.getStatusCode(), newResponse.getStatusCode());
+            log.info(
+                    "STATUS CODE CHANGE: {} -> {}",
+                    rememberedRestAssuredResponse.getStatusCode(),
+                    newResponse.getStatusCode());
             return true;
         }
 
-        if (!Objects.equals(newResponse.getBody().asString(), rememberedRestAssuredResponse.getBody().asString())) {
-            log.info("BODY CHANGE: {} -> {}", rememberedRestAssuredResponse.getBody().asString(), newResponse.getBody().asString());
+        if (!Objects.equals(
+                newResponse.getBody().asString(),
+                rememberedRestAssuredResponse.getBody().asString())) {
+            log.info(
+                    "BODY CHANGE: {} -> {}",
+                    rememberedRestAssuredResponse.getBody().asString(),
+                    newResponse.getBody().asString());
             return true;
         }
 

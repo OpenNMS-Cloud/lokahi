@@ -1,8 +1,8 @@
 <template>
-  <FeatherListSwitch 
-    class="basic-switch" 
-    v-model="toggled" 
-    @update:modelValue="$emit('toggle', toggled)" 
+  <FeatherListSwitch
+    class="basic-switch"
+    v-model="toggled"
+    @update:modelValue="$emit('toggle', toggled)"
   />
 </template>
 

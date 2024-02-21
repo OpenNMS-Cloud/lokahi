@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.component;
 
 import com.google.common.base.Strings;
@@ -34,6 +27,16 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
+import javax.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -59,17 +62,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
-
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -80,18 +72,19 @@ public class MinionHeartbeatConsumer {
     private static final int DEFAULT_MESSAGE_SIZE = 1024;
     private static final long ECHO_TIMEOUT = 30_000;
     private static final int MONITOR_PERIOD = 30_000 - 2000; // We expect heartbeats every 30 secs,
-    // we should still process heartbeats received closer to 30secs interval, so 2secs prior arrival should still be processed.
+    // we should still process heartbeats received closer to 30secs interval, so 2secs prior arrival should still be
+    // processed.
     private final MinionRpcClient rpcClient;
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("handle-minion-heartbeat-%d")
-        .build();
+            .setNameFormat("handle-minion-heartbeat-%d")
+            .build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
 
     @Value("${kafka.topics.task-set-results:" + DEFAULT_TASK_RESULTS_TOPIC + "}")
     private String kafkaTopic;
 
-     // Testability
+    // Testability
     @Setter
     private Consumer<Runnable> rpcMonitorRunner = CompletableFuture::runAsync;
 
@@ -120,14 +113,21 @@ public class MinionHeartbeatConsumer {
             Span.current().setAttribute("location-id", locationId);
             Span.current().setAttribute("system-id", message.getIdentity().getSystemId());
 
-            Optional<MonitoringLocationDTO> location = locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
+            Optional<MonitoringLocationDTO> location =
+                    locationService.getByIdAndTenantId(Long.parseLong(locationId), tenantId);
             if (location.isEmpty()) {
-                log.info("Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
-                    tenantId, locationId, message.getIdentity().getSystemId());
+                log.info(
+                        "Received heartbeat message for orphaned minion: tenantId={}; locationId={}; systemId={}",
+                        tenantId,
+                        locationId,
+                        message.getIdentity().getSystemId());
                 return;
             }
-            log.info("Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
-                tenantId, locationId, message.getIdentity().getSystemId());
+            log.info(
+                    "Received heartbeat message for minion: tenantId={}; locationId={}; systemId={}",
+                    tenantId,
+                    locationId,
+                    message.getIdentity().getSystemId());
             monitoringSystemService.addMonitoringSystemFromHeartbeat(message);
 
             String systemId = message.getIdentity().getSystemId();
@@ -138,7 +138,7 @@ public class MinionHeartbeatConsumer {
             // WARNING: this uses wall-clock.  If a system's time is changed, this logic will be impacted.
             // TODO: consider changing to System.nanoTime() which is not affected by wall-clock changes
             long currentTimeMs = clock.getCurrentTimeMs();
-            if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { //prevent run too many rpc calls
+            if (lastRun == null || (currentTimeMs > (lastRun + MONITOR_PERIOD))) { // prevent run too many rpc calls
                 rpcMonitorRunner.accept(() -> runRpcMonitor(tenantId, locationId, systemId));
                 rpcMaps.put(key, currentTimeMs);
             }
@@ -152,7 +152,7 @@ public class MinionHeartbeatConsumer {
 
     @PreDestroy
     public void shutDown() {
-        if(rpcClient != null) {
+        if (rpcClient != null) {
             rpcClient.shutdown();
         }
     }
@@ -160,69 +160,72 @@ public class MinionHeartbeatConsumer {
     private void runRpcMonitor(String tenantId, String locationId, String systemId) {
         log.info("Sending RPC request for tenantId={}; locationId={}; systemId={}", tenantId, locationId, systemId);
         EchoRequest echoRequest = EchoRequest.newBuilder()
-            .setTime(System.nanoTime())
-            .setMessage(Strings.repeat("*", DEFAULT_MESSAGE_SIZE))
-            .build();
+                .setTime(System.nanoTime())
+                .setMessage(Strings.repeat("*", DEFAULT_MESSAGE_SIZE))
+                .build();
 
-        MinionIdentity minionIdentity =
-            MinionIdentity.newBuilder()
+        MinionIdentity minionIdentity = MinionIdentity.newBuilder()
                 .setTenantId(tenantId)
                 .setLocationId(locationId)
                 .setSystemId(systemId)
                 .build();
 
         GatewayRpcRequestProto request = GatewayRpcRequestProto.newBuilder()
-            .setIdentity(minionIdentity)
-            .setModuleId("Echo")
-            .setExpirationTime(System.currentTimeMillis() + ECHO_TIMEOUT)
-            .setRpcId(UUID.randomUUID().toString())
-            .setPayload(Any.pack(echoRequest))
-            .build();
+                .setIdentity(minionIdentity)
+                .setModuleId("Echo")
+                .setExpirationTime(System.currentTimeMillis() + ECHO_TIMEOUT)
+                .setRpcId(UUID.randomUUID().toString())
+                .setPayload(Any.pack(echoRequest))
+                .build();
 
-        rpcClient.sendRpcRequest(tenantId, request).thenApply(GatewayRpcResponseProto::getPayload)
-            .thenApply(payload -> {
-                try {
-                    return payload.unpack(EchoResponse.class);
-                } catch (InvalidProtocolBufferException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .whenComplete((echoResponse, error) -> {
+        rpcClient
+                .sendRpcRequest(tenantId, request)
+                .thenApply(GatewayRpcResponseProto::getPayload)
+                .thenApply(payload -> {
+                    try {
+                        return payload.unpack(EchoResponse.class);
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .whenComplete((echoResponse, error) -> {
                     if (error != null) {
-                        log.error("Unable to complete echo request for monitoring with tenantId={}; locationId={}; systemId={}",
-                            tenantId, locationId, systemId, error);
+                        log.error(
+                                "Unable to complete echo request for monitoring with tenantId={}; locationId={}; systemId={}",
+                                tenantId,
+                                locationId,
+                                systemId,
+                                error);
                         return;
                     }
                     long responseTime = (System.nanoTime() - echoResponse.getTime()) / 1000000;
                     publishResult(systemId, locationId, tenantId, responseTime);
                     log.info("Response time for minion {} is {} msecs", systemId, responseTime);
-                }
-            );
+                });
     }
 
     private void publishResult(String systemId, String locationId, String tenantId, long responseTime) {
         // TODO: use a separate structure from TaskSetResult - this is not the result of processing a TaskSet
-        org.opennms.taskset.contract.Identity identity =
-            org.opennms.taskset.contract.Identity.newBuilder()
+        org.opennms.taskset.contract.Identity identity = org.opennms.taskset.contract.Identity.newBuilder()
                 .setSystemId(systemId)
                 .build();
         MonitorResponse monitorResponse = MonitorResponse.newBuilder()
-            .setStatus("UP")
-            .setResponseTimeMs(responseTime)
-            .setMonitorType(MonitorType.ECHO)
-            .setIpAddress(systemId) //for minion only
-            .setTimestamp(System.currentTimeMillis())
-            .build();
+                .setStatus("UP")
+                .setResponseTimeMs(responseTime)
+                .setMonitorType(MonitorType.ECHO)
+                .setIpAddress(systemId) // for minion only
+                .setTimestamp(System.currentTimeMillis())
+                .build();
         TaskResult result = TaskResult.newBuilder()
-            .setId("monitor-"+systemId)
-            .setIdentity(identity)
-            .setMonitorResponse(monitorResponse)
-            .build();
+                .setId("monitor-" + systemId)
+                .setIdentity(identity)
+                .setMonitorResponse(monitorResponse)
+                .build();
         TenantLocationSpecificTaskSetResults results = TenantLocationSpecificTaskSetResults.newBuilder()
-            .setTenantId(tenantId)
-            .setLocationId(locationId)
-            .addResults(result)
-            .build();
+                .setTenantId(tenantId)
+                .setLocationId(locationId)
+                .addResults(result)
+                .build();
 
         ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>(kafkaTopic, results.toByteArray());
         kafkaTemplate.send(producerRecord);

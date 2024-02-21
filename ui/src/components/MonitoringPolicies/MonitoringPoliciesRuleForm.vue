@@ -39,7 +39,7 @@
           <div class="col">
             <div class="subtitle">New Rule Name</div>
             <FeatherInput
-              v-model="store.selectedRule.name"
+              v-model.trim="store.selectedRule.name"
               label=""
               hideLabel
               v-focus
@@ -216,7 +216,7 @@ const countAlertsAndOpenDeleteModal = async () => {
   openModal()
 }
 
-const deleteMsg = computed(() => 
+const deleteMsg = computed(() =>
   `Deleting rule ${store.selectedRule?.name} removes ${store.numOfAlertsForRule} associated alerts. Do you wish to proceed?`
 )
 </script>

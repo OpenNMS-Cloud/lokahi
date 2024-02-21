@@ -1,33 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.grpc;
-
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -35,6 +27,8 @@ import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
@@ -81,9 +75,6 @@ import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 @RequiredArgsConstructor
 public class InventoryClient {
     private final ManagedChannel channel;
@@ -93,8 +84,10 @@ public class InventoryClient {
     private MonitoringSystemServiceGrpc.MonitoringSystemServiceBlockingStub systemStub;
     private TagServiceGrpc.TagServiceBlockingStub tagStub;
     private ActiveDiscoveryServiceGrpc.ActiveDiscoveryServiceBlockingStub activeDiscoveryServiceBlockingStub;
-    private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub icmpActiveDiscoveryServiceBlockingStub;
-    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
+    private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub
+            icmpActiveDiscoveryServiceBlockingStub;
+    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub
+            azureActiveDiscoveryServiceBlockingStub;
     private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
     private MonitorStatusServiceGrpc.MonitorStatusServiceBlockingStub monitorStatusServiceBlockingStub;
 
@@ -120,251 +113,349 @@ public class InventoryClient {
     public List<ActiveDiscoveryDTO> listActiveDiscoveries(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return activeDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .listDiscoveries(Empty.getDefaultInstance()).getActiveDiscoveriesList();
+        return activeDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listDiscoveries(Empty.getDefaultInstance())
+                .getActiveDiscoveriesList();
     }
 
     public IcmpActiveDiscoveryDTO createIcmpActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .createDiscovery(request);
+        return icmpActiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .createDiscovery(request);
     }
 
     public List<IcmpActiveDiscoveryDTO> listIcmpDiscoveries(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .listDiscoveries(Empty.getDefaultInstance()).getDiscoveriesList();
+        return icmpActiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listDiscoveries(Empty.getDefaultInstance())
+                .getDiscoveriesList();
     }
 
     public IcmpActiveDiscoveryDTO upsertIcmpActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .upsertActiveDiscovery(request);
+        return icmpActiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .upsertActiveDiscovery(request);
     }
 
     public Boolean deleteIcmpActiveDiscovery(long discoveryId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        var result = icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deleteActiveDiscovery(Int64Value.of(discoveryId));
+        var result = icmpActiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .deleteActiveDiscovery(Int64Value.of(discoveryId));
         return result.getValue();
     }
 
     public IcmpActiveDiscoveryDTO getIcmpDiscoveryById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return icmpActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .getDiscoveryById(Int64Value.of(id));
+        return icmpActiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getDiscoveryById(Int64Value.of(id));
     }
 
     public NodeDTO createNewNode(NodeCreateDTO node, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createNode(node);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .createNode(node);
     }
 
     public Long updateNode(NodeUpdateDTO node, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).updateNode(node).getValue();
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .updateNode(node)
+                .getValue();
     }
 
     public List<NodeDTO> listNodes(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodes(Empty.newBuilder().build()).getNodesList();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listNodes(Empty.newBuilder().build())
+                .getNodesList();
     }
 
     public List<NodeDTO> listNodesByMonitoredState(String monitoredState, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        MonitoredStateQuery query = MonitoredStateQuery.newBuilder().setMonitoredState(MonitoredState.valueOf(monitoredState)).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByMonitoredState(query).getNodesList();
+        MonitoredStateQuery query = MonitoredStateQuery.newBuilder()
+                .setMonitoredState(MonitoredState.valueOf(monitoredState))
+                .build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listNodesByMonitoredState(query)
+                .getNodesList();
     }
 
     public List<NodeDTO> listNodesByNodeLabelSearch(String labelSearchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        NodeLabelSearchQuery query = NodeLabelSearchQuery.newBuilder().setSearchTerm(labelSearchTerm).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByNodeLabel(query).getNodesList();
+        NodeLabelSearchQuery query =
+                NodeLabelSearchQuery.newBuilder().setSearchTerm(labelSearchTerm).build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listNodesByNodeLabel(query)
+                .getNodesList();
     }
 
     public List<NodeDTO> listNodesByTags(List<String> tags, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         TagNameQuery query = TagNameQuery.newBuilder().addAllTags(tags).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listNodesByTags(query).getNodesList();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listNodesByTags(query)
+                .getNodesList();
     }
 
     public NodeDTO getNodeById(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getNodeById(Int64Value.of(id));
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getNodeById(Int64Value.of(id));
     }
 
     public List<MonitoringLocationDTO> listLocations(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listLocations(Empty.newBuilder().build()).getLocationsList();
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listLocations(Empty.newBuilder().build())
+                .getLocationsList();
     }
 
     public MonitoringLocationDTO getLocationById(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getLocationById(Int64Value.of(id));
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getLocationById(Int64Value.of(id));
     }
 
     public MonitoringLocationDTO getLocationByName(String locationName, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getLocationByName(StringValue.of(locationName));
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getLocationByName(StringValue.of(locationName));
     }
 
     public List<MonitoringSystemDTO> listMonitoringSystems(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
+        return systemStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listMonitoringSystem(Empty.newBuilder().build())
+                .getSystemsList();
     }
 
     public List<MonitoringSystemDTO> getMonitoringSystemsByLocationId(long locationId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listMonitoringSystemByLocationId(Int64Value.of(locationId)).getSystemsList();
+        return systemStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listMonitoringSystemByLocationId(Int64Value.of(locationId))
+                .getSystemsList();
     }
 
     public MonitoringSystemDTO getSystemBySystemId(long systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoringSystemById(Int64Value.of(systemId));
+        return systemStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getMonitoringSystemById(Int64Value.of(systemId));
     }
 
     public List<MonitoringLocationDTO> listLocationsByIds(List<DataLoaderFactory.Key> keys) {
-        return keys.stream().map(DataLoaderFactory.Key::getToken).findFirst().map(accessToken -> {
-            Metadata metadata = new Metadata();
-            metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-            List<Int64Value> idValues = keys.stream().map(k -> Int64Value.of(k.getId())).toList();
-            return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listLocationsByIds(IdList.newBuilder().addAllIds(idValues).build()).getLocationsList();
-        }).orElseThrow();
+        return keys.stream()
+                .map(DataLoaderFactory.Key::getToken)
+                .findFirst()
+                .map(accessToken -> {
+                    Metadata metadata = new Metadata();
+                    metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+                    List<Int64Value> idValues =
+                            keys.stream().map(k -> Int64Value.of(k.getId())).toList();
+                    return locationStub
+                            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                            .listLocationsByIds(
+                                    IdList.newBuilder().addAllIds(idValues).build())
+                            .getLocationsList();
+                })
+                .orElseThrow();
     }
 
     public List<MonitoringLocationDTO> searchLocations(String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .searchLocations(StringValue.of(searchTerm)).getLocationsList();
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .searchLocations(StringValue.of(searchTerm))
+                .getLocationsList();
     }
 
     public boolean deleteNode(long nodeId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).deleteNode(Int64Value.of(nodeId)).getValue();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .deleteNode(Int64Value.of(nodeId))
+                .getValue();
     }
 
     public boolean deleteMonitoringSystem(long systemId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return systemStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(systemId).build()).getValue();
+        return systemStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .deleteMonitoringSystem(
+                        Int64Value.newBuilder().setValue(systemId).build())
+                .getValue();
     }
 
     public boolean startScanByNodeIds(List<Long> ids, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).startNodeScanByIds(NodeIdList.newBuilder().addAllIds(ids).build()).getValue();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .startNodeScanByIds(NodeIdList.newBuilder().addAllIds(ids).build())
+                .getValue();
     }
 
-    public AzureActiveDiscoveryDTO createAzureActiveDiscovery(AzureActiveDiscoveryCreateDTO request, String accessToken) {
+    public AzureActiveDiscoveryDTO createAzureActiveDiscovery(
+            AzureActiveDiscoveryCreateDTO request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return azureActiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createDiscovery(request);
+        return azureActiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .createDiscovery(request);
     }
 
     public PassiveDiscoveryDTO upsertPassiveDiscovery(PassiveDiscoveryUpsertDTO passiveDiscovery, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).upsertDiscovery(passiveDiscovery);
+        return passiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .upsertDiscovery(passiveDiscovery);
     }
 
     public Boolean deletePassiveDiscovery(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        var result = passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteDiscovery(Int64Value.of(id));
+        var result = passiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .deleteDiscovery(Int64Value.of(id));
         return result.getValue();
     }
 
     public PassiveDiscoveryListDTO listPassiveDiscoveries(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listAllDiscoveries(Empty.getDefaultInstance());
+        return passiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listAllDiscoveries(Empty.getDefaultInstance());
     }
 
     public TagListDTO addTags(TagCreateListDTO tagCreateList, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).addTags(tagCreateList);
+        return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .addTags(tagCreateList);
     }
 
     public void removeTags(TagRemoveListDTO tagRemoveList, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).removeTags(tagRemoveList);
+        tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .removeTags(tagRemoveList);
     }
 
     public TagListDTO getTagsByNodeId(long nodeId, String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeId))
-            .setParams(buildTagListParams(searchTerm))
-            .build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeId))
+                .setParams(buildTagListParams(searchTerm))
+                .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getTagsByEntityId(params);
     }
 
     public TagListDTO getTagsByNodeId(long nodeId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeId))
-            .build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(nodeId))
+                .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getTagsByEntityId(params);
     }
 
     public TagListDTO getTagsByActiveDiscoveryId(long activeDiscoveryId, String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscoveryId))
-            .setParams(buildTagListParams(searchTerm))
-            .build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(activeDiscoveryId))
+                .setParams(buildTagListParams(searchTerm))
+                .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getTagsByEntityId(params);
     }
 
     public TagListDTO getTagsByPassiveDiscoveryId(long passiveDiscoveryId, String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscoveryId))
-            .setParams(buildTagListParams(searchTerm))
-            .build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscoveryId))
+                .setParams(buildTagListParams(searchTerm))
+                .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTagsByEntityId(params);
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getTagsByEntityId(params);
     }
 
     public TagListDTO getTags(String searchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
-            .setParams(buildTagListParams(searchTerm))
-            .build();
+                .setParams(buildTagListParams(searchTerm))
+                .build();
         return tagStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getTags(params);
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getTags(params);
     }
 
     private TagListParamsDTO buildTagListParams(String searchTerm) {
@@ -378,46 +469,60 @@ public class InventoryClient {
     public PassiveDiscoveryDTO createPassiveDiscoveryToggle(PassiveDiscoveryToggleDTO request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return passiveDiscoveryServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).toggleDiscovery(request);
+        return passiveDiscoveryServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .toggleDiscovery(request);
     }
 
     public IpInterfaceDTO getIpInterfaceById(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getIpInterfaceById(Int64Value.of(id));
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getIpInterfaceById(Int64Value.of(id));
     }
 
     public MonitoringLocationDTO createLocation(MonitoringLocationCreateDTO location, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createLocation(location);
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .createLocation(location);
     }
 
     public MonitoringLocationDTO updateLocation(MonitoringLocationDTO location, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .updateLocation(location);
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .updateLocation(location);
     }
 
     public boolean deleteLocation(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return locationStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deleteLocation(Int64Value.of(id)).getValue();
+        return locationStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .deleteLocation(Int64Value.of(id))
+                .getValue();
     }
 
     public MonitoredServiceStatusDTO getMonitorStatus(MonitoredServiceStatusRequest request, String accessToken) {
         MonitoredServiceQuery monitoredStateQuery = MonitoredServiceQuery.newBuilder()
-            .setNodeId(request.getNodeId())
-            .setMonitoredServiceType(request.getMonitorType())
-            .setIpAddress(request.getIpAddress()).build();
+                .setNodeId(request.getNodeId())
+                .setMonitoredServiceType(request.getMonitorType())
+                .setIpAddress(request.getIpAddress())
+                .build();
 
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return monitorStatusServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoredServiceStatus(monitoredStateQuery);
+        return monitorStatusServiceBlockingStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getMonitoredServiceStatus(monitoredStateQuery);
     }
 }

@@ -2,7 +2,7 @@
   <div class="cards">
     <div v-for="node in tabContent" :key="node.id" class="card" :data-test="state">
       <section class="node-header">
-        <h5 data-test="heading" class="node-label">{{ node?.nodeAlias || node?.nodeLabel }}</h5>
+        <h5 data-test="heading" class="node-label pointer" @click="() => onNodeClick(node.id)">{{ node?.nodeAlias || node?.nodeLabel }}</h5>
         <div class="card-chip-list">
           <div class="text-badge-row" v-if="state === MonitoredStates.MONITORED">
             <div v-for="badge, index in metricsAsTextBadges(node?.metrics)" :key="index">
@@ -49,6 +49,7 @@ defineProps({
 const tagStore = useTagStore()
 const inventoryStore = useInventoryStore()
 const isTagManagerReset = computed(() => inventoryStore.isTagManagerReset)
+const router = useRouter()
 
 watch(isTagManagerReset, (isReset) => {
   if (isReset) {
@@ -63,6 +64,13 @@ const resetState = () => {
   inventoryStore.isTagManagerReset = false
 }
 
+const onNodeClick = (id: number) => {
+  router.push({
+    name: 'Node Status',
+    params: { id }
+  })
+}
+
 const openModalForDeletingTags = (node: NewInventoryNode) => {
   tagStore.setActiveNode(node)
   tagStore.openModal()
@@ -71,11 +79,11 @@ const openModalForDeletingTags = (node: NewInventoryNode) => {
 const metricsAsTextBadges = (metrics?: RawMetric) => {
   const badges = []
 
-  if (metrics?.value?.[1]){
-    badges.push({ type: BadgeTypes.success,label:metrics.value?.[1] + 'ms' })
-    badges.push({ type: BadgeTypes.success,label:'Up' })
+  if (metrics?.value?.[1]) {
+    badges.push({ type: BadgeTypes.success, label: metrics.value?.[1] + 'ms' })
+    badges.push({ type: BadgeTypes.success, label: 'Up' })
   } else {
-    badges.push({ type: BadgeTypes.error,label:'Down' })
+    badges.push({ type: BadgeTypes.error, label: 'Down' })
   }
 
   return badges

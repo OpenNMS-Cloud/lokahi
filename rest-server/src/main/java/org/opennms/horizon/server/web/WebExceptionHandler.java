@@ -1,33 +1,30 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.server.web;
 
+import static org.opennms.horizon.server.web.WebExceptionHandler.BEFORE_OTHER_WEB_EXCEPTION_HANDLERS;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.web.WebProperties;
@@ -51,11 +48,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.opennms.horizon.server.web.WebExceptionHandler.BEFORE_OTHER_WEB_EXCEPTION_HANDLERS;
 
 /**
  * Handles web-level exceptions, ensuring that appropriate data is returned.
@@ -90,12 +82,11 @@ public class WebExceptionHandler extends AbstractErrorWebExceptionHandler {
 
     /** {@inheritDoc} */
     public WebExceptionHandler(
-        ErrorAttributes errorAttributes,
-        WebProperties webProperties,
-        ApplicationContext applicationContext,
-        ObjectProvider<ViewResolver> viewResolvers,
-        ServerCodecConfigurer serverCodecConfigurer
-    ) {
+            ErrorAttributes errorAttributes,
+            WebProperties webProperties,
+            ApplicationContext applicationContext,
+            ObjectProvider<ViewResolver> viewResolvers,
+            ServerCodecConfigurer serverCodecConfigurer) {
         super(errorAttributes, webProperties.getResources(), applicationContext);
 
         // Additional required config. See org.springframework.boot.autoconfigure
@@ -147,30 +138,19 @@ public class WebExceptionHandler extends AbstractErrorWebExceptionHandler {
         return createResponse(e, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private Mono<ServerResponse> createResponse(
-        Throwable t,
-        ServerRequest request,
-        HttpStatus status
-    ) {
+    private Mono<ServerResponse> createResponse(Throwable t, ServerRequest request, HttpStatus status) {
         return createResponse(t, request, status, status.getReasonPhrase());
     }
 
-    private Mono<ServerResponse> createResponse(
-        Throwable t,
-        ServerRequest request,
-        HttpStatus status,
-        String message
-    ) {
+    private Mono<ServerResponse> createResponse(Throwable t, ServerRequest request, HttpStatus status, String message) {
         if (status.is5xxServerError()) {
             log.error("Exception occurred during request processing", t);
         }
-        Map<String, Object> attributes = getErrorAttributes(
-            request, ErrorAttributeOptions.defaults()
-        );
+        Map<String, Object> attributes = getErrorAttributes(request, ErrorAttributeOptions.defaults());
         attributes.put("message", message);
 
         return ServerResponse.status(status)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(attributes));
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(attributes));
     }
 }

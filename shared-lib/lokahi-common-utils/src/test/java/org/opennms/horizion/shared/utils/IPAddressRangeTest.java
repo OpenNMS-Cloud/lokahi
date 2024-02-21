@@ -1,38 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2007-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizion.shared.utils;
-
-import junit.framework.TestCase;
-import org.opennms.horizon.shared.utils.ByteArrayComparator;
-import org.opennms.horizon.shared.utils.IPAddress;
-import org.opennms.horizon.shared.utils.IPAddressRange;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 import java.math.BigInteger;
 import java.net.Inet4Address;
@@ -43,6 +30,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import junit.framework.TestCase;
+import org.opennms.horizon.shared.utils.ByteArrayComparator;
+import org.opennms.horizon.shared.utils.IPAddress;
+import org.opennms.horizon.shared.utils.IPAddressRange;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
 
 /**
  * IPAddressRangeTest
@@ -98,31 +90,108 @@ public class IPAddressRangeTest extends TestCase {
 
         assertEquals(1L, one.toBigInteger().longValue());
 
-        assertEquals((long)(Math.pow(2, 30) - 1.0), thirtyBitNumber.toBigInteger().longValue());
+        assertEquals(
+                (long) (Math.pow(2, 30) - 1.0), thirtyBitNumber.toBigInteger().longValue());
 
-        assertEquals((long)(Math.pow(2, 31) - 1.0), thirtyOneBitNumber.toBigInteger().longValue());
+        assertEquals(
+                (long) (Math.pow(2, 31) - 1.0),
+                thirtyOneBitNumber.toBigInteger().longValue());
 
-        assertEquals((long)(Math.pow(2, 31)), thirtyTwoBit.toBigInteger().longValue());
+        assertEquals((long) (Math.pow(2, 31)), thirtyTwoBit.toBigInteger().longValue());
 
-        assertEquals((long)(Math.pow(2, 32) - 1.0), maxIPv4.toBigInteger().longValue());
+        assertEquals((long) (Math.pow(2, 32) - 1.0), maxIPv4.toBigInteger().longValue());
         // assertEquals((long)(Math.pow(2, 16 * 8) - 1.0), maxIPv6.toBigInteger().longValue());
     }
 
     public void testConvertBigIntegerIntoInetAddress() throws UnknownHostException {
-        assertEquals(0, new ByteArrayComparator().compare(zero.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(zero.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(one.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(zero.incr().toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(zero.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(one.decr().toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(one.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(one.toBigInteger()).getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                zero.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(zero.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                one.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(
+                                                zero.incr().toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                zero.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(
+                                                one.decr().toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                one.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(one.toBigInteger())
+                                        .getAddress()));
 
-        assertEquals(0, new ByteArrayComparator().compare(one.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(one.toBigInteger()).getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                one.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(one.toBigInteger())
+                                        .getAddress()));
 
-        assertEquals(0, new ByteArrayComparator().compare(maxOneOctet.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(maxOneOctet.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(maxTwoOctet.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(maxTwoOctet.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(maxThreeOctet.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(maxThreeOctet.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(thirtyBitNumber.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(thirtyBitNumber.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(thirtyOneBitNumber.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(thirtyOneBitNumber.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(thirtyTwoBit.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(thirtyTwoBit.toBigInteger()).getAddress()));
-        assertEquals(0, new ByteArrayComparator().compare(maxFourOctet.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(maxFourOctet.toBigInteger()).getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                maxOneOctet.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(maxOneOctet.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                maxTwoOctet.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(maxTwoOctet.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                maxThreeOctet.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(maxThreeOctet.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                thirtyBitNumber.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(thirtyBitNumber.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                thirtyOneBitNumber.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(thirtyOneBitNumber.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                thirtyTwoBit.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(thirtyTwoBit.toBigInteger())
+                                        .getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                maxFourOctet.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(maxFourOctet.toBigInteger())
+                                        .getAddress()));
 
         InetAddress maxIPv4Addr = InetAddressUtils.convertBigIntegerIntoInetAddress(maxIPv4.toBigInteger());
         assertTrue(maxIPv4Addr instanceof Inet4Address);
@@ -134,7 +203,13 @@ public class IPAddressRangeTest extends TestCase {
         assertFalse(maxIPv6Addr instanceof Inet4Address);
         assertEquals(0, new ByteArrayComparator().compare(maxIPv6.toOctets(), maxIPv6Addr.getAddress()));
 
-        assertEquals(0, new ByteArrayComparator().compare(maxIPv6MinusFive.toOctets(), InetAddressUtils.convertBigIntegerIntoInetAddress(maxIPv6MinusFive.toBigInteger()).getAddress()));
+        assertEquals(
+                0,
+                new ByteArrayComparator()
+                        .compare(
+                                maxIPv6MinusFive.toOctets(),
+                                InetAddressUtils.convertBigIntegerIntoInetAddress(maxIPv6MinusFive.toBigInteger())
+                                        .getAddress()));
 
         try {
             InetAddressUtils.convertBigIntegerIntoInetAddress(new BigInteger("-1"));
@@ -156,13 +231,27 @@ public class IPAddressRangeTest extends TestCase {
         assertEquals("0.0.0.1", InetAddressUtils.toIpAddrString(one.toOctets()));
 
         assertEquals("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", InetAddressUtils.toIpAddrString(maxIPv6.toOctets()));
-        assertEquals("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffa", InetAddressUtils.toIpAddrString(maxIPv6MinusFive.toOctets()));
-        assertEquals("0000:0000:0000:0000:0000:0000:0000:0001", InetAddressUtils.toIpAddrString(new IPAddress("::1").toOctets()));
-        assertEquals("aaaa:0000:0000:0000:0000:0000:0000:0001", InetAddressUtils.toIpAddrString(new IPAddress("AAAA::1").toOctets()));
-        assertEquals("aaaa:0000:0000:0000:0000:0000:0000:0000", InetAddressUtils.toIpAddrString(new IPAddress("AAAA::").toOctets()));
-        assertEquals("00aa:0000:0000:0000:0000:0000:0000:0000", InetAddressUtils.toIpAddrString(new IPAddress("AA::").toOctets()));
-        assertEquals("aaaa:0000:0000:0000:0000:0000:0000:0000%15", InetAddressUtils.toIpAddrString(InetAddressUtils.addr("AAAA::%15")));
-        assertEquals("aaaa:0000:0000:0000:0000:0000:0000:0000", InetAddressUtils.toIpAddrString(InetAddressUtils.addr("AAAA::%0")));
+        assertEquals(
+                "ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffa",
+                InetAddressUtils.toIpAddrString(maxIPv6MinusFive.toOctets()));
+        assertEquals(
+                "0000:0000:0000:0000:0000:0000:0000:0001",
+                InetAddressUtils.toIpAddrString(new IPAddress("::1").toOctets()));
+        assertEquals(
+                "aaaa:0000:0000:0000:0000:0000:0000:0001",
+                InetAddressUtils.toIpAddrString(new IPAddress("AAAA::1").toOctets()));
+        assertEquals(
+                "aaaa:0000:0000:0000:0000:0000:0000:0000",
+                InetAddressUtils.toIpAddrString(new IPAddress("AAAA::").toOctets()));
+        assertEquals(
+                "00aa:0000:0000:0000:0000:0000:0000:0000",
+                InetAddressUtils.toIpAddrString(new IPAddress("AA::").toOctets()));
+        assertEquals(
+                "aaaa:0000:0000:0000:0000:0000:0000:0000%15",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.addr("AAAA::%15")));
+        assertEquals(
+                "aaaa:0000:0000:0000:0000:0000:0000:0000",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.addr("AAAA::%0")));
     }
 
     public void testCreate() {
@@ -209,65 +298,65 @@ public class IPAddressRangeTest extends TestCase {
         assertNull(InetAddressUtils.getLowestInetAddress(Collections.<InetAddress>emptyList()));
 
         List<InetAddress> ips;
-        ips = Arrays.asList(
-                            InetAddressUtils.addr("0.0.0.0")
-        );
+        ips = Arrays.asList(InetAddressUtils.addr("0.0.0.0"));
         assertEquals("0.0.0.0", getLowestHostAddress(ips));
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("0.0.0.0"),
-                            InetAddressUtils.addr("abcd:ef00:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("127.0.0.1")
-        );
+                InetAddressUtils.addr("0.0.0.0"),
+                InetAddressUtils.addr("abcd:ef00:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("127.0.0.1"));
         assertEquals("0.0.0.0", getLowestHostAddress(ips));
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("255.255.255.255"),
-                            InetAddressUtils.addr("abcd:ef00:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("127.0.0.1")
-        );
+                InetAddressUtils.addr("255.255.255.255"),
+                InetAddressUtils.addr("abcd:ef00:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("127.0.0.1"));
         assertEquals("127.0.0.1", getLowestHostAddress(ips));
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001")
-        );
-        assertEquals("8000:0000:0000:0000:0000:0000:0000:0001", InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
+                InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"));
+        assertEquals(
+                "8000:0000:0000:0000:0000:0000:0000:0001",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001")
-        );
-        assertEquals("8000:0000:0000:0000:0000:0000:0000:0001", InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("8000:0000:0000:0000:0000:0000:0000:0001"));
+        assertEquals(
+                "8000:0000:0000:0000:0000:0000:0000:0001",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
 
-        // TODO: These tests produce strange results because it is unclear how this function should 
+        // TODO: These tests produce strange results because it is unclear how this function should
         // compare IPv6 addresses that include scope IDs
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%5"),
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001")
-        );
-        assertEquals("ff00:0000:0000:0000:0000:0000:0000:0001%5", InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%5"),
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"));
+        assertEquals(
+                "ff00:0000:0000:0000:0000:0000:0000:0001%5",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%5")
-        );
-        assertEquals("ff00:0000:0000:0000:0000:0000:0000:0001", InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001"),
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%5"));
+        assertEquals(
+                "ff00:0000:0000:0000:0000:0000:0000:0001",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
 
         ips = Arrays.asList(
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%6"),
-                            InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%5")
-        );
-        assertEquals("ff00:0000:0000:0000:0000:0000:0000:0001%6", InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%6"),
+                InetAddressUtils.addr("ff00:0000:0000:0000:0000:0000:0000:0001%5"));
+        assertEquals(
+                "ff00:0000:0000:0000:0000:0000:0000:0001%6",
+                InetAddressUtils.toIpAddrString(InetAddressUtils.getLowestInetAddress(ips)));
     }
 
-	private String getLowestHostAddress(final List<InetAddress> ips) {
-		return InetAddressUtils.str(InetAddressUtils.getLowestInetAddress(ips));
-	}
-
+    private String getLowestHostAddress(final List<InetAddress> ips) {
+        return InetAddressUtils.str(InetAddressUtils.getLowestInetAddress(ips));
+    }
 }

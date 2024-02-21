@@ -143,7 +143,7 @@ const dataSets = computed(() => {
     hitRadius: 5,
     hoverRadius: 6,
     // hides the last point, which tracks the gap between the previous point and now
-    pointRadius: Array.from(Array(xAxisLabels.value.length).keys()).map((_, index) => xAxisLabels.value.length -1 === index ? 0 : 3),
+    pointRadius: Array.from(Array(xAxisLabels.value.length).keys()).map((_, index) => xAxisLabels.value.length - 1 === index ? 0 : 3),
     spanGaps: 1000 * 60 * 2 // no line over 2+ minute gaps
   }))
 })
@@ -179,8 +179,8 @@ const onDownload = () => {
   const canvas = document.getElementById(props.graph.label) as HTMLCanvasElement
   downloadCanvas(canvas, props.graph.label)
 }
-watch(props,async () => {
-  if (props.graph.metrics){
+watch(props, async () => {
+  if (props.graph.metrics) {
     await graphs.getMetrics(props.graph)
     render()
   }

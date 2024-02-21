@@ -1,4 +1,27 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.testtool.miniongateway.wiremock.client;
+
+import static org.junit.Assert.*;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -9,17 +32,6 @@ import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
-import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.entity.ContentType;
-import org.apache.http.protocol.HTTP;
-import org.opennms.horizon.testtool.miniongateway.wiremock.api.SinkMessageDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,8 +41,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.entity.ContentType;
+import org.apache.http.protocol.HTTP;
+import org.opennms.horizon.testtool.miniongateway.wiremock.api.SinkMessageDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MinionGatewayWiremockTestSteps {
 
@@ -49,18 +67,17 @@ public class MinionGatewayWiremockTestSteps {
 
     private Response restAssuredResponse;
 
-//========================================
-// Constructor
-//----------------------------------------
+    // ========================================
+    // Constructor
+    // ----------------------------------------
 
     public MinionGatewayWiremockTestSteps(RetryUtils retryUtils) {
         this.retryUtils = retryUtils;
     }
 
-
-//========================================
-// Cucumber Step Definitions
-//----------------------------------------
+    // ========================================
+    // Cucumber Step Definitions
+    // ----------------------------------------
 
     @Given("MOCK Minion Gateway Base URL in system property {string}")
     public void minionGatewayBaseURLInSystemProperty(String systemProperty) {
@@ -81,21 +98,18 @@ public class MinionGatewayWiremockTestSteps {
 
         RestAssuredConfig restAssuredConfig = createRestAssuredTestConfig();
 
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig)
-            ;
+        RequestSpecification requestSpecification = RestAssured.given().config(restAssuredConfig);
 
-        restAssuredResponse =
-            requestSpecification
+        restAssuredResponse = requestSpecification
                 .header(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
                 .body(twinUpdateContent)
                 .post(requestUrl)
-                .thenReturn()
-        ;
+                .thenReturn();
 
-        log.info("MOCK twin-update status-code={}; body={}", restAssuredResponse.getStatusCode(), restAssuredResponse.getBody().asString());
+        log.info(
+                "MOCK twin-update status-code={}; body={}",
+                restAssuredResponse.getStatusCode(),
+                restAssuredResponse.getBody().asString());
     }
 
     @Then("MOCK verify minion is connected with id {string}")
@@ -107,13 +121,7 @@ public class MinionGatewayWiremockTestSteps {
     public void waitForMinionConnection(String minionId, int timeout) throws Exception {
 
         boolean found =
-            retryUtils.retry(
-                () -> isMinionConnected(minionId, false),
-                result -> result,
-                500,
-                timeout,
-                false
-                );
+                retryUtils.retry(() -> isMinionConnected(minionId, false), result -> result, 500, timeout, false);
 
         assertTrue("Minion is connected: minion-id=" + minionId, found);
     }
@@ -121,20 +129,14 @@ public class MinionGatewayWiremockTestSteps {
     @Then("Verify gateway has received netflow packages")
     public void checkIfGatewayReceivedNetflowPackages() throws InterruptedException {
 
-        final List<SinkMessageDto> messages = retryUtils.retry(
-            this::getFlowMessages,
-            list -> !list.isEmpty(),
-            500,
-            30000,
-            Collections.emptyList()
-        );
+        final List<SinkMessageDto> messages =
+                retryUtils.retry(this::getFlowMessages, list -> !list.isEmpty(), 500, 30000, Collections.emptyList());
         assertFalse(messages.isEmpty());
     }
 
-
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private String readResourceFile(String path) throws Exception {
         String content = "";
@@ -148,10 +150,9 @@ public class MinionGatewayWiremockTestSteps {
 
     private RestAssuredConfig createRestAssuredTestConfig() {
         return RestAssuredConfig.config()
-            .httpClient(HttpClientConfig.httpClientConfig()
-                .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-                .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-            );
+                .httpClient(HttpClientConfig.httpClientConfig()
+                        .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
+                        .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT));
     }
 
     private URL formatTwinUpdateUrl(String topic) throws MalformedURLException {
@@ -172,18 +173,12 @@ public class MinionGatewayWiremockTestSteps {
 
         RestAssuredConfig restAssuredConfig = createRestAssuredTestConfig();
 
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig)
-            ;
+        RequestSpecification requestSpecification = RestAssured.given().config(restAssuredConfig);
 
-        restAssuredResponse =
-            requestSpecification
+        restAssuredResponse = requestSpecification
                 .header(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType())
                 .get(requestUrl)
-                .thenReturn()
-        ;
+                .thenReturn();
 
         if (useAssert) {
             assertEquals(200, restAssuredResponse.getStatusCode());
@@ -202,11 +197,7 @@ public class MinionGatewayWiremockTestSteps {
             throw new RuntimeException("failed to parse response", exc);
         }
 
-        boolean found =
-            minions.stream()
-                .anyMatch(
-                    (identity) -> (minionId.equals(((Map) identity).get("systemId")))
-                );
+        boolean found = minions.stream().anyMatch((identity) -> (minionId.equals(((Map) identity).get("systemId"))));
 
         if (useAssert) {
             assertTrue("Minion is connected: minion-id=" + minionId, found);
@@ -217,23 +208,22 @@ public class MinionGatewayWiremockTestSteps {
 
     @SneakyThrows
     private List<SinkMessageDto> getFlowMessages() {
-        RestAssuredConfig restAssuredConfig = RestAssuredConfig.config()
-            .httpClient(HttpClientConfig.httpClientConfig()
-            );
+        RestAssuredConfig restAssuredConfig =
+                RestAssuredConfig.config().httpClient(HttpClientConfig.httpClientConfig());
 
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
+        RequestSpecification requestSpecification = RestAssured.given().config(restAssuredConfig);
 
         final SinkMessageDto[] result = requestSpecification
-            .get(formatUrl(BASE_PATH + "/sinkMessages"))
-            .thenReturn()
-            .as(SinkMessageDto[].class);
+                .get(formatUrl(BASE_PATH + "/sinkMessages"))
+                .thenReturn()
+                .as(SinkMessageDto[].class);
         List<SinkMessageDto> messages = Arrays.stream(result)
-            .filter(msg -> "Flow".equals(msg.getModuleId()))
-            .collect(Collectors.toList());
-        log.info("Cloud Gateway received:\n   {} SinkMessages in total\n   {} of these were Flow messages", result.length, messages.size());
+                .filter(msg -> "Flow".equals(msg.getModuleId()))
+                .collect(Collectors.toList());
+        log.info(
+                "Cloud Gateway received:\n   {} SinkMessages in total\n   {} of these were Flow messages",
+                result.length,
+                messages.size());
         return messages;
     }
 }

@@ -1,36 +1,37 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.service;
 
 import io.grpc.Context;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertType;
@@ -54,15 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Used to process/reduce events to alerts.
@@ -94,7 +86,6 @@ public class AlertEventProcessor {
 
     private Counter eventsWithoutAlertDataCounter;
 
-
     @PostConstruct
     public void init() {
         eventsWithoutAlertDataCounter = registry.counter("events_without_alert_data_counter");
@@ -105,27 +96,35 @@ public class AlertEventProcessor {
         LOG.trace("Processing event with UEI: {} for tenant id: {}", e.getUei(), e.getTenantId());
         List<org.opennms.horizon.alertservice.db.entity.Alert> dbAlerts = addOrReduceEventAsAlert(e);
         if (dbAlerts.isEmpty()) {
-            LOG.debug("No alert returned from processing event with UEI: {} for tenant id: {}", e.getUei(), e.getTenantId());
+            LOG.debug(
+                    "No alert returned from processing event with UEI: {} for tenant id: {}",
+                    e.getUei(),
+                    e.getTenantId());
             return Collections.emptyList();
         }
-        return dbAlerts.stream().map(dbAlert -> {
-            var alert = Alert.newBuilder(alertMapper.toProto(dbAlert));
+        return dbAlerts.stream()
+                .map(dbAlert -> {
+                    var alert = Alert.newBuilder(alertMapper.toProto(dbAlert));
 
-            saveLocation(e);
-            alert.setLocation(e.getLocationName());
-            nodeRepository.findByIdAndTenantId(e.getNodeId(), e.getTenantId()).ifPresent(node ->
-                alert.setNodeName(node.getNodeLabel())
-            );
-            alert.addRuleName(dbAlert.getAlertCondition().getRule().getName());
-            alert.addPolicyName(dbAlert.getAlertCondition().getRule().getPolicy().getName());
-            return alert.build();
-        }).toList();
+                    saveLocation(e);
+                    alert.setLocation(e.getLocationName());
+                    nodeRepository
+                            .findByIdAndTenantId(e.getNodeId(), e.getTenantId())
+                            .ifPresent(node -> alert.setNodeName(node.getNodeLabel()));
+                    alert.addRuleName(dbAlert.getAlertCondition().getRule().getName());
+                    alert.addPolicyName(
+                            dbAlert.getAlertCondition().getRule().getPolicy().getName());
+                    return alert.build();
+                })
+                .toList();
     }
 
     protected List<org.opennms.horizon.alertservice.db.entity.Alert> addOrReduceEventAsAlert(Event event) {
-        List<AlertDefinition> alertDefinitions = alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei());
+        List<AlertDefinition> alertDefinitions =
+                alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei());
         if (alertDefinitions.isEmpty()) {
-            alertDefinitions = alertDefinitionRepository.findByTenantIdAndUei(MonitorPolicyService.SYSTEM_TENANT, event.getUei());
+            alertDefinitions =
+                    alertDefinitionRepository.findByTenantIdAndUei(MonitorPolicyService.SYSTEM_TENANT, event.getUei());
         }
         if (alertDefinitions.isEmpty()) {
             // No alert definition matching, no alert to create
@@ -134,11 +133,11 @@ public class AlertEventProcessor {
         }
 
         List<org.opennms.horizon.alertservice.db.entity.Alert> alerts = alertDefinitions.stream()
-            .map(alertDefinition -> getAlertData(event, alertDefinition))
-            .map(alertData -> createOrUpdateAlert(event, alertData))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .toList();
+                .map(alertDefinition -> getAlertData(event, alertDefinition))
+                .map(alertData -> createOrUpdateAlert(event, alertData))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
         // FIXME: If the alert is going to be delete immediately, should we even bother creating it?
         alertRepository.saveAll(alerts);
@@ -153,41 +152,44 @@ public class AlertEventProcessor {
         List<MonitorPolicy> matchingPolicies = new ArrayList<>();
         tags.forEach(tag -> matchingPolicies.addAll(tag.getPolicies().stream().toList()));
         var policies = matchingPolicies.stream().map(MonitorPolicy::getId).toList();
-        return new AlertData(
-            reductionKey,
-            clearKey,
-            alertDefinition.getType(),
-            policies,
-            alertCondition
-        );
+        return new AlertData(reductionKey, clearKey, alertDefinition.getType(), policies, alertCondition);
     }
 
-    private Optional<org.opennms.horizon.alertservice.db.entity.Alert> createOrUpdateAlert(Event event, AlertData alertData) {
+    private Optional<org.opennms.horizon.alertservice.db.entity.Alert> createOrUpdateAlert(
+            Event event, AlertData alertData) {
         Optional<org.opennms.horizon.alertservice.db.entity.Alert> queryResult = Optional.empty();
         if (alertData.clearKey() != null) {
             // If a clearKey is set, determine if there is an existing alert, and reduce onto that one
-            queryResult = tenantLookup.lookupTenantId(Context.current())
-                .flatMap(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.clearKey(), tenantId));
+            queryResult = tenantLookup
+                    .lookupTenantId(Context.current())
+                    .flatMap(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.clearKey(), tenantId));
             if (queryResult.isEmpty()) {
-                LOG.debug("No existing alert found with clear key: {}. This is possibly an out-of-order event: {}", alertData.clearKey(), event);
+                LOG.debug(
+                        "No existing alert found with clear key: {}. This is possibly an out-of-order event: {}",
+                        alertData.clearKey(),
+                        event);
             }
         }
         if (queryResult.isEmpty()) {
             // If we didn't find an existing alert to reduce to with the clearKey, the lookup by reductionKey
-            queryResult = tenantLookup.lookupTenantId(Context.current())
-                .flatMap(tenantId -> alertRepository.findByReductionKeyAndTenantId(alertData.reductionKey(), tenantId));
+            queryResult = tenantLookup
+                    .lookupTenantId(Context.current())
+                    .flatMap(tenantId ->
+                            alertRepository.findByReductionKeyAndTenantId(alertData.reductionKey(), tenantId));
         }
 
         // a cleared alert will reset threshold limit
-        if (queryResult.isPresent() && queryResult.get().getSeverity() == Severity.CLEARED
-            && queryResult.get().getEventUei().equals(event.getUei())) {
+        if (queryResult.isPresent()
+                && queryResult.get().getSeverity() == Severity.CLEARED
+                && queryResult.get().getEventUei().equals(event.getUei())) {
             archiveClearedAlert(queryResult.get(), event);
             queryResult = Optional.empty();
         }
 
         boolean thresholdMet;
         if (isThresholding(alertData) && !AlertType.CLEAR.equals(alertData.type())) {
-            // TODO: (Quote from Jose) We will have to add an option to auto close if rate is no longer met - that will be post FMA.
+            // TODO: (Quote from Jose) We will have to add an option to auto close if rate is no longer met - that will
+            // be post FMA.
             // If we don't wish to use SQL, this can be done by passing the ThresholdedEvent to the AlertEngine,
             // using the tick() method to check for expiredEvents.
             // In AlertEngine, need id, tenant, expiryDate. Save in a TreeMap sorted by expiryDate.
@@ -216,12 +218,14 @@ public class AlertEventProcessor {
             }
 
             if (event.hasField(Event.getDescriptor().findFieldByNumber(Event.DESCRIPTION_FIELD_NUMBER))) {
-                String desc = event.getDescription().toLowerCase().contains("exception") ?
-                    "Monitoring error." : event.getDescription();
-                event.getParametersList().stream().filter(p -> "serviceName".equals(p.getName())).findFirst()
-                    .ifPresentOrElse(
-                        p -> alert.setDescription(p.getValue() + " " + desc),
-                        () -> alert.setDescription(desc));
+                String desc = event.getDescription().toLowerCase().contains("exception")
+                        ? "Monitoring error."
+                        : event.getDescription();
+                event.getParametersList().stream()
+                        .filter(p -> "serviceName".equals(p.getName()))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                p -> alert.setDescription(p.getValue() + " " + desc), () -> alert.setDescription(desc));
             }
 
             alert.setType(alertData.type());
@@ -238,7 +242,7 @@ public class AlertEventProcessor {
     }
 
     private void archiveClearedAlert(org.opennms.horizon.alertservice.db.entity.Alert clearedAlert, Event event) {
-        if(clearedAlert == null || clearedAlert.getSeverity() != Severity.CLEARED) {
+        if (clearedAlert == null || clearedAlert.getSeverity() != Severity.CLEARED) {
             throw new IllegalArgumentException("Only cleared alert can be archived");
         }
         clearedAlert.setReductionKey(reductionKeyService.renderArchiveReductionKey(clearedAlert, event));
@@ -250,7 +254,8 @@ public class AlertEventProcessor {
     private boolean isThresholdMet(AlertData alertData, String tenantId) {
         Date current = new Date();
 
-        int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(alertData.reductionKey(), tenantId, current);
+        int currentCount = thresholdedEventRepository.countByReductionKeyAndTenantIdAndExpiryTimeGreaterThanEqual(
+                alertData.reductionKey(), tenantId, current);
         return alertData.alertCondition().getCount() <= currentCount;
     }
 
@@ -276,8 +281,10 @@ public class AlertEventProcessor {
         } else {
             switch (alertData.alertCondition().getOvertimeUnit()) {
                 case HOUR -> dur = Duration.ofHours(alertData.alertCondition().getOvertime());
-                case MINUTE -> dur = Duration.ofMinutes(alertData.alertCondition().getOvertime());
-                case SECOND -> dur = Duration.ofSeconds(alertData.alertCondition().getOvertime());
+                case MINUTE -> dur =
+                        Duration.ofMinutes(alertData.alertCondition().getOvertime());
+                case SECOND -> dur =
+                        Duration.ofSeconds(alertData.alertCondition().getOvertime());
             }
         }
 
@@ -291,9 +298,9 @@ public class AlertEventProcessor {
     }
 
     private boolean isThresholding(AlertData alertData) {
-        return (alertData.alertCondition().getCount() > 1 ||
-            alertData.alertCondition().getOvertime() != null
-            && alertData.alertCondition().getOvertime() > 0);
+        return (alertData.alertCondition().getCount() > 1
+                || alertData.alertCondition().getOvertime() != null
+                        && alertData.alertCondition().getOvertime() > 0);
     }
 
     private org.opennms.horizon.alertservice.db.entity.Alert createNewAlert(Event event, AlertData alertData) {
@@ -333,18 +340,16 @@ public class AlertEventProcessor {
     }
 
     private record AlertData(
-        String reductionKey,
-        String clearKey,
-        AlertType type,
-        List<Long> monitoringPolicyId,
-        AlertCondition alertCondition
-    ) {
-    }
+            String reductionKey,
+            String clearKey,
+            AlertType type,
+            List<Long> monitoringPolicyId,
+            AlertCondition alertCondition) {}
 
     /**
      * Save for location id > name looking during query
      */
-    private void saveLocation(final Event e){
+    private void saveLocation(final Event e) {
         if (!e.hasField(Event.getDescriptor().findFieldByNumber(Event.LOCATION_ID_FIELD_NUMBER))) {
             return;
         }
@@ -355,7 +360,11 @@ public class AlertEventProcessor {
             location.setTenantId(e.getTenantId());
             locationRepository.save(location);
         } catch (Exception ex) {
-            LOG.warn("Fail to store location cache: {}, tenantId: {} error: {}", e.getLocationId(), e.getTenantId(), ex.getMessage());
+            LOG.warn(
+                    "Fail to store location cache: {}, tenantId: {} error: {}",
+                    e.getLocationId(),
+                    e.getTenantId(),
+                    ex.getMessage());
         }
     }
 }

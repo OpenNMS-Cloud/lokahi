@@ -1,34 +1,46 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
 import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,39 +67,23 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
-//This purpose of this test class is keep checking the dataloader logic is correct.
+// This purpose of this test class is keep checking the dataloader logic is correct.
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 public class GraphQLNodeServiceTest {
     @MockBean
     private InventoryClient mockClient;
+
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
+
     @MockBean
     private TSDBMetricsService tsdbMetricsService;
+
     private GraphQLWebTestClient webClient;
     private String accessToken;
     private MonitoringLocationDTO locationDTO1, locationDTO2;
     private NodeDTO nodeDTO1, nodeDTO2, nodeDTO3, nodeDTO4;
+
     @Captor
     private ArgumentCaptor<List<DataLoaderFactory.Key>> keyCaptor;
 
@@ -96,20 +92,40 @@ public class GraphQLNodeServiceTest {
         webClient = GraphQLWebTestClient.from(webTestClient);
         accessToken = webClient.getAccessToken();
 
-        locationDTO1 = MonitoringLocationDTO.newBuilder().setId(1L).setLocation("test-location1").build();
-        locationDTO2 = MonitoringLocationDTO.newBuilder().setId(2L).setLocation("test-location2").build();
-        nodeDTO1 = NodeDTO.newBuilder().setId(1L).setMonitoringLocationId(locationDTO1.getId()).build();
-        nodeDTO2 = NodeDTO.newBuilder().setId(2L).setMonitoringLocationId(locationDTO1.getId()).build();
-        nodeDTO3 = NodeDTO.newBuilder().setId(3L).setMonitoringLocationId(locationDTO2.getId()).build();
+        locationDTO1 = MonitoringLocationDTO.newBuilder()
+                .setId(1L)
+                .setLocation("test-location1")
+                .build();
+        locationDTO2 = MonitoringLocationDTO.newBuilder()
+                .setId(2L)
+                .setLocation("test-location2")
+                .build();
+        nodeDTO1 = NodeDTO.newBuilder()
+                .setId(1L)
+                .setMonitoringLocationId(locationDTO1.getId())
+                .build();
+        nodeDTO2 = NodeDTO.newBuilder()
+                .setId(2L)
+                .setMonitoringLocationId(locationDTO1.getId())
+                .build();
+        nodeDTO3 = NodeDTO.newBuilder()
+                .setId(3L)
+                .setMonitoringLocationId(locationDTO2.getId())
+                .build();
 
-        IpInterfaceDTO ipInterfaceDTO = IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").build();
-        nodeDTO4 = NodeDTO.newBuilder().setId(4L).setMonitoringLocationId(locationDTO2.getId()).addIpInterfaces(ipInterfaceDTO).build();
+        IpInterfaceDTO ipInterfaceDTO =
+                IpInterfaceDTO.newBuilder().setIpAddress("127.0.0.1").build();
+        nodeDTO4 = NodeDTO.newBuilder()
+                .setId(4L)
+                .setMonitoringLocationId(locationDTO2.getId())
+                .addIpInterfaces(ipInterfaceDTO)
+                .build();
 
         doReturn(accessToken).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @AfterEach
-    public void afterTest(){
+    public void afterTest() {
         verifyNoMoreInteractions(mockClient);
         verifyNoMoreInteractions(mockHeaderUtil);
     }
@@ -120,12 +136,16 @@ public class GraphQLNodeServiceTest {
         doReturn(Arrays.asList(locationDTO1, locationDTO2)).when(mockClient).listLocationsByIds(keyCaptor.capture());
         String request = "query {findAllNodes {id location {location}}}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findAllNodes.size()").isEqualTo(3)
-            .jsonPath("$.data.findAllNodes[0].location.location").isEqualTo(locationDTO1.getLocation())
-            .jsonPath("$.data.findAllNodes[1].location.location").isEqualTo(locationDTO1.getLocation())
-            .jsonPath("$.data.findAllNodes[2].location.location").isEqualTo(locationDTO2.getLocation());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findAllNodes.size()")
+                .isEqualTo(3)
+                .jsonPath("$.data.findAllNodes[0].location.location")
+                .isEqualTo(locationDTO1.getLocation())
+                .jsonPath("$.data.findAllNodes[1].location.location")
+                .isEqualTo(locationDTO1.getLocation())
+                .jsonPath("$.data.findAllNodes[2].location.location")
+                .isEqualTo(locationDTO2.getLocation());
         verify(mockClient).listNodes(accessToken);
         verify(mockHeaderUtil, times(4)).getAuthHeader(any(ResolutionEnvironment.class));
         verify(mockClient).listLocationsByIds(keyCaptor.capture());
@@ -135,19 +155,20 @@ public class GraphQLNodeServiceTest {
 
     @Test
     public void testFindAllNodesByNodeLabelSearch() throws JSONException {
-        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient)
-            .listNodesByNodeLabelSearch("test-search-term", accessToken);
-        String request = "query {\n" +
-            "    findAllNodesByNodeLabelSearch(labelSearchTerm: \"test-search-term\") {\n" +
-            "       id, " +
-            "       nodeLabel, " +
-            "       createTime " +
-            "    } " +
-            "}";
+        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3))
+                .when(mockClient)
+                .listNodesByNodeLabelSearch("test-search-term", accessToken);
+        String request = "query {\n" + "    findAllNodesByNodeLabelSearch(labelSearchTerm: \"test-search-term\") {\n"
+                + "       id, "
+                + "       nodeLabel, "
+                + "       createTime "
+                + "    } "
+                + "}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findAllNodesByNodeLabelSearch.size()").isEqualTo(3);
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findAllNodesByNodeLabelSearch.size()")
+                .isEqualTo(3);
         verify(mockClient).listNodesByNodeLabelSearch("test-search-term", accessToken);
         verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -155,19 +176,18 @@ public class GraphQLNodeServiceTest {
     @Test
     public void testFindAllNodesByTags() throws JSONException {
         List<String> tags = Arrays.asList("tag1");
-        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient)
-            .listNodesByTags(tags, accessToken);
-        String request = "query { " +
-            "    findAllNodesByTags(tags: [\"tag1\"]) { " +
-            "       id, " +
-            "       nodeLabel, " +
-            "       createTime " +
-            "    } " +
-            "}";
+        doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient).listNodesByTags(tags, accessToken);
+        String request = "query { " + "    findAllNodesByTags(tags: [\"tag1\"]) { "
+                + "       id, "
+                + "       nodeLabel, "
+                + "       createTime "
+                + "    } "
+                + "}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findAllNodesByTags.size()").isEqualTo(3);
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findAllNodesByTags.size()")
+                .isEqualTo(3);
         verify(mockClient).listNodesByTags(tags, accessToken);
         verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -177,12 +197,16 @@ public class GraphQLNodeServiceTest {
         doReturn(Arrays.asList(nodeDTO1, nodeDTO2, nodeDTO3)).when(mockClient).listNodes(accessToken);
         String request = "query {findAllNodes {id}}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findAllNodes.size()").isEqualTo(3)
-            .jsonPath("$.data.findAllNodes[0].location").doesNotExist()
-            .jsonPath("$.data.findAllNodes[1].location").doesNotExist()
-            .jsonPath("$.data.findAllNodes[2].location").doesNotExist();
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findAllNodes.size()")
+                .isEqualTo(3)
+                .jsonPath("$.data.findAllNodes[0].location")
+                .doesNotExist()
+                .jsonPath("$.data.findAllNodes[1].location")
+                .doesNotExist()
+                .jsonPath("$.data.findAllNodes[2].location")
+                .doesNotExist();
         verify(mockClient).listNodes(accessToken);
         verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -193,10 +217,12 @@ public class GraphQLNodeServiceTest {
         doReturn(Collections.singletonList(locationDTO1)).when(mockClient).listLocationsByIds(keyCaptor.capture());
         String request = "query{findNodeById(id: " + nodeDTO1.getId() + ") {id location {location} nodeLabel}}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findNodeById.id").isEqualTo(nodeDTO1.getId())
-            .jsonPath("$.data.findNodeById.location.location").isEqualTo(locationDTO1.getLocation());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findNodeById.id")
+                .isEqualTo(nodeDTO1.getId())
+                .jsonPath("$.data.findNodeById.location.location")
+                .isEqualTo(locationDTO1.getLocation());
         verify(mockClient).getNodeById(nodeDTO1.getId(), accessToken);
         verify(mockHeaderUtil, times(2)).getAuthHeader(any(ResolutionEnvironment.class));
         verify(mockClient).listLocationsByIds(keyCaptor.capture());
@@ -209,10 +235,12 @@ public class GraphQLNodeServiceTest {
         doReturn(nodeDTO1).when(mockClient).getNodeById(nodeDTO1.getId(), accessToken);
         String request = "query{findNodeById(id: " + nodeDTO1.getId() + ") {id nodeLabel}}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findNodeById.id").isEqualTo(nodeDTO1.getId())
-            .jsonPath("$.data.findNodeById.location").doesNotExist();
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findNodeById.id")
+                .isEqualTo(nodeDTO1.getId())
+                .jsonPath("$.data.findNodeById.location")
+                .doesNotExist();
         verify(mockClient).getNodeById(nodeDTO1.getId(), accessToken);
         verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -221,13 +249,16 @@ public class GraphQLNodeServiceTest {
     public void testCreateNode() throws JSONException {
         doReturn(nodeDTO1).when(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
         doReturn(Collections.singletonList(locationDTO1)).when(mockClient).listLocationsByIds(keyCaptor.capture());
-        String request = "mutation {addNode(node: {label: \"test-node\", locationId: \"1000\", managementIp: \"127.0.0.1\", tags: [{name:\"tag-10\"}]})" +
-            "{id nodeLabel}}";
+        String request =
+                "mutation {addNode(node: {label: \"test-node\", locationId: \"1000\", managementIp: \"127.0.0.1\", tags: [{name:\"tag-10\"}]})"
+                        + "{id nodeLabel}}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.addNode.id").isEqualTo(nodeDTO1.getId())
-            .jsonPath("$.data.addNode.nodeLabel").isEqualTo(nodeDTO1.getNodeLabel());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.addNode.id")
+                .isEqualTo(nodeDTO1.getId())
+                .jsonPath("$.data.addNode.nodeLabel")
+                .isEqualTo(nodeDTO1.getNodeLabel());
         verify(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -235,14 +266,17 @@ public class GraphQLNodeServiceTest {
     @Test
     public void testCreateNodeSkipLocationInReturn() throws JSONException {
         doReturn(nodeDTO1).when(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
-        String request = "mutation {addNode(node: {label: \"test-node\" managementIp: \"127.0.0.1\"})" +
-            "{id nodeLabel}}";
+        String request =
+                "mutation {addNode(node: {label: \"test-node\" managementIp: \"127.0.0.1\"})" + "{id nodeLabel}}";
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.addNode.id").isEqualTo(nodeDTO1.getId())
-            .jsonPath("$.data.addNode.location").doesNotExist()
-            .jsonPath("$.data.addNode.nodeLabel").exists();
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.addNode.id")
+                .isEqualTo(nodeDTO1.getId())
+                .jsonPath("$.data.addNode.location")
+                .doesNotExist()
+                .jsonPath("$.data.addNode.nodeLabel")
+                .exists();
         verify(mockClient).createNewNode(any(NodeCreateDTO.class), eq(accessToken));
         verify(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -252,15 +286,18 @@ public class GraphQLNodeServiceTest {
         TimeSeriesQueryResult tsQueryResult = buildTsQueryResult(true);
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
-        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsService)
-            .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
+        doReturn(Mono.just(tsQueryResult))
+                .when(tsdbMetricsService)
+                .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
         webClient
-            .exchangeGraphQLQuery(query)
-            .expectCleanResponse()
-            .jsonPath("$.data.nodeStatus.id").isEqualTo(nodeDTO4.getId())
-            .jsonPath("$.data.nodeStatus.status").isEqualTo("UP");
+                .exchangeGraphQLQuery(query)
+                .expectCleanResponse()
+                .jsonPath("$.data.nodeStatus.id")
+                .isEqualTo(nodeDTO4.getId())
+                .jsonPath("$.data.nodeStatus.status")
+                .isEqualTo("UP");
         verify(mockClient).getNodeById(eq(nodeDTO4.getId()), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -270,15 +307,18 @@ public class GraphQLNodeServiceTest {
         TimeSeriesQueryResult tsQueryResult = buildTsQueryResult(false);
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
-        doReturn(Mono.just(tsQueryResult)).when(tsdbMetricsService)
-            .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
+        doReturn(Mono.just(tsQueryResult))
+                .when(tsdbMetricsService)
+                .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
         webClient
-            .exchangeGraphQLQuery(query)
-            .expectCleanResponse()
-            .jsonPath("$.data.nodeStatus.id").isEqualTo(nodeDTO4.getId())
-            .jsonPath("$.data.nodeStatus.status").isEqualTo("DOWN");
+                .exchangeGraphQLQuery(query)
+                .expectCleanResponse()
+                .jsonPath("$.data.nodeStatus.id")
+                .isEqualTo(nodeDTO4.getId())
+                .jsonPath("$.data.nodeStatus.status")
+                .isEqualTo("DOWN");
         verify(mockClient).getNodeById(eq(nodeDTO4.getId()), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }
@@ -289,10 +329,12 @@ public class GraphQLNodeServiceTest {
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO3.getId());
         webClient
-            .exchangeGraphQLQuery(query)
-            .expectCleanResponse()
-            .jsonPath("$.data.nodeStatus.id").isEqualTo(nodeDTO3.getId())
-            .jsonPath("$.data.nodeStatus.status").isEqualTo("DOWN");
+                .exchangeGraphQLQuery(query)
+                .expectCleanResponse()
+                .jsonPath("$.data.nodeStatus.id")
+                .isEqualTo(nodeDTO3.getId())
+                .jsonPath("$.data.nodeStatus.status")
+                .isEqualTo("DOWN");
         verify(mockClient).getNodeById(eq(nodeDTO3.getId()), eq(accessToken));
         verify(mockHeaderUtil, times(1)).getAuthHeader(any(ResolutionEnvironment.class));
     }

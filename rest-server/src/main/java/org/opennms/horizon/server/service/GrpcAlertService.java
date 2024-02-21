@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -34,6 +27,7 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.server.mapper.alert.AlertMapper;
@@ -51,8 +45,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
@@ -64,63 +56,74 @@ public class GrpcAlertService {
 
     @SuppressWarnings("squid:S107")
     @GraphQLQuery
-    public Mono<ListAlertResponse> findAllAlerts(@GraphQLArgument(name = "pageSize") Integer pageSize,
-                                                 @GraphQLArgument(name = "page") int page,
-                                                 @GraphQLArgument(name = "timeRange") TimeRange timeRange,
-                                                 @GraphQLArgument(name = "severities") List<String> severities,
-                                                 @GraphQLArgument(name = "sortBy") String sortBy,
-                                                 @GraphQLArgument(name = "sortAscending") boolean sortAscending,
-                                                 @GraphQLArgument(name = "nodeLabel") String nodeLabel,
-                                                 @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono
-            .just(alertsClient.listAlerts(
-                pageSize, page, severities, timeRange, sortBy, sortAscending, nodeLabel, headerUtil.getAuthHeader(env)
-            ))
-            .map(mapper::protoToAlertResponse);
+    public Mono<ListAlertResponse> findAllAlerts(
+            @GraphQLArgument(name = "pageSize") Integer pageSize,
+            @GraphQLArgument(name = "page") int page,
+            @GraphQLArgument(name = "timeRange") TimeRange timeRange,
+            @GraphQLArgument(name = "severities") List<String> severities,
+            @GraphQLArgument(name = "sortBy") String sortBy,
+            @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+            @GraphQLArgument(name = "nodeLabel") String nodeLabel,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.listAlerts(
+                        pageSize,
+                        page,
+                        severities,
+                        timeRange,
+                        sortBy,
+                        sortAscending,
+                        nodeLabel,
+                        headerUtil.getAuthHeader(env)))
+                .map(mapper::protoToAlertResponse);
     }
 
     @GraphQLQuery(
-        name = "countAlerts",
-        description = "Returns the total count of alerts filtered by severity and time."
-    )
-    public Mono<CountAlertResponse> countAlerts(@GraphQLArgument(name = "timeRange") TimeRange timeRange,
-                                  @GraphQLArgument(name = "severityFilters") List<String> severityFilters,
-                                  @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToCountAlertResponse(alertsClient.countAlerts(severityFilters, timeRange, headerUtil.getAuthHeader(env))));
+            name = "countAlerts",
+            description = "Returns the total count of alerts filtered by severity and time.")
+    public Mono<CountAlertResponse> countAlerts(
+            @GraphQLArgument(name = "timeRange") TimeRange timeRange,
+            @GraphQLArgument(name = "severityFilters") List<String> severityFilters,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToCountAlertResponse(
+                alertsClient.countAlerts(severityFilters, timeRange, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<AlertResponse> acknowledgeAlert(@GraphQLArgument(name = "ids") List<Long> ids,
-                                                @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlertResponse(alertsClient.acknowledgeAlert(ids, headerUtil.getAuthHeader(env))));
+    public Mono<AlertResponse> acknowledgeAlert(
+            @GraphQLArgument(name = "ids") List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(
+                mapper.protoToAlertResponse(alertsClient.acknowledgeAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<AlertResponse> unacknowledgeAlert(@GraphQLArgument(name = "ids") List<Long> ids,
-                                                  @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToAlertResponse(alertsClient.unacknowledgeAlert(ids, headerUtil.getAuthHeader(env))));
+    public Mono<AlertResponse> unacknowledgeAlert(
+            @GraphQLArgument(name = "ids") List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(
+                mapper.protoToAlertResponse(alertsClient.unacknowledgeAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<AlertResponse> escalateAlert(@GraphQLArgument(name = "ids") List<Long> ids,
-                                             @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<AlertResponse> escalateAlert(
+            @GraphQLArgument(name = "ids") List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToAlertResponse(alertsClient.escalateAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<AlertResponse> clearAlert(@GraphQLArgument(name = "ids") List<Long> ids,
-                                          @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<AlertResponse> clearAlert(
+            @GraphQLArgument(name = "ids") List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToAlertResponse(alertsClient.clearAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<DeleteAlertResponse> deleteAlert(@GraphQLArgument(name = "ids") List<Long> ids,
-                                                 @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToDeleteAlertResponse(alertsClient.deleteAlert(ids, headerUtil.getAuthHeader(env))));
+    public Mono<DeleteAlertResponse> deleteAlert(
+            @GraphQLArgument(name = "ids") List<Long> ids, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(
+                mapper.protoToDeleteAlertResponse(alertsClient.deleteAlert(ids, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<MonitorPolicy> createMonitorPolicy(MonitorPolicy policy, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<MonitorPolicy> createMonitorPolicy(
+            MonitorPolicy policy, @GraphQLEnvironment ResolutionEnvironment env) {
         var monitorPolicy = alertsClient.createMonitorPolicy(policy, headerUtil.getAuthHeader(env));
         return Mono.just(monitorPolicy);
     }
@@ -141,7 +144,8 @@ public class GrpcAlertService {
     }
 
     @GraphQLQuery
-    public Flux<AlertEventDefinition> listAlertEventDefinitions(EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Flux<AlertEventDefinition> listAlertEventDefinitions(
+            EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(alertsClient.listAlertEventDefinitions(eventType, headerUtil.getAuthHeader(env)));
     }
 
@@ -167,6 +171,6 @@ public class GrpcAlertService {
 
     @GraphQLQuery(name = "alertCounts")
     public Mono<AlertCount> getAlertCounts(@GraphQLEnvironment ResolutionEnvironment env) {
-         return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
+        return Mono.just(alertsClient.countAlerts(headerUtil.getAuthHeader(env)));
     }
 }

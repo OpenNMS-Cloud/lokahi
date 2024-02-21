@@ -1,10 +1,44 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.grpc;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,20 +53,6 @@ import org.opennms.horizon.inventory.dto.MonitoringLocationList;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.ConfigUpdateService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MonitoringLocationGrpcServiceTest {
@@ -87,8 +107,10 @@ class MonitoringLocationGrpcServiceTest {
 
     @Test
     void testGetLocationByName() {
-        StringValue locationName = StringValue.newBuilder().setValue("locationName").build();
-        MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
+        StringValue locationName =
+                StringValue.newBuilder().setValue("locationName").build();
+        MonitoringLocationDTO expectedLocation =
+                MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
         when(service.findByLocationAndTenantId(anyString(), anyString())).thenReturn(Optional.of(expectedLocation));
 
@@ -103,7 +125,8 @@ class MonitoringLocationGrpcServiceTest {
     @Test
     void testGetLocationById() {
         Int64Value request = Int64Value.newBuilder().setValue(1L).build();
-        MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
+        MonitoringLocationDTO expectedLocation =
+                MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
         when(service.getByIdAndTenantId(anyLong(), anyString())).thenReturn(Optional.of(expectedLocation));
 
@@ -117,7 +140,9 @@ class MonitoringLocationGrpcServiceTest {
 
     @Test
     void testListLocationsByIds() {
-        IdList request = IdList.newBuilder().addIds(Int64Value.newBuilder().setValue(1L).build()).build();
+        IdList request = IdList.newBuilder()
+                .addIds(Int64Value.newBuilder().setValue(1L).build())
+                .build();
         List<MonitoringLocationDTO> expectedLocations = new ArrayList<>();
         when(service.findByLocationIds(anyList())).thenReturn(expectedLocations);
 
@@ -146,8 +171,10 @@ class MonitoringLocationGrpcServiceTest {
 
     @Test
     void testCreateLocation() throws LocationNotFoundException {
-        MonitoringLocationCreateDTO request = MonitoringLocationCreateDTO.newBuilder().build();
-        MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
+        MonitoringLocationCreateDTO request =
+                MonitoringLocationCreateDTO.newBuilder().build();
+        MonitoringLocationDTO expectedLocation =
+                MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
         when(service.upsert(any())).thenReturn(expectedLocation);
 
@@ -161,7 +188,8 @@ class MonitoringLocationGrpcServiceTest {
 
     @Test
     void testCreateLocationException() throws LocationNotFoundException {
-        MonitoringLocationCreateDTO request = MonitoringLocationCreateDTO.newBuilder().build();
+        MonitoringLocationCreateDTO request =
+                MonitoringLocationCreateDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
         when(service.upsert(any())).thenThrow(new RuntimeException("test exception"));
 
@@ -175,7 +203,8 @@ class MonitoringLocationGrpcServiceTest {
     @Test
     void testUpdateLocation() throws LocationNotFoundException {
         MonitoringLocationDTO request = MonitoringLocationDTO.newBuilder().build();
-        MonitoringLocationDTO expectedLocation = MonitoringLocationDTO.newBuilder().build();
+        MonitoringLocationDTO expectedLocation =
+                MonitoringLocationDTO.newBuilder().build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
         when(service.upsert(any())).thenReturn(expectedLocation);
 
@@ -202,17 +231,19 @@ class MonitoringLocationGrpcServiceTest {
 
     @Test
     void testUpdateInvalidLocationException() throws LocationNotFoundException {
-        MonitoringLocationDTO request = MonitoringLocationDTO.newBuilder().setId(INVALID_LOCATION_ID).build();
+        MonitoringLocationDTO request =
+                MonitoringLocationDTO.newBuilder().setId(INVALID_LOCATION_ID).build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
 
         when(service.upsert(argThat((dto) -> INVALID_LOCATION_ID.equals(dto.getId()))))
-            .thenThrow(new LocationNotFoundException("test exception"));
+                .thenThrow(new LocationNotFoundException("test exception"));
 
         grpcService.updateLocation(request, getResponseObserver);
 
         ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
         verify(getResponseObserver).onError(throwableCaptor.capture());
-        assertEquals("INVALID_ARGUMENT: test exception", throwableCaptor.getValue().getMessage());
+        assertEquals(
+                "INVALID_ARGUMENT: test exception", throwableCaptor.getValue().getMessage());
     }
 
     @Test
@@ -245,7 +276,8 @@ class MonitoringLocationGrpcServiceTest {
 
     @Test
     void testDeleteInvalidLocationException() throws LocationNotFoundException {
-        Int64Value request =  Int64Value.newBuilder().setValue(INVALID_LOCATION_ID).build();
+        Int64Value request =
+                Int64Value.newBuilder().setValue(INVALID_LOCATION_ID).build();
         when(tenantLookup.lookupTenantId(any())).thenReturn(Optional.of(TENANT_ID));
 
         doThrow(new LocationNotFoundException("test exception")).when(service).delete(INVALID_LOCATION_ID, TENANT_ID);
@@ -254,6 +286,7 @@ class MonitoringLocationGrpcServiceTest {
 
         ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
         verify(deleteResponseObserver).onError(throwableCaptor.capture());
-        assertEquals("INVALID_ARGUMENT: test exception", throwableCaptor.getValue().getMessage());
+        assertEquals(
+                "INVALID_ARGUMENT: test exception", throwableCaptor.getValue().getMessage());
     }
 }

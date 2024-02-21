@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.grpc;
 
 import io.grpc.Context;
@@ -35,6 +28,8 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.TokenVerifier;
@@ -48,21 +43,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 public class AlertServerInterceptor implements ServerInterceptor {
     private static final Logger LOG = LoggerFactory.getLogger(AlertServerInterceptor.class);
     private static final String TOKEN_PREFIX = "Bearer";
     private final KeycloakDeployment keycloak;
+
     @Override
-    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
+    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
+            ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
         String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {
             Optional<String> tenantId = verifyAccessToken(authHeader);
-            Context context = tenantId.map(tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId)).orElseThrow();
+            Context context = tenantId.map(
+                            tnId -> Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tnId))
+                    .orElseThrow();
             return Contexts.interceptCall(context, serverCall, headers, callHandler);
         } catch (VerificationException e) {
             LOG.error("Failed to verify access token", e);
@@ -76,13 +72,17 @@ public class AlertServerInterceptor implements ServerInterceptor {
 
     protected Optional<String> verifyAccessToken(String authHeader) throws VerificationException {
         if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith(TOKEN_PREFIX)) {
-            throw  new VerificationException();
+            throw new VerificationException();
         }
-        String token = authHeader.substring(TOKEN_PREFIX.length()+1);
-        TokenVerifier<AccessToken> verifier = AdapterTokenVerifier.createVerifier(token, keycloak, false, AccessToken.class);
-        verifier.withChecks(TokenVerifier.SUBJECT_EXISTS_CHECK, new TokenVerifier.TokenTypeCheck(TokenUtil.TOKEN_TYPE_BEARER), TokenVerifier.IS_ACTIVE);
+        String token = authHeader.substring(TOKEN_PREFIX.length() + 1);
+        TokenVerifier<AccessToken> verifier =
+                AdapterTokenVerifier.createVerifier(token, keycloak, false, AccessToken.class);
+        verifier.withChecks(
+                TokenVerifier.SUBJECT_EXISTS_CHECK,
+                new TokenVerifier.TokenTypeCheck(TokenUtil.TOKEN_TYPE_BEARER),
+                TokenVerifier.IS_ACTIVE);
         verifier.verify();
         AccessToken accessToken = verifier.getToken();
-        return Optional.ofNullable((String)accessToken.getOtherClaims().get(GrpcConstants.TENANT_ID_KEY));
+        return Optional.ofNullable((String) accessToken.getOtherClaims().get(GrpcConstants.TENANT_ID_KEY));
     }
 }

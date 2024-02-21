@@ -39,43 +39,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
-import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.dto.ActiveDiscoveryServiceGrpc;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryCreateDTO;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.dto.AzureActiveDiscoveryServiceGrpc;
-import org.opennms.horizon.inventory.dto.IdList;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
-import org.opennms.horizon.inventory.dto.MonitorStatusServiceGrpc;
-import org.opennms.horizon.inventory.dto.MonitoredServiceQuery;
-import org.opennms.horizon.inventory.dto.MonitoredServiceStatusDTO;
-import org.opennms.horizon.inventory.dto.MonitoredState;
-import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
-import org.opennms.horizon.inventory.dto.MonitoringLocationCreateDTO;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.dto.MonitoringLocationServiceGrpc;
-import org.opennms.horizon.inventory.dto.MonitoringSystemDTO;
-import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdList;
-import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
-import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryDTO;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
-import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
-import org.opennms.horizon.inventory.dto.TagCreateListDTO;
-import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
-import org.opennms.horizon.inventory.dto.TagListDTO;
-import org.opennms.horizon.inventory.dto.TagListParamsDTO;
-import org.opennms.horizon.inventory.dto.TagNameQuery;
-import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
-import org.opennms.horizon.inventory.dto.TagServiceGrpc;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -419,5 +383,13 @@ public class InventoryClient {
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return monitorStatusServiceBlockingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
             .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getMonitoredServiceStatus(monitoredStateQuery);
+    }
+
+
+    public List<IpInterfaceDTO> listIpInterfacesByNodeSearch(Long nodeId,String ipInterfaceSearchTerm,String ipAddress, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        SearchIpInterfaceQuery query = SearchIpInterfaceQuery.newBuilder().setNodeId(nodeId).setSearchTerm(ipInterfaceSearchTerm).setIpAddress(ipAddress).build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getSearchIpInterfacesByQuery(query).getIpInterfaceList();
     }
 }

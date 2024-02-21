@@ -43,17 +43,7 @@ import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdList;
-import org.opennms.horizon.inventory.dto.NodeIdQuery;
-import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
-import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
-import org.opennms.horizon.inventory.dto.TagNameQuery;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -419,5 +409,33 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         for(Map.Entry<Long, List<NodeDTO>> entry: locationNodes.entrySet()) {
             scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
+    }
+
+
+    @Override
+    public void getSearchIpInterfacesByQuery(SearchIpInterfaceQuery request, StreamObserver<IpInterfaceList> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(tenantId -> {
+            try {
+                List<IpInterfaceDTO> ipInterfaceList = nodeService.listSearchIpInterfacesByQuery(tenantId,request.getNodeId() ,request.getSearchTerm(),request.getIpAddress());
+                responseObserver.onNext(IpInterfaceList.newBuilder().addAllIpInterface(ipInterfaceList).build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+
+                Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage(e.getMessage())
+                    .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            }
+        }, () -> {
+
+            Status status = Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setMessage(EMPTY_TENANT_ID_MSG)
+                .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        });
     }
 }

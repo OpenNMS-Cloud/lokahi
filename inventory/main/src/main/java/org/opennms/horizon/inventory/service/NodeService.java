@@ -34,16 +34,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
-import org.opennms.horizon.inventory.dto.MonitoredState;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
-import org.opennms.horizon.inventory.dto.TagCreateListDTO;
-import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
+import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -69,11 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetAddress;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -101,6 +93,9 @@ public class NodeService {
     private final NodeMapper mapper;
     private final TagPublisher tagPublisher;
     private final TagRepository tagRepository;
+    private final IpInterfaceMapper ipInterfaceMapper;
+
+
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -364,5 +359,16 @@ public class NodeService {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
             .map(mapper::modelToDTO).toList();
     }
+
+
+   @Transactional(readOnly = true)
+    public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(String tenantId, Long nodeId, String searchIpInterfaceTerm, String ipAddress) {
+           List<IpInterface> ipInterfaces =null;
+           InetAddress addr = InetAddressUtils.addr(ipAddress);
+           ipInterfaces = ipInterfaceRepository.findBytenantIdAndSearchIpInterfacesTerm(tenantId, nodeId,  addr, searchIpInterfaceTerm).stream().toList();
+
+        return ipInterfaces.stream().map(ipInterfaceMapper::modelToDTO).collect(Collectors.toList());
+    }
+
 
 }

@@ -219,12 +219,39 @@ public class NodeStepDefinitions {
         return foundMessages == expectedMessages;
     }
 
-    @Then("fetch a list of nodes by node alias with search term {string}")
-    public void fetchNodesByAlias(String searchTerm) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
-            .setSearchTerm(searchTerm).build());
-        assertNotNull(fetchedNodeList);
+    @Given("a new node with node_alias {string}, label {string}, ip address {string} in location named {string}")
+    public void aNewNodeWithNode_aliasLabelIpAddressInLocationNamed(String alias, String label, String ipAddress, String location) {
+        aNewNodeWithAliasIpAddressAndLocation(alias, label,ipAddress, location, true);
     }
 
+    private void aNewNodeWithAliasIpAddressAndLocation(String alias, String label,String ipAddress, String location, boolean isClear) {
+        if (isClear) {
+            deleteAllNodes();
+        }
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        var node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label)
+            .setManagementIp(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
+        nodeServiceBlockingStub.updateNode(NodeUpdateDTO.newBuilder().setId(node.getId()).setNodeAlias(alias)
+            .setTenantId(node.getTenantId()).build());
+    }
+
+    @Then("verify that a new node is created with node_alias {string}")
+    public void verifyThatANewNodeIsCreatedWithNode_aliasIpAddressAndLocation(String alias) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
+            .filter(fetched -> alias.equals(fetched.getNodeAlias()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Node " + alias + " not found"));
+
+        assertEquals(alias, node.getNodeAlias());
+
+    }
+    @Then("fetch a list of nodes by node node_alias with search term {string}")
+    public void fetchAListOfNodesByNodeNode_aliasWithSearchTerm(String aliasSearchTerm) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder().setSearchTerm(aliasSearchTerm).build());
+        List<NodeDTO> nodeList = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
+            .filter(fetched -> aliasSearchTerm.equals(fetched.getNodeAlias())).toList();
+        assertTrue(nodeList.size()>0);
+    }
 }

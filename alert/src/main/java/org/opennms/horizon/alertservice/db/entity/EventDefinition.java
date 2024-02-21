@@ -21,14 +21,22 @@
  */
 package org.opennms.horizon.alertservice.db.entity;
 
-import jakarta.persistence.*;
-import java.io.Serial;
-import java.io.Serializable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.opennms.horizon.alerts.proto.EventType;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "event_definition")

@@ -28,20 +28,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
-import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alertservice.api.AlertLifecycleListener;
 import org.opennms.horizon.alertservice.api.AlertService;
-import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.opennms.horizon.alertservice.db.repository.AlertRepository;
-import org.opennms.horizon.alertservice.db.repository.EventDefinitionRepository;
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
-import org.opennms.horizon.events.api.EventConfDao;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +61,6 @@ public class AlertEngine implements AlertLifecycleListener {
     private final AlertListenerRegistry alertEntityNotifier;
     private final Map<String, Map<String, Alert>> alertsByReductionKeyByTenantId = new ConcurrentHashMap<>();
     private final Timer nextTimer = new Timer();
-    private final EventConfDao eventConfDao;
-    private final EventDefinitionRepository eventDefinitionRepository;
 
     @PostConstruct
     @Transactional
@@ -88,67 +80,6 @@ public class AlertEngine implements AlertLifecycleListener {
                 TimeUnit.SECONDS.toMillis(5),
                 TimeUnit.SECONDS.toMillis(5));
         alertRepository.findAll().forEach(a -> handleNewOrUpdatedAlert(alertMapper.toProto(a)));
-        // saveAllEventDef();
-    }
-
-    private void saveAllEventDef() {
-        eventConfDao.getAllEventsByUEI().forEach((uei, eventConf) -> {
-            var eventDefinition = new EventDefinition();
-            eventDefinition.setEventUei(eventConf.getUei());
-            String vendor = extractVendorFromUei(eventConf.getUei());
-            if (vendor != null) {
-                eventDefinition.setVendor(vendor);
-            }
-            String enterpriseId = null;
-            var enterpriseIds = eventConf.getMaskElementValues("id");
-            if (enterpriseIds != null && enterpriseIds.size() == 1) {
-                enterpriseId = enterpriseIds.get(0);
-                if (enterpriseId != null) {
-                    eventDefinition.setEnterpriseId(enterpriseId);
-                }
-            }
-            eventDefinition.setEventType(EventType.SNMP_TRAP);
-            if (eventConf.getAlertData() != null) {
-                var reductionKey = eventConf.getAlertData().getReductionKey();
-                var clearKey = eventConf.getAlertData().getClearKey();
-                if (reductionKey != null) {
-                    eventDefinition.setReductionKey(reductionKey);
-                }
-                if (clearKey != null) {
-                    eventDefinition.setClearKey(clearKey);
-                }
-            }
-            eventDefinitionRepository.save(eventDefinition);
-        });
-    }
-
-    private String extractVendorFromUei(String eventUei) {
-
-        if (eventUei.contains("vendor")) {
-            Pattern pattern = Pattern.compile("/vendor(s?)/([^/]+)/");
-            Matcher matcher = pattern.matcher(eventUei);
-            if (matcher.find()) {
-                // Extract word immediately after "vendor" or "vendors" within slashes
-                return matcher.group(2);
-            } else {
-                throw new IllegalArgumentException("No match found for " + eventUei);
-            }
-        } else if (eventUei.contains("trap")) {
-            Pattern pattern = Pattern.compile("/traps/([^/]+)/");
-            Matcher matcher = pattern.matcher(eventUei);
-            if (matcher.find()) {
-                // Extract word immediately after "traps" within slashes
-                return matcher.group(1);
-            } else {
-                Pattern patternForTraps = Pattern.compile("uei\\.opennms\\.org/(.*?)/traps/");
-                Matcher matcherForTraps = patternForTraps.matcher(eventUei);
-                if (matcherForTraps.find()) {
-                    // Extract the string between "uei.opennms.org" and "/traps/"
-                    return matcherForTraps.group(1);
-                }
-            }
-        }
-        return null;
     }
 
     @PreDestroy

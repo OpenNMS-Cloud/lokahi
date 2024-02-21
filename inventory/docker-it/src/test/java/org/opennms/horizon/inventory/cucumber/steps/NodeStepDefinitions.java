@@ -202,7 +202,7 @@ public class NodeStepDefinitions {
         assertEquals(nodeListSize, fetchedNodeList.getNodesCount());
 
         List<NodeDTO> nodesList = fetchedNodeList.getNodesList();
-        nodesList.stream().map(NodeDTO::getNodeLabel).forEach(label -> assertTrue(label.contains(labelSearchTerm)));
+        nodesList.stream().map(NodeDTO::getNodeLabel).forEach(label -> Assert.assertTrue(label.contains(labelSearchTerm)));
     }
 
     @Then("verify the list of nodes is empty")

@@ -290,6 +290,6 @@ public class NodeStepDefinitions {
         fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder().setSearchTerm(aliasSearchTerm).build());
         List<NodeDTO> nodeList = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
             .filter(fetched -> aliasSearchTerm.equals(fetched.getNodeAlias())).toList();
-        assertTrue(nodeList.size()>0);
+        Assert.assertTrue(nodeList.size()>0);
     }
 }

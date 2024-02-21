@@ -369,7 +369,8 @@ public class NodeService {
     @Transactional(readOnly = true)
     public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
         return nodeRepository.findByTenantIdAndNodeLabelOrAliasLike(tenantId, nodeLabelSearchTerm).stream()
-            .map(mapper::modelToDTO).toList();
+                .map(mapper::modelToDTO)
+                .toList();
     }
 
     @Transactional(readOnly = true)

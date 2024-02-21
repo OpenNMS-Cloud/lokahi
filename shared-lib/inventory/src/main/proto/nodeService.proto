@@ -104,6 +104,12 @@ message NodeIdList {
   repeated int64 ids = 1;
 }
 
+message SearchBy {
+  string search = 1;
+}
+message SnmpInterfacesList {
+  repeated opennms.inventory.SnmpInterfaceDTO snmp_interfaces = 1;
+}
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
   rpc updateNode(NodeUpdateDTO) returns (google.protobuf.Int64Value) {};
@@ -117,4 +123,6 @@ service NodeService {
   rpc startNodeScanByIds(NodeIdList) returns(google.protobuf.BoolValue) {};
   rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
+  rpc createSnmpInterface(SnmpInterfaceCreateDTO) returns (SnmpInterfaceDTO) {};
+  rpc listSnmpInterfaces(SearchBy) returns (SnmpInterfacesList) {};
 }

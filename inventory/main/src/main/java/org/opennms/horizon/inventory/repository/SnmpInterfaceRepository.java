@@ -26,9 +26,9 @@ import java.util.Optional;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 @Repository
-public interface SnmpInterfaceRepository extends JpaRepository<SnmpInterface, Long> {
+public interface SnmpInterfaceRepository extends JpaRepository<SnmpInterface, Long>,JpaSpecificationExecutor<SnmpInterface> {
     List<SnmpInterface> findByTenantId(String tenantId);
 
     Optional<SnmpInterface> findByNodeIdAndTenantIdAndIfIndex(long nodeId, String tenantId, int ifIndex);

@@ -68,7 +68,8 @@ import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.springframework.test.annotation.DirtiesContext;
-
+import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
+import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class NodeGrpcServiceTest {
     private static final String TEST_LOCATION_NAME = "x-location-x";
@@ -87,6 +88,8 @@ class NodeGrpcServiceTest {
     private MonitoringLocationService mockMonitoringLocationService;
     private NodeGrpcService target;
 
+    private SnmpInterfaceService mockSnmpInterfaceService;
+    private SnmpInterfaceMapper mockSnmpInterfaceMapper;
     private Node testNode;
     private NodeDTO testNodeDTO1;
     private NodeDTO testNodeDTO2A;
@@ -146,7 +149,9 @@ class NodeGrpcServiceTest {
                 mockNodeMapper,
                 mockTenantLookup,
                 mockScannerTaskSetService,
-                mockMonitoringLocationService);
+                mockMonitoringLocationService,
+                mockSnmpInterfaceService,
+                mockSnmpInterfaceMapper);
 
         //
         // Common test interactions

@@ -32,12 +32,17 @@ import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.springframework.stereotype.Service;
+import org.opennms.horizon.inventory.dto.SearchBy;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceCreateDTO;
+import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.SnmpInterfaceSpecifications;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 @RequiredArgsConstructor
 public class SnmpInterfaceService {
     private final SnmpInterfaceRepository modelRepo;
-
+    private final NodeRepository nodeRepository;
     private final SnmpInterfaceMapper mapper;
 
     public List<SnmpInterfaceDTO> findByTenantId(String tenantId) {
@@ -59,5 +64,41 @@ public class SnmpInterfaceService {
                     snmp.setTenantId(tenantId);
                     return modelRepo.save(snmp);
                 });
+    }
+
+    public List<SnmpInterfaceDTO> searchBy(SearchBy searchBy) {
+        List<SnmpInterface> list= modelRepo.findAll(
+            Specification.where(SnmpInterfaceSpecifications.hasName(searchBy.getSearch()))
+                .or(SnmpInterfaceSpecifications.hasAlias(searchBy.getSearch()))
+                .or(SnmpInterfaceSpecifications.hasDesc(searchBy.getSearch()))
+                .or(SnmpInterfaceSpecifications.hasPhysicalAddress(searchBy.getSearch()))
+        );
+
+
+        return list
+            .stream()
+            .map(mapper::modelToDTO)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
+    public SnmpInterface saveSnmpInterface(SnmpInterfaceCreateDTO request) {
+
+
+        List<Node> nodes= nodeRepository.findByNodeLabel(request.getNodeLabel());
+        SnmpInterface snmpInterface = new SnmpInterface();
+        snmpInterface.setTenantId(request.getTenantId());
+        snmpInterface.setIfDescr(request.getIfDescr());
+        snmpInterface.setPhysicalAddr(request.getPhysicalAddr());
+        snmpInterface.setIfAlias(request.getIfAlias());
+        snmpInterface.setIfAdminStatus(request.getIfAdminStatus());
+        snmpInterface.setIfType(request.getIfType());
+        snmpInterface.setIfSpeed(request.getIfSpeed());
+        snmpInterface.setIfName(request.getIfName());
+        snmpInterface.setIfOperatorStatus(request.getIfOperatorStatus());
+        if(nodes!=null && !nodes.isEmpty()) {
+            snmpInterface.setNode(nodes.get(0));
+        }
+        return modelRepo.save(snmpInterface);
     }
 }

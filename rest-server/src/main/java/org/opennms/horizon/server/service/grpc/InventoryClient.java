@@ -74,6 +74,9 @@ import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.springframework.util.StringUtils;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.SearchBy;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceCreateDTO;
 
 @RequiredArgsConstructor
 public class InventoryClient {
@@ -524,5 +527,17 @@ public class InventoryClient {
                 .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .getMonitoredServiceStatus(monitoredStateQuery);
+    }
+    public List<SnmpInterfaceDTO> listSnmpInterfaces(String search,String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        SearchBy query = SearchBy.newBuilder()
+            .setSearch((search!=null)?search:"").build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listSnmpInterfaces(query).getSnmpInterfacesList();
+    }
+    public SnmpInterfaceDTO createNewSnmpInterface(SnmpInterfaceCreateDTO snmpInterfaceDTO, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createSnmpInterface(snmpInterfaceDTO);
     }
 }

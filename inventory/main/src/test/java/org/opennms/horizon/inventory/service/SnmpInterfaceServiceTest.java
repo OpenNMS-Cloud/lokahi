@@ -35,7 +35,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
-
+import org.opennms.horizon.inventory.repository.NodeRepository;
 public class SnmpInterfaceServiceTest {
 
     public static final String TEST_TENANT_ID = "x-tenant-id-x";
@@ -51,7 +51,7 @@ public class SnmpInterfaceServiceTest {
     private SnmpInterfaceDTO testSnmpInterfaceDTO1;
     private SnmpInterfaceDTO testSnmpInterfaceDTO2;
     private SnmpInterfaceDTO testSnmpInterfaceDTO3;
-
+    private NodeRepository mockNodeRepository;
     private Node testNode;
     private SnmpInterfaceResult testSnmpInterfaceResult;
 
@@ -61,7 +61,7 @@ public class SnmpInterfaceServiceTest {
     public void setUp() {
         mockSnmpInterfaceRepository = Mockito.mock(SnmpInterfaceRepository.class);
         mockSnmpInterfaceMapper = Mockito.mock(SnmpInterfaceMapper.class);
-
+        mockNodeRepository = Mockito.mock(NodeRepository.class);
         testSnmpInterface1 = new SnmpInterface();
         testSnmpInterface2 = new SnmpInterface();
         testSnmpInterface3 = new SnmpInterface();
@@ -74,7 +74,7 @@ public class SnmpInterfaceServiceTest {
         testNode.setId(1313);
         testSnmpInterfaceResult = SnmpInterfaceResult.newBuilder().setIfIndex(1).build();
 
-        target = new SnmpInterfaceService(mockSnmpInterfaceRepository, mockSnmpInterfaceMapper);
+        target = new SnmpInterfaceService(mockSnmpInterfaceRepository, mockNodeRepository,mockSnmpInterfaceMapper);
     }
 
     @Test

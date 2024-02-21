@@ -236,7 +236,7 @@ public class NodeStepDefinitions {
     }
 
     @Then("verify that a new node is created with node_alias {string}")
-    public void verifyThatANewNodeIsCreatedWithNode_aliasIpAddressAndLocation(String alias) {
+    public void verifyThatANewNodeIsCreatedWithNode_alias(String alias) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
             .filter(fetched -> alias.equals(fetched.getNodeAlias()))

@@ -1,10 +1,33 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.grpc.queue;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.awaitility.Awaitility.await;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Longs;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
@@ -13,15 +36,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueue;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Longs;
 
 public class SwappingSendQueueFactoryTest {
 
@@ -131,17 +149,17 @@ public class SwappingSendQueueFactoryTest {
         final var random = new Random();
 
         final var queues = ImmutableMap.<String, SendQueue>builder()
-            .put("A", this.factory.createQueue("testA"))
-            .put("B", this.factory.createQueue("testB"))
-            .put("C", this.factory.createQueue("testC"))
-            .build();
+                .put("A", this.factory.createQueue("testA"))
+                .put("B", this.factory.createQueue("testB"))
+                .put("C", this.factory.createQueue("testC"))
+                .build();
 
         final var executor = Executors.newWorkStealingPool(100);
 
         final var consumedSum = new AtomicLong(0);
         final var producedSum = new AtomicLong(0);
 
-        for (final var queue: queues.entrySet()) {
+        for (final var queue : queues.entrySet()) {
             IntStream.range(0, 50).forEach(i -> {
                 executor.submit((Callable<?>) () -> {
                     for (int cnt = 0; cnt < rounds; cnt++) {
@@ -156,7 +174,7 @@ public class SwappingSendQueueFactoryTest {
 
         final List<Future<?>> producers = Lists.newArrayList();
 
-        for (final var queue: queues.entrySet()) {
+        for (final var queue : queues.entrySet()) {
             IntStream.range(0, 50).forEach(i -> {
                 producers.add(executor.submit((Callable<?>) () -> {
                     // System.out.printf("[%s:%d] Starting producer\n", queue.getKey(), i);

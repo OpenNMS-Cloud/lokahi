@@ -1,32 +1,34 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.grpc;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -36,6 +38,10 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.MetadataUtils;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,20 +54,6 @@ import org.opennms.horizon.inventory.dto.MonitoringSystemServiceGrpc;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.service.MonitoringSystemService;
 import org.springframework.test.annotation.DirtiesContext;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
@@ -90,10 +82,12 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
 
     @Test
     void testListMonitoringSystem() {
-        MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
-            .setSystemId(systemId).build();
+        MonitoringSystemDTO systemDTO =
+                MonitoringSystemDTO.newBuilder().setSystemId(systemId).build();
         doReturn(Collections.singletonList(systemDTO)).when(mockService).findByTenantId(TENANT_ID);
-        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystem(Empty.newBuilder().build())).isNotNull();
+        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                        .listMonitoringSystem(Empty.newBuilder().build()))
+                .isNotNull();
         verify(mockService).findByTenantId(TENANT_ID);
     }
 
@@ -101,20 +95,28 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     void testListMonitoringSystemByLocationId() {
         long locationId = 1L;
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
-            .setSystemId(systemId).setMonitoringLocationId(locationId).build();
-        doReturn(Collections.singletonList(systemDTO)).when(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
-        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders())).listMonitoringSystemByLocationId(Int64Value.of(locationId))).isNotNull();
+                .setSystemId(systemId)
+                .setMonitoringLocationId(locationId)
+                .build();
+        doReturn(Collections.singletonList(systemDTO))
+                .when(mockService)
+                .findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+        assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                        .listMonitoringSystemByLocationId(Int64Value.of(locationId)))
+                .isNotNull();
         verify(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
     }
 
     @Test
     void testListMonitoringSystemByLocationIdNoMinions() {
         long locationId = 1L;
-        doReturn(Collections.emptyList()).when(mockService)
-            .findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+        doReturn(Collections.emptyList())
+                .when(mockService)
+                .findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
 
         var result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .listMonitoringSystemByLocationId(Int64Value.of(locationId)).getSystemsList();
+                .listMonitoringSystemByLocationId(Int64Value.of(locationId))
+                .getSystemsList();
 
         Assertions.assertTrue(result.isEmpty());
         verify(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
@@ -124,11 +126,10 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     void testListMonitoringSystemByLocationIdLocationNotFound() {
         long locationId = 1L;
         var locationException = new LocationNotFoundException("Location not found for id: " + locationId);
-        doThrow(locationException)
-            .when(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
+        doThrow(locationException).when(mockService).findByMonitoringLocationIdAndTenantId(locationId, TENANT_ID);
 
-        var exception = assertThrows(StatusRuntimeException.class, () ->
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        var exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .listMonitoringSystemByLocationId(Int64Value.of(locationId)));
 
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
@@ -140,14 +141,20 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
         long locationId = 1L;
 
         MonitoringSystemQuery query = MonitoringSystemQuery.newBuilder()
-            .setLocation(String.valueOf(locationId)).setSystemId(systemId)
-            .build();
+                .setLocation(String.valueOf(locationId))
+                .setSystemId(systemId)
+                .build();
         MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
-            .setSystemId(systemId).setMonitoringLocationId(locationId).build();
-        doReturn(Optional.of(systemDTO)).when(mockService).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), TENANT_ID);
+                .setSystemId(systemId)
+                .setMonitoringLocationId(locationId)
+                .build();
+        doReturn(Optional.of(systemDTO))
+                .when(mockService)
+                .findByLocationAndSystemId(query.getLocation(), query.getSystemId(), TENANT_ID);
 
         assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .getMonitoringSystemByQuery(query)).isNotNull();
+                        .getMonitoringSystemByQuery(query))
+                .isNotNull();
 
         verify(mockService, times(1)).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), TENANT_ID);
     }
@@ -155,10 +162,12 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     @Test
     void testGetMonitoringSystemByQueryNotFound() {
         MonitoringSystemQuery query = MonitoringSystemQuery.newBuilder().build();
-        doReturn(Optional.empty()).when(mockService).findByLocationAndSystemId(query.getLocation(), query.getSystemId(), TENANT_ID);
+        doReturn(Optional.empty())
+                .when(mockService)
+                .findByLocationAndSystemId(query.getLocation(), query.getSystemId(), TENANT_ID);
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .getMonitoringSystemByQuery(MonitoringSystemQuery.newBuilder().build()));
 
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
@@ -170,8 +179,8 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
         Mockito.reset(spyInterceptor);
         doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(AUTH_HEADER);
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .getMonitoringSystemByQuery(MonitoringSystemQuery.newBuilder().build()));
 
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
@@ -180,11 +189,12 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     @Test
     void testDeleteSystem() {
         long id = 1L;
-        MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
-                .setSystemId(systemId).setId(id).build();
+        MonitoringSystemDTO systemDTO =
+                MonitoringSystemDTO.newBuilder().setSystemId(systemId).setId(id).build();
         doReturn(Optional.of(systemDTO)).when(mockService).findById(id, TENANT_ID);
         assertThat(stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()).getValue());
+                .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build())
+                .getValue());
         verify(mockService).findById(id, TENANT_ID);
         verify(mockService).deleteMonitoringSystem(id);
     }
@@ -193,9 +203,9 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     void testDeleteSystemNotFound() {
         long id = 1L;
         doReturn(Optional.empty()).when(mockService).findById(id, TENANT_ID);
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()));
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()));
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.NOT_FOUND_VALUE);
         verify(mockService).findById(id, TENANT_ID);
     }
@@ -205,8 +215,8 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
         Mockito.reset(spyInterceptor);
         doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(AUTH_HEADER);
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .deleteMonitoringSystem(Int64Value.of(1)));
 
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
@@ -215,13 +225,13 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
     @Test
     void testDeleteSystemException() {
         long id = 1L;
-        MonitoringSystemDTO systemDTO = MonitoringSystemDTO.newBuilder()
-            .setSystemId(systemId).setId(id).build();
+        MonitoringSystemDTO systemDTO =
+                MonitoringSystemDTO.newBuilder().setSystemId(systemId).setId(id).build();
         doReturn(Optional.of(systemDTO)).when(mockService).findById(id, TENANT_ID);
         doThrow(new RuntimeException("bad request")).when(mockService).deleteMonitoringSystem(id);
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-            .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()));
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+                .deleteMonitoringSystem(Int64Value.newBuilder().setValue(id).build()));
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.INTERNAL_VALUE);
         verify(mockService).findById(id, TENANT_ID);
         verify(mockService).deleteMonitoringSystem(id);
@@ -232,8 +242,8 @@ class MonitoringSystemGrpcServiceTest extends AbstractGrpcUnitTest {
         Mockito.reset(spyInterceptor);
         doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(AUTH_HEADER);
 
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () ->
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> stub.withInterceptors(
+                        MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .getMonitoringSystemById(Int64Value.of(1)));
 
         assertThat(StatusProto.fromThrowable(exception).getCode()).isEqualTo(Code.UNAUTHENTICATED_VALUE);

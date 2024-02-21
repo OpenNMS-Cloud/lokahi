@@ -1,35 +1,31 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.component;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -45,10 +41,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -58,9 +50,8 @@ public class TaskSetResultsConsumer {
     private final ScannerResponseService scannerResponseService;
 
     private final MonitorResponseService monitorResponseService;
-    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("handle-taskset-%d")
-        .build();
+    private final ThreadFactory threadFactory =
+            new ThreadFactoryBuilder().setNameFormat("handle-taskset-%d").build();
     // This fixed thread pool allows us to process tasksets in parallel apart from Kafka concurrency which is
     // still tunable at the application level.
     private final ExecutorService executorService = Executors.newFixedThreadPool(100, threadFactory);
@@ -92,11 +83,10 @@ public class TaskSetResultsConsumer {
                             LOG.error("Exception while consuming response", e);
                         }
                     });
-                } else if(taskResult.hasMonitorResponse()) {
+                } else if (taskResult.hasMonitorResponse()) {
                     var monitorResponse = taskResult.getMonitorResponse();
                     monitorResponseService.updateMonitoredState(tenantId, locationId, monitorResponse);
                 }
-
             }
         } catch (Exception e) {
             log.error("Error while processing kafka message for TaskResults: ", e);

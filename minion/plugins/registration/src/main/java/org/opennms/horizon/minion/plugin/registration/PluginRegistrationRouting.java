@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.plugin.registration;
 
 import java.util.List;
@@ -15,13 +36,14 @@ import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
 @Slf4j
 public class PluginRegistrationRouting extends RouteBuilder {
 
-    public static final String ROUTE_ID =  "MINION_REGISTRATION";
+    public static final String ROUTE_ID = "MINION_REGISTRATION";
 
     private final String registrationUri;
     private final SyncDispatcher<PluginConfigMessage> dispatcher;
     private final long aggregationDelay;
 
-    public PluginRegistrationRouting(String uri, MessageDispatcherFactory messageDispatcherFactory, long aggregationDelay) {
+    public PluginRegistrationRouting(
+            String uri, MessageDispatcherFactory messageDispatcherFactory, long aggregationDelay) {
         this.registrationUri = uri;
         dispatcher = messageDispatcherFactory.createSyncDispatcher(new PluginConfigSinkModule());
         this.aggregationDelay = aggregationDelay;
@@ -29,11 +51,13 @@ public class PluginRegistrationRouting extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        from(registrationUri).routeId(ROUTE_ID).
-                log(LoggingLevel.INFO, "Got a single plugin config message").
-                aggregate(new PluginConfigAggregationStrategy()).constant(true).
-                completionTimeout(aggregationDelay).
-                process(exchange -> {
+        from(registrationUri)
+                .routeId(ROUTE_ID)
+                .log(LoggingLevel.INFO, "Got a single plugin config message")
+                .aggregate(new PluginConfigAggregationStrategy())
+                .constant(true)
+                .completionTimeout(aggregationDelay)
+                .process(exchange -> {
                     log.info("Got a plugin registration notice!");
 
                     List<PluginMetadata> pluginMetadataList = exchange.getIn().getBody(List.class);
@@ -49,9 +73,10 @@ public class PluginRegistrationRouting extends RouteBuilder {
 
                         //  iterate over each of the plugins that sent a config
                         pluginMetadataList.forEach(pluginMetadata -> {
-                            PluginConfigMeta.Builder pluginConfigMetaBuilder = PluginConfigMeta.newBuilder().
-                                setPluginName(pluginMetadata.getPluginName()).
-                                setPluginType(pluginMetadata.getPluginType().toString());
+                            PluginConfigMeta.Builder pluginConfigMetaBuilder = PluginConfigMeta.newBuilder()
+                                    .setPluginName(pluginMetadata.getPluginName())
+                                    .setPluginType(
+                                            pluginMetadata.getPluginType().toString());
                             // iterate over each field in the plugin config
                             /*
                             // TODO get schema in place
@@ -78,7 +103,7 @@ public class PluginRegistrationRouting extends RouteBuilder {
                     }
                 });
 
-        //TODO: we may need dead letter handling here if comms to horizon haven't spun up yet.
+        // TODO: we may need dead letter handling here if comms to horizon haven't spun up yet.
     }
 
     private class PluginConfigAggregationStrategy extends AbstractListAggregationStrategy<PluginMetadata> {

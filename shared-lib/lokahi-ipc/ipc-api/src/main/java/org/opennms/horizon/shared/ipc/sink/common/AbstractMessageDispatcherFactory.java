@@ -1,36 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2016-2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.ipc.sink.common;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer.Context;
+import com.google.protobuf.Message;
+import io.opentracing.Scope;
+import io.opentracing.Tracer;
 import java.io.IOException;
 import java.util.Objects;
-
 import org.opennms.horizon.shared.ipc.sink.aggregation.AggregatingMessageDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
@@ -38,15 +35,6 @@ import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcherFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.ipc.sink.api.SinkModule;
 import org.opennms.horizon.shared.ipc.sink.api.SyncDispatcher;
-import org.osgi.framework.ServiceRegistration;
-
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricSet;
-import com.codahale.metrics.Timer.Context;
-import com.google.protobuf.Message;
-
-import io.opentracing.Scope;
-import io.opentracing.Tracer;
 
 /**
  * This class does all the hard work of building and maintaining the state of the message
@@ -61,7 +49,8 @@ import io.opentracing.Tracer;
  */
 public abstract class AbstractMessageDispatcherFactory<W> implements MessageDispatcherFactory {
 
-    protected abstract <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, W metadata, byte[] message);
+    protected abstract <S extends Message, T extends Message> void dispatch(
+            SinkModule<S, T> module, W metadata, byte[] message);
 
     public abstract Tracer getTracer();
 
@@ -74,7 +63,7 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
         state.getDispatchCounter().inc();
 
         try (Context ctx = state.getDispatchTimer().time();
-             Scope scope = getTracer().buildSpan(state.getModule().getId()).startActive(true)) {
+                Scope scope = getTracer().buildSpan(state.getModule().getId()).startActive(true)) {
             dispatch(state.getModule(), state.getMetaData(), message);
         }
     }
@@ -99,8 +88,8 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
 
         final var state = new DispatcherState<>(AbstractMessageDispatcherFactory.this, module);
 
-        final var dispatcher = createMessageDispatcher(state,
-            message -> AbstractMessageDispatcherFactory.this.timedDispatch(state, message));
+        final var dispatcher = createMessageDispatcher(
+                state, message -> AbstractMessageDispatcherFactory.this.timedDispatch(state, message));
 
         return new SyncDispatcher<>() {
 
@@ -118,13 +107,15 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     }
 
     @Override
-    public <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module) throws IOException {
+    public <S extends Message, T extends Message> AsyncDispatcher<S> createAsyncDispatcher(SinkModule<S, T> module)
+            throws IOException {
         Objects.requireNonNull(module, "module cannot be null");
         Objects.requireNonNull(module.getAsyncPolicy(), "module must have an AsyncPolicy");
 
         final DispatcherState<W, S, T> state = new DispatcherState<>(this, module);
 
-        return new AsyncDispatcherImpl<>(state, this.getSendQueueFactory(), message -> this.timedDispatch(state, message));
+        return new AsyncDispatcherImpl<>(
+                state, this.getSendQueueFactory(), message -> this.timedDispatch(state, message));
     }
 
     protected abstract SendQueueFactory getSendQueueFactory();
@@ -133,8 +124,7 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
 
         private final DispatcherState<?, S, T> state;
 
-        protected DirectDispatcher(final DispatcherState<?, S, T> state,
-                                   final Sender sender) {
+        protected DirectDispatcher(final DispatcherState<?, S, T> state, final Sender sender) {
             super(state, sender);
             this.state = Objects.requireNonNull(state);
         }
@@ -154,9 +144,7 @@ public abstract class AbstractMessageDispatcherFactory<W> implements MessageDisp
     }
 
     public static <S extends Message, T extends Message> MessageDispatcher<S, T> createMessageDispatcher(
-        final DispatcherState<?, S, T> state,
-        final MessageDispatcher.Sender sender
-    ) {
+            final DispatcherState<?, S, T> state, final MessageDispatcher.Sender sender) {
         if (state.getModule().getAggregationPolicy() != null) {
             // Aggregate the message before dispatching them
             return new AggregatingMessageDispatcher<>(state, sender);

@@ -1,58 +1,48 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.ipfix.proto;
 
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import io.netty.buffer.ByteBuf;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-
-import io.netty.buffer.ByteBuf;
 import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
 import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
 import org.opennms.horizon.minion.flows.parser.ie.RecordProvider;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
+import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
 import org.opennms.horizon.minion.flows.parser.session.Session;
 import org.opennms.horizon.minion.flows.parser.session.Template;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
     private static final Logger LOG = LoggerFactory.getLogger(Packet.class);
@@ -77,9 +67,7 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
     public final List<OptionsTemplateSet> optionTemplateSets;
     public final List<DataSet> dataSets;
 
-    public Packet(final Session session,
-                  final Header header,
-                  final ByteBuf buffer) throws InvalidPacketException {
+    public Packet(final Session session, final Header header, final ByteBuf buffer) throws InvalidPacketException {
         this.header = Objects.requireNonNull(header);
 
         final List<TemplateSet> templateSets = new LinkedList();
@@ -108,7 +96,8 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
                             }
 
                         } else {
-                            session.addTemplate(this.header.observationDomainId,
+                            session.addTemplate(
+                                    this.header.observationDomainId,
                                     Template.builder(record.header.templateId, Template.Type.TEMPLATE)
                                             .withFields(record.fields)
                                             .build());
@@ -120,14 +109,16 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
                 }
 
                 case OPTIONS_TEMPLATE_SET: {
-                    final OptionsTemplateSet optionsTemplateSet = new OptionsTemplateSet(this, setHeader, payloadBuffer);
+                    final OptionsTemplateSet optionsTemplateSet =
+                            new OptionsTemplateSet(this, setHeader, payloadBuffer);
 
                     for (final OptionsTemplateRecord record : optionsTemplateSet) {
                         if (record.header.fieldCount == 0) {
                             // Empty template means revocation
                             if (record.header.templateId == FlowSetHeader.OPTIONS_TEMPLATE_SET_ID) {
                                 // Remove all templates
-                                session.removeAllTemplate(this.header.observationDomainId, Template.Type.OPTIONS_TEMPLATE);
+                                session.removeAllTemplate(
+                                        this.header.observationDomainId, Template.Type.OPTIONS_TEMPLATE);
 
                             } else if (record.header.fieldCount == 0) {
                                 // Empty template means revocation
@@ -135,7 +126,8 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
                             }
 
                         } else {
-                            session.addTemplate(this.header.observationDomainId,
+                            session.addTemplate(
+                                    this.header.observationDomainId,
                                     Template.builder(record.header.templateId, Template.Type.OPTIONS_TEMPLATE)
                                             .withScopes(record.scopes)
                                             .withFields(record.fields)
@@ -160,7 +152,8 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
 
                     if (dataSet.template.type == Template.Type.OPTIONS_TEMPLATE) {
                         for (final DataRecord record : dataSet) {
-                            session.addOptions(this.header.observationDomainId, dataSet.template.id, record.scopes, record.fields);
+                            session.addOptions(
+                                    this.header.observationDomainId, dataSet.template.id, record.scopes, record.fields);
                         }
                     } else {
                         dataSets.add(dataSet);
@@ -182,16 +175,14 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
 
     @Override
     public Iterator<FlowSet<?>> iterator() {
-        return Iterators.concat(this.templateSets.iterator(),
-                                this.optionTemplateSets.iterator(),
-                                this.dataSets.iterator());
+        return Iterators.concat(
+                this.templateSets.iterator(), this.optionTemplateSets.iterator(), this.dataSets.iterator());
     }
 
     @Override
     public Stream<Iterable<Value<?>>> getRecords() {
-        final int recordCount = this.dataSets.stream()
-                .mapToInt(s -> s.records.size())
-                .sum();
+        final int recordCount =
+                this.dataSets.stream().mapToInt(s -> s.records.size()).sum();
 
         return this.dataSets.stream()
                 .flatMap(s -> s.records.stream())
@@ -202,8 +193,7 @@ public final class Packet implements Iterable<FlowSet<?>>, RecordProvider {
                                 new UnsignedValue("@exportTime", this.header.exportTime),
                                 new UnsignedValue("@observationDomainId", this.header.observationDomainId)),
                         r.fields,
-                        r.options
-                ));
+                        r.options));
     }
 
     @Override

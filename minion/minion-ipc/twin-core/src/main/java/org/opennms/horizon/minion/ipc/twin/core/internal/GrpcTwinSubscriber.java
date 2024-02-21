@@ -1,32 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.ipc.twin.core.internal;
-
 
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -37,7 +30,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
@@ -60,8 +52,8 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber implements CloudM
     private final ClientRequestDispatcher requestDispatcher;
 
     private AtomicBoolean isShutDown = new AtomicBoolean(false);
-    private final ScheduledExecutorService twinRequestSenderExecutor = Executors.newScheduledThreadPool(TWIN_REQUEST_POOL_SIZE,
-            new TwinThreadFactory());
+    private final ScheduledExecutorService twinRequestSenderExecutor =
+            Executors.newScheduledThreadPool(TWIN_REQUEST_POOL_SIZE, new TwinThreadFactory());
 
     public GrpcTwinSubscriber(IpcIdentity minionIdentity, ClientRequestDispatcher requestDispatcher) {
         super(minionIdentity);
@@ -88,17 +80,17 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber implements CloudM
     private void retrySendRpcRequest(TwinRequestProto twinRequestProto) {
         // We can only send RPC If channel is active and RPC stream is not in error.
         // Schedule sending RPC request with given retrieval timeout until it succeeds.
-        scheduleWithDelayUntilFunctionSucceeds(twinRequestSenderExecutor, this::sendTwinRpcRequest, RETRIEVAL_TIMEOUT, twinRequestProto);
+        scheduleWithDelayUntilFunctionSucceeds(
+                twinRequestSenderExecutor, this::sendTwinRpcRequest, RETRIEVAL_TIMEOUT, twinRequestProto);
     }
 
-    private <T> void scheduleWithDelayUntilFunctionSucceeds(ScheduledExecutorService executorService,
-                                                            Function<T, Boolean> function,
-                                                            long delayInMsec,
-                                                            T obj) {
+    private <T> void scheduleWithDelayUntilFunctionSucceeds(
+            ScheduledExecutorService executorService, Function<T, Boolean> function, long delayInMsec, T obj) {
         boolean succeeded = function.apply(obj);
         if (!succeeded) {
             do {
-                ScheduledFuture<Boolean> future = executorService.schedule(() -> function.apply(obj), delayInMsec, TimeUnit.MILLISECONDS);
+                ScheduledFuture<Boolean> future =
+                        executorService.schedule(() -> function.apply(obj), delayInMsec, TimeUnit.MILLISECONDS);
                 try {
                     succeeded = future.get();
                     if (succeeded) {
@@ -116,11 +108,11 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber implements CloudM
     private synchronized boolean sendTwinRpcRequest(TwinRequestProto twinRequestProto) {
         String rpcId = UUID.randomUUID().toString();
         RpcRequestProto rpcRequestProto = RpcRequestProto.newBuilder()
-            .setIdentity(Identity.newBuilder().setSystemId(getIdentity().getId()))
-            .setPayload(Any.pack(twinRequestProto))
-            .setModuleId("twin")
-            .setRpcId(rpcId)
-            .build();
+                .setIdentity(Identity.newBuilder().setSystemId(getIdentity().getId()))
+                .setPayload(Any.pack(twinRequestProto))
+                .setModuleId("twin")
+                .setRpcId(rpcId)
+                .build();
 
         requestDispatcher.call(rpcRequestProto).whenComplete((response, error) -> {
             if (error != null) {
@@ -161,9 +153,9 @@ public class GrpcTwinSubscriber extends AbstractTwinSubscriber implements CloudM
         }
     }
 
-
     static class TwinThreadFactory implements ThreadFactory {
-        private final static AtomicInteger COUNTER = new AtomicInteger();
+        private static final AtomicInteger COUNTER = new AtomicInteger();
+
         @Override
         public Thread newThread(Runnable runnable) {
             return new Thread(runnable, "twin-request-sender-" + COUNTER.incrementAndGet());

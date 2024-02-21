@@ -1,7 +1,39 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.ignite;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import javax.cache.configuration.Factory;
+import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
+import javax.cache.event.CacheEntryEvent;
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.CacheEntryListenerException;
+import javax.cache.event.CacheEntryUpdatedListener;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
@@ -9,21 +41,9 @@ import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.junit.Test;
 
-import javax.cache.configuration.Factory;
-import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
-import javax.cache.event.CacheEntryEvent;
-import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerException;
-import javax.cache.event.CacheEntryUpdatedListener;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-
 /**
  * DEVELOPER TEST - only executed manually
- * 
+ *
  * Tests to verify ignite operations
  */
 public class IgniteDT {
@@ -100,11 +120,7 @@ public class IgniteDT {
             CacheTestObject entry1 = createTestObject();
 
             cache.registerCacheEntryListener(new MutableCacheEntryListenerConfiguration<String, CacheTestObject>(
-                new MyCacheEntryListenerFactory(),
-                null,
-                false,
-                false
-            ));
+                    new MyCacheEntryListenerFactory(), null, false, false));
 
             //
             // INITIAL PUT
@@ -114,7 +130,8 @@ public class IgniteDT {
 
             // GET 1
             CacheTestObject entry1B = cache.get("item001");
-            System.out.println("RETURNED item001 with id=" + System.identityHashCode(entry1B) + "; " + formatIsSame(entry1, entry1B));
+            System.out.println("RETURNED item001 with id=" + System.identityHashCode(entry1B) + "; "
+                    + formatIsSame(entry1, entry1B));
 
             // UPDATE THE ORIGINALLY "put" OBJECT
             entry1.subObjects.add(new CacheTestSubObject("item001.sub003-id"));
@@ -131,7 +148,8 @@ public class IgniteDT {
 
             // GET 2
             CacheTestObject entry1C = cache.get("item001");
-            System.out.println("RETURNED ANOTHER item001 with id=" + System.identityHashCode(entry1C) + "; " + formatIsSame(entry1B, entry1C));
+            System.out.println("RETURNED ANOTHER item001 with id=" + System.identityHashCode(entry1C) + "; "
+                    + formatIsSame(entry1B, entry1C));
 
             // DUMP
             System.out.println("ENTRY SUB-OBJ LIST AFTER 2ND GET:");
@@ -145,14 +163,16 @@ public class IgniteDT {
             cache.put("item001", entry1B);
 
             CacheTestObject entry1D = cache.get("item001");
-            System.out.println("RETURNED ANOTHER item001 AFTER UPDATE with id=" + System.identityHashCode(entry1D) + "; " + formatIsSame(entry1B, entry1D));
+            System.out.println("RETURNED ANOTHER item001 AFTER UPDATE with id=" + System.identityHashCode(entry1D)
+                    + "; " + formatIsSame(entry1B, entry1D));
 
             System.out.println("ENTRY SUB-OBJ LIST AFTER 3RD GET:");
             System.out.print("    ");
             dumpJson(entry1D.subObjects);
 
             CacheTestObject entry1E = cache.get("item001");
-            System.out.println("SECOND GET AFTER UPDATE with id=" + System.identityHashCode(entry1D) + "; " + formatIsSame(entry1E, entry1D));
+            System.out.println("SECOND GET AFTER UPDATE with id=" + System.identityHashCode(entry1D) + "; "
+                    + formatIsSame(entry1E, entry1D));
         } catch (Exception exc) {
             exc.printStackTrace();
         } finally {
@@ -163,7 +183,8 @@ public class IgniteDT {
         }
     }
 
-    private CacheConfiguration<String, CacheTestObject> prepareCacheConfiguration(boolean onHeapCache, boolean copyOnRead) {
+    private CacheConfiguration<String, CacheTestObject> prepareCacheConfiguration(
+            boolean onHeapCache, boolean copyOnRead) {
         CacheConfiguration<String, CacheTestObject> result = new CacheConfiguration<>("test-cache");
 
         result.setOnheapCacheEnabled(onHeapCache);
@@ -179,14 +200,9 @@ public class IgniteDT {
 
     private CacheTestObject createTestObject() {
         return new CacheTestObject(
-            "item001-id",
-            new LinkedList<>(
-                Arrays.asList(
-                    new CacheTestSubObject("item001.sub001-id"),
-                    new CacheTestSubObject("item001.sub002-id")
-                )
-            )
-        );
+                "item001-id",
+                new LinkedList<>(Arrays.asList(
+                        new CacheTestSubObject("item001.sub001-id"), new CacheTestSubObject("item001.sub002-id"))));
     }
 
     private void dumpJson(Object obj) throws JsonProcessingException {
@@ -221,7 +237,8 @@ public class IgniteDT {
 
     private class MyCacheEntryListener implements CacheEntryUpdatedListener<String, CacheTestObject> {
         @Override
-        public void onUpdated(Iterable<CacheEntryEvent<? extends String, ? extends CacheTestObject>> cacheEntryEvents) throws CacheEntryListenerException {
+        public void onUpdated(Iterable<CacheEntryEvent<? extends String, ? extends CacheTestObject>> cacheEntryEvents)
+                throws CacheEntryListenerException {
             CacheTestObject cacheTestObject = cacheEntryEvents.iterator().next().getValue();
 
             try {

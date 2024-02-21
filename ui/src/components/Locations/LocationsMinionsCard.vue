@@ -95,8 +95,8 @@ const minion = computed(() => {
   }
 
   latencyPill = {
-    label: `${props.item.latency?.value || 0}ms`, //Latency is not on this Object
-    style: latencyThreshold(props.item.latency?.value || 0) //.match(/\d+/g))
+    label: `${props.item.latency?.value || 0}ms`, // Latency is not on this Object
+    style: latencyThreshold(props.item.latency?.value || 0) // .match(/\d+/g))
   }
 
   ipPill = {

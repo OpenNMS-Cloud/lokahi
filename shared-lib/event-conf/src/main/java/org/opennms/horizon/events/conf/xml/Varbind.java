@@ -1,0 +1,150 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
+package org.opennms.horizon.events.conf.xml;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import org.opennms.horizon.events.util.ConfigUtils;
+import org.opennms.horizon.events.util.ValidateUsing;
+
+@XmlRootElement(name = "varbind")
+@XmlAccessorType(XmlAccessType.NONE)
+@ValidateUsing("eventconf.xsd")
+@XmlType(propOrder = {"m_vbnumber", "m_values"})
+public class Varbind implements Serializable {
+    private static final long serialVersionUID = 2L;
+
+    private static final List<String> TEXTUAL_CONVENTIONS = Arrays.asList(
+            "PhysAddress",
+            "MacAddress",
+            "TruthValue",
+            "TestAndIncr",
+            "AutonomousType",
+            "InstancePointer",
+            "VariablePointer",
+            "RowPointer",
+            "RowStatus",
+            "TimeStamp",
+            "TimeInterval",
+            "DateAndTime",
+            "StorageType",
+            "TDomain",
+            "TAddress");
+
+    @XmlAttribute(name = "textual-convention", required = false)
+    private String m_textualConvention;
+
+    @XmlElement(name = "vbnumber", required = true)
+    private Integer m_vbnumber;
+
+    @XmlElement(name = "vbvalue", required = true)
+    private List<String> m_values = new ArrayList<>();
+
+    public String getTextualConvention() {
+        return m_textualConvention;
+    }
+
+    public void setTextualConvention(final String textualConvention) {
+        m_textualConvention =
+                ConfigUtils.assertOnlyContains(textualConvention, TEXTUAL_CONVENTIONS, "textual-convention");
+        if (m_textualConvention != null) {
+            m_textualConvention = m_textualConvention.intern();
+        }
+    }
+
+    public Integer getVbnumber() {
+        return m_vbnumber;
+    }
+
+    public void setVbnumber(final Integer vbnumber) {
+        m_vbnumber = ConfigUtils.assertNotNull(vbnumber, "vbnumber");
+    }
+
+    public List<String> getVbvalues() {
+        return m_values;
+    }
+
+    public void setVbvalues(final List<String> values) {
+        if (values == m_values) return;
+        m_values.clear();
+        if (values != null) m_values.addAll(values);
+    }
+
+    public void addVbvalue(final String value) throws IndexOutOfBoundsException {
+        m_values.add(value == null ? null : value.intern());
+    }
+
+    public boolean removeVbvalue(final String value) {
+        return m_values.remove(value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(m_textualConvention, m_vbnumber, m_values);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof Varbind) {
+            final Varbind that = (Varbind) obj;
+            return Objects.equals(this.m_textualConvention, that.m_textualConvention)
+                    && Objects.equals(this.m_vbnumber, that.m_vbnumber)
+                    && Objects.equals(this.m_values, that.m_values);
+        }
+        return false;
+    }
+
+    public EventMatcher constructMatcher() {
+        if (m_vbnumber == null) return EventMatchers.trueMatcher();
+
+        List<EventMatcher> valueMatchers = new ArrayList<EventMatcher>(m_values.size());
+        for (final String value : m_values) {
+            if (value == null) continue;
+            if (value.startsWith("~")) {
+                valueMatchers.add(EventMatchers.valueMatchesRegexMatcher(EventMatchers.varbind(m_vbnumber), value));
+            } else if (value.endsWith("%")) {
+                valueMatchers.add(EventMatchers.valueStartsWithMatcher(EventMatchers.varbind(m_vbnumber), value));
+            } else {
+                valueMatchers.add(EventMatchers.valueEqualsMatcher(EventMatchers.varbind(m_vbnumber), value));
+            }
+        }
+
+        if (valueMatchers.size() == 1) {
+            return valueMatchers.get(0);
+        } else {
+            EventMatcher[] matchers = valueMatchers.toArray(new EventMatcher[valueMatchers.size()]);
+            return EventMatchers.or(matchers);
+        }
+    }
+}

@@ -1,76 +1,66 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.jicmp.jna;
 
+import com.sun.jna.Structure;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.jna.Structure;
-
 public class bsd_sockaddr_in extends Structure {
 
-    public byte    sin_len;
-    public byte    sin_family;
+    public byte sin_len;
+    public byte sin_family;
     /* we  use an array of bytes rather than int16 to avoid jna byte reordering */
-    public byte[]  sin_port;
-    /* we use an array of bytes rather than the tradition int32 
+    public byte[] sin_port;
+    /* we use an array of bytes rather than the tradition int32
      * to avoid having jna to byte-order swapping.. They are already in
      * network byte order in java
      */
-    public byte[]  sin_addr;
-    public byte[]  sin_zero = new byte[8];
+    public byte[] sin_addr;
+    public byte[] sin_zero = new byte[8];
 
     public bsd_sockaddr_in(int family, byte[] addr, byte[] port) {
-        sin_family = (byte)(0xff & family);
+        sin_family = (byte) (0xff & family);
         assertLen("port", port, 2);
-        sin_port = port == null? null : port.clone();
+        sin_port = port == null ? null : port.clone();
         assertLen("address", addr, 4);
-        sin_addr = addr == null? null : addr.clone();
-        sin_len = (byte)(0xff & size());
+        sin_addr = addr == null ? null : addr.clone();
+        sin_len = (byte) (0xff & size());
     }
-    
+
     public bsd_sockaddr_in() {
-        this((byte)0, new byte[4], new byte[2]);
+        this((byte) 0, new byte[4], new byte[2]);
     }
-    
+
     public bsd_sockaddr_in(InetAddress address, int port) {
-        this(NativeDatagramSocket.AF_INET, 
-             address.getAddress(), 
-             new byte[] {(byte)(0xff & (port >> 8)), (byte)(0xff & port)});
+        this(NativeDatagramSocket.AF_INET, address.getAddress(), new byte[] {
+            (byte) (0xff & (port >> 8)), (byte) (0xff & port)
+        });
     }
-    
+
     public bsd_sockaddr_in(final int port) {
-        this(NativeDatagramSocket.AF_INET, 
-             new byte[4], 
-             new byte[] {(byte)(0xff & (port >> 8)), (byte)(0xff & port)});
+        this(NativeDatagramSocket.AF_INET, new byte[4], new byte[] {(byte) (0xff & (port >> 8)), (byte) (0xff & port)});
     }
 
     @Override
@@ -80,10 +70,10 @@ public class bsd_sockaddr_in extends Structure {
 
     private void assertLen(String field, byte[] addr, int len) {
         if (addr.length != len) {
-            throw new IllegalArgumentException(field+" length must be "+len+" bytes");
+            throw new IllegalArgumentException(field + " length must be " + len + " bytes");
         }
     }
-    
+
     public InetAddress getAddress() {
         try {
             return InetAddress.getByAddress(sin_addr);
@@ -92,7 +82,7 @@ public class bsd_sockaddr_in extends Structure {
             return null;
         }
     }
-    
+
     public void setAddress(InetAddress address) {
         byte[] addr = address.getAddress();
         assertLen("address", addr, 4);
@@ -101,14 +91,14 @@ public class bsd_sockaddr_in extends Structure {
 
     public int getPort() {
         int port = 0;
-        for(int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             port = ((port << 8) | (sin_port[i] & 0xff));
         }
         return port;
     }
-    
+
     public void setPort(int port) {
-        byte[] p = new byte[] {(byte)(0xff & (port >> 8)), (byte)(0xff & port)};
+        byte[] p = new byte[] {(byte) (0xff & (port >> 8)), (byte) (0xff & port)};
         assertLen("port", p, 2);
         sin_port = p;
     }

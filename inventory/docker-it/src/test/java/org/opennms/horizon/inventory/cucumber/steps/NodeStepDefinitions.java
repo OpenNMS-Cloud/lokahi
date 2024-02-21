@@ -1,10 +1,36 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber.steps;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
@@ -19,12 +45,6 @@ import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
 @Slf4j
 public class NodeStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
@@ -36,7 +56,8 @@ public class NodeStepDefinitions {
 
     private Exception lastException;
 
-    public NodeStepDefinitions(RetryUtils retryUtils, KafkaTestHelper kafkaTestHelper, InventoryBackgroundHelper backgroundHelper) {
+    public NodeStepDefinitions(
+            RetryUtils retryUtils, KafkaTestHelper kafkaTestHelper, InventoryBackgroundHelper backgroundHelper) {
         this.retryUtils = retryUtils;
         this.kafkaTestHelper = kafkaTestHelper;
         this.backgroundHelper = backgroundHelper;
@@ -88,27 +109,36 @@ public class NodeStepDefinitions {
         aNewNodeWithLabelIpAddressAndLocation(label, ipAddress, location, false);
     }
 
-    private void aNewNodeWithLabelIpAddressAndLocation(String label, String ipAddress, String location, boolean isClear) {
+    private void aNewNodeWithLabelIpAddressAndLocation(
+            String label, String ipAddress, String location, boolean isClear) {
         if (isClear) {
             deleteAllNodes();
         }
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label)
-            .setManagementIp(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
+        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(label)
+                .setManagementIp(ipAddress)
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .build());
     }
 
     @Given("update node {string} with alias {string} exception {string}")
-    public void updateNodeWithAliasException (String label, String alias, String expectException) {
+    public void updateNodeWithAliasException(String label, String alias, String expectException) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         var nodes = nodeServiceBlockingStub.listNodes(Empty.newBuilder().build());
-        var filterNodes = nodes.getNodesList().stream().filter(n -> label.equals(n.getNodeLabel())).toList();
+        var filterNodes = nodes.getNodesList().stream()
+                .filter(n -> label.equals(n.getNodeLabel()))
+                .toList();
         Assert.assertEquals(1, filterNodes.size());
         var node = filterNodes.get(0);
         lastException = null;
         NodeDTO updatedNode = null;
         try {
-            var nodeId = nodeServiceBlockingStub.updateNode(NodeUpdateDTO.newBuilder().setId(node.getId()).setNodeAlias(alias)
-                .setTenantId(node.getTenantId()).build());
+            var nodeId = nodeServiceBlockingStub.updateNode(NodeUpdateDTO.newBuilder()
+                    .setId(node.getId())
+                    .setNodeAlias(alias)
+                    .setTenantId(node.getTenantId())
+                    .build());
             updatedNode = nodeServiceBlockingStub.getNodeById(nodeId);
         } catch (Exception e) {
             lastException = e;
@@ -136,12 +166,13 @@ public class NodeStepDefinitions {
      */
 
     @Then("verify that a new node is created with label {string}, ip address {string} and location {string}")
-    public void verifyThatANewNodeIsCreatedWithLabelIpAddressAndLocation(String label, String ipAddress, String location) {
+    public void verifyThatANewNodeIsCreatedWithLabelIpAddressAndLocation(
+            String label, String ipAddress, String location) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
-            .filter(fetched -> label.equals(fetched.getNodeLabel()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Node " + label + " not found"));
+                .filter(fetched -> label.equals(fetched.getNodeLabel()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Node " + label + " not found"));
 
         String locationId = backgroundHelper.findLocationId(location);
 
@@ -153,8 +184,8 @@ public class NodeStepDefinitions {
     @Then("fetch a list of nodes by node label with search term {string}")
     public void fetchAListOfNodesByNodeLabelWithSearchTerm(String labelSearchTerm) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(NodeLabelSearchQuery.newBuilder()
-            .setSearchTerm(labelSearchTerm).build());
+        fetchedNodeList = nodeServiceBlockingStub.listNodesByNodeLabel(
+                NodeLabelSearchQuery.newBuilder().setSearchTerm(labelSearchTerm).build());
     }
 
     @Then("verify the list of nodes has size {int} and labels contain {string}")
@@ -162,8 +193,7 @@ public class NodeStepDefinitions {
         assertEquals(nodeListSize, fetchedNodeList.getNodesCount());
 
         List<NodeDTO> nodesList = fetchedNodeList.getNodesList();
-        nodesList.stream().map(NodeDTO::getNodeLabel)
-            .forEach(label -> assertTrue(label.contains(labelSearchTerm)));
+        nodesList.stream().map(NodeDTO::getNodeLabel).forEach(label -> assertTrue(label.contains(labelSearchTerm)));
     }
 
     @Then("verify the list of nodes is empty")
@@ -174,11 +204,11 @@ public class NodeStepDefinitions {
     @Then("verify node topic has {int} messages with tenant {string}")
     public void verifyNodeTopicContainsTenant(int expectedMessages, String tenant) throws InterruptedException {
         boolean success = retryUtils.retry(
-            () -> this.checkNumberOfMessageForOneTenant(tenant, expectedMessages, nodeTopic),
-            result -> result,
-            100,
-            10000,
-            false);
+                () -> this.checkNumberOfMessageForOneTenant(tenant, expectedMessages, nodeTopic),
+                result -> result,
+                100,
+                10000,
+                false);
 
         Assert.assertTrue("Verify node topic has the right number of message(s)", success);
     }
@@ -189,15 +219,17 @@ public class NodeStepDefinitions {
      */
     private void deleteAllNodes() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
-            nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
+        for (NodeDTO nodeDTO :
+                nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
+            nodeServiceBlockingStub.deleteNode(
+                    Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
         }
     }
 
     private boolean checkNumberOfMessageForOneTenant(String tenant, int expectedMessages, String topic) {
         int foundMessages = 0;
         List<ConsumerRecord<String, byte[]>> records = kafkaTestHelper.getConsumedMessages(topic);
-        for (ConsumerRecord<String, byte[]> record: records) {
+        for (ConsumerRecord<String, byte[]> record : records) {
             if (record.value() == null) {
                 continue;
             }

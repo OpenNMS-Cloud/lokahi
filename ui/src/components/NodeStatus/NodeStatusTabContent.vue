@@ -3,31 +3,31 @@
     <div class="column-left">
       <div class="card">
         <NodeSystemInformation />
-      </div> 
+      </div>
       <div class="card">
         <NodeTags />
-      </div> 
+      </div>
       <div class="card">
         <NodeMonitoringPolicies />
-      </div> 
+      </div>
       <div class="card">
         <NodeDiscoveries />
-      </div> 
+      </div>
     </div>
     <div class="column-right">
       <div class="card">
         <NodeAlerts />
-      </div> 
+      </div>
       <div class="card">
         <NodeGraph
           title="CPU Utilization"
         />
-      </div> 
+      </div>
       <div class="card">
         <NodeGraph
           title="Memory Utilization"
         />
-      </div> 
+      </div>
     </div>
   </div>
 </template>

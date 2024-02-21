@@ -1,5 +1,5 @@
 <template>
-  <FeatherButton 
+  <FeatherButton
     text
     data-test="notifications-btn"
     @click="openModal"
@@ -20,15 +20,15 @@
     </template>
 
     <template v-slot:footer>
-      <FeatherButton 
-        data-test="cancel-btn" 
-        secondary 
+      <FeatherButton
+        data-test="cancel-btn"
+        secondary
         @click="closeModal">
           Cancel
       </FeatherButton>
 
-      <FeatherButton 
-        data-test="save-btn" 
+      <FeatherButton
+        data-test="save-btn"
         primary
         :disabled="!config.integrationkey"
         @click="save">

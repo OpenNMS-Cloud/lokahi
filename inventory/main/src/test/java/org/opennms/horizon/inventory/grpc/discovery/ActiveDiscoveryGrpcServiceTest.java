@@ -1,4 +1,27 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.grpc.discovery;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
@@ -8,6 +31,8 @@ import io.grpc.Context;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -16,11 +41,6 @@ import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryList;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.ActiveDiscoveryService;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ActiveDiscoveryGrpcServiceTest {
 
@@ -48,15 +68,12 @@ public class ActiveDiscoveryGrpcServiceTest {
         var testActiveDiscoveryDTO2 = ActiveDiscoveryDTO.newBuilder().build();
         var testActiveDiscoveryDTO3 = ActiveDiscoveryDTO.newBuilder().build();
         var testActiveDiscoveryList =
-            List.of(
-                testActiveDiscoveryDTO1,
-                testActiveDiscoveryDTO2,
-                testActiveDiscoveryDTO3
-            );
+                List.of(testActiveDiscoveryDTO1, testActiveDiscoveryDTO2, testActiveDiscoveryDTO3);
 
         prepareCommonTenantLookup();
         StreamObserver<ActiveDiscoveryList> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockActiveDiscoveryService.getActiveDiscoveries(TEST_TENANT_ID)).thenReturn(testActiveDiscoveryList);
+        Mockito.when(mockActiveDiscoveryService.getActiveDiscoveries(TEST_TENANT_ID))
+                .thenReturn(testActiveDiscoveryList);
 
         //
         // Execute
@@ -66,17 +83,11 @@ public class ActiveDiscoveryGrpcServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockStreamObserver).onNext(
-            Mockito.argThat(
-                (argument) ->
-                    (
-                        (argument.getActiveDiscoveriesCount() == 3) &&
-                        (argument.getActiveDiscoveries(0) == testActiveDiscoveryDTO1) &&
-                        (argument.getActiveDiscoveries(1) == testActiveDiscoveryDTO2) &&
-                        (argument.getActiveDiscoveries(2) == testActiveDiscoveryDTO3)
-                    )
-            )
-        );
+        Mockito.verify(mockStreamObserver)
+                .onNext(Mockito.argThat((argument) -> ((argument.getActiveDiscoveriesCount() == 3)
+                        && (argument.getActiveDiscoveries(0) == testActiveDiscoveryDTO1)
+                        && (argument.getActiveDiscoveries(1) == testActiveDiscoveryDTO2)
+                        && (argument.getActiveDiscoveries(2) == testActiveDiscoveryDTO3))));
         Mockito.verify(mockStreamObserver).onCompleted();
     }
 
@@ -88,7 +99,8 @@ public class ActiveDiscoveryGrpcServiceTest {
         var testException = new RuntimeException("x-test-exception-x");
         prepareCommonTenantLookup();
         StreamObserver<ActiveDiscoveryList> mockStreamObserver = Mockito.mock(StreamObserver.class);
-        Mockito.when(mockActiveDiscoveryService.getActiveDiscoveries(TEST_TENANT_ID)).thenThrow(testException);
+        Mockito.when(mockActiveDiscoveryService.getActiveDiscoveries(TEST_TENANT_ID))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -207,24 +219,23 @@ public class ActiveDiscoveryGrpcServiceTest {
         Mockito.verify(mockStreamObserver).onError(Mockito.argThat(matcher));
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void prepareCommonTenantLookup() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.of(TEST_TENANT_ID));
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class)))
+                .thenReturn(Optional.of(TEST_TENANT_ID));
     }
 
     private void prepareTenantLookupOnMissingTenant() {
-        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class))).thenReturn(Optional.empty());
+        Mockito.when(mockTenantLookup.lookupTenantId(Mockito.any(Context.class)))
+                .thenReturn(Optional.empty());
     }
 
     private ArgumentMatcher<Exception> prepareStatusExceptionMatcher(int expectedCode, String expectedMessage) {
-        return argument ->
-            (
-                (argument instanceof StatusRuntimeException) &&
-                (((StatusRuntimeException) argument).getStatus().getCode().value() == expectedCode)  &&
-                argument.getMessage().contains(expectedMessage)
-            );
+        return argument -> ((argument instanceof StatusRuntimeException)
+                && (((StatusRuntimeException) argument).getStatus().getCode().value() == expectedCode)
+                && argument.getMessage().contains(expectedMessage));
     }
 }

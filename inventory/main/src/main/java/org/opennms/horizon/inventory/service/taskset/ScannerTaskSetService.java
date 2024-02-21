@@ -1,35 +1,41 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service.taskset;
+
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.DEFAULT_SCHEDULE_FOR_SCAN;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForDiscoveryTask;
+import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.protobuf.Any;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.net.util.SubnetUtils;
 import org.opennms.azure.contract.AzureScanRequest;
@@ -53,29 +59,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.DEFAULT_SCHEDULE_FOR_SCAN;
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForAzureTask;
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForDiscoveryTask;
-import static org.opennms.horizon.inventory.service.taskset.TaskUtils.identityForNodeScan;
-
-
-
 @Component
 @RequiredArgsConstructor
 public class ScannerTaskSetService {
     private static final Logger LOG = LoggerFactory.getLogger(ScannerTaskSetService.class);
-    private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("send-taskset-for-scan-%d")
-        .build();
+    private final ThreadFactory threadFactory =
+            new ThreadFactoryBuilder().setNameFormat("send-taskset-for-scan-%d").build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
     public static final String DISCOVERY_TASK_PLUGIN_NAME = "Discovery-Ping";
@@ -88,8 +77,10 @@ public class ScannerTaskSetService {
     }
 
     public void sendNodeScannerTask(List<NodeDTO> nodes, Long locationId, String tenantId) {
-        List<TaskDefinition> tasks = nodes.stream().map(node -> createNodeScanTask(node, locationId, new ArrayList<>()))
-            .flatMap(Optional::stream).toList();
+        List<TaskDefinition> tasks = nodes.stream()
+                .map(node -> createNodeScanTask(node, locationId, new ArrayList<>()))
+                .flatMap(Optional::stream)
+                .toList();
         if (!tasks.isEmpty()) {
             taskSetPublisher.publishNewTasks(tenantId, locationId, tasks);
         }
@@ -102,7 +93,8 @@ public class ScannerTaskSetService {
 
     public void sendNodeScannerTask(NodeDTO node, Long locationId, List<SnmpConfiguration> snmpConfigs) {
         var taskDef = createNodeScanTask(node, locationId, snmpConfigs);
-        taskDef.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(node.getTenantId(), locationId, List.of(taskDefinition)));
+        taskDef.ifPresent(taskDefinition ->
+                taskSetPublisher.publishNewTasks(node.getTenantId(), locationId, List.of(taskDefinition)));
     }
 
     public Optional<TaskDefinition> getNodeScanTasks(Node node) {
@@ -110,21 +102,25 @@ public class ScannerTaskSetService {
         return createNodeScanTask(nodeDto, node.getMonitoringLocation().getId(), new ArrayList<>());
     }
 
-    public void sendDiscoveryScannerTask(List<String> ipAddresses, Long locationId, String tenantId, long activeDiscoveryId) {
+    public void sendDiscoveryScannerTask(
+            List<String> ipAddresses, Long locationId, String tenantId, long activeDiscoveryId) {
         executorService.execute(() -> createAndPublishTasks(ipAddresses, locationId, tenantId, activeDiscoveryId));
     }
 
-    private void createAndPublishTasks(List<String> ipAddresses, Long locationId, String tenantId, long activeDiscoveryId) {
+    private void createAndPublishTasks(
+            List<String> ipAddresses, Long locationId, String tenantId, long activeDiscoveryId) {
         Optional<TaskDefinition> tasks = createDiscoveryTask(ipAddresses, locationId, activeDiscoveryId);
-        tasks.ifPresent(taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, locationId, List.of(taskDefinition)));
+        tasks.ifPresent(
+                taskDefinition -> taskSetPublisher.publishNewTasks(tenantId, locationId, List.of(taskDefinition)));
     }
 
     public void removeDiscoveryScanTask(Long locationId, long activeDiscoveryId, String tenantId) {
         String taskId = identityForDiscoveryTask(locationId, activeDiscoveryId);
         var taskDef = TaskDefinition.newBuilder()
-            .setType(TaskType.SCANNER)
-            .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
-            .setId(taskId).build();
+                .setType(TaskType.SCANNER)
+                .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
+                .setId(taskId)
+                .build();
 
         taskSetPublisher.publishTaskDeletion(tenantId, locationId, List.of(taskDef));
     }
@@ -133,7 +129,6 @@ public class ScannerTaskSetService {
 
         var ipRanges = new ArrayList<IpRange>();
         ipAddresses.forEach(ipAddressDTO -> {
-
             ipAddressDTO = ipAddressDTO.trim();
             if (ipAddressDTO.contains("-")) {
                 var range = ipAddressDTO.split("-", 2);
@@ -188,12 +183,12 @@ public class ScannerTaskSetService {
 
         String taskId = identityForDiscoveryTask(locationId, activeDiscoveryId);
         return Optional.of(TaskDefinition.newBuilder()
-            .setType(TaskType.SCANNER)
-            .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
-            .setId(taskId)
-            .setConfiguration(configuration)
-            .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
-            .build());
+                .setType(TaskType.SCANNER)
+                .setPluginName(DISCOVERY_TASK_PLUGIN_NAME)
+                .setId(taskId)
+                .setConfiguration(configuration)
+                .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
+                .build());
     }
 
     private void sendAzureScannerTask(AzureActiveDiscovery discovery) {
@@ -206,8 +201,7 @@ public class ScannerTaskSetService {
     }
 
     private TaskDefinition addAzureScannerTask(AzureActiveDiscovery discovery) {
-        Any configuration =
-            Any.pack(AzureScanRequest.newBuilder()
+        Any configuration = Any.pack(AzureScanRequest.newBuilder()
                 .setActiveDiscoveryId(discovery.getId())
                 .setClientId(discovery.getClientId())
                 .setClientSecret(discovery.getClientSecret())
@@ -219,41 +213,52 @@ public class ScannerTaskSetService {
 
         String taskId = identityForAzureTask("azure-scanner", String.valueOf(discovery.getId()));
         return TaskDefinition.newBuilder()
-            .setType(TaskType.SCANNER)
-            .setPluginName("AZUREScanner")
-            .setId(taskId)
-            .setConfiguration(configuration)
-            .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
-            .build();
-    }
-
-    private Optional<TaskDefinition> createNodeScanTask(NodeDTO node, Long locationId, List<SnmpConfiguration> snmpConfigs) {
-        Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
-            .filter(IpInterfaceDTO::getSnmpPrimary).findFirst()
-            .or(() -> node.getIpInterfacesList().stream().findAny());
-        if (ipInterface.isPresent()) {
-            var snmpConfig = snmpConfigService.getSnmpConfig(node.getTenantId(),
-                locationId, InetAddressUtils.getInetAddress(ipInterface.get().getIpAddress()));
-            snmpConfig.ifPresent(snmpConfigs::add);
-        }
-        return ipInterface.map(ip -> {
-            String taskId = identityForNodeScan(node.getId());
-
-            Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
-                .setNodeId(node.getId())
-                .setPrimaryIp(ip.getIpAddress())
-                .addDetector(DetectRequest.newBuilder().setService(ServiceType.SNMP).build())
-                .addDetector(DetectRequest.newBuilder().setService(ServiceType.ICMP).build())
-                .addAllSnmpConfigs(snmpConfigs).build());
-
-            return TaskDefinition.newBuilder()
                 .setType(TaskType.SCANNER)
-                .setPluginName("NodeScanner")
+                .setPluginName("AZUREScanner")
                 .setId(taskId)
-                .setNodeId(node.getId())
-                .setConfiguration(taskConfig)
+                .setConfiguration(configuration)
                 .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
                 .build();
-        }).or(Optional::empty);
+    }
+
+    private Optional<TaskDefinition> createNodeScanTask(
+            NodeDTO node, Long locationId, List<SnmpConfiguration> snmpConfigs) {
+        Optional<IpInterfaceDTO> ipInterface = node.getIpInterfacesList().stream()
+                .filter(IpInterfaceDTO::getSnmpPrimary)
+                .findFirst()
+                .or(() -> node.getIpInterfacesList().stream().findAny());
+        if (ipInterface.isPresent()) {
+            var snmpConfig = snmpConfigService.getSnmpConfig(
+                    node.getTenantId(),
+                    locationId,
+                    InetAddressUtils.getInetAddress(ipInterface.get().getIpAddress()));
+            snmpConfig.ifPresent(snmpConfigs::add);
+        }
+        return ipInterface
+                .map(ip -> {
+                    String taskId = identityForNodeScan(node.getId());
+
+                    Any taskConfig = Any.pack(NodeScanRequest.newBuilder()
+                            .setNodeId(node.getId())
+                            .setPrimaryIp(ip.getIpAddress())
+                            .addDetector(DetectRequest.newBuilder()
+                                    .setService(ServiceType.SNMP)
+                                    .build())
+                            .addDetector(DetectRequest.newBuilder()
+                                    .setService(ServiceType.ICMP)
+                                    .build())
+                            .addAllSnmpConfigs(snmpConfigs)
+                            .build());
+
+                    return TaskDefinition.newBuilder()
+                            .setType(TaskType.SCANNER)
+                            .setPluginName("NodeScanner")
+                            .setId(taskId)
+                            .setNodeId(node.getId())
+                            .setConfiguration(taskConfig)
+                            .setSchedule(DEFAULT_SCHEDULE_FOR_SCAN)
+                            .build();
+                })
+                .or(Optional::empty);
     }
 }

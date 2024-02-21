@@ -1,8 +1,38 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.grpc.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
 import com.google.protobuf.UInt64Value;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -20,17 +50,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled //
 @SpringBootTest
@@ -56,8 +75,10 @@ class EventGrpcIntTest extends GrpcTestBase {
     }
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.5-alpine")
-        .withDatabaseName("events").withUsername("events")
-        .withPassword("password").withExposedPorts(5432);
+            .withDatabaseName("events")
+            .withUsername("events")
+            .withPassword("password")
+            .withExposedPorts(5432);
 
     static {
         postgres.start();
@@ -65,8 +86,11 @@ class EventGrpcIntTest extends GrpcTestBase {
 
     @DynamicPropertySource
     static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url",
-            () -> String.format("jdbc:postgresql://localhost:%d/%s", postgres.getFirstMappedPort(), postgres.getDatabaseName()));
+        registry.add(
+                "spring.datasource.url",
+                () -> String.format(
+                        "jdbc:postgresql://localhost:%d/%s",
+                        postgres.getFirstMappedPort(), postgres.getDatabaseName()));
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
     }
@@ -133,7 +157,6 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(2);
         }
 
-
         EventLog eventLog1 = serviceStub.getEventsByNodeId(UInt64Value.of(1));
         List<org.opennms.horizon.events.proto.Event> eventsNode1 = eventLog1.getEventsList();
 
@@ -190,12 +213,12 @@ class EventGrpcIntTest extends GrpcTestBase {
         event.setEventParameters(parms);
 
         SnmpInfo snmpInfo = SnmpInfo.newBuilder()
-            .setId(TEST_ID)
-            .setTrapOid(TEST_TRAP_OID)
-            .setCommunity(TEST_COMMUNITY)
-            .setGeneric(TEST_GENERIC).build();
-        EventInfo eventInfo = EventInfo.newBuilder()
-            .setSnmp(snmpInfo).build();
+                .setId(TEST_ID)
+                .setTrapOid(TEST_TRAP_OID)
+                .setCommunity(TEST_COMMUNITY)
+                .setGeneric(TEST_GENERIC)
+                .build();
+        EventInfo eventInfo = EventInfo.newBuilder().setSnmp(snmpInfo).build();
 
         event.setEventInfo(eventInfo.toByteArray());
 
@@ -226,5 +249,4 @@ class EventGrpcIntTest extends GrpcTestBase {
         assertEquals(TEST_COMMUNITY, snmpInfo.getCommunity());
         assertEquals(TEST_GENERIC, snmpInfo.getGeneric());
     }
-
 }

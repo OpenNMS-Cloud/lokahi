@@ -1,45 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.ipfix.proto;
 
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.slice;
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint16;
 import static org.opennms.horizon.minion.flows.listeners.utils.BufferUtils.uint8;
 
+import com.google.common.base.MoreObjects;
+import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
-import com.google.common.base.MoreObjects;
-
-import io.netty.buffer.ByteBuf;
 import org.opennms.horizon.minion.flows.parser.InvalidPacketException;
 import org.opennms.horizon.minion.flows.parser.MissingTemplateException;
 import org.opennms.horizon.minion.flows.parser.ie.Value;
@@ -82,7 +73,7 @@ public final class DataRecord implements Record {
     public static final int VARIABLE_SIZED = 0xFFFF;
     public static final int VARIABLE_SIZED_EXTENDED = 0xFF;
 
-    public final DataSet set;  // Enclosing set
+    public final DataSet set; // Enclosing set
 
     public final Template template;
 
@@ -90,10 +81,8 @@ public final class DataRecord implements Record {
     public final List<Value<?>> fields;
     public final List<Value<?>> options;
 
-    public DataRecord(final DataSet set,
-                      final Session.Resolver resolver,
-                      final Template template,
-                      final ByteBuf buffer) throws InvalidPacketException, MissingTemplateException {
+    public DataRecord(final DataSet set, final Session.Resolver resolver, final Template template, final ByteBuf buffer)
+            throws InvalidPacketException, MissingTemplateException {
         this.set = Objects.requireNonNull(set);
 
         this.template = Objects.requireNonNull(template);
@@ -129,9 +118,8 @@ public final class DataRecord implements Record {
                 .toString();
     }
 
-    public static Value<?> parseField(final Field field,
-                                      final Session.Resolver resolver,
-                                      final ByteBuf buffer) throws InvalidPacketException, MissingTemplateException {
+    public static Value<?> parseField(final Field field, final Session.Resolver resolver, final ByteBuf buffer)
+            throws InvalidPacketException, MissingTemplateException {
         int length = field.length();
         if (length == VARIABLE_SIZED) {
             length = uint8(buffer);

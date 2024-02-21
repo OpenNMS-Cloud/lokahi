@@ -1,32 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.tsdata.collector;
+
+import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_AZURE_NODE_TYPE;
+import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_INSTANCE_LABEL;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -42,9 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import prometheus.PrometheusTypes;
 
-import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_AZURE_NODE_TYPE;
-import static org.opennms.horizon.tsdata.MetricNameConstants.METRIC_INSTANCE_LABEL;
-
 @Component
 public class TaskSetCollectorAzureResponseProcessor {
 
@@ -58,7 +51,9 @@ public class TaskSetCollectorAzureResponseProcessor {
         this.tenantMetricsTracker = tenantMetricsTracker;
     }
 
-    public void processAzureCollectorResponse(String tenantId, String location, CollectorResponse response, String[] labelValues) throws InvalidProtocolBufferException {
+    public void processAzureCollectorResponse(
+            String tenantId, String location, CollectorResponse response, String[] labelValues)
+            throws InvalidProtocolBufferException {
         Any collectorMetric = response.getResult();
         var azureResponse = collectorMetric.unpack(AzureResponseMetric.class);
 
@@ -66,29 +61,29 @@ public class TaskSetCollectorAzureResponseProcessor {
             try {
                 PrometheusTypes.TimeSeries.Builder builder = PrometheusTypes.TimeSeries.newBuilder();
                 builder.addLabels(PrometheusTypes.Label.newBuilder()
-                    .setName(MetricNameConstants.METRIC_NAME_LABEL)
-                    .setValue(CortexTSS.sanitizeMetricName(azureResult.getAlias())));
+                        .setName(MetricNameConstants.METRIC_NAME_LABEL)
+                        .setValue(CortexTSS.sanitizeMetricName(azureResult.getAlias())));
 
                 for (int i = 0; i < MetricNameConstants.MONITOR_METRICS_LABEL_NAMES.length; i++) {
                     final var label = MetricNameConstants.MONITOR_METRICS_LABEL_NAMES[i];
                     var value = labelValues[i];
-                    if (METRIC_INSTANCE_LABEL.equals(label)){
+                    if (METRIC_INSTANCE_LABEL.equals(label)) {
                         value = getInstance(azureResult);
                     }
                     builder.addLabels(PrometheusTypes.Label.newBuilder()
-                        .setName(CortexTSS.sanitizeLabelName(label))
-                        .setValue(CortexTSS.sanitizeLabelValue(value)));
+                            .setName(CortexTSS.sanitizeLabelName(label))
+                            .setValue(CortexTSS.sanitizeLabelValue(value)));
                 }
 
                 int type = azureResult.getValue().getTypeValue();
                 if (type == AzureValueType.INT64_VALUE) {
                     builder.addSamples(PrometheusTypes.Sample.newBuilder()
-                        .setTimestamp(response.getTimestamp())
-                        .setValue(azureResult.getValue().getUint64()));
+                            .setTimestamp(response.getTimestamp())
+                            .setValue(azureResult.getValue().getUint64()));
                     cortexTSS.store(tenantId, builder);
                     tenantMetricsTracker.addTenantMetricSampleCount(tenantId, builder.getSamplesCount());
                 } else {
-                    LOG.warn("SKIP Unrecognized azure value type: {} azureResult: {}", type,  azureResult);
+                    LOG.warn("SKIP Unrecognized azure value type: {} azureResult: {}", type, azureResult);
                 }
             } catch (Exception e) {
                 LOG.warn("Exception parsing azure metrics", e);

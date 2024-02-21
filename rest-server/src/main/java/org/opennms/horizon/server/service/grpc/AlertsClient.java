@@ -1,30 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.grpc;
 
 import com.google.protobuf.Empty;
@@ -33,6 +27,11 @@ import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
 import org.opennms.horizon.alerts.proto.AlertRequest;
@@ -57,12 +56,6 @@ import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class AlertsClient {
@@ -89,7 +82,15 @@ public class AlertsClient {
     }
 
     @SuppressWarnings("squid:S107")
-    public ListAlertsResponse listAlerts(int pageSize, int page, List<String> severityFilters, TimeRange timeRange, String sortBy, boolean sortAscending, String nodeLabel, String accessToken) {
+    public ListAlertsResponse listAlerts(
+            int pageSize,
+            int page,
+            List<String> severityFilters,
+            TimeRange timeRange,
+            String sortBy,
+            boolean sortAscending,
+            String nodeLabel,
+            String accessToken) {
         Metadata metadata = getMetadata(accessToken);
 
         final var request = ListAlertsRequest.newBuilder();
@@ -100,36 +101,54 @@ public class AlertsClient {
         }
 
         request.setPageSize(pageSize)
-            .setPage(page)
-            .setSortBy(sortBy)
-            .setSortAscending(sortAscending)
-            .build();
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listAlerts(request.build());
+                .setPage(page)
+                .setSortBy(sortBy)
+                .setSortAscending(sortAscending)
+                .build();
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listAlerts(request.build());
     }
 
     public AlertResponse acknowledgeAlert(List<Long> ids, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).acknowledgeAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .acknowledgeAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
     }
 
     public AlertResponse unacknowledgeAlert(List<Long> ids, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).unacknowledgeAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .unacknowledgeAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
     }
 
     public AlertResponse clearAlert(List<Long> ids, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).clearAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .clearAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
     }
 
     public AlertResponse escalateAlert(List<Long> ids, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).escalateAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .escalateAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
     }
 
     public DeleteAlertResponse deleteAlert(List<Long> ids, String accessToken) {
         Metadata metadata = getMetadata(accessToken);
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).deleteAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .deleteAlert(AlertRequest.newBuilder().addAllAlertId(ids).build());
     }
 
     public CountAlertResponse countAlerts(List<String> severityFilter, TimeRange timeRange, String accessToken) {
@@ -139,8 +158,10 @@ public class AlertsClient {
         getTimeRangeFilter(timeRange, request);
         getSeverity(severityFilter, request);
 
-        return alertStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).countAlerts(request
-            .build());
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .countAlerts(request.build());
     }
 
     private static void getTimeRangeFilter(TimeRange timeRange, ListAlertsRequest.Builder request) {
@@ -172,7 +193,8 @@ public class AlertsClient {
         filterBuilder.setStartTime(startTimeBuilder.build());
         filterBuilder.setEndTime(endTimeBuilder.build());
 
-        request.addFilters(Filter.newBuilder().setTimeRange(filterBuilder.build()).build());
+        request.addFilters(
+                Filter.newBuilder().setTimeRange(filterBuilder.build()).build());
     }
 
     private static void getSeverity(List<String> severityFilters, ListAlertsRequest.Builder request) {
@@ -180,8 +202,9 @@ public class AlertsClient {
             return;
         }
         severityFilters.stream()
-            .map(Severity::valueOf)
-            .forEach(severity -> request.addFilters(Filter.newBuilder().setSeverity(severity).build()));
+                .map(Severity::valueOf)
+                .forEach(severity -> request.addFilters(
+                        Filter.newBuilder().setSeverity(severity).build()));
     }
 
     private static Metadata getMetadata(String accessToken) {
@@ -193,38 +216,51 @@ public class AlertsClient {
     public MonitorPolicy createMonitorPolicy(MonitorPolicy policy, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        MonitorPolicyProto newPolicy = policyStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).createPolicy(policyMapper.map(policy));
+        MonitorPolicyProto newPolicy = policyStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .createPolicy(policyMapper.map(policy));
         return policyMapper.map(newPolicy);
     }
 
     public List<MonitorPolicy> listMonitorPolicies(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        return policyStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listPolicies(Empty.getDefaultInstance())
-            .getPoliciesList().stream().map(policyMapper::map).toList();
+        return policyStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listPolicies(Empty.getDefaultInstance())
+                .getPoliciesList()
+                .stream()
+                .map(policyMapper::map)
+                .toList();
     }
 
     public MonitorPolicy getMonitorPolicyById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyMapper.map(policyStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .getPolicyById(Int64Value.of(id)));
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getPolicyById(Int64Value.of(id)));
     }
 
     public List<AlertEventDefinition> listAlertEventDefinitions(EventType eventType, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
 
-        var request = ListAlertEventDefinitionsRequest.newBuilder().setEventType(eventType).build();
+        var request = ListAlertEventDefinitionsRequest.newBuilder()
+                .setEventType(eventType)
+                .build();
 
         return alertEventDefinitionStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .listAlertEventDefinitions(request).getAlertEventDefinitionsList().stream().map(alertEventDefinitionMapper::protoToAlertEventDefinition).toList();
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listAlertEventDefinitions(request)
+                .getAlertEventDefinitionsList()
+                .stream()
+                .map(alertEventDefinitionMapper::protoToAlertEventDefinition)
+                .toList();
     }
 
     public static long getStartTime(TimeRange timeRange) {
@@ -246,54 +282,58 @@ public class AlertsClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyMapper.map(policyStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .getDefaultPolicy(Empty.getDefaultInstance()));
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getDefaultPolicy(Empty.getDefaultInstance()));
     }
 
     public boolean deletePolicyById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deletePolicyById(Int64Value.of(id)).getValue();
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .deletePolicyById(Int64Value.of(id))
+                .getValue();
     }
 
     public boolean deleteRuleById(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .deleteRuleById(Int64Value.of(id)).getValue();
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .deleteRuleById(Int64Value.of(id))
+                .getValue();
     }
 
     public long countAlertByPolicyId(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .countAlertByPolicyId(Int64Value.of(id)).getValue();
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .countAlertByPolicyId(Int64Value.of(id))
+                .getValue();
     }
 
     public long countAlertByRuleId(Long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return policyStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .countAlertByRuleId(Int64Value.of(id)).getValue();
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .countAlertByRuleId(Int64Value.of(id))
+                .getValue();
     }
 
     public AlertCount countAlerts(String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         var alertCountProto = alertStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .alertCounts(Empty.getDefaultInstance());
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .alertCounts(Empty.getDefaultInstance());
         return alertsCountMapper.protoToAlertCount(alertCountProto);
     }
 }

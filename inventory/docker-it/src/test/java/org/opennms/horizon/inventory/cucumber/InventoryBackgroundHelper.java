@@ -1,42 +1,39 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber;
 
 import com.google.protobuf.Empty;
+import io.grpc.ClientInterceptor;
+import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.MetadataUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -55,13 +52,6 @@ import org.opennms.horizon.shared.constants.GrpcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.grpc.ClientInterceptor;
-import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.stub.MetadataUtils;
-import lombok.Getter;
-
 @Getter
 public class InventoryBackgroundHelper {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryBackgroundHelper.class);
@@ -75,15 +65,16 @@ public class InventoryBackgroundHelper {
     private NodeServiceGrpc.NodeServiceBlockingStub nodeServiceBlockingStub;
     private TagServiceGrpc.TagServiceBlockingStub tagServiceBlockingStub;
     private ActiveDiscoveryServiceGrpc.ActiveDiscoveryServiceBlockingStub activeDiscoveryServiceBlockingStub;
-    private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub icmpActiveDiscoveryServiceBlockingStub;
-    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub azureActiveDiscoveryServiceBlockingStub;
+    private IcmpActiveDiscoveryServiceGrpc.IcmpActiveDiscoveryServiceBlockingStub
+            icmpActiveDiscoveryServiceBlockingStub;
+    private AzureActiveDiscoveryServiceGrpc.AzureActiveDiscoveryServiceBlockingStub
+            azureActiveDiscoveryServiceBlockingStub;
     private PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub passiveDiscoveryServiceBlockingStub;
 
     private static KafkaConsumer<String, byte[]> kafkaConsumer;
 
     private final Map<String, String> grpcHeaders = new TreeMap<>();
     private static boolean isConsumerInitialized = false;
-
 
     public void externalGRPCPortInSystemProperty(String propertyName) {
         String value = System.getProperty(propertyName);
@@ -94,11 +85,13 @@ public class InventoryBackgroundHelper {
     public void kafkaBootstrapURLInSystemProperty(String systemPropertyName) {
         kafkaBootstrapUrl = System.getProperty(systemPropertyName);
         LOG.info("Using Kafka Bootstrap URL {}", kafkaBootstrapUrl);
-        if(kafkaConsumer == null && StringUtils.isNotEmpty(kafkaBootstrapUrl)) {
+        if (kafkaConsumer == null && StringUtils.isNotEmpty(kafkaBootstrapUrl)) {
             Properties consumerConfig = new Properties();
             consumerConfig.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapUrl);
-            consumerConfig.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-            consumerConfig.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+            consumerConfig.setProperty(
+                    ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            consumerConfig.setProperty(
+                    ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
             consumerConfig.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "inventory-test");
             consumerConfig.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
             consumerConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -107,7 +100,7 @@ public class InventoryBackgroundHelper {
     }
 
     public void subscribeKafkaTopics(List<String> topics) {
-        if(!isConsumerInitialized) {
+        if (!isConsumerInitialized) {
             kafkaConsumer.subscribe(topics);
             isConsumerInitialized = true;
         }
@@ -122,50 +115,57 @@ public class InventoryBackgroundHelper {
 
     public String findLocationId(String locationName) {
         return monitoringLocationStub.listLocations(Empty.newBuilder().build()).getLocationsList().stream()
-            .filter(loc -> locationName.equals(loc.getLocation()))
-            .findFirst()
-            .map(MonitoringLocationDTO::getId)
-            .map(String::valueOf)
-            .orElseThrow(() -> new IllegalArgumentException("Location " + locationName + " not found"));
+                .filter(loc -> locationName.equals(loc.getLocation()))
+                .findFirst()
+                .map(MonitoringLocationDTO::getId)
+                .map(String::valueOf)
+                .orElseThrow(() -> new IllegalArgumentException("Location " + locationName + " not found"));
     }
 
     public void clearTenantId() {
         grpcHeaders.remove(GrpcConstants.TENANT_ID_KEY);
         LOG.info("Blank Tenant Id");
 
-        NettyChannelBuilder channelBuilder =
-            NettyChannelBuilder.forAddress(LOCALHOST, externalGrpcPort);
+        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(LOCALHOST, externalGrpcPort);
 
         ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
         managedChannel.getState(true);
         azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
-            .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
     }
 
     public void createGrpcConnectionForInventory() {
-        NettyChannelBuilder channelBuilder =
-            NettyChannelBuilder.forAddress(LOCALHOST, externalGrpcPort);
+        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(LOCALHOST, externalGrpcPort);
 
         ManagedChannel managedChannel = channelBuilder.usePlaintext().build();
         managedChannel.getState(true);
         monitoringSystemStub = MonitoringSystemServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         monitoringLocationStub = MonitoringLocationServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         nodeServiceBlockingStub = NodeServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         tagServiceBlockingStub = TagServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         activeDiscoveryServiceBlockingStub = ActiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         icmpActiveDiscoveryServiceBlockingStub = IcmpActiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         azureActiveDiscoveryServiceBlockingStub = AzureActiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
         passiveDiscoveryServiceBlockingStub = PassiveDiscoveryServiceGrpc.newBlockingStub(managedChannel)
-            .withInterceptors(prepareGrpcHeaderInterceptor()).withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withInterceptors(prepareGrpcHeaderInterceptor())
+                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
     }
 
     private ClientInterceptor prepareGrpcHeaderInterceptor() {
@@ -182,5 +182,4 @@ public class InventoryBackgroundHelper {
     public static KafkaConsumer<String, byte[]> getKafkaConsumer() {
         return kafkaConsumer;
     }
-
 }

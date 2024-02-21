@@ -15,7 +15,7 @@
 
       <FeatherExpansionPanel
         class="expansion"
-        v-if="!state.showModalOnLoad" 
+        v-if="!state.showModalOnLoad"
         title="Show me what is being sent.">
         <pre>
           <code>
@@ -26,15 +26,15 @@
     </template>
 
     <template v-slot:footer>
-      <FeatherButton 
-        data-test="opt-out-btn" 
-        secondary 
+      <FeatherButton
+        data-test="opt-out-btn"
+        secondary
         @click="opt()">
           Opt-out
       </FeatherButton>
-      
-      <FeatherButton 
-        data-test="opt-in-btn" 
+
+      <FeatherButton
+        data-test="opt-in-btn"
         primary
         @click="opt(true)">
           Opt-in
@@ -61,7 +61,7 @@ const state = useStorage<{ showModalOnLoad: boolean } >('first-load', {
 const opt = (choice = false) => {
   state.value.showModalOnLoad = false
 
-  // usageStatsMutations.toggleUsageStats({ 
+  // usageStatsMutations.toggleUsageStats({
   //   toggleDataChoices: {
   //     toggle: choice
   //   }

@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.utils;
 
 import java.math.BigInteger;
@@ -43,9 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.management.remote.JMXServiceURL;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -78,7 +69,7 @@ public abstract class InetAddressUtils {
     protected static final DecimalFormat ONE_DIGIT_AFTER_DECIMAL = new DecimalFormat("0");
 
     public static final String INVALID_BRIDGE_ADDRESS = "000000000000";
-    public static final String INVALID_STP_BRIDGE_ID  = "0000000000000000";
+    public static final String INVALID_STP_BRIDGE_ID = "0000000000000000";
     public static final String INVALID_STP_BRIDGE_DESIGNATED_PORT = "0000";
 
     private static final ByteArrayComparator s_BYTE_ARRAY_COMPARATOR = new ByteArrayComparator();
@@ -93,7 +84,7 @@ public abstract class InetAddressUtils {
             // This address (192.0.2.123) is within a range of test IPs that
             // that is guaranteed to be non-routed.
             //
-            UNPINGABLE_ADDRESS = InetAddress.getByAddress(new byte[] {(byte)192, (byte)0, (byte)2, (byte)123});
+            UNPINGABLE_ADDRESS = InetAddress.getByAddress(new byte[] {(byte) 192, (byte) 0, (byte) 2, (byte) 123});
         } catch (final UnknownHostException e) {
             throw new IllegalStateException(e);
         }
@@ -122,14 +113,16 @@ public abstract class InetAddressUtils {
         try {
             return InetAddress.getLocalHost();
         } catch (final UnknownHostException e) {
-            log.warn("getLocalHostAddress: Could not lookup the host address for the local host machine, address set to '127.0.0.1'.", e);
+            log.warn(
+                    "getLocalHostAddress: Could not lookup the host address for the local host machine, address set to '127.0.0.1'.",
+                    e);
             return addr("127.0.0.1");
         }
     }
 
     public static String getLocalHostAddressAsString() {
         final String localhost = str(getLocalHostAddress());
-        return localhost == null? "127.0.0.1" : localhost;
+        return localhost == null ? "127.0.0.1" : localhost;
     }
 
     public static Optional<InetAddress> getLocalLoopbackAddress() {
@@ -142,7 +135,10 @@ public abstract class InetAddressUtils {
                     final Enumeration<InetAddress> addrs = iface.getInetAddresses();
                     while (addrs.hasMoreElements()) {
                         final InetAddress addr = addrs.nextElement();
-                        if (!addr.isMulticastAddress() && (addr.isLinkLocalAddress() || addr.isLoopbackAddress() || addr.isAnyLocalAddress())) {
+                        if (!addr.isMulticastAddress()
+                                && (addr.isLinkLocalAddress()
+                                        || addr.isLoopbackAddress()
+                                        || addr.isAnyLocalAddress())) {
                             loopbackAddresses.add(addr);
                         }
                     }
@@ -154,7 +150,9 @@ public abstract class InetAddressUtils {
                 return Optional.of(loopbackAddresses.get(0));
             }
         } catch (final Exception e) {
-            log.warn("getLocalLoopbackAddress: an exception occurred while attempting to determine the local loopback address.",e);
+            log.warn(
+                    "getLocalLoopbackAddress: an exception occurred while attempting to determine the local loopback address.",
+                    e);
         }
         return Optional.empty();
     }
@@ -162,7 +160,8 @@ public abstract class InetAddressUtils {
     public static String getLocalHostName() {
         final InetAddress localHostAddress = getLocalHostAddress();
         if (localHostAddress == null) {
-            log.warn("getLocalHostName: Could not lookup the host name for the local host machine, name set to 'localhost'.");
+            log.warn(
+                    "getLocalHostName: Could not lookup the host name for the local host machine, name set to 'localhost'.");
             return "localhost";
         }
         return localHostAddress.getHostName();
@@ -196,7 +195,6 @@ public abstract class InetAddressUtils {
 
     public static InetAddress getInetAddress(final byte[] ipAddrOctets) {
         return new IPAddress(ipAddrOctets).toInetAddress();
-
     }
 
     /**
@@ -293,7 +291,8 @@ public abstract class InetAddressUtils {
         return isInetAddressInRange(laddr, begin, end);
     }
 
-    public static boolean isInetAddressInRange(final String addrString, final String beginString, final String endString) {
+    public static boolean isInetAddressInRange(
+            final String addrString, final String beginString, final String endString) {
         final byte[] addr = InetAddressUtils.toIpAddrBytes(addrString);
         final byte[] begin = InetAddressUtils.toIpAddrBytes(beginString);
         if (s_BYTE_ARRAY_COMPARATOR.compare(addr, begin) > 0) {
@@ -306,7 +305,7 @@ public abstract class InetAddressUtils {
         }
     }
 
-    public static boolean areSameInetAddress(final byte[] leftInetAddr, final byte[] rightInetAddr){
+    public static boolean areSameInetAddress(final byte[] leftInetAddr, final byte[] rightInetAddr) {
         return s_BYTE_ARRAY_COMPARATOR.compare(leftInetAddr, rightInetAddr) == 0;
     }
 
@@ -318,7 +317,9 @@ public abstract class InetAddressUtils {
                 return false;
             } else {
                 // Compare the IPv6 scope IDs
-                return Integer.valueOf(((Inet6Address)addr1).getScopeId()).compareTo(((Inet6Address)addr2).getScopeId()) == 0;
+                return Integer.valueOf(((Inet6Address) addr1).getScopeId())
+                                .compareTo(((Inet6Address) addr2).getScopeId())
+                        == 0;
             }
         }
     }
@@ -328,9 +329,8 @@ public abstract class InetAddressUtils {
         final byte[] netMask = netmask.getAddress();
         final byte[] netWork = new byte[4];
 
-        for (int i=0;i< 4; i++) {
+        for (int i = 0; i < 4; i++) {
             netWork[i] = Integer.valueOf(ipAddress[i] & netMask[i]).byteValue();
-
         }
         return InetAddressUtils.getInetAddress(netWork);
     }
@@ -343,13 +343,10 @@ public abstract class InetAddressUtils {
         final byte[] ipAddress2 = addr2.getAddress();
         final byte[] netMask = mask.getAddress();
 
-        for (int i=0;i< 4; i++) {
-            if ((ipAddress1[i] & netMask[i]) != (ipAddress2[i] & netMask[i]))
-                return false;
-
+        for (int i = 0; i < 4; i++) {
+            if ((ipAddress1[i] & netMask[i]) != (ipAddress2[i] & netMask[i])) return false;
         }
         return true;
-
     }
 
     public static boolean isInetAddressInRange(final byte[] addr, final byte[] begin, final byte[] end) {
@@ -404,7 +401,8 @@ public abstract class InetAddressUtils {
 
     public static InetAddress convertBigIntegerIntoInetAddress(final BigInteger i) throws UnknownHostException {
         if (i.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException("BigInteger is negative, cannot convert into an IP address: " + i.toString());
+            throw new IllegalArgumentException(
+                    "BigInteger is negative, cannot convert into an IP address: " + i.toString());
         } else {
             // Note: This function will return the two's complement byte array so there will always
             // be a bit of value '0' (indicating positive sign) at the first position of the array
@@ -452,7 +450,8 @@ public abstract class InetAddressUtils {
                 }
                 return InetAddress.getByAddress(addressBytes);
             } else {
-                throw new IllegalArgumentException("BigInteger is too large to convert into an IP address: " + i.toString());
+                throw new IllegalArgumentException(
+                        "BigInteger is too large to convert into an IP address: " + i.toString());
             }
         }
     }
@@ -468,7 +467,7 @@ public abstract class InetAddressUtils {
      * FIXME: do we lose
      */
     public static String normalize(final String ipAddrString) {
-        return ipAddrString == null? null : toIpAddrString(addr(ipAddrString.trim()));
+        return ipAddrString == null ? null : toIpAddrString(addr(ipAddrString.trim()));
     }
 
     public static String str(final InetAddress addr) {
@@ -512,12 +511,12 @@ public abstract class InetAddressUtils {
             // If the MAC address is 12 hex digits long
             if (macAddress.length() == 12) {
                 digits = new String[] {
-                        macAddress.substring(0, 2),
-                        macAddress.substring(2, 4),
-                        macAddress.substring(4, 6),
-                        macAddress.substring(6, 8),
-                        macAddress.substring(8, 10),
-                        macAddress.substring(10)
+                    macAddress.substring(0, 2),
+                    macAddress.substring(2, 4),
+                    macAddress.substring(4, 6),
+                    macAddress.substring(6, 8),
+                    macAddress.substring(8, 10),
+                    macAddress.substring(10)
                 };
             } else {
                 throw new IllegalArgumentException("Cannot decode MAC address: '" + macAddress + "'");
@@ -537,15 +536,9 @@ public abstract class InetAddressUtils {
         }
 
         return String.format(
-                //"%02X:%02X:%02X:%02X:%02X:%02X",
+                // "%02X:%02X:%02X:%02X:%02X:%02X",
                 "%02x%02x%02x%02x%02x%02x",
-                macAddress[0],
-                macAddress[1],
-                macAddress[2],
-                macAddress[3],
-                macAddress[4],
-                macAddress[5]
-        );
+                macAddress[0], macAddress[1], macAddress[2], macAddress[3], macAddress[4], macAddress[5]);
     }
 
     public static String normalizeMacAddress(String macAddress) {
@@ -561,21 +554,18 @@ public abstract class InetAddressUtils {
     }
 
     public static int getBridgeDesignatedPortNumber(String stpPortDesignatedPort) {
-        return 8191 & Integer.parseInt(stpPortDesignatedPort,
-                16);
+        return 8191 & Integer.parseInt(stpPortDesignatedPort, 16);
     }
 
     public static boolean isValidBridgeAddress(String bridgeAddress) {
-        if (bridgeAddress == null || bridgeAddress.equals(INVALID_BRIDGE_ADDRESS))
-            return false;
+        if (bridgeAddress == null || bridgeAddress.equals(INVALID_BRIDGE_ADDRESS)) return false;
         Pattern pattern = Pattern.compile("([0-9a-f]{12})");
         Matcher matcher = pattern.matcher(bridgeAddress);
         return matcher.matches();
     }
 
     public static boolean isValidStpBridgeId(String bridgeId) {
-        if (bridgeId == null || bridgeId.equals(INVALID_STP_BRIDGE_ID))
-            return false;
+        if (bridgeId == null || bridgeId.equals(INVALID_STP_BRIDGE_ID)) return false;
         Pattern pattern = Pattern.compile("([0-9a-f]{16})");
         Matcher matcher = pattern.matcher(bridgeId);
         return matcher.matches();

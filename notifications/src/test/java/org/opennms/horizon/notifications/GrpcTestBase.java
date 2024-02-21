@@ -1,32 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.notifications;
+
+import static org.mockito.Mockito.*;
 
 import io.grpc.BindableService;
 import io.grpc.ManagedChannel;
@@ -34,6 +29,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessServerBuilder;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.notifications.grpc.config.NotificationServerInterceptor;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -42,16 +40,10 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.Mockito.*;
-
 public abstract class GrpcTestBase {
     @DynamicPropertySource
     private static void registerDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("grpc.server.port", ()->6767);
+        registry.add("grpc.server.port", () -> 6767);
     }
 
     protected final String tenantId = "test-tenant";
@@ -61,13 +53,15 @@ public abstract class GrpcTestBase {
     protected final String differentTenantHeader = "Bearer esgs12345different";
     public static final String defaultTenant = "opennms-prime";
     protected ManagedChannel channel;
+
     @Autowired
     @SpyBean
     protected NotificationServerInterceptor spyInterceptor;
 
     protected void prepareServer() throws VerificationException {
         channel = ManagedChannelBuilder.forAddress("localhost", 6767)
-                .usePlaintext().build();
+                .usePlaintext()
+                .build();
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
         doReturn(Optional.of(alternativeTenantId)).when(spyInterceptor).verifyAccessToken(differentTenantHeader);
         doReturn(Optional.empty()).when(spyInterceptor).verifyAccessToken(headerWithoutTenant);
@@ -86,11 +80,11 @@ public abstract class GrpcTestBase {
         headers.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, value);
         return headers;
     }
+
     protected static Server server;
 
     protected static Server startMockServer(String name, BindableService... services) throws IOException {
-        InProcessServerBuilder builder = InProcessServerBuilder
-            .forName(name).directExecutor();
+        InProcessServerBuilder builder = InProcessServerBuilder.forName(name).directExecutor();
 
         if (services != null) {
             for (BindableService service : services) {

@@ -1,7 +1,29 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.taskset.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import nl.altindag.log.LogCaptor;
-import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.taskset.contract.TaskDefinition;
@@ -10,11 +32,6 @@ import org.opennms.taskset.service.contract.AddSingleTaskOp;
 import org.opennms.taskset.service.contract.RemoveSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
-
-import java.util.Objects;
-import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TaskSetGrpcServiceUpdateProcessorTest {
 
@@ -32,66 +49,69 @@ class TaskSetGrpcServiceUpdateProcessorTest {
 
     @BeforeEach
     void setUp() {
-        testTaskDefinition1 =
-            TaskDefinition.newBuilder()
+        testTaskDefinition1 = TaskDefinition.newBuilder()
                 .setId("x-task-001-id-x")
                 .setPluginName("x-plugin-name-x")
                 .build();
 
-        testTaskDefinition2 =
-            TaskDefinition.newBuilder()
+        testTaskDefinition2 = TaskDefinition.newBuilder()
                 .setId("x-task-002-id-x")
                 .setPluginName("x-plugin-name-x")
                 .build();
 
         testRemovalTaskDefinition =
-            TaskDefinition.newBuilder()
-                .setId("x-task-002-id-x")
+                TaskDefinition.newBuilder().setId("x-task-002-id-x").build();
+
+        testAddSingleTaskOp1 = AddSingleTaskOp.newBuilder()
+                .setTaskDefinition(testTaskDefinition1)
                 .build();
 
-        testAddSingleTaskOp1 = AddSingleTaskOp.newBuilder().setTaskDefinition(testTaskDefinition1).build();
-
-        testAddSingleTaskOp2 = AddSingleTaskOp.newBuilder().setTaskDefinition(testTaskDefinition2).build();
+        testAddSingleTaskOp2 = AddSingleTaskOp.newBuilder()
+                .setTaskDefinition(testTaskDefinition2)
+                .build();
 
         testRemoveSingleTaskOp =
-            RemoveSingleTaskOp.newBuilder()
-                .setTaskId("x-task-002-id-x")
-                .build();
+                RemoveSingleTaskOp.newBuilder().setTaskId("x-task-002-id-x").build();
 
-        testRequestAdd1Remove1 =
-            UpdateTasksRequest.newBuilder()
+        testRequestAdd1Remove1 = UpdateTasksRequest.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
-                .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp1).build())
-                .addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(testRemoveSingleTaskOp).build())
+                .addUpdate(UpdateSingleTaskOp.newBuilder()
+                        .setAddTask(testAddSingleTaskOp1)
+                        .build())
+                .addUpdate(UpdateSingleTaskOp.newBuilder()
+                        .setRemoveTask(testRemoveSingleTaskOp)
+                        .build())
                 .build();
 
-        testRequestRemove1 =
-            UpdateTasksRequest.newBuilder()
+        testRequestRemove1 = UpdateTasksRequest.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
-                .addUpdate(UpdateSingleTaskOp.newBuilder().setRemoveTask(testRemoveSingleTaskOp).build())
+                .addUpdate(UpdateSingleTaskOp.newBuilder()
+                        .setRemoveTask(testRemoveSingleTaskOp)
+                        .build())
                 .build();
 
-        testRequestAdd1 =
-            UpdateTasksRequest.newBuilder()
+        testRequestAdd1 = UpdateTasksRequest.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
-                .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp1).build())
+                .addUpdate(UpdateSingleTaskOp.newBuilder()
+                        .setAddTask(testAddSingleTaskOp1)
+                        .build())
                 .build();
-        
-        testRequestNeitherAddNorRemove =
-            UpdateTasksRequest.newBuilder()
+
+        testRequestNeitherAddNorRemove = UpdateTasksRequest.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
                 .addUpdate(UpdateSingleTaskOp.newBuilder().build())
                 .build();
 
-        testRequestAddAnother1 =
-            UpdateTasksRequest.newBuilder()
+        testRequestAddAnother1 = UpdateTasksRequest.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
-                .addUpdate(UpdateSingleTaskOp.newBuilder().setAddTask(testAddSingleTaskOp2).build())
+                .addUpdate(UpdateSingleTaskOp.newBuilder()
+                        .setAddTask(testAddSingleTaskOp2)
+                        .build())
                 .build();
     }
 
@@ -123,8 +143,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         //
         // Setup Test Data and Interactions
         //
-        TaskSet testOriginal =
-            TaskSet.newBuilder()
+        TaskSet testOriginal = TaskSet.newBuilder()
                 .addTaskDefinition(testTaskDefinition1)
                 .addTaskDefinition(testRemovalTaskDefinition)
                 .build();
@@ -173,9 +192,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         // Setup Test Data and Interactions
         //
         TaskSet testOriginalWithTaskThatWillBeReplaced =
-            TaskSet.newBuilder()
-                .addTaskDefinition(testTaskDefinition1)
-                .build();
+                TaskSet.newBuilder().addTaskDefinition(testTaskDefinition1).build();
         var target = new TaskSetGrpcServiceUpdateProcessor(testRequestAdd1);
 
         //
@@ -199,7 +216,6 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         //
         TaskSet testEmptyOriginal = TaskSet.newBuilder().build();
         var target = new TaskSetGrpcServiceUpdateProcessor(testRequestNeitherAddNorRemove);
-
 
         try (LogCaptor logCaptor = LogCaptor.forClass(TaskSetGrpcServiceUpdateProcessor.class)) {
             //
@@ -236,9 +252,7 @@ class TaskSetGrpcServiceUpdateProcessorTest {
         // Setup Test Data and Interactions
         //
         TaskSet testOriginalWith1Task =
-            TaskSet.newBuilder()
-                .addTaskDefinition(testTaskDefinition1)
-                .build();
+                TaskSet.newBuilder().addTaskDefinition(testTaskDefinition1).build();
         var target = new TaskSetGrpcServiceUpdateProcessor(testRequestAddAnother1);
 
         //

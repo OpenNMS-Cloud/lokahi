@@ -1,7 +1,38 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.List;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,17 +61,6 @@ import org.opennms.horizon.alertservice.mapper.AlertMapper;
 import org.opennms.horizon.alertservice.mapper.AlertMapperImpl;
 import org.opennms.horizon.events.proto.Event;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class AlertEventProcessorTest {
     private static final String TEST_TENANT_ID = "tenantA";
@@ -53,6 +73,7 @@ class AlertEventProcessorTest {
 
     @Mock
     NodeRepository nodeRepository;
+
     @Mock
     LocationRepository locationRepository;
 
@@ -87,13 +108,13 @@ class AlertEventProcessorTest {
     @Test
     void generateAlert() {
         Event event = Event.newBuilder()
-            .setTenantId(TEST_TENANT_ID)
-            .setUei("uei")
-            .setDescription("desc")
-            .setNodeId(10L)
-            .setLocationId("11")
-            .setLocationName("locationName")
-            .build();
+                .setTenantId(TEST_TENANT_ID)
+                .setUei("uei")
+                .setDescription("desc")
+                .setNodeId(10L)
+                .setLocationId("11")
+                .setLocationName("locationName")
+                .build();
 
         AlertCondition alertCondition = new AlertCondition();
         alertCondition.setTenantId(TEST_TENANT_ID);
@@ -122,23 +143,24 @@ class AlertEventProcessorTest {
         tag.getPolicies().add(monitorPolicy);
 
         when(alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei()))
-            .thenReturn(List.of(alertDefinition));
+                .thenReturn(List.of(alertDefinition));
 
         when(tagRepository.findByTenantIdAndNodeId(anyString(), anyLong())).thenReturn(List.of(tag));
 
         var node = new Node();
         node.setId(event.getNodeId());
         node.setNodeLabel("nodeLabel");
-        when(nodeRepository.findByIdAndTenantId(event.getNodeId(), event.getTenantId())).thenReturn(Optional.of(node));
+        when(nodeRepository.findByIdAndTenantId(event.getNodeId(), event.getTenantId()))
+                .thenReturn(Optional.of(node));
 
         List<Alert> alerts = processor.process(event);
 
         assertThat(alerts).hasSize(1);
         assertThat(alerts.get(0))
-            .returns(TEST_TENANT_ID, Alert::getTenantId)
-            .returns("desc", Alert::getDescription)
-            .returns(alertCondition.getSeverity(), Alert::getSeverity)
-            .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyIdList);
+                .returns(TEST_TENANT_ID, Alert::getTenantId)
+                .returns("desc", Alert::getDescription)
+                .returns(alertCondition.getSeverity(), Alert::getSeverity)
+                .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyIdList);
 
         ArgumentCaptor<Location> saveLocationArg = ArgumentCaptor.forClass(Location.class);
         verify(locationRepository, times(1)).save(saveLocationArg.capture());
@@ -155,13 +177,13 @@ class AlertEventProcessorTest {
         final String uei = "uei";
 
         Event event = Event.newBuilder()
-            .setTenantId(TEST_TENANT_ID)
-            .setUei(uei)
-            .setDescription("desc")
-            .setNodeId(10L)
-            .setLocationId("11")
-            .setLocationName("locationName")
-            .build();
+                .setTenantId(TEST_TENANT_ID)
+                .setUei(uei)
+                .setDescription("desc")
+                .setNodeId(10L)
+                .setLocationId("11")
+                .setLocationName("locationName")
+                .build();
 
         AlertCondition alertCondition = new AlertCondition();
         alertCondition.setTenantId(TEST_TENANT_ID);
@@ -197,16 +219,18 @@ class AlertEventProcessorTest {
         tag.getPolicies().add(monitorPolicy);
 
         when(alertDefinitionRepository.findByTenantIdAndUei(event.getTenantId(), event.getUei()))
-            .thenReturn(List.of(alertDefinition));
+                .thenReturn(List.of(alertDefinition));
 
         when(tagRepository.findByTenantIdAndNodeId(anyString(), anyLong())).thenReturn(List.of(tag));
-        
-        when(alertRepository.findByReductionKeyAndTenantId(cleanKey, TEST_TENANT_ID)).thenReturn(Optional.of(existingAlert));
+
+        when(alertRepository.findByReductionKeyAndTenantId(cleanKey, TEST_TENANT_ID))
+                .thenReturn(Optional.of(existingAlert));
 
         var node = new Node();
         node.setId(event.getNodeId());
         node.setNodeLabel("nodeLabel");
-        when(nodeRepository.findByIdAndTenantId(event.getNodeId(), event.getTenantId())).thenReturn(Optional.of(node));
+        when(nodeRepository.findByIdAndTenantId(event.getNodeId(), event.getTenantId()))
+                .thenReturn(Optional.of(node));
 
         List<Alert> alerts = processor.process(event);
 
@@ -216,10 +240,10 @@ class AlertEventProcessorTest {
 
         assertThat(alerts).hasSize(1);
         assertThat(alerts.get(0))
-            .returns(TEST_TENANT_ID, Alert::getTenantId)
-            .returns("desc", Alert::getDescription)
-            .returns(alertCondition.getSeverity(), Alert::getSeverity)
-            .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyIdList);
+                .returns(TEST_TENANT_ID, Alert::getTenantId)
+                .returns("desc", Alert::getDescription)
+                .returns(alertCondition.getSeverity(), Alert::getSeverity)
+                .returns(List.of(monitorPolicy.getId()), Alert::getMonitoringPolicyIdList);
 
         ArgumentCaptor<Location> saveLocationArg = ArgumentCaptor.forClass(Location.class);
         verify(locationRepository, times(1)).save(saveLocationArg.capture());

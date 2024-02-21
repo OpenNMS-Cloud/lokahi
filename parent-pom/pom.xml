@@ -4,7 +4,7 @@
 
     <name>OpenNMS Lokahi :: Lokahi Parent</name>
     <description>
-        Top-level Parent POM with standard dependency versions for use across multiple top-level projects.
+        Parent POM with standard dependency versions for use across multiple top-level projects.
     </description>
 
     <groupId>org.opennms.lokahi</groupId>
@@ -162,6 +162,7 @@
         <azure-communication-email.version>1.0.0</azure-communication-email.version>
         <io.hypersistence.verion>3.3.2</io.hypersistence.verion>
         <rocksdb.version>8.0.0</rocksdb.version>
+        <spotless.version>2.43.0</spotless.version>
     </properties>
 
     <dependencyManagement>
@@ -980,6 +981,36 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <cleanthat>
+                            <version>2.8</version>
+                        </cleanthat>
+                        <palantirJavaFormat>
+                            <version>2.10.0</version>
+                        </palantirJavaFormat>
+                        <licenseHeader>
+                            <file>${maven.multiModuleProjectDirectory}/spotless/header-java.txt</file>
+                        </licenseHeader>
+                    </java>
+                    <pom>
+                       <includes>
+                           <include>pom.xml</include>
+                       </includes>
+                       <sortPom />
+                       <licenseHeader>
+                           <file>${maven.multiModuleProjectDirectory}/spotless/header-xml.txt</file>
+                           <delimiter><![CDATA[<project]]></delimiter>
+                       </licenseHeader>
+                    </pom>
+                </configuration>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>

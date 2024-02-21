@@ -1,5 +1,31 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,12 +36,6 @@ import org.opennms.horizon.inventory.model.MonitoredService;
 import org.opennms.horizon.inventory.model.MonitoredServiceType;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoredServiceRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class MonitoredServiceServiceTest {
 
@@ -42,26 +62,23 @@ public class MonitoredServiceServiceTest {
         mockMonitoredServiceMapper = Mockito.mock(MonitoredServiceMapper.class);
         ipInterfaceRepository = Mockito.mock(IpInterfaceRepository.class);
 
-        testMonitoredServiceDTO1 =
-            MonitoredServiceDTO.newBuilder()
+        testMonitoredServiceDTO1 = MonitoredServiceDTO.newBuilder()
                 .setTenantId(TEST_TENANT_ID)
                 .setId(1313)
                 .build();
 
-        testMonitoredServiceDTO2 =
-            MonitoredServiceDTO.newBuilder()
+        testMonitoredServiceDTO2 = MonitoredServiceDTO.newBuilder()
                 .setTenantId(TEST_TENANT_ID)
                 .setId(1717)
                 .build();
 
-        testMonitoredServiceDTO3 =
-            MonitoredServiceDTO.newBuilder()
+        testMonitoredServiceDTO3 = MonitoredServiceDTO.newBuilder()
                 .setTenantId(TEST_TENANT_ID)
                 .setId(1919)
                 .build();
 
         testMonitoredServiceType = new MonitoredServiceType();
-        testMonitoredServiceType.setServiceName("x-service-name-x");    // e.g. SSH
+        testMonitoredServiceType.setServiceName("x-service-name-x"); // e.g. SSH
 
         testMonitoredService1 = new MonitoredService();
         testMonitoredService1.setId(1313);
@@ -75,7 +92,8 @@ public class MonitoredServiceServiceTest {
         testIpInterface = new IpInterface();
         testIpInterface.setHostname("x-hostname-x");
 
-        target = new MonitoredServiceService(mockMonitoredServiceRepository, mockMonitoredServiceMapper, ipInterfaceRepository);
+        target = new MonitoredServiceService(
+                mockMonitoredServiceRepository, mockMonitoredServiceMapper, ipInterfaceRepository);
     }
 
     @Test
@@ -83,13 +101,11 @@ public class MonitoredServiceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(
-            mockMonitoredServiceRepository
-                .findByTenantIdTypeAndIpInterface(
-                    TEST_TENANT_ID,
-                    testMonitoredServiceType, testIpInterface)
-        ).thenReturn(Optional.empty());
-        Mockito.when(mockMonitoredServiceMapper.dtoToModel(testMonitoredServiceDTO1)).thenReturn(testMonitoredService1);
+        Mockito.when(mockMonitoredServiceRepository.findByTenantIdTypeAndIpInterface(
+                        TEST_TENANT_ID, testMonitoredServiceType, testIpInterface))
+                .thenReturn(Optional.empty());
+        Mockito.when(mockMonitoredServiceMapper.dtoToModel(testMonitoredServiceDTO1))
+                .thenReturn(testMonitoredService1);
 
         //
         // Execute
@@ -107,12 +123,9 @@ public class MonitoredServiceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(
-            mockMonitoredServiceRepository
-                .findByTenantIdTypeAndIpInterface(
-                    TEST_TENANT_ID,
-                    testMonitoredServiceType, testIpInterface)
-        ).thenReturn(Optional.of(testMonitoredService1));
+        Mockito.when(mockMonitoredServiceRepository.findByTenantIdTypeAndIpInterface(
+                        TEST_TENANT_ID, testMonitoredServiceType, testIpInterface))
+                .thenReturn(Optional.of(testMonitoredService1));
 
         //
         // Execute
@@ -130,13 +143,16 @@ public class MonitoredServiceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testMonitoredServiceList =
-            List.of(testMonitoredService1, testMonitoredService2, testMonitoredService3);
+        var testMonitoredServiceList = List.of(testMonitoredService1, testMonitoredService2, testMonitoredService3);
 
-        Mockito.when(mockMonitoredServiceRepository.findByTenantId(TEST_TENANT_ID)).thenReturn(testMonitoredServiceList);
-        Mockito.when(mockMonitoredServiceMapper.modelToDTO(testMonitoredService1)).thenReturn(testMonitoredServiceDTO1);
-        Mockito.when(mockMonitoredServiceMapper.modelToDTO(testMonitoredService2)).thenReturn(testMonitoredServiceDTO2);
-        Mockito.when(mockMonitoredServiceMapper.modelToDTO(testMonitoredService3)).thenReturn(testMonitoredServiceDTO3);
+        Mockito.when(mockMonitoredServiceRepository.findByTenantId(TEST_TENANT_ID))
+                .thenReturn(testMonitoredServiceList);
+        Mockito.when(mockMonitoredServiceMapper.modelToDTO(testMonitoredService1))
+                .thenReturn(testMonitoredServiceDTO1);
+        Mockito.when(mockMonitoredServiceMapper.modelToDTO(testMonitoredService2))
+                .thenReturn(testMonitoredServiceDTO2);
+        Mockito.when(mockMonitoredServiceMapper.modelToDTO(testMonitoredService3))
+                .thenReturn(testMonitoredServiceDTO3);
 
         //
         // Execute

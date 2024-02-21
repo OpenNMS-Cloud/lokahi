@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp;
 
 import java.io.Serializable;
@@ -63,7 +56,7 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
 
     /**
      * Don't expose credentials here in plaintext in case this object is used in a log message.
-     * 
+     *
      * http://issues.opennms.org/browse/NMS-1504
      */
     @Override
@@ -82,22 +75,21 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
         if (isVersion3()) {
             buff.append(", SecurityLevel: " + getSecurityLevel());
             buff.append(", SecurityName: " + getSecurityName());
-            buff.append(", AuthPassPhrase: XXXXXXXX"); //getAuthPassPhrase()
+            buff.append(", AuthPassPhrase: XXXXXXXX"); // getAuthPassPhrase()
             buff.append(", AuthProtocol: " + getAuthProtocol());
-            buff.append(", PrivPassphrase: XXXXXXXX"); //getPrivPassPhrase()
+            buff.append(", PrivPassphrase: XXXXXXXX"); // getPrivPassPhrase()
             buff.append(", PrivProtocol: " + getPrivProtocol());
             buff.append(", ContextName: " + getContextName());
             buff.append(", EngineId: " + getEngineId());
             buff.append(", ContextEngineId: " + getContextEngineId());
             buff.append(", EnterpriseId:" + getEnterpriseId());
         } else {
-            buff.append(", ReadCommunity: XXXXXXXX"); //getReadCommunity()
-            buff.append(", WriteCommunity: XXXXXXXX"); //getWriteCommunity()
+            buff.append(", ReadCommunity: XXXXXXXX"); // getReadCommunity()
+            buff.append(", WriteCommunity: XXXXXXXX"); // getWriteCommunity()
         }
         buff.append("]");
         return buff.toString();
     }
-
 
     public InetAddress getAddress() {
         return m_address;
@@ -138,28 +130,29 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(getAddress(),
-                                getProxyFor(),
-                                getPort(),
-                                getTimeout(),
-                                getRetries(),
-                                getMaxVarsPerPdu(),
-                                getMaxRepetitions(),
-                                getMaxRequestSize(),
-                                getVersion(),
-                                getSecurityLevel(),
-                                getSecurityName(),
-                                getAuthPassPhrase(),
-                                getAuthProtocol(),
-                                getPrivPassPhrase(),
-                                getPrivProtocol(),
-                                getContextName(),
-                                getEngineId(),
-                                getContextEngineId(),
-                                getEnterpriseId(),
-                                getReadCommunity(),
-                                getWriteCommunity(),
-                                getTTL());
+        int hash = Objects.hash(
+                getAddress(),
+                getProxyFor(),
+                getPort(),
+                getTimeout(),
+                getRetries(),
+                getMaxVarsPerPdu(),
+                getMaxRepetitions(),
+                getMaxRequestSize(),
+                getVersion(),
+                getSecurityLevel(),
+                getSecurityName(),
+                getAuthPassPhrase(),
+                getAuthProtocol(),
+                getPrivPassPhrase(),
+                getPrivProtocol(),
+                getContextName(),
+                getEngineId(),
+                getContextEngineId(),
+                getEnterpriseId(),
+                getReadCommunity(),
+                getWriteCommunity(),
+                getTTL());
         return hash;
     }
 
@@ -225,7 +218,7 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
         map.put("read-community", getReadCommunity());
         map.put("write-community", getWriteCommunity());
         // No default value for ttl.
-        if(getTTL() != null) {
+        if (getTTL() != null) {
             map.put("ttl", Long.toString(getTTL()));
         }
         return map;
@@ -240,7 +233,8 @@ public class SnmpAgentConfig extends SnmpConfiguration implements Serializable {
         if (map.get("retries") != null) config.setRetries(Integer.parseInt(map.get("retries")));
         if (map.get("max-vars-per-pdu") != null) config.setMaxVarsPerPdu(Integer.parseInt(map.get("max-vars-per-pdu")));
         if (map.get("max-repetitions") != null) config.setMaxRepetitions(Integer.parseInt(map.get("max-repetitions")));
-        if (map.get("max-request-size") != null) config.setMaxRequestSize(Integer.parseInt(map.get("max-request-size")));
+        if (map.get("max-request-size") != null)
+            config.setMaxRequestSize(Integer.parseInt(map.get("max-request-size")));
         if (map.get("version") != null) config.setVersion(Integer.parseInt(map.get("version")));
         if (map.get("security-level") != null) config.setSecurityLevel(Integer.parseInt(map.get("security-level")));
         if (map.get("security-name") != null) config.setSecurityName(map.get("security-name"));

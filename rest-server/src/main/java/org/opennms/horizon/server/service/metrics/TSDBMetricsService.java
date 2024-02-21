@@ -1,37 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.metrics;
 
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.server.model.TimeRangeUnit;
@@ -44,10 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @GraphQLApi
@@ -64,11 +56,12 @@ public class TSDBMetricsService {
     private final WebClient tsdbQueryWebClient;
     private final WebClient tsdbrangeQueryWebClient;
 
-    public TSDBMetricsService(ServerHeaderUtil headerUtil,
-                              MetricLabelUtils metricLabelUtils,
-                              QueryService queryService,
-                              InventoryClient inventoryClient,
-                              @Value("${tsdb.url}") String tsdbURL) {
+    public TSDBMetricsService(
+            ServerHeaderUtil headerUtil,
+            MetricLabelUtils metricLabelUtils,
+            QueryService queryService,
+            InventoryClient inventoryClient,
+            @Value("${tsdb.url}") String tsdbURL) {
 
         this.headerUtil = headerUtil;
         this.metricLabelUtils = metricLabelUtils;
@@ -77,28 +70,31 @@ public class TSDBMetricsService {
         String tsdbQueryURL = tsdbURL + QUERY_ENDPOINT;
         String tsdbRangeQueryURL = tsdbURL + QUERY_RANGE_ENDPOINT;
         this.tsdbQueryWebClient = WebClient.builder()
-            .baseUrl(tsdbQueryURL)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .build();
+                .baseUrl(tsdbQueryURL)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .build();
         this.tsdbrangeQueryWebClient = WebClient.builder()
-            .baseUrl(tsdbRangeQueryURL)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .build();
+                .baseUrl(tsdbRangeQueryURL)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .build();
     }
 
     @GraphQLQuery
-    public Mono<TimeSeriesQueryResult> getMetric(@GraphQLEnvironment ResolutionEnvironment env,
-                                                 String name, Map<String, String> labels,
-                                                 Integer timeRange, TimeRangeUnit timeRangeUnit) {
+    public Mono<TimeSeriesQueryResult> getMetric(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            String name,
+            Map<String, String> labels,
+            Integer timeRange,
+            TimeRangeUnit timeRangeUnit) {
 
-        Map<String, String> metricLabels = Optional.ofNullable(labels)
-            .map(HashMap::new).orElseGet(HashMap::new);
+        Map<String, String> metricLabels =
+                Optional.ofNullable(labels).map(HashMap::new).orElseGet(HashMap::new);
 
         String tenantId = headerUtil.extractTenant(env);
 
-        //in the case of minion echo, there is no node information
+        // in the case of minion echo, there is no node information
         Optional<NodeDTO> nodeOpt = getNode(env, metricLabels);
 
         String queryString = queryService.getQueryString(nodeOpt, name, metricLabels, timeRange, timeRangeUnit);
@@ -109,39 +105,49 @@ public class TSDBMetricsService {
         return getMetrics(tenantId, queryString);
     }
 
-    public Mono<TimeSeriesQueryResult> getCustomMetric(@GraphQLEnvironment ResolutionEnvironment env,
-                                                 String name, Map<String, String> labels,
-                                                 Integer timeRange, TimeRangeUnit timeRangeUnit, Map<String,String> optionalParams) {
+    public Mono<TimeSeriesQueryResult> getCustomMetric(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            String name,
+            Map<String, String> labels,
+            Integer timeRange,
+            TimeRangeUnit timeRangeUnit,
+            Map<String, String> optionalParams) {
 
-        Map<String, String> metricLabels = Optional.ofNullable(labels)
-            .map(HashMap::new).orElseGet(HashMap::new);
+        Map<String, String> metricLabels =
+                Optional.ofNullable(labels).map(HashMap::new).orElseGet(HashMap::new);
 
         String tenantId = headerUtil.extractTenant(env);
-        String queryString = queryService.getCustomQueryString(name, metricLabels, timeRange, timeRangeUnit, optionalParams);
+        String queryString =
+                queryService.getCustomQueryString(name, metricLabels, timeRange, timeRangeUnit, optionalParams);
         return getMetrics(tenantId, queryString);
     }
+
     private Optional<NodeDTO> getNode(ResolutionEnvironment env, Map<String, String> metricLabels) {
-        return metricLabelUtils.getNodeId(metricLabels).map(nodeId -> {
-            String accessToken = headerUtil.getAuthHeader(env);
-            return Optional.of(inventoryClient.getNodeById(nodeId, accessToken));
-        }).orElse(Optional.empty());
+        return metricLabelUtils
+                .getNodeId(metricLabels)
+                .map(nodeId -> {
+                    String accessToken = headerUtil.getAuthHeader(env);
+                    return Optional.of(inventoryClient.getNodeById(nodeId, accessToken));
+                })
+                .orElse(Optional.empty());
     }
 
-
     private Mono<TimeSeriesQueryResult> getMetrics(String tenantId, String queryString) {
-        return tsdbQueryWebClient.post()
-            .header("X-Scope-OrgID", tenantId)
-            .bodyValue(queryString)
-            .retrieve()
-            .bodyToMono(TimeSeriesQueryResult.class);
+        return tsdbQueryWebClient
+                .post()
+                .header("X-Scope-OrgID", tenantId)
+                .bodyValue(queryString)
+                .retrieve()
+                .bodyToMono(TimeSeriesQueryResult.class);
     }
 
     private Mono<TimeSeriesQueryResult> getRangeMetrics(String tenantId, String queryString) {
-        return tsdbrangeQueryWebClient.post()
-            .header("X-Scope-OrgID", tenantId)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .bodyValue(queryString)
-            .retrieve()
-            .bodyToMono(TimeSeriesQueryResult.class);
+        return tsdbrangeQueryWebClient
+                .post()
+                .header("X-Scope-OrgID", tenantId)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .bodyValue(queryString)
+                .retrieve()
+                .bodyToMono(TimeSeriesQueryResult.class);
     }
 }

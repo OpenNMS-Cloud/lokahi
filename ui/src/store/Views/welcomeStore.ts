@@ -184,7 +184,7 @@ export const useWelcomeStore = defineStore('welcomeStore', {
     async getFirstNode() {
       const defaultLatency = 0
       const timeoutDelay = 10000
-      const maxDelayLoops = 9 // 10 seconds * 9 loops === 1.5 minutes of waiting before showing a DOWN discovery. 
+      const maxDelayLoops = 9 // 10 seconds * 9 loops === 1.5 minutes of waiting before showing a DOWN discovery.
       const { getDiscoveries } = useDiscoveryQueries()
       const { getNodeDetails } = useWelcomeQueries()
       await getDiscoveries()

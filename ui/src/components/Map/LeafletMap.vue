@@ -193,7 +193,7 @@ const invalidateSizeFn = () => {
   return leafletObject.value.invalidateSize()
 }
 
-/*****Tile Layer*****/
+// *** Tile Layer ***
 const defaultLayer = ref({
   name: 'OpenStreetMap',
   visible: true,

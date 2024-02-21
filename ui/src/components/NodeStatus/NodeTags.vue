@@ -21,7 +21,7 @@
         </FeatherChip>
       </FeatherChipList>
     </section>
-  </div> 
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -57,7 +57,7 @@ const unselectItem = (name: string) => {
   line-height: 20px;
   letter-spacing: 0.28px;
 }
- 
+
 .node-component-content {
   display: flex;
   flex-direction: row;

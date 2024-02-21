@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 defineEmits([
-  'slideNext', 
+  'slideNext',
   'slidePrev'
 ])
 

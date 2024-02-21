@@ -1,43 +1,35 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2020-2020 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification.internal.value;
-
-import org.opennms.horizon.flows.classification.IpAddr;
-import org.opennms.horizon.flows.classification.internal.decision.Bound;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import org.opennms.horizon.flows.classification.IpAddr;
+import org.opennms.horizon.flows.classification.internal.decision.Bound;
+import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IpValue implements RuleValue<IpAddr, IpValue> {
 
@@ -66,7 +58,8 @@ public class IpValue implements RuleValue<IpAddr, IpValue> {
                         throw new IllegalArgumentException("Ranged value may not contain a CIDR expression");
                     }
                 }
-                ranges.add(IpRange.of(rangedValues.get(0).getValue(), rangedValues.get(1).getValue()));
+                ranges.add(IpRange.of(
+                        rangedValues.get(0).getValue(), rangedValues.get(1).getValue()));
             } else if (eachValue.getValue().contains("/")) {
                 // Value may be a CIDR address - build range for it
                 ranges.add(parseCIDR(eachValue.getValue()));
@@ -86,7 +79,7 @@ public class IpValue implements RuleValue<IpAddr, IpValue> {
     }
 
     public boolean isInRange(final IpAddr address) {
-        for (var r: ranges) {
+        for (var r : ranges) {
             if (r.contains(address)) {
                 return true;
             }
@@ -110,7 +103,7 @@ public class IpValue implements RuleValue<IpAddr, IpValue> {
         // Mask the lower bound with all zero
         final byte[] lower = Arrays.copyOf(address, address.length);
         for (int i = lower.length - 1; i >= mask / 8; i--) {
-            if (i*8 >= mask) {
+            if (i * 8 >= mask) {
                 lower[i] = (byte) 0x00;
             } else {
                 lower[i] &= 0xFF << (8 - (mask - i * 8));
@@ -120,21 +113,20 @@ public class IpValue implements RuleValue<IpAddr, IpValue> {
         // Mask the upper bound with all ones
         final byte[] upper = Arrays.copyOf(address, address.length);
         for (int i = upper.length - 1; i >= mask / 8; i--) {
-            if (i*8 >= mask) {
+            if (i * 8 >= mask) {
                 upper[i] = (byte) 0xFF;
             } else {
                 upper[i] |= 0xFF >> (mask - i * 8);
             }
         }
 
-        return IpRange.of(InetAddressUtils.toIpAddrString(lower),
-                                  InetAddressUtils.toIpAddrString(upper));
+        return IpRange.of(InetAddressUtils.toIpAddrString(lower), InetAddressUtils.toIpAddrString(upper));
     }
 
     @Override
     public IpValue shrink(Bound<IpAddr> bound) {
         List<IpRange> l = new ArrayList<>(ranges.size());
-        for (var r: ranges) {
+        for (var r : ranges) {
             if (bound.overlaps(r.begin, r.end)) {
                 l.add(r);
             }

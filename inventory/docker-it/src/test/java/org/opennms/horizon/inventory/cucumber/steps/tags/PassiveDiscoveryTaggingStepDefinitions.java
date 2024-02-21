@@ -1,38 +1,40 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber.steps.tags;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
@@ -47,16 +49,6 @@ import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class PassiveDiscoveryTaggingStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
@@ -101,32 +93,31 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         deleteAllTags();
         deleteAllPassiveDiscovery();
     }
-    
+
     @Given("Passive discovery communities {string}")
     public void passiveDiscoveryCommunities(String communities) {
-        initializePassiveDiscoveryDto().addAllCommunities(Arrays.stream(communities.split(","))
-            .map(String::trim)
-            .toList()
-        );
+        initializePassiveDiscoveryDto()
+                .addAllCommunities(
+                        Arrays.stream(communities.split(",")).map(String::trim).toList());
     }
 
     @Given("Passive discovery ports {string}")
     public void passiveDiscoveryPorts(String ports) {
-        initializePassiveDiscoveryDto().addAllPorts(Arrays.stream(ports.split(","))
-            .map(String::trim)
-            .map(Integer::parseInt)
-            .toList()
-        );
+        initializePassiveDiscoveryDto()
+                .addAllPorts(Arrays.stream(ports.split(","))
+                        .map(String::trim)
+                        .map(Integer::parseInt)
+                        .toList());
     }
 
     @Given("Passive discovery tags {string}")
     public void passiveDiscoveryTags(String tags) {
-        initializePassiveDiscoveryDto().addAllTags(Arrays.stream(tags.split(","))
-            .map(String::trim)
-            .filter(str -> !str.isEmpty())
-            .map(name -> TagCreateDTO.newBuilder().setName(name).build())
-            .toList()
-        );
+        initializePassiveDiscoveryDto()
+                .addAllTags(Arrays.stream(tags.split(","))
+                        .map(String::trim)
+                        .filter(str -> !str.isEmpty())
+                        .map(name -> TagCreateDTO.newBuilder().setName(name).build())
+                        .toList());
     }
 
     @Given("Passive discovery location named {string}")
@@ -142,10 +133,8 @@ public class PassiveDiscoveryTaggingStepDefinitions {
     public void aNewPassiveDiscovery(String label) {
         try {
             var passiveDiscoveryServiceBlockingStub = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
-            passiveDiscoveryServiceBlockingStub.upsertDiscovery(initializePassiveDiscoveryDto()
-                .setName(label)
-                .build()
-            );
+            passiveDiscoveryServiceBlockingStub.upsertDiscovery(
+                    initializePassiveDiscoveryDto().setName(label).build());
         } finally {
             // reset scenario state
             this.passiveDiscoveryDTO = null;
@@ -160,26 +149,27 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
 
         tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addEntityIds(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
-            .build()
-        );
+                .addAllTags(tagCreateList)
+                .addEntityIds(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
+                .build());
     }
 
     @When("A GRPC request to create tags {string} for both passive discovery with label {string}")
     public void aGRPCRequestToCreateTagsForBothPassiveDiscovery(String tags, String label) {
         String[] tagArray = tags.split(",");
-        PassiveDiscoveryDTO passiveDiscovery = findPassiveDiscovery(
-            label);
+        PassiveDiscoveryDTO passiveDiscovery = findPassiveDiscovery(label);
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
 
         List<TagEntityIdDTO> tagEntityList = new ArrayList<>();
-        tagEntityList.add(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()).build());
+        tagEntityList.add(TagEntityIdDTO.newBuilder()
+                .setPassiveDiscoveryId(passiveDiscovery.getId())
+                .build());
 
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addAllEntityIds(tagEntityList).build());
+                .addAllTags(tagCreateList)
+                .addAllEntityIds(tagEntityList)
+                .build());
     }
 
     @When("A GRPC request to fetch tags for passive discovery with label {string}")
@@ -187,9 +177,9 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         PassiveDiscoveryDTO passiveDiscovery = findPassiveDiscovery(label);
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder()
-                .setPassiveDiscoveryId(passiveDiscovery.getId()))
-            .setParams(TagListParamsDTO.newBuilder().build()).build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
+                .setParams(TagListParamsDTO.newBuilder().build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -202,10 +192,10 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         for (TagDTO tagDTO : fetchedTagList.getTagsList()) {
             if (tagDTO.getName().equals(tag)) {
                 tagServiceBlockingStub.removeTags(TagRemoveListDTO.newBuilder()
-                    .addAllTagIds(Collections.singletonList(Int64Value.newBuilder()
-                        .setValue(tagDTO.getId()).build()))
-                    .addEntityIds(TagEntityIdDTO.newBuilder()
-                        .setPassiveDiscoveryId(passiveDiscovery.getId())).build());
+                        .addAllTagIds(Collections.singletonList(
+                                Int64Value.newBuilder().setValue(tagDTO.getId()).build()))
+                        .addEntityIds(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
+                        .build());
                 break;
             }
         }
@@ -216,9 +206,10 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         PassiveDiscoveryDTO passiveDiscovery = findPassiveDiscovery(label);
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder()
-                .setPassiveDiscoveryId(passiveDiscovery.getId()))
-            .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
+                .setParams(
+                        TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -231,11 +222,11 @@ public class PassiveDiscoveryTaggingStepDefinitions {
     public void fetchPassiveDiscoveryTags(String label) {
         PassiveDiscoveryDTO passiveDiscovery = findPassiveDiscovery(label);
 
-        this.fetchedTagList = backgroundHelper.getTagServiceBlockingStub().getTagsByEntityId(
-            ListTagsByEntityIdParamsDTO.newBuilder()
-                .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
-                .build()
-        );
+        this.fetchedTagList = backgroundHelper
+                .getTagServiceBlockingStub()
+                .getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+                        .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(passiveDiscovery.getId()))
+                        .build());
     }
 
     @Then("The passive discovery tag response should contain only tags {string}")
@@ -244,11 +235,9 @@ public class PassiveDiscoveryTaggingStepDefinitions {
 
         assertNotNull(fetchedTagList);
 
-        Set<String> givenTags = Arrays.stream(tagArray)
-            .collect(Collectors.toSet());
-        Set<String> fetchedTags = fetchedTagList.getTagsList().stream()
-            .map(TagDTO::getName)
-            .collect(Collectors.toSet());
+        Set<String> givenTags = Arrays.stream(tagArray).collect(Collectors.toSet());
+        Set<String> fetchedTags =
+                fetchedTagList.getTagsList().stream().map(TagDTO::getName).collect(Collectors.toSet());
 
         assertEquals(givenTags, fetchedTags);
     }
@@ -272,25 +261,33 @@ public class PassiveDiscoveryTaggingStepDefinitions {
 
     private void deleteAllTags() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        List<Int64Value> tagIds = tagServiceBlockingStub.getTags(ListAllTagsParamsDTO.newBuilder().build())
-            .getTagsList().stream().map(tagDTO -> Int64Value.of(tagDTO.getId())).toList();
-        tagServiceBlockingStub.deleteTags(DeleteTagsDTO.newBuilder().addAllTagIds(tagIds).build());
+        List<Int64Value> tagIds =
+                tagServiceBlockingStub.getTags(ListAllTagsParamsDTO.newBuilder().build()).getTagsList().stream()
+                        .map(tagDTO -> Int64Value.of(tagDTO.getId()))
+                        .toList();
+        tagServiceBlockingStub.deleteTags(
+                DeleteTagsDTO.newBuilder().addAllTagIds(tagIds).build());
     }
 
     private void deleteAllPassiveDiscovery() {
         var passiveDiscoveryServiceBlockingStub = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
-        for (PassiveDiscoveryDTO discoveryDTO : passiveDiscoveryServiceBlockingStub.listAllDiscoveries(Empty.newBuilder().build()).getDiscoveriesList()) {
+        for (PassiveDiscoveryDTO discoveryDTO : passiveDiscoveryServiceBlockingStub
+                .listAllDiscoveries(Empty.newBuilder().build())
+                .getDiscoveriesList()) {
             passiveDiscoveryServiceBlockingStub.deleteDiscovery(Int64Value.of(discoveryDTO.getId()));
         }
     }
 
     private PassiveDiscoveryDTO findPassiveDiscovery(String label) {
-        return backgroundHelper.getPassiveDiscoveryServiceBlockingStub()
-            .listAllDiscoveries(Empty.getDefaultInstance())
-            .getDiscoveriesList().stream()
-            .filter(disco -> label.equals(disco.getName()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Passive discovery with label " + label + " not found"));
+        return backgroundHelper
+                .getPassiveDiscoveryServiceBlockingStub()
+                .listAllDiscoveries(Empty.getDefaultInstance())
+                .getDiscoveriesList()
+                .stream()
+                .filter(disco -> label.equals(disco.getName()))
+                .findFirst()
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Passive discovery with label " + label + " not found"));
     }
 
     private static List<TagCreateDTO> getTagCreateList(String[] tagArray) {
@@ -300,6 +297,4 @@ public class PassiveDiscoveryTaggingStepDefinitions {
         }
         return tagCreateList;
     }
-
-
 }

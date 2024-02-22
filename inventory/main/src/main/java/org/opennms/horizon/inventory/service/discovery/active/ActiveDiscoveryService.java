@@ -34,7 +34,7 @@ public class ActiveDiscoveryService {
                 throw new EntityNotFoundException(String.format("active discovery id %d not found", id));
             });
         // updating nodes containing discovery id
-        List<Node> nodeList = new ArrayList<>();//nodeRepository.findByTenantIdAndDiscoveryIdsContains(tenantId, id);
+        List<Node> nodeList = new ArrayList<>();//nodeRepository.findByTenantIdAndDiscoveryIdsContain(tenantId, id);
         nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
         nodeRepository.saveAll(nodeList);
     }

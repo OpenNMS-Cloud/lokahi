@@ -338,4 +338,17 @@ public class MonitorPolicySteps {
             assertThat(lastException.getMessage()).isEqualTo(message);
         }
     }
+
+    @Then("Validate whether we have loaded all event definitions of size greater than or equal to {int}")
+    public void validateWhetherWeHaveLoadedAllEventDefinitions(int count) {
+
+        ListAlertEventDefinitionsRequest request = ListAlertEventDefinitionsRequest.newBuilder()
+                .setEventType(EventType.SNMP_TRAP)
+                .build();
+        List<AlertEventDefinitionProto> eventDefinitionsList = this.grpcClient
+                .getAlertEventDefinitionStub()
+                .listAlertEventDefinitions(request)
+                .getAlertEventDefinitionsList();
+        assertThat(eventDefinitionsList.size()).isGreaterThanOrEqualTo(count);
+    }
 }

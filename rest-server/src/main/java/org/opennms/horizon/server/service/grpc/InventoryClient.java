@@ -390,6 +390,6 @@ public class InventoryClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         SearchIpInterfaceQuery query = SearchIpInterfaceQuery.newBuilder().setNodeId(nodeId).setSearchTerm(ipInterfaceSearchTerm).setIpAddress(ipAddress).build();
-        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).getSearchIpInterfacesByQuery(query).getIpInterfaceList();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listSearchIpInterfaceByQuery(query).getIpInterfaceList();
     }
 }

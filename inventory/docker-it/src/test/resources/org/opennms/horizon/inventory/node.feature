@@ -26,3 +26,7 @@ Feature: Node
     Given update node "node1" with alias "alias1" exception "false"
     Given update node "node2" with alias "alias1" exception "true"
     Then [Node] Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate node alias with name alias1"
+
+  Scenario: Search IpInterfaces by Node
+    When searching ip interfaces by node
+    Then verify the list of IpInterfaces has size greater than 0.

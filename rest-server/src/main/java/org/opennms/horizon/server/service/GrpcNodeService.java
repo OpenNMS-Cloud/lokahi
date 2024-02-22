@@ -198,7 +198,7 @@ public class GrpcNodeService {
 
 
 
-    @GraphQLQuery(name = "searchIpInterfaceByNodeAndSearchTerm")
+    @GraphQLQuery(name = "listIpInterfacesByNodeSearch")
     public Flux<IpInterface> searchIpInterfaceByNodeAndSearchTerm(@GraphQLEnvironment ResolutionEnvironment env,
                                                                   @GraphQLArgument(name = "nodeId") Long nodeId,
                                                                   @GraphQLArgument(name = "searchTerm") String searchTerm,

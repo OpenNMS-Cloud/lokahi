@@ -413,7 +413,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
 
 
     @Override
-    public void getSearchIpInterfacesByQuery(SearchIpInterfaceQuery request, StreamObserver<IpInterfaceList> responseObserver) {
+    public void listSearchIpInterfaceByQuery(SearchIpInterfaceQuery request, StreamObserver<IpInterfaceList> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(tenantId -> {

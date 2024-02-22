@@ -5,6 +5,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
@@ -12,12 +13,7 @@ import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.RetryUtils;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaTestHelper;
-import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
-import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.*;
 
 import java.util.List;
 
@@ -32,7 +28,10 @@ public class NodeStepDefinitions {
     private KafkaTestHelper kafkaTestHelper;
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
+
+    private IpInterfaceList ipInterfaceList;
     private String nodeTopic;
+
 
     private Exception lastException;
 
@@ -215,4 +214,23 @@ public class NodeStepDefinitions {
         log.info("Found {} messages for tenant {}", foundMessages, tenant);
         return foundMessages == expectedMessages;
     }
+
+    @When("searching ip interfaces by node")
+    public void searchingIpInterfacesByNode() {
+
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        var nodes = nodeServiceBlockingStub.listNodes(Empty.newBuilder().build());
+        var filterNodes = nodes.getNodesList().stream().toList();
+        var node = filterNodes.get(0);
+
+        ipInterfaceList = nodeServiceBlockingStub.listSearchIpInterfaceByQuery(SearchIpInterfaceQuery.newBuilder().
+            setNodeId(node.getIpInterfacesList().get(0).getNodeId()).setIpAddress(node.getIpInterfacesList().get(0).getIpAddress())
+            .setSearchTerm(node.getIpInterfacesList().get(0).getHostname()).build());
+    }
+
+    @Then("verify the list of IpInterfaces has size greater than {int}.")
+    public void verifyTheListOfIpInterfacesHasSizeGreaterThan(int size) {
+        assertTrue(ipInterfaceList.getIpInterfaceList().size() > size);
+    }
+
 }

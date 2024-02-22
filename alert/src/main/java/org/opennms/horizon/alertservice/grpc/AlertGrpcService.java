@@ -44,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertError;
 import org.opennms.horizon.alerts.proto.AlertRequest;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.CountAlertResponse;
@@ -63,8 +64,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -367,6 +370,44 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         } catch (Exception e) {
             responseObserver.onError(e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void getAlertsByNode(AlertRequestByNode request, StreamObserver<ListAlertsResponse> responseObserver) {
+
+        int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
+        int page = request.getPage();
+        long nodeId = request.getNodeId();
+        String sortBy = !request.getSortBy().isEmpty() ? request.getSortBy() : SORT_BY_DEFAULT;
+        boolean sortAscending = request.getSortAscending();
+
+        Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
+
+        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+        try {
+            Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage;
+            alertPage = alertRepository.findAlertsByNodeId(tenantId, nodeId, pageRequest);
+
+            List<Alert> alerts = alertPage.getContent().stream()
+                    .map(alert -> Alert.newBuilder(alertMapper.toProto(alert)).build())
+                    .collect(Collectors.toList());
+
+            ListAlertsResponse.Builder responseBuilder =
+                    ListAlertsResponse.newBuilder().addAllAlerts(alerts);
+
+            if (alertPage.hasNext()) {
+                responseBuilder.setNextPage(alertPage.nextPageable().getPageNumber());
+            }
+            responseBuilder.setLastPage(alertPage.getTotalPages() - 1);
+            responseBuilder.setTotalAlerts(alertPage.getTotalElements());
+            ListAlertsResponse response = responseBuilder.build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            LOG.error("Noinstance available! " + e.getMessage());
         }
     }
 

@@ -33,21 +33,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
-import org.opennms.horizon.alerts.proto.AlertRequest;
-import org.opennms.horizon.alerts.proto.AlertResponse;
-import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
-import org.opennms.horizon.alerts.proto.CountAlertResponse;
-import org.opennms.horizon.alerts.proto.DeleteAlertResponse;
-import org.opennms.horizon.alerts.proto.EventType;
-import org.opennms.horizon.alerts.proto.Filter;
-import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
-import org.opennms.horizon.alerts.proto.ListAlertsRequest;
-import org.opennms.horizon.alerts.proto.ListAlertsResponse;
-import org.opennms.horizon.alerts.proto.MonitorPolicyProto;
-import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
-import org.opennms.horizon.alerts.proto.Severity;
-import org.opennms.horizon.alerts.proto.TimeRangeFilter;
+import org.opennms.horizon.alerts.proto.*;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
@@ -335,5 +321,22 @@ public class AlertsClient {
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .alertCounts(Empty.getDefaultInstance());
         return alertsCountMapper.protoToAlertCount(alertCountProto);
+    }
+
+    public ListAlertsResponse getAlertsByNode(
+            int pageSize, int page, String sortBy, boolean sortAscending, long nodeId, String accessToken) {
+        Metadata metadata = getMetadata(accessToken);
+
+        final var request = AlertRequestByNode.newBuilder();
+        request.setPageSize(pageSize)
+                .setPage(page)
+                .setSortBy(sortBy)
+                .setSortAscending(sortAscending)
+                .setNodeId(nodeId)
+                .build();
+        return alertStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .getAlertsByNode(request.build());
     }
 }

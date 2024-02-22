@@ -5,7 +5,7 @@
         <NodeSystemInformation />
       </div>
       <div class="card">
-        <NodeTags :nodeTagsContent="tabContent[0]?.tags || []"/>
+        <NodeTags />
       </div>
       <div class="card">
         <NodeMonitoringPolicies />
@@ -33,15 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { InventoryItem } from '@/types'
-import { PropType } from 'vue'
 
-defineProps({
-  tabContent: {
-    type: Object as PropType<InventoryItem[]>,
-    required: true
-  }
-})
 </script>
 
 <style lang="scss" scoped>

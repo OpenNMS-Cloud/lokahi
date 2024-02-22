@@ -15,7 +15,7 @@
         >
           <span class="node-tag-content">{{ tag?.name }}</span>
           <FeatherIcon
-          @click="deleteTag(tag)"
+          @click="removeTagFromNode(tag)"
           :icon="CancelIcon"
           class="pointer"
           />
@@ -30,39 +30,24 @@ import CancelIcon from '@featherds/icon/navigation/Cancel'
 import { useTagStore } from '@/store/Components/tagStore'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
-import { InventoryItem } from '@/types'
-import { PropType } from 'vue'
 import useSnackbar from '@/composables/useSnackbar'
-
-const props = defineProps({
-  nodeTagsContent: {
-    type: Object as PropType<InventoryItem['tags']>,
-    required: true
-  }
-})
 
 const nodeMutations = useNodeMutations()
 const nodeStatusStore = useNodeStatusStore()
 const { showSnackbar } = useSnackbar()
 const tagStore = useTagStore()
 
-watchEffect(() => {
-  if (props?.nodeTagsContent) {
-    tagStore.setFilteredTags(props.nodeTagsContent)
-  }
-})
-
-const deleteTag = async (tag: any) => {
+const removeTagFromNode = async (tag: any) => {
   if (tag?.id) {
     const deleteTagResult = await nodeMutations.removeTagsFromNodes({ nodeIds: nodeStatusStore.nodeId, tagIds: tag?.id })
     if (!deleteTagResult.error) {
       tagStore.filterTag(tag)
       showSnackbar({
-        msg: 'Node successfully deleted.'
+        msg: 'Tag successfully removed from node.'
       })
     } else {
       showSnackbar({
-        msg: 'Error deleting tag'
+        msg: 'Error removing tag.'
       })
     }
   }

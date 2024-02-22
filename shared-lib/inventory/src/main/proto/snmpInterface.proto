@@ -47,16 +47,3 @@ message SnmpInterfaceDTO {
   string ifAlias = 11;
   string physicalAddr = 12;
 }
-message SnmpInterfaceCreateDTO {
-  string tenant_id = 1;
-  string node_label = 2;
-  int32 if_index = 3;
-  string if_descr = 4;
-  int32 ifType = 5;
-  string ifName = 6;
-  int64 ifSpeed = 7;
-  int32 ifAdminStatus = 8;
-  int32 ifOperatorStatus = 9;
-  string ifAlias = 10;
-  string physicalAddr = 11;
-}

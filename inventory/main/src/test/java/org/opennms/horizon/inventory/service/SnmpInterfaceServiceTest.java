@@ -33,9 +33,10 @@ import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
-import org.opennms.horizon.inventory.repository.NodeRepository;
+
 public class SnmpInterfaceServiceTest {
 
     public static final String TEST_TENANT_ID = "x-tenant-id-x";
@@ -74,7 +75,7 @@ public class SnmpInterfaceServiceTest {
         testNode.setId(1313);
         testSnmpInterfaceResult = SnmpInterfaceResult.newBuilder().setIfIndex(1).build();
 
-        target = new SnmpInterfaceService(mockSnmpInterfaceRepository, mockNodeRepository,mockSnmpInterfaceMapper);
+        target = new SnmpInterfaceService(mockSnmpInterfaceRepository, mockNodeRepository, mockSnmpInterfaceMapper);
     }
 
     @Test

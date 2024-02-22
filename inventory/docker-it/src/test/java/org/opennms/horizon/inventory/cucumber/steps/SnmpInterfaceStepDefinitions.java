@@ -1,16 +1,34 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber.steps;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
-import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.SnmpInterfaceCreateDTO;
-import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
 import org.opennms.horizon.inventory.dto.SearchBy;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
 
 @Slf4j
 public class SnmpInterfaceStepDefinitions {
@@ -20,38 +38,13 @@ public class SnmpInterfaceStepDefinitions {
         this.backgroundHelper = backgroundHelper;
     }
 
-
-    @Given("a new snmp_interface with name {string}, desc {string} ,alias {string} , physical address {string} and node label {string} with tenant {string}")
-    public void aNewSnmp_interfaceWithNameDescAliasPhysicalAddressAndNodeIdWithTenant(String name, String desc, String alias, String phyAddr, String nodelabel, String tenant) {
-        aNewSnmpInterface(name, desc, alias, phyAddr, nodelabel, tenant);
-    }
-
-    private void aNewSnmpInterface(String name, String desc, String alias, String physicalAddr, String nodelabel, String tenantId) {
-
-        var snmpCreateDTO = SnmpInterfaceCreateDTO.newBuilder();
-        snmpCreateDTO
-            .setIfAlias(alias)
-            .setTenantId(tenantId)
-            .setIfDescr(desc)
-            .setIfIndex(1)
-            .setIfAdminStatus(1)
-            .setIfName(name)
-            .setIfOperatorStatus(1)
-            .setPhysicalAddr(physicalAddr)
-            .setIfType(1)
-            .setNodeLabel(nodelabel);
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        nodeServiceBlockingStub.createSnmpInterface(snmpCreateDTO.build());
-    }
-
     @Then("fetch a list of snmp_interface by name with search {string}")
     public void fetchAListOfSnmpInterfaceByNameWithSearch(String search) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        SnmpInterfacesList list = nodeServiceBlockingStub.listSnmpInterfaces(SearchBy.newBuilder()
-            .setSearch(search).build());
-        list.getSnmpInterfacesList().stream().map(SnmpInterfaceDTO::getIfName)
-            .forEach(label -> assertTrue(label.contains(search)));
-
+        SnmpInterfacesList list = nodeServiceBlockingStub.listSnmpInterfaces(
+                SearchBy.newBuilder().setSearch(search).build());
+        list.getSnmpInterfacesList().stream()
+                .map(SnmpInterfaceDTO::getIfName)
+                .forEach(label -> assertTrue(label.contains(search)));
     }
 }
-

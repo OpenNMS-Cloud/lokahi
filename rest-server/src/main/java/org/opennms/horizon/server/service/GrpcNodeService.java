@@ -38,12 +38,14 @@ import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.inventory.NodeUpdate;
+import org.opennms.horizon.server.model.inventory.SnmpInterface;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
 import org.opennms.horizon.server.model.status.NodeStatus;
@@ -52,9 +54,7 @@ import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.opennms.horizon.server.mapper.SnmpInterfaceMapper;
-import org.opennms.horizon.server.model.inventory.SnmpInterfaceCreate;
-import org.opennms.horizon.server.model.inventory.SnmpInterface;
+
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
@@ -66,6 +66,7 @@ public class GrpcNodeService {
     private final ServerHeaderUtil headerUtil;
     private final NodeStatusService nodeStatusService;
     private final SnmpInterfaceMapper snmpInterfaceMapper;
+
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listNodes(headerUtil.getAuthHeader(env)).stream()
@@ -193,14 +194,13 @@ public class GrpcNodeService {
                     }
                 });
     }
-    @GraphQLMutation
-    public Mono<SnmpInterface> addSnmpInterface(@GraphQLArgument(name = "snmpInterface") SnmpInterfaceCreate dto, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(snmpInterfaceMapper.protobufToSnmpInterface(client.createNewSnmpInterface(snmpInterfaceMapper.snmpCreateToProto(dto), headerUtil.getAuthHeader(env))));
-    }
+
     @GraphQLQuery(name = "getSnmpInterfaces")
-    public Flux<SnmpInterface> getSnmpInterfaces(@GraphQLArgument(name = "search") String search,
-                                                 @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listSnmpInterfaces(search,headerUtil.getAuthHeader(env)).stream().map(snmpInterfaceMapper::protobufToSnmpInterface).toList());
+    public Flux<SnmpInterface> getSnmpInterfaces(
+            @GraphQLArgument(name = "search") String search, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listSnmpInterfaces(search, headerUtil.getAuthHeader(env)).stream()
+                .map(snmpInterfaceMapper::protobufToSnmpInterface)
+                .toList());
     }
 
     private static TopNResponse generateDownloadableTopNResponse(

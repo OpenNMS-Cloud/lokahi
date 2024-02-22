@@ -55,27 +55,25 @@ import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.SearchBy;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
+import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.opennms.horizon.inventory.dto.SearchBy;
-import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.SnmpInterfaceCreateDTO;
-import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
-import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
-import org.opennms.horizon.inventory.model.SnmpInterface;
-import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 
 @Component
 @RequiredArgsConstructor
@@ -99,7 +97,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final TenantLookup tenantLookup;
     private final ScannerTaskSetService scannerService;
     private final MonitoringLocationService monitoringLocationService;
-    private final SnmpInterfaceService  snmpInterfaceService;
+    private final SnmpInterfaceService snmpInterfaceService;
     private final SnmpInterfaceMapper snmpInterfaceMapper;
     private final ThreadFactory threadFactory =
             new ThreadFactoryBuilder().setNameFormat("send-taskset-for-node-%d").build();
@@ -419,34 +417,23 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     @Override
-    public void createSnmpInterface(SnmpInterfaceCreateDTO snmpInterfaceDTO, StreamObserver<SnmpInterfaceDTO> responseObserver) {
-        try {
-            SnmpInterface snmpInterface = snmpInterfaceService.saveSnmpInterface(snmpInterfaceDTO);
-            responseObserver.onNext(snmpInterfaceMapper.modelToDTO(snmpInterface));
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            LOG.error("Error while adding snmpInterface", e);
-            Status status = Status.newBuilder()
-                .setCode(Code.INTERNAL_VALUE)
-                .setMessage("Error while adding snmpInterface").build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        }
-    }
-
-    @Override
     public void listSnmpInterfaces(SearchBy searchBy, StreamObserver<SnmpInterfacesList> responseObserver) {
         try {
-            List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy);           ;
-            responseObserver.onNext( SnmpInterfacesList.newBuilder().addAllSnmpInterfaces(list).build());
+            List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy);
+            ;
+            responseObserver.onNext(
+                    SnmpInterfacesList.newBuilder().addAllSnmpInterfaces(list).build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             LOG.error("Error while getting snmpInterfaces", e);
             Status status = Status.newBuilder()
-                .setCode(Code.INTERNAL_VALUE)
-                .setMessage("Error while getting snmpInterfaces").build();
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while getting snmpInterfaces")
+                    .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
+
     private Status createTenantIdMissingStatus() {
         return Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)

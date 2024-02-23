@@ -203,12 +203,12 @@ public class NodeStepDefinitions {
         assertEquals(0, fetchedNodeList.getNodesCount());
     }
 
-    @Then("count the list of nodes response not equal to {int}")
+    @Then("fetch the list of nodes response not equal to {int}")
     public void countTheListOfNodes(int size) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        Int64Value count =
-                nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build());
-        assertTrue(count.getValue() > size);
+        long count =
+                nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build()).getValue();
+        assertTrue(count > size);
     }
 
     @Then("verify node topic has {int} messages with tenant {string}")

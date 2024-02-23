@@ -409,15 +409,16 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                 () -> responseObserver.onError(
                         StatusProto.toStatusRuntimeException(createStatusNotExits(request.getValue()))));
     }
+
     @Override
-    public void getNodeCount(Empty request,StreamObserver<Int64Value> responseObserver) {
+    public void getNodeCount(Empty request, StreamObserver<Int64Value> responseObserver) {
         try {
             Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
             if (tenantIdOptional.isEmpty()) {
                 Status status = Status.newBuilder()
-                    .setCode(Code.INVALID_ARGUMENT_VALUE)
-                    .setMessage(EMPTY_TENANT_ID_MSG)
-                    .build();
+                        .setCode(Code.INVALID_ARGUMENT_VALUE)
+                        .setMessage(EMPTY_TENANT_ID_MSG)
+                        .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                 return;
             }
@@ -428,12 +429,13 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         } catch (Exception e) {
             LOG.error("Error while getting node count", e);
             Status status = Status.newBuilder()
-                .setCode(Code.INTERNAL_VALUE)
-                .setMessage("Error while getting node count")
-                .build();
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while getting node count")
+                    .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
+
     private Status createTenantIdMissingStatus() {
         return Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)

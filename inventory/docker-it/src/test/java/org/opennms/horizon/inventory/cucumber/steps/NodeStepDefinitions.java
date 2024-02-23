@@ -22,8 +22,8 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -202,12 +202,15 @@ public class NodeStepDefinitions {
     public void verifyTheListOfNodesIsEmpty() {
         assertEquals(0, fetchedNodeList.getNodesCount());
     }
+
     @Then("count the list of nodes response not equal to {int}")
     public void countTheListOfNodes(int size) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        Int64Value count= nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build());
-        assertTrue(count.getValue()>size);
+        Int64Value count =
+                nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build());
+        assertTrue(count.getValue() > size);
     }
+
     @Then("verify node topic has {int} messages with tenant {string}")
     public void verifyNodeTopicContainsTenant(int expectedMessages, String tenant) throws InterruptedException {
         boolean success = retryUtils.retry(

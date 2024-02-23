@@ -22,7 +22,6 @@
 package org.opennms.horizon.alertservice.stepdefs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -287,8 +286,8 @@ public class AlertTestSteps {
         assertEquals(expected, countAlertsResponse.getCount());
     }
 
-    @Then("Count alerts for the tenant on node {int} with page {int} pageSize {int}")
-    public void countAlertsForNode(int nodeId, int page, int pageSize) {
+    @Then("Count alerts for the tenant on node {int} with page {int} pageSize {int} response is not equal to {int}")
+    public void countAlertsForNode(int nodeId, int page, int pageSize, int count) {
         final var requestBuilder = AlertRequestByNode.newBuilder()
                 .setSortBy("id")
                 .setNodeId(Long.valueOf(nodeId))
@@ -296,7 +295,7 @@ public class AlertTestSteps {
                 .setPage(page)
                 .setSortAscending(true);
         var ListAlertsResponse = clientUtils.getAlertServiceStub().getAlertsByNode(requestBuilder.build());
-        assertNotNull(ListAlertsResponse.getAlertsList());
+        assertTrue(ListAlertsResponse.getAlertsList().size() > count);
     }
     // ========================================
     // Internals

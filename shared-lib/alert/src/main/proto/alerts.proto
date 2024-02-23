@@ -131,6 +131,7 @@ message Alert {
   string label = 21;
   repeated string rule_name = 22;
   repeated string policy_name = 23;
+  uint64 node_id=24;
 }
 
 message EventMatch {

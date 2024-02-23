@@ -354,6 +354,7 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     }
 
     @Override
+    @Transactional
     public void alertCounts(
             com.google.protobuf.Empty request,
             io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.AlertCount> responseObserver) {
@@ -407,7 +408,12 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            LOG.error("Noinstance available! " + e.getMessage());
+            LOG.error("Error while getting alerts by nodeId {}", nodeId, e);
+            Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while getting alerts with nodeId {} " + nodeId + e.getMessage())
+                    .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }
 

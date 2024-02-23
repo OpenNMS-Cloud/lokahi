@@ -168,8 +168,8 @@ watch(() => hasIPInterfaces.value, () => {
   if (hasIPInterfaces.value) {
     page.value = 1
     pageSize.value = 10
-    total.value = ipInterfaces.value?.length || 0
-    pageObjects.value = getPageObjects(ipInterfaces.value || [], page.value, pageSize.value)
+    total.value = ipInterfaces.value?.length ?? 0
+    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], page.value, pageSize.value)
   }
 })
 
@@ -189,14 +189,14 @@ const sortChanged = (sortObj: Record<string, string>) => {
 
 const updatePage = (v: number) => {
   if (hasIPInterfaces.value) {
-    pageObjects.value = getPageObjects(ipInterfaces.value || [], v, pageSize.value)
+    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], v, pageSize.value)
   }
 }
 
 const updatePageSize = (v: number) => {
   if (hasIPInterfaces.value) {
     pageSize.value = v
-    pageObjects.value = getPageObjects(ipInterfaces.value || [], page.value, v)
+    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], page.value, v)
   }
 }
 

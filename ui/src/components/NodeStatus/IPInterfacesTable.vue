@@ -138,7 +138,7 @@ const pageObjects = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
 const columns = computed(() => {
-    if (nodeStatusStore.isAzure) {
+  if (nodeStatusStore.isAzure) {
     return [
       { id: 'ipAddress', label: 'IP Address' },
       { id: 'privateIpId', label: 'Private IP ID' },
@@ -157,8 +157,8 @@ const columns = computed(() => {
   }
 })
 const hasIPInterfaces = computed(() => {
-    return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
-});
+  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
+})
 
 const ipInterfaces = computed(() => {
   return hasIPInterfaces.value ? nodeStatusStore.node.ipInterfaces : []

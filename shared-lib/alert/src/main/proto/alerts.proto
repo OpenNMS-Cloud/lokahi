@@ -300,6 +300,8 @@ message AlertEventDefinitionProto {
   string reductionKey = 4;
   string clearKey = 5;
   EventType eventType = 6;
+  string vendor = 7;
+  string enterpriseId = 8;
 }
 
 enum EventType {
@@ -315,6 +317,21 @@ message ListAlertEventDefinitionsResponse {
   repeated AlertEventDefinitionProto alertEventDefinitions = 1;
 }
 
+message VendorList {
+  repeated string  vendor = 1;
+}
+
+message EventDefinitionByVendor {
+  string  vendor = 1;
+  AlertEventDefinitionProto eventDefinition = 2;
+}
+
+message ListEventDefinitionsByVendor {
+  repeated  EventDefinitionByVendor eventDefinitionByVendor = 1;
+}
+
 service AlertEventDefinitionService {
   rpc listAlertEventDefinitions(ListAlertEventDefinitionsRequest) returns(ListAlertEventDefinitionsResponse);
+  rpc listVendors(google.protobuf.Empty) returns (VendorList);
+  rpc listAlertEventDefinitionsByVendor(ListAlertEventDefinitionsRequest) returns(ListEventDefinitionsByVendor);
 }

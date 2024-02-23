@@ -7,7 +7,7 @@
             &lt;p>A provisioning adapter failed for host.&lt;/p>
         </logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%host%:%parm[reason]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%host%:%parm[reason]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/internal/provisiond/scheduledNodeScanStarted</uei>
@@ -79,7 +79,7 @@
             %parm[importResource]%&lt;/p>
         </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%parm[importResource]%" alarm-type="2" clear-key="uei.opennms.org/internal/importer/importFailed:%parm[importResource]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%parm[importResource]%" alert-type="2" clear-key="uei.opennms.org/internal/importer/importFailed:%parm[importResource]%" auto-clean="true"/>
    </event>
    <event>
       <uei>uei.opennms.org/internal/importer/importFailed</uei>
@@ -90,6 +90,6 @@
             &lt;p>This event indicates the model-importer process has failed from resource: %parm[importResource]%&lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%parm[importResource]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[importResource]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

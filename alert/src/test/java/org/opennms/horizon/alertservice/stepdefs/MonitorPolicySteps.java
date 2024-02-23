@@ -43,6 +43,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.assertj.core.groups.Tuple;
 import org.junit.platform.commons.util.StringUtils;
 import org.opennms.horizon.alerts.proto.Alert;
@@ -145,6 +146,7 @@ public class MonitorPolicySteps {
                 .listAlertEventDefinitions(request)
                 .getAlertEventDefinitionsList();
         return eventDefinitionsList.stream()
+                .filter(proto -> Strings.isNotBlank(proto.getName()))
                 .collect(Collectors.toMap(AlertEventDefinitionProto::getName, Function.identity()));
     }
 
@@ -335,5 +337,18 @@ public class MonitorPolicySteps {
             assertThat(lastException.getClass().getSimpleName()).isEqualTo(exceptionName);
             assertThat(lastException.getMessage()).isEqualTo(message);
         }
+    }
+
+    @Then("Validate whether we have loaded all event definitions of size greater than or equal to {int}")
+    public void validateWhetherWeHaveLoadedAllEventDefinitions(int count) {
+
+        ListAlertEventDefinitionsRequest request = ListAlertEventDefinitionsRequest.newBuilder()
+                .setEventType(EventType.SNMP_TRAP)
+                .build();
+        List<AlertEventDefinitionProto> eventDefinitionsList = this.grpcClient
+                .getAlertEventDefinitionStub()
+                .listAlertEventDefinitions(request)
+                .getAlertEventDefinitionsList();
+        assertThat(eventDefinitionsList.size()).isGreaterThanOrEqualTo(count);
     }
 }

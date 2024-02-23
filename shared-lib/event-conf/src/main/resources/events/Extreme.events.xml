@@ -36,7 +36,7 @@ the unit has come back on line.&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -73,7 +73,7 @@ normal operation.&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -108,7 +108,7 @@ is now operating correctly.&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/fanfailed:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/fanfailed:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -143,7 +143,7 @@ access due to incorrect username or password&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -288,7 +288,7 @@ the DOS threshold is cleared .&lt;/p>&lt;table>
 			extremeDosAlertLevel=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeDosThresholdReached:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeDosThresholdReached:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -318,7 +318,7 @@ the DOS threshold is crossed for any of the ports.&lt;/p>&lt;table>
 			extremeDosAlertLevel=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -353,7 +353,7 @@ the DOS threshold is crossed for any of the ports.&lt;/p>&lt;table>
 			extremeEnhDosPortRateLimitThreshold=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -388,7 +388,7 @@ the DOS threshold is cleared for any of the ports.&lt;/p>&lt;table>
 			extremeEnhDosPortRateLimitThreshold=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeEnhDosThresholdReached:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeEnhDosThresholdReached:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1162,7 +1162,7 @@ packet received on that port if
 			extremeCpuMonitorThreshold=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1206,7 +1206,7 @@ packet received on that port if
 			noOfDaysLeft=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1245,7 +1245,7 @@ packet received on that port if
 			noOfDaysLeft=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1417,7 +1417,7 @@ The trap will not be generated for discovering state.&lt;/p>&lt;table>
 			extremeSystemPowerState=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1461,7 +1461,7 @@ the unit has come back on line.&lt;/p>&lt;table>
 			extremeCurrentTemperature=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1503,7 +1503,7 @@ normal operation.&lt;/p>&lt;table>
 			extremeFanNumber=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1543,7 +1543,7 @@ is now operating correctly.&lt;/p>&lt;table>
 			extremeFanNumber=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeFanfailed:%dpname%:%nodeid%:%parm[#3]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeFanfailed:%dpname%:%nodeid%:%parm[#3]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1578,7 +1578,7 @@ refused access due to incorrect username or password&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1618,7 +1618,7 @@ Presumably a redundant power-supply has taken over.&lt;/p>&lt;table>
 			extremePowerSupplyNumber=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1658,7 +1658,7 @@ has come back to life without causing an agent restart.&lt;/p>&lt;table>
 			extremePowerSupplyNumber=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremePowerSupplyFail:%dpname%:%nodeid%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremePowerSupplyFail:%dpname%:%nodeid%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1693,7 +1693,7 @@ an alarm condition.&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1728,7 +1728,7 @@ indicating an alarm condition.&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeRpsAlarm:%dpname%:%nodeid%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeRpsAlarm:%dpname%:%nodeid%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1768,7 +1768,7 @@ was created in the last thirty seconds.&lt;/p>&lt;table>
 			sysDescr=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1984,7 +1984,7 @@ the specified extremeSlotNumber has changed.&lt;/p>&lt;table>
 			extremeSlotModuleState=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2072,7 +2072,7 @@ the specified extremeSlotNumber has changed.&lt;/p>&lt;table>
 			extremeEsrpTrackedIpRoutes=%parm[#12]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2098,7 +2098,7 @@ due to the failure of another server load balancer.&lt;/p>&lt;table>&lt;/table><
 			extremeSlbUnitAdded trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2125,7 +2125,7 @@ its ping check may be failing.&lt;/p>&lt;table>&lt;/table></descr>
 			extremeSlbUnitRemoved trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2273,7 +2273,7 @@ out by the device.&lt;/p>&lt;table>
 			extremeSlotNumber=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2402,7 +2402,7 @@ out by the device.&lt;/p>&lt;table>
 			extremeHealthCheckMaxRetries=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2442,7 +2442,7 @@ extremeCpuUtilRisingThreshold is touched/crossed &lt;/p>&lt;table>
 			extremeCpuUtilRisingThreshold=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2483,7 +2483,7 @@ extremeCpuUtilRisingThreshold&lt;/p>&lt;table>
 			extremeCpuUtilRisingThreshold=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeCpuUtilizationRisingTrap:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/extremeCpuUtilizationRisingTrap:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2522,7 +2522,7 @@ extremeCpuUtilRisingThreshold&lt;/p>&lt;table>
 			extremeNPModuleProcessorState=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2569,7 +2569,7 @@ extremeCpuUtilRisingThreshold&lt;/p>&lt;table>
 			extremeMsmFailoverCause=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2619,7 +2619,7 @@ Thus, a new master (this switch) was elected.&lt;/p>&lt;table>
 			extremeEsrpState=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2674,7 +2674,7 @@ Thus, a new master (this switch) was elected.&lt;/p>&lt;table>
 			extremeExceededByteCount=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2705,7 +2705,7 @@ peer session reaches the threshold limit.&lt;/p>&lt;table>
 			bgpPeerRemoteAddr=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2736,7 +2736,7 @@ peer session reaches the maximum configured limit.&lt;/p>&lt;table>
 			bgpPeerRemoteAddr=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2787,7 +2787,7 @@ port.&lt;/p>&lt;table>
 			extremeMacSecurityVlanId=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2838,7 +2838,7 @@ configured  as a 'secure mac' on some other port(s).&lt;/p>&lt;table>
 			extremeMacSecurityPortIfIndex=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2888,7 +2888,7 @@ configured, when a new MAC address is learnt on that port.&lt;/p>&lt;table>
 			extremeMacSecurityPortIfIndex=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2974,7 +2974,7 @@ authentication and logs in successfully into the network.&lt;/p>&lt;table>
 			extremeNetloginSessionStatus=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3061,7 +3061,7 @@ authenticated and logged in supplicant. &lt;/p>&lt;table>
 			extremeNetloginSessionStatus=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3147,7 +3147,7 @@ netlogin supplicant&lt;/p>&lt;table>
 			extremeNetloginSessionStatus=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3197,7 +3197,7 @@ configured, when a gratuitous ARP does not match the internal static or secured 
                         extremeArpSecurityMacAddress=%parm[#5]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3344,7 +3344,7 @@ when the EAPS domain has a state change.&lt;/p>&lt;table>
 			extremeEapsState=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3410,7 +3410,7 @@ for the first time, while its state is not in Fail state.&lt;/p>&lt;table>
 			extremeEapsState=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3476,7 +3476,7 @@ is cleared.&lt;/p>&lt;table>
 			extremeEapsState=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3543,7 +3543,7 @@ switch that has issued this trap message.&lt;/p>&lt;table>
 			extremeEapsState=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3598,7 +3598,7 @@ generated when an EAPS primary or secondary port changes state.&lt;/p>&lt;table>
 			extremeEapsLastStatusChange=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3629,7 +3629,7 @@ after the first change is made to limit the number of traps sent&lt;/p>&lt;table
 			extremeEapsLastConfigurationChange=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -3713,7 +3713,7 @@ peer session reaches the threshold limit.&lt;/p>&lt;table>
 			bgpM2PeerLocalAddrType=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -3759,7 +3759,7 @@ peer session reaches the maximum configured limit.&lt;/p>&lt;table>
 			bgpM2PeerLocalAddrType=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -5081,7 +5081,7 @@ the specified interface has been detected.&lt;/p>&lt;table>
 			dsx1LineStatus=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -5131,7 +5131,7 @@ the specified interface has been detected.&lt;/p>&lt;table>
 			dsx1LineStatus=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -5181,7 +5181,7 @@ the specified interface has been detected.&lt;/p>&lt;table>
 			dsx1LineStatus=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/wanDsx1LossOfMasterClock:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/wanDsx1LossOfMasterClock:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -5231,7 +5231,7 @@ the specified interface has been detected.&lt;/p>&lt;table>
 			dsx3LineStatus=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -5281,7 +5281,7 @@ the specified interface has been detected.&lt;/p>&lt;table>
 			dsx3LineStatus=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -5331,6 +5331,6 @@ the specified interface has been detected.&lt;/p>&lt;table>
 			dsx3LineStatus=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/wanDsx3LossOfMasterClock:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/extreme/traps/wanDsx3LossOfMasterClock:%dpname%:%nodeid%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
 </events>

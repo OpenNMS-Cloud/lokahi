@@ -124,7 +124,7 @@
          <decode varbindvalue="30" varbinddecodedstring="tcpFinNoAck"/>
          <decode varbindvalue="31" varbinddecodedstring="ipFragmentation"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%source%:%snmphost%:%id%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#5]%" alarm-type="1"/>
+      <alert-data reduction-key="%source%:%snmphost%:%id%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#5]%" alert-type="1"/>
    </event>
    <event>
       <mask>

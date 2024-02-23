@@ -1,68 +1,90 @@
 <template>
-  <div>
-    <section class="node-component-header">
-      <h3 data-test="heading" class="node-label">Tags</h3>
+  <div class="node-tag-section">
+    <section class="feather-row">
+      <h3 data-test="heading" class="feather-col-6">Tags</h3>
+      <FeatherButton text class="feather-col-6 btn">Manage</FeatherButton>
     </section>
     <section class="node-component-content">
       <FeatherChipList
-        label=""
-        data-test="node-tags-chip-list"
+      label=""
+      data-test="node-tags-chip-list"
       >
         <FeatherChip
-          v-for="(item, index) in chips"
-          :key="index"
+        v-for="(tag) in tagStore?.filteredTags"
+        :key="tag?.id"
         >
-          <span>{{ item }}</span>
-          <template v-slot:icon
-            ><FeatherIcon
-              @click="unselectItem(item as string)"
-              :icon="CancelIcon"
-          /></template>
+          <span class="node-tag-content">{{ tag?.name }}</span>
+          <FeatherIcon
+          @click="removeTagFromNode(tag)"
+          :icon="CancelIcon"
+          class="pointer"
+          />
         </FeatherChip>
-      </FeatherChipList>
-    </section>
+    </FeatherChipList>
+  </section>
   </div>
-</template>
+  </template>
 
 <script lang="ts" setup>
 import CancelIcon from '@featherds/icon/navigation/Cancel'
+import { useTagStore } from '@/store/Components/tagStore'
+import { useNodeMutations } from '@/store/Mutations/nodeMutations'
+import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import useSnackbar from '@/composables/useSnackbar'
 
-// TODO: Actual implementation
-const chips = ref<string[]>(['Tag Name 1', 'Other Name', 'Name 3'])
+const nodeMutations = useNodeMutations()
+const nodeStatusStore = useNodeStatusStore()
+const { showSnackbar } = useSnackbar()
+const tagStore = useTagStore()
 
-const unselectItem = (name: string) => {
-  // TODO
-  console.log(`Unselected tag: ${name}`)
+const removeTagFromNode = async (tag: any) => {
+  if (tag?.id) {
+    const deleteTagResult = await nodeMutations.removeTagsFromNodes({ nodeIds: nodeStatusStore.nodeId, tagIds: tag?.id })
+    if (!deleteTagResult.error) {
+      tagStore.filterTag(tag)
+      showSnackbar({
+        msg: 'Tag successfully removed from node.'
+      })
+    } else {
+      showSnackbar({
+        msg: 'Error removing tag.'
+      })
+    }
+  }
 }
-
 </script>
 
-<style lang="scss" scoped>
-@use '@featherds/styles/themes/variables';
-@use '@/styles/vars';
-@use '@/styles/mediaQueriesMixins';
-@use '@featherds/styles/mixins/typography';
+  <style lang="scss" scoped>
+  @use '@featherds/styles/themes/variables';
+  @use '@/styles/vars';
+  @use '@/styles/mediaQueriesMixins';
+  @use '@featherds/styles/mixins/typography';
 
-.node-component-header {
-  margin-bottom: var(variables.$spacing-s);
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: space-between;
+  .node-tag-section {
+    margin: 0px 1.5rem 1.5rem 1.5rem;
+    .feather-row {
+      margin-bottom: var(variables.$spacing-s);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+      .btn-text {
+        color: var(variables.$primary);
+        font-weight: bold;
+        &:hover, &:focus {
+          border-color: transparent;
+        }
+      }
+  }
 }
-
-.node-component-label {
-  margin: 0;
-  line-height: 20px;
-  letter-spacing: 0.28px;
+  .node-component-content {
+    .node-tag-content {
+      padding-right: var(variables.$spacing-s);
+    }
+    :deep(.chip-icon) {
+      background-color: transparent;
+      padding: 6px 8px 6px 12px;
+    }
 }
+  </style>
 
-.node-component-content {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-</style>

@@ -168,7 +168,7 @@ public class GrpcNodeService {
     @GraphQLQuery(name = "nodeCount")
     public Mono<Integer> getNodeCount(@GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(
-                Long.valueOf(client.getNodeCount(headerUtil.getAuthHeader(env))).intValue());
+            Math.toIntExact(client.getNodeCount(headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery(name = "downloadTopN")

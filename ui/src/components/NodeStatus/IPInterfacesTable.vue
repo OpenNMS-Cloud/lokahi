@@ -18,7 +18,6 @@
               <FeatherIcon :icon="fsIcons.Search" />
             </template>
           </FeatherInput>
-          {{ searchVal }}
         </div>
         <div class="download-csv">
           <FeatherButton
@@ -96,7 +95,7 @@
       @update:modelValue="updatePage"
       @update:pageSize="updatePageSize"
       class="ip-interfaces-pagination py-2"
-      v-if="nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0"
+      v-if="hasIPInterfaces"
     ></FeatherPagination>
     </div>
   </TableCard>
@@ -121,23 +120,16 @@ const fsIcons = markRaw({
 })
 
 const sort = reactive({
-  iPAddress: SORT.NONE,
-  privateIPID: SORT.NONE,
+  ipAddress: SORT.NONE,
+  privateIpId: SORT.NONE,
   interfaceName: SORT.NONE,
-  publicIP: SORT.NONE,
-  graphs: SORT.NONE,
+  publicIpId: SORT.NONE,
+  publicIpAddress: SORT.NONE,
   location: SORT.NONE,
-  iPHostname: SORT.NONE,
+  hostname: SORT.NONE,
   netmask: SORT.NONE,
-  primary: SORT.NONE
+  snmpPrimary: SORT.NONE
 }) as any
-
-// Function to retrieve objects for a given page
-function getPageObjects(array: Array<any>, pageNumber: number, pageSize: number) {
-  const startIndex = (pageNumber - 1) * pageSize
-  const endIndex = startIndex + pageSize
-  return array.slice(startIndex, endIndex)
-}
 
 const page = ref(0)
 const pageSize = ref(0)
@@ -145,56 +137,66 @@ const total = ref(0)
 const pageObjects = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
-let columns = [] as any[]
-
-watchEffect(() => {
-  if (nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0) {
-    page.value = 1
-    pageSize.value = 10
-    total.value = nodeStatusStore?.node?.ipInterfaces?.length
-    pageObjects.value = getPageObjects(nodeStatusStore?.node?.ipInterfaces, page.value, pageSize.value)
-  }
-})
-
-watchEffect(() => {
-  if (nodeStatusStore.isAzure) {
-    columns = [
-      { id: 'iPAddress', label: 'IP Address' },
-      { id: 'privateIPID', label: 'Private IP ID' },
+const columns = computed(() => {
+    if (nodeStatusStore.isAzure) {
+    return [
+      { id: 'ipAddress', label: 'IP Address' },
+      { id: 'privateIpId', label: 'Private IP ID' },
       { id: 'interfaceName', label: 'Interface Name' },
-      { id: 'publicIP', label: 'Public IP ID' },
-      { id: 'graphs', label: 'Graphs' },
+      { id: 'publicIpId', label: 'Public IP ID' },
+      { id: 'publicIpAddress', label: 'Graphs' },
       { id: 'location', label: 'Location' }
     ]
-  } else if (!nodeStatusStore.isAzure) {
-    columns = [
-      { id: 'IP Address', label: 'IP Address' },
-      { id: 'iPHostname', label: 'IP Hostname' },
+  } else {
+    return [
+      { id: 'ipAddress', label: 'IP Address' },
+      { id: 'hostname', label: 'IP Hostname' },
       { id: 'netmask', label: 'Netmask' },
-      { id: 'Primary', label: 'Primary' }
+      { id: 'snmpPrimary', label: 'Primary' }
     ]
   }
 })
+const hasIPInterfaces = computed(() => {
+    return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
+});
+
+const ipInterfaces = computed(() => {
+  return hasIPInterfaces.value ? nodeStatusStore.node.ipInterfaces : []
+})
+
+watch(() => hasIPInterfaces.value, () => {
+  if (hasIPInterfaces.value) {
+    page.value = 1
+    pageSize.value = 10
+    total.value = ipInterfaces.value?.length || 0
+    pageObjects.value = getPageObjects(ipInterfaces.value || [], page.value, pageSize.value)
+  }
+})
+
+// Function to retrieve objects for a given page
+const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
+  const startIndex = (pageNumber - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  return array.slice(startIndex, endIndex)
+}
 
 const sortChanged = (sortObj: Record<string, string>) => {
-  // store.setTopNNodesTableSort(sortObj)
-
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
-
   sort[sortObj.property] = sortObj.value
 }
 
 const updatePage = (v: number) => {
-  if (nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0) {
-    pageObjects.value = getPageObjects(nodeStatusStore?.node?.ipInterfaces, v, pageSize.value)
+  if (hasIPInterfaces.value) {
+    pageObjects.value = getPageObjects(ipInterfaces.value || [], v, pageSize.value)
   }
 }
 
 const updatePageSize = (v: number) => {
-  if (nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0) {
-    pageObjects.value = getPageObjects(nodeStatusStore?.node?.ipInterfaces, page.value, v)
+  if (hasIPInterfaces.value) {
+    pageSize.value = v
+    pageObjects.value = getPageObjects(ipInterfaces.value || [], page.value, v)
   }
 }
 

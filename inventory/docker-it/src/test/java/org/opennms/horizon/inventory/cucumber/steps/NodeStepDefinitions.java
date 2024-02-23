@@ -215,22 +215,42 @@ public class NodeStepDefinitions {
         return foundMessages == expectedMessages;
     }
 
-    @When("searching ip interfaces by node")
-    public void searchingIpInterfacesByNode() {
-
+    @Given("a new node with IpInterface along with node label {string} and ipAddress {string}")
+    public void aNewNodeWithIpInterfaceAlongWithNodeLabelAndIpAddress(String nodeLabel, String ipAddress) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        var nodes = nodeServiceBlockingStub.listNodes(Empty.newBuilder().build());
-        var filterNodes = nodes.getNodesList().stream().toList();
-        var node = filterNodes.get(0);
-
-        ipInterfaceList = nodeServiceBlockingStub.listSearchIpInterfaceByQuery(SearchIpInterfaceQuery.newBuilder().
-            setNodeId(node.getIpInterfacesList().get(0).getNodeId()).setIpAddress(node.getIpInterfacesList().get(0).getIpAddress())
-            .setSearchTerm(node.getIpInterfacesList().get(0).getHostname()).build());
+        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(nodeLabel)
+            .setManagementIp(ipAddress)
+            .setLocationId(backgroundHelper.findLocationId("Default"))
+            .build());
     }
 
-    @Then("verify the list of IpInterfaces has size greater than {int}.")
+    @Then("verify that a new node is created with the ip address {string}")
+    public void verifyThatANewNodeIsCreatedWithTheIpAddress(String ipAddress) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
+            .filter(fetched -> ipAddress.equals(fetched.getIpInterfaces(0).getIpAddress()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Node " + ipAddress + " not found"));
+
+        assertEquals(ipAddress, node.getIpInterfaces(0).getIpAddress());
+    }
+
+    @Then("fetch a list of IpInterfaces by node using search term {string}")
+    public void fetchAListOfIpInterfacesByNodeUsingSearchTerm(String searchTerm) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
+            .filter(fetch -> fetch.getIpInterfacesList().stream()
+                .anyMatch(ipInterface -> searchTerm.equals(ipInterface.getIpAddress())
+                    || ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase())))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
+
+
+        ipInterfaceList = nodeServiceBlockingStub.listSearchIpInterfaceByQuery(SearchIpInterfaceQuery.newBuilder().setNodeId(node.getId()).setSearchTerm(searchTerm).build());
+    }
+
+    @Then("verify the list of IpInterfaces has size greater than {int}")
     public void verifyTheListOfIpInterfacesHasSizeGreaterThan(int size) {
-        assertTrue(ipInterfaceList.getIpInterfaceList().size() > size);
+        assertTrue(ipInterfaceList.getIpInterfaceCount() > size);
     }
-
 }

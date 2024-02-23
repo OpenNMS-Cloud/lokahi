@@ -77,9 +77,9 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
         "WHERE ip.tenantId = :tenantId " +
         "AND ip.node.id = :nodeId " +
         "AND (ip.ipAddress = :ipAddress " +
-        "OR LOWER(ip.hostname) LIKE LOWER(CONCAT('%', :hostName, '%')))")
-    Optional<IpInterface> findBytenantIdAndSearchIpInterfacesTerm(@Param("tenantId") String tenantId,
+        "OR LOWER(ip.hostname) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+    List<IpInterface> findBytenantIdAndSearchIpInterfacesTerm(@Param("tenantId") String tenantId,
                                                                   @Param("nodeId") long nodeId,
                                                                   @Param("ipAddress") InetAddress ipAddress,
-                                                                  @Param("hostName") String hostName);
+                                                                  @Param("searchTerm") String searchTerm);
 }

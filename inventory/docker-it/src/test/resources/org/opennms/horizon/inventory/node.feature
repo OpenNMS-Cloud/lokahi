@@ -13,6 +13,7 @@ Feature: Node
     Then fetch a list of nodes by node label with search term "node"
     Then verify the list of nodes has size 1 and labels contain "node"
     Then verify node topic has 2 messages with tenant "node-tenant-stream"
+    Then count the list of nodes response not equal to 0
 
   Scenario: Add a node and verify list nodes by node label search does not return result
     Given a new node with label "node-label", ip address "127.0.0.1" in location named "Default"

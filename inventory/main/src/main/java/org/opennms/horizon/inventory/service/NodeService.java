@@ -295,7 +295,10 @@ public class NodeService {
                 InetAddressUtils.getInetAddress(ipAddress), locationId, tenantId, ScanType.DISCOVERY_SCAN);
         return optionalIpAddress.map(IpInterface::getNode).map(mapper::modelToDTO);
     }
-
+    @Transactional(readOnly = true)
+    public Long getNodeCount(String tenantId) {
+        return nodeRepository.countDistinctNodes(tenantId);
+    }
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
 

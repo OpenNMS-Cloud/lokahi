@@ -18,7 +18,8 @@
  * either express or implied.  See the License for the specific
  * language governing permissions and limitations under the
  * License.
- */
+ *//*
+
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,7 +39,8 @@ public class SnmpInterfaceStepDefinitions {
         this.backgroundHelper = backgroundHelper;
     }
 
- /*   @Then("fetch a list of snmp_interface by name with search {string}")
+ */
+/*   @Then("fetch a list of snmp_interface by name with search {string}")
     public void fetchAListOfSnmpInterfaceByNameWithSearch(String search) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         SnmpInterfacesList list = nodeServiceBlockingStub.listSnmpInterfaces(
@@ -46,5 +48,7 @@ public class SnmpInterfaceStepDefinitions {
         list.getSnmpInterfacesList().stream()
                 .map(SnmpInterfaceDTO::getIfName)
                 .forEach(label -> assertTrue(label.contains(search)));
-    }*/
+    }*//*
+
 }
+*/

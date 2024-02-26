@@ -215,12 +215,12 @@ public class NodeStepDefinitions {
         return foundMessages == expectedMessages;
     }
 
-    @Given("a new node with IpInterface along with node label {string} and ipAddress {string}")
-    public void aNewNodeWithIpInterfaceAlongWithNodeLabelAndIpAddress(String nodeLabel, String ipAddress) {
+    @Given("a new node with IpInterface along with node label {string} ip address {string} in location named {string}")
+    public void aNewNodeWithIpInterfaceAlongWithNodeLabelIpAddressInLocationNamed(String nodeLabel, String ipAddress, String loccation) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(nodeLabel)
             .setManagementIp(ipAddress)
-            .setLocationId(backgroundHelper.findLocationId("Default"))
+            .setLocationId(backgroundHelper.findLocationId(loccation))
             .build());
     }
 
@@ -253,4 +253,6 @@ public class NodeStepDefinitions {
     public void verifyTheListOfIpInterfacesHasSizeGreaterThan(int size) {
         assertTrue(ipInterfaceList.getIpInterfaceCount() > size);
     }
+
+
 }

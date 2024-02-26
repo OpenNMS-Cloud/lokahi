@@ -28,7 +28,7 @@ Feature: Node
     Then [Node] Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate node alias with name alias1"
 
   Scenario: Search IpInterfaces by Node
-    Given a new node with IpInterface along with node label "my-label" and ipAddress "128.0.0.1"
+    Given a new node with IpInterface along with node label "my-label" ip address "128.0.0.1" in location named "Default"
     Then verify that a new node is created with the ip address "128.0.0.1"
     Then fetch a list of IpInterfaces by node using search term "128.0.0.1"
     Then verify the list of IpInterfaces has size greater than 0

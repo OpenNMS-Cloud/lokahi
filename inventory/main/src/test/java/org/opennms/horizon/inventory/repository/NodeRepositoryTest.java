@@ -86,7 +86,7 @@ public class NodeRepositoryTest {
         node.setDiscoveryIds(new ArrayList<>(Arrays.asList(1L,2L)));
         node.setNodeLabel("test");
         nodeRepository.save(node);
-        var result = nodeRepository.findByTenantId("opennms-prime");
+        var result = nodeRepository.findByTenantIdAndDiscoveryIdsContain("opennms-prime", 2L);
         Assertions.assertFalse(result.isEmpty());
     }
 }

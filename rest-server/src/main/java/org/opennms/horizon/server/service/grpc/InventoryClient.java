@@ -69,6 +69,7 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
+import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.model.inventory.MonitoredServiceStatusRequest;
@@ -533,5 +534,12 @@ public class InventoryClient {
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .getNodeCount(Empty.newBuilder().build())
                 .getValue();
+    }
+
+    public List<IpInterfaceDTO> listIpInterfacesByNodeSearch(Long nodeId,String ipInterfaceSearchTerm, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        SearchIpInterfaceQuery query = SearchIpInterfaceQuery.newBuilder().setNodeId(nodeId).setSearchTerm(ipInterfaceSearchTerm).build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).withDeadlineAfter(deadline, TimeUnit.MILLISECONDS).listSearchIpInterfaceByQuery(query).getIpInterfaceList();
     }
 }

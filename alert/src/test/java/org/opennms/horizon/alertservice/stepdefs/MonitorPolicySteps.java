@@ -21,6 +21,12 @@
  */
 package org.opennms.horizon.alertservice.stepdefs;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -28,6 +34,13 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -47,20 +60,6 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -365,13 +364,13 @@ public class MonitorPolicySteps {
     @Then("Fetch event defs for vendor {string} and verify size is greater than or equal to {int}")
     public void fetchEventDefsForVendorAndVerifySizeIsGreaterThanOrEqualTo(String vendor, int size) {
         ListAlertEventDefinitionsRequest request = ListAlertEventDefinitionsRequest.newBuilder()
-            .setEventType(EventType.SNMP_TRAP)
-            .build();
-        var eventDefinitionsByVendor = this.grpcClient
-            .getAlertEventDefinitionStub()
-            .listAlertEventDefinitionsByVendor(request);
-        var genericEventDefs = eventDefinitionsByVendor.getEventDefinitionByVendorList()
-            .stream().filter(eventDef -> eventDef.getVendor().equals(vendor)).toList();
+                .setEventType(EventType.SNMP_TRAP)
+                .build();
+        var eventDefinitionsByVendor =
+                this.grpcClient.getAlertEventDefinitionStub().listAlertEventDefinitionsByVendor(request);
+        var genericEventDefs = eventDefinitionsByVendor.getEventDefinitionByVendorList().stream()
+                .filter(eventDef -> eventDef.getVendor().equals(vendor))
+                .toList();
         assertThat(genericEventDefs.size()).isGreaterThanOrEqualTo(size);
     }
 }

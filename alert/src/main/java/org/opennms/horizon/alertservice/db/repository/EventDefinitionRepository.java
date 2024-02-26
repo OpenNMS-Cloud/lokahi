@@ -21,14 +21,13 @@
  */
 package org.opennms.horizon.alertservice.db.repository;
 
+import java.util.List;
+import java.util.Optional;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface EventDefinitionRepository extends JpaRepository<EventDefinition, Long> {

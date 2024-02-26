@@ -25,6 +25,7 @@ import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
@@ -40,8 +41,6 @@ import org.opennms.horizon.alertservice.mapper.EventDefinitionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -99,24 +98,25 @@ public class AlertEventDefinitionGrpcService
         try {
             List<EventDefinition> eventDefinitions = eventDefinitionRepository.findByEventType(request.getEventType());
             var eventDefinitionListByVendor = eventDefinitions.stream()
-                .map(eventDefinitionMapper::entityToProto)
-                // Only filter events with reduction key
-                .filter(alertEventDefinitionProto -> Strings.isNotBlank(alertEventDefinitionProto.getReductionKey()))
-                .map(eventDef -> EventDefinitionByVendor.newBuilder()
-                    .setVendor(eventDef.getVendor())
-                    .setEventDefinition(eventDef)
-                    .build())
-                .toList();
+                    .map(eventDefinitionMapper::entityToProto)
+                    // Only filter events with reduction key
+                    .filter(alertEventDefinitionProto ->
+                            Strings.isNotBlank(alertEventDefinitionProto.getReductionKey()))
+                    .map(eventDef -> EventDefinitionByVendor.newBuilder()
+                            .setVendor(eventDef.getVendor())
+                            .setEventDefinition(eventDef)
+                            .build())
+                    .toList();
             responseObserver.onNext(ListEventDefinitionsByVendor.newBuilder()
-                .addAllEventDefinitionByVendor(eventDefinitionListByVendor)
-                .build());
+                    .addAllEventDefinitionByVendor(eventDefinitionListByVendor)
+                    .build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             LOG.error("Exception while retrieving eventDefinitions by vendor", e);
             var status = Status.newBuilder()
-                .setCode(Code.INTERNAL.getNumber())
-                .setMessage("failed to retrieve eventDefinitions by vendor")
-                .build();
+                    .setCode(Code.INTERNAL.getNumber())
+                    .setMessage("failed to retrieve eventDefinitions by vendor")
+                    .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
     }

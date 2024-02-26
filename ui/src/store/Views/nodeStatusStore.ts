@@ -9,9 +9,10 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
   const exporters = ref<DeepPartial<Exporter>[]>([])
-
+  const nodeId = ref()
   const setNodeId = (id: number) => {
     nodeStatusQueries.setNodeId(id)
+    nodeId.value = id
   }
 
   const fetchExporters = async (id: number) => {
@@ -70,6 +71,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     isAzure: computed(() => fetchedData.value.node.scanType === AZURE_SCAN),
     fetchExporters,
     exporters,
-    node
+    node,
+    nodeId
   }
 })

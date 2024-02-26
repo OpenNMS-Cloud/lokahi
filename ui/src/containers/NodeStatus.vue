@@ -50,7 +50,7 @@
       </template>
       <!-- Status -->
       <FeatherTabPanel>
-        <NodeStatusTabContent />
+        <NodeStatusTabContent/>
         <!-- <NodeInfoTable /> -->
       </FeatherTabPanel>
       <!-- Interfaces -->
@@ -81,20 +81,48 @@ import EditIcon from '@featherds/icon/action/EditMode'
 import useModal from '@/composables/useModal'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
+import { useInventoryStore } from '@/store/Views/inventoryStore'
+import { useTagStore } from '@/store/Components/tagStore'
 
 const nodeStatusStore = useNodeStatusStore()
 const queries = useNodeStatusQueries()
 const route = useRoute()
 const { openModal, closeModal, isVisible } = useModal()
-
+const inventoryStore = useInventoryStore()
+const tagStore  = useTagStore()
 const onManageTags = () => {
   console.log('Manage Tags clicked')
 }
 
+const updateFilteredTags = (nodeId: number) => {
+  if (nodeId) {
+    const filteredNodes = inventoryStore?.nodes?.filter((node) => node?.id === nodeId)
+    const filteredTags = filteredNodes?.[0]?.tags || []
+
+    tagStore.setFilteredTags(filteredTags)
+  } else {
+    tagStore.setFilteredTags([])
+  }
+}
+
+const fetchDataAndInitialize = async (nodeId: any) => {
+  await inventoryStore.init()
+  if (nodeId) {
+    updateFilteredTags(nodeId)
+  }
+}
 onBeforeMount(() => {
   const nodeId = Number(route.params.id)
   nodeStatusStore.setNodeId(nodeId)
   nodeStatusStore.fetchExporters(nodeId)
+  fetchDataAndInitialize(nodeId)
+})
+
+watchEffect(() => {
+  const nodeId = nodeStatusStore?.nodeId
+  if (nodeId) {
+    updateFilteredTags(nodeId)
+  }
 })
 </script>
 

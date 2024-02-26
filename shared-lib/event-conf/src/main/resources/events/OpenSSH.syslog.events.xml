@@ -18,7 +18,7 @@
             &lt;p>Invalid user %parm[user]% from host %parm[remoteHost]% failed OpenSSH %parm[authMethod]% authentication &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/openssh/syslog/sshd/passwordFailure</uei>
@@ -39,7 +39,7 @@
             &lt;p>User %parm[user]% from host %parm[remoteHost]% failed OpenSSH %parm[authMethod]% authentication &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/openssh/syslog/sshd/authenticationRefused</uei>
@@ -56,7 +56,7 @@
             &lt;p>OpenSSH server on node %nodelabel% refused to perform some authentication &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/openssh/syslog/sshd/bindFailure</uei>
@@ -75,7 +75,7 @@
             &lt;p>OpenSSH sshd failed to bind to port %parm[bindPort]% of address %parm[bindAddress]% &lt;/p>
         </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[bindAddress]%:%parm[bindPort]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[bindAddress]%:%parm[bindPort]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/openssh/syslog/sshd/totalBindFailure</uei>
@@ -91,7 +91,7 @@
             &lt;p>OpenSSH sshd failed to bind any address on host %nodelabel%  &lt;/p>
         </logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/openssh/syslog/sshd/unknownMessage</uei>

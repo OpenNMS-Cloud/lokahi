@@ -22,6 +22,7 @@
 package org.opennms.horizon.events.api;
 
 import java.util.List;
+import java.util.Map;
 import org.opennms.horizon.events.conf.xml.Event;
 
 public interface EventConfDao {
@@ -29,4 +30,6 @@ public interface EventConfDao {
     Event findByEvent(org.opennms.horizon.events.xml.Event matchingEvent);
 
     List<String> getEventUEIs();
+
+    Map<String, Event> getAllEventsByUEI();
 }

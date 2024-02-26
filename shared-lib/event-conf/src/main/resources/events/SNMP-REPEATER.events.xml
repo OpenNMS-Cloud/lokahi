@@ -215,7 +215,7 @@ to all configured recipients.)&lt;/p>&lt;table>
 			rptrInfoOperStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -265,7 +265,7 @@ to all configured recipients.)&lt;/p>&lt;table>
 			rptrInfoOperStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/standard/rfc2108/traps/rptrInfoHealthFailure:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/standard/rfc2108/traps/rptrInfoHealthFailure:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -324,6 +324,6 @@ and warmStart trap PDUs.&lt;/p>&lt;table>
 			rptrInfoOperStatus=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
 </events>

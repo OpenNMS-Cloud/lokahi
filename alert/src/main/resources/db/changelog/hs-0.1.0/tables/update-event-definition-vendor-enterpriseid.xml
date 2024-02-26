@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="hs-0.1.0-add-vendor-enterpriseid-to-event-defintion" author="cgorantla">
+        <addColumn tableName="event_definition">
+            <column name="enterprise_id" type="text" />
+        </addColumn>
+        <addColumn tableName="event_definition">
+            <column name="vendor" type="text" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="hs-0.1.0-drop-not-null-constraint-for-name-in-event-defintion" author="cgorantla">
+        <dropNotNullConstraint tableName="event_definition" columnName="name"/>
+    </changeSet>
+    <changeSet id="hs-0.1.0-drop-not-null-constraint-for-reductionkey-in-event-defintion" author="cgorantla">
+        <dropNotNullConstraint tableName="event_definition" columnName="reduction_key"/>
+    </changeSet>
+</databaseChangeLog>

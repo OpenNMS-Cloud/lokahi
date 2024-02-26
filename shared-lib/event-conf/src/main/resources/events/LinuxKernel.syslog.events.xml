@@ -19,6 +19,6 @@
                         &lt;p>Linux OOM killer killed process %parm[killedProcName]% (PID %parm[killedProcID]%) &lt;/p>
                 </logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[killedProcName]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[killedProcName]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

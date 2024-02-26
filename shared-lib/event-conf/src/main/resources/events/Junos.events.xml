@@ -69,7 +69,7 @@ the BGP FSM enters the ESTABLISHED state.&lt;/p>&lt;table>
 			jnxBgpM2PeerState=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxBgpM2BackwardTransition:%dpname%:%nodeid%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxBgpM2BackwardTransition:%dpname%:%nodeid%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -147,7 +147,7 @@ state to a lower numbered state.&lt;/p>&lt;table>
 			jnxBgpM2PeerState=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -332,7 +332,7 @@ condition.&lt;/p>&lt;table>
 			jnxOperatingState=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -398,7 +398,7 @@ condition.&lt;/p>&lt;table>
 			jnxOperatingState=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -456,7 +456,7 @@ condition.&lt;/p>&lt;table>
 			jnxOperatingTemp=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -628,7 +628,7 @@ has been removed from the chassis.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -705,7 +705,7 @@ inserted into the chassis.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruRemoval:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruRemoval:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -822,7 +822,7 @@ has been powered off in the chassis.&lt;/p>&lt;table>
 			jnxFruLastPowerOn=%parm[#10]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -939,7 +939,7 @@ powered on in the chassis.&lt;/p>&lt;table>
 			jnxFruLastPowerOn=%parm[#10]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruPowerOff:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruPowerOff:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1016,7 +1016,7 @@ able to load ukernel. In these cases, fru is replaced.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1133,7 +1133,7 @@ has gone offline in the chassis.&lt;/p>&lt;table>
 			jnxFruLastPowerOn=%parm[#10]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1210,7 +1210,7 @@ gone online in the chassis.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruOffLine:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruOffLine:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1366,7 +1366,7 @@ switched over.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1446,7 +1446,7 @@ failed state in the chassis.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1525,7 +1525,7 @@ from boot device list.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1591,7 +1591,7 @@ condition.&lt;/p>&lt;table>
 			jnxOperatingState=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxPowerSupplyFailure:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxPowerSupplyFailure:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1656,7 +1656,7 @@ has recovered from the failure (not spinning) condition.&lt;/p>&lt;table>
 			jnxOperatingState=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFanFailure:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFanFailure:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1714,7 +1714,7 @@ condition.&lt;/p>&lt;table>
 			jnxOperatingTemp=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxOverTemperature:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxOverTemperature:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -1794,7 +1794,7 @@ is in ok state in the chassis.&lt;/p>&lt;table>
 			jnxFruSlot=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruFailed:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxFruFailed:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -6227,7 +6227,7 @@ the jnxSyslogTrap objects, this notification can include
 	jnxJsChClusterSwitchoverInfoReason=%parm[#6]%&lt;/p>
 	</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -6279,7 +6279,7 @@ jnxJsFwAuthServiceDesc=%parm[#3]%
 jnxJsFwAuthReason=%parm[#4]%&lt;/p>
 	</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%:%parm[#1]%:%parm[#2]%:%parm[#3]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6303,7 +6303,7 @@ jnxJsFwAuthReason=%parm[#4]%&lt;/p>
 jnxJsFwAuthServiceUp trap received&lt;/p>
 	</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxJsFwAuthServiceDown:%dpname%:%nodeid%:%ipaddr%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/jnxJsFwAuthServiceDown:%dpname%:%nodeid%:%ipaddr%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6327,7 +6327,7 @@ jnxJsFwAuthServiceUp trap received&lt;/p>
 jnxJsFwAuthServiceDown trap received&lt;/p>
 	</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6355,6 +6355,6 @@ users. &lt;/p>&lt;table>&lt;/table></descr>
 jnxJsFwAuthCapacityExceeded trap received&lt;/p>
 	</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%ipaddr%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

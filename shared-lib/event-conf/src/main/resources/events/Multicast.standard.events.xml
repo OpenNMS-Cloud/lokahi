@@ -19,7 +19,7 @@
       <descr>&lt;p>A pimNeighborLoss trap signifies the loss of an adjacency with a neighbor. This trap should be generated when the neighbor timer expires, and the router has no other neighbors on the same interface with a lower IP address than itself.&lt;/p>&lt;table> &lt;tr>&lt;td>&lt;b> pimNeighborIfIndex&lt;/b>&lt;/td>&lt;td> %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> pimNeighborLoss trap received pimNeighborIfIndex=%parm[#1]%&lt;/p> </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -41,7 +41,7 @@
       <descr>&lt;p>The MSDP Established event is generated when the MSDP FSM enters the ESTABLISHED state.&lt;/p>&lt;table> &lt;tr>&lt;td>&lt;b> msdpPeerFsmEstablishedTransitions&lt;/b>&lt;/td>&lt;td> %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> msdpEstablished trap received msdpPeerFsmEstablishedTransitions=%parm[#1]%&lt;/p> </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/mib2opennms/msdpBackwardTransition:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/mib2opennms/msdpBackwardTransition:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -63,6 +63,6 @@
       <descr>&lt;p>The MSDPBackwardTransition Event is generated when the MSDP FSM moves from a higher-numbered state to a lower-numbered state.&lt;/p>&lt;table> &lt;tr>&lt;td>&lt;b> msdpPeerState&lt;/b>&lt;/td>&lt;td> %parm[#1]%;&lt;/td>&lt;td>&lt;p> inactive(1) listen(2) connecting(3) established(4) disabled(5) &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> msdpBackwardTransition trap received msdpPeerState=%parm[#1]%&lt;/p> </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

@@ -21,7 +21,7 @@
 			threednsTrapVSGreenToRed trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -45,7 +45,7 @@
 			threednsTrapVSRedToGreen trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/f5/traps/threednsTrapVSGreenToRed:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/f5/traps/threednsTrapVSGreenToRed:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -69,7 +69,7 @@
 			threednsTrapServerRedToGreen trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/f5/traps/threednsTrapServerGreenToRed:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/f5/traps/threednsTrapServerGreenToRed:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -93,7 +93,7 @@
 			threednsTrapServerGreenToRed trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -117,7 +117,7 @@
 			threednsTrapCRCFailure trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -146,7 +146,7 @@
 			loadBalTrapMessage=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -185,7 +185,7 @@
 			memberPort=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -224,7 +224,7 @@
 			memberPort=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/f5/traps/loadBalTrapServiceDown`:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/f5/traps/loadBalTrapServiceDown`:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -253,7 +253,7 @@
 			loadBalTrapMessage=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -282,7 +282,7 @@
 			loadBalTrapMessage=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -311,7 +311,7 @@
 			loadBalTrapMessage=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -340,7 +340,7 @@
 			loadBalTrapMessage=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -369,7 +369,7 @@
 			loadBalTrapMessage=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/f5/traps/loadBalTrapRemoveUnit:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/f5/traps/loadBalTrapRemoveUnit:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -393,7 +393,7 @@
 			bigipAgentStart trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipAgentShutdown:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipAgentShutdown:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -417,7 +417,7 @@
 			bigipAgentShutdown trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -443,7 +443,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipAgentRestart trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -472,7 +472,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -501,7 +501,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -530,7 +530,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -559,7 +559,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -588,7 +588,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -617,7 +617,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -656,7 +656,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjPort=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -695,7 +695,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjPort=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipServiceDown:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipServiceDown:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -729,7 +729,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjNode=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -763,7 +763,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjNode=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipNodeDown:%dpname%:%nodeid%:%interface%:%parm[#2]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipNodeDown:%dpname%:%nodeid%:%interface%:%parm[#2]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -792,7 +792,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -821,7 +821,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -850,7 +850,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -879,7 +879,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -908,7 +908,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipFeatureFailed:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/F5/traps/bigipFeatureFailed:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -937,7 +937,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -966,7 +966,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -995,7 +995,7 @@ changed (unlike the standard coldStart or warmStart traps)&lt;/p>&lt;table>&lt;/
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1026,7 +1026,7 @@ for DOS prevention.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1055,7 +1055,7 @@ for DOS prevention.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1087,7 +1087,7 @@ If they do, it indicates a serious problem.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1116,7 +1116,7 @@ If they do, it indicates a serious problem.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1145,7 +1145,7 @@ If they do, it indicates a serious problem.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1174,7 +1174,7 @@ If they do, it indicates a serious problem.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1203,7 +1203,7 @@ If they do, it indicates a serious problem.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1232,7 +1232,7 @@ If they do, it indicates a serious problem.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1262,7 +1262,7 @@ properly.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1291,7 +1291,7 @@ properly.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1320,7 +1320,7 @@ properly.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1349,7 +1349,7 @@ properly.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1378,7 +1378,7 @@ properly.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1407,7 +1407,7 @@ properly.&lt;/p>&lt;table>
 			bigipNotifyObjMsg=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1437,7 +1437,7 @@ properly.&lt;/p>&lt;table>
 	bigipSslLimitExceeded trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1471,7 +1471,7 @@ properly.&lt;/p>&lt;table>
 	bigipExternalLinkChange trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1501,7 +1501,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmRequestBlocked trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1531,7 +1531,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmRequestViolation trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1559,7 +1559,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1588,7 +1588,7 @@ properly.&lt;/p>&lt;table>
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
       <operinstruct></operinstruct>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1616,7 +1616,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1644,7 +1644,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1672,7 +1672,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmLinkAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1700,7 +1700,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmLinkNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1728,7 +1728,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmLinkDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1756,7 +1756,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmLinkEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1784,7 +1784,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmWideIpAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1812,7 +1812,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmWideIpNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1840,7 +1840,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmWideIpDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1868,7 +1868,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmWideIpEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1896,7 +1896,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolMbrAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1924,7 +1924,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolMbrNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1952,7 +1952,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolMbrDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1980,7 +1980,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmPoolMbrEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2008,7 +2008,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmServerAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2036,7 +2036,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmServerNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2064,7 +2064,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmServerDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2092,7 +2092,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmServerEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2120,7 +2120,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmVsAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2148,7 +2148,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmVsNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2176,7 +2176,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmVsDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2204,7 +2204,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmVsEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2232,7 +2232,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmDcAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2260,7 +2260,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmDcNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Critical</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2288,7 +2288,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmDcDisabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2316,7 +2316,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmDcEnabled trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2344,7 +2344,7 @@ properly.&lt;/p>&lt;table>
 	bigipHardDiskFailure trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2372,7 +2372,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmAppObjAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2400,7 +2400,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmAppObjNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2428,7 +2428,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmAppAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2456,7 +2456,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmAppNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2484,7 +2484,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmJoinedGroup trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2512,7 +2512,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmLeftGroup trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2540,7 +2540,7 @@ properly.&lt;/p>&lt;table>
 	bigipStandByFail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2568,7 +2568,7 @@ properly.&lt;/p>&lt;table>
 	bigipInetPortExhaustion trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2596,7 +2596,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmBoxAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2624,7 +2624,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmBoxNotAvail trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2654,7 +2654,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmFtpRequestBlocked trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2684,7 +2684,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmFtpRequestViolation trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2712,7 +2712,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmBig3dSslCertExpired trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2740,7 +2740,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmBig3dSslCertWillExpire trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2768,7 +2768,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmSslCertExpired trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2796,7 +2796,7 @@ properly.&lt;/p>&lt;table>
 	bigipGtmSslCertWillExpire trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2826,7 +2826,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmSmtpRequestBlocked trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2856,7 +2856,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmSmtpRequestViolation trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2884,7 +2884,7 @@ properly.&lt;/p>&lt;table>
 	bigipBladeTempHigh trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2912,7 +2912,7 @@ properly.&lt;/p>&lt;table>
 	bigipBladeNoPower trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2940,7 +2940,7 @@ properly.&lt;/p>&lt;table>
 	bigipClusterdNoResponse trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2968,7 +2968,7 @@ properly.&lt;/p>&lt;table>
 	bigipBladeOffline trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2996,7 +2996,7 @@ properly.&lt;/p>&lt;table>
 	bigipAsmDosAttackDetected trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3024,6 +3024,6 @@ properly.&lt;/p>&lt;table>
 	bigipAsmBruteForceAttackDetected trap received
 	bigipNotifyObjMsg=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

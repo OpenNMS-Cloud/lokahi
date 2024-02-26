@@ -476,7 +476,7 @@
 	Ironport: System could not connect to %parm[#1]%
 	</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%parm[#1]%" alarm-type="3" auto-clean="true"/> 
+      <alert-data reduction-key="%uei%:%parm[#1]%" alert-type="3" auto-clean="true"/> 
    </event>
    <event>
       <mask>

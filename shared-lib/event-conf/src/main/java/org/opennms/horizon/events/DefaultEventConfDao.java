@@ -83,4 +83,9 @@ public class DefaultEventConfDao implements EventConfDao {
             throw new RuntimeException("Unable to load " + configResource, e);
         }
     }
+
+    @Override
+    public Map<String, Event> getAllEventsByUEI() {
+        return events.getAllEventsByUei();
+    }
 }

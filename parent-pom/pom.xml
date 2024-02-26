@@ -137,7 +137,7 @@
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
         <mockito.version>4.8.0</mockito.version>
-        <jupiter.version>5.9.0</jupiter.version>
+        <jupiter.version>5.10.2</jupiter.version>
         <jib.version>3.3.1</jib.version>
         <surefire.version>3.1.0</surefire.version>
         <failsafe.version>3.1.0</failsafe.version>

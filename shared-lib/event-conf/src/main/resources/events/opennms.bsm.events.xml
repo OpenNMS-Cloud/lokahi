@@ -18,9 +18,9 @@
       <logmsg dest="logndisplay">One or more problems are affecting business service '%parm[businessServiceName]%'.
         </logmsg>
       <severity>Indeterminate</severity>
-       <alarm-data reduction-key="%uei%:%parm[businessServiceId]%" alarm-type="1" auto-clean="false">
+       <alert-data reduction-key="%uei%:%parm[businessServiceId]%" alert-type="1" auto-clean="false">
            <update-field field-name="severity" update-on-reduction="true"/>
-       </alarm-data>
+       </alert-data>
    </event>
    <event>
       <uei>uei.opennms.org/bsm/serviceProblemResolved</uei>
@@ -31,7 +31,7 @@
             resolved.
         </logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/bsm/serviceProblem:%parm[businessServiceId]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/bsm/serviceProblem:%parm[businessServiceId]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
        <uei>uei.opennms.org/bsm/graphInvalidated</uei>
@@ -41,8 +41,8 @@
              Please verify it's &lt;a href=&quot;admin/bsm/adminpage.jsp&quot;>definition&lt;/a>.&lt;/p></descr>
        <logmsg dest="logndisplay">Business service '%parm[businessServiceName]%' with ID '%parm[businessServiceId]%' is affected by the deletion of %parm[cause]%.</logmsg>
        <severity>Warning</severity>
-       <alarm-data reduction-key="%uei%:%parm[businessServiceId]%" alarm-type="1" auto-clean="false">
-       </alarm-data>
+       <alert-data reduction-key="%uei%:%parm[businessServiceId]%" alert-type="1" auto-clean="false">
+       </alert-data>
    </event>
    <event>
        <uei>uei.opennms.org/internal/serviceDeleted</uei>
@@ -52,8 +52,8 @@
        <logmsg dest="logndisplay">The business service '%parm[businessServiceName]%' has been deleted.
        </logmsg>
        <severity>Indeterminate</severity>
-       <alarm-data reduction-key="%uei%:%parm[businessServiceId]%" alarm-type="2" clear-key="uei.opennms.org/bsm/serviceProblem:%parm[businessServiceId]%" auto-clean="false">
+       <alert-data reduction-key="%uei%:%parm[businessServiceId]%" alert-type="2" clear-key="uei.opennms.org/bsm/serviceProblem:%parm[businessServiceId]%" auto-clean="false">
            <update-field field-name="logmsg" update-on-reduction="false"/>
-       </alarm-data>
+       </alert-data>
    </event>
 </events>

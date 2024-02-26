@@ -59,7 +59,7 @@ outlets on the tower.&lt;/p>&lt;table>
 			towerName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/towerStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/towerStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -121,7 +121,7 @@ outlets on the tower.&lt;/p>&lt;table>
 			towerName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -183,7 +183,7 @@ outlets on the tower.&lt;/p>&lt;table>
 			towerName=%parm[#3]% 
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -245,7 +245,7 @@ outlets on the tower.&lt;/p>&lt;table>
 			towerName=%parm[#3]% 
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -369,7 +369,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -435,7 +435,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -501,7 +501,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -567,7 +567,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -633,7 +633,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -699,7 +699,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -765,7 +765,7 @@ load traps are suppressed for outlets on the input feed.&lt;/p>&lt;table>
 			infeedName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -900,7 +900,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -974,7 +974,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/infeedLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1048,7 +1048,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1122,7 +1122,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1196,7 +1196,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1270,7 +1270,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1344,7 +1344,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1418,7 +1418,7 @@ stops being repeated.&lt;/p>&lt;table>
 			infeedLoadHighThresh=%parm[#6]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1555,7 +1555,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1623,7 +1623,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1691,7 +1691,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1759,7 +1759,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1827,7 +1827,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1895,7 +1895,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1963,7 +1963,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2031,7 +2031,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2099,7 +2099,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2167,7 +2167,7 @@ are suppressed for the outlet.&lt;/p>&lt;table>
 			outletStatus=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2305,7 +2305,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2380,7 +2380,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/outletLoadEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2455,7 +2455,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2530,7 +2530,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2605,7 +2605,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2680,7 +2680,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2755,7 +2755,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2830,7 +2830,7 @@ stops being repeated.&lt;/p>&lt;table>
 			outletName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3043,7 +3043,7 @@ monitor.&lt;/p>&lt;table>
 			envMonName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/envMonStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/envMonStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3104,7 +3104,7 @@ monitor.&lt;/p>&lt;table>
 			envMonName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3218,7 +3218,7 @@ envMonWaterSensorStatus, and then stops being repeated.&lt;/p>&lt;table>
 			envMonWaterSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/envMonWaterSensorEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/envMonWaterSensorEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3275,7 +3275,7 @@ envMonWaterSensorStatus, and then stops being repeated.&lt;/p>&lt;table>
 			envMonWaterSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3332,7 +3332,7 @@ envMonWaterSensorStatus, and then stops being repeated.&lt;/p>&lt;table>
 			envMonWaterSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3458,7 +3458,7 @@ repeated.&lt;/p>&lt;table>
 			envMonADCName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/envMonADCEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/envMonADCEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3531,7 +3531,7 @@ repeated.&lt;/p>&lt;table>
 			envMonADCName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3604,7 +3604,7 @@ repeated.&lt;/p>&lt;table>
 			envMonADCName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3677,7 +3677,7 @@ repeated.&lt;/p>&lt;table>
 			envMonADCName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3750,7 +3750,7 @@ repeated.&lt;/p>&lt;table>
 			envMonADCName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3823,7 +3823,7 @@ repeated.&lt;/p>&lt;table>
 			envMonADCName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3957,7 +3957,7 @@ temperature/humudity sensor.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4019,7 +4019,7 @@ temperature/humudity sensor.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorStatusEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4081,7 +4081,7 @@ temperature/humudity sensor.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4143,7 +4143,7 @@ temperature/humudity sensor.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4283,7 +4283,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorTempEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorTempEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4365,7 +4365,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorTempEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorTempEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4447,7 +4447,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4529,7 +4529,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4611,7 +4611,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4693,7 +4693,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4775,7 +4775,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4857,7 +4857,7 @@ tempHumidSensorTempStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5014,7 +5014,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorHumidEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorHumidEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5089,7 +5089,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorHumidEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/tempHumidSensorHumidEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5164,7 +5164,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5239,7 +5239,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5314,7 +5314,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5389,7 +5389,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5464,7 +5464,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5539,7 +5539,7 @@ tempHumidSensorHumidStatus, and then stops being repeated.&lt;/p>&lt;table>
 			tempHumidSensorName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5670,7 +5670,7 @@ contactClosureStatus, and then stops being repeated.&lt;/p>&lt;table>
 			contactClosureName=%parm[#3]% 
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/contactClosureEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/vendor/ServerTech/traps/contactClosureEvent-Error:%dpname%:%nodeid%:%interface%:%parm[#2]%i:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5727,7 +5727,7 @@ contactClosureStatus, and then stops being repeated.&lt;/p>&lt;table>
 			contactClosureName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5784,7 +5784,7 @@ contactClosureStatus, and then stops being repeated.&lt;/p>&lt;table>
 			contactClosureName=%parm[#3]% 
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>

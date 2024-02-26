@@ -7,7 +7,7 @@
             node: %nodeid% with ifindex: %ifindex% is down
         </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%ifindex%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%ifindex%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/internal/topology/linkUp</uei>
@@ -17,6 +17,6 @@
             node: %nodeid% with ifindex: %ifindex% is up
         </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%ifindex%" alarm-type="2" clear-key="uei.opennms.org/internal/topology/linkDown:%nodeid%:%ifindex%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%ifindex%" alert-type="2" clear-key="uei.opennms.org/internal/topology/linkDown:%nodeid%:%ifindex%" auto-clean="false"/>
    </event>
 </events>

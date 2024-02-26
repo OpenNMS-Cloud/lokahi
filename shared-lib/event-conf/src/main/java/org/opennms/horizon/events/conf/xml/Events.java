@@ -555,4 +555,8 @@ public class Events implements Serializable {
     public Event getEventByUeiOptimistic(String uei) {
         return m_eventsByUei.get(uei);
     }
+
+    public Map<String, Event> getAllEventsByUei() {
+        return m_eventsByUei;
+    }
 }

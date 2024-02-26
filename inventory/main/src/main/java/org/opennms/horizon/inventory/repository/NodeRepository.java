@@ -84,4 +84,7 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByTenantIdAndTagNamesIn(@Param("tenantId") String tenantId, @Param("tags") List<String> tags);
 
     List<Node> findByNodeAliasAndTenantId(String alias, String tenantId);
+
+    @Query("SELECT COUNT(n.id) FROM Node n WHERE n.tenantId = :tenantId ")
+    long countDistinctNodes(@Param("tenantId") String tenantId);
 }

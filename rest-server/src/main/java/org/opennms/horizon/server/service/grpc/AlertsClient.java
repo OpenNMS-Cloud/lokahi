@@ -33,6 +33,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
 import org.opennms.horizon.alerts.proto.AlertRequest;
 import org.opennms.horizon.alerts.proto.AlertResponse;
@@ -259,6 +260,8 @@ public class AlertsClient {
                 .listAlertEventDefinitions(request)
                 .getAlertEventDefinitionsList()
                 .stream()
+                // TODO: Remove this limitation of having name in event def to use all event def in LOK-2288
+                .filter(eventDefProto -> Strings.isNotBlank(eventDefProto.getName()))
                 .map(alertEventDefinitionMapper::protoToAlertEventDefinition)
                 .toList();
     }

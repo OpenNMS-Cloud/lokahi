@@ -19,7 +19,7 @@
       <descr>Indicates that the AX device is going from HA Active mode to Standby mode.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%node%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%node%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -41,7 +41,7 @@
       <descr>Indicates that the AX device is going from HA Standby mode to Active mode.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%node%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%node%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -63,7 +63,7 @@
       <descr>Indicates that the AX device is going to Active-Active mode.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%node%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%node%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -86,7 +86,7 @@
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]% VirtualServer=%parm[#2]%
             Port=%parm[#3]% Type=%parm[#4]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -109,7 +109,7 @@
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]% VirtualServer=%parm[#2]%
             Port=%parm[#3]% Type=%parm[#4]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/traps/A10/axVirtualServerPortDown:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/traps/A10/axVirtualServerPortDown:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -135,7 +135,7 @@
       <descr>Indicates that an SLB service has gone down.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]% Server=%parm[#2]% Port=%parm[#3]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -161,7 +161,7 @@
       <descr>Indicates that an SLB service has come up.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]% Server=%parm[#2]% Port=%parm[#3]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%" alarm-type="2" clear-key="uei.opennms.org/traps/A10/axServiceDown:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[#2]%:%parm[#3]%" alert-type="2" clear-key="uei.opennms.org/traps/A10/axServiceDown:%parm[#2]%:%parm[#3]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -188,7 +188,7 @@
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%
             Server=%parm[#2]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -215,7 +215,7 @@
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%
             Server=%parm[#2]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/traps/A10/axServerDown:%parm[#2]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/traps/A10/axServerDown:%parm[#2]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -237,7 +237,7 @@
       <descr>Indicates that the AX device has started.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -259,7 +259,7 @@
       <descr>Indicates that the AX device has shut down.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -281,7 +281,7 @@
       <descr>Indicates that the temperature inside the AX chassis is too high (68 C or higher).</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -303,7 +303,7 @@
       <descr>Indicates that system fan 1 has failed. Contact A10 Networks.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -325,7 +325,7 @@
       <descr>Indicates that system fan 2 has failed. Contact A10 Networks.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -347,7 +347,7 @@
       <descr>Indicates that system fan 3 has failed. Contact A10 Networks.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -369,7 +369,7 @@
       <descr>Indicates that the upper power supply has failed. The power supply needs to be replaced.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -391,7 +391,7 @@
       <descr>Indicates that the lower power supply has failed. The power supply needs to be replaced.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -414,7 +414,7 @@
             primary Hard Disk is the one on the left, as you are facing the front of the AX chassis.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -437,7 +437,7 @@
             The primary Hard Disk is the one on the right, as you are facing the front of the AX chassis.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -459,7 +459,7 @@
       <descr>Indicates that hard disk usage on the AX device is high (85% or higher).</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -481,7 +481,7 @@
       <descr>Indicates that memory usage on the AX device is high (95% or higher).</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -503,7 +503,7 @@
       <descr>Indicates that the AX device is going to reboot or reload.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=restart&lt;/p></logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -525,7 +525,7 @@
       <descr>Indicates that control CPU utilization is high.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -547,6 +547,6 @@
       <descr>Indicates that data CPU utilization is high.</descr>
       <logmsg dest="logndisplay">&lt;p> A10 trap received Description=%parm[#1]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

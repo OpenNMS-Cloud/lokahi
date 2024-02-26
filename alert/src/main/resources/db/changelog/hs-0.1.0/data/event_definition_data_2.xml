@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+<changeSet id="hs-0.1.0-event-definition-as-table" author="cgorantla" runOnChange="true">
+<loadUpdateData tableName="event_definition" file="data/event_definition_data_2.csv" primaryKey="id" relativeToChangelogFile="true"/>
+<sql dbms="postgres">
+SELECT setval('event_definition_id_seq', (select count(id) from event_definition), true);
+</sql>
+</changeSet>
+
+</databaseChangeLog>

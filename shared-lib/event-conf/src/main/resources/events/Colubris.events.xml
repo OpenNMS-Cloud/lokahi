@@ -23,7 +23,7 @@
       coDot11CurrentSNRLevel&lt;/b>&lt;/td>&lt;td> %parm[#4]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> coDot11SNRLevelNotification trap received ifIndex=%parm[#1]% ifDescr=%parm[#2]% coVirtualApSSID=%parm[#3]% coDot11CurrentSNRLevel=%parm[#4]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%" alarm-type="1"/>
+      <alert-data reduction-key="%uei%" alert-type="1"/>
    </event>
    <event>
       <mask>
@@ -152,7 +152,7 @@
       certificateExpiryDate&lt;/b>&lt;/td>&lt;td> %parm[#1]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> certificateAboutToExpireNotification trap received certificateExpiryDate=%parm[#1]%&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%" alarm-type="1"/>
+      <alert-data reduction-key="%uei%" alert-type="1"/>
    </event>
    <event>
       <mask>
@@ -391,7 +391,7 @@
       satelliteSSID&lt;/b>&lt;/td>&lt;td> %parm[#5]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> satelliteUpNotification trap received satelliteName=%parm[#1]% satelliteDeviceId=%parm[#2]% satelliteMacAddress=%parm[#3]% satelliteIpAddress=%parm[#4]% satelliteSSID=%parm[#5]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%" alarm-type="1"/>
+      <alert-data reduction-key="%uei%" alert-type="1"/>
    </event>
    <event>
       <mask>
@@ -418,7 +418,7 @@
       satelliteSSID&lt;/b>&lt;/td>&lt;td> %parm[#5]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p> satelliteDownNotification trap received satelliteName=%parm[#1]% satelliteDeviceId=%parm[#2]% satelliteMacAddress=%parm[#3]% satelliteIpAddress=%parm[#4]% satelliteSSID=%parm[#5]%&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%" alarm-type="1"/>
+      <alert-data reduction-key="%uei%" alert-type="1"/>
    </event>
    <event>
       <mask>

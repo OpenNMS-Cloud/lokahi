@@ -855,7 +855,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: RADIUS authentication server %parm[#1]% unavailable, next available server %parm[#2]%.</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -877,7 +877,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
       <descr>This trap will be generated when all of the requested servers were not available.</descr>
       <logmsg dest="logndisplay">Juniper Event: No RADIUS authentication server available.</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -902,7 +902,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: RADIUS accounting server %parm[#1]% unavailable, next available server %parm[#2]%.</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -924,7 +924,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
       <descr>This trap will be generated when all of the requested servers were not available.</descr>
       <logmsg dest="logndisplay">Juniper Event: No RADIUS accounting server available.</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -948,7 +948,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: RADIUS authentication server %parm[#1]% available.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniRadiusAuthClientServerUnavailable:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniRadiusAuthClientServerUnavailable:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -972,7 +972,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: RADUS accounting server %parm[#1]% available.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniRadiusAcctClientServerUnavailable:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniRadiusAcctClientServerUnavailable:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1004,7 +1004,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: High Memory Utilization MemCapacity=%parm[#1]% MemUtilPct=%parm[#2]% AbatedMemUtilThreshold=%parm[#3]% HighMemUtilThreshold=%parm[#4]% MemKBytesCapacity=%parm[#5]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1036,7 +1036,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: System Memory utilization abated. Capacity=%parm[#1]% UtilPct=%parm[#2]% AbatedMemUtilThreshold=%parm[#3]% HighMemUtilThreshold=%parm[#4]% KBytesCapacity=%parm[#5]%</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemHighMemUtil:%dpname%:%nodeid%:%interface%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemHighMemUtil:%dpname%:%nodeid%:%interface%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1097,7 +1097,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Power Status Change. entPhysicalDescr=%parm[#1]% PowerStatus=%parm[#2]%</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemPowerStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemPowerStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1122,7 +1122,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Power Status Change. entPhysicalDescr=%parm[#1]% PowerStatus=%parm[#2]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1153,7 +1153,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Fan Status Change. entPhysicalDescr=%parm[#1]% FanStatus=%parm[#2]%</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1184,7 +1184,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Fan Status Change. entPhysicalDescr=%parm[#1]% FanStatus=%parm[#2]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1215,7 +1215,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Fan Status Change. entPhysicalDescr=%parm[#1]% FanStatus=%parm[#2]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1242,7 +1242,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Fan Status Change. entPhysicalDescr=%parm[#1]% FanStatus=%parm[#2]%</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemFanStatusChange:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1272,7 +1272,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1302,7 +1302,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1332,7 +1332,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1362,7 +1362,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1392,7 +1392,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1422,7 +1422,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1448,7 +1448,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Status Change. Status=%parm[#1]%</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1480,7 +1480,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Protection Status Change. Status=%parm[#1]% ProtectionHoldOffTimeRemaining=%parm[#2]%</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1512,7 +1512,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Protection Status Change. Status=%parm[#1]% ProtectionHoldOffTimeRemaining=%parm[#2]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1544,7 +1544,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Protection Status Change. Status=%parm[#1]% ProtectionHoldOffTimeRemaining=%parm[#2]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1576,7 +1576,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Protection Status Change. Status=%parm[#1]% ProtectionHoldOffTimeRemaining=%parm[#2]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1608,7 +1608,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Protection Status Change. Status=%parm[#1]% ProtectionHoldOffTimeRemaining=%parm[#2]%</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1636,7 +1636,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Temperature Protection Status Change. Status=%parm[#1]% ProtectionHoldOffTimeRemaining=%parm[#2]%</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/juniper/traps/juniSystemTempProtectionStatusChange:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1661,7 +1661,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	included in the notification: juniSystemReloadSlotNumber</descr>
       <logmsg dest="logndisplay">Juniper Event: Reload command issued.</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1692,7 +1692,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: System Utilization Threshold rising. Max=%parm[#2]% Current=%parm[#3]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1723,7 +1723,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: System Utilization Threshold falling. Max=%parm[#2]% Current=%parm[#3]%</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemUtilizationThresholdRising:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniSystemUtilizationThresholdRising:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1747,7 +1747,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: NTP Frequency Calibration Start, Error %parm[#1]%s.</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1771,7 +1771,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: NTP Frequency Calibration End, Error %parm[#1]%s.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniNtpFrequencyCalibrationStart:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniNtpFrequencyCalibrationStart:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1798,7 +1798,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	problems) when NTP is enabled on the router.</descr>
       <logmsg dest="logndisplay">Juniper Event: Time Synchronisation Up.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniNtpTimeSynDown:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniNtpTimeSynDown:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1822,7 +1822,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	reasons when NTP is enabled on the router.</descr>
       <logmsg dest="logndisplay">Juniper Event: Time Synchronisation Down.</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1849,7 +1849,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Time Server Synchronisation Up.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniNtpTimeServerSynDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniNtpTimeServerSynDown:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1876,7 +1876,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Time Server Synchronisation Down.</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1904,7 +1904,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: First Time System Clock Set.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1934,7 +1934,7 @@ what conditions trigger a resource utilization notification.&lt;/p>&lt;table>
 	&lt;/table></descr>
       <logmsg dest="logndisplay">Juniper Event: Clock Offset Limit Crossed by %parm[#1]%s.</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1984,7 +1984,7 @@ utilization threshold.&lt;/p>&lt;table>
                         juniAddressPoolUtilPct=%parm[#5]%&lt;/p>
                 </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2034,7 +2034,7 @@ threshold level.&lt;/p>&lt;table>
                         juniAddressPoolUtilPct=%parm[#5]%&lt;/p>
                 </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniAddressPoolHighAddrUtil:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendor/juniper/traps/juniAddressPoolHighAddrUtil:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2075,7 +2075,7 @@ fully utilized pool.&lt;/p>&lt;table>
                         juniAddressPoolSize=%parm[#3]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2119,7 +2119,7 @@ fully utilized pool.&lt;/p>&lt;table>
          <decode varbindvalue="2" varbinddecodedstring="notKnown"/>
          <decode varbindvalue="3" varbinddecodedstring="userInitiated"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2163,7 +2163,7 @@ fully utilized pool.&lt;/p>&lt;table>
          <decode varbindvalue="2" varbinddecodedstring="notKnown"/>
          <decode varbindvalue="3" varbinddecodedstring="userInitiated"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2192,7 +2192,7 @@ fully utilized pool.&lt;/p>&lt;table>
 	juniRedundancyActiveSlot=%parm[#1]%&lt;/p>
 	</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/juniRedundancyStateDisabledNotification:%dpname%:%nodeid%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/Juniper/traps/juniRedundancyStateDisabledNotification:%dpname%:%nodeid%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2221,7 +2221,7 @@ fully utilized pool.&lt;/p>&lt;table>
 	juniRedundancyActiveSlot=%parm[#1]%&lt;/p>
 	</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2250,7 +2250,7 @@ fully utilized pool.&lt;/p>&lt;table>
 	juniRedundancyActiveSlot=%parm[#1]%&lt;/p>
 	</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2293,6 +2293,6 @@ and vice versa.&lt;/p>&lt;table>
          <decode varbindvalue="1" varbinddecodedstring="fileSystemSynchronization"/>
          <decode varbindvalue="2" varbinddecodedstring="highAvailability"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

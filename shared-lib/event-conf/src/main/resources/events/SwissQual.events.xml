@@ -315,7 +315,7 @@
 			nqaaTestType=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" alarm-type="2" clear-key="uei.opennms.org/vendor/swissqual/traps/nqAgentAlarm:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" alert-type="2" clear-key="uei.opennms.org/vendor/swissqual/traps/nqAgentAlarm:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -633,7 +633,7 @@
 			nqaaTestType=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -947,6 +947,6 @@
 			nqaaTestType=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

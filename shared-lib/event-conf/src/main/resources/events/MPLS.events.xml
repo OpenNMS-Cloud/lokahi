@@ -25,7 +25,7 @@ b. When an interface with ifOperStatus = up(1) is
 			mplsVrfIfUp trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -53,7 +53,7 @@ b. When an interface with ifOperStatus = up(1) state is
 			mplsVrfIfDown trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -79,7 +79,7 @@ mplsVrfMidRouteThreshold.&lt;/p>&lt;table>&lt;/table></descr>
 			mplsNumVrfRouteMidThreshExceeded trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -106,7 +106,7 @@ mplsVrfMaxRouteThreshold.&lt;/p>&lt;table>&lt;/table></descr>
 			mplsNumVrfRouteMaxThreshExceeded trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -136,7 +136,7 @@ the threshold at the time this notification is issued.&lt;/p>&lt;table>&lt;/tabl
 			mplsNumVrfSecIllegalLabelThreshExceeded trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -190,7 +190,7 @@ c. Multiple interfaces are associated with this VRF, and the
 			mplsL3VpnVrfOperStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfDown:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" alert-type="2" clear-key="uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfDown:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -245,7 +245,7 @@ c. The last interface with ifOperStatus equal to up(1)
 			mplsL3VpnVrfOperStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -285,7 +285,7 @@ mplsL3VpnVrfConfMidRteThresh.&lt;/p>&lt;table>
 			mplsL3VpnVrfConfMidRteThresh=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -340,7 +340,7 @@ value.&lt;/p>&lt;table>
 			mplsL3VpnVrfConfHighRteThresh=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -376,7 +376,7 @@ the threshold at the time this notification is issued.&lt;/p>&lt;table>
 			mplsL3VpnVrfSecIllegalLblVltns=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[name-#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -436,7 +436,7 @@ whenever the maximum threshold has been cleared.&lt;/p>&lt;table>
 			mplsL3VpnVrfConfHighRteThresh=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfNumVrfRouteMaxThreshExceeded:%dpname%:%nodeid%:%interface%:%parm[name-#2]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfNumVrfRouteMaxThreshExceeded:%dpname%:%nodeid%:%interface%:%parm[name-#2]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -504,7 +504,7 @@ mplsXCOperStatus objects MUST be the identical.&lt;/p>&lt;table>
 			mplsXCOperStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#1.14:]%:%parm[name-#2.14:]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsLsrStdMib/traps/mplsXCDown:%dpname%:%nodeid%:%parm[name-#1.14:]%:%parm[name-#2.14:]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#1.14:]%:%parm[name-#2.14:]%" alert-type="2" clear-key="uei.opennms.org/ietf/mplsLsrStdMib/traps/mplsXCDown:%dpname%:%nodeid%:%parm[name-#1.14:]%:%parm[name-#2.14:]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -572,7 +572,7 @@ mplsXCOperStatus objects MUST be identical.&lt;/p>&lt;table>
 			mplsXCOperStatus=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#1.14:]%:%parm[name-#2.14:]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#1.14:]%:%parm[name-#2.14:]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>

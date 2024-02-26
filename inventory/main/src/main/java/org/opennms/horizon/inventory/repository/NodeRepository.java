@@ -52,8 +52,9 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
 
     @Query("SELECT n " + "FROM Node n "
             + "WHERE n.tenantId = :tenantId "
-            + "AND LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%'))")
-    List<Node> findByTenantIdAndNodeLabelLike(
+            + "AND (LOWER(n.nodeLabel) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%'))"
+            + "OR LOWER(n.nodeAlias) LIKE LOWER(CONCAT('%', :nodeLabelSearchTerm, '%')))")
+    List<Node> findByTenantIdAndNodeLabelOrAliasLike(
             @Param("tenantId") String tenantId, @Param("nodeLabelSearchTerm") String nodeLabelSearchTerm);
 
     List<Node> findByIdInAndTenantId(List<Long> ids, String tenantId);
@@ -83,4 +84,7 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByTenantIdAndTagNamesIn(@Param("tenantId") String tenantId, @Param("tags") List<String> tags);
 
     List<Node> findByNodeAliasAndTenantId(String alias, String tenantId);
+
+    @Query("SELECT COUNT(n.id) FROM Node n WHERE n.tenantId = :tenantId ")
+    long countDistinctNodes(@Param("tenantId") String tenantId);
 }

@@ -22,6 +22,8 @@
 package org.opennms.horizon.alertservice.config;
 
 import org.opennms.horizon.alertservice.mapper.AlertMapper;
+import org.opennms.horizon.events.DefaultEventConfDao;
+import org.opennms.horizon.events.api.EventConfDao;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,5 +33,10 @@ public class AlertServiceConfig {
     @Bean("alertMapper")
     public AlertMapper alertMapper() {
         return AlertMapper.INSTANCE;
+    }
+
+    @Bean
+    public EventConfDao getEventConfDao() {
+        return new DefaultEventConfDao();
     }
 }

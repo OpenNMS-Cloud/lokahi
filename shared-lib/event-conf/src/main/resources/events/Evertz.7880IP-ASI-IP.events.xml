@@ -22,7 +22,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultboardStatusFalse trap received
             faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultboardStatusTrue:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultboardStatusTrue:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -47,7 +47,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultboardStatusTrue trap received
             faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -72,7 +72,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputPresentAsii1False trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputPresentAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputPresentAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -97,7 +97,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputPresentAsii1True trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -122,7 +122,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputPresentAsii2False trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputPresentAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputPresentAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -147,7 +147,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputPresentAsii2True trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -172,7 +172,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputSyncErrorAsii1False
             trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputSyncErrorAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputSyncErrorAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -197,7 +197,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputSyncErrorAsii1True trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -222,7 +222,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputSyncErrorAsii2False
             trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputSyncErrorAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputSyncErrorAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -247,7 +247,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultasiInputSyncErrorAsii2True trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -272,7 +272,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event:
             faultasiInputContinuityErrorAsii1False trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputContinuityErrorAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputContinuityErrorAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -297,7 +297,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event:
             faultasiInputContinuityErrorAsii1True trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -322,7 +322,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event:
             faultasiInputContinuityErrorAsii2False trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputContinuityErrorAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultasiInputContinuityErrorAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -347,7 +347,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event:
             faultasiInputContinuityErrorAsii2True trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -372,7 +372,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultinputStreamMissingStream1False
             trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamMissingStream1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamMissingStream1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -397,7 +397,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultinputStreamMissingStream1True
             trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -422,7 +422,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultinputStreamMissingStream2False
             trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamMissingStream2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamMissingStream2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -447,7 +447,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultinputStreamMissingStream2True
             trap received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -473,7 +473,7 @@
             faultinputStreamCorrectedFECFramesStream1False trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamCorrectedFECFramesStream1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamCorrectedFECFramesStream1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -499,7 +499,7 @@
             faultinputStreamCorrectedFECFramesStream1True trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -525,7 +525,7 @@
             faultinputStreamCorrectedFECFramesStream2False trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamCorrectedFECFramesStream2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamCorrectedFECFramesStream2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -551,7 +551,7 @@
             faultinputStreamCorrectedFECFramesStream2True trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -577,7 +577,7 @@
             faultinputStreamUnCorrectedFECFramesStream1False trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamUnCorrectedFECFramesStream1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamUnCorrectedFECFramesStream1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -603,7 +603,7 @@
             faultinputStreamUnCorrectedFECFramesStream1True trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -629,7 +629,7 @@
             faultinputStreamUnCorrectedFECFramesStream2False trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamUnCorrectedFECFramesStream2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultinputStreamUnCorrectedFECFramesStream2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -655,7 +655,7 @@
             faultinputStreamUnCorrectedFECFramesStream2True trap received faultReservedData=%parm[#1]%
             faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -680,7 +680,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultsdiInputPresentAsii1False trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultsdiInputPresentAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultsdiInputPresentAsii1True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -705,7 +705,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultsdiInputPresentAsii1True trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -730,7 +730,7 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultsdiInputPresentAsii2False trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultsdiInputPresentAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/traps/evertz/ipasiip7880/faultsdiInputPresentAsii2True:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -755,6 +755,6 @@
       <logmsg dest="logndisplay">&lt;p> %nodelabel%: Evertz IPASIIP7880 Event: faultsdiInputPresentAsii2True trap
             received faultReservedData=%parm[#1]% faultExtraData=%parm[#2]%&lt;/p>        </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

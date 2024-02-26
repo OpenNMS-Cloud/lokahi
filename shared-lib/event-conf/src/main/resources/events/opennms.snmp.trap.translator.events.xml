@@ -49,7 +49,7 @@
         </logmsg>
       <severity>Minor</severity>
       <!-- Removed this alarm in preference to the translated version -->
-      <!-- <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" /> -->
+      <!-- <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" /> -->
    </event>
    <event>
       <uei>uei.opennms.org/translator/traps/SNMP_Link_Down</uei>
@@ -64,9 +64,9 @@
         </logmsg>
       <severity>Minor</severity>
        <!-- reduce alarms from traps and polls into a single alarm -->
-       <alarm-data reduction-key="uei.opennms.org/nodes/snmp/interfaceOperDown:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false">
+       <alert-data reduction-key="uei.opennms.org/nodes/snmp/interfaceOperDown:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false">
            <update-field field-name="severity" update-on-reduction="true"/>
-       </alarm-data>
+       </alert-data>
    </event>
    <event>
       <mask>
@@ -87,7 +87,7 @@
         </logmsg>
       <severity>Normal</severity>
       <!-- Removed this alarm in preference to the translated version -->
-      <!-- <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/generic/traps/SNMP_Link_Down:%dpname%:%nodeid%:%interface%" /> -->
+      <!-- <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/generic/traps/SNMP_Link_Down:%dpname%:%nodeid%:%interface%" /> -->
    </event>
    <event>
       <uei>uei.opennms.org/translator/traps/SNMP_Link_Up</uei>
@@ -102,7 +102,7 @@
         </logmsg>
       <severity>Normal</severity>
        <!-- reduce alarms from traps and polls into a single alarm -->
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/nodes/snmp/interfaceOperDown:%dpname%:%nodeid%:%parm[#1]"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/nodes/snmp/interfaceOperDown:%dpname%:%nodeid%:%parm[#1]"/>
    </event>
    <event>
       <mask>
@@ -119,7 +119,7 @@
       <logmsg dest="logndisplay">Incorrect Community Name (authenticationFailure Trap)
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>

@@ -296,6 +296,11 @@ public class NodeService {
         return optionalIpAddress.map(IpInterface::getNode).map(mapper::modelToDTO);
     }
 
+    @Transactional(readOnly = true)
+    public Long getNodeCount(String tenantId) {
+        return nodeRepository.countDistinctNodes(tenantId);
+    }
+
     public void updateNodeInfo(Node node, NodeInfoResult nodeInfo) {
         mapper.updateFromNodeInfo(nodeInfo, node);
 
@@ -368,7 +373,7 @@ public class NodeService {
 
     @Transactional(readOnly = true)
     public List<NodeDTO> listNodesByNodeLabelSearch(String tenantId, String nodeLabelSearchTerm) {
-        return nodeRepository.findByTenantIdAndNodeLabelLike(tenantId, nodeLabelSearchTerm).stream()
+        return nodeRepository.findByTenantIdAndNodeLabelOrAliasLike(tenantId, nodeLabelSearchTerm).stream()
                 .map(mapper::modelToDTO)
                 .toList();
     }

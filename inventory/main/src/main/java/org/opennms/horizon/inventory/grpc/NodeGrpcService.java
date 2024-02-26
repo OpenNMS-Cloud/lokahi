@@ -482,7 +482,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }
     }
 
-
     /**
      * * Get Discoveries by nodeId
      * @param request
@@ -491,27 +490,33 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void getDiscoveriesByNodeId(Int64Value request, StreamObserver<ActiveDiscoveryList> responseObserver) {
 
-        Optional<NodeDTO> node = tenantLookup.lookupTenantId(Context.current())
-            .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
-            .orElseThrow();
-        node.ifPresentOrElse(nodeDTO -> {
-            try {
-                List<ActiveDiscoveryDTO> discoveries = nodeService.getActiveDiscoveriesByIdList(nodeDTO.getTenantId(), nodeDTO.getDiscoveryIdsList());
-                responseObserver.onNext(ActiveDiscoveryList.newBuilder().addAllActiveDiscoveries(discoveries).build());
-                responseObserver.onCompleted();
-            } catch (Exception e) {
-                Status status = Status.newBuilder()
-                    .setCode(Code.INTERNAL_VALUE)
-                    .setMessage(e.getMessage())
-                    .build();
-                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            }
-        }, () -> {
-            Status status = Status.newBuilder()
-                .setCode(Code.NOT_FOUND_VALUE)
-                .setMessage("Node not found")
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+        Optional<NodeDTO> node = tenantLookup
+                .lookupTenantId(Context.current())
+                .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
+                .orElseThrow();
+        node.ifPresentOrElse(
+                nodeDTO -> {
+                    try {
+                        List<ActiveDiscoveryDTO> discoveries = nodeService.getActiveDiscoveriesByIdList(
+                                nodeDTO.getTenantId(), nodeDTO.getDiscoveryIdsList());
+                        responseObserver.onNext(ActiveDiscoveryList.newBuilder()
+                                .addAllActiveDiscoveries(discoveries)
+                                .build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
+                        Status status = Status.newBuilder()
+                                .setCode(Code.INTERNAL_VALUE)
+                                .setMessage(e.getMessage())
+                                .build();
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    }
+                },
+                () -> {
+                    Status status = Status.newBuilder()
+                            .setCode(Code.NOT_FOUND_VALUE)
+                            .setMessage("Node not found")
+                            .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                });
     }
 }

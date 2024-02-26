@@ -23,6 +23,7 @@ package org.opennms.horizon.inventory.service.discovery.active;
 
 import com.google.protobuf.Int64Value;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,6 @@ import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -127,7 +126,8 @@ public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationServ
                             .build());
             repository.deleteById(icmpActiveDiscovery.getId());
             // updating nodes containing discovery id
-            List<Node> nodeList =  new ArrayList<>();//nodeRepository.findByTenantIdAndDiscoveryIdsContain(tenantId, id);
+            List<Node> nodeList =
+                    new ArrayList<>(); // nodeRepository.findByTenantIdAndDiscoveryIdsContain(tenantId, id);
             nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
             nodeRepository.saveAll(nodeList);
             return true;

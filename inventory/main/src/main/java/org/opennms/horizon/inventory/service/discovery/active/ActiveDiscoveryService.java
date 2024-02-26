@@ -22,6 +22,7 @@
 package org.opennms.horizon.inventory.service.discovery.active;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
@@ -32,8 +33,6 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -54,7 +53,7 @@ public class ActiveDiscoveryService {
             throw new EntityNotFoundException(String.format("active discovery id %d not found", id));
         });
         // updating nodes containing discovery id
-        List<Node> nodeList = new ArrayList<>();//nodeRepository.findByTenantIdAndDiscoveryIdsContain(tenantId, id);
+        List<Node> nodeList = new ArrayList<>(); // nodeRepository.findByTenantIdAndDiscoveryIdsContain(tenantId, id);
         nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
         nodeRepository.saveAll(nodeList);
     }

@@ -36,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
-import org.opennms.horizon.inventory.dto.ActiveDiscoveryList;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.mapper.discovery.ActiveDiscoveryMapper;
@@ -110,8 +109,12 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery(name = "getDiscoveriesByNodeId")
-    public Flux<ActiveDiscovery> getDiscoveriesByNodeId(@GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)).getActiveDiscoveriesList().stream().map(activeDiscoveryMapper::dtoToActiveDiscovery).toList());
+    public Flux<ActiveDiscovery> getDiscoveriesByNodeId(
+            @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(
+                client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)).getActiveDiscoveriesList().stream()
+                        .map(activeDiscoveryMapper::dtoToActiveDiscovery)
+                        .toList());
     }
 
     @GraphQLMutation

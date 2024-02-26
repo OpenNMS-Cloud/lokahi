@@ -35,13 +35,9 @@ import org.springframework.stereotype.Repository;
 public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findByTenantId(String tenantId);
 
-
-    @Query("SELECT n " +
-        "FROM Node n " +
-        "WHERE n.tenantId = :tenantId " +
-        "AND :discoveryId  = ANY(n.discoveryIds)")
-    List<Node>  findByTenantIdAndDiscoveryIdsContain(@Param("tenantId") String tenantId,
-                                                     @Param("discoveryId") Long discoveryId);
+    @Query("SELECT n " + "FROM Node n " + "WHERE n.tenantId = :tenantId " + "AND :discoveryId  = ANY(n.discoveryIds)")
+    List<Node> findByTenantIdAndDiscoveryIdsContain(
+            @Param("tenantId") String tenantId, @Param("discoveryId") Long discoveryId);
 
     Optional<Node> findByIdAndTenantId(long id, String tenantID);
 

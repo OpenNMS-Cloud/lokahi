@@ -485,7 +485,7 @@ public class NodeServiceTest {
                 nodeMapper,
                 mockTagPublisher,
                 tagRepository,
-            activeDiscoveryMapper);
+                activeDiscoveryMapper);
 
         //
         // Execute

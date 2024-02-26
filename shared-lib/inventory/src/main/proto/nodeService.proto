@@ -108,7 +108,6 @@ message NodeIdList {
 message  SearchIpInterfaceQuery{
   int64  node_id = 1;
   string search_term = 2;
-  string ip_address =3;
 }
 
 

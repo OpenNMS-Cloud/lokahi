@@ -125,5 +125,4 @@ service NodeService {
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
   rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
   rpc listSnmpInterfaces(SearchBy) returns (SnmpInterfacesList) {};
-  rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
 }

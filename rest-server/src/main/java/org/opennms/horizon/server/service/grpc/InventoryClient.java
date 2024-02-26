@@ -540,8 +540,7 @@ public class InventoryClient {
     public List<SnmpInterfaceDTO> listSnmpInterfaces(String search, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        SearchBy query =
-                SearchBy.newBuilder().setSearch((search != null) ? search : "").build();
+        SearchBy query = SearchBy.newBuilder().setSearch(search).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .listSnmpInterfaces(query)

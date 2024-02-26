@@ -6,7 +6,7 @@ import * as yup from 'yup'
 export const splitStringOnSemiCommaOrDot = (inString?: string) => {
   return inString?.split(/[;,]+/) ?? []
 }
-  
+
 export const discoveryFromClientToServer = (discovery: NewOrUpdatedDiscovery) => {
   if (discovery.type === DiscoveryType.Azure) {
     return discoveryFromAzureClientToServer(discovery)
@@ -31,7 +31,7 @@ export const discoveryFromActiveClientToServer = (discovery: NewOrUpdatedDiscove
     locationId: discovery.locations?.[0]?.id,
     name: discovery.name,
     snmpConfig: {ports: splitStringOnSemiCommaOrDot(meta.udpPorts), readCommunities: splitStringOnSemiCommaOrDot(meta.communityStrings)},
-    tags: discovery.tags?.map((t) => ({name:t.name}))
+    tags: discovery.tags?.map((t) => ({ name: t.name }))
   }
 }
 
@@ -41,7 +41,7 @@ export const discoveryFromAzureClientToServer = (discovery: NewOrUpdatedDiscover
     id: discovery.id,
     locationId: discovery.locations?.[0]?.id,
     name: discovery.name,
-    tags: discovery.tags?.map((t) => ({name:t.name})),
+    tags: discovery.tags?.map((t) => ({ name: t.name })),
     clientId: meta.clientId,
     subscriptionId: meta.subscriptionId,
     clientSecret: meta.clientSecret,
@@ -55,31 +55,42 @@ export const discoveryFromTrapClientToServer = (discovery: NewOrUpdatedDiscovery
     id: discovery.id,
     locationId: discovery.locations?.[0]?.id,
     name: discovery.name,
-    snmpPorts: splitStringOnSemiCommaOrDot(meta.udpPorts), 
+    snmpPorts: splitStringOnSemiCommaOrDot(meta.udpPorts),
     snmpCommunities: splitStringOnSemiCommaOrDot(meta.communityStrings),
-    tags: discovery.tags?.map((t) => ({name:t.name}))
+    tags: discovery.tags?.map((t) => ({name: t.name}))
   }
 }
-export const sortDiscoveriesByName = (a: {name?:string}, b: {name?:string}) => {
-  let ret = 0
-  if (!a.name) a.name = ''
-  if (!b.name) b.name = ''
 
-  if (a.name < b.name) ret = -1
-  if (a.name > b.name) ret = 1
+export const sortDiscoveriesByName = (a: { name?: string }, b: { name?: string }) => {
+  let ret = 0
+
+  if (!a.name) {
+    a.name = ''
+  }
+  if (!b.name) {
+    b.name = ''
+  }
+
+  if (a.name < b.name) {
+    ret = -1
+  }
+  if (a.name > b.name) {
+    ret = 1
+  }
+
   return ret
 }
 
-export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations: Array<{id: number}>) => {
+export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations: Array<{ id: number }>) => {
   let combined: Array<NewOrUpdatedDiscovery> = []
 
   dataIn.listActiveDiscovery?.forEach((d) => {
     combined.push({
-      id:d.details?.id,
+      id: d.details?.id,
       name: d.details?.name,
       tags: d.details?.tags,
       type: d.discoveryType,
-      locations: locations.filter((b) => {return b.id === Number(d.details?.locationId)}),
+      locations: locations.filter((b) => { return b.id === Number(d.details?.locationId) }),
       meta: {
         communityStrings: d?.details?.snmpConfig?.readCommunities.join(';') ?? '',
         ipRanges: d?.details?.ipAddresses?.join(';') ?? '',
@@ -91,29 +102,30 @@ export const discoveryFromServerToClient = (dataIn: ServerDiscoveries, locations
       }
     })
   })
-  
+
   dataIn.passiveDiscoveries?.forEach((d) => {
     combined.push({
-      id:d.id,
+      id: d.id,
       name: d.name,
       tags: d.tags,
-      locations: locations.filter((b) => {return b.id === Number(d.locationId)}),
+      locations: locations.filter((b) => { return b.id === Number(d.locationId) }),
       type: DiscoveryType.SyslogSNMPTraps,
       meta: {
         udpPorts: d?.snmpPorts?.join(';'),
         communityStrings: d?.snmpCommunities?.join(';'),
-        toggle:{toggle:d.toggle,id:d.id}
+        toggle: { toggle: d.toggle, id: d.id }
       }
     })
   })
-  combined = combined.sort(sortDiscoveriesByName) 
+
+  combined = combined.sort(sortDiscoveriesByName)
   return combined
 }
 
 const activeDiscoveryValidation = yup.object().shape({
   name: yup.string().trim().required('Please enter a name.'),
-  locationId:yup.string().trim().required('Location required.'),
-  ipAddresses: yup.array().min(1,'Please enter an ip address.').of(yup.string().required('Please enter an IP address.')
+  locationId: yup.string().trim().required('Location required.'),
+  ipAddresses: yup.array().min(1, 'Please enter an ip address.').of(yup.string().required('Please enter an IP address.')
     .test('validate-ip',
       (ip, ctx) => {
         const matches = []
@@ -139,7 +151,7 @@ const activeDiscoveryValidation = yup.object().shape({
 
 const passiveDiscoveryValidation = yup.object().shape({
   name: yup.string().trim().required('Please enter a name.'),
-  locationId:yup.string().trim().required('Location required.'),
+  locationId: yup.string().trim().required('Location required.'),
   snmpConfig: yup.object({
     communityStrings: yup.array().of(yup.string().required('Please enter a community string.')),
     udpPorts: yup.array().of(yup.number())
@@ -148,14 +160,14 @@ const passiveDiscoveryValidation = yup.object().shape({
 
 const azureDiscoveryValidation = yup.object().shape({
   name: yup.string().trim().required('Please enter a name.'),
-  locationId:yup.string().trim().required('Location required.'),
+  locationId: yup.string().trim().required('Location required.'),
   clientId: yup.string().trim().required('Client ID is required.'),
   subscriptionId: yup.string().trim().required('Client subscription ID is required.'),
   directoryId: yup.string().trim().required('Directory ID is required.'),
   clientSecret: yup.string().trim().required('Client secret is required.')
 }).required()
 
-const validatorMap: Record<string,yup.Schema> = {
+const validatorMap: Record<string, yup.Schema> = {
   [DiscoveryType.Azure]: azureDiscoveryValidation,
   [DiscoveryType.ICMP]: activeDiscoveryValidation,
   [DiscoveryType.SyslogSNMPTraps]: passiveDiscoveryValidation
@@ -171,7 +183,7 @@ export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDi
 
   try {
     await validatorToUse.validate(convertedDiscovery, { abortEarly: false })
-  } catch(e) {
+  } catch (e) {
     validationErrors = validationErrorsToStringRecord(e as yup.ValidationError)
     isValid = false
   }

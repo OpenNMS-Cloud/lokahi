@@ -1,4 +1,4 @@
-<!-- 
+<!--
   Props:
     - items: actionable item list
       - default: empty list

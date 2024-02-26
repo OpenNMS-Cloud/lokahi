@@ -1,37 +1,39 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.server;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.web.GraphQLExecutor;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,21 +52,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 @Slf4j
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 public class GraphQLControllerTest {
 
-    private static final String QUERY = """
+    private static final String QUERY =
+            """
         mutation {
             createLocation(location: {
                 location: "foo",
@@ -81,15 +74,14 @@ public class GraphQLControllerTest {
         }
         """;
     private static final MonitoringLocationDTO RESPONSE_DTO = MonitoringLocationDTO.newBuilder()
-        .setId(5L)
-        .setLocation("foo")
-        .setAddress("bar")
-        .setGeoLocation(GeoLocation.newBuilder()
-            .setLatitude(0)
-            .setLongitude(0)
-            .build())
-        .build();
-    private static final String RESPONSE_DTO_JSON = """
+            .setId(5L)
+            .setLocation("foo")
+            .setAddress("bar")
+            .setGeoLocation(
+                    GeoLocation.newBuilder().setLatitude(0).setLongitude(0).build())
+            .build();
+    private static final String RESPONSE_DTO_JSON =
+            """
         {
           "data": {
             "createLocation": {
@@ -119,87 +111,87 @@ public class GraphQLControllerTest {
     void setUp(@Autowired WebTestClient webTestClient) {
         webClient = GraphQLWebTestClient.from(webTestClient);
 
-        doReturn(webClient.getAccessToken())
-            .when(mockHeaderUtil)
-            .getAuthHeader(any(ResolutionEnvironment.class));
+        doReturn(webClient.getAccessToken()).when(mockHeaderUtil).getAuthHeader(any(ResolutionEnvironment.class));
     }
 
     @Test
     void doesNotAllowRequestsViaGet() {
-        webClient.exchangeGet(webClient.getEndpoint() + "?query={q}", Map.of("q", QUERY))
-            .expectJsonResponse(HttpStatus.METHOD_NOT_ALLOWED)
-            .jsonPath("$.error").isEqualTo("Method Not Allowed")
-            .jsonPath("$.message").isEqualTo("Request method 'GET' is not supported.");
+        webClient
+                .exchangeGet(webClient.getEndpoint() + "?query={q}", Map.of("q", QUERY))
+                .expectJsonResponse(HttpStatus.METHOD_NOT_ALLOWED)
+                .jsonPath("$.error")
+                .isEqualTo("Method Not Allowed")
+                .jsonPath("$.message")
+                .isEqualTo("Request method 'GET' is not supported.");
     }
 
-    @ValueSource(strings = {
-        MediaType.APPLICATION_XML_VALUE,
-        MediaType.APPLICATION_FORM_URLENCODED_VALUE
-    })
+    @ValueSource(strings = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     @ParameterizedTest
     void doesNotAllowUnsupportedMediaTypes(String mediaType) {
         webClient
-            .withContentType(MediaType.parseMediaType(mediaType))
-            .exchangeGraphQLQuery(QUERY)
-            .expectJsonResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-            .jsonPath("$.error").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
-            .jsonPath("$.message").isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
+                .withContentType(MediaType.parseMediaType(mediaType))
+                .exchangeGraphQLQuery(QUERY)
+                .expectJsonResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .jsonPath("$.error")
+                .isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
+                .jsonPath("$.message")
+                .isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
     }
 
     @Test
     void allowsPostRequests() {
         when(inventoryClient.createLocation(any(), any())).thenReturn(RESPONSE_DTO);
 
-        webClient
-            .exchangeGraphQLQuery(QUERY)
-            .expectCleanResponse()
-            .json(RESPONSE_DTO_JSON);
+        webClient.exchangeGraphQLQuery(QUERY).expectCleanResponse().json(RESPONSE_DTO_JSON);
     }
 
-    @ValueSource(strings = {
-        "NONSENSE", "{\"query\":"
-    })
+    @ValueSource(strings = {"NONSENSE", "{\"query\":"})
     @ParameterizedTest
     void invalidRequestsBodyShouldReturn400Error(String requestBody) {
         webClient
-            .exchangePost(requestBody)
-            .expectJsonResponse(HttpStatus.BAD_REQUEST)
-            .jsonPath("$.error").isEqualTo("Bad Request")
-            .jsonPath("$.message").isEqualTo("Failed to read HTTP message");
+                .exchangePost(requestBody)
+                .expectJsonResponse(HttpStatus.BAD_REQUEST)
+                .jsonPath("$.error")
+                .isEqualTo("Bad Request")
+                .jsonPath("$.message")
+                .isEqualTo("Failed to read HTTP message");
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void anUnexpectedWebLayerErrorDoesNotLeakInternalDetails() {
         doThrow(new RuntimeException("internal error details"))
-            .when(graphQLExecutor).execute(any(), any());
+                .when(graphQLExecutor)
+                .execute(any(), any());
 
         webClient
-            .exchangeGraphQLQuery(QUERY)
-            .expectJsonResponse(HttpStatus.INTERNAL_SERVER_ERROR)
-            .jsonPath("$.error").isEqualTo("Internal Server Error")
-            .jsonPath("$.message").isEqualTo("Internal Server Error");
+                .exchangeGraphQLQuery(QUERY)
+                .expectJsonResponse(HttpStatus.INTERNAL_SERVER_ERROR)
+                .jsonPath("$.error")
+                .isEqualTo("Internal Server Error")
+                .jsonPath("$.message")
+                .isEqualTo("Internal Server Error");
     }
 
     @Test
     void anUnexpectedErrorDoesNotLeakInternalDetails() {
-        when(inventoryClient.createLocation(any(), any()))
-            .thenThrow(new RuntimeException("internal error details"));
+        when(inventoryClient.createLocation(any(), any())).thenThrow(new RuntimeException("internal error details"));
 
         webClient
-            .exchangeGraphQLQuery(QUERY)
-            .expectJsonResponse(HttpStatus.OK)
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.errors[0].message").isEqualTo(
-                "Exception while fetching data (/createLocation) : Internal Error"
-            )
-            .jsonPath("$.errors[0].path[0]").isEqualTo("createLocation");
+                .exchangeGraphQLQuery(QUERY)
+                .expectJsonResponse(HttpStatus.OK)
+                .jsonPath("$.errors")
+                .isArray()
+                .jsonPath("$.errors[0].message")
+                .isEqualTo("Exception while fetching data (/createLocation) : Internal Error")
+                .jsonPath("$.errors[0].path[0]")
+                .isEqualTo("createLocation");
     }
 
     @Test
     void anUnexpectedGRPCErrorDoesNotLeakInternalDetails() {
         when(inventoryClient.deleteLocation(anyLong(), anyString()))
-            .thenThrow(new StatusRuntimeException(Status.DATA_LOSS));
+                .thenThrow(new StatusRuntimeException(Status.DATA_LOSS));
 
         String query = """
             mutation {
@@ -208,12 +200,13 @@ public class GraphQLControllerTest {
             """;
 
         webClient
-            .exchangeGraphQLQuery(query)
-            .expectJsonResponse(HttpStatus.OK)
-            .jsonPath("$.errors").isArray()
-            .jsonPath("$.errors[0].message").isEqualTo(
-                "Exception while fetching data (/deleteLocation) : Internal Error"
-            )
-            .jsonPath("$.errors[0].path[0]").isEqualTo("deleteLocation");
+                .exchangeGraphQLQuery(query)
+                .expectJsonResponse(HttpStatus.OK)
+                .jsonPath("$.errors")
+                .isArray()
+                .jsonPath("$.errors[0].message")
+                .isEqualTo("Exception while fetching data (/deleteLocation) : Internal Error")
+                .jsonPath("$.errors[0].path[0]")
+                .isEqualTo("deleteLocation");
     }
 }

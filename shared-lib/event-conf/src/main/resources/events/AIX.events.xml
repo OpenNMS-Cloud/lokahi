@@ -28,7 +28,7 @@ aixFsTable.&lt;/p>&lt;table>
 			aixFsName=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -85,7 +85,7 @@ aixFsThreshold - the threshold for the file system size&lt;/p>&lt;table>
 			aixFsThreshold=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/IBM/AIX/aixFileSystemFull:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/IBM/AIX/aixFileSystemFull:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -138,7 +138,7 @@ aixFsThreshold - the threshold for the file system size&lt;/p>&lt;table>
 			aixFsThreshold=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -191,7 +191,7 @@ aixVgThreshold - the threshold for the volume group.&lt;/p>&lt;table>
 			aixVgThreshold=%parm[#4]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -244,7 +244,7 @@ aixPageThreshold - the threshold value of the paging
 			aixPageThreshold=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="uei.opennms.org/vendor/IBM/AIX/aixPageFull:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="uei.opennms.org/vendor/IBM/AIX/aixPageFull:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -293,7 +293,7 @@ aixPageThreshold - the threshold value of the paging
 			aixPageThreshold=%parm[#3]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -328,7 +328,7 @@ attempts occurred.&lt;/p>&lt;table>
 			aixFailedLoginTimePeriod=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -366,7 +366,7 @@ aixSeThresholdCPU - Threshold value.  &lt;/p>&lt;table>
 			aixSeCPUThreshold=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>

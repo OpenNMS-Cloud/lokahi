@@ -16,6 +16,6 @@
             &lt;p>su failure for user %parm[user]% to user %parm[targetUser]% on %parm[tty]% &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

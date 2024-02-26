@@ -1,36 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.conf.xml;
-
-
-import org.opennms.horizon.events.util.ConfigUtils;
-import org.opennms.horizon.events.util.ValidateUsing;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -39,14 +28,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 import java.util.Objects;
+import org.opennms.horizon.events.util.ConfigUtils;
+import org.opennms.horizon.events.util.ValidateUsing;
 
 /**
  * The SNMP information from the trap
  */
-@XmlRootElement(name="snmp")
+@XmlRootElement(name = "snmp")
 @XmlAccessorType(XmlAccessType.NONE)
 @ValidateUsing("eventconf.xsd")
-@XmlType(propOrder={"m_id", "m_idText", "m_version", "m_specific", "m_generic", "m_community", "m_trapOID"})
+@XmlType(propOrder = {"m_id", "m_idText", "m_version", "m_specific", "m_generic", "m_community", "m_trapOID"})
 public class Snmp implements Serializable {
     private static final long serialVersionUID = 2L;
 
@@ -54,41 +45,41 @@ public class Snmp implements Serializable {
      * The SNMP enterprise ID
      */
     // @NotNull
-    @XmlElement(name="id", required=true)
+    @XmlElement(name = "id", required = true)
     private String m_id;
 
-    @XmlElement(name="trapoid")
+    @XmlElement(name = "trapoid")
     private String m_trapOID;
 
     /**
      * The SNMP enterprise ID text
      */
-    @XmlElement(name="idtext", required=false)
+    @XmlElement(name = "idtext", required = false)
     private String m_idText;
 
     /**
      * The SNMP version
      */
     // @NotNull
-    @XmlElement(name="version", required=true)
+    @XmlElement(name = "version", required = true)
     private String m_version;
 
     /**
      * The specific trap number
      */
-    @XmlElement(name="specific", required=false)
+    @XmlElement(name = "specific", required = false)
     private Integer m_specific;
 
     /**
      * The generic trap number
      */
-    @XmlElement(name="generic", required=false)
+    @XmlElement(name = "generic", required = false)
     private Integer m_generic;
 
     /**
      * The community name
      */
-    @XmlElement(name="community", required=false)
+    @XmlElement(name = "community", required = false)
     private String m_community;
 
     /** The SNMP enterprise ID */
@@ -164,15 +155,14 @@ public class Snmp implements Serializable {
         }
         if (obj instanceof Snmp) {
             final Snmp that = (Snmp) obj;
-            return Objects.equals(this.m_id, that.m_id) &&
-                    Objects.equals(this.m_idText, that.m_idText) &&
-                    Objects.equals(this.m_version, that.m_version) &&
-                    Objects.equals(this.m_specific, that.m_specific) &&
-                    Objects.equals(this.m_generic, that.m_generic) &&
-                    Objects.equals(this.m_community, that.m_community) &&
-                    Objects.equals(this.m_trapOID, that.m_trapOID);
+            return Objects.equals(this.m_id, that.m_id)
+                    && Objects.equals(this.m_idText, that.m_idText)
+                    && Objects.equals(this.m_version, that.m_version)
+                    && Objects.equals(this.m_specific, that.m_specific)
+                    && Objects.equals(this.m_generic, that.m_generic)
+                    && Objects.equals(this.m_community, that.m_community)
+                    && Objects.equals(this.m_trapOID, that.m_trapOID);
         }
         return false;
     }
-
 }

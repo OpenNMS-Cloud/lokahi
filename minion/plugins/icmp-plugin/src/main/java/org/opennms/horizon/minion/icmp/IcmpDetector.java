@@ -1,35 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.icmp;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import java.net.InetAddress;
+import java.util.concurrent.CompletableFuture;
 import org.opennms.horizon.minion.plugin.api.ServiceDetector;
 import org.opennms.horizon.shared.icmp.EchoPacket;
 import org.opennms.horizon.shared.icmp.PingConstants;
@@ -40,9 +35,6 @@ import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.icmp.contract.IcmpDetectorRequest;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.ServiceResult;
-
-import java.net.InetAddress;
-import java.util.concurrent.CompletableFuture;
 
 public class IcmpDetector implements ServiceDetector {
 
@@ -57,15 +49,19 @@ public class IcmpDetector implements ServiceDetector {
     public IcmpDetector(PingerFactory pingerFactory) {
         this.pingerFactory = pingerFactory;
 
-        Descriptors.Descriptor icmpDetectorRequestDescriptor = IcmpDetectorRequest.getDefaultInstance().getDescriptorForType();
+        Descriptors.Descriptor icmpDetectorRequestDescriptor =
+                IcmpDetectorRequest.getDefaultInstance().getDescriptorForType();
 
-        allowFragmentationFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.ALLOW_FRAGMENTATION_FIELD_NUMBER);
+        allowFragmentationFieldDescriptor =
+                icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.ALLOW_FRAGMENTATION_FIELD_NUMBER);
         dscpFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.DSCP_FIELD_NUMBER);
-        packetSizeFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.PACKET_SIZE_FIELD_NUMBER);
-        retriesFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.RETRIES_FIELD_NUMBER);
-        timeoutFieldDescriptor = icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.TIMEOUT_FIELD_NUMBER);
+        packetSizeFieldDescriptor =
+                icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.PACKET_SIZE_FIELD_NUMBER);
+        retriesFieldDescriptor =
+                icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.RETRIES_FIELD_NUMBER);
+        timeoutFieldDescriptor =
+                icmpDetectorRequestDescriptor.findFieldByNumber(IcmpDetectorRequest.TIMEOUT_FIELD_NUMBER);
     }
-
 
     @Override
     public CompletableFuture<ServiceResult> detect(String host, Any config) {
@@ -74,7 +70,8 @@ public class IcmpDetector implements ServiceDetector {
         try {
 
             if (!config.is(IcmpDetectorRequest.class)) {
-                throw new IllegalArgumentException("configuration must be an IcmpDetectorRequest; type-url=" + config.getTypeUrl());
+                throw new IllegalArgumentException(
+                        "configuration must be an IcmpDetectorRequest; type-url=" + config.getTypeUrl());
             }
 
             IcmpDetectorRequest icmpDetectorRequest = config.unpack(IcmpDetectorRequest.class);
@@ -87,12 +84,11 @@ public class IcmpDetector implements ServiceDetector {
             Pinger pinger = pingerFactory.getInstance(dscp, allowFragmentation);
 
             pinger.ping(
-                hostAddress,
-                effectiveRequest.getTimeout(),
-                effectiveRequest.getRetries(),
-                effectiveRequest.getPacketSize(),
-                new PingResponseHandler(future)
-            );
+                    hostAddress,
+                    effectiveRequest.getTimeout(),
+                    effectiveRequest.getRetries(),
+                    effectiveRequest.getPacketSize(),
+                    new PingResponseHandler(future));
         } catch (Exception e) {
             future.complete(ServiceResult.newBuilder().setIpAddress(host).build());
         }
@@ -137,28 +133,28 @@ public class IcmpDetector implements ServiceDetector {
         @Override
         public void handleResponse(InetAddress address, EchoPacket response) {
             future.complete(ServiceResult.newBuilder()
-                .setIpAddress(InetAddressUtils.str(address))
-                .setService(ServiceType.ICMP)
-                .setStatus(true)
-                .build());
+                    .setIpAddress(InetAddressUtils.str(address))
+                    .setService(ServiceType.ICMP)
+                    .setStatus(true)
+                    .build());
         }
 
         @Override
         public void handleTimeout(InetAddress address, EchoPacket request) {
             future.complete(ServiceResult.newBuilder()
-                .setIpAddress(InetAddressUtils.str(address))
-                .setService(ServiceType.ICMP)
-                .setStatus(false)
-                .build());
+                    .setIpAddress(InetAddressUtils.str(address))
+                    .setService(ServiceType.ICMP)
+                    .setStatus(false)
+                    .build());
         }
 
         @Override
         public void handleError(InetAddress address, EchoPacket request, Throwable t) {
             future.complete(ServiceResult.newBuilder()
-                .setIpAddress(InetAddressUtils.str(address))
-                .setService(ServiceType.ICMP)
-                .setStatus(false)
-                .build());
+                    .setIpAddress(InetAddressUtils.str(address))
+                    .setService(ServiceType.ICMP)
+                    .setStatus(false)
+                    .build());
         }
     }
 }

@@ -1,32 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.grpc;
+
+import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
@@ -38,6 +33,21 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.opentracing.Tracer;
+import java.io.IOException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import lombok.Setter;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc.CloudServiceStub;
@@ -59,24 +69,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
-
-import java.io.IOException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-
-import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 /**
  * Minion GRPC client runs both RPC/Sink together.
@@ -105,12 +97,13 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     private Context.CancellableContext cloudToMinionStreamCancellableContext;
 
     private final AtomicLong counter = new AtomicLong();
-    private final ThreadFactory blockingSinkMessageThreadFactory = (runnable) -> new Thread(runnable, "blocking-sink-message-" + counter.incrementAndGet());
+    private final ThreadFactory blockingSinkMessageThreadFactory =
+            (runnable) -> new Thread(runnable, "blocking-sink-message-" + counter.incrementAndGet());
     // Each request is handled in a new thread which unmarshals and executes the request.
     // This maintains a blocking thread for each dispatch module when OpenNMS is not in active state.
 
-    private final ScheduledExecutorService blockingSinkMessageScheduler = Executors.newScheduledThreadPool(SINK_BLOCKING_THREAD_POOL_SIZE,
-            blockingSinkMessageThreadFactory);
+    private final ScheduledExecutorService blockingSinkMessageScheduler =
+            Executors.newScheduledThreadPool(SINK_BLOCKING_THREAD_POOL_SIZE, blockingSinkMessageThreadFactory);
     private final Map<SinkMessage, ScheduledFuture<?>> pendingMessages = new ConcurrentHashMap<>(2000);
     private final Tracer tracer;
     private final ManagedChannelFactory managedChannelFactory;
@@ -118,36 +111,41 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     private final GrpcShutdownHandler grpcShutdownHandler;
 
     private ReconnectStrategy reconnectStrategy;
+
     @Setter
     private RpcRequestHandler rpcRequestHandler;
+
     @Setter
     private CloudMessageHandler cloudMessageHandler;
 
     @Setter
     private SimpleReconnectStrategyFactory simpleReconnectStrategyFactory = SimpleReconnectStrategy::new;
+
     @Setter
     private Function<ManagedChannel, CloudServiceStub> newStubOperation = CloudServiceGrpc::newStub;
 
     @Setter
     private String grpcHost;
+
     @Setter
     private int grpcPort;
+
     @Setter
     private String overrideAuthority;
 
     private final SendQueueFactory sendQueueFactory;
 
-//========================================
-// Constructor
-//----------------------------------------
+    // ========================================
+    // Constructor
+    // ----------------------------------------
 
     public MinionGrpcClient(
-        IpcIdentity ipcIdentity,
-        MetricRegistry metricRegistry,
-        Tracer tracer,
-        SendQueueFactory sendQueueFactory,
-        ManagedChannelFactory managedChannelFactory,
-        GrpcShutdownHandler grpcShutdownHandler) {
+            IpcIdentity ipcIdentity,
+            MetricRegistry metricRegistry,
+            Tracer tracer,
+            SendQueueFactory sendQueueFactory,
+            ManagedChannelFactory managedChannelFactory,
+            GrpcShutdownHandler grpcShutdownHandler) {
 
         this.ipcIdentity = ipcIdentity;
         this.metricRegistry = metricRegistry;
@@ -157,21 +155,20 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         this.grpcShutdownHandler = grpcShutdownHandler;
     }
 
-//========================================
-// Lifecycle
-//----------------------------------------
+    // ========================================
+    // Lifecycle
+    // ----------------------------------------
 
     public void start() throws IOException {
         channel = managedChannelFactory.create(grpcHost, grpcPort, overrideAuthority);
         asyncStub = newStubOperation.apply(channel);
 
-        reconnectStrategy = simpleReconnectStrategyFactory.create(channel, this::handleReconnect, this::handleDisconnect);
+        reconnectStrategy =
+                simpleReconnectStrategyFactory.create(channel, this::handleReconnect, this::handleDisconnect);
         reconnectStrategy.activate();
 
         LOG.info("Minion with systemId {} started", ipcIdentity.getId());
-
     }
-
 
     public void shutdown() {
         blockingSinkMessageScheduler.shutdown();
@@ -185,13 +182,11 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             channel.shutdown();
         }
         LOG.info("Minion with systemId {} stopped", ipcIdentity.getId());
-
     }
 
-
-//========================================
-// Misc
-//----------------------------------------
+    // ========================================
+    // Misc
+    // ----------------------------------------
 
     @Override
     public Tracer getTracer() {
@@ -208,13 +203,15 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         return this.sendQueueFactory;
     }
 
-//========================================
-// Processing
-//----------------------------------------
+    // ========================================
+    // Processing
+    // ----------------------------------------
 
     @Override
-    // public <S extends org.opennms.horizon.ipc.sink.api.Message, T extends org.opennms.horizon.ipc.sink.api.Message> void dispatch(SinkModule<S, T> module, String metadata, T message) {
-    public <S extends Message, T extends Message> void dispatch(SinkModule<S, T> module, String metadata, byte[] message) {
+    // public <S extends org.opennms.horizon.ipc.sink.api.Message, T extends org.opennms.horizon.ipc.sink.api.Message>
+    // void dispatch(SinkModule<S, T> module, String metadata, T message) {
+    public <S extends Message, T extends Message> void dispatch(
+            SinkModule<S, T> module, String metadata, byte[] message) {
         try (MDCCloseable mdc = MDC.putCloseable("prefix", MessageConsumerManager.LOG_PREFIX)) {
             String messageId = UUID.randomUUID().toString();
             SinkMessage.Builder sinkMessageBuilder = SinkMessage.newBuilder()
@@ -245,8 +242,8 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
                 var rootCause = findRootCause(throwable);
                 // sun.security.provider.certpath.SunCertPathBuilderException is not visible by default
                 if (rootCause.getClass().getName().contains("SunCertPathBuilderException")
-                    || rootCause instanceof CertificateExpiredException
-                    || rootCause instanceof CertificateNotYetValidException) {
+                        || rootCause instanceof CertificateExpiredException
+                        || rootCause instanceof CertificateNotYetValidException) {
                     LOG.error("Client received error {}", rootCause.getMessage());
                     shutdown();
                     reconnectStrategy.shutdown();
@@ -266,10 +263,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         return future;
     }
 
-
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
     private Throwable findRootCause(Throwable t) {
         Throwable rootCause = t;
         while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
@@ -277,6 +273,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         }
         return rootCause;
     }
+
     private void handleReconnect() {
         initializeRpcStub();
         initializeSinkStub();
@@ -328,17 +325,14 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
     }
 
     private void initializeCloudReceiver() {
-        Identity identity = Identity.newBuilder()
-            .setSystemId(ipcIdentity.getId())
-            .build();
+        Identity identity =
+                Identity.newBuilder().setSystemId(ipcIdentity.getId()).build();
 
         cloudToMinionStreamCancellableContext = Context.current().withCancellation();
-        cloudToMinionStreamCancellableContext.run(
-            () -> {
-                asyncStub.cloudToMinionMessages(identity, new CloudMessageObserver(cloudMessageHandler));
-                LOG.info("Initialized cloud receiver stream");
-            });
-
+        cloudToMinionStreamCancellableContext.run(() -> {
+            asyncStub.cloudToMinionMessages(identity, new CloudMessageObserver(cloudMessageHandler));
+            LOG.info("Initialized cloud receiver stream");
+        });
     }
 
     private void sendBlockingSinkMessage(SinkMessage sinkMessage) {
@@ -346,29 +340,31 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         if (succeeded) {
             return;
         }
-        //Recursively try to send sink message until it succeeds.
+        // Recursively try to send sink message until it succeeds.
         scheduleSinkMessageAfterDelay(sinkMessage);
     }
 
     private void scheduleSinkMessageAfterDelay(SinkMessage sinkMessage) {
         // try until we get a successful send
-        ScheduledFuture<?> future = blockingSinkMessageScheduler.scheduleWithFixedDelay(() -> {
-            if (sendSinkMessage(sinkMessage)) {
-                // canceling myself?
-                pendingMessages.remove(sinkMessage).cancel(false);
-            }
-        }, SINK_BLOCKING_TIMEOUT, SINK_BLOCKING_TIMEOUT, TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> future = blockingSinkMessageScheduler.scheduleWithFixedDelay(
+                () -> {
+                    if (sendSinkMessage(sinkMessage)) {
+                        // canceling myself?
+                        pendingMessages.remove(sinkMessage).cancel(false);
+                    }
+                },
+                SINK_BLOCKING_TIMEOUT,
+                SINK_BLOCKING_TIMEOUT,
+                TimeUnit.MILLISECONDS);
         pendingMessages.put(sinkMessage, future);
     }
-
 
     private synchronized boolean sendSinkMessage(SinkMessage sinkMessage) {
         if (sinkStream != null) {
             try {
                 sinkStream.onNext(MinionToCloudMessage.newBuilder()
-                    .setSinkMessage(sinkMessage)
-                    .build()
-                );
+                        .setSinkMessage(sinkMessage)
+                        .build());
                 return true;
             } catch (Throwable e) {
                 if (LOG.isDebugEnabled()) {
@@ -380,7 +376,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         }
         return false;
     }
-
 
     private void sendMinionHeaders() {
         RpcResponseProto rpcHeader = RpcResponseProto.newBuilder()
@@ -412,8 +407,10 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             try {
                 rpcStream.onNext(rpcResponseProto);
             } catch (Exception e) {
-                LOG.debug("Exception while sending RPC response : response = {}, message = {}",
-                    rpcResponseProto, e.getMessage());
+                LOG.debug(
+                        "Exception while sending RPC response : response = {}, message = {}",
+                        rpcResponseProto,
+                        e.getMessage());
             }
         } else {
             LOG.warn("gRPC IPC server is not in ready state");
@@ -430,7 +427,7 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
         @Override
         public void onError(Throwable throwable) {
             if (throwable instanceof StatusRuntimeException statusRuntimeException
-                && (statusRuntimeException.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
+                    && (statusRuntimeException.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
                 LOG.error("Client received error {}", Status.Code.UNAUTHENTICATED);
                 shutdown();
                 reconnectStrategy.shutdown();
@@ -452,7 +449,6 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             reconnectStrategy.activate();
             LOG.info("Client closed the connection, will reconnect");
         }
-
     }
 
     private class CloudMessageObserver implements StreamObserver<CloudToMinionMessage> {
@@ -511,10 +507,9 @@ public class MinionGrpcClient extends AbstractMessageDispatcherFactory<String> i
             reconnectStrategy.activate();
             LOG.info("Client closed the connection, will reconnect");
         }
-
     }
+
     public interface SimpleReconnectStrategyFactory {
         SimpleReconnectStrategy create(ManagedChannel channel, Runnable onConnect, Runnable onDisconnect);
     }
-
 }

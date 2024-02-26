@@ -1,4 +1,28 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.traps;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,9 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
 import org.springframework.kafka.core.KafkaTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class EventForwarderTest {
@@ -36,14 +57,8 @@ public class EventForwarderTest {
 
     @Test
     void testSendTrapEvent() {
-        Event testEvent =
-            Event.newBuilder()
-                .setNodeId(1)
-                .build();
-        EventLog testProtoEventLog =
-            EventLog.newBuilder()
-                .addEvents(testEvent)
-                .build();
+        Event testEvent = Event.newBuilder().setNodeId(1).build();
+        EventLog testProtoEventLog = EventLog.newBuilder().addEvents(testEvent).build();
 
         eventForwarder.sendTrapEvents(testProtoEventLog);
         verify(kafkaTemplate).send(producerRecordCaptor.capture());
@@ -55,18 +70,14 @@ public class EventForwarderTest {
 
     @Test
     void testSendInternalEvent() {
-        Event testEvent =
-            Event.newBuilder()
-                .setNodeId(1)
-                .build();
+        Event testEvent = Event.newBuilder().setNodeId(1).build();
 
         eventForwarder.sendInternalEvent(testEvent);
         verify(kafkaTemplate).send(producerRecordCaptor.capture());
 
         ProducerRecord<String, byte[]> producerRecord = producerRecordCaptor.getValue();
         assertThat(producerRecord.topic()).isEqualTo(internalEventsTopic);
-        assertThat(producerRecord.value()).isEqualTo(EventLog.newBuilder().addEvents(testEvent).build().toByteArray());
+        assertThat(producerRecord.value())
+                .isEqualTo(EventLog.newBuilder().addEvents(testEvent).build().toByteArray());
     }
-
-
 }

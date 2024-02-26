@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp;
 
 import java.io.IOException;
@@ -37,7 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,12 +50,14 @@ public class SnmpHelperImpl implements SnmpHelper {
 
     private SnmpStrategy strategy;
 
-    static SnmpHelperImpl.TooBigReportingAggregator createTooBigTracker(SnmpAgentConfig agentConfig, CollectionTracker... trackers) {
+    static SnmpHelperImpl.TooBigReportingAggregator createTooBigTracker(
+            SnmpAgentConfig agentConfig, CollectionTracker... trackers) {
         return new SnmpHelperImpl.TooBigReportingAggregator(trackers, agentConfig.getAddress());
     }
 
-    static SnmpHelperImpl.TooBigReportingAggregator createTooBigTracker(SnmpAgentConfig agentConfig, CollectionTracker tracker) {
-        return createTooBigTracker(agentConfig, new CollectionTracker[] { tracker });
+    static SnmpHelperImpl.TooBigReportingAggregator createTooBigTracker(
+            SnmpAgentConfig agentConfig, CollectionTracker tracker) {
+        return createTooBigTracker(agentConfig, new CollectionTracker[] {tracker});
     }
 
     public SnmpHelperImpl(StrategyResolver resolver) {
@@ -88,7 +82,7 @@ public class SnmpHelperImpl implements SnmpHelper {
     public SnmpValue get(SnmpAgentConfig agentConfig, SnmpObjId oid) {
         return getStrategy().get(agentConfig, oid);
     }
-    
+
     @Override
     public SnmpValue[] get(SnmpAgentConfig agentConfig, SnmpObjId[] oids) {
         return getStrategy().get(agentConfig, oids);
@@ -103,12 +97,12 @@ public class SnmpHelperImpl implements SnmpHelper {
     public SnmpValue getNext(SnmpAgentConfig agentConfig, SnmpObjId oid) {
         return getStrategy().getNext(agentConfig, oid);
     }
-    
+
     @Override
     public SnmpValue[] getNext(SnmpAgentConfig agentConfig, SnmpObjId[] oids) {
         return getStrategy().getNext(agentConfig, oids);
     }
-    
+
     @Override
     public SnmpValue[] getBulk(SnmpAgentConfig agentConfig, SnmpObjId[] oids) {
         return getStrategy().getBulk(agentConfig, oids);
@@ -125,11 +119,12 @@ public class SnmpHelperImpl implements SnmpHelper {
     }
 
     @Override
-    public List<SnmpValue> getColumns(final SnmpAgentConfig agentConfig, final String name, final SnmpObjId oid)  throws InterruptedException {
+    public List<SnmpValue> getColumns(final SnmpAgentConfig agentConfig, final String name, final SnmpObjId oid)
+            throws InterruptedException {
 
         final List<SnmpValue> results = new ArrayList<>();
-        
-        try(SnmpWalker walker= createWalker(agentConfig, name, new ColumnTracker(oid) {
+
+        try (SnmpWalker walker = createWalker(agentConfig, name, new ColumnTracker(oid) {
             @Override
             protected void storeResult(SnmpResult res) {
                 results.add(res.getValue());
@@ -143,11 +138,11 @@ public class SnmpHelperImpl implements SnmpHelper {
 
     @Override
     public Map<SnmpInstId, SnmpValue> getOidValues(SnmpAgentConfig agentConfig, String name, SnmpObjId oid)
-    throws InterruptedException {
+            throws InterruptedException {
 
         final Map<SnmpInstId, SnmpValue> results = new LinkedHashMap<SnmpInstId, SnmpValue>();
-        
-        try(SnmpWalker walker= createWalker(agentConfig, name, new ColumnTracker(oid) {
+
+        try (SnmpWalker walker = createWalker(agentConfig, name, new ColumnTracker(oid) {
             @Override
             protected void storeResult(SnmpResult res) {
                 results.put(res.getInstance(), res.getValue());
@@ -160,30 +155,37 @@ public class SnmpHelperImpl implements SnmpHelper {
     }
 
     @Override
-    public void registerForTraps(final TrapNotificationListener listener, final InetAddress address, final int snmpTrapPort, final List<SnmpV3User> snmpUsers) throws IOException {
+    public void registerForTraps(
+            final TrapNotificationListener listener,
+            final InetAddress address,
+            final int snmpTrapPort,
+            final List<SnmpV3User> snmpUsers)
+            throws IOException {
         getStrategy().registerForTraps(listener, address, snmpTrapPort, snmpUsers);
     }
 
     @Override
-    public void registerForTraps(final TrapNotificationListener listener, final InetAddress address, final int snmpTrapPort) throws IOException {
+    public void registerForTraps(
+            final TrapNotificationListener listener, final InetAddress address, final int snmpTrapPort)
+            throws IOException {
         getStrategy().registerForTraps(listener, address, snmpTrapPort);
     }
-    
+
     @Override
     public void unregisterForTraps(final TrapNotificationListener listener) throws IOException {
         getStrategy().unregisterForTraps(listener);
     }
-    
+
     @Override
     public SnmpValueFactory getValueFactory() {
         return getStrategy().getValueFactory();
     }
-    
+
     @Override
     public SnmpV1TrapBuilder getV1TrapBuilder() {
         return getStrategy().getV1TrapBuilder();
     }
-    
+
     @Override
     public SnmpTrapBuilder getV2TrapBuilder() {
         return getStrategy().getV2TrapBuilder();
@@ -208,24 +210,23 @@ public class SnmpHelperImpl implements SnmpHelper {
     public String getLocalEngineID() {
         return getHexString(getStrategy().getLocalEngineID());
     }
-    
+
     static final byte[] HEX_CHAR_TABLE = {
-        (byte)'0', (byte)'1', (byte)'2', (byte)'3',
-        (byte)'4', (byte)'5', (byte)'6', (byte)'7',
-        (byte)'8', (byte)'9', (byte)'a', (byte)'b',
-        (byte)'c', (byte)'d', (byte)'e', (byte)'f'
-    };    
+        (byte) '0', (byte) '1', (byte) '2', (byte) '3',
+        (byte) '4', (byte) '5', (byte) '6', (byte) '7',
+        (byte) '8', (byte) '9', (byte) 'a', (byte) 'b',
+        (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f'
+    };
 
     @Override
-    public String getHexString(byte[] raw)
-      {
+    public String getHexString(byte[] raw) {
         byte[] hex = new byte[2 * raw.length];
         int index = 0;
 
         for (byte b : raw) {
-          int v = b & 0xFF;
-          hex[index++] = HEX_CHAR_TABLE[v >>> 4];
-          hex[index++] = HEX_CHAR_TABLE[v & 0xF];
+            int v = b & 0xFF;
+            hex[index++] = HEX_CHAR_TABLE[v >>> 4];
+            hex[index++] = HEX_CHAR_TABLE[v & 0xF];
         }
         try {
             return new String(hex, "ASCII");
@@ -237,9 +238,11 @@ public class SnmpHelperImpl implements SnmpHelper {
 
     @Override
     public Long getProtoCounter63Value(SnmpValue value) {
-        Long retval = getProtoCounter63Value(value.getBytes()); 
+        Long retval = getProtoCounter63Value(value.getBytes());
         if (retval != null && value.isDisplayable()) {
-            LOG.info("Value '{}' is entirely displayable but still meets our other checks to be treated as a proto-Counter64. This may not be what you want.", new String(value.getBytes()));
+            LOG.info(
+                    "Value '{}' is entirely displayable but still meets our other checks to be treated as a proto-Counter64. This may not be what you want.",
+                    new String(value.getBytes()));
         }
         return retval;
     }
@@ -247,7 +250,7 @@ public class SnmpHelperImpl implements SnmpHelper {
     /**
      * <p>Enable the SNMP code to digest OCTET STRING values acting as proto-Counter64
      * objects as seen in the FCMGMT-MIB with the following comment:</p>
-     * 
+     *
      * <p>There is one and only one statistics table for each
      * individual port. For all objects in statistics table, if the object is not
      * supported by the conn unit then the high order bit is set to 1 with all other
@@ -255,7 +258,7 @@ public class SnmpHelperImpl implements SnmpHelper {
      * if supported or not. All objects start at a value of zero at hardware
      * initialization and continue incrementing till end of 63 bits and then
      * wrap to zero.</p>
-     * 
+     *
      * @see <a href="http://issues.opennms.org/browse/NMS-5423">NMS-5423</a>
      */
     @Override
@@ -263,8 +266,9 @@ public class SnmpHelperImpl implements SnmpHelper {
         if (valBytes.length != 8) {
             LOG.trace("Value should be 8 bytes long for a proto-Counter63 but this one is {} bytes.", valBytes);
             return null;
-        } else if (Arrays.equals(valBytes, new byte[]{ (byte)0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 })) {
-            LOG.trace("Value has high-order bit set and all others zero, which indicates \"not supported\" in FCMGMT-MIB convention");
+        } else if (Arrays.equals(valBytes, new byte[] {(byte) 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0})) {
+            LOG.trace(
+                    "Value has high-order bit set and all others zero, which indicates \"not supported\" in FCMGMT-MIB convention");
             return null;
         } else if ((valBytes[0] & 0x80) == 0x80) {
             LOG.trace("Value has high-order bit set but proto-Counter63 should only be 63 bits");
@@ -291,8 +295,29 @@ public class SnmpHelperImpl implements SnmpHelper {
             return null;
         }
 
-        Long retVal = Long.decode(String.format("0x%02x%02x%02x%02x%02x%02x%02x%02x", valBytes[0], valBytes[1], valBytes[2], valBytes[3], valBytes[4], valBytes[5], valBytes[6], valBytes[7]));
-        LOG.trace("Converted octet-string {} as a proto-Counter63 of value {}", String.format("0x%02x%02x%02x%02x%02x%02x%02x%02x", valBytes[0], valBytes[1], valBytes[2], valBytes[3], valBytes[4], valBytes[5], valBytes[6], valBytes[7]), retVal);
+        Long retVal = Long.decode(String.format(
+                "0x%02x%02x%02x%02x%02x%02x%02x%02x",
+                valBytes[0],
+                valBytes[1],
+                valBytes[2],
+                valBytes[3],
+                valBytes[4],
+                valBytes[5],
+                valBytes[6],
+                valBytes[7]));
+        LOG.trace(
+                "Converted octet-string {} as a proto-Counter63 of value {}",
+                String.format(
+                        "0x%02x%02x%02x%02x%02x%02x%02x%02x",
+                        valBytes[0],
+                        valBytes[1],
+                        valBytes[2],
+                        valBytes[3],
+                        valBytes[4],
+                        valBytes[5],
+                        valBytes[6],
+                        valBytes[7]),
+                retVal);
         return retVal;
     }
 
@@ -315,5 +340,4 @@ public class SnmpHelperImpl implements SnmpHelper {
             logger.info("Received tooBig response from {}. {}", address, msg);
         }
     }
-
 }

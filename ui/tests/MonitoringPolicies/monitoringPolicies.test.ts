@@ -82,7 +82,7 @@ describe('Monitoring Policies', () => {
     await newRuleBtn.trigger('click')
     expect(store.displayRuleForm).toHaveBeenCalledTimes(1)
     // FIXME: This test broke after displayRuleForm was made async
-    //expect(store.selectedRule).toBeTruthy()
+    // expect(store.selectedRule).toBeTruthy()
   })
 
   test('Saving a rule to the policy.', async () => {

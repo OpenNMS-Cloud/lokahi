@@ -1,38 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.timeseries.cortex;
-
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.ConnectionPool;
@@ -48,13 +46,6 @@ import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 import prometheus.PrometheusRemote;
 import prometheus.PrometheusTypes;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Time Series Storage integration for Cortex.
@@ -88,28 +79,29 @@ public class CortexTSS {
         samplesWritten = metrics.meter("samplesWritten");
         samplesLost = metrics.meter("samplesLost");
 
-        ConnectionPool connectionPool = new ConnectionPool(config.getMaxConcurrentHttpConnections(), 5, TimeUnit.MINUTES);
+        ConnectionPool connectionPool =
+                new ConnectionPool(config.getMaxConcurrentHttpConnections(), 5, TimeUnit.MINUTES);
         Dispatcher dispatcher = new Dispatcher();
         dispatcher.setMaxRequests(config.getMaxConcurrentHttpConnections());
         dispatcher.setMaxRequestsPerHost(config.getMaxConcurrentHttpConnections());
 
         this.client = new OkHttpClient.Builder()
-            .readTimeout(config.getReadTimeoutInMs(), TimeUnit.MILLISECONDS)
-            .writeTimeout(config.getWriteTimeoutInMs(), TimeUnit.MILLISECONDS)
-            .dispatcher(dispatcher)
-            .connectionPool(connectionPool)
-            .build();
+                .readTimeout(config.getReadTimeoutInMs(), TimeUnit.MILLISECONDS)
+                .writeTimeout(config.getWriteTimeoutInMs(), TimeUnit.MILLISECONDS)
+                .dispatcher(dispatcher)
+                .connectionPool(connectionPool)
+                .build();
 
         BulkheadConfig bulkheadConfig = BulkheadConfig.custom()
-            .maxConcurrentCalls(config.getMaxConcurrentHttpConnections() * 6)
-            .maxWaitDuration(Duration.ofMillis(config.getBulkheadMaxWaitDurationInMs()))
-            .fairCallHandlingStrategyEnabled(true)
-            .build();
+                .maxConcurrentCalls(config.getMaxConcurrentHttpConnections() * 6)
+                .maxWaitDuration(Duration.ofMillis(config.getBulkheadMaxWaitDurationInMs()))
+                .fairCallHandlingStrategyEnabled(true)
+                .build();
         asyncHttpCallsBulkhead = Bulkhead.of("asyncHttpCalls", bulkheadConfig);
     }
 
-
-    public void store(String tenantId, prometheus.PrometheusTypes.TimeSeries.Builder timeSeriesBuilder) throws IOException {
+    public void store(String tenantId, prometheus.PrometheusTypes.TimeSeries.Builder timeSeriesBuilder)
+            throws IOException {
         store(tenantId, List.of(timeSeriesBuilder.build()));
     }
 
@@ -126,11 +118,11 @@ public class CortexTSS {
         // Build the HTTP request
         final RequestBody body = RequestBody.create(PROTOBUF_MEDIA_TYPE, writeRequestCompressed);
         final Request.Builder builder = new Request.Builder()
-            .url(config.getWriteUrl())
-            .addHeader("X-Prometheus-Remote-Write-Version", "0.1.0")
-            .addHeader("Content-Encoding", "snappy")
-            .addHeader("User-Agent", CortexTSS.class.getCanonicalName())
-            .post(body);
+                .url(config.getWriteUrl())
+                .addHeader("X-Prometheus-Remote-Write-Version", "0.1.0")
+                .addHeader("Content-Encoding", "snappy")
+                .addHeader("User-Agent", CortexTSS.class.getCanonicalName())
+                .post(body);
         // Add the OrgId header if set
         if (tenantId != null && tenantId.trim().length() > 0) {
             builder.addHeader(X_SCOPE_ORG_ID_HEADER, tenantId);
@@ -138,17 +130,18 @@ public class CortexTSS {
         final Request request = builder.build();
 
         LOG.trace("Writing: {}", writeRequest);
-        asyncHttpCallsBulkhead.executeCompletionStage(() -> executeAsync(request)).whenComplete((r, ex) -> {
-            if (ex == null) {
-                samplesWritten.mark(1);
-            } else {
-                // FIXME: Data loss
-                samplesLost.mark(1);
-                LOG.error("Error occurred while storing result, sample will be lost.", ex);
-            }
-        });
+        asyncHttpCallsBulkhead
+                .executeCompletionStage(() -> executeAsync(request))
+                .whenComplete((r, ex) -> {
+                    if (ex == null) {
+                        samplesWritten.mark(1);
+                    } else {
+                        // FIXME: Data loss
+                        samplesLost.mark(1);
+                        LOG.error("Error occurred while storing result, sample will be lost.", ex);
+                    }
+                });
     }
-
 
     public CompletableFuture<Void> executeAsync(Request request) {
         final CompletableFuture<Void> future = new CompletableFuture<>();
@@ -170,10 +163,9 @@ public class CortexTSS {
                                 bodyAsString = "(error reading body)";
                             }
                         }
-                        future.completeExceptionally(new RuntimeException(String.format("Writing to Prometheus failed: %s - %s: %s",
-                            response.code(),
-                            response.message(),
-                            bodyAsString)));
+                        future.completeExceptionally(new RuntimeException(String.format(
+                                "Writing to Prometheus failed: %s - %s: %s",
+                                response.code(), response.message(), bodyAsString)));
                     } else {
                         future.complete(null);
                     }
@@ -209,7 +201,11 @@ public class CortexTSS {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < metricName.length(); i++) {
             char b = metricName.charAt(i);
-            if (!((b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || b == '_' || b == ':' || (b >= '0' && b <= '9' && i > 0))) {
+            if (!((b >= 'a' && b <= 'z')
+                    || (b >= 'A' && b <= 'Z')
+                    || b == '_'
+                    || b == ':'
+                    || (b >= '0' && b <= '9' && i > 0))) {
                 sb.append("_");
             } else {
                 sb.append(b);

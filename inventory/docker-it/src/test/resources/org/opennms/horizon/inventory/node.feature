@@ -27,6 +27,15 @@ Feature: Node
     Given update node "node2" with alias "alias1" exception "true"
     Then [Node] Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate node alias with name alias1"
 
+  Scenario: Add a node and verify list nodes by node alias search returns result
+    Given a new node with node_alias "node-alias", label "node-label", ip address "127.0.0.1" in location named "Default"
+    Then verify that a new node is created with node_alias "node-alias"
+    Then fetch a list of nodes by node node_alias with search term "node-alias"
+
+  Scenario: Add a node
+    Given a new node with node_alias "node", label "label", ip address "127.0.0.1" in location named "Default"
+    Then fetch the list of nodes response not equal to 0
+
   Scenario: Search IpInterfaces by Node
     Given a new node with IpInterface along with node label "my-label" ip address "128.0.0.1" in location named "Default"
     Then verify that a new node is created with the ip address "128.0.0.1"

@@ -12,6 +12,6 @@
             &lt;p>Procmail: Suspicious rcfile %parm[rcfile]% on node %nodelabel%&lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[rcfile]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[rcfile]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

@@ -1,32 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2018-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.Combinators;
@@ -36,7 +40,6 @@ import net.jqwik.api.Provide;
 import net.jqwik.api.Shrinkable;
 import net.jqwik.api.Tuple;
 import org.apache.commons.lang3.StringUtils;
-
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
 import org.opennms.horizon.flows.classification.internal.decision.Classifier;
 import org.opennms.horizon.flows.classification.internal.matcher.DstAddressMatcher;
@@ -60,17 +63,6 @@ import org.opennms.horizon.shared.utils.IPPortRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
  * Tests the classification engine using generated random rule sets.
  * <p>
@@ -91,7 +83,7 @@ public class RandomClassificationEngineTest {
     private static final FilterService FILTER_SERVICE = org.mockito.Mockito.mock(FilterService.class);
 
     private static IPAddress ipAddress(int value) {
-        var bytes = new byte[]{(byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value};
+        var bytes = new byte[] {(byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value};
         return new IPAddress(bytes);
     }
 
@@ -113,12 +105,21 @@ public class RandomClassificationEngineTest {
 
     @Property
     public boolean test(
-            @ForAll("rulesAndRequests") Tuple.Tuple2<List<Rule>, List<ClassificationRequest>> rulesAndRequests
-    ) throws InterruptedException {
+            @ForAll("rulesAndRequests") Tuple.Tuple2<List<Rule>, List<ClassificationRequest>> rulesAndRequests)
+            throws InterruptedException {
         LOG.debug("construct decision tree");
         if (LOG.isDebugEnabled()) {
             rulesAndRequests.get1().forEach(r -> {
-                var s = Stream.of(r.getName(), r.getProtocol(), r.getSrcAddress(), r.getSrcPort(), r.getDstAddress(), r.getDstPort(), "", String.valueOf(r.isOmnidirectional())).collect(Collectors.joining(";"));
+                var s = Stream.of(
+                                r.getName(),
+                                r.getProtocol(),
+                                r.getSrcAddress(),
+                                r.getSrcPort(),
+                                r.getDstAddress(),
+                                r.getDstPort(),
+                                "",
+                                String.valueOf(r.isOmnidirectional()))
+                        .collect(Collectors.joining(";"));
                 System.out.println(s);
             });
         }
@@ -134,7 +135,11 @@ public class RandomClassificationEngineTest {
             var appByTree = Optional.ofNullable(ce.classify(r));
             // brute force classification
             // -> take the result of the first matching classifier
-            var appDirect = classifiers.stream().map(c -> c.classify(r)).filter(s -> s != null).findFirst().map(cr -> cr.name);
+            var appDirect = classifiers.stream()
+                    .map(c -> c.classify(r))
+                    .filter(s -> s != null)
+                    .findFirst()
+                    .map(cr -> cr.name);
             return Objects.equals(appByTree, appDirect);
         });
         LOG.debug("checked classification");
@@ -143,7 +148,8 @@ public class RandomClassificationEngineTest {
 
     @Provide
     public Arbitrary<Tuple.Tuple2<List<Rule>, List<ClassificationRequest>>> rulesAndRequests() {
-        return rules(0, MAX_RULES, MAX_PROTOCOL, MAX_PORT, MAX_ADDR).flatMap(rules -> classificationRequest(rules).list().map(requests -> Tuple.of(rules, requests)));
+        return rules(0, MAX_RULES, MAX_PROTOCOL, MAX_PORT, MAX_ADDR)
+                .flatMap(rules -> classificationRequest(rules).list().map(requests -> Tuple.of(rules, requests)));
     }
 
     /**
@@ -158,42 +164,63 @@ public class RandomClassificationEngineTest {
      * @param maxAddr     maximum address for src/dst addresses
      */
     public static Arbitrary<List<Rule>> rules(int minRules, int maxRules, int maxProtocol, int maxPort, int maxAddr) {
-        var protocols = Arbitraries.integers().between(0, maxProtocol).map(Protocols::getProtocol).list().ofMinSize(0).ofMaxSize(5);
+        var protocols = Arbitraries.integers()
+                .between(0, maxProtocol)
+                .map(Protocols::getProtocol)
+                .list()
+                .ofMinSize(0)
+                .ofMaxSize(5);
 
-        var portRanges = Arbitraries.integers().between(0, maxPort)
-                .flatMap(begin ->
-                        Arbitraries.integers().between(begin, maxPort)
-                                .map(end -> new IPPortRange(begin, end))
-                ).list().ofMinSize(0).ofMaxSize(5);
+        var portRanges = Arbitraries.integers()
+                .between(0, maxPort)
+                .flatMap(
+                        begin -> Arbitraries.integers().between(begin, maxPort).map(end -> new IPPortRange(begin, end)))
+                .list()
+                .ofMinSize(0)
+                .ofMaxSize(5);
 
-        var addressRanges = Arbitraries.integers().between(0, maxAddr)
-                .flatMap(begin ->
-                        Arbitraries.integers().between(begin, maxAddr)
-                                .map(end -> new IPAddressRange(ipAddress(begin), ipAddress(end)))
-                ).list().ofMinSize(0).ofMaxSize(5);
+        var addressRanges = Arbitraries.integers()
+                .between(0, maxAddr)
+                .flatMap(begin -> Arbitraries.integers()
+                        .between(begin, maxAddr)
+                        .map(end -> new IPAddressRange(ipAddress(begin), ipAddress(end))))
+                .list()
+                .ofMinSize(0)
+                .ofMaxSize(5);
 
         var omnidirectional = Arbitraries.of(true, false);
 
-        return Combinators.combine(protocols, portRanges, portRanges, addressRanges, addressRanges, omnidirectional).as(
-                (protos, srcPortRanges, dstPortRanges, srcAddressRanges, dstAddressRanges, omnidir) ->
+        return Combinators.combine(protocols, portRanges, portRanges, addressRanges, addressRanges, omnidirectional)
+                .as((protos, srcPortRanges, dstPortRanges, srcAddressRanges, dstAddressRanges, omnidir) ->
                         new RuleBuilder()
                                 .withName("x") // the name will be set again when the list is mapped below
-                                .withProtocol(protos.stream().map(p -> p.getKeyword()).collect(Collectors.joining(",")))
-                                .withSrcPort(srcPortRanges.stream().map(RandomClassificationEngineTest::string).collect(Collectors.joining(",")))
-                                .withDstPort(dstPortRanges.stream().map(RandomClassificationEngineTest::string).collect(Collectors.joining(",")))
-                                .withSrcAddress((srcAddressRanges.stream().map(RandomClassificationEngineTest::string).collect(Collectors.joining(","))))
-                                .withDstAddress((dstAddressRanges.stream().map(RandomClassificationEngineTest::string).collect(Collectors.joining(","))))
+                                .withProtocol(
+                                        protos.stream().map(p -> p.getKeyword()).collect(Collectors.joining(",")))
+                                .withSrcPort(srcPortRanges.stream()
+                                        .map(RandomClassificationEngineTest::string)
+                                        .collect(Collectors.joining(",")))
+                                .withDstPort(dstPortRanges.stream()
+                                        .map(RandomClassificationEngineTest::string)
+                                        .collect(Collectors.joining(",")))
+                                .withSrcAddress((srcAddressRanges.stream()
+                                        .map(RandomClassificationEngineTest::string)
+                                        .collect(Collectors.joining(","))))
+                                .withDstAddress((dstAddressRanges.stream()
+                                        .map(RandomClassificationEngineTest::string)
+                                        .collect(Collectors.joining(","))))
                                 .withOmnidirectional(omnidir)
-                                .build()
-
-        ).list().ofMinSize(minRules).ofMaxSize(maxRules).map(rules -> {
-            var pos = 0;
-            for (var r : rules) {
-                r.setName(String.valueOf(pos));
-                r.setPosition(pos++);
-            }
-            return rules;
-        });
+                                .build())
+                .list()
+                .ofMinSize(minRules)
+                .ofMaxSize(maxRules)
+                .map(rules -> {
+                    var pos = 0;
+                    for (var r : rules) {
+                        r.setName(String.valueOf(pos));
+                        r.setPosition(pos++);
+                    }
+                    return rules;
+                });
     }
 
     /**
@@ -209,33 +236,24 @@ public class RandomClassificationEngineTest {
 
         for (var r : rules) {
             new StringValue(r.getProtocol())
-                    .splitBy(",")
-                    .stream()
-                    .map(p -> Protocols.getProtocol(p.getValue()))
-                    .filter(p -> p != null)
-                    .map(Protocol::getDecimal)
-                    .forEach(protocols::add);
-            PortValue.of(r.getSrcPort())
-                    .getPortRanges()
-                    .stream()
+                    .splitBy(",").stream()
+                            .map(p -> Protocols.getProtocol(p.getValue()))
+                            .filter(p -> p != null)
+                            .map(Protocol::getDecimal)
+                            .forEach(protocols::add);
+            PortValue.of(r.getSrcPort()).getPortRanges().stream()
                     .flatMap(range -> Stream.of(range.getBegin(), range.getEnd()))
                     .forEach(ports::add);
-            PortValue.of(r.getDstPort())
-                    .getPortRanges()
-                    .stream()
+            PortValue.of(r.getDstPort()).getPortRanges().stream()
                     .flatMap(range -> Stream.of(range.getBegin(), range.getEnd()))
                     .forEach(ports::add);
             if (StringUtils.isNoneBlank(r.getSrcAddress())) {
-                IpValue.of(r.getSrcAddress())
-                        .getIpAddressRanges()
-                        .stream()
+                IpValue.of(r.getSrcAddress()).getIpAddressRanges().stream()
                         .flatMap(range -> Stream.of(range.begin, range.end))
                         .forEach(addresses::add);
             }
             if (StringUtils.isNoneBlank(r.getDstAddress())) {
-                IpValue.of(r.getDstAddress())
-                        .getIpAddressRanges()
-                        .stream()
+                IpValue.of(r.getDstAddress()).getIpAddressRanges().stream()
                         .flatMap(range -> Stream.of(range.begin, range.end))
                         .forEach(addresses::add);
             }
@@ -243,7 +261,8 @@ public class RandomClassificationEngineTest {
         return classificationRequest(protocols, ports, addresses);
     }
 
-    private static Arbitrary<ClassificationRequest> classificationRequest(Set<Integer> protocols, Set<Integer> ports, Set<IpAddr> addresses) {
+    private static Arbitrary<ClassificationRequest> classificationRequest(
+            Set<Integer> protocols, Set<Integer> ports, Set<IpAddr> addresses) {
         final var protocolsArray = protocols.toArray(new Integer[0]);
         final var portsArray = ports.toArray(new Integer[0]);
         final var addressesArray = addresses.toArray(new IpAddr[0]);
@@ -251,16 +270,11 @@ public class RandomClassificationEngineTest {
         // -> use zero as a default in case that a set is empty
         final var protocolsArb = protocolsArray.length == 0 ? Arbitraries.just(0) : Arbitraries.of(protocolsArray);
         final var portsArb = portsArray.length == 0 ? Arbitraries.just(0) : Arbitraries.of(portsArray);
-        final var addressesArb = addressesArray.length == 0 ? Arbitraries.just(IpAddr.of("0.0.0.0")) : Arbitraries.of(addressesArray);
-        return Combinators.combine(
-                protocolsArb,
-                portsArb,
-                portsArb,
-                addressesArb,
-                addressesArb
-        ).as((protocol, srcPort, dstPort, srcAddr, dstAddr) ->
-                new ClassificationRequest("default", srcPort, srcAddr, dstPort, dstAddr, Protocols.getProtocol(protocol))
-        );
+        final var addressesArb =
+                addressesArray.length == 0 ? Arbitraries.just(IpAddr.of("0.0.0.0")) : Arbitraries.of(addressesArray);
+        return Combinators.combine(protocolsArb, portsArb, portsArb, addressesArb, addressesArb)
+                .as((protocol, srcPort, dstPort, srcAddr, dstAddr) -> new ClassificationRequest(
+                        "default", srcPort, srcAddr, dstPort, dstAddr, Protocols.getProtocol(protocol)));
     }
 
     public static Classifier classifier(RuleDefinition ruleDefinition) {
@@ -287,12 +301,11 @@ public class RandomClassificationEngineTest {
         return new Classifier(
                 matchers.toArray(new Matcher[matchers.size()]),
                 new Classifier.Result(matchedAspects, ruleDefinition.getName()),
-                ruleDefinition.getPosition()
-        );
+                ruleDefinition.getPosition());
     }
 
     public static Stream<ClassificationRequest> streamOfclassificationRequests(Collection<Rule> rules, long seed) {
-        return classificationRequest(rules).generator(1000).stream(new Random(seed)).map(Shrinkable::value);
+        return classificationRequest(rules).generator(1000).stream(new Random(seed))
+                .map(Shrinkable::value);
     }
-
 }

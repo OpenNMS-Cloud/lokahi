@@ -1,32 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber.steps;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
@@ -35,6 +33,8 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -56,15 +56,6 @@ import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
 import org.opennms.horizon.shared.events.EventConstants;
 
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-
 public class PassiveDiscoveryStepDefinitions {
     private final InventoryBackgroundHelper backgroundHelper;
     private PassiveDiscoveryUpsertDTO passiveDiscoveryUpsertDTO;
@@ -72,7 +63,7 @@ public class PassiveDiscoveryStepDefinitions {
     private PassiveDiscoveryListDTO fetchedPassiveDiscoveryList;
     private TagListDTO tagList;
     private long fetchedId;
-    private final String internalEventTopic  = "internal-event";
+    private final String internalEventTopic = "internal-event";
 
     public PassiveDiscoveryStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -114,24 +105,24 @@ public class PassiveDiscoveryStepDefinitions {
     @Given("Passive Discovery fields to persist for location named {string}")
     public void passiveDiscoveryFieldsToPersist(String location) {
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
-            .setName("not blank")
-            .setLocationId(backgroundHelper.findLocationId(location))
-            .addCommunities("public")
-            .addPorts(161)
-            .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
-            .build();
+                .setName("not blank")
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .addCommunities("public")
+                .addPorts(161)
+                .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
+                .build();
     }
 
     @Given("Passive Discovery fields to update for location named {string}")
     public void passiveDiscoveryFieldsToUpdate(String location) {
         passiveDiscoveryUpsertDTO = PassiveDiscoveryUpsertDTO.newBuilder()
-            .setId(fetchedId)
-            .setName("updated name")
-            .setLocationId(backgroundHelper.findLocationId(location))
-            .addCommunities("other")
-            .addPorts(161)
-            .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
-            .build();
+                .setId(fetchedId)
+                .setName("updated name")
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .addCommunities("other")
+                .addPorts(161)
+                .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
+                .build();
     }
 
     /*
@@ -140,27 +131,27 @@ public class PassiveDiscoveryStepDefinitions {
      */
     @When("A GRPC request to upsert a passive discovery")
     public void aGRPCRequestToCreateANewPassiveDiscovery() {
-        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
-            = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub =
+                backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
         upsertedDiscovery = stub.upsertDiscovery(passiveDiscoveryUpsertDTO);
     }
 
     @When("A GRPC request to toggle a passive discovery")
     public void aGRPCRequestToToggleAPassiveDiscovery() {
         PassiveDiscoveryToggleDTO toggleDTO = PassiveDiscoveryToggleDTO.newBuilder()
-            .setId(fetchedId)
-            .setToggle(false)
-            .build();
+                .setId(fetchedId)
+                .setToggle(false)
+                .build();
 
-        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
-            = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub =
+                backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
         upsertedDiscovery = stub.toggleDiscovery(toggleDTO);
     }
 
     @And("A GRPC request to get passive discovery list")
     public void aGRPCRequestToGetPassiveDiscoveryList() {
-        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
-            = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub =
+                backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
         fetchedPassiveDiscoveryList = stub.listAllDiscoveries(Empty.getDefaultInstance());
     }
 
@@ -168,8 +159,8 @@ public class PassiveDiscoveryStepDefinitions {
     public void aGRPCRequestToGetTagsForPassiveDiscovery() {
         TagServiceGrpc.TagServiceBlockingStub stub = backgroundHelper.getTagServiceBlockingStub();
         tagList = stub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder()
-                .setPassiveDiscoveryId(upsertedDiscovery.getId())).build());
+                .setEntityId(TagEntityIdDTO.newBuilder().setPassiveDiscoveryId(upsertedDiscovery.getId()))
+                .build());
     }
 
     /*
@@ -207,7 +198,9 @@ public class PassiveDiscoveryStepDefinitions {
     @Then("the tags for passive discovery match what it was created with")
     public void theTagsForPassiveDiscoveryMatchWhatItWasCreatedWith() {
         assertEquals(passiveDiscoveryUpsertDTO.getTagsCount(), tagList.getTagsCount());
-        assertEquals(passiveDiscoveryUpsertDTO.getTags(0).getName(), tagList.getTags(0).getName());
+        assertEquals(
+                passiveDiscoveryUpsertDTO.getTags(0).getName(),
+                tagList.getTags(0).getName());
     }
 
     /*
@@ -216,7 +209,9 @@ public class PassiveDiscoveryStepDefinitions {
      */
     private void deleteAllPassiveDiscovery() {
         var passiveDiscoveryServiceBlockingStub = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
-        for (PassiveDiscoveryDTO discoveryDTO : passiveDiscoveryServiceBlockingStub.listAllDiscoveries(Empty.newBuilder().build()).getDiscoveriesList()) {
+        for (PassiveDiscoveryDTO discoveryDTO : passiveDiscoveryServiceBlockingStub
+                .listAllDiscoveries(Empty.newBuilder().build())
+                .getDiscoveriesList()) {
             passiveDiscoveryServiceBlockingStub.deleteDiscovery(Int64Value.of(discoveryDTO.getId()));
         }
     }
@@ -224,17 +219,18 @@ public class PassiveDiscoveryStepDefinitions {
     @Given("A GRPC request to enable a passive discovery")
     public void aGRPCRequestToEnableAPassiveDiscovery() {
         PassiveDiscoveryToggleDTO toggleDTO = PassiveDiscoveryToggleDTO.newBuilder()
-            .setId(fetchedId)
-            .setToggle(true)
-            .build();
+                .setId(fetchedId)
+                .setToggle(true)
+                .build();
 
-        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub
-            = backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
+        PassiveDiscoveryServiceGrpc.PassiveDiscoveryServiceBlockingStub stub =
+                backgroundHelper.getPassiveDiscoveryServiceBlockingStub();
         upsertedDiscovery = stub.toggleDiscovery(toggleDTO);
     }
 
     @When("A new suspect event sent to Inventory for location named {string} and IP Address {string}")
-    public void aNewSuspectEventSentToInventoryForLocationNamedAndIPAddress(String location , String ipAddress) throws InterruptedException {
+    public void aNewSuspectEventSentToInventoryForLocationNamedAndIPAddress(String location, String ipAddress)
+            throws InterruptedException {
 
         var locationDTO = backgroundHelper.getMonitoringLocationStub().getLocationByName(StringValue.of(location));
         Properties producerConfig = new Properties();
@@ -242,18 +238,17 @@ public class PassiveDiscoveryStepDefinitions {
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
         producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
 
-        var eventBuilder = Event.newBuilder().setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
-            .setLocationId(String.valueOf(locationDTO.getId()))
-            .setIpAddress(ipAddress)
-            .setTenantId(backgroundHelper.getTenantId());
+        var eventBuilder = Event.newBuilder()
+                .setUei(EventConstants.NEW_SUSPECT_INTERFACE_EVENT_UEI)
+                .setLocationId(String.valueOf(locationDTO.getId()))
+                .setIpAddress(ipAddress)
+                .setTenantId(backgroundHelper.getTenantId());
         var eventLog = EventLog.newBuilder().addEvents(eventBuilder.build()).build();
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
             var producerRecord = new ProducerRecord<String, byte[]>(internalEventTopic, eventLog.toByteArray());
             kafkaProducer.send(producerRecord);
         }
-
     }
-
 
     @Then("A new node should be created with location {string} and IP Address {string}")
     public void aNewNodeShouldBeCreatedWithLocationAndIPAddress(String location, String ipAddress) {
@@ -262,8 +257,12 @@ public class PassiveDiscoveryStepDefinitions {
 
         await().atMost(10, TimeUnit.SECONDS).until(() -> {
             try {
-                var result = backgroundHelper.getNodeServiceBlockingStub().getNodeIdFromQuery(NodeIdQuery.newBuilder()
-                    .setIpAddress(ipAddress).setLocationId(String.valueOf(locationDTO.getId())).build());
+                var result = backgroundHelper
+                        .getNodeServiceBlockingStub()
+                        .getNodeIdFromQuery(NodeIdQuery.newBuilder()
+                                .setIpAddress(ipAddress)
+                                .setLocationId(String.valueOf(locationDTO.getId()))
+                                .build());
                 var nodeDTO = backgroundHelper.getNodeServiceBlockingStub().getNodeById(result);
                 return nodeDTO.getIpInterfacesList().get(0).getIpAddress().equals(ipAddress);
             } catch (Exception e) {
@@ -271,6 +270,4 @@ public class PassiveDiscoveryStepDefinitions {
             }
         });
     }
-
-
 }

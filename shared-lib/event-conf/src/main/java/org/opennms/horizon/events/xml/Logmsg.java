@@ -1,36 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2020 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.xml;
 
-  //---------------------------------/
- //- Imported classes and packages -/
-//---------------------------------/
+// ---------------------------------/
+// - Imported classes and packages -/
+// ---------------------------------/
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -48,49 +41,47 @@ import java.io.Serializable;
  *  destination attribute of 'donotpersist' indicates that Eventd
  * is not to
  *  persist the event to the database. The optional notify
- * attributed can be 
+ * attributed can be
  *  used to suppress notices on a particular event (by default it
- * is true - 
+ * is true -
  *  i.e. a notice will be sent.
- * 
+ *
  * @version $Revision$ $Date$
  */
-
-@XmlRootElement(name="logmsg")
+@XmlRootElement(name = "logmsg")
 @XmlAccessorType(XmlAccessType.FIELD)
-//@ValidateUsing("event.xsd")
+// @ValidateUsing("event.xsd")
 public class Logmsg implements Serializable {
 
     private static final long serialVersionUID = -7173862847984790914L;
 
-    //--------------------------/
-     //- Class/Member Variables -/
-    //--------------------------/
+    // --------------------------/
+    // - Class/Member Variables -/
+    // --------------------------/
 
-	/**
+    /**
      * internal content storage
      */
-	@XmlValue
-	@NotNull
+    @XmlValue
+    @NotNull
     private String _content = "";
 
     /**
      * Field _notify.
      */
-	@XmlAttribute(name="notify")
+    @XmlAttribute(name = "notify")
     private Boolean _notify = true;
 
     /**
      * Field _dest.
      */
-    @XmlAttribute(name="dest")
-    @Pattern(regexp="(logndisplay|displayonly|logonly|suppress|donotpersist)")
+    @XmlAttribute(name = "dest")
+    @Pattern(regexp = "(logndisplay|displayonly|logonly|suppress|donotpersist)")
     private String _dest = "logndisplay";
 
-
-      //----------------/
-     //- Constructors -/
-    //----------------/
+    // ----------------/
+    // - Constructors -/
+    // ----------------/
 
     public Logmsg() {
         super();
@@ -98,62 +89,56 @@ public class Logmsg implements Serializable {
         setDest("logndisplay");
     }
 
-
-      //-----------/
-     //- Methods -/
-    //-----------/
+    // -----------/
+    // - Methods -/
+    // -----------/
 
     /**
      */
-    public void deleteNotify(
-    ) {
+    public void deleteNotify() {
         this._notify = null;
     }
 
     /**
      * Returns the value of field 'content'. The field 'content'
      * has the following description: internal content storage
-     * 
+     *
      * @return the value of field 'Content'.
      */
-    public String getContent(
-    ) {
+    public String getContent() {
         return this._content;
     }
 
     /**
      * Returns the value of field 'dest'.
-     * 
+     *
      * @return the value of field 'Dest'.
      */
-    public String getDest(
-    ) {
+    public String getDest() {
         return this._dest;
     }
 
     /**
      * Returns the value of field 'notify'.
-     * 
+     *
      * @return the value of field 'Notify'.
      */
-    public Boolean getNotify(
-    ) {
-        return this._notify == null? false : this._notify;
+    public Boolean getNotify() {
+        return this._notify == null ? false : this._notify;
     }
 
     /**
      * Method hasNotify.
-     * 
+     *
      * @return true if at least one Notify has been added
      */
-    public boolean hasNotify(
-    ) {
+    public boolean hasNotify() {
         return this._notify != null;
     }
 
     /**
      * Returns the value of field 'notify'.
-     * 
+     *
      * @return the value of field 'Notify'.
      */
     public Boolean isNotify() {
@@ -163,36 +148,33 @@ public class Logmsg implements Serializable {
     /**
      * Sets the value of field 'content'. The field 'content' has
      * the following description: internal content storage
-     * 
+     *
      * @param content the value of field 'content'.
      */
-    public void setContent(
-            final String content) {
+    public void setContent(final String content) {
         this._content = content;
     }
 
     /**
      * Sets the value of field 'dest'.
-     * 
+     *
      * @param dest the value of field 'dest'.
      */
-    public void setDest(
-            final String dest) {
+    public void setDest(final String dest) {
         this._dest = dest;
     }
 
     /**
      * Sets the value of field 'notify'.
-     * 
+     *
      * @param notify the value of field 'notify'.
      */
-    public void setNotify(
-            final Boolean notify) {
+    public void setNotify(final Boolean notify) {
         this._notify = notify;
     }
 
     @Override
     public String toString() {
-    	return new OnmsStringBuilder(this).toString();
+        return new OnmsStringBuilder(this).toString();
     }
 }

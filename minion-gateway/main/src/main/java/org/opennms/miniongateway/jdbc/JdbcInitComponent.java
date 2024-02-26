@@ -1,46 +1,36 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.miniongateway.jdbc;
 
+import java.sql.Connection;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * HS-1284
@@ -69,6 +59,7 @@ public class JdbcInitComponent {
 
     @Setter
     private Supplier<Long> timestampClockSource = System::nanoTime;
+
     @Setter
     private Consumer<Long> delayOperation = this::delay;
 
@@ -76,17 +67,17 @@ public class JdbcInitComponent {
 
     private Exception lastException;
 
-//========================================
-// Constructor
-//----------------------------------------
+    // ========================================
+    // Constructor
+    // ----------------------------------------
 
     public JdbcInitComponent(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-//========================================
-// Initialization
-//----------------------------------------
+    // ========================================
+    // Initialization
+    // ----------------------------------------
 
     @PostConstruct
     public void init() {
@@ -96,10 +87,7 @@ public class JdbcInitComponent {
         boolean first = true;
         int count = 0;
 
-        while (
-            (! connected) &&
-            (! isTimedOut(startTimestamp, now, timeout))
-        ) {
+        while ((!connected) && (!isTimedOut(startTimestamp, now, timeout))) {
             if (first) {
                 first = false;
             } else {
@@ -112,14 +100,18 @@ public class JdbcInitComponent {
         }
 
         if (!connected) {
-            LOG.error("Timed out attempting to connect to the database; aborting startup: connection-attempt-count={}; timeout={}", count, timeout);
-            throw new RuntimeException("Timed out attempting to connect to the database; aborting startup", lastException);
+            LOG.error(
+                    "Timed out attempting to connect to the database; aborting startup: connection-attempt-count={}; timeout={}",
+                    count,
+                    timeout);
+            throw new RuntimeException(
+                    "Timed out attempting to connect to the database; aborting startup", lastException);
         }
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private boolean attemptConnect() {
         try {

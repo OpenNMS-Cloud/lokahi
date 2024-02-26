@@ -1,32 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- ******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.stepdefs;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
@@ -39,6 +35,14 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -52,18 +56,6 @@ import org.opennms.horizon.alerts.proto.TimeRangeFilter;
 import org.opennms.horizon.alertservice.AlertGrpcClientUtils;
 import org.opennms.horizon.alertservice.RetryUtils;
 import org.opennms.horizon.alertservice.kafkahelper.KafkaTestHelper;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.function.Supplier;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -88,74 +80,87 @@ public class AlertTestSteps {
     private List<Alert> alertsFromLastResponse;
     private Alert firstAlertFromLastResponse;
 
-    //========================================
+    // ========================================
     // Gherkin Rules
-    //========================================
+    // ========================================
     @Then("List alerts for the tenant, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenant(List<String> expectedJson) throws InterruptedException {
-        listAlertsForTenant(tenantSteps.getTenantId(), (int) Duration.ofSeconds(5).toMillis(), expectedJson);
+        listAlertsForTenant(
+                tenantSteps.getTenantId(), (int) Duration.ofSeconds(5).toMillis(), expectedJson);
     }
 
-    @Then("List alerts for the tenant, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    @Then(
+            "List alerts for the tenant, with timeout {int}ms, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenant(int timeout, List<String> expectedJson) throws InterruptedException {
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, expectedJson);
     }
 
-    @Then("List alerts for tenant {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void listAlertsForTenant(String tenantId, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
-        var requestBuilder = ListAlertsRequest.newBuilder()
-            .setSortBy("id")
-            .setSortAscending(true);
+    @Then(
+            "List alerts for tenant {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenant(String tenantId, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
+        var requestBuilder = ListAlertsRequest.newBuilder().setSortBy("id").setSortAscending(true);
         listAlertsForTenant(tenantId, timeout, jsonPathExpressions, requestBuilder);
     }
 
-    @Then("List alerts for the tenant and label {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void listAlertsForTenantByNode(String label, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+    @Then(
+            "List alerts for the tenant and label {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantByNode(String label, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
         var filter = Filter.newBuilder().setNodeLabel(label).build();
         var requestBuilder = ListAlertsRequest.newBuilder()
-            .addFilters(filter)
-            .setSortBy("id")
-            .setSortAscending(true);
+                .addFilters(filter)
+                .setSortBy("id")
+                .setSortAscending(true);
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
-    @Then("List alerts for the tenant with hours {long}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void listAlertsForTenantFilteredByTime(long hours, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
-        var requestBuilder = ListAlertsRequest.newBuilder()
-            .setSortBy("id")
-            .setSortAscending(true);
+    @Then(
+            "List alerts for the tenant with hours {long}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantFilteredByTime(long hours, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
+        var requestBuilder = ListAlertsRequest.newBuilder().setSortBy("id").setSortAscending(true);
         getTimeRangeFilter(hours, requestBuilder);
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
     @Then("Delete the alert")
     public void deleteTheAlert() {
-        clientUtils.getAlertServiceStub()
-            .deleteAlert(AlertRequest.newBuilder().addAlertId(firstAlertFromLastResponse.getDatabaseId()).build());
+        clientUtils
+                .getAlertServiceStub()
+                .deleteAlert(AlertRequest.newBuilder()
+                        .addAlertId(firstAlertFromLastResponse.getDatabaseId())
+                        .build());
     }
 
     @Then("Acknowledge the alert")
     public void acknowledgeTheAlert() {
-        clientUtils.getAlertServiceStub()
-            .acknowledgeAlert(AlertRequest.newBuilder().addAlertId(firstAlertFromLastResponse.getDatabaseId()).build());
+        clientUtils
+                .getAlertServiceStub()
+                .acknowledgeAlert(AlertRequest.newBuilder()
+                        .addAlertId(firstAlertFromLastResponse.getDatabaseId())
+                        .build());
     }
 
     @Then("Unacknowledge the alert")
     public void unacknowledgeTheAlert() {
-        clientUtils.getAlertServiceStub()
-            .unacknowledgeAlert(AlertRequest.newBuilder().addAlertId(firstAlertFromLastResponse.getDatabaseId()).build());
+        clientUtils
+                .getAlertServiceStub()
+                .unacknowledgeAlert(AlertRequest.newBuilder()
+                        .addAlertId(firstAlertFromLastResponse.getDatabaseId())
+                        .build());
     }
 
-    @Then("Send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void sendGETRequestToApplicationAtPathUntilJSONResponseMatchesTheFollowingJSONPathExpressions(String path, int timeout, List<String> jsonPathExpressions) throws Exception {
-        boolean success =
-            retryUtils.retry(
+    @Then(
+            "Send GET request to application at path {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void sendGETRequestToApplicationAtPathUntilJSONResponseMatchesTheFollowingJSONPathExpressions(
+            String path, int timeout, List<String> jsonPathExpressions) throws Exception {
+        boolean success = retryUtils.retry(
                 () -> this.processGetRequestThenCheckJsonPathMatch(path, jsonPathExpressions),
                 result -> result,
                 100,
                 timeout,
-                false
-            );
+                false);
 
         assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
     }
@@ -168,11 +173,11 @@ public class AlertTestSteps {
     @Then("Verify alert topic has {int} messages with tenant {string}")
     public void verifyTopicContainsTenant(int expectedMessages, String tenant) throws InterruptedException {
         boolean success = retryUtils.retry(
-            () -> this.checkNumberOfMessageForOneTenant(tenant, expectedMessages),
-            result -> result,
-            100,
-            10000,
-            false);
+                () -> this.checkNumberOfMessageForOneTenant(tenant, expectedMessages),
+                result -> result,
+                100,
+                10000,
+                false);
 
         assertTrue("Verify alert topic has the right number of message(s)", success);
     }
@@ -186,68 +191,77 @@ public class AlertTestSteps {
         }
     }
 
-    @Then("List alerts for the tenant with page size {int}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void listAlertsForTenantWithPageSize(int pageSize, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
+    @Then(
+            "List alerts for the tenant with page size {int}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantWithPageSize(int pageSize, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
         var requestBuilder = ListAlertsRequest.newBuilder().setPageSize(pageSize);
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
-    @Then("List alerts for the tenant sorted by {string} ascending {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void listAlertsForTenantSorted(String filter, String ascending, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
-        var requestBuilder = ListAlertsRequest.newBuilder()
-            .setSortBy(filter)
-            .setSortAscending(Boolean.parseBoolean(ascending));
+    @Then(
+            "List alerts for the tenant sorted by {string} ascending {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantSorted(
+            String filter, String ascending, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
+        var requestBuilder =
+                ListAlertsRequest.newBuilder().setSortBy(filter).setSortAscending(Boolean.parseBoolean(ascending));
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
-    @Then("List alerts for the tenant filtered by severity {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
-    public void listAlertsForTenantFilteredBySeverity(String severity, int timeout, List<String> jsonPathExpressions) throws InterruptedException {
-        Filter filter = Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build();
-        var requestBuilder = ListAlertsRequest.newBuilder()
-            .addFilters(filter);
+    @Then(
+            "List alerts for the tenant filtered by severity {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    public void listAlertsForTenantFilteredBySeverity(String severity, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
+        Filter filter =
+                Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build();
+        var requestBuilder = ListAlertsRequest.newBuilder().addFilters(filter);
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
-    @Then("List alerts for the tenant filtered by severity {string} and {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    @Then(
+            "List alerts for the tenant filtered by severity {string} and {string}, with timeout {int}ms, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenantFilteredBySeverities(
-        String severity, String severity2, int timeout, List<String> jsonPathExpressions
-    ) throws InterruptedException {
+            String severity, String severity2, int timeout, List<String> jsonPathExpressions)
+            throws InterruptedException {
         var requestBuilder = ListAlertsRequest.newBuilder()
-            .addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build())
-            .addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity2)).build())
-            .setSortBy("id").setSortAscending(true);
+                .addFilters(Filter.newBuilder()
+                        .setSeverity(Severity.valueOf(severity))
+                        .build())
+                .addFilters(Filter.newBuilder()
+                        .setSeverity(Severity.valueOf(severity2))
+                        .build())
+                .setSortBy("id")
+                .setSortAscending(true);
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
-    @Then("List alerts for the tenant today, with timeout {int}ms, until JSON response matches the following JSON path expressions")
+    @Then(
+            "List alerts for the tenant today, with timeout {int}ms, until JSON response matches the following JSON path expressions")
     public void listAlertsForTenantToday(int timeout, List<String> jsonPathExpressions) throws InterruptedException {
-        final var requestBuilder = ListAlertsRequest.newBuilder()
-            .setSortBy("id")
-            .setSortAscending(true);
+        final var requestBuilder =
+                ListAlertsRequest.newBuilder().setSortBy("id").setSortAscending(true);
         getTimeRangeFilter(LocalTime.MIDNIGHT.until(LocalTime.now(), ChronoUnit.HOURS), requestBuilder);
         listAlertsForTenant(tenantSteps.getTenantId(), timeout, jsonPathExpressions, requestBuilder);
     }
 
     public void listAlertsForTenant(
-        String tenantId,
-        int timeout,
-        List<String> jsonPathExpressions,
-        ListAlertsRequest.Builder requestBuilder
-    ) throws InterruptedException {
+            String tenantId, int timeout, List<String> jsonPathExpressions, ListAlertsRequest.Builder requestBuilder)
+            throws InterruptedException {
         log.info("List for tenant {}, timeout {}ms, data {}", tenantId, timeout, jsonPathExpressions);
         Supplier<MessageOrBuilder> call = () -> {
             clientUtils.setTenantId(tenantId);
-            ListAlertsResponse listAlertsResponse = clientUtils.getAlertServiceStub()
-                .listAlerts(requestBuilder.build());
+            ListAlertsResponse listAlertsResponse =
+                    clientUtils.getAlertServiceStub().listAlerts(requestBuilder.build());
             alertsFromLastResponse = listAlertsResponse.getAlertsList();
             return listAlertsResponse;
         };
         boolean success = retryUtils.retry(
-            () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
-            result -> result,
-            100,
-            timeout,
-            false);
+                () -> this.doRequestThenCheckJsonPathMatch(call, jsonPathExpressions),
+                result -> result,
+                100,
+                timeout,
+                false);
         assertTrue("GET request expected to return JSON response matching JSON path expression(s)", success);
     }
 
@@ -255,24 +269,25 @@ public class AlertTestSteps {
     public void countAlertsForTenantWithTimeoutMsUntilJSONResponseMatchesTheFollowingJSONPathExpressions(int expected) {
         clientUtils.setTenantId(tenantSteps.getTenantId());
         ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder().build();
-        var countAlertsResponse = clientUtils.getAlertServiceStub()
-            .countAlerts(listAlertsRequest);
+        var countAlertsResponse = clientUtils.getAlertServiceStub().countAlerts(listAlertsRequest);
         assertEquals(expected, countAlertsResponse.getCount());
-
     }
 
     @Then("Count alerts for the tenant, filtered by severity {string}, assert response is {int}")
     public void countAlertsForTenantFilteredBySeverity(String severity, int expected) {
         clientUtils.setTenantId(tenantSteps.getTenantId());
-        ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder().addFilters(Filter.newBuilder().setSeverity(Severity.valueOf(severity)).build()).build();
-        var countAlertsResponse = clientUtils.getAlertServiceStub()
-            .countAlerts(listAlertsRequest);
+        ListAlertsRequest listAlertsRequest = ListAlertsRequest.newBuilder()
+                .addFilters(Filter.newBuilder()
+                        .setSeverity(Severity.valueOf(severity))
+                        .build())
+                .build();
+        var countAlertsResponse = clientUtils.getAlertServiceStub().countAlerts(listAlertsRequest);
         assertEquals(expected, countAlertsResponse.getCount());
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void verifyJsonPathExpressionMatch(JsonPath jsonPath, String pathExpression) {
         String[] parts = pathExpression.split(" == ", 2);
@@ -305,22 +320,16 @@ public class AlertTestSteps {
 
         RestAssuredConfig restAssuredConfig = this.createRestAssuredTestConfig();
 
-        RequestSpecification requestSpecification =
-            RestAssured
-                .given()
-                .config(restAssuredConfig);
+        RequestSpecification requestSpecification = RestAssured.given().config(restAssuredConfig);
 
-        restAssuredResponse = requestSpecification
-            .get(requestUrl)
-            .thenReturn();
+        restAssuredResponse = requestSpecification.get(requestUrl).thenReturn();
     }
 
     private RestAssuredConfig createRestAssuredTestConfig() {
         return RestAssuredConfig.config()
-            .httpClient(HttpClientConfig.httpClientConfig()
-                .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-                .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
-            );
+                .httpClient(HttpClientConfig.httpClientConfig()
+                        .setParam("http.connection.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT)
+                        .setParam("http.socket.timeout", DEFAULT_HTTP_SOCKET_TIMEOUT));
     }
 
     private void commonParseJsonResponse() {
@@ -340,21 +349,23 @@ public class AlertTestSteps {
 
             log.debug("finished get with check; path={}; json-path-expressions={}", path, jsonPathExpressions);
             return true;
-        } catch (Throwable thrown) {    // Assertions extend Error
+        } catch (Throwable thrown) { // Assertions extend Error
             throw new RuntimeException(thrown);
         }
     }
 
-    private boolean doRequestThenCheckJsonPathMatch(Supplier<MessageOrBuilder> supplier, List<String> jsonPathExpressions) {
+    private boolean doRequestThenCheckJsonPathMatch(
+            Supplier<MessageOrBuilder> supplier, List<String> jsonPathExpressions) {
         log.debug("Running request with check; json-path-expressions={}", jsonPathExpressions);
         try {
             var message = supplier.get();
             var messageJson = JsonFormat.printer()
-                .sortingMapKeys().includingDefaultValueFields()
-                .print(message);
+                    .sortingMapKeys()
+                    .includingDefaultValueFields()
+                    .print(message);
             parsedJsonResponse = JsonPath.from(messageJson);
             log.info("Json response: {}", messageJson);
-            //commonParseJsonResponse();
+            // commonParseJsonResponse();
 
             log.debug("Checking json path expressions");
             for (String onePathExpression : jsonPathExpressions) {
@@ -393,17 +404,19 @@ public class AlertTestSteps {
     private static void getTimeRangeFilter(Long hours, ListAlertsRequest.Builder request) {
         Instant nowTime = Instant.now();
         Timestamp nowTimestamp = Timestamp.newBuilder()
-            .setSeconds(nowTime.getEpochSecond())
-            .setNanos(nowTime.getNano()).build();
+                .setSeconds(nowTime.getEpochSecond())
+                .setNanos(nowTime.getNano())
+                .build();
 
         Instant thenTime = nowTime.minus(hours, ChronoUnit.HOURS);
         Timestamp thenTimestamp = Timestamp.newBuilder()
-            .setSeconds(thenTime.getEpochSecond())
-            .setNanos(thenTime.getNano()).build();
+                .setSeconds(thenTime.getEpochSecond())
+                .setNanos(thenTime.getNano())
+                .build();
 
-        request.addFilters(Filter.newBuilder().setTimeRange(TimeRangeFilter.newBuilder()
-                .setStartTime(thenTimestamp)
-                .setEndTime(nowTimestamp))
-            .build());
+        request.addFilters(Filter.newBuilder()
+                .setTimeRange(
+                        TimeRangeFilter.newBuilder().setStartTime(thenTimestamp).setEndTime(nowTimestamp))
+                .build());
     }
 }

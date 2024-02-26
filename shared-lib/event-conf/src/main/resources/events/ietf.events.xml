@@ -73,7 +73,7 @@
             &lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>ENTITY Configuration Change Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -203,7 +203,7 @@
             &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Dial Control Event: Peer Call Information.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -253,7 +253,7 @@
             &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Dial Control Event: Peer Call Setup Notification.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -282,7 +282,7 @@
             &lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Bridge MIB: New Spanning Tree Root.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -311,7 +311,7 @@
             &lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Bridge MIB: Topology Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -345,7 +345,7 @@
             &lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>RFC1315 Event: Frame Relay DLCI Status Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>

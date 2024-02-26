@@ -1,37 +1,41 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,18 +53,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GraphQLTSDBMetricServiceTest {
     private static final long NODE_ID_1 = 1L;
@@ -77,6 +69,7 @@ class GraphQLTSDBMetricServiceTest {
 
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
+
     private GraphQLWebTestClient webClient;
     private String accessToken;
 
@@ -88,9 +81,20 @@ class GraphQLTSDBMetricServiceTest {
         accessToken = webClient.getAccessToken();
 
         wireMock.start();
-        MonitoringLocationDTO locationDTO1 = MonitoringLocationDTO.newBuilder().setId(LOCATION_ID).setLocation(TEST_LOCATION).build();
-        nodeDTO1 = NodeDTO.newBuilder().setId(NODE_ID_1).setScanType(NODE_SCAN_SCAN_TYPE).setMonitoringLocationId(locationDTO1.getId()).build();
-        nodeDTO2 = NodeDTO.newBuilder().setId(NODE_ID_2).setScanType(AZURE_SCAN_SCAN_TYPE).setMonitoringLocationId(locationDTO1.getId()).build();
+        MonitoringLocationDTO locationDTO1 = MonitoringLocationDTO.newBuilder()
+                .setId(LOCATION_ID)
+                .setLocation(TEST_LOCATION)
+                .build();
+        nodeDTO1 = NodeDTO.newBuilder()
+                .setId(NODE_ID_1)
+                .setScanType(NODE_SCAN_SCAN_TYPE)
+                .setMonitoringLocationId(locationDTO1.getId())
+                .build();
+        nodeDTO2 = NodeDTO.newBuilder()
+                .setId(NODE_ID_2)
+                .setScanType(AZURE_SCAN_SCAN_TYPE)
+                .setMonitoringLocationId(locationDTO1.getId())
+                .build();
     }
 
     @AfterEach
@@ -105,23 +109,22 @@ class GraphQLTSDBMetricServiceTest {
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
-            .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
-            .willReturn(ResponseDefinitionBuilder.okForJson(buildTsQueryResult(NODE_ID_1, "SNMP", "ifInOctets", "sysUpTime"))));
+                .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
+                .willReturn(ResponseDefinitionBuilder.okForJson(
+                        buildTsQueryResult(NODE_ID_1, "SNMP", "ifInOctets", "sysUpTime"))));
 
-        String request = "query { " +
-            "    metric(name: \"network_in_total_bytes\", labels: {node_id: \"1\", monitor: \"SNMP\"}, timeRange: 1, timeRangeUnit: MINUTE) { " +
-            "        status, " +
-            "        data { " +
-            "            resultType, " +
-            "            result { " +
-            "                metric " +
-            "            } " +
-            "        } " +
-            "    } " +
-            "}";
-        webClient
-            .exchangeGraphQLQuery(request)
-            .expectJsonResponse();
+        String request = "query { "
+                + "    metric(name: \"network_in_total_bytes\", labels: {node_id: \"1\", monitor: \"SNMP\"}, timeRange: 1, timeRangeUnit: MINUTE) { "
+                + "        status, "
+                + "        data { "
+                + "            resultType, "
+                + "            result { "
+                + "                metric "
+                + "            } "
+                + "        } "
+                + "    } "
+                + "}";
+        webClient.exchangeGraphQLQuery(request).expectJsonResponse();
     }
 
     @Test
@@ -131,23 +134,22 @@ class GraphQLTSDBMetricServiceTest {
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
-            .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
-            .willReturn(ResponseDefinitionBuilder.okForJson(buildTsQueryResult(NODE_ID_1, "SNMP", "ifOutOctets", "sysUpTime"))));
+                .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
+                .willReturn(ResponseDefinitionBuilder.okForJson(
+                        buildTsQueryResult(NODE_ID_1, "SNMP", "ifOutOctets", "sysUpTime"))));
 
-        String request = "query { " +
-            "    metric(name: \"network_out_total_bytes\", labels: {node_id: \"1\", monitor: \"SNMP\"}, timeRange: 1, timeRangeUnit: MINUTE) { " +
-            "        status, " +
-            "        data { " +
-            "            resultType, " +
-            "            result { " +
-            "                metric " +
-            "            } " +
-            "        } " +
-            "    } " +
-            "}";
-        webClient
-            .exchangeGraphQLQuery(request)
-            .expectJsonResponse();
+        String request = "query { "
+                + "    metric(name: \"network_out_total_bytes\", labels: {node_id: \"1\", monitor: \"SNMP\"}, timeRange: 1, timeRangeUnit: MINUTE) { "
+                + "        status, "
+                + "        data { "
+                + "            resultType, "
+                + "            result { "
+                + "                metric "
+                + "            } "
+                + "        } "
+                + "    } "
+                + "}";
+        webClient.exchangeGraphQLQuery(request).expectJsonResponse();
     }
 
     @Test
@@ -157,23 +159,22 @@ class GraphQLTSDBMetricServiceTest {
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
-            .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
-            .willReturn(ResponseDefinitionBuilder.okForJson(buildTsQueryResult(NODE_ID_2, "AZURE", "network_in_total_bytes"))));
+                .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
+                .willReturn(ResponseDefinitionBuilder.okForJson(
+                        buildTsQueryResult(NODE_ID_2, "AZURE", "network_in_total_bytes"))));
 
-        String request = "query { " +
-            "    metric(name: \"network_in_total_bytes\", labels: {node_id: \"2\"}, timeRange: 1, timeRangeUnit: MINUTE) { " +
-            "        status, " +
-            "        data { " +
-            "            resultType, " +
-            "            result { " +
-            "                metric " +
-            "            } " +
-            "        } " +
-            "    } " +
-            "}";
-        webClient
-            .exchangeGraphQLQuery(request)
-            .expectJsonResponse();
+        String request = "query { "
+                + "    metric(name: \"network_in_total_bytes\", labels: {node_id: \"2\"}, timeRange: 1, timeRangeUnit: MINUTE) { "
+                + "        status, "
+                + "        data { "
+                + "            resultType, "
+                + "            result { "
+                + "                metric "
+                + "            } "
+                + "        } "
+                + "    } "
+                + "}";
+        webClient.exchangeGraphQLQuery(request).expectJsonResponse();
     }
 
     @Test
@@ -183,24 +184,24 @@ class GraphQLTSDBMetricServiceTest {
         when(mockHeaderUtil.extractTenant(any(ResolutionEnvironment.class))).thenReturn(TEST_TENANT_ID);
 
         wireMock.stubFor(post("/api/v1/query")
-            .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
-            .willReturn(ResponseDefinitionBuilder.okForJson(buildTsQueryResult(NODE_ID_2, "AZURE", "network_out_total_bytes"))));
+                .withHeader("X-Scope-OrgID", new EqualToPattern(TEST_TENANT_ID))
+                .willReturn(ResponseDefinitionBuilder.okForJson(
+                        buildTsQueryResult(NODE_ID_2, "AZURE", "network_out_total_bytes"))));
 
-        String request = "query { " +
-            "    metric(name: \"network_out_total_bytes\", labels: {node_id: \"2\"}, timeRange: 1, timeRangeUnit: MINUTE) { " +
-            "        status, " +
-            "        data { " +
-            "            resultType, " +
-            "            result { " +
-            "                metric " +
-            "            } " +
-            "        } " +
-            "    } " +
-            "}";
-        webClient
-            .exchangeGraphQLQuery(request)
-            .expectJsonResponse();
+        String request = "query { "
+                + "    metric(name: \"network_out_total_bytes\", labels: {node_id: \"2\"}, timeRange: 1, timeRangeUnit: MINUTE) { "
+                + "        status, "
+                + "        data { "
+                + "            resultType, "
+                + "            result { "
+                + "                metric "
+                + "            } "
+                + "        } "
+                + "    } "
+                + "}";
+        webClient.exchangeGraphQLQuery(request).expectJsonResponse();
     }
+
     private TimeSeriesQueryResult buildTsQueryResult(long nodeId, String monitor, String... metricNames) {
         TimeSeriesQueryResult result = new TimeSeriesQueryResult();
         result.setStatus("success");

@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -34,6 +27,8 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagDTO;
@@ -49,9 +44,6 @@ import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
@@ -65,7 +57,8 @@ public class GrpcTagService {
         String authHeader = headerUtil.getAuthHeader(env);
         TagCreateListDTO tagCreateListDTO = mapper.tagListAddToProtoCustom(tags);
         TagListDTO tagListDTO = client.addTags(tagCreateListDTO, authHeader);
-        return Mono.just(tagListDTO.getTagsList().stream().map(mapper::protoToTag).toList());
+        return Mono.just(
+                tagListDTO.getTagsList().stream().map(mapper::protoToTag).toList());
     }
 
     @GraphQLMutation
@@ -77,19 +70,22 @@ public class GrpcTagService {
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTagsByNodeId(@GraphQLArgument(name = "nodeId") Long nodeId,
-                                           @GraphQLArgument(name = "searchTerm") String searchTerm,
-                                           @GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+    public Mono<List<Tag>> getTagsByNodeId(
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByNodeId(nodeId, searchTerm, headerUtil.getAuthHeader(env))
+                .getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 
     @GraphQLQuery
-    public Mono<List<NodeTags>> getTagsByNodeIds(@GraphQLArgument(name = "nodeIds") List<Long> nodeIds,
-                                                 @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<List<NodeTags>> getTagsByNodeIds(
+            @GraphQLArgument(name = "nodeIds") List<Long> nodeIds, @GraphQLEnvironment ResolutionEnvironment env) {
         List<NodeTags> nodeTags = new ArrayList<>();
         for (Long nodeId : nodeIds) {
-            List<TagDTO> tagsDtoList = client.getTagsByNodeId(nodeId, headerUtil.getAuthHeader(env)).getTagsList();
+            List<TagDTO> tagsDtoList = client.getTagsByNodeId(nodeId, headerUtil.getAuthHeader(env))
+                    .getTagsList();
             List<Tag> tagList = tagsDtoList.stream().map(mapper::protoToTag).toList();
             nodeTags.add(new NodeTags(nodeId, tagList));
         }
@@ -97,25 +93,32 @@ public class GrpcTagService {
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTagsByActiveDiscoveryId(@GraphQLArgument(name = "activeDiscoveryId") Long activeDiscoveryId,
-                                                      @GraphQLArgument(name = "searchTerm") String searchTerm,
-                                                      @GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTagsByActiveDiscoveryId(activeDiscoveryId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+    public Mono<List<Tag>> getTagsByActiveDiscoveryId(
+            @GraphQLArgument(name = "activeDiscoveryId") Long activeDiscoveryId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByActiveDiscoveryId(
+                        activeDiscoveryId, searchTerm, headerUtil.getAuthHeader(env))
+                .getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTagsByPassiveDiscoveryId(@GraphQLArgument(name = "passiveDiscoveryId") Long activeDiscoveryId,
-                                                      @GraphQLArgument(name = "searchTerm") String searchTerm,
-                                                      @GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTagsByPassiveDiscoveryId(activeDiscoveryId, searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+    public Mono<List<Tag>> getTagsByPassiveDiscoveryId(
+            @GraphQLArgument(name = "passiveDiscoveryId") Long activeDiscoveryId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList = client.getTagsByPassiveDiscoveryId(
+                        activeDiscoveryId, searchTerm, headerUtil.getAuthHeader(env))
+                .getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 
     @GraphQLQuery
-    public Mono<List<Tag>> getTags(@GraphQLArgument(name = "searchTerm") String searchTerm,
-                                   @GraphQLEnvironment ResolutionEnvironment env) {
-        List<TagDTO> tagsList = client.getTags(searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
+    public Mono<List<Tag>> getTags(
+            @GraphQLArgument(name = "searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
+        List<TagDTO> tagsList =
+                client.getTags(searchTerm, headerUtil.getAuthHeader(env)).getTagsList();
         return Mono.just(tagsList.stream().map(mapper::protoToTag).toList());
     }
 }

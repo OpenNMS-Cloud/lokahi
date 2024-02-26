@@ -1,8 +1,31 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.metrics;
-
 
 import static org.awaitility.Awaitility.await;
 
+import io.grpc.Server;
+import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.testing.GrpcCleanupRule;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -11,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -45,15 +67,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import io.grpc.Server;
-import io.grpc.inprocess.InProcessServerBuilder;
-import io.grpc.testing.GrpcCleanupRule;
-
 @Disabled // TODO: REPLACE WITH CUCUMBER TEST
 @SpringBootTest
-@ContextConfiguration(classes = {IngestorApplicationConfig.class, InventoryApplicationConfig.class,
-    FlowProcessorTestConfig.class})
-@EmbeddedKafka(brokerProperties = {"listeners=PLAINTEXT://localhost:59092", "port=59092"}, topics = "flows-test")
+@ContextConfiguration(
+        classes = {IngestorApplicationConfig.class, InventoryApplicationConfig.class, FlowProcessorTestConfig.class})
+@EmbeddedKafka(
+        brokerProperties = {"listeners=PLAINTEXT://localhost:59092", "port=59092"},
+        topics = "flows-test")
 @DirtiesContext
 @TestPropertySource(locations = "/application-test.yml")
 @ActiveProfiles("test")
@@ -85,15 +105,17 @@ class FlowProcessorIntegrationTest {
     @BeforeAll
     public static void setUpMockServers() throws IOException {
         ingestorServer = InProcessServerBuilder.forName(IngestorApplicationConfig.SERVER_NAME)
-            .directExecutor()
-            .addService(grpcIngesterMockServer)
-            .build().start();
+                .directExecutor()
+                .addService(grpcIngesterMockServer)
+                .build()
+                .start();
         grpcCleanupRule.register(ingestorServer);
 
         inventoryServer = InProcessServerBuilder.forName(InventoryApplicationConfig.SERVER_NAME)
-            .directExecutor()
-            .addService(grpcInventoryMockServer)
-            .build().start();
+                .directExecutor()
+                .addService(grpcInventoryMockServer)
+                .build()
+                .start();
         grpcCleanupRule.register(inventoryServer);
     }
 
@@ -113,36 +135,41 @@ class FlowProcessorIntegrationTest {
         // Given
         String tenantId = "tenant-id";
         TaskResult testTaskResult = TaskResult.newBuilder().build();
-        TaskSetResults testTaskSetResults = TaskSetResults.newBuilder().addResults(testTaskResult).build();
+        TaskSetResults testTaskSetResults =
+                TaskSetResults.newBuilder().addResults(testTaskResult).build();
 
-        FlowDocumentLog flows = FlowDocumentLog.newBuilder().addMessage(FlowDocument.newBuilder()
-            .setSrcAddress("127.0.0.1")
-            .setDstAddress("8.8.8.8")
-            .setLocation(LOCATION1)
-            .setExporterAddress("127.0.0.1")
-        ).addMessage(FlowDocument.newBuilder()
-            .setSrcAddress("192.168.0.1")
-            .setDstAddress("1.1.1.1")
-            .setLocation(LOCATION2)
-            .setExporterAddress("127.0.0.1")
-        ).build();
+        FlowDocumentLog flows = FlowDocumentLog.newBuilder()
+                .addMessage(FlowDocument.newBuilder()
+                        .setSrcAddress("127.0.0.1")
+                        .setDstAddress("8.8.8.8")
+                        .setLocation(LOCATION1)
+                        .setExporterAddress("127.0.0.1"))
+                .addMessage(FlowDocument.newBuilder()
+                        .setSrcAddress("192.168.0.1")
+                        .setDstAddress("1.1.1.1")
+                        .setLocation(LOCATION2)
+                        .setExporterAddress("127.0.0.1"))
+                .build();
 
         ProducerRecord<String, byte[]> producerRecord = formatProducerRecord(flows.toByteArray(), tenantId);
         LOG.info("sending payload='{}' to topic='{}'", producerRecord, flowTopic);
 
-
         // When
         CompletableFuture<SendResult<String, byte[]>> future = kafkaTemplate.send(producerRecord);
         future.whenComplete((result, ex) -> Optional.ofNullable(ex)
-            .ifPresentOrElse(val -> LOG.error("Unable to send message=[{}] due to: {}", testTaskSetResults.toByteArray(), val.getMessage()),
-                () -> LOG.info("Sent message=[{}] with offset=[{}]", testTaskSetResults.toByteArray(), result.getRecordMetadata().offset())));
+                .ifPresentOrElse(
+                        val -> LOG.error(
+                                "Unable to send message=[{}] due to: {}",
+                                testTaskSetResults.toByteArray(),
+                                val.getMessage()),
+                        () -> LOG.info(
+                                "Sent message=[{}] with offset=[{}]",
+                                testTaskSetResults.toByteArray(),
+                                result.getRecordMetadata().offset())));
 
         // Then
         // Flow Documents should be persisted
-        await()
-            .await()
-            .atMost(Duration.ofSeconds(10))
-            .until(() -> grpcIngesterMockServer.isFlowDocumentPersisted());
+        await().await().atMost(Duration.ofSeconds(10)).until(() -> grpcIngesterMockServer.isFlowDocumentPersisted());
         Assertions.assertEquals(String.format("%s,%s", tenantId, tenantId), grpcIngesterMockServer.getSavedTenantId());
 
         // Flow Documents are sent to Inventory for Enrichment
@@ -156,12 +183,6 @@ class FlowProcessorIntegrationTest {
         List<Header> headers = new LinkedList<>();
         headers.add(new RecordHeader(tenantId, tenantId.getBytes(StandardCharsets.UTF_8)));
 
-        return new ProducerRecord<String, byte[]>(
-            flowTopic,
-            null,
-            null,
-            rawContent,
-            headers
-        );
+        return new ProducerRecord<String, byte[]>(flowTopic, null, null, rawContent, headers);
     }
 }

@@ -1,34 +1,33 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.tsdata.monitor;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.opennms.horizon.tsdata.MetricNameConstants.METRICS_NAME_PREFIX_MONITOR;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,20 +41,12 @@ import org.opennms.taskset.contract.MonitorResponse;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
 import prometheus.PrometheusTypes;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import prometheus.PrometheusTypes.TimeSeries;
 import prometheus.PrometheusTypes.TimeSeries.Builder;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.opennms.horizon.tsdata.MetricNameConstants.METRICS_NAME_PREFIX_MONITOR;
-
 public class TaskSetMonitorResultProcessorTest {
 
-    public final static String TENANT_ID = "foobar";
+    public static final String TENANT_ID = "foobar";
     private static final String SYSTEM_ID = "minion-x";
     private static final String LOCATION = "location-y";
 
@@ -74,34 +65,26 @@ public class TaskSetMonitorResultProcessorTest {
         mockCortexTSS = Mockito.mock(CortexTSS.class);
         mockTenantMetricsTracker = Mockito.mock(TenantMetricsTracker.class);
 
-        testTaskResult =
-            TaskResult.newBuilder()
+        testTaskResult = TaskResult.newBuilder()
                 .setId("x-task-id-x")
-                .setIdentity(
-                    Identity.newBuilder()
-                        .setSystemId("x-system-id-x")
-                        .build()
-                )
+                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x").build())
                 .build();
 
-        testIcmpMonitorResponse =
-            MonitorResponse.newBuilder()
+        testIcmpMonitorResponse = MonitorResponse.newBuilder()
                 .setIpAddress("x-ip-address-x")
                 .setResponseTimeMs(1313.0)
                 .setNodeId(151515L)
                 .setMonitorType(MonitorType.ICMP)
                 .build();
 
-        testEchoMonitorResponse =
-            MonitorResponse.newBuilder()
+        testEchoMonitorResponse = MonitorResponse.newBuilder()
                 .setIpAddress("x-ip-address-x")
                 .setResponseTimeMs(1313.0)
                 .setNodeId(151515L)
                 .setMonitorType(MonitorType.ECHO)
                 .build();
 
-        testMonitorResponseWithAdditionalMetrics =
-            MonitorResponse.newBuilder()
+        testMonitorResponseWithAdditionalMetrics = MonitorResponse.newBuilder()
                 .setIpAddress("x-ip-address-x")
                 .setResponseTimeMs(1313.0)
                 .setNodeId(151515L)
@@ -124,7 +107,8 @@ public class TaskSetMonitorResultProcessorTest {
         //
         // Verify the Results
         //
-        var matcher = new PrometheusTimeSeriersBuilderArgumentMatcher(1313.0, MonitorType.ICMP, MetricNameConstants.METRICS_NAME_RESPONSE);
+        var matcher = new PrometheusTimeSeriersBuilderArgumentMatcher(
+                1313.0, MonitorType.ICMP, MetricNameConstants.METRICS_NAME_RESPONSE);
         Mockito.verify(mockCortexTSS).store(eq("x-tenant-id-x"), Mockito.argThat(matcher));
         Mockito.verify(mockTenantMetricsTracker).addTenantMetricSampleCount("x-tenant-id-x", 1);
         Mockito.verifyNoMoreInteractions(mockCortexTSS);
@@ -141,7 +125,8 @@ public class TaskSetMonitorResultProcessorTest {
         //
         // Verify the Results
         //
-        var matcher = new PrometheusTimeSeriersBuilderArgumentMatcher(1313.0, MonitorType.ECHO, MetricNameConstants.METRICS_NAME_RESPONSE);
+        var matcher = new PrometheusTimeSeriersBuilderArgumentMatcher(
+                1313.0, MonitorType.ECHO, MetricNameConstants.METRICS_NAME_RESPONSE);
         Mockito.verify(mockCortexTSS).store(eq("x-tenant-id-x"), Mockito.argThat(matcher));
         Mockito.verify(mockTenantMetricsTracker).addTenantMetricSampleCount("x-tenant-id-x", 1);
         Mockito.verifyNoMoreInteractions(mockCortexTSS);
@@ -153,25 +138,26 @@ public class TaskSetMonitorResultProcessorTest {
         //
         // Execute
         //
-        target.processMonitorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testMonitorResponseWithAdditionalMetrics);
+        target.processMonitorResponse(
+                "x-tenant-id-x", "x-location-x", testTaskResult, testMonitorResponseWithAdditionalMetrics);
 
         //
         // Verify the Results
         //
-        var mainMetricMatcher =
-            new PrometheusTimeSeriersBuilderArgumentMatcher(1313.0, MonitorType.ECHO, MetricNameConstants.METRICS_NAME_RESPONSE);
+        var mainMetricMatcher = new PrometheusTimeSeriersBuilderArgumentMatcher(
+                1313.0, MonitorType.ECHO, MetricNameConstants.METRICS_NAME_RESPONSE);
         Mockito.verify(mockCortexTSS).store(eq("x-tenant-id-x"), Mockito.argThat(mainMetricMatcher));
 
-        var matcher1 =
-            new PrometheusTimeSeriersBuilderArgumentMatcher(1.001, MonitorType.ECHO, METRICS_NAME_PREFIX_MONITOR + "x_metric_001_x");
+        var matcher1 = new PrometheusTimeSeriersBuilderArgumentMatcher(
+                1.001, MonitorType.ECHO, METRICS_NAME_PREFIX_MONITOR + "x_metric_001_x");
         Mockito.verify(mockCortexTSS).store(eq("x-tenant-id-x"), Mockito.argThat(matcher1));
 
-        var matcher2 =
-            new PrometheusTimeSeriersBuilderArgumentMatcher(2.002, MonitorType.ECHO, METRICS_NAME_PREFIX_MONITOR + "x_metric_002_x");
+        var matcher2 = new PrometheusTimeSeriersBuilderArgumentMatcher(
+                2.002, MonitorType.ECHO, METRICS_NAME_PREFIX_MONITOR + "x_metric_002_x");
         Mockito.verify(mockCortexTSS).store(eq("x-tenant-id-x"), Mockito.argThat(matcher2));
 
-        var matcher3 =
-            new PrometheusTimeSeriersBuilderArgumentMatcher(3.003, MonitorType.ECHO, METRICS_NAME_PREFIX_MONITOR + "x_metric_003_x");
+        var matcher3 = new PrometheusTimeSeriersBuilderArgumentMatcher(
+                3.003, MonitorType.ECHO, METRICS_NAME_PREFIX_MONITOR + "x_metric_003_x");
         Mockito.verify(mockCortexTSS).store(eq("x-tenant-id-x"), Mockito.argThat(matcher3));
 
         Mockito.verify(mockTenantMetricsTracker, Mockito.times(4)).addTenantMetricSampleCount("x-tenant-id-x", 1);
@@ -203,25 +189,21 @@ public class TaskSetMonitorResultProcessorTest {
 
     private static TaskResult createMonitorSample(long timestamp) {
         MonitorResponse monitorResponse = MonitorResponse.newBuilder()
-            .setResponseTimeMs(10.0)
-            .setTimestamp(timestamp)
-            .setNodeId(10L)
-            .build();
+                .setResponseTimeMs(10.0)
+                .setTimestamp(timestamp)
+                .setNodeId(10L)
+                .build();
 
         return TaskResult.newBuilder()
-            .setIdentity(
-                Identity.newBuilder()
-                    .setSystemId(SYSTEM_ID)
-                    .build()
-            )
-            .setId("test-monitor")
-            .setMonitorResponse(monitorResponse)
-            .build();
+                .setIdentity(Identity.newBuilder().setSystemId(SYSTEM_ID).build())
+                .setId("test-monitor")
+                .setMonitorResponse(monitorResponse)
+                .build();
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     static class TimeMatcher implements ArgumentMatcher<TimeSeries.Builder> {
 
@@ -246,13 +228,15 @@ public class TaskSetMonitorResultProcessorTest {
         }
     }
 
-    private class PrometheusTimeSeriersBuilderArgumentMatcher implements ArgumentMatcher<PrometheusTypes.TimeSeries.Builder> {
+    private class PrometheusTimeSeriersBuilderArgumentMatcher
+            implements ArgumentMatcher<PrometheusTypes.TimeSeries.Builder> {
 
         private final double metricValue;
         private final MonitorType monitorType;
         private final String metricName;
 
-        public PrometheusTimeSeriersBuilderArgumentMatcher(double metricValue, MonitorType monitorType, String metricName) {
+        public PrometheusTimeSeriersBuilderArgumentMatcher(
+                double metricValue, MonitorType monitorType, String metricName) {
             this.metricValue = metricValue;
             this.monitorType = monitorType;
             this.metricName = metricName;
@@ -260,10 +244,7 @@ public class TaskSetMonitorResultProcessorTest {
 
         @Override
         public boolean matches(PrometheusTypes.TimeSeries.Builder timeseriesBuilder) {
-            if (
-                (labelMatches(timeseriesBuilder)) &&
-                (sampleMatches(timeseriesBuilder))
-            ) {
+            if ((labelMatches(timeseriesBuilder)) && (sampleMatches(timeseriesBuilder))) {
                 return true;
             }
             return false;
@@ -285,14 +266,12 @@ public class TaskSetMonitorResultProcessorTest {
                     labelMap.put(label.getName(), label.getValue());
                 }
 
-                return (
-                    (Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL))) &&
-                    (Objects.equals("x-ip-address-x", labelMap.get("instance"))) &&
-                    (Objects.equals("x-location-x", labelMap.get("location_id"))) &&
-                    (Objects.equals("x-system-id-x", labelMap.get("system_id"))) &&
-                    (Objects.equals(monitorType.name(), labelMap.get("monitor"))) &&
-                    ((isEchoMatcher) || Objects.equals("151515", labelMap.get("node_id")))
-                );
+                return ((Objects.equals(metricName, labelMap.get(MetricNameConstants.METRIC_NAME_LABEL)))
+                        && (Objects.equals("x-ip-address-x", labelMap.get("instance")))
+                        && (Objects.equals("x-location-x", labelMap.get("location_id")))
+                        && (Objects.equals("x-system-id-x", labelMap.get("system_id")))
+                        && (Objects.equals(monitorType.name(), labelMap.get("monitor")))
+                        && ((isEchoMatcher) || Objects.equals("151515", labelMap.get("node_id"))));
             }
 
             return false;
@@ -310,5 +289,4 @@ public class TaskSetMonitorResultProcessorTest {
             return false;
         }
     }
-
 }

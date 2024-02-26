@@ -65,6 +65,11 @@ jobs:
       - name: Build and install prerequisites
         uses: ./.github/actions/java-install-prereqs
 
+      - name: Run maven spotless checks
+        uses: ./.github/actions/maven-spotless
+        with:
+          working-directory: 'events'
+
       - name: Jib Maven build, scan, and push
         uses: ./.github/actions/jib-maven-sonar
         with:

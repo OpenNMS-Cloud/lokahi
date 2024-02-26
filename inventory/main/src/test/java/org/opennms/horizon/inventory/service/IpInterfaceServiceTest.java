@@ -1,12 +1,41 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -14,20 +43,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.shared.utils.IPAddress;
-import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IpInterfaceServiceTest {
 
@@ -49,10 +65,7 @@ public class IpInterfaceServiceTest {
         mockIpInterfaceMapper = Mockito.mock(IpInterfaceMapper.class);
 
         testIpInterface = new IpInterface();
-        testIpInterfaceDTO =
-            IpInterfaceDTO.newBuilder()
-                .setId(1313)
-                .build();
+        testIpInterfaceDTO = IpInterfaceDTO.newBuilder().setId(1313).build();
 
         target = new IpInterfaceService(mockIpInterfaceRepository, mockIpInterfaceMapper);
     }
@@ -90,7 +103,8 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIdAndTenantId(1313, TEST_TENANT_ID)).thenReturn(Optional.of(testIpInterface));
+        Mockito.when(mockIpInterfaceRepository.findByIdAndTenantId(1313, TEST_TENANT_ID))
+                .thenReturn(Optional.of(testIpInterface));
         Mockito.when(mockIpInterfaceMapper.modelToDTO(testIpInterface)).thenReturn(testIpInterfaceDTO);
 
         //
@@ -112,8 +126,7 @@ public class IpInterfaceServiceTest {
         var testNode = new Node();
         var azureInterface = new AzureInterface();
         azureInterface.setId(1L);
-        var testAzureScanNetworkInterfaceItem =
-            AzureScanNetworkInterfaceItem.newBuilder()
+        var testAzureScanNetworkInterfaceItem = AzureScanNetworkInterfaceItem.newBuilder()
                 .setIpAddress("11.11.11.11")
                 .build();
 
@@ -125,15 +138,11 @@ public class IpInterfaceServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockIpInterfaceRepository).save(
-            Mockito.argThat(
-                argument -> (
-                    ( ! argument.getSnmpPrimary() ) &&
-                    ( argument.getNode() == testNode ) &&
-                    ( Objects.equals("11.11.11.11", argument.getIpAddress().getHostName()) )
-                )
-            )
-        );
+        Mockito.verify(mockIpInterfaceRepository)
+                .save(Mockito.argThat(argument -> ((!argument.getSnmpPrimary())
+                        && (argument.getNode() == testNode)
+                        && (Objects.equals(
+                                "11.11.11.11", argument.getIpAddress().getHostName())))));
     }
 
     @Test
@@ -141,13 +150,16 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(List.of(testIpInterface));
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(
+                        new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
+                .thenReturn(List.of(testIpInterface));
         Mockito.when(mockIpInterfaceMapper.modelToDTO(testIpInterface)).thenReturn(testIpInterfaceDTO);
 
         //
         // Execute
         //
-        var result = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
+        var result =
+                target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
 
         //
         // Verify the Results
@@ -160,12 +172,15 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID)).thenReturn(new ArrayList<>());
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(
+                        new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
+                .thenReturn(new ArrayList<>());
 
         //
         // Execute
         //
-        var result = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
+        var result =
+                target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
 
         //
         // Verify the Results
@@ -178,27 +193,31 @@ public class IpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        IpInterface ipAddress1  = new IpInterface();
+        IpInterface ipAddress1 = new IpInterface();
         ipAddress1.setId(1L);
-        IpInterface ipAddress2  = new IpInterface();
+        IpInterface ipAddress2 = new IpInterface();
         ipAddress2.setId(2L);
-        IpInterface ipAddress3  = new IpInterface();
+        IpInterface ipAddress3 = new IpInterface();
         ipAddress3.setId(3L);
         ipAddress3.setSnmpPrimary(true);
         var testIpInterfaceDTO1 = IpInterfaceDTO.newBuilder().setId(1L).build();
         var testIpInterfaceDTO3 = IpInterfaceDTO.newBuilder().setId(1L).build();
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
-            .thenReturn(List.of(ipAddress1, ipAddress2));
-        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(new IPAddress("11.11.11.12").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
-            .thenReturn(List.of(ipAddress1, ipAddress2, ipAddress3));
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(
+                        new IPAddress("11.11.11.11").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
+                .thenReturn(List.of(ipAddress1, ipAddress2));
+        Mockito.when(mockIpInterfaceRepository.findByIpAddressAndLocationIdAndTenantId(
+                        new IPAddress("11.11.11.12").toInetAddress(), TEST_LOCATION_ID, TEST_TENANT_ID))
+                .thenReturn(List.of(ipAddress1, ipAddress2, ipAddress3));
         Mockito.when(mockIpInterfaceMapper.modelToDTO(ipAddress1)).thenReturn(testIpInterfaceDTO1);
         Mockito.when(mockIpInterfaceMapper.modelToDTO(ipAddress3)).thenReturn(testIpInterfaceDTO3);
 
         //
         // Execute
         //
-        var expectFirstAddress = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
-        var expectSnmpAddress = target.findByIpAddressAndLocationIdAndTenantId("11.11.11.12", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
+        var expectFirstAddress =
+                target.findByIpAddressAndLocationIdAndTenantId("11.11.11.11", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
+        var expectSnmpAddress =
+                target.findByIpAddressAndLocationIdAndTenantId("11.11.11.12", TEST_LOCATION_ID_TEXT, TEST_TENANT_ID);
 
         //
         // Verify the Results
@@ -216,8 +235,7 @@ public class IpInterfaceServiceTest {
         //
         var testNode = new Node();
         testNode.setId(1313);
-        var testIpInterfaceResult =
-            IpInterfaceResult.newBuilder()
+        var testIpInterfaceResult = IpInterfaceResult.newBuilder()
                 .setIfIndex(1)
                 .setIpHostName("x-hostname-x")
                 .setNetmask("x-netmask-x")
@@ -225,12 +243,12 @@ public class IpInterfaceServiceTest {
                 .build();
         var testSnmpInterface1 = new SnmpInterface();
         var testSnmpInterface2 = new SnmpInterface();
-        Map<Integer, SnmpInterface> snmpInterfaceMap =
-            Map.of(
+        Map<Integer, SnmpInterface> snmpInterfaceMap = Map.of(
                 1, testSnmpInterface1,
-                2, testSnmpInterface2
-            );
-        Mockito.when(mockIpInterfaceRepository.findByNodeIdAndTenantIdAndIpAddress(1313, TEST_TENANT_ID, new IPAddress("11.11.11.11").toInetAddress())).thenReturn(Optional.of(testIpInterface));
+                2, testSnmpInterface2);
+        Mockito.when(mockIpInterfaceRepository.findByNodeIdAndTenantIdAndIpAddress(
+                        1313, TEST_TENANT_ID, new IPAddress("11.11.11.11").toInetAddress()))
+                .thenReturn(Optional.of(testIpInterface));
 
         //
         // Execute
@@ -240,13 +258,9 @@ public class IpInterfaceServiceTest {
         //
         // Verify the Results
         //
-        Mockito.verify(mockIpInterfaceRepository).save(Mockito.argThat(
-            argument ->
-                (
-                    ( Objects.equals("x-hostname-x", argument.getHostname()) ) &&
-                    ( Objects.equals("x-netmask-x", argument.getNetmask()) )
-                )
-        ));
+        Mockito.verify(mockIpInterfaceRepository)
+                .save(Mockito.argThat(argument -> ((Objects.equals("x-hostname-x", argument.getHostname()))
+                        && (Objects.equals("x-netmask-x", argument.getNetmask())))));
     }
 
     @Test
@@ -256,8 +270,7 @@ public class IpInterfaceServiceTest {
         //
         var testNode = new Node();
         testNode.setId(1313);
-        var testIpInterfaceResult =
-            IpInterfaceResult.newBuilder()
+        var testIpInterfaceResult = IpInterfaceResult.newBuilder()
                 .setIfIndex(1)
                 .setIpHostName("x-hostname-x")
                 .setNetmask("x-netmask-x")
@@ -265,13 +278,14 @@ public class IpInterfaceServiceTest {
                 .build();
         var testSnmpInterface1 = new SnmpInterface();
         var testSnmpInterface2 = new SnmpInterface();
-        Map<Integer, SnmpInterface> snmpInterfaceMap =
-            Map.of(
+        Map<Integer, SnmpInterface> snmpInterfaceMap = Map.of(
                 1, testSnmpInterface1,
-                2, testSnmpInterface2
-            );
-        Mockito.when(mockIpInterfaceRepository.findByNodeIdAndTenantIdAndIpAddress(1313, TEST_TENANT_ID, new IPAddress("11.11.11.11").toInetAddress())).thenReturn(Optional.empty());
-        Mockito.when(mockIpInterfaceMapper.fromScanResult(testIpInterfaceResult)).thenReturn(testIpInterface);
+                2, testSnmpInterface2);
+        Mockito.when(mockIpInterfaceRepository.findByNodeIdAndTenantIdAndIpAddress(
+                        1313, TEST_TENANT_ID, new IPAddress("11.11.11.11").toInetAddress()))
+                .thenReturn(Optional.empty());
+        Mockito.when(mockIpInterfaceMapper.fromScanResult(testIpInterfaceResult))
+                .thenReturn(testIpInterface);
 
         //
         // Execute

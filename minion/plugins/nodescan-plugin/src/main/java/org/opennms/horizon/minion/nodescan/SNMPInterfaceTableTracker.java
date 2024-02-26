@@ -1,36 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.nodescan;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.opennms.horizon.shared.snmp.RowCallback;
 import org.opennms.horizon.shared.snmp.SnmpInstId;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
@@ -66,9 +57,8 @@ public class SNMPInterfaceTableTracker extends TableTracker {
     /** Constant <code>IF_LAST_CHANGE</code> */
     public static final SnmpObjId IF_LAST_CHANGE = SnmpObjId.get(IF_TABLE_ENTRY, "9");
 
-
     /** Constant <code>IF_XTABLE_ENTRY</code> */
-    public static final SnmpObjId IF_XTABLE_ENTRY = SnmpObjId.get( ".1.3.6.1.2.1.31.1.1.1");
+    public static final SnmpObjId IF_XTABLE_ENTRY = SnmpObjId.get(".1.3.6.1.2.1.31.1.1.1");
     /** Constant <code>IF_NAME</code> */
     public static final SnmpObjId IF_NAME = SnmpObjId.get(IF_XTABLE_ENTRY, "1");
     /** Constant <code>IF_IN_MCAST_PKTS</code> */
@@ -89,6 +79,7 @@ public class SNMPInterfaceTableTracker extends TableTracker {
     public static final SnmpObjId IF_ALIAS = SnmpObjId.get(IF_XTABLE_ENTRY, "18");
     /** Constant <code>IF_COUNTER_DISCONTINUITY_TIME</code> */
     public static final SnmpObjId IF_COUNTER_DISCONTINUITY_TIME = SnmpObjId.get(IF_XTABLE_ENTRY, "19");
+
     public static final int SNMP_IFTYPE_LOOPBACK = 24;
 
     private static SnmpObjId[] s_tableColumns = new SnmpObjId[] {
@@ -129,7 +120,6 @@ public class SNMPInterfaceTableTracker extends TableTracker {
         private Optional<Integer> getIfType() {
             final SnmpValue value = getValue(IF_TYPE);
             return Optional.ofNullable(value == null ? null : value.toInt());
-
         }
 
         private Optional<Long> getIfSpeed() {
@@ -150,10 +140,15 @@ public class SNMPInterfaceTableTracker extends TableTracker {
             }
             if (ifSpeed.isEmpty()) {
                 if (highSpeed.isPresent() && highSpeed.get() > 0) {
-                    LOG.warn("the ifSpeed for ifIndex {} is null, which is a violation of the standard (this seems to be related to a broken SNMP agent). But, the ifHighSpeed is {}, so that value will be used instead.", getIfIndex(), highSpeed);
+                    LOG.warn(
+                            "the ifSpeed for ifIndex {} is null, which is a violation of the standard (this seems to be related to a broken SNMP agent). But, the ifHighSpeed is {}, so that value will be used instead.",
+                            getIfIndex(),
+                            highSpeed);
                     return highSpeed.map(h -> h * 1000000L);
                 } else {
-                    LOG.warn("the ifSpeed for ifIndex {} is null, which is a violation of the standard (this seems to be related to a broken SNMP agent). Returning 0 instead", getIfIndex());
+                    LOG.warn(
+                            "the ifSpeed for ifIndex {} is null, which is a violation of the standard (this seems to be related to a broken SNMP agent). Returning 0 instead",
+                            getIfIndex());
                     return Optional.of(0L);
                 }
             }
@@ -203,7 +198,10 @@ public class SNMPInterfaceTableTracker extends TableTracker {
                     // This is the normal case that most agents conform to: the value is an ASCII
                     // string representing the colon-separated MAC address. We just need to reformat
                     // it to remove the colons and convert it into a 12-character string.
-                    return Optional.ofNullable(displayString == null || displayString.trim().isEmpty() ? null : InetAddressUtils.normalizeMacAddress(displayString));
+                    return Optional.ofNullable(
+                            displayString == null || displayString.trim().isEmpty()
+                                    ? null
+                                    : InetAddressUtils.normalizeMacAddress(displayString));
                 }
             } catch (IllegalArgumentException e) {
                 LOG.warn(e.getMessage(), e);
@@ -237,7 +235,6 @@ public class SNMPInterfaceTableTracker extends TableTracker {
         super(s_tableColumns);
     }
 
-
     public SNMPInterfaceTableTracker(final RowCallback rowProcessor) {
         super(rowProcessor, s_tableColumns);
     }
@@ -251,10 +248,8 @@ public class SNMPInterfaceTableTracker extends TableTracker {
     /** {@inheritDoc} */
     @Override
     public void rowCompleted(final SnmpRowResult row) {
-        processPhysicalInterfaceRow((PhysicalInterfaceRow)row);
+        processPhysicalInterfaceRow((PhysicalInterfaceRow) row);
     }
 
-    public void processPhysicalInterfaceRow(final PhysicalInterfaceRow row) {
-
-    }
+    public void processPhysicalInterfaceRow(final PhysicalInterfaceRow row) {}
 }

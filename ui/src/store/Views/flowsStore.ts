@@ -21,12 +21,12 @@ export const useFlowsStore = defineStore('flowsStore', {
       },
       steps: 2000000,
       maxDataPoints: undefined as undefined | number,
-      //Application AutoComplete
+      // Application AutoComplete
       applications: [] as IAutocompleteItemType[],
       selectedApplications: [],
       isApplicationsLoading: false,
       filteredApplications: [] as IAutocompleteItemType[],
-      //Exporter AutoComplete
+      // Exporter AutoComplete
       exporters: [] as IAutocompleteItemType[],
       selectedExporterTopApplication: undefined as undefined | IAutocompleteItemType,
       // Selected Exporters can be set as [{ _text: 'Node Name', value: { nodeId: 1, ipInterfaceId: 1 } }] to autopopulate autofill with exporter
@@ -115,13 +115,13 @@ export const useFlowsStore = defineStore('flowsStore', {
     getSpanGap() {
       switch (this.filters.dateFilter) {
         case TimeRange.Today:
-          return 1000 * 60 * 5 // 5 mins 
+          return 1000 * 60 * 5 // 5 mins
         case TimeRange.Last_24Hours:
-          return 1000 * 60 * 10 // 10 mins 
+          return 1000 * 60 * 10 // 10 mins
         case TimeRange.SevenDays:
-          return 1000 * 60 * 60 // 1 hour 
+          return 1000 * 60 * 60 // 1 hour
         default:
-          return 1000 * 60 * 5 // 5 mins 
+          return 1000 * 60 * 5 // 5 mins
       }
     },
     async onDateFilterUpdate(e: any) {

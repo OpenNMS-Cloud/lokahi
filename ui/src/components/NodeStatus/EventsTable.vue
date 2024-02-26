@@ -49,7 +49,7 @@ const pageSize = ref(10)
 const total = ref(0)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updatePageSize = (v: number) => { pageSize.value = v }
-  
+
 const nodeData = computed(() => {
   const events = nodeStatusStore.fetchedData?.events
 

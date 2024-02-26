@@ -1,206 +1,223 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.opennms.lokahi.minion</groupId>
-        <artifactId>minion</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.opennms.lokahi.minion</groupId>
+    <artifactId>minion</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
-    <name>OpenNMS Lokahi :: Minion :: Docker IT</name>
-    <description>
-        Docker build-time, Black Box, System Integration Tests for the OpenNMS Lokahi project.
+  <artifactId>docker-it</artifactId>
+
+  <name>OpenNMS Lokahi :: Minion :: Docker IT</name>
+  <description>Docker build-time, Black Box, System Integration Tests for the OpenNMS Lokahi project.
 
         The docker-maven-plugin is used to spin up containers with the Minion and dependencies, then exercise
         Minion functionality.
 
-        Uses a mock of the Minion Gateway (gRPC server).
-    </description>
+        Uses a mock of the Minion Gateway (gRPC server).</description>
 
-    <artifactId>docker-it</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>docker-assembly</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+      <!-- Exclude all transitive dependencies; this dependency is only needed for build order, to ensure the -->
+      <!--  docker image is built before building this module.                                                -->
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>docker-assembly</artifactId>
-            <type>pom</type>
-            <scope>test</scope>
-            <version>${project.version}</version>
-            <!-- Exclude all transitive dependencies; this dependency is only needed for build order, to ensure the -->
-            <!--  docker image is built before building this module.                                                -->
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>minion-gateway-wiremock-api</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>minion-gateway-wiremock-api</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>minion-gateway-wiremock-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>minion-gateway-wiremock-client</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>flows-parser</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>flows-parser</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-picocontainer</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-picocontainer</artifactId>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
+    <!--      -->
+    <!-- JAXB -->
+    <!--      -->
+    <!-- TODO: version in the parent / BOM -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-core</artifactId>
+      <version>2.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.3.0</version>
+      <scope>test</scope>
+    </dependency>
 
-        <!--      -->
-        <!-- JAXB -->
-        <!--      -->
-        <!-- TODO: version in the parent / BOM -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>2.3.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.3.0</version>
-            <scope>test</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-        </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <build>
+    <testResources>
+      <testResource>
+        <filtering>false</filtering>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <filtering>true</filtering>
+        <directory>src/test/resources-filtered</directory>
+      </testResource>
+    </testResources>
 
-    <build>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>false</filtering>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources-filtered</directory>
-                <filtering>true</filtering>
-            </testResource>
-        </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
 
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
+      <!--                -->
+      <!-- TEST EXECUTION -->
+      <!--                -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skipITs>${skipITs}</skipITs>
+          <reuseForks>true</reuseForks>
+          <useSystemClassLoader>false</useSystemClassLoader>
+          <systemProperties>
+            <application.docker.image>${application.docker.image}</application.docker.image>
+          </systemProperties>
+        </configuration>
+        <executions>
+          <execution>
+            <id>lokahi-integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
+              <includes>
+                <include>**/*IT.java</include>
+              </includes>
+            </configuration>
+          </execution>
 
+          <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
+          <!--  phase executes even after an IT failure.                                                 -->
+          <execution>
+            <id>lokahi-verify-it</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-            <!--                -->
-            <!-- TEST EXECUTION -->
-            <!--                -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>lokahi-integration-test</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                        </goals>
-                        <phase>integration-test</phase>
-                        <configuration>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>**/*IT.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-
-                    <!-- Fail the build on IT Failures.  Executed as a separate step so that post-integration-test -->
-                    <!--  phase executes even after an IT failure.                                                 -->
-                    <execution>
-                        <id>lokahi-verify-it</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skipITs>${skipITs}</skipITs>
-                    <reuseForks>true</reuseForks>
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                    <systemProperties>
-                        <application.docker.image>${application.docker.image}</application.docker.image>
-                    </systemProperties>
-                </configuration>
-            </plugin>
-
-        </plugins>
-    </build>
+    </plugins>
+  </build>
 </project>

@@ -79,7 +79,7 @@ is: 'monCurrVal monOperator monValue'.&lt;/p>&lt;table>
 			monFlags=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -170,7 +170,7 @@ all properly configured managers.&lt;/p>&lt;table>
 			monFlags=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -302,7 +302,7 @@ becomes 'active(1)'.&lt;/p>&lt;table>
 			logMonitorFlags=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -386,7 +386,7 @@ ntEventMonMatch events.&lt;/p>&lt;table>
 			ntEventMonFlags=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -466,7 +466,7 @@ becomes 'active(1)'.&lt;/p>&lt;table>
 			ntEventMonFlags=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -555,7 +555,7 @@ from True to false.&lt;/p>&lt;table>
 			monFlags=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alarm-type="2" clear-key="uei.opennms.org/vendor/SystemEdge/traps/monitorTrap:%dpname%:%nodeid%:%interface%:%parm[#7]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#7]%" alert-type="2" clear-key="uei.opennms.org/vendor/SystemEdge/traps/monitorTrap:%dpname%:%nodeid%:%interface%:%parm[#7]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -655,7 +655,7 @@ of pmonFlags does not preclude sending Traps.&lt;/p>&lt;table>
 			pmonCurrentPID=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -755,7 +755,7 @@ specifies  that processStart Traps should be pay.&lt;/p>&lt;table>
 			pmonCurrentPID=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/SystemEdge/traps/processStopTrap:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/SystemEdge/traps/processStopTrap:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -857,7 +857,7 @@ not preclude the sending of Traps.&lt;/p>&lt;table>
 			pmonCurrentPID=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -958,7 +958,7 @@ to False, this Trap is sent.&lt;/p>&lt;table>
 			pmonCurrentPID=%parm[#9]%&lt;/p>
 		</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/SystemEdge/traps/processThresholdTrap:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/SystemEdge/traps/processThresholdTrap:%dpname%:%nodeid%:%interface%:%parm[#1]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -994,7 +994,7 @@ the license information for that product or module.&lt;/p>&lt;table>
 			sysedgeLicenseString=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1106,6 +1106,6 @@ be useless on multi-homed systems.&lt;/p>&lt;table>
 			pgmonStatusList=%parm[#8]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

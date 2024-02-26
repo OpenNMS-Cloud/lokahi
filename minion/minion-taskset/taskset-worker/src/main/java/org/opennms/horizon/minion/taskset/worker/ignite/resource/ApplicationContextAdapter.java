@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.ignite.resource;
 
 import java.io.IOException;
@@ -97,8 +118,7 @@ public class ApplicationContextAdapter implements ApplicationContext {
     }
 
     @Override
-    public String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons,
-        boolean allowEagerInit) {
+    public String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
         return new String[0];
     }
 
@@ -108,8 +128,7 @@ public class ApplicationContextAdapter implements ApplicationContext {
     }
 
     @Override
-    public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons,
-        boolean allowEagerInit) {
+    public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
         return new String[0];
     }
 
@@ -119,8 +138,8 @@ public class ApplicationContextAdapter implements ApplicationContext {
     }
 
     @Override
-    public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons,
-        boolean allowEagerInit) throws BeansException {
+    public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
+            throws BeansException {
         return null;
     }
 
@@ -131,13 +150,13 @@ public class ApplicationContextAdapter implements ApplicationContext {
 
     @Override
     public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
-        throws BeansException {
+            throws BeansException {
         return null;
     }
 
     @Override
     public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
-        throws NoSuchBeanDefinitionException {
+            throws NoSuchBeanDefinitionException {
         return null;
     }
 
@@ -192,14 +211,12 @@ public class ApplicationContextAdapter implements ApplicationContext {
     }
 
     @Override
-    public boolean isTypeMatch(String name, ResolvableType typeToMatch)
-        throws NoSuchBeanDefinitionException {
+    public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
         return false;
     }
 
     @Override
-    public boolean isTypeMatch(String name, Class<?> typeToMatch)
-        throws NoSuchBeanDefinitionException {
+    public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
         return false;
     }
 
@@ -219,9 +236,7 @@ public class ApplicationContextAdapter implements ApplicationContext {
     }
 
     @Override
-    public void publishEvent(Object event) {
-
-    }
+    public void publishEvent(Object event) {}
 
     @Override
     public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
@@ -229,14 +244,12 @@ public class ApplicationContextAdapter implements ApplicationContext {
     }
 
     @Override
-    public String getMessage(String code, Object[] args, Locale locale)
-        throws NoSuchMessageException {
+    public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
         return null;
     }
 
     @Override
-    public String getMessage(MessageSourceResolvable resolvable, Locale locale)
-        throws NoSuchMessageException {
+    public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
         return null;
     }
 

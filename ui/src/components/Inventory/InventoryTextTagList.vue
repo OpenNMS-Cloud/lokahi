@@ -2,7 +2,7 @@
   <ul class="text-anchor-list">
     <li data-test="location">
       <label :for="label.location">{{ label.location }}: </label>
-     
+
       <span  :id="label.location">{{ location }}</span>
     </li>
     <li data-test="management-ip">

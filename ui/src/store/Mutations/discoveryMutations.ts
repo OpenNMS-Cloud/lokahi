@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { useMutation } from 'villus'
-import { 
-  CreateAzureActiveDiscoveryDocument, 
-  CreateIcmpActiveDiscoveryDocument, 
+import {
+  CreateAzureActiveDiscoveryDocument,
+  CreateIcmpActiveDiscoveryDocument,
   UpsertPassiveDiscoveryDocument,
   TogglePassiveDiscoveryDocument,
   CreateOrUpdateActiveIcmpDiscoveryDocument,
@@ -40,7 +40,7 @@ export const useDiscoveryMutations = defineStore('discoveryMutations', () => {
     error: createOrUpdateDiscoveryError,
     isFetching: createOrUpdateDiscoveryIsFetching
   } = useMutation(CreateOrUpdateActiveIcmpDiscoveryDocument)
- 
+
   const {
     execute: deletePassiveDiscovery,
     error: deletePassiveDiscoveryError,

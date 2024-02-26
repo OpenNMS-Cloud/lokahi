@@ -1,36 +1,35 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.nodescan;
-
 
 import com.google.common.base.Strings;
 import com.google.protobuf.Any;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
@@ -52,15 +51,6 @@ import org.opennms.snmp.contract.SnmpDetectorRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-
 public class NodeScanner implements Scanner {
     private static final Logger LOG = LoggerFactory.getLogger(NodeScanner.class);
     private final SnmpHelper snmpHelper;
@@ -78,7 +68,8 @@ public class NodeScanner implements Scanner {
         LOG.info("Received node scan config {}", config);
         NodeScanRequest scanRequest = null;
         if (!config.is(NodeScanRequest.class)) {
-            throw new IllegalArgumentException("Task config must be a NodeScanRequest, this is wrong type: " + config.getTypeUrl());
+            throw new IllegalArgumentException(
+                    "Task config must be a NodeScanRequest, this is wrong type: " + config.getTypeUrl());
         }
 
         try {
@@ -88,7 +79,8 @@ public class NodeScanner implements Scanner {
             SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
             // Derive configs from request
             Set<SnmpAgentConfig> configs = deriveSnmpConfigs(scanRequest.getSnmpConfigsList(), primaryIpAddress);
-            List<SnmpAgentConfig> snmpAgentConfigs = snmpConfigDiscovery.getDiscoveredConfig(configs.stream().toList());
+            List<SnmpAgentConfig> snmpAgentConfigs =
+                    snmpConfigDiscovery.getDiscoveredConfig(configs.stream().toList());
             if (!snmpAgentConfigs.isEmpty()) {
                 // Get first matching config
                 agentConfig = snmpAgentConfigs.get(0);
@@ -100,8 +92,9 @@ public class NodeScanner implements Scanner {
             List<IpInterfaceResult> ipInterfaceResults = scanIpAddrTable(agentConfig);
             List<SnmpInterfaceResult> snmpInterfaceResults = scanSnmpInterface(agentConfig);
 
-            var ipAddresses = ipInterfaceResults.stream().map(IpInterfaceResult::getIpAddress)
-                .collect(Collectors.toSet());
+            var ipAddresses = ipInterfaceResults.stream()
+                    .map(IpInterfaceResult::getIpAddress)
+                    .collect(Collectors.toSet());
             ipAddresses.add(scanRequest.getPrimaryIp());
             var detectors = scanRequest.getDetectorList();
             List<CompletableFuture<ServiceResult>> futures = new ArrayList<>();
@@ -109,59 +102,64 @@ public class NodeScanner implements Scanner {
             ipAddresses.forEach(ipAddress -> {
                 detectors.forEach(detector -> {
                     try {
-                        var serviceDetectorManager = detectorRegistry.getService(detector.getService().name());
+                        var serviceDetectorManager = detectorRegistry.getService(
+                                detector.getService().name());
                         var serviceDetector = serviceDetectorManager.create();
                         switch (detector.getService()) {
                             case SNMP -> {
                                 SnmpDetectorRequest detectorRequest = SnmpDetectorRequest.newBuilder()
-                                    .setAgentConfig(mapSnmpAgentConfig(finalAgentConfig)).build();
-                                var snmpDetectorFuture =
-                                    serviceDetector.detect(ipAddress, Any.pack(detectorRequest));
+                                        .setAgentConfig(mapSnmpAgentConfig(finalAgentConfig))
+                                        .build();
+                                var snmpDetectorFuture = serviceDetector.detect(ipAddress, Any.pack(detectorRequest));
                                 futures.add(snmpDetectorFuture);
                             }
                             case ICMP -> {
-                                IcmpDetectorRequest icmpDetectorRequest = IcmpDetectorRequest.newBuilder().build();
+                                IcmpDetectorRequest icmpDetectorRequest =
+                                        IcmpDetectorRequest.newBuilder().build();
                                 var icmpDetectorFuture =
-                                    serviceDetector.detect(ipAddress, Any.pack(icmpDetectorRequest));
+                                        serviceDetector.detect(ipAddress, Any.pack(icmpDetectorRequest));
                                 futures.add(icmpDetectorFuture);
                             }
                         }
                     } catch (Exception e) {
                         LOG.error("Exception while detecting service {}", detector.getService());
                         CompletableFuture<ServiceResult> future =
-                            CompletableFuture.completedFuture(
-                                ServiceResult.newBuilder()
-                                    .setService(detector.getService())
-                                    .setIpAddress(ipAddress).setStatus(false)
-                                    .build());
+                                CompletableFuture.completedFuture(ServiceResult.newBuilder()
+                                        .setService(detector.getService())
+                                        .setIpAddress(ipAddress)
+                                        .setStatus(false)
+                                        .build());
                         futures.add(future);
                     }
                 });
             });
-            CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+            CompletableFuture<Void> allFutures =
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
             allFutures.join();
 
-            List<ServiceResult> detectorResponses = futures.stream()
-                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
+            List<ServiceResult> detectorResponses =
+                    futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
 
             return CompletableFuture.completedFuture(ScanResultsResponseImpl.builder()
                     .results(NodeScanResult.newBuilder()
-                        .setNodeId(scanRequest.getNodeId())
-                        .setNodeInfo(nodeInfo)
-                        .addAllIpInterfaces(ipInterfaceResults)
-                        .addAllSnmpInterfaces(snmpInterfaceResults)
-                        .setSnmpConfig(mapSnmpAgentConfig(agentConfig))
-                        .addAllSnmpInterfaces(snmpInterfaceResults)
-                        .addAllDetectorResult(detectorResponses)
-                        .build())
+                            .setNodeId(scanRequest.getNodeId())
+                            .setNodeInfo(nodeInfo)
+                            .addAllIpInterfaces(ipInterfaceResults)
+                            .addAllSnmpInterfaces(snmpInterfaceResults)
+                            .setSnmpConfig(mapSnmpAgentConfig(agentConfig))
+                            .addAllSnmpInterfaces(snmpInterfaceResults)
+                            .addAllDetectorResult(detectorResponses)
+                            .build())
                     .build());
         } catch (Exception e) {
             if (scanRequest != null) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Error while performing node scan for nodeId = {}", scanRequest.getNodeId(), e);
                 } else {
-                    LOG.error("Error while performing node scan for nodeId = {}, message = {}", scanRequest.getNodeId(), e.getMessage());
+                    LOG.error(
+                            "Error while performing node scan for nodeId = {}, message = {}",
+                            scanRequest.getNodeId(),
+                            e.getMessage());
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -172,33 +170,32 @@ public class NodeScanner implements Scanner {
             }
             return CompletableFuture.failedFuture(e);
         }
-
     }
 
     private org.opennms.horizon.snmp.api.SnmpConfiguration mapSnmpAgentConfig(SnmpAgentConfig agentConfig) {
         return org.opennms.horizon.snmp.api.SnmpConfiguration.newBuilder()
-            .setVersion(Version.forNumber(agentConfig.getVersion()))
-            .setAddress(InetAddressUtils.str(agentConfig.getAddress()))
-            .setPort(agentConfig.getPort())
-            .setRetries(agentConfig.getRetries())
-            .setTimeout(agentConfig.getTimeout())
-            .setMaxVarsPerPdu(agentConfig.getMaxVarsPerPdu())
-            .setMaxRepetitions(agentConfig.getMaxRepetitions())
-            .setMaxRequestSize(agentConfig.getMaxRequestSize())
-            .setReadCommunity(agentConfig.getReadCommunity())
-            .setWriteCommunity(agentConfig.getWriteCommunity())
-            // Skip V3 for now
-            .build();
+                .setVersion(Version.forNumber(agentConfig.getVersion()))
+                .setAddress(InetAddressUtils.str(agentConfig.getAddress()))
+                .setPort(agentConfig.getPort())
+                .setRetries(agentConfig.getRetries())
+                .setTimeout(agentConfig.getTimeout())
+                .setMaxVarsPerPdu(agentConfig.getMaxVarsPerPdu())
+                .setMaxRepetitions(agentConfig.getMaxRepetitions())
+                .setMaxRequestSize(agentConfig.getMaxRequestSize())
+                .setReadCommunity(agentConfig.getReadCommunity())
+                .setWriteCommunity(agentConfig.getWriteCommunity())
+                // Skip V3 for now
+                .build();
     }
 
-    Set<SnmpAgentConfig> deriveSnmpConfigs(List<org.opennms.horizon.snmp.api.SnmpConfiguration> configsFromRequest,
-                                           InetAddress primaryIpAddress) {
+    Set<SnmpAgentConfig> deriveSnmpConfigs(
+            List<org.opennms.horizon.snmp.api.SnmpConfiguration> configsFromRequest, InetAddress primaryIpAddress) {
         Set<SnmpAgentConfig> configs = new HashSet<>();
         List<SnmpAgentConfig> configsForReadCommunity = new ArrayList<>();
         configsFromRequest.forEach(snmpConfig -> {
             var readCommunity = snmpConfig.getReadCommunity();
-            if (!Strings.isNullOrEmpty(readCommunity) &&
-                !SnmpConfiguration.DEFAULT_READ_COMMUNITY.equals(readCommunity)) {
+            if (!Strings.isNullOrEmpty(readCommunity)
+                    && !SnmpConfiguration.DEFAULT_READ_COMMUNITY.equals(readCommunity)) {
                 SnmpAgentConfig agentConfig = new SnmpAgentConfig(primaryIpAddress, SnmpConfiguration.DEFAULTS);
                 agentConfig.setReadCommunity(readCommunity);
                 configsForReadCommunity.add(agentConfig);
@@ -247,7 +244,7 @@ public class NodeScanner implements Scanner {
                 row.createInterfaceFromRow().ifPresent(results::add);
             }
         };
-        try(SnmpWalker walker = snmpHelper.createWalker(agentConfig, "snmpInterfaceTable", tracker)) {
+        try (SnmpWalker walker = snmpHelper.createWalker(agentConfig, "snmpInterfaceTable", tracker)) {
             walker.start();
             walker.waitFor();
         }
@@ -262,7 +259,7 @@ public class NodeScanner implements Scanner {
                 row.createInterfaceFromRow().ifPresent(results::add);
             }
         };
-        try(var walker = snmpHelper.createWalker(agentConfig, "ipAddrEntry", tracker)) {
+        try (var walker = snmpHelper.createWalker(agentConfig, "ipAddrEntry", tracker)) {
             walker.start();
             walker.waitFor();
         }
@@ -272,7 +269,7 @@ public class NodeScanner implements Scanner {
                 row.createInterfaceFromRow().ifPresent(results::add);
             }
         };
-        try(var walker = snmpHelper.createWalker(agentConfig, "ipAddressTableEntry", ipAddressTableTracker)) {
+        try (var walker = snmpHelper.createWalker(agentConfig, "ipAddressTableEntry", ipAddressTableTracker)) {
             walker.start();
             walker.waitFor();
         }
@@ -281,7 +278,7 @@ public class NodeScanner implements Scanner {
 
     private NodeInfoResult scanSystem(SnmpAgentConfig agentConfig) throws InterruptedException {
         SystemGroupTracker tracker = new SystemGroupTracker(agentConfig.getAddress());
-        try(var walker = snmpHelper.createWalker(agentConfig, "systemGroup", tracker)) {
+        try (var walker = snmpHelper.createWalker(agentConfig, "systemGroup", tracker)) {
             walker.start();
             walker.waitFor();
         }

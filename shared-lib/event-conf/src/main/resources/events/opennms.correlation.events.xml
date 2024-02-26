@@ -7,6 +7,6 @@
             The service: %service% has been correlated to indicate a flapping state.
         </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%service%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%service%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

@@ -1,44 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.netflow9;
 
 import java.util.Optional;
-
+import org.opennms.horizon.minion.flows.parser.Protocol;
+import org.opennms.horizon.minion.flows.parser.ie.InformationElementDatabase;
+import org.opennms.horizon.minion.flows.parser.ie.Semantics;
 import org.opennms.horizon.minion.flows.parser.ie.values.IPv4AddressValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.IPv6AddressValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.MacAddressValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.OctetArrayValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.StringValue;
 import org.opennms.horizon.minion.flows.parser.ie.values.UnsignedValue;
-import org.opennms.horizon.minion.flows.parser.Protocol;
-import org.opennms.horizon.minion.flows.parser.ie.InformationElementDatabase;
-import org.opennms.horizon.minion.flows.parser.ie.Semantics;
 
 public class InformationElementProvider implements InformationElementDatabase.Provider {
 
@@ -90,10 +82,20 @@ public class InformationElementProvider implements InformationElementDatabase.Pr
         adder.add(Protocol.NETFLOW9, 44, UnsignedValue::parserWith32Bit, "IPV4_SRC_PREFIX", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 45, UnsignedValue::parserWith32Bit, "IPV4_DST_PREFIX", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 46, UnsignedValue::parserWith8Bit, "MPLS_TOP_LABEL_TYPE", Semantics.IDENTIFIER);
-        adder.add(Protocol.NETFLOW9, 47, OctetArrayValue.parserWithLimits(4, 4), "MPLS_TOP_LABEL_IP_ADDR", Semantics.DEFAULT);
+        adder.add(
+                Protocol.NETFLOW9,
+                47,
+                OctetArrayValue.parserWithLimits(4, 4),
+                "MPLS_TOP_LABEL_IP_ADDR",
+                Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 48, UnsignedValue::parserWith32Bit, "FLOW_SAMPLER_ID", Semantics.IDENTIFIER);
         adder.add(Protocol.NETFLOW9, 49, UnsignedValue::parserWith8Bit, "FLOW_SAMPLER_MODE", Semantics.IDENTIFIER);
-        adder.add(Protocol.NETFLOW9, 50, UnsignedValue::parserWith32Bit, "FLOW_SAMPLER_RANDOM_INTERVAL", Semantics.QUANTITY);
+        adder.add(
+                Protocol.NETFLOW9,
+                50,
+                UnsignedValue::parserWith32Bit,
+                "FLOW_SAMPLER_RANDOM_INTERVAL",
+                Semantics.QUANTITY);
         // 51 vendor proprietary
         adder.add(Protocol.NETFLOW9, 52, UnsignedValue::parserWith8Bit, "MIN_TTL", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 53, UnsignedValue::parserWith8Bit, "MAX_TTL", Semantics.DEFAULT);
@@ -146,7 +148,8 @@ public class InformationElementProvider implements InformationElementDatabase.Pr
         adder.add(Protocol.NETFLOW9, 99, UnsignedValue::parserWith32Bit, "replication factor", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 100, OctetArrayValue::parser, "DEPRECATED", Semantics.DEFAULT);
         // 101 ?
-        adder.add(Protocol.NETFLOW9, 102, UnsignedValue::parserWith32Bit, "layer2packetSectionOffset", Semantics.DEFAULT);
+        adder.add(
+                Protocol.NETFLOW9, 102, UnsignedValue::parserWith32Bit, "layer2packetSectionOffset", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 103, UnsignedValue::parserWith32Bit, "layer2packetSectionSize", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 104, OctetArrayValue::parser, "layer2packetSectionData", Semantics.DEFAULT);
         // 105-127 reserved for future use by cisco
@@ -156,7 +159,8 @@ public class InformationElementProvider implements InformationElementDatabase.Pr
         adder.add(Protocol.NETFLOW9, 153, UnsignedValue::parserWith64Bit, "flowEndMilliseconds", Semantics.DEFAULT);
 
         // these IEs also appear in some NF9 implementations, see NMS-14130
-        adder.add(Protocol.NETFLOW9, 252, UnsignedValue::parserWith32Bit, "ingressPhysicalInterface", Semantics.DEFAULT);
+        adder.add(
+                Protocol.NETFLOW9, 252, UnsignedValue::parserWith32Bit, "ingressPhysicalInterface", Semantics.DEFAULT);
         adder.add(Protocol.NETFLOW9, 253, UnsignedValue::parserWith32Bit, "egressPhysicalInterface", Semantics.DEFAULT);
     }
 }

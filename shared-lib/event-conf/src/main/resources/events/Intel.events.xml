@@ -352,7 +352,7 @@
 		&lt;p>Dummy Trap for testing trap received&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -387,7 +387,7 @@
 			remoteHost=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -422,7 +422,7 @@
 			remoteHost=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -457,7 +457,7 @@
 			remoteHost=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -492,7 +492,7 @@
 			eventDesc=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -527,7 +527,7 @@
 			remoteHost=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>

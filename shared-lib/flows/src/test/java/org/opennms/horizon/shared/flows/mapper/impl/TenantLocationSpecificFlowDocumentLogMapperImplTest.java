@@ -1,47 +1,40 @@
-/**
- * This file is part of OpenNMS(R).
- * <p>
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
- * <p>
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
- * <p>
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- * <p>
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- * <p>
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- * http://www.gnu.org/licenses/
- * <p>
- * For more information contact:
- * OpenNMS(R) Licensing <license@opennms.org>
- * http://www.opennms.org/
- * http://www.opennms.com/
- **/
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.flows.mapper.impl;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.FlowDocumentLog;
 import org.opennms.horizon.flows.document.TenantLocationSpecificFlowDocumentLog;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
     private TenantLocationSpecificFlowDocumentLogMapperImpl target;
@@ -56,8 +49,7 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-        FlowDocumentLog testFlowDocumentLog =
-            FlowDocumentLog.newBuilder()
+        FlowDocumentLog testFlowDocumentLog = FlowDocumentLog.newBuilder()
                 .setSystemId("systemId")
                 .addMessage(FlowDocument.newBuilder())
                 .build();
@@ -66,7 +58,7 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
         // Execute
         //
         TenantLocationSpecificFlowDocumentLog mappedResult =
-            target.mapBareToTenanted("x-tenant-id-x", "x-location-x", testFlowDocumentLog);
+                target.mapBareToTenanted("x-tenant-id-x", "x-location-x", testFlowDocumentLog);
 
         //
         // Verify the Results
@@ -86,19 +78,17 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
         // Setup Test Data and Interactions
         //
         TenantLocationSpecificFlowDocumentLog testTenantLocationSpecificFlowDocumentLog =
-            TenantLocationSpecificFlowDocumentLog.newBuilder()
-                .setTenantId("x-tenant-id-x")
-                .setLocationId("x-location-x")
-                .setSystemId("systemId")
-                .addMessage(FlowDocument.newBuilder())
-                .build();
-
+                TenantLocationSpecificFlowDocumentLog.newBuilder()
+                        .setTenantId("x-tenant-id-x")
+                        .setLocationId("x-location-x")
+                        .setSystemId("systemId")
+                        .addMessage(FlowDocument.newBuilder())
+                        .build();
 
         //
         // Execute
         //
-        FlowDocumentLog mappedResult =
-            target.mapTenantedToBare(testTenantLocationSpecificFlowDocumentLog);
+        FlowDocumentLog mappedResult = target.mapTenantedToBare(testTenantLocationSpecificFlowDocumentLog);
 
         //
         // Verify the Results
@@ -116,12 +106,12 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
     @Test
     public void testDefinitionsMatch() {
         verifyAllFieldsExceptTenantIdAndLocationMatch(
-            FlowDocumentLog.getDefaultInstance(), TenantLocationSpecificFlowDocumentLog.getDefaultInstance());
+                FlowDocumentLog.getDefaultInstance(), TenantLocationSpecificFlowDocumentLog.getDefaultInstance());
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     /**
      * Verify all of the fields in the given message have been set to help ensure completeness of the test.
@@ -143,13 +133,14 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
             if (fieldDescriptor.isRepeated()) {
                 if (repeatedMustNotBeEmpty) {
                     assertTrue(
-                        ( message.getRepeatedFieldCount(fieldDescriptor) > 0 ),
-                        "message " + typeDescriptor.getFullName() + " has 0 repeated field values for field " + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")"
-                        );
+                            (message.getRepeatedFieldCount(fieldDescriptor) > 0),
+                            "message " + typeDescriptor.getFullName() + " has 0 repeated field values for field "
+                                    + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")");
                 }
             } else {
                 if (!message.hasField(fieldDescriptor)) {
-                    fail("message " + typeDescriptor.getFullName() + " is missing field " + fieldDescriptor.getName() + " (" + fieldDescriptor.getNumber() + ")");
+                    fail("message " + typeDescriptor.getFullName() + " is missing field " + fieldDescriptor.getName()
+                            + " (" + fieldDescriptor.getNumber() + ")");
                 }
             }
         }
@@ -161,20 +152,21 @@ public class TenantLocationSpecificFlowDocumentLogMapperImplTest {
      * @param messageWithoutTenant
      * @param messageWithTenant
      */
-    private void verifyAllFieldsExceptTenantIdAndLocationMatch(Message messageWithoutTenant, Message messageWithTenant) {
+    private void verifyAllFieldsExceptTenantIdAndLocationMatch(
+            Message messageWithoutTenant, Message messageWithTenant) {
         Descriptors.Descriptor withoutTenantTypeDescriptor = messageWithoutTenant.getDescriptorForType();
         Descriptors.Descriptor withTenantTypeDescriptor = messageWithTenant.getDescriptorForType();
 
-        Set<String> withoutTenantTypeFields =
-            withoutTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
-        Set<String> withTenantTypeFields =
-            withTenantTypeDescriptor.getFields().stream().map(Descriptors.FieldDescriptor::getName).collect(Collectors.toSet());
+        Set<String> withoutTenantTypeFields = withoutTenantTypeDescriptor.getFields().stream()
+                .map(Descriptors.FieldDescriptor::getName)
+                .collect(Collectors.toSet());
+        Set<String> withTenantTypeFields = withTenantTypeDescriptor.getFields().stream()
+                .map(Descriptors.FieldDescriptor::getName)
+                .collect(Collectors.toSet());
 
         withTenantTypeFields.remove("tenant_id");
         withTenantTypeFields.remove("location_id");
 
         assertEquals(withTenantTypeFields, withoutTenantTypeFields);
     }
-
-
 }

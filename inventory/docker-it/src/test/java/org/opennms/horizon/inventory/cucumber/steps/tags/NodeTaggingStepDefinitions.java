@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber.steps.tags;
 
 import static org.junit.Assert.assertEquals;
@@ -33,6 +26,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +41,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
@@ -61,17 +62,6 @@ import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
-
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import io.cucumber.datatable.DataTable;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NodeTaggingStepDefinitions {
@@ -131,45 +121,60 @@ public class NodeTaggingStepDefinitions {
     @Given("A new node")
     public void aNewNode() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocationId(locationId).setManagementIp("127.0.0.1").build());
+        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel("node")
+                .setLocationId(locationId)
+                .setManagementIp("127.0.0.1")
+                .build());
     }
 
     @Given("2 new nodes")
     public void twoNewNodes() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node1")
-            .setLocationId(locationId).setManagementIp("127.0.0.1").build());
-        node2 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node2")
-            .setLocationId(locationId).setManagementIp("127.0.0.2").build());
+        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel("node1")
+                .setLocationId(locationId)
+                .setManagementIp("127.0.0.1")
+                .build());
+        node2 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel("node2")
+                .setLocationId(locationId)
+                .setManagementIp("127.0.0.2")
+                .build());
     }
 
     @Given("A new node with tags {string}")
     public void aNewNodeWithTags(String tags) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("node")
-            .setLocationId(locationId).setManagementIp("127.0.0.1").build());
+        node1 = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel("node")
+                .setLocationId(locationId)
+                .setManagementIp("127.0.0.1")
+                .build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         addedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId())).build());
+                .addAllTags(tagCreateList)
+                .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                .build());
     }
 
     @Given("Another node with tags {string}")
     public void anotherNodeWithTags(String tags) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        NodeDTO node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel("Another Node")
-            .setLocationId(locationId).setManagementIp("127.0.0.2").build());
+        NodeDTO node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel("Another Node")
+                .setLocationId(locationId)
+                .setManagementIp("127.0.0.2")
+                .build());
         String[] tagArray = tags.split(",");
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node.getId())).build());
+                .addAllTags(tagCreateList)
+                .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(node.getId()))
+                .build());
     }
 
     /*
@@ -183,9 +188,9 @@ public class NodeTaggingStepDefinitions {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         List<TagCreateDTO> tagCreateList = getTagCreateList(tagArray);
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId())).build());
+                .addAllTags(tagCreateList)
+                .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                .build());
     }
 
     @When("A GRPC request to create tags {string} for both nodes")
@@ -200,17 +205,18 @@ public class NodeTaggingStepDefinitions {
         tagEntityList.add(TagEntityIdDTO.newBuilder().setNodeId(node2.getId()).build());
 
         fetchedTagList = tagServiceBlockingStub.addTags(TagCreateListDTO.newBuilder()
-            .addAllTags(tagCreateList)
-            .addAllEntityIds(tagEntityList).build());
+                .addAllTags(tagCreateList)
+                .addAllEntityIds(tagEntityList)
+                .build());
     }
 
     @When("A GRPC request to fetch tags for node")
     public void aGrpcRequestToFetchTagsForNode() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId()))
-            .setParams(TagListParamsDTO.newBuilder().build()).build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                .setParams(TagListParamsDTO.newBuilder().build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -221,17 +227,17 @@ public class NodeTaggingStepDefinitions {
         for (TagDTO tagDTO : addedTagList.getTagsList()) {
             if (tagDTO.getName().equals(tag)) {
                 tagServiceBlockingStub.removeTags(TagRemoveListDTO.newBuilder()
-                    .addAllTagIds(Collections.singletonList(Int64Value.newBuilder()
-                        .setValue(tagDTO.getId()).build()))
-                    .addEntityIds(TagEntityIdDTO.newBuilder()
-                        .setNodeId(node1.getId())).build());
+                        .addAllTagIds(Collections.singletonList(
+                                Int64Value.newBuilder().setValue(tagDTO.getId()).build()))
+                        .addEntityIds(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                        .build());
                 break;
             }
         }
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId()))
-            .setParams(TagListParamsDTO.newBuilder().build()).build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                .setParams(TagListParamsDTO.newBuilder().build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -239,7 +245,8 @@ public class NodeTaggingStepDefinitions {
     public void aGRPCRequestToFetchAllTags() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
-            .setParams(TagListParamsDTO.newBuilder().build()).build();
+                .setParams(TagListParamsDTO.newBuilder().build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTags(params);
     }
 
@@ -247,9 +254,10 @@ public class NodeTaggingStepDefinitions {
     public void aGRPCRequestToFetchAllTagsForNodeWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListTagsByEntityIdParamsDTO params = ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder()
-                .setNodeId(node1.getId()))
-            .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                .setParams(
+                        TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTagsByEntityId(params);
     }
 
@@ -257,7 +265,9 @@ public class NodeTaggingStepDefinitions {
     public void aGRPCRequestToFetchAllTagsWithNameLike(String searchTerm) {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         ListAllTagsParamsDTO params = ListAllTagsParamsDTO.newBuilder()
-            .setParams(TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build()).build();
+                .setParams(
+                        TagListParamsDTO.newBuilder().setSearchTerm(searchTerm).build())
+                .build();
         fetchedTagList = tagServiceBlockingStub.getTags(params);
     }
 
@@ -274,10 +284,12 @@ public class NodeTaggingStepDefinitions {
 
         List<String> tagArraySorted = Arrays.stream(tagArray).sorted().toList();
         List<TagDTO> fetchedTagListSorted = fetchedTagList.getTagsList().stream()
-            .sorted(Comparator.comparing(TagDTO::getName)).toList();
+                .sorted(Comparator.comparing(TagDTO::getName))
+                .toList();
 
         for (int index = 0; index < tagArraySorted.size(); index++) {
-            assertEquals(tagArraySorted.get(index), fetchedTagListSorted.get(index).getName());
+            assertEquals(
+                    tagArraySorted.get(index), fetchedTagListSorted.get(index).getName());
         }
     }
 
@@ -293,9 +305,11 @@ public class NodeTaggingStepDefinitions {
 
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
         TagListDTO node1TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId())).build());
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node1.getId()))
+                .build());
         TagListDTO node2TagList = tagServiceBlockingStub.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-            .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node2.getId())).build());
+                .setEntityId(TagEntityIdDTO.newBuilder().setNodeId(node2.getId()))
+                .build());
 
         assertEquals(tagArray.length, node1TagList.getTagsCount());
         assertEquals(tagArray.length, node1TagList.getTagsCount());
@@ -303,14 +317,17 @@ public class NodeTaggingStepDefinitions {
 
         List<String> tagArraySorted = Arrays.stream(tagArray).sorted().toList();
         List<TagDTO> node1TagListSorted = node1TagList.getTagsList().stream()
-            .sorted(Comparator.comparing(TagDTO::getName)).toList();
+                .sorted(Comparator.comparing(TagDTO::getName))
+                .toList();
         List<TagDTO> node2TagListSorted = node2TagList.getTagsList().stream()
-            .sorted(Comparator.comparing(TagDTO::getName)).toList();
+                .sorted(Comparator.comparing(TagDTO::getName))
+                .toList();
 
         assertEquals(node1TagListSorted, node2TagListSorted);
 
         for (int index = 0; index < tagArraySorted.size(); index++) {
-            assertEquals(tagArraySorted.get(index), node1TagListSorted.get(index).getName());
+            assertEquals(
+                    tagArraySorted.get(index), node1TagListSorted.get(index).getName());
         }
     }
 
@@ -320,7 +337,8 @@ public class NodeTaggingStepDefinitions {
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         fetchedNodeList = nodeServiceBlockingStub.listNodesByTags(TagNameQuery.newBuilder()
-            .addAllTags(Arrays.stream(tagArray).toList()).build());
+                .addAllTags(Arrays.stream(tagArray).toList())
+                .build());
     }
 
     @Then("Both nodes should be fetched for")
@@ -351,15 +369,20 @@ public class NodeTaggingStepDefinitions {
      */
     private void deleteAllTags() {
         var tagServiceBlockingStub = backgroundHelper.getTagServiceBlockingStub();
-        List<Int64Value> tagIds = tagServiceBlockingStub.getTags(ListAllTagsParamsDTO.newBuilder().build())
-            .getTagsList().stream().map(tagDTO -> Int64Value.of(tagDTO.getId())).toList();
-        tagServiceBlockingStub.deleteTags(DeleteTagsDTO.newBuilder().addAllTagIds(tagIds).build());
+        List<Int64Value> tagIds =
+                tagServiceBlockingStub.getTags(ListAllTagsParamsDTO.newBuilder().build()).getTagsList().stream()
+                        .map(tagDTO -> Int64Value.of(tagDTO.getId()))
+                        .toList();
+        tagServiceBlockingStub.deleteTags(
+                DeleteTagsDTO.newBuilder().addAllTagIds(tagIds).build());
     }
 
     private void deleteAllNodes() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        for (NodeDTO nodeDTO : nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
-            nodeServiceBlockingStub.deleteNode(Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
+        for (NodeDTO nodeDTO :
+                nodeServiceBlockingStub.listNodes(Empty.newBuilder().build()).getNodesList()) {
+            nodeServiceBlockingStub.deleteNode(
+                    Int64Value.newBuilder().setValue(nodeDTO.getId()).build());
         }
     }
 
@@ -372,25 +395,30 @@ public class NodeTaggingStepDefinitions {
     }
 
     @Then("Verify Kafka message with {int} node(s)")
-    public void verifyKafkaMessageWithData(int nodeCount, DataTable table) throws InvalidProtocolBufferException, InterruptedException {
+    public void verifyKafkaMessageWithData(int nodeCount, DataTable table)
+            throws InvalidProtocolBufferException, InterruptedException {
         List<Map<String, String>> dataList = table.asMaps();
-        long endTime = System.currentTimeMillis() + 60000; //1 minute
-        List<Long> nodeIdList = switch (nodeCount) {
-            case 1 -> List.of(node1.getId());
-            case 2 -> List.of(node1.getId(), node2.getId());
-            default -> new ArrayList<>();
-        };
+        long endTime = System.currentTimeMillis() + 60000; // 1 minute
+        List<Long> nodeIdList =
+                switch (nodeCount) {
+                    case 1 -> List.of(node1.getId());
+                    case 2 -> List.of(node1.getId(), node2.getId());
+                    default -> new ArrayList<>();
+                };
         while (System.currentTimeMillis() < endTime) {
-            ConsumerRecords<String, byte[]> records = InventoryBackgroundHelper.getKafkaConsumer().poll(Duration.ofMillis(300));
-            if(!records.isEmpty()) {
+            ConsumerRecords<String, byte[]> records =
+                    InventoryBackgroundHelper.getKafkaConsumer().poll(Duration.ofMillis(300));
+            if (!records.isEmpty()) {
                 List<TagOperationList> tagOpList = new ArrayList<>();
-                for(ConsumerRecord<String, byte[]> r : records) {
+                for (ConsumerRecord<String, byte[]> r : records) {
                     if (r.timestamp() > tagMessageFilterTime) {
                         tagOpList.add(TagOperationList.parseFrom(r.value()));
                     }
                 }
 
-                List<TagOperationList> list = tagOpList.stream().filter(t -> t.getTagsList().size() == dataList.size()).toList();
+                List<TagOperationList> list = tagOpList.stream()
+                        .filter(t -> t.getTagsList().size() == dataList.size())
+                        .toList();
                 list.forEach(l -> {
                     List<TagOperationProto> opList = l.getTagsList();
                     assertEquals(dataList.size(), opList.size());
@@ -415,11 +443,14 @@ public class NodeTaggingStepDefinitions {
         backgroundHelper.getNodeServiceBlockingStub().deleteNode(Int64Value.of(node1.getId()));
     }
 
-    private void verifyKafkaMessage(List<Map<String, String>> data, List<TagOperationProto> result, List<Long> nodeIds) {
+    private void verifyKafkaMessage(
+            List<Map<String, String>> data, List<TagOperationProto> result, List<Long> nodeIds) {
         data.forEach(map -> {
-            List<TagOperationProto> topPlist = result.stream().filter(r -> r.getTenantId().equals(map.get("tenant_id"))
-                && r.getTagName().equals(map.get("tag_name"))).toList();
-            if(topPlist.isEmpty()) {
+            List<TagOperationProto> topPlist = result.stream()
+                    .filter(r -> r.getTenantId().equals(map.get("tenant_id"))
+                            && r.getTagName().equals(map.get("tag_name")))
+                    .toList();
+            if (topPlist.isEmpty()) {
                 fail("Failed receiving TagOperation massages");
             }
             topPlist.forEach(top -> {

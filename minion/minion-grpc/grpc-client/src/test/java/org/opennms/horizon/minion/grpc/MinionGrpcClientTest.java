@@ -1,33 +1,28 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.minion.grpc;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import com.codahale.metrics.MetricRegistry;
 import io.grpc.ManagedChannel;
@@ -40,6 +35,9 @@ import java.io.IOException;
 import java.security.cert.CertificateExpiredException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,17 +50,10 @@ import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.cloud.grpc.minion.RpcRequestProto;
 import org.opennms.cloud.grpc.minion.RpcResponseProto;
-import org.opennms.horizon.minion.grpc.rpc.RpcRequestHandler;
 import org.opennms.horizon.minion.grpc.channel.ManagedChannelFactory;
+import org.opennms.horizon.minion.grpc.rpc.RpcRequestHandler;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * WARNING: this test does not provide complete coverage of the MinionGrpcClient.
@@ -78,29 +69,40 @@ public class MinionGrpcClientTest {
 
     @Mock
     private MetricRegistry mockMetricRegistry;
+
     @Mock
     private Tracer mockTracer;
 
     @Mock
     private SendQueueFactory mockSendQueueFactory;
+
     @Mock
     private ManagedChannel mockManagedChannel;
+
     @Mock
     private ManagedChannelFactory managedChannelFactory;
+
     @Mock
     private MinionGrpcClient.SimpleReconnectStrategyFactory mockSimpleReconnectStrategyFactory;
+
     @Mock
     private SimpleReconnectStrategy mockSimpleReconnectStrategy;
+
     @Mock
     private Function<ManagedChannel, CloudServiceGrpc.CloudServiceStub> mockNewStubOperation;
+
     @Mock
     private CloudServiceGrpc.CloudServiceStub mockAsyncStub;
+
     @Mock
     private CloudMessageHandler mockCloudMessageHandler;
+
     @Mock
     private RpcRequestHandler mockRpcRequestHandler;
+
     @Mock
     private StreamObserver mockRpcStream;
+
     @Mock
     private StreamObserver mockSinkStream;
 
@@ -128,7 +130,13 @@ public class MinionGrpcClientTest {
 
         mockGrpcShutdownHandler = Mockito.mock(GrpcShutdownHandler.class);
 
-        target = new MinionGrpcClient(testIpcIdentity, mockMetricRegistry, mockTracer, mockSendQueueFactory, managedChannelFactory, mockGrpcShutdownHandler);
+        target = new MinionGrpcClient(
+                testIpcIdentity,
+                mockMetricRegistry,
+                mockTracer,
+                mockSendQueueFactory,
+                managedChannelFactory,
+                mockGrpcShutdownHandler);
         target.setSimpleReconnectStrategyFactory(mockSimpleReconnectStrategyFactory);
     }
 
@@ -137,8 +145,7 @@ public class MinionGrpcClientTest {
         //
         // Setup Test Data and Interactions
         //
-        try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null))
-            .with(reconnectStrategyFactoryCall())) {
+        try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null)).with(reconnectStrategyFactoryCall())) {
             //
             // Execute
             //
@@ -155,7 +162,7 @@ public class MinionGrpcClientTest {
     @Test
     void testStartTlsWithOverrideAuthority() throws Exception {
         try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, "x-override-authority-x"))
-            .with(reconnectStrategyFactoryCall())) {
+                .with(reconnectStrategyFactoryCall())) {
             target.setOverrideAuthority("x-override-authority-x");
             target.setGrpcHost("x-grpc-host-x");
             target.setGrpcPort(1313);
@@ -186,8 +193,8 @@ public class MinionGrpcClientTest {
         // Setup Test Data and Interactions
         //
         try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null))
-            .with(reconnectStrategyFactoryCall())
-            .with(stubFactoryCall())) {
+                .with(reconnectStrategyFactoryCall())
+                .with(stubFactoryCall())) {
             //
             // Execute
             //
@@ -214,8 +221,7 @@ public class MinionGrpcClientTest {
         //
         // Setup Test Data and Interactions
         //
-        try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null))
-            .with(reconnectStrategyFactoryCall())) {
+        try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null)).with(reconnectStrategyFactoryCall())) {
             //
             // Execute
             //
@@ -237,8 +243,8 @@ public class MinionGrpcClientTest {
         // Setup Test Data and Interactions
         //
         try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, null))
-            .with(reconnectStrategyFactoryCall())
-            .with(stubFactoryCall())) {
+                .with(reconnectStrategyFactoryCall())
+                .with(stubFactoryCall())) {
             //
             // Execute
             //
@@ -253,7 +259,8 @@ public class MinionGrpcClientTest {
         //
         var onConnectHandler = ArgumentCaptor.forClass(Runnable.class);
         var onDisconnectHandler = ArgumentCaptor.forClass(Runnable.class);
-        verify(mockSimpleReconnectStrategyFactory).create(eq(mockManagedChannel), onConnectHandler.capture(), onDisconnectHandler.capture());
+        verify(mockSimpleReconnectStrategyFactory)
+                .create(eq(mockManagedChannel), onConnectHandler.capture(), onDisconnectHandler.capture());
         verify(mockSimpleReconnectStrategy).activate();
 
         verifyOnConnectHandler(onConnectHandler.getValue());
@@ -268,8 +275,8 @@ public class MinionGrpcClientTest {
         when(mockAsyncStub.cloudToMinionRPC(any(StreamObserver.class))).thenReturn(mockRpcStream);
 
         try (var ignored = expect(connectionCall("x-grpc-host-x", 1313, "abc"))
-            .with(reconnectStrategyFactoryCall())
-            .with(stubFactoryCall())) {
+                .with(reconnectStrategyFactoryCall())
+                .with(stubFactoryCall())) {
             //
             // Execute
             //
@@ -284,7 +291,8 @@ public class MinionGrpcClientTest {
         //
         var onConnectHandler = ArgumentCaptor.forClass(Runnable.class);
         var onDisconnectHandler = ArgumentCaptor.forClass(Runnable.class);
-        verify(mockSimpleReconnectStrategyFactory).create(eq(mockManagedChannel), onConnectHandler.capture(), onDisconnectHandler.capture());
+        verify(mockSimpleReconnectStrategyFactory)
+                .create(eq(mockManagedChannel), onConnectHandler.capture(), onDisconnectHandler.capture());
         verify(mockSimpleReconnectStrategy).activate();
 
         //
@@ -320,7 +328,8 @@ public class MinionGrpcClientTest {
         //
         var onConnectHandler = ArgumentCaptor.forClass(Runnable.class);
         var onDisconnectHandler = ArgumentCaptor.forClass(Runnable.class);
-        verify(mockSimpleReconnectStrategyFactory).create(any(ManagedChannel.class), onConnectHandler.capture(), onDisconnectHandler.capture());
+        verify(mockSimpleReconnectStrategyFactory)
+                .create(any(ManagedChannel.class), onConnectHandler.capture(), onDisconnectHandler.capture());
         verify(mockSimpleReconnectStrategy).activate();
 
         //
@@ -334,9 +343,9 @@ public class MinionGrpcClientTest {
         verifyCloudMessageObserver(cloudMessageObserverCaptor.getValue());
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void verifyOnConnectHandler(Runnable onConnectHandler) {
         //
@@ -367,8 +376,7 @@ public class MinionGrpcClientTest {
 
     private void verifyCloudMessageObserver(StreamObserver streamObserver) {
         CloudToMinionMessage cloudToMinionMessage =
-            CloudToMinionMessage.newBuilder()
-                .build();
+                CloudToMinionMessage.newBuilder().build();
 
         streamObserver.onNext(cloudToMinionMessage);
         verify(mockCloudMessageHandler).handle(cloudToMinionMessage);
@@ -384,9 +392,7 @@ public class MinionGrpcClientTest {
     }
 
     private void verifyRpcMessageHandler(StreamObserver streamObserver) {
-        RpcRequestProto rpcRequest =
-            RpcRequestProto.newBuilder()
-                .build();
+        RpcRequestProto rpcRequest = RpcRequestProto.newBuilder().build();
 
         CompletableFuture mockCompletableFuture = Mockito.mock(CompletableFuture.class);
 
@@ -407,15 +413,14 @@ public class MinionGrpcClientTest {
         streamObserver.onError(testException);
         verify(mockSimpleReconnectStrategy).activate();
 
-        StatusRuntimeException statusRuntimeException = new StatusRuntimeException(Status.fromCode(Status.Code.UNAUTHENTICATED));
+        StatusRuntimeException statusRuntimeException =
+                new StatusRuntimeException(Status.fromCode(Status.Code.UNAUTHENTICATED));
         streamObserver.onError(statusRuntimeException);
         verify(mockGrpcShutdownHandler).shutdown(GrpcErrorMessages.UNAUTHENTICATED);
     }
 
     private void verifyRpcRequestCompletion(BiConsumer<RpcResponseProto, Throwable> completionOp) {
-        RpcResponseProto rpcResponse =
-            RpcResponseProto.newBuilder()
-                .build();
+        RpcResponseProto rpcResponse = RpcResponseProto.newBuilder().build();
 
         completionOp.accept(rpcResponse, null);
         verify(mockRpcStream).onNext(rpcResponse);
@@ -439,10 +444,13 @@ public class MinionGrpcClientTest {
     }
 
     private Runnable reconnectStrategyFactoryCall() {
-        when(mockSimpleReconnectStrategyFactory.create(eq(mockManagedChannel), any(Runnable.class), any(Runnable.class))).thenReturn(mockSimpleReconnectStrategy);
+        when(mockSimpleReconnectStrategyFactory.create(
+                        eq(mockManagedChannel), any(Runnable.class), any(Runnable.class)))
+                .thenReturn(mockSimpleReconnectStrategy);
 
         target.setSimpleReconnectStrategyFactory(mockSimpleReconnectStrategyFactory);
-        return () -> verify(mockSimpleReconnectStrategyFactory).create(eq(mockManagedChannel), any(Runnable.class), any(Runnable.class));
+        return () -> verify(mockSimpleReconnectStrategyFactory)
+                .create(eq(mockManagedChannel), any(Runnable.class), any(Runnable.class));
     }
 
     private Runnable reconnection() {
@@ -474,6 +482,5 @@ public class MinionGrpcClientTest {
                 closure.run();
             }
         }
-
     }
 }

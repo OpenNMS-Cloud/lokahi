@@ -1,35 +1,32 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minioncertmanager.certificate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.rocksdb.CompressionType;
@@ -41,11 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Objects;
-
 /**
  * DB structure is key (serial number) value (metadata)
  */
@@ -55,20 +47,21 @@ public class SerialNumberRepository {
     private static final Logger LOG = LoggerFactory.getLogger(SerialNumberRepository.class);
 
     private final RocksDB db;
-    public SerialNumberRepository(@Value("${grpc.server.db.url:/app/rocks-db}") String rootDir) throws RocksDBException{
+
+    public SerialNumberRepository(@Value("${grpc.server.db.url:/app/rocks-db}") String rootDir)
+            throws RocksDBException {
         Objects.requireNonNull(rootDir);
         LOG.info("Beginning init of rocksDB: db-path={}", rootDir);
         try (Options dbOptions = new Options()) {
-            dbOptions.setCreateMissingColumnFamilies(true)
-                .setCreateIfMissing(true)
-                .setCompressionType(CompressionType.SNAPPY_COMPRESSION)
-            ;
+            dbOptions
+                    .setCreateMissingColumnFamilies(true)
+                    .setCreateIfMissing(true)
+                    .setCompressionType(CompressionType.SNAPPY_COMPRESSION);
             this.db = RocksDB.open(dbOptions, rootDir);
 
             LOG.info("Successfully init rocksDB of {}", rootDir);
         }
     }
-
 
     public void close() {
         LOG.info("Begin to close rocketDb");
@@ -78,7 +71,8 @@ public class SerialNumberRepository {
         LOG.info("Successfully closed rocketDb");
     }
 
-    public void addCertificate(String tenantId, String locationId, X509Certificate certificate) throws RocksDBException, IOException {
+    public void addCertificate(String tenantId, String locationId, X509Certificate certificate)
+            throws RocksDBException, IOException {
         var meta = new CertificateMeta(tenantId, locationId, certificate);
         db.put(meta.getSerial().getBytes(), mapper.writeValueAsBytes(meta));
     }
@@ -90,8 +84,7 @@ public class SerialNumberRepository {
         try (var ite = db.newIterator()) {
             ite.seekToFirst();
             while (ite.isValid()) {
-                var meta = mapper.readValue(ite.value(), new TypeReference<CertificateMeta>() {
-                });
+                var meta = mapper.readValue(ite.value(), new TypeReference<CertificateMeta>() {});
                 if (locationId.equals(meta.getLocationId()) && tenantId.equals(meta.getTenantId())) {
                     db.delete(ite.key());
                 }
@@ -102,8 +95,7 @@ public class SerialNumberRepository {
 
     public CertificateMeta getBySerial(String serial) throws IOException, RocksDBException {
         byte[] data = db.get(serial.getBytes());
-        return (data == null) ? null : mapper.readValue(data, new TypeReference<>() {
-        });
+        return (data == null) ? null : mapper.readValue(data, new TypeReference<>() {});
     }
 
     public CertificateMeta getByLocationId(String tenantId, String locationId) throws IOException {
@@ -112,8 +104,7 @@ public class SerialNumberRepository {
         try (var ite = db.newIterator()) {
             ite.seekToFirst();
             while (ite.isValid()) {
-                var meta = mapper.readValue(ite.value(), new TypeReference<CertificateMeta>() {
-                });
+                var meta = mapper.readValue(ite.value(), new TypeReference<CertificateMeta>() {});
                 if (locationId.equals(meta.getLocationId()) && tenantId.equals(meta.getTenantId())) {
                     return meta;
                 }
@@ -127,12 +118,16 @@ public class SerialNumberRepository {
     public static class CertificateMeta {
         @Getter
         private String serial;
+
         @Getter
         private String locationId;
+
         @Getter
         private String tenantId;
+
         @Getter
         private Date notBefore;
+
         @Getter
         private Date notAfter;
 

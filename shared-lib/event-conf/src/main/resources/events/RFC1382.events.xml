@@ -32,7 +32,7 @@ trap.&lt;/p>&lt;table>
 			x25OperIndex=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -67,6 +67,6 @@ agent should send an x25Reset trap.&lt;/p>&lt;table>
 			x25CircuitChannel=%parm[#2]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
 </events>

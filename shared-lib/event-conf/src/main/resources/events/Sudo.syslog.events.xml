@@ -18,7 +18,7 @@
             &lt;p>User %parm[user]% not authorized on host %nodelabel% to sudo command %parm[command]% &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/toddcmiller/syslog/sudo/commandNotAllowed</uei>
@@ -39,7 +39,7 @@
             &lt;p>User %parm[user]% not allowed to sudo command %parm[command]% &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/toddcmiller/syslog/sudo/userNotInSudoers</uei>
@@ -60,7 +60,7 @@
             &lt;p>User %parm[user]% not in sudoers but tried to use sudo &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/toddcmiller/syslog/sudo/incorrectPassword</uei>
@@ -82,7 +82,7 @@
             &lt;p>User %parm[user]% failed %parm[attempts]% times to sudo %parm[command]% as user %[targetUser]% &lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/vendor/toddcmiller/syslog/sudo/unknownMessage</uei>
@@ -100,6 +100,6 @@
             Message: %parm[syslogmessage]% &lt;br>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[user]%:%parm[targetUser]%:%parm[command]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

@@ -1,5 +1,28 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.ignite;
 
+import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.ignite.Ignite;
@@ -19,9 +42,6 @@ import org.apache.ignite.spi.metric.MetricExporterSpi;
 import org.opennms.horizon.minion.taskset.worker.ignite.classloader.CompoundClassLoader;
 import org.opennms.horizon.minion.taskset.worker.impl.TaskSetLifecycleManagerImpl;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 @Data
 @AllArgsConstructor
 public class WorkerIgniteConfiguration {
@@ -35,11 +55,11 @@ public class WorkerIgniteConfiguration {
         IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
 
         igniteConfiguration.setClientMode(false);
-        igniteConfiguration.setMetricsLogFrequency(0);  // DISABLE IGNITE METRICS
+        igniteConfiguration.setMetricsLogFrequency(0); // DISABLE IGNITE METRICS
 
         Optional.ofNullable(System.getenv("MINION_ID"))
-            .or(() -> Optional.ofNullable(System.getenv("HOSTNAME")))
-            .ifPresent(igniteConfiguration::setConsistentId);
+                .or(() -> Optional.ofNullable(System.getenv("HOSTNAME")))
+                .ifPresent(igniteConfiguration::setConsistentId);
 
         if (useKubernetes) {
             configureClusterNodeDiscoveryKubernetes(igniteConfiguration);
@@ -57,17 +77,20 @@ public class WorkerIgniteConfiguration {
         return igniteConfiguration;
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void configureClassLoader(IgniteConfiguration igniteConfiguration) {
         // Required for OSGI, otherwise ignite has trouble finding our application classes for (un)marshalling.  Need
         //  a composite class loader to make sure ignite can still find its own internals as well.
 
-        CompoundClassLoader compoundClassLoader =
-                new CompoundClassLoader(this,
-                        Arrays.asList(this.getClass().getClassLoader(), Ignite.class.getClassLoader(), GridResourceProcessor.class.getClassLoader()));
+        CompoundClassLoader compoundClassLoader = new CompoundClassLoader(
+                this,
+                Arrays.asList(
+                        this.getClass().getClassLoader(),
+                        Ignite.class.getClassLoader(),
+                        GridResourceProcessor.class.getClassLoader()));
 
         igniteConfiguration.setClassLoader(compoundClassLoader);
     }
@@ -88,7 +111,7 @@ public class WorkerIgniteConfiguration {
         KubernetesConnectionConfiguration connectionConfiguration = new KubernetesConnectionConfiguration();
         connectionConfiguration.setServiceName(kubernetesServiceName);
 
-        if ((kubernetesNamespace != null) && (! kubernetesNamespace.isEmpty())) {
+        if ((kubernetesNamespace != null) && (!kubernetesNamespace.isEmpty())) {
             connectionConfiguration.setNamespace(kubernetesNamespace);
         }
 
@@ -106,7 +129,7 @@ public class WorkerIgniteConfiguration {
     }
 
     private void configureCache(IgniteConfiguration igniteConfiguration, String cacheName) {
-        CacheConfiguration<?,?> cacheConfiguration = new CacheConfiguration<>(cacheName);
+        CacheConfiguration<?, ?> cacheConfiguration = new CacheConfiguration<>(cacheName);
 
         cacheConfiguration.setCacheMode(CacheMode.PARTITIONED);
         cacheConfiguration.setBackups(2);

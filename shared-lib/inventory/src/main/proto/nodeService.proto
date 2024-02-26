@@ -34,7 +34,6 @@ import "snmpInterface.proto";
 import "azureInterface.proto";
 import "tag.proto";
 
-
 package opennms.inventory;
 option java_multiple_files = true;
 option java_package = "org.opennms.horizon.inventory.dto";
@@ -124,6 +123,7 @@ service NodeService {
   rpc startNodeScanByIds(NodeIdList) returns(google.protobuf.BoolValue) {};
   rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
+  rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
   rpc listSearchIpInterfaceByQuery(SearchIpInterfaceQuery) returns (IpInterfaceList) {};
 
 

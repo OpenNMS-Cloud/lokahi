@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.minion.icmp.jni;
 
 import java.io.IOException;
@@ -36,7 +29,6 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opennms.horizon.shared.icmp.EchoPacket;
 import org.opennms.horizon.shared.icmp.HostIsDownException;
 import org.opennms.horizon.shared.icmp.PingResponseCallback;
@@ -55,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest, JniPingResponse>, EchoPacket {
 
-	private static final Logger LOG = LoggerFactory.getLogger(JniPingRequest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JniPingRequest.class);
 
     private static final AtomicLong s_nextTid = new AtomicLong(1);
 
@@ -77,53 +69,63 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
      * The callback to use when this object is ready to do something
      */
     private final PingResponseCallback m_callback;
-    
+
     /**
      * How many retries
      */
     private final int m_retries;
-    
+
     /**
      * The ICMP packet size
      */
     private final int m_packetsize;
-    
 
     /**
      * how long to wait for a response
      */
     private final long m_timeout;
-    
+
     /**
      * The expiration time of this request
      */
     private long m_expiration = -1L;
-    
+
     /**
      * The thread logger associated with this request.
      */
-    
-    
     private final AtomicBoolean m_processed = new AtomicBoolean(false);
-    
 
-    public JniPingRequest(JniPingRequestId id, long timeout, int retries, int packetsize, PingResponseCallback callback) {
+    public JniPingRequest(
+            JniPingRequestId id, long timeout, int retries, int packetsize, PingResponseCallback callback) {
         m_id = id;
         m_timeout = timeout;
         m_retries = retries;
         m_packetsize = packetsize;
         m_callback = callback;
     }
-    
-    public JniPingRequest(InetAddress addr, int identifier, int sequenceNumber, long threadId, long timeout, int retries, int packetsize, PingResponseCallback cb) {
+
+    public JniPingRequest(
+            InetAddress addr,
+            int identifier,
+            int sequenceNumber,
+            long threadId,
+            long timeout,
+            int retries,
+            int packetsize,
+            PingResponseCallback cb) {
         this(new JniPingRequestId(addr, identifier, sequenceNumber, threadId), timeout, retries, packetsize, cb);
     }
-    
 
-    public JniPingRequest(InetAddress addr, int identifier, int sequenceNumber, long timeout, int retries, int packetsize, PingResponseCallback cb) {
+    public JniPingRequest(
+            InetAddress addr,
+            int identifier,
+            int sequenceNumber,
+            long timeout,
+            int retries,
+            int packetsize,
+            PingResponseCallback cb) {
         this(addr, identifier, sequenceNumber, getNextTID(), timeout, retries, packetsize, cb);
     }
-
 
     /**
      * <p>processResponse</p>
@@ -164,7 +166,7 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
             setProcessed(true);
         }
     }
-    
+
     /**
      * <p>isExpired</p>
      *
@@ -232,7 +234,7 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
             setProcessed(true);
         }
     }
-    
+
     private void setProcessed(boolean processed) {
         m_processed.set(processed);
     }
@@ -255,7 +257,7 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
     public void send(IcmpSocket icmpSocket) {
         try {
             m_requestPacket = createRequestPacket();
-    
+
             LOG.debug("{}: Sending Ping Request: {}", System.currentTimeMillis(), this);
             byte[] data = m_requestPacket.toBytes();
             m_expiration = System.currentTimeMillis() + m_timeout;
@@ -269,7 +271,7 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
     private void send(IcmpSocket icmpSocket, DatagramPacket packet) throws IOException {
         try {
             icmpSocket.send(packet);
-        } catch(IOException e) {
+        } catch (IOException e) {
             if (e.getMessage().matches("sendto error \\(65, .*\\)")) {
                 throw new NoRouteToHostException("No Route to Host " + m_id.getAddress() + ": " + e.getMessage());
             } else if (e.getMessage().matches("sendto error \\(64, .*\\)")) {
@@ -286,7 +288,7 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
 
     private ICMPEchoPacket createRequestPacket() {
         ICMPEchoPacket iPkt = new ICMPEchoPacket(m_id.getThreadId(), m_packetsize);
-        iPkt.setIdentity((short)m_id.getIdentifier());
+        iPkt.setIdentity((short) m_id.getIdentifier());
         iPkt.setSequenceId((short) m_id.getSequenceNumber());
         iPkt.computeChecksum();
         return iPkt;
@@ -311,6 +313,7 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
     public long getThreadId() {
         return getRequestPacket().getTID();
     }
+
     @Override
     public long getReceivedTimeNanos() {
         return getRequestPacket().getReceivedTime();
@@ -327,5 +330,4 @@ public class JniPingRequest implements Request<JniPingRequestId, JniPingRequest,
         double nanosPerUnit = TimeUnit.NANOSECONDS.convert(1, timeUnit);
         return (getRequestPacket().getPingRTT() * 1000) / nanosPerUnit;
     }
-
 }

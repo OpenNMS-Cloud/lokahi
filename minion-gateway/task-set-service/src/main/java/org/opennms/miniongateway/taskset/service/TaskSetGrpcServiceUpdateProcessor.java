@@ -1,11 +1,30 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.taskset.service;
-
-import lombok.Getter;
-import org.opennms.taskset.contract.TaskSet;
 
 import java.util.HashSet;
 import java.util.Set;
-
+import lombok.Getter;
+import org.opennms.taskset.contract.TaskSet;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,17 +65,17 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
     private Set<String> requestedRemovalIds;
     private Set<String> replacedIds;
 
-//========================================
-// Constructor
-//----------------------------------------
+    // ========================================
+    // Constructor
+    // ----------------------------------------
 
     public TaskSetGrpcServiceUpdateProcessor(UpdateTasksRequest updateTasksRequest) {
         this.updateTasksRequest = updateTasksRequest;
     }
 
-//========================================
-// Processor
-//----------------------------------------
+    // ========================================
+    // Processor
+    // ----------------------------------------
 
     /**
      * CRITICAL SECTION WARNING - this method is called with a distributed lock held.  Keep it short and sweet.
@@ -87,8 +106,13 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
         // Finally, add any new tasks
         addNewTasks(updateTasksRequest, updatedTaskSetBuilder);
 
-        LOG.debug("Remove tasks: tenantId={}; locationId={}; added-count={}; replaced-count={}; removed-count={}",
-            updateTasksRequest.getTenantId(), updateTasksRequest.getLocationId(), numNew, numReplaced, numRemoved);
+        LOG.debug(
+                "Remove tasks: tenantId={}; locationId={}; added-count={}; replaced-count={}; removed-count={}",
+                updateTasksRequest.getTenantId(),
+                updateTasksRequest.getLocationId(),
+                numNew,
+                numReplaced,
+                numRemoved);
 
         // Determine the return value based on whether there was an actual change
         TaskSet result;
@@ -103,24 +127,24 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
         return result;
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void extractRequestedAddRemovalIds(UpdateTasksRequest request) {
 
-        request.getUpdateList().forEach(
-            (update) -> {
-                if (update.hasAddTask()) {
-                    requestedAddIds.add(update.getAddTask().getTaskDefinition().getId());
-                } else if (update.hasRemoveTask()) {
-                    requestedRemovalIds.add(update.getRemoveTask().getTaskId());
-                } else {
-                    LOG.error("Ignoring unrecognized update request with no add-task and no remove-task: tenantId={}; locationId={}",
-                        request.getTenantId(), request.getLocationId());
-                }
+        request.getUpdateList().forEach((update) -> {
+            if (update.hasAddTask()) {
+                requestedAddIds.add(update.getAddTask().getTaskDefinition().getId());
+            } else if (update.hasRemoveTask()) {
+                requestedRemovalIds.add(update.getRemoveTask().getTaskId());
+            } else {
+                LOG.error(
+                        "Ignoring unrecognized update request with no add-task and no remove-task: tenantId={}; locationId={}",
+                        request.getTenantId(),
+                        request.getLocationId());
             }
-        );
+        });
     }
 
     private void copyExistingTasksWithFilter(TaskSet original, TaskSet.Builder updatedTaskSetBuilder) {
@@ -147,7 +171,7 @@ public class TaskSetGrpcServiceUpdateProcessor implements TaskSetStorageUpdateFu
                 updatedTaskSetBuilder.addTaskDefinition(taskDefinition);
 
                 // Update the add count, if this wasn't already counted as a replacement.
-                if (! replacedIds.contains(taskDefinition.getId())) {
+                if (!replacedIds.contains(taskDefinition.getId())) {
                     numNew++;
                 }
             }

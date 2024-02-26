@@ -1,40 +1,32 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp.traps;
-
-import org.opennms.horizon.shared.snmp.SnmpV3User;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.opennms.horizon.shared.snmp.SnmpV3User;
 
 public class TrapdConfigBean implements TrapdConfig, Serializable {
 
@@ -43,7 +35,7 @@ public class TrapdConfigBean implements TrapdConfig, Serializable {
     private String snmpTrapAddress;
     private int snmpTrapPort;
     private boolean newSuspectOnTrap;
-    private List<SnmpV3User> snmpV3Users= new ArrayList<>();
+    private List<SnmpV3User> snmpV3Users = new ArrayList<>();
     private boolean includeRawMessage;
     private int batchIntervalInMs;
     private int batchSize;
@@ -51,14 +43,11 @@ public class TrapdConfigBean implements TrapdConfig, Serializable {
     private int numThreads;
     private boolean useAddressFromVarbind;
 
-    public TrapdConfigBean() {
-
-    }
+    public TrapdConfigBean() {}
 
     public TrapdConfigBean(TrapdConfig configToClone) {
         update(configToClone);
     }
-
 
     public void setSnmpTrapAddress(String snmpTrapAddress) {
         this.snmpTrapAddress = snmpTrapAddress;
@@ -157,7 +146,6 @@ public class TrapdConfigBean implements TrapdConfig, Serializable {
         this.numThreads = numThreads;
     }
 
-
     @Override
     public boolean shouldUseAddressFromVarbind() {
         return this.useAddressFromVarbind;
@@ -167,4 +155,3 @@ public class TrapdConfigBean implements TrapdConfig, Serializable {
         this.useAddressFromVarbind = useAddressFromVarbind;
     }
 }
-

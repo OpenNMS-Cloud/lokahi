@@ -266,6 +266,7 @@ import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import CancelIcon from '@featherds/icon/navigation/Cancel'
 import { FeatherTabContainer } from '@featherds/tabs'
 import { sortDiscoveriesByName } from '@/dtos/discovery.dto'
+import { NewOrUpdatedDiscovery } from '@/types/discovery'
 const selectedTab = ref()
 const changeSnmpType = (type: any) => {
   if (type === 0) {
@@ -305,8 +306,16 @@ const isICMPOrPassive = computed(
     discoveryStore.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps
 )
 const typeVisible = false
+const route = useRoute()
 onMounted(() => {
   discoveryStore.init()
+})
+
+watchEffect(() => {
+  if (discoveryStore.loadedDiscoveries.length > 0 && route?.params?.id) {
+    const filteredDiscovery = discoveryStore.loadedDiscoveries.find((item: NewOrUpdatedDiscovery) => item.id === Number(route.params.id))
+    discoveryStore.editDiscovery(filteredDiscovery)
+  }
 })
 onUnmounted(() => {
   discoveryStore.$reset()

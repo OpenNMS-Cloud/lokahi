@@ -79,6 +79,11 @@ jobs:
       - name: Build and install prerequisites
         uses: ./.github/actions/java-install-prereqs
 
+      - name: Run maven spotless checks
+        uses: ./.github/actions/maven-spotless
+        with:
+          working-directory: 'minion'
+
       - name: Build & Sonar Scan
         run: |
           mvn -B -Dstyle.color=always \

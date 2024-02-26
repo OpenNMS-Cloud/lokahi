@@ -32,7 +32,7 @@ export const useTagStore = defineStore('tagStore', () => {
   }
 
   const addFilteredTag = (tag: Tag) => {
-    if (!filteredTags.value.find((t) => t.name === tag.name)){
+    if (!filteredTags.value.find((t) => t.name === tag.name)) {
       filteredTags.value = [...filteredTags.value].concat([tag])
     }
   }
@@ -46,25 +46,35 @@ export const useTagStore = defineStore('tagStore', () => {
     isLoading.value = true
     const newTags = filteredTags.value.filter((d) => !originalTags.value.find((e) => e.id === d.id))
     const tagsToDelete = originalTags.value.filter((d) => !filteredTags.value.find((e) => e.id === d.id))
-    const result = await nodeMutations.addTagsToNodes({ nodeIds:[activeNode.value.id], tags:newTags.map((b) => ({name:b.name})) })
-    if (result.error){
-      snackbar.showSnackbar({msg:result.error.message,error:true})
+    const result = await nodeMutations.addTagsToNodes({ nodeIds: [activeNode.value.id], tags: newTags.map((b) => ({name: b.name})) })
+
+    if (result.error) {
+      snackbar.showSnackbar({msg: result.error.message, error: true})
     }
-    const resultRemove = await nodeMutations.removeTagsFromNodes({ nodeIds:[activeNode.value.id], tagIds:tagsToDelete.map((b) => (b.id)) })
-    if (resultRemove.error){
-      snackbar.showSnackbar({msg:resultRemove.error.message,error:true})
+
+    const resultRemove = await nodeMutations.removeTagsFromNodes({ nodeIds: [activeNode.value.id], tagIds: tagsToDelete.map((b) => (b.id)) })
+    if (resultRemove.error) {
+      snackbar.showSnackbar({msg: resultRemove.error.message, error: true})
     }
+
     if (!result.error && !resultRemove.error) {
       await updateAllNodeTypes()
       closeModal()
     }
+
     isLoading.value = false
   }
 
   const addNewTag = (newTag: Record<string, string>, skipTagEdit = false ) => {
     const tagSelectedExists = tagsSelected.value.some(({ name }) => name === newTag.name)
-    if (!tagSelectedExists) tagsSelected.value.push(newTag as Tag)
-    if (!skipTagEdit) updateTagEditMode()
+
+    if (!tagSelectedExists) {
+      tagsSelected.value.push(newTag as Tag)
+    }
+
+    if (!skipTagEdit) {
+      updateTagEditMode()
+    }
   }
 
   const updateTagEditMode = () => {
@@ -79,12 +89,14 @@ export const useTagStore = defineStore('tagStore', () => {
     const newTags = [...tagsSelected.value]
     newTags.splice(tagIndex, 1)
     setTags(newTags)
+
     if (newTags.length === 0) {
       setTagEditMode(false)
       const inventoryStore = useInventoryStore()
       inventoryStore.nodesSelected = []
     }
   }
+
   const toggleTagsSelected = (tag: Tag) => {
     const isTagAlreadySelected = tagsSelected.value.some(({ name }) => name === tag.name)
 
@@ -99,7 +111,6 @@ export const useTagStore = defineStore('tagStore', () => {
     tagsSelected.value = selectAll ? tagsSelected.value : []
   }
 
-
   const resetState = () => {
     areAllTagsSelected.value = false
     tagsSelected.value = []
@@ -110,12 +121,15 @@ export const useTagStore = defineStore('tagStore', () => {
     const inventoryStore = useInventoryStore()
     const nodeMutations = useNodeMutations()
     const nodeIds = inventoryStore.nodesSelected.map((node) => node.id)
+
     await nodeMutations.addTagsToNodes({ nodeIds, tags })
     await updateAllNodeTypes()
+
     tagsSelected.value = []
     inventoryStore.isTagManagerOpen = false
     inventoryStore.nodesSelected = []
     isTagEditMode.value = false
+
     resetState()
   }
 
@@ -123,9 +137,11 @@ export const useTagStore = defineStore('tagStore', () => {
     areAllTagsSelected.value = !areAllTagsSelected.value
     selectAllTags(areAllTagsSelected.value)
   }
+
   const filterTag = (tag: Tag) => {
     filteredTags.value = filteredTags.value.filter((d) => d.name !== tag.name)
   }
+
   return {
     activeNode,
     tagSelected,

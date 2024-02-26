@@ -1,12 +1,12 @@
-<!-- 
-This component is used as a wrapper, over FeatherIcon component, to facilitating the use of `viewBox` attribute, which enables in setting dimension for an SVG. 
-  - viewBox: attribute is required to control an SVG icon dimension 
-    - @material-design-icons: does not have viewBox prop 
-    - required to set it manually on the FeatherIcon component with width/height 
+<!--
+This component is used as a wrapper, over FeatherIcon component, to facilitating the use of `viewBox` attribute, which enables in setting dimension for an SVG.
+  - viewBox: attribute is required to control an SVG icon dimension
+    - @material-design-icons: does not have viewBox prop
+    - required to set it manually on the FeatherIcon component with width/height
   - css: use font-size to set the icon dimension (recommended), with width and height set to 1em (already set
-by FeatherIcon component) 
-  - svg: icon rendering props 
-    - @material-design-icons: only width/height available 
+by FeatherIcon component)
+  - svg: icon rendering props
+    - @material-design-icons: only width/height available
     - @featherds: only viewBox available
  -->
 <template>

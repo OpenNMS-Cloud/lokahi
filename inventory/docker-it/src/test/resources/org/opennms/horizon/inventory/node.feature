@@ -26,3 +26,9 @@ Feature: Node
     Given update node "node1" with alias "alias1" exception "false"
     Given update node "node2" with alias "alias1" exception "true"
     Then [Node] Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate node alias with name alias1"
+
+  Scenario: Add a node and verify list nodes by node alias search returns result
+    Given a new node with node_alias "node-alias", label "node-label", ip address "127.0.0.1" in location named "Default"
+    Then verify that a new node is created with node_alias "node-alias"
+    Then fetch a list of nodes by node node_alias with search term "node-alias"
+

@@ -1,6 +1,33 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.server.rpcrequest.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCompute;
 import org.apache.ignite.compute.ComputeTaskFuture;
@@ -10,9 +37,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.opennms.cloud.grpc.minion.Identity;
-import org.opennms.cloud.grpc.minion.RpcRequestProto;
-import org.opennms.cloud.grpc.minion.RpcResponseProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcRequestProto;
 import org.opennms.cloud.grpc.minion_gateway.GatewayRpcResponseProto;
 import org.opennms.cloud.grpc.minion_gateway.MinionIdentity;
@@ -20,13 +44,6 @@ import org.opennms.horizon.shared.grpc.common.TenantIDGrpcServerInterceptor;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RouterTaskData;
 import org.opennms.miniongateway.grpc.server.rpcrequest.RpcRequestRouterIgniteTask;
 import org.slf4j.Logger;
-
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 public class RpcRequestRouterImplTest {
 
@@ -53,8 +70,11 @@ public class RpcRequestRouterImplTest {
         mockTenantIDGrpcServerInterceptor = Mockito.mock(TenantIDGrpcServerInterceptor.class);
 
         Mockito.when(mockIgnite.compute()).thenReturn(mockIgniteCompute);
-        Mockito.when(mockIgniteCompute.executeAsync(Mockito.same(mockRpcRequestRouterIgniteTask), Mockito.any(RouterTaskData.class))).thenReturn(mockComputeTaskFuture);
-        Mockito.when(mockTenantIDGrpcServerInterceptor.readCurrentContextTenantId()).thenReturn("x-tenant-id-x");
+        Mockito.when(mockIgniteCompute.executeAsync(
+                        Mockito.same(mockRpcRequestRouterIgniteTask), Mockito.any(RouterTaskData.class)))
+                .thenReturn(mockComputeTaskFuture);
+        Mockito.when(mockTenantIDGrpcServerInterceptor.readCurrentContextTenantId())
+                .thenReturn("x-tenant-id-x");
     }
 
     @Test
@@ -62,22 +82,17 @@ public class RpcRequestRouterImplTest {
         //
         // Setup Test Data and Interactions
         //
-        GatewayRpcRequestProto testRequest =
-            GatewayRpcRequestProto.newBuilder()
+        GatewayRpcRequestProto testRequest = GatewayRpcRequestProto.newBuilder()
                 .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
-                .build()
-            ;
-        GatewayRpcResponseProto rpcResponseProto =
-            GatewayRpcResponseProto.newBuilder()
+                .build();
+        GatewayRpcResponseProto rpcResponseProto = GatewayRpcResponseProto.newBuilder()
                 .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-response-location-x"))
-                .build()
-            ;
+                .build();
         byte[] responseBytes = rpcResponseProto.toByteArray();
 
         Mockito.when(mockIgniteFuture.get()).thenReturn(responseBytes);
         Mockito.when(mockIgniteFuture.isDone()).thenReturn(true);
-
 
         //
         // Execute
@@ -92,7 +107,6 @@ public class RpcRequestRouterImplTest {
 
         IgniteInClosure igniteInClosure = runnableArgumentCaptor.getValue();
         igniteInClosure.apply(mockIgniteFuture);
-
 
         //
         // Verify the Results
@@ -106,18 +120,15 @@ public class RpcRequestRouterImplTest {
         //
         // Setup Test Data and Interactions
         //
-        GatewayRpcRequestProto testRequest =
-            GatewayRpcRequestProto.newBuilder()
+        GatewayRpcRequestProto testRequest = GatewayRpcRequestProto.newBuilder()
                 .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
-                .build()
-            ;
+                .build();
 
         RuntimeException testException = new RuntimeException("x-test-exception-x");
 
         Mockito.when(mockIgniteFuture.get()).thenThrow(testException);
         Mockito.when(mockIgniteFuture.isDone()).thenReturn(true);
-
 
         //
         // Execute
@@ -132,7 +143,6 @@ public class RpcRequestRouterImplTest {
 
         IgniteInClosure igniteInClosure = runnableArgumentCaptor.getValue();
         igniteInClosure.apply(mockIgniteFuture);
-
 
         //
         // Verify the Results
@@ -150,18 +160,15 @@ public class RpcRequestRouterImplTest {
         //
         // Setup Test Data and Interactions
         //
-        GatewayRpcRequestProto testRequest =
-            GatewayRpcRequestProto.newBuilder()
+        GatewayRpcRequestProto testRequest = GatewayRpcRequestProto.newBuilder()
                 .setIdentity(MinionIdentity.newBuilder().setLocationId("x-test-location-x"))
                 .setRpcId("x-rpc-id-x")
-                .build()
-            ;
+                .build();
 
         InvalidProtocolBufferException testException = new InvalidProtocolBufferException("x-test-exception-x");
 
         Mockito.when(mockIgniteFuture.get()).thenReturn("garbage".getBytes(StandardCharsets.UTF_8));
         Mockito.when(mockIgniteFuture.isDone()).thenReturn(true);
-
 
         //
         // Execute
@@ -177,7 +184,6 @@ public class RpcRequestRouterImplTest {
 
         IgniteInClosure igniteInClosure = runnableArgumentCaptor.getValue();
         igniteInClosure.apply(mockIgniteFuture);
-
 
         //
         // Verify the Results

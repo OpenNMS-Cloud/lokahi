@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.router;
 
 import static org.junit.Assert.assertEquals;
@@ -16,7 +37,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
-
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteCluster;
@@ -69,18 +89,30 @@ public class MinionLookupServiceImplTest {
         minionInfo.setLocation("blahLocation");
 
         when(igniteLocationCache.lock(any())).thenReturn(lock);
-        when(igniteIdCache.get(any())).thenAnswer((Answer<UUID>) invocationOnMock -> idMap.get(invocationOnMock.getArgument(0)));
-        when(igniteIdCache.remove(any())).thenAnswer((Answer<Boolean>) invocationOnMock -> ( idMap.remove(invocationOnMock.getArgument(0)) != null ));
-        doAnswer((Answer<UUID>) invocationOnMock -> idMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1))).
-            when(igniteIdCache).put(any(), any());
+        when(igniteIdCache.get(any()))
+                .thenAnswer((Answer<UUID>) invocationOnMock -> idMap.get(invocationOnMock.getArgument(0)));
+        when(igniteIdCache.remove(any())).thenAnswer((Answer<Boolean>)
+                invocationOnMock -> (idMap.remove(invocationOnMock.getArgument(0)) != null));
+        doAnswer((Answer<UUID>)
+                        invocationOnMock -> idMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1)))
+                .when(igniteIdCache)
+                .put(any(), any());
 
-        when(igniteLocationCache.get(any())).thenAnswer((Answer<Queue<UUID>>) invocationOnMock -> locationMap.get(invocationOnMock.getArgument(0)));
-        when(igniteLocationCache.remove(any())).thenAnswer((Answer<Boolean>) invocationOnMock -> ( locationMap.remove(invocationOnMock.getArgument(0)) != null));
-        doAnswer((Answer<Queue<UUID>>) invocationOnMock -> locationMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1))).
-            when(igniteLocationCache).put(any(), any());
+        when(igniteLocationCache.get(any()))
+                .thenAnswer((Answer<Queue<UUID>>) invocationOnMock -> locationMap.get(invocationOnMock.getArgument(0)));
+        when(igniteLocationCache.remove(any())).thenAnswer((Answer<Boolean>)
+                invocationOnMock -> (locationMap.remove(invocationOnMock.getArgument(0)) != null));
+        doAnswer((Answer<Queue<UUID>>) invocationOnMock ->
+                        locationMap.put(invocationOnMock.getArgument(0), invocationOnMock.getArgument(1)))
+                .when(igniteLocationCache)
+                .put(any(), any());
 
-        doReturn(igniteIdCache).when(ignite).getOrCreateCache(argThat((CacheConfiguration config) -> config.getName().equals(MinionLookupServiceImpl.MINIONS_BY_ID)));
-        doReturn(igniteLocationCache).when(ignite).getOrCreateCache(argThat((CacheConfiguration config) -> config.getName().equals(MinionLookupServiceImpl.MINIONS_BY_LOCATION)));
+        doReturn(igniteIdCache).when(ignite).getOrCreateCache(argThat((CacheConfiguration config) -> config.getName()
+                .equals(MinionLookupServiceImpl.MINIONS_BY_ID)));
+        doReturn(igniteLocationCache)
+                .when(ignite)
+                .getOrCreateCache(argThat((CacheConfiguration config) ->
+                        config.getName().equals(MinionLookupServiceImpl.MINIONS_BY_LOCATION)));
 
         when(ignite.cache(eq(MinionLookupServiceImpl.MINIONS_BY_ID))).thenReturn(igniteIdCache);
         when(ignite.cache(eq(MinionLookupServiceImpl.MINIONS_BY_LOCATION))).thenReturn(igniteLocationCache);
@@ -88,10 +120,8 @@ public class MinionLookupServiceImplTest {
         when(igniteCluster.localNode()).thenReturn(clusterNode);
         when(clusterNode.id()).thenReturn(localNodeUUID);
 
-
         minionLookupService = new MinionLookupServiceImpl(ignite);
     }
-    
 
     @Test
     public void findGatewayNodeWithId() {
@@ -119,7 +149,6 @@ public class MinionLookupServiceImplTest {
 
         uuids = minionLookupService.findGatewayNodeWithLocation("tenant", "badLocation");
         assertNull(uuids);
-
     }
 
     @Test
@@ -139,10 +168,10 @@ public class MinionLookupServiceImplTest {
     }
 
     private void generateMinions(int num) {
-        for (int i=0;i<num;i++) {
+        for (int i = 0; i < num; i++) {
             MinionInfo minionInfo1 = new MinionInfo();
             minionInfo1.setTenantId("tenant");
-            minionInfo1.setId("minion"+i);
+            minionInfo1.setId("minion" + i);
             minionInfo1.setLocation(("location"));
 
             minionLookupService.onMinionAdded(i, minionInfo1);

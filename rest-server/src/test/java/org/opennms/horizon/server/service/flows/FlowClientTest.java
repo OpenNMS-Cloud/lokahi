@@ -1,38 +1,44 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.flows;
+
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -56,20 +62,6 @@ import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TimeRange;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class FlowClientTest {
     @Rule
     public final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
@@ -92,96 +84,122 @@ public class FlowClientTest {
     @Before
     public void setup() throws IOException {
         var inventoryClient = mock(InventoryClient.class);
-        when(inventoryClient.getNodeById(anyLong(), anyString())).thenReturn(
-            NodeDTO.newBuilder()
-                .addIpInterfaces(IpInterfaceDTO.newBuilder().setId(1))
-                .addIpInterfaces(IpInterfaceDTO.newBuilder().setId(2)).build());
-        var applicationsServiceBlockingStub = mock(ApplicationsServiceGrpc.ApplicationsServiceImplBase.class, delegatesTo(
-            new ApplicationsServiceGrpc.ApplicationsServiceImplBase() {
-                @Override
-                public void getApplications(ListRequest request, StreamObserver<org.opennms.dataplatform.flows.querier.v1.List> responseObserver) {
-                    checkTimeRangeFilters(request.getFiltersList());
-                    Assert.assertEquals(tenantId, request.getTenantId());
-                    Assert.assertEquals(count, request.getLimit());
-                    checkApplication(application, request.getFiltersList());
-                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
-                        responseObserver.onNext(org.opennms.dataplatform.flows.querier.v1.List.newBuilder().addElements(application).build());
-                        responseObserver.onCompleted();
-                    });
-                }
+        when(inventoryClient.getNodeById(anyLong(), anyString()))
+                .thenReturn(NodeDTO.newBuilder()
+                        .addIpInterfaces(IpInterfaceDTO.newBuilder().setId(1))
+                        .addIpInterfaces(IpInterfaceDTO.newBuilder().setId(2))
+                        .build());
+        var applicationsServiceBlockingStub = mock(
+                ApplicationsServiceGrpc.ApplicationsServiceImplBase.class,
+                delegatesTo(new ApplicationsServiceGrpc.ApplicationsServiceImplBase() {
+                    @Override
+                    public void getApplications(
+                            ListRequest request,
+                            StreamObserver<org.opennms.dataplatform.flows.querier.v1.List> responseObserver) {
+                        checkTimeRangeFilters(request.getFiltersList());
+                        Assert.assertEquals(tenantId, request.getTenantId());
+                        Assert.assertEquals(count, request.getLimit());
+                        checkApplication(application, request.getFiltersList());
+                        CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
+                                .execute(() -> {
+                                    responseObserver.onNext(org.opennms.dataplatform.flows.querier.v1.List.newBuilder()
+                                            .addElements(application)
+                                            .build());
+                                    responseObserver.onCompleted();
+                                });
+                    }
 
-                @Override
-                public void getApplicationSummaries(ApplicationSummariesRequest request, StreamObserver<Summaries> responseObserver) {
-                    checkTimeRangeFilters(request.getFiltersList());
-                    Assert.assertEquals(tenantId, request.getTenantId());
-                    Assert.assertEquals(count, request.getCount());
-                    Assert.assertEquals(includeOther, request.getIncludeOther());
-                    Assert.assertEquals(application, request.getApplications(0));
-                    var exporters = new ArrayList<Exporter>();
-                    exporters.add(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build());
-                    // interfaceId from nodeId 1 from inventoryClient mock.
-                    exporters.add(Exporter.newBuilder().setInterfaceId(1).build());
-                    exporters.add(Exporter.newBuilder().setInterfaceId(2).build());
-                    checkExporter(exporters, request.getFiltersList());
-                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
-                        responseObserver.onNext(Summaries.newBuilder()
-                            .addSummaries(TrafficSummary.newBuilder().setApplication(application).setBytesIn(bytesIn).setBytesOut(bytesOut))
-                            .build());
-                        responseObserver.onCompleted();
-                    });
-                }
+                    @Override
+                    public void getApplicationSummaries(
+                            ApplicationSummariesRequest request, StreamObserver<Summaries> responseObserver) {
+                        checkTimeRangeFilters(request.getFiltersList());
+                        Assert.assertEquals(tenantId, request.getTenantId());
+                        Assert.assertEquals(count, request.getCount());
+                        Assert.assertEquals(includeOther, request.getIncludeOther());
+                        Assert.assertEquals(application, request.getApplications(0));
+                        var exporters = new ArrayList<Exporter>();
+                        exporters.add(Exporter.newBuilder()
+                                .setInterfaceId(exporterInterfaceId)
+                                .build());
+                        // interfaceId from nodeId 1 from inventoryClient mock.
+                        exporters.add(Exporter.newBuilder().setInterfaceId(1).build());
+                        exporters.add(Exporter.newBuilder().setInterfaceId(2).build());
+                        checkExporter(exporters, request.getFiltersList());
+                        CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
+                                .execute(() -> {
+                                    responseObserver.onNext(Summaries.newBuilder()
+                                            .addSummaries(TrafficSummary.newBuilder()
+                                                    .setApplication(application)
+                                                    .setBytesIn(bytesIn)
+                                                    .setBytesOut(bytesOut))
+                                            .build());
+                                    responseObserver.onCompleted();
+                                });
+                    }
 
-                @Override
-                public void getApplicationSeries(ApplicationSeriesRequest request, StreamObserver<Series> responseObserver) {
-                    checkTimeRangeFilters(request.getFiltersList());
-                    Assert.assertEquals(tenantId, request.getTenantId());
-                    Assert.assertEquals(count, request.getCount());
-                    Assert.assertEquals(application, request.getApplications(0));
-                    var exporters = new ArrayList<Exporter>();
-                    exporters.add(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build());
-                    checkExporter(exporters, request.getFiltersList());
+                    @Override
+                    public void getApplicationSeries(
+                            ApplicationSeriesRequest request, StreamObserver<Series> responseObserver) {
+                        checkTimeRangeFilters(request.getFiltersList());
+                        Assert.assertEquals(tenantId, request.getTenantId());
+                        Assert.assertEquals(count, request.getCount());
+                        Assert.assertEquals(application, request.getApplications(0));
+                        var exporters = new ArrayList<Exporter>();
+                        exporters.add(Exporter.newBuilder()
+                                .setInterfaceId(exporterInterfaceId)
+                                .build());
+                        checkExporter(exporters, request.getFiltersList());
 
-                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
-                        responseObserver.onNext(Series.newBuilder()
-                            .addPoint(FlowingPoint.newBuilder().setApplication(application).setValue(bytesIn).setDirection(Direction.INGRESS))
-                            .build());
-                        responseObserver.onCompleted();
-                    });
-                }
-            }
-        ));
+                        CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
+                                .execute(() -> {
+                                    responseObserver.onNext(Series.newBuilder()
+                                            .addPoint(FlowingPoint.newBuilder()
+                                                    .setApplication(application)
+                                                    .setValue(bytesIn)
+                                                    .setDirection(Direction.INGRESS))
+                                            .build());
+                                    responseObserver.onCompleted();
+                                });
+                    }
+                }));
 
-        var exporterServiceStub = mock(ExporterServiceGrpc.ExporterServiceImplBase.class, delegatesTo(
-            new ExporterServiceGrpc.ExporterServiceImplBase() {
-                @Override
-                public void getExporterInterfaces(ListRequest request, StreamObserver<org.opennms.dataplatform.flows.querier.v1.List> responseObserver) {
-                    checkTimeRangeFilters(request.getFiltersList());
-                    Assert.assertEquals(tenantId, request.getTenantId());
-                    Assert.assertEquals(count, request.getLimit());
-                    var exporters = new ArrayList<Exporter>();
-                    exporters.add(Exporter.newBuilder().setInterfaceId(exporterInterfaceId).build());
-                    checkExporter(exporters, request.getFiltersList());
-                    CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> {
-                        responseObserver.onNext(org.opennms.dataplatform.flows.querier.v1.List.newBuilder()
-                            .addElements(String.valueOf(exporterInterfaceId)).build());
-                        responseObserver.onCompleted();
-                    });
-                }
-            }
-        ));
+        var exporterServiceStub = mock(
+                ExporterServiceGrpc.ExporterServiceImplBase.class,
+                delegatesTo(new ExporterServiceGrpc.ExporterServiceImplBase() {
+                    @Override
+                    public void getExporterInterfaces(
+                            ListRequest request,
+                            StreamObserver<org.opennms.dataplatform.flows.querier.v1.List> responseObserver) {
+                        checkTimeRangeFilters(request.getFiltersList());
+                        Assert.assertEquals(tenantId, request.getTenantId());
+                        Assert.assertEquals(count, request.getLimit());
+                        var exporters = new ArrayList<Exporter>();
+                        exporters.add(Exporter.newBuilder()
+                                .setInterfaceId(exporterInterfaceId)
+                                .build());
+                        checkExporter(exporters, request.getFiltersList());
+                        CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS)
+                                .execute(() -> {
+                                    responseObserver.onNext(org.opennms.dataplatform.flows.querier.v1.List.newBuilder()
+                                            .addElements(String.valueOf(exporterInterfaceId))
+                                            .build());
+                                    responseObserver.onCompleted();
+                                });
+                    }
+                }));
 
         grpcCleanUp.register(InProcessServerBuilder.forName(FlowClientTest.class.getName())
-            .addService(applicationsServiceBlockingStub)
-            .addService(exporterServiceStub)
-            .directExecutor()
-            .build()
-            .start());
+                .addService(applicationsServiceBlockingStub)
+                .addService(exporterServiceStub)
+                .directExecutor()
+                .build()
+                .start());
         ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName(FlowClientTest.class.getName())
-            .directExecutor().build());
+                .directExecutor()
+                .build());
         flowClient = new FlowClient(inventoryClient, channel, 600);
         flowClient.initialStubs();
     }
-
 
     @Test
     public void testGetApplications() {
@@ -264,11 +282,15 @@ public class FlowClientTest {
         var applicationFilter = filters.stream().filter(Filter::hasApplication).toList();
 
         Assert.assertEquals(1, applicationFilter.size());
-        Assert.assertEquals(application, applicationFilter.get(0).getApplication().getApplication());
+        Assert.assertEquals(
+                application, applicationFilter.get(0).getApplication().getApplication());
     }
 
     private void checkExporter(List<Exporter> exporters, List<Filter> filters) {
-        var exporterFilters = filters.stream().filter(Filter::hasExporter).map(f->f.getExporter().getExporter()).toList();
+        var exporterFilters = filters.stream()
+                .filter(Filter::hasExporter)
+                .map(f -> f.getExporter().getExporter())
+                .toList();
         Assert.assertEquals(exporters.size(), exporterFilters.size());
 
         Assert.assertEquals(exporters, exporterFilters);

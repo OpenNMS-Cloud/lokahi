@@ -14,11 +14,11 @@
                         title="A Minion is a lightweight, secure collector that monitors and communicates with your network devices."
                         v-slot="{ attrs, on }"
                     >
-                        <FeatherIcon        
+                        <FeatherIcon
                             v-bind="attrs"
-                            v-on="on" 
-                            class="info-icon" 
-                            :icon="icons.InformationIcon" 
+                            v-on="on"
+                            class="info-icon"
+                            :icon="icons.InformationIcon"
                         />
                     </FeatherTooltip>
                 </h1>

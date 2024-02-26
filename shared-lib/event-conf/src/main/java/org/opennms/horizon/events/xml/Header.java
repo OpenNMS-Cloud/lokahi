@@ -1,36 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.xml;
 
-  //---------------------------------/
- //- Imported classes and packages -/
-//---------------------------------/
+// ---------------------------------/
+// - Imported classes and packages -/
+// ---------------------------------/
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -40,30 +33,29 @@ import java.io.Serializable;
 
 /**
  * Class Header.
- * 
+ *
  * @version $Revision$ $Date$
  */
-
-@XmlRootElement(name="header")
+@XmlRootElement(name = "header")
 @XmlAccessorType(XmlAccessType.FIELD)
-//@ValidateUsing("event.xsd")
+// @ValidateUsing("event.xsd")
 public class Header implements Serializable {
-	private static final long serialVersionUID = 1963826810463701325L;
+    private static final long serialVersionUID = 1963826810463701325L;
 
-      //--------------------------/
-     //- Class/Member Variables -/
-    //--------------------------/
+    // --------------------------/
+    // - Class/Member Variables -/
+    // --------------------------/
 
-	/**
+    /**
      * Field _ver.
      */
-	@XmlElement(name="ver")
+    @XmlElement(name = "ver")
     private String _ver;
 
     /**
      * Field _dpName.
      */
-	@XmlElement(name="dpName")
+    @XmlElement(name = "dpName")
     private String _dpName;
 
     /**
@@ -73,28 +65,26 @@ public class Header implements Serializable {
      *  DateFormat.FULL style for the default locale. For example:
      *  "Monday, February 18, 2002 3:01:58 PM EST"
      */
-	@XmlElement(name="created")
+    @XmlElement(name = "created")
     private String _created;
 
     /**
      * Field _mstation.
      */
-	@XmlElement(name="mstation")
+    @XmlElement(name = "mstation")
     private String _mstation;
 
-
-      //----------------/
-     //- Constructors -/
-    //----------------/
+    // ----------------/
+    // - Constructors -/
+    // ----------------/
 
     public Header() {
         super();
     }
 
-
-      //-----------/
-     //- Methods -/
-    //-----------/
+    // -----------/
+    // - Methods -/
+    // -----------/
 
     /**
      * Returns the value of field 'created'. The field 'created'
@@ -104,41 +94,37 @@ public class Header implements Serializable {
      * using the
      *  DateFormat.FULL style for the default locale. For example:
      *  "Monday, February 18, 2002 3:01:58 PM EST"
-     * 
+     *
      * @return the value of field 'Created'.
      */
-    public String getCreated(
-    ) {
+    public String getCreated() {
         return this._created;
     }
 
     /**
      * Returns the value of field 'dpName'.
-     * 
+     *
      * @return the value of field 'DpName'.
      */
-    public String getDpName(
-    ) {
+    public String getDpName() {
         return this._dpName;
     }
 
     /**
      * Returns the value of field 'mstation'.
-     * 
+     *
      * @return the value of field 'Mstation'.
      */
-    public String getMstation(
-    ) {
+    public String getMstation() {
         return this._mstation;
     }
 
     /**
      * Returns the value of field 'ver'.
-     * 
+     *
      * @return the value of field 'Ver'.
      */
-    public String getVer(
-    ) {
+    public String getVer() {
         return this._ver;
     }
 
@@ -150,46 +136,42 @@ public class Header implements Serializable {
      * using the
      *  DateFormat.FULL style for the default locale. For example:
      *  "Monday, February 18, 2002 3:01:58 PM EST"
-     * 
+     *
      * @param created the value of field 'created'.
      */
-    public void setCreated(
-            final String created) {
+    public void setCreated(final String created) {
         this._created = created;
     }
 
     /**
      * Sets the value of field 'dpName'.
-     * 
+     *
      * @param dpName the value of field 'dpName'.
      */
-    public void setDpName(
-            final String dpName) {
+    public void setDpName(final String dpName) {
         this._dpName = dpName;
     }
 
     /**
      * Sets the value of field 'mstation'.
-     * 
+     *
      * @param mstation the value of field 'mstation'.
      */
-    public void setMstation(
-            final String mstation) {
+    public void setMstation(final String mstation) {
         this._mstation = mstation;
     }
 
     /**
      * Sets the value of field 'ver'.
-     * 
+     *
      * @param ver the value of field 'ver'.
      */
-    public void setVer(
-            final String ver) {
+    public void setVer(final String ver) {
         this._ver = ver;
     }
 
-        @Override
+    @Override
     public String toString() {
-    	return new OnmsStringBuilder(this).toString();
+        return new OnmsStringBuilder(this).toString();
     }
 }

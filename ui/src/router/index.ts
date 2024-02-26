@@ -31,8 +31,18 @@ const router = createRouter({
       component: () => import('@/containers/Discovery.vue')
     },
     {
+      path: '/discovery/:id',
+      name: 'Discovery Selected',
+      component: () => import('@/containers/Discovery.vue')
+    },
+    {
       path: '/monitoring-policies',
       name: 'Monitoring Policies',
+      component: () => import('@/containers/MonitoringPolicies.vue')
+    },
+    {
+      path: '/monitoring-policies/:id',
+      name: 'Monitoring Policies Selected',
       component: () => import('@/containers/MonitoringPolicies.vue')
     },
     {
@@ -66,7 +76,7 @@ const router = createRouter({
       name: 'Flows',
       component: () => import('@/containers/Flows.vue')
     },
-    { 
+    {
       path: '/welcome',
       name: 'Welcome',
       component: () => import('@/containers/Welcome.vue')

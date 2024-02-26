@@ -1,34 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.opennms.azure.contract.AzureCollectorRequest;
 import org.opennms.azure.contract.AzureCollectorResourcesRequest;
 import org.opennms.horizon.azure.api.AzureResponseMetric;
@@ -48,16 +50,6 @@ import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
 public class AzureCollector implements ServiceCollector {
     private final Logger log = LoggerFactory.getLogger(AzureCollector.class);
 
@@ -74,22 +66,19 @@ public class AzureCollector implements ServiceCollector {
 
     // Azure Metric Key - Metrics Processor Key
     private static final Map<String, String> AZURE_NODE_METRIC_TO_ALIAS = Map.of(
-        "Network In Total", "network_in_total_bytes",
-        "Network Out Total", "network_out_total_bytes"
-    );
+            "Network In Total", "network_in_total_bytes",
+            "Network Out Total", "network_out_total_bytes");
 
     // Valid metrics: BytesSentRate,BytesReceivedRate,PacketsSentRate,PacketsReceivedRate
     // https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-network-networkinterfaces-metrics
     private static final Map<String, String> AZURE_INTERFACE_METRIC_TO_ALIAS = Map.of(
-        "BytesReceivedRate", "bytes_received_rate",
-        "BytesSentRate", "bytes_sent_rate"
-    );
+            "BytesReceivedRate", "bytes_received_rate",
+            "BytesSentRate", "bytes_sent_rate");
 
-    // Valid metrics: PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
+    // Valid metrics:
+    // PacketsInDDoS,PacketsDroppedDDoS,PacketsForwardedDDoS,TCPPacketsInDDoS,TCPPacketsDroppedDDoS,TCPPacketsForwardedDDoS,UDPPacketsInDDoS,UDPPacketsDroppedDDoS,UDPPacketsForwardedDDoS,BytesInDDoS,BytesDroppedDDoS,BytesForwardedDDoS,TCPBytesInDDoS,TCPBytesDroppedDDoS,TCPBytesForwardedDDoS,UDPBytesInDDoS,UDPBytesDroppedDDoS,UDPBytesForwardedDDoS,IfUnderDDoSAttack,DDoSTriggerTCPPackets,DDoSTriggerUDPPackets,DDoSTriggerSYNPackets,VipAvailability,ByteCount,PacketCount,SynCount
     // https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-network-publicipaddresses-metrics
-    private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = Map.of(
-        "ByteCount", "bytes_received"
-    );
+    private static final Map<String, String> AZURE_IPINTERFACE_METRIC_TO_ALIAS = Map.of("ByteCount", "bytes_received");
 
     private static final String AZURE_NODE_PREFIX = "azure-node-";
     private static final String METRIC_DELIMITER = ",";
@@ -106,23 +95,33 @@ public class AzureCollector implements ServiceCollector {
 
         try {
             if (!config.is(AzureCollectorRequest.class)) {
-                throw new IllegalArgumentException("configuration must be an AzureCollectorRequest; type-url=" + config.getTypeUrl());
+                throw new IllegalArgumentException(
+                        "configuration must be an AzureCollectorRequest; type-url=" + config.getTypeUrl());
             }
 
             AzureCollectorRequest request = config.unpack(AzureCollectorRequest.class);
 
-            AzureOAuthToken token = client.login(request.getDirectoryId(),
-                request.getClientId(), request.getClientSecret(), request.getTimeoutMs(), request.getRetries());
+            AzureOAuthToken token = client.login(
+                    request.getDirectoryId(),
+                    request.getClientId(),
+                    request.getClientSecret(),
+                    request.getTimeoutMs(),
+                    request.getRetries());
 
-            AzureInstanceView instanceView = client.getInstanceView(token, request.getSubscriptionId(),
-                request.getResourceGroup(), request.getResource(), request.getTimeoutMs(), request.getRetries());
+            AzureInstanceView instanceView = client.getInstanceView(
+                    token,
+                    request.getSubscriptionId(),
+                    request.getResourceGroup(),
+                    request.getResource(),
+                    request.getTimeoutMs(),
+                    request.getRetries());
 
             if (instanceView.isUp() && instanceView.isReady()) {
 
                 // host metrics
                 List<AzureResultMetric> metricResults = collectNodeMetrics(request, token).entrySet().stream()
-                    .map(nodeMetric -> mapNodeResult(request, nodeMetric))
-                    .collect(Collectors.toCollection(ArrayList::new));
+                        .map(nodeMetric -> mapNodeResult(request, nodeMetric))
+                        .collect(Collectors.toCollection(ArrayList::new));
 
                 // interface metrics
                 collectNetworkMetrics(request, token, metricResults);
@@ -130,76 +129,96 @@ public class AzureCollector implements ServiceCollector {
                 log.debug("AZURE COLLECTOR metricResults LIST: {}", metricResults);
 
                 AzureResponseMetric results = AzureResponseMetric.newBuilder()
-                    .addAllResults(metricResults)
-                    .build();
+                        .addAllResults(metricResults)
+                        .build();
 
                 future.complete(ServiceCollectorResponseImpl.builder()
-                    .results(results)
-                    .nodeId(collectionRequest.getNodeId())
-                    .monitorType(MonitorType.AZURE)
-                    .status(true)
-                    .timeStamp(System.currentTimeMillis())
-                    .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
-                    .build());
+                        .results(results)
+                        .nodeId(collectionRequest.getNodeId())
+                        .monitorType(MonitorType.AZURE)
+                        .status(true)
+                        .timeStamp(System.currentTimeMillis())
+                        .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
+                        .build());
 
             } else {
                 future.complete(ServiceCollectorResponseImpl.builder()
+                        .nodeId(collectionRequest.getNodeId())
+                        .monitorType(MonitorType.AZURE)
+                        .status(false)
+                        .timeStamp(System.currentTimeMillis())
+                        .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
+                        .build());
+            }
+        } catch (Exception e) {
+            log.error(
+                    "Failed to collect for azure resource nodeId: {}, error: {}",
+                    collectionRequest.getNodeId(),
+                    e.getMessage(),
+                    e);
+            future.complete(ServiceCollectorResponseImpl.builder()
                     .nodeId(collectionRequest.getNodeId())
                     .monitorType(MonitorType.AZURE)
                     .status(false)
                     .timeStamp(System.currentTimeMillis())
                     .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
                     .build());
-            }
-        } catch (Exception e) {
-            log.error("Failed to collect for azure resource nodeId: {}, error: {}", collectionRequest.getNodeId(),
-                e.getMessage(), e);
-            future.complete(ServiceCollectorResponseImpl.builder()
-                .nodeId(collectionRequest.getNodeId())
-                .monitorType(MonitorType.AZURE)
-                .status(false)
-                .timeStamp(System.currentTimeMillis())
-                .ipAddress(AZURE_NODE_PREFIX + collectionRequest.getNodeId())
-                .build());
         }
         return future;
     }
 
-    private Map<String, Double> collectNodeMetrics(AzureCollectorRequest request, AzureOAuthToken token) throws AzureHttpException {
+    private Map<String, Double> collectNodeMetrics(AzureCollectorRequest request, AzureOAuthToken token)
+            throws AzureHttpException {
         Map<String, String> params = getMetricsParams(AZURE_NODE_METRIC_TO_ALIAS.keySet());
 
-        AzureMetrics metrics = client.getMetrics(token, request.getSubscriptionId(),
-            request.getResourceGroup(), request.getResource(), params, request.getTimeoutMs(), request.getRetries());
+        AzureMetrics metrics = client.getMetrics(
+                token,
+                request.getSubscriptionId(),
+                request.getResourceGroup(),
+                request.getResource(),
+                params,
+                request.getTimeoutMs(),
+                request.getRetries());
 
         return metrics.collect();
     }
 
-    private void collectNetworkMetrics(AzureCollectorRequest request, AzureOAuthToken token, List<AzureResultMetric> metricResults) {
+    private void collectNetworkMetrics(
+            AzureCollectorRequest request, AzureOAuthToken token, List<AzureResultMetric> metricResults) {
         for (var resource : request.getCollectorResourcesList()) {
             try {
-                metricResults.addAll(collectNetworkMetric(request, resource, token)
-                    .entrySet().stream().map(interfaceMetric ->
-                        mapInterfaceResult(request, resource.getResource(), resource.getType(), interfaceMetric))
-                    .toList());
+                metricResults.addAll(collectNetworkMetric(request, resource, token).entrySet().stream()
+                        .map(interfaceMetric -> mapInterfaceResult(
+                                request, resource.getResource(), resource.getType(), interfaceMetric))
+                        .toList());
             } catch (AzureHttpException ex) {
-                log.warn("Skip failed network collection. resource: {}, type: {}, error: {}", resource.getResource(),
-                    resource.getType(), ex.getMessage());
+                log.warn(
+                        "Skip failed network collection. resource: {}, type: {}, error: {}",
+                        resource.getResource(),
+                        resource.getType(),
+                        ex.getMessage());
             }
         }
     }
 
-    private Map<String, Double> collectNetworkMetric(AzureCollectorRequest request,
-                                                     AzureCollectorResourcesRequest resource,
-                                                     AzureOAuthToken token) throws AzureHttpException {
+    private Map<String, Double> collectNetworkMetric(
+            AzureCollectorRequest request, AzureCollectorResourcesRequest resource, AzureOAuthToken token)
+            throws AzureHttpException {
         try {
             var type = AzureHttpClient.ResourcesType.fromMetricName(resource.getType());
-            Map<String, String> params =
-                getMetricsParams(AzureHttpClient.ResourcesType.NETWORK_INTERFACES == type ?
-                    AZURE_INTERFACE_METRIC_TO_ALIAS.keySet() : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());
+            Map<String, String> params = getMetricsParams(
+                    AzureHttpClient.ResourcesType.NETWORK_INTERFACES == type
+                            ? AZURE_INTERFACE_METRIC_TO_ALIAS.keySet()
+                            : AZURE_IPINTERFACE_METRIC_TO_ALIAS.keySet());
 
-            AzureMetrics metrics = client.getNetworkInterfaceMetrics(token, request.getSubscriptionId(),
-                request.getResourceGroup(), resource.getType() + "/" + resource.getResource(), params,
-                request.getTimeoutMs(), request.getRetries());
+            AzureMetrics metrics = client.getNetworkInterfaceMetrics(
+                    token,
+                    request.getSubscriptionId(),
+                    request.getResourceGroup(),
+                    resource.getType() + "/" + resource.getResource(),
+                    params,
+                    request.getTimeoutMs(),
+                    request.getRetries());
 
             return metrics.collect();
         } catch (IllegalArgumentException ex) {
@@ -221,32 +240,29 @@ public class AzureCollector implements ServiceCollector {
 
     private AzureResultMetric mapNodeResult(AzureCollectorRequest request, Map.Entry<String, Double> metricData) {
         return AzureResultMetric.newBuilder()
-            .setResourceGroup(request.getResourceGroup())
-            .setResourceName(request.getResource())
-            .setType("node")
-            .setAlias(getNodeMetricAlias(metricData.getKey()))
-            .setValue(
-                AzureValueMetric.newBuilder()
-                    .setType(AzureValueType.INT64)
-                    .setUint64(metricData.getValue().longValue())
-                    .build())
-            .build();
+                .setResourceGroup(request.getResourceGroup())
+                .setResourceName(request.getResource())
+                .setType("node")
+                .setAlias(getNodeMetricAlias(metricData.getKey()))
+                .setValue(AzureValueMetric.newBuilder()
+                        .setType(AzureValueType.INT64)
+                        .setUint64(metricData.getValue().longValue())
+                        .build())
+                .build();
     }
 
-    private AzureResultMetric mapInterfaceResult(AzureCollectorRequest request,
-                                                 String resourceName, String type,
-                                                 Map.Entry<String, Double> metricData) {
+    private AzureResultMetric mapInterfaceResult(
+            AzureCollectorRequest request, String resourceName, String type, Map.Entry<String, Double> metricData) {
         return AzureResultMetric.newBuilder()
-            .setResourceGroup(request.getResourceGroup())
-            .setResourceName(resourceName)
-            .setType(type)
-            .setAlias(getInterfaceMetricAlias(metricData.getKey()))
-            .setValue(
-                AzureValueMetric.newBuilder()
-                    .setType(AzureValueType.INT64)
-                    .setUint64(metricData.getValue().longValue())
-                    .build())
-            .build();
+                .setResourceGroup(request.getResourceGroup())
+                .setResourceName(resourceName)
+                .setType(type)
+                .setAlias(getInterfaceMetricAlias(metricData.getKey()))
+                .setValue(AzureValueMetric.newBuilder()
+                        .setType(AzureValueType.INT64)
+                        .setUint64(metricData.getValue().longValue())
+                        .build())
+                .build();
     }
 
     private String getNodeMetricAlias(String metricName) {

@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +27,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -41,15 +36,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Test;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
 import org.opennms.horizon.minion.flows.parser.proto.Header;
 import org.opennms.horizon.minion.flows.parser.proto.Packet;
 import org.opennms.horizon.minion.flows.parser.proto.Record;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 public class RecordEnricherTest {
 
@@ -57,7 +48,8 @@ public class RecordEnricherTest {
      * Test flow enrichment by mocking the {@link DnsResolver}.
      */
     @Test
-    public void canEnrichFlow() throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
+    public void canEnrichFlow()
+            throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
         enrichFlow(CompletableFuture.completedFuture(Optional.of("test")), Optional.of("test"), true);
         enrichFlow(CompletableFuture.completedFuture(Optional.empty()), Optional.empty(), true);
 
@@ -67,7 +59,8 @@ public class RecordEnricherTest {
     }
 
     @Test
-    public void canDisableEnrichFlow() throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
+    public void canDisableEnrichFlow()
+            throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
         enrichFlow(CompletableFuture.completedFuture(Optional.of("test")), Optional.empty(), false);
 
         CompletableFuture exceptionalFuture = new CompletableFuture();
@@ -75,16 +68,19 @@ public class RecordEnricherTest {
         enrichFlow(exceptionalFuture, Optional.empty(), false);
     }
 
-    private void enrichFlow(CompletableFuture reverseLookupFuture, Optional<String> expectedValue, boolean dnsLookupsEnabled) throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
+    private void enrichFlow(
+            CompletableFuture reverseLookupFuture, Optional<String> expectedValue, boolean dnsLookupsEnabled)
+            throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
         DnsResolver dnsResolver = mock(DnsResolver.class);
         when(dnsResolver.reverseLookup(any())).thenReturn(reverseLookupFuture);
 
         RecordEnricher enricher = new RecordEnricher(dnsResolver, dnsLookupsEnabled);
 
         final Packet packet = getSampleNf5Packet();
-        final List<CompletableFuture<RecordEnrichment>> enrichmentFutures = packet.getRecords().map(enricher::enrich).toList();
+        final List<CompletableFuture<RecordEnrichment>> enrichmentFutures =
+                packet.getRecords().map(enricher::enrich).toList();
 
-        CompletableFuture.allOf(enrichmentFutures.toArray(new CompletableFuture[]{}));
+        CompletableFuture.allOf(enrichmentFutures.toArray(new CompletableFuture[] {}));
 
         for (CompletableFuture<RecordEnrichment> future : enrichmentFutures) {
             assertFalse(future.isCompletedExceptionally());
@@ -108,5 +104,4 @@ public class RecordEnricherTest {
         final Header header = new Header(buffer);
         return new Packet(header, buffer);
     }
-
 }

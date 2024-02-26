@@ -1,0 +1,23 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+        exclude: |
+            (?x)^(
+                charts/lokahi/templates/.*\.yaml
+            )$
+        args: [ --multi ]
+    -   id: check-added-large-files
+-   repo: https://github.com/ejba/pre-commit-maven
+    rev: v0.3.4
+    hooks:
+    -   id: maven-spotless-apply
+    -   id: maven-compile
+        stages: [ pre-push ]
+    -   id: maven-test
+        stages: [ pre-push ]

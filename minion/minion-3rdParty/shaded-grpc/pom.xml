@@ -1,99 +1,117 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>minion-3rdParty</artifactId>
-        <groupId>org.opennms.lokahi.minion</groupId>
-        <version>0.1.0-SNAPSHOT</version>
-    </parent>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-<!--    NOTE: This shaded version of the grpc jar is needed to remove a problem with a split package between two modules.-->
-<!--    This consolidates it all into one bundle.-->
-<!--    https://github.com/grpc/grpc-java/issues/2727-->
-    
-    <modelVersion>4.0.0</modelVersion>
+  <!--    NOTE: This shaded version of the grpc jar is needed to remove a problem with a split package between two modules.-->
+  <!--    This consolidates it all into one bundle.-->
+  <!--    https://github.com/grpc/grpc-java/issues/2727-->
 
-    <artifactId>shaded-grpc</artifactId>
-    <name>OpenNMS Lokahi :: Minion :: 3rd Party :: gRPC (shaded)</name>
-    <packaging>bundle</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opennms.lokahi.minion</groupId>
+    <artifactId>minion-3rdParty</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.opennms.lokahi.shared</groupId>
-            <artifactId>lokahi-shaded-grpc-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.protobuf</groupId>
-                    <artifactId>protobuf-java</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
-        </dependency>
-    </dependencies>
+  <artifactId>shaded-grpc</artifactId>
+  <packaging>bundle</packaging>
+  <name>OpenNMS Lokahi :: Minion :: 3rd Party :: gRPC (shaded)</name>
 
-    <build>
-        <defaultGoal>install</defaultGoal>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <excludes>
-                                    <!-- <exclude>com.google.guava:guava</exclude> -->
-                                    <exclude>io.grpc:grpc-core</exclude>
-                                    <exclude>org.slf4j:*</exclude>
-                                    <exclude>org.projectlombok:lombok</exclude>
-                                </excludes>
-                            </artifactSet>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            com.google.protobuf;version="[3.19,4)",
+  <dependencies>
+    <dependency>
+      <groupId>org.opennms.lokahi.shared</groupId>
+      <artifactId>lokahi-shaded-grpc-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-netty-shaded</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-okhttp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-protobuf</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-stub</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <artifactSet>
+                <excludes>
+                  <!-- <exclude>com.google.guava:guava</exclude> -->
+                  <exclude>io.grpc:grpc-core</exclude>
+                  <exclude>org.slf4j:*</exclude>
+                  <exclude>org.projectlombok:lombok</exclude>
+                </excludes>
+              </artifactSet>
+              <createDependencyReducedPom>true</createDependencyReducedPom>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              com.google.protobuf;version="[3.19,4)",
                             javax.net,
                             javax.net.ssl,
                             javax.security.cert,
                             javax.security.auth.x500,
-                            <!-- SLF4J required for lokahi-shaded-grpc-core -->
-                            org.slf4j
-                        </Import-Package>
-                        <Export-Package>
-                            io.grpc,
+              <!-- SLF4J required for lokahi-shaded-grpc-core -->
+              org.slf4j
+            </Import-Package>
+            <Export-Package>io.grpc,
                             io.grpc.stub,
                             io.grpc.protobuf,
                             io.grpc.internal,
@@ -101,12 +119,11 @@
                             io.grpc.netty.shaded.io.netty.util.collection,
                             io.grpc.netty.shaded.io.grpc.netty,
                             io.grpc.netty.shaded.io.netty.handler.ssl,
-                            io.grpc.netty.shaded.io.netty.util.collection
-                        </Export-Package>
-                    </instructions>
-                    <unpackBundle>true</unpackBundle>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+                            io.grpc.netty.shaded.io.netty.util.collection</Export-Package>
+          </instructions>
+          <unpackBundle>true</unpackBundle>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

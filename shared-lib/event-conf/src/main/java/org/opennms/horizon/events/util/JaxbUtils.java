@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.util;
 
 import jakarta.xml.bind.JAXBContext;
@@ -38,29 +31,6 @@ import jakarta.xml.bind.ValidationEventHandler;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSchema;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
-import org.apache.commons.io.IOUtils;
-import org.eclipse.persistence.jaxb.MarshallerProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.io.Resource;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.XMLFilter;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -84,6 +54,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.persistence.jaxb.MarshallerProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.io.Resource;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.XMLFilter;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 public abstract class JaxbUtils {
     private static final Logger LOG = LoggerFactory.getLogger(JaxbUtils.class);
@@ -94,8 +86,7 @@ public abstract class JaxbUtils {
 
     protected static final class LoggingValidationEventHandler implements ValidationEventHandler {
 
-        protected LoggingValidationEventHandler() {
-        }
+        protected LoggingValidationEventHandler() {}
 
         @Override
         public boolean handleEvent(final ValidationEvent event) {
@@ -105,13 +96,15 @@ public abstract class JaxbUtils {
     }
 
     private static final MarshallingExceptionTranslator EXCEPTION_TRANSLATOR = new MarshallingExceptionTranslator();
-    private static final Map<Class<?>,JAXBContext> m_contexts = Collections.synchronizedMap(new WeakHashMap<Class<?>,JAXBContext>());
-    private static final Map<Class<?>,Schema> m_schemas = Collections.synchronizedMap(new WeakHashMap<Class<?>,Schema>());
-    private static final Map<String,Class<?>> m_elementClasses = Collections.synchronizedMap(new WeakHashMap<String,Class<?>>());
+    private static final Map<Class<?>, JAXBContext> m_contexts =
+            Collections.synchronizedMap(new WeakHashMap<Class<?>, JAXBContext>());
+    private static final Map<Class<?>, Schema> m_schemas =
+            Collections.synchronizedMap(new WeakHashMap<Class<?>, Schema>());
+    private static final Map<String, Class<?>> m_elementClasses =
+            Collections.synchronizedMap(new WeakHashMap<String, Class<?>>());
     private static final boolean VALIDATE_IF_POSSIBLE = true;
 
-    private JaxbUtils() {
-    }
+    private JaxbUtils() {}
 
     public static String marshal(final Object obj) {
         final StringWriter jaxbWriter = new StringWriter();
@@ -132,7 +125,6 @@ public abstract class JaxbUtils {
                 fileWriter.write(xmlString);
                 fileWriter.flush();
             }
-
         }
     }
 
@@ -142,7 +134,8 @@ public abstract class JaxbUtils {
         final Class<?> existing = m_elementClasses.get(elementName);
         if (existing != null) return existing;
 
-        final ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        final ClassPathScanningCandidateComponentProvider scanner =
+                new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(XmlRootElement.class));
         for (final BeanDefinition bd : scanner.findCandidateComponents("org.opennms")) {
             final String className = bd.getBeanClassName();
@@ -265,10 +258,18 @@ public abstract class JaxbUtils {
         return unmarshal(clazz, inputSource, jaxbContext, VALIDATE_IF_POSSIBLE);
     }
 
-    public static <T> T unmarshal(final Class<T> clazz, final InputSource inputSource, final JAXBContext jaxbContext, final boolean validate) {
+    public static <T> T unmarshal(
+            final Class<T> clazz,
+            final InputSource inputSource,
+            final JAXBContext jaxbContext,
+            final boolean validate) {
         final Unmarshaller um = getUnmarshallerFor(clazz, jaxbContext, validate);
 
-        LOG.trace("unmarshalling class {} from input source {} with unmarshaller {}", clazz.getSimpleName(), inputSource, um);
+        LOG.trace(
+                "unmarshalling class {} from input source {} with unmarshaller {}",
+                clazz.getSimpleName(),
+                inputSource,
+                um);
         try {
             final XMLFilter filter = getXMLFilterForClass(clazz);
             final SAXSource source = new SAXSource(filter, inputSource);
@@ -297,7 +298,8 @@ public abstract class JaxbUtils {
 
     public static <T> XMLFilter getXMLFilterForClass(final Class<T> clazz) throws SAXException {
         final String namespace = getNamespaceForClass(clazz);
-        XMLFilter filter = namespace == null? new SimpleNamespaceFilter("", false) : new SimpleNamespaceFilter(namespace, true);
+        XMLFilter filter =
+                namespace == null ? new SimpleNamespaceFilter("", false) : new SimpleNamespaceFilter(namespace, true);
 
         LOG.trace("namespace filter for class {}: {}", clazz, filter);
         final XMLReader xmlReader = XMLReaderFactory.createXMLReader();
@@ -308,7 +310,7 @@ public abstract class JaxbUtils {
     }
 
     public static Marshaller getMarshallerFor(final Object obj, final JAXBContext jaxbContext) {
-        final Class<?> clazz = (Class<?>)(obj instanceof Class<?> ? obj : obj.getClass());
+        final Class<?> clazz = (Class<?>) (obj instanceof Class<?> ? obj : obj.getClass());
 
         LOG.trace("creating unmarshaller for {}", clazz);
 
@@ -345,7 +347,7 @@ public abstract class JaxbUtils {
      * @return an Unmarshaller
      */
     public static Unmarshaller getUnmarshallerFor(final Object obj, final JAXBContext jaxbContext, boolean validate) {
-        final Class<?> clazz = (Class<?>)(obj instanceof Class<?> ? obj : obj.getClass());
+        final Class<?> clazz = (Class<?>) (obj instanceof Class<?> ? obj : obj.getClass());
 
         Unmarshaller unmarshaller = null;
         try {
@@ -395,7 +397,8 @@ public abstract class JaxbUtils {
         } else {
             final Collection<Class<?>> allRelatedClasses = getAllRelatedClasses(clazz);
             LOG.trace("Creating new context for classes: {}", allRelatedClasses);
-            context = org.eclipse.persistence.jaxb.JAXBContextFactory.createContext(allRelatedClasses.toArray(EMPTY_CLASS_LIST), null);
+            context = org.eclipse.persistence.jaxb.JAXBContextFactory.createContext(
+                    allRelatedClasses.toArray(EMPTY_CLASS_LIST), null);
             LOG.trace("Context for {}: {}", allRelatedClasses, context);
             m_contexts.put(clazz, context);
         }
@@ -436,21 +439,25 @@ public abstract class JaxbUtils {
             InputStream schemaInputStream = null;
             try {
                 {
-                    final File schemaFile = new File(System.getProperty("opennms.home") + "/share/xsds/" + schemaFileName);
+                    final File schemaFile =
+                            new File(System.getProperty("opennms.home") + "/share/xsds/" + schemaFileName);
                     if (schemaFile.exists()) {
                         LOG.trace("Found schema file {} related to {}", schemaFile, clazz);
                         schemaInputStream = new FileInputStream(schemaFile);
-                    };
+                    }
+                    ;
                 }
                 if (schemaInputStream == null) {
                     final File schemaFile = new File("target/xsds/" + schemaFileName);
                     if (schemaFile.exists()) {
                         LOG.trace("Found schema file {} related to {}", schemaFile, clazz);
                         schemaInputStream = new FileInputStream(schemaFile);
-                    };
+                    }
+                    ;
                 }
                 if (schemaInputStream == null) {
-                    URL schemaResource = Thread.currentThread().getContextClassLoader().getResource("xsds/" + schemaFileName);
+                    URL schemaResource =
+                            Thread.currentThread().getContextClassLoader().getResource("xsds/" + schemaFileName);
                     if (schemaResource == null) {
                         schemaResource = clazz.getClassLoader().getResource("xsds/" + schemaFileName);
                     }
@@ -471,7 +478,7 @@ public abstract class JaxbUtils {
             }
         }
 
-        if (sources.size() == 0) {
+        if (sources.isEmpty()) {
             LOG.debug("No schema files found for validating {}", clazz);
             return null;
         }

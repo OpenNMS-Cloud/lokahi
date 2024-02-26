@@ -1,38 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017-2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification.internal.decision;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.opennms.horizon.flows.classification.ClassificationRequest;
-import org.opennms.horizon.flows.classification.FilterService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +30,10 @@ import java.util.Map;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.opennms.horizon.flows.classification.ClassificationRequest;
+import org.opennms.horizon.flows.classification.FilterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a decision tree for classifying flows.
@@ -63,11 +56,12 @@ public abstract class Tree {
      * Recursively constructs a decision tree consisting of nodes that split the given rules by thresholds
      * and leaves that contain the classifiers that were selected by the thresholds of their ancestor nodes.
      */
-    public static Tree of(List<PreprocessedRule> rules, FilterService filterService) throws InterruptedException  {
+    public static Tree of(List<PreprocessedRule> rules, FilterService filterService) throws InterruptedException {
         return of(rules, Bounds.ANY, 0, filterService);
     }
 
-    private static Tree of(List<PreprocessedRule> rules, Bounds bounds, int depth, FilterService filterService) throws InterruptedException {
+    private static Tree of(List<PreprocessedRule> rules, Bounds bounds, int depth, FilterService filterService)
+            throws InterruptedException {
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }
@@ -86,15 +80,19 @@ public abstract class Tree {
                 .map(t -> Map.entry(t, t.match(rules, bounds)))
                 .filter(e -> maximumSize(e) < ruleSetSize)
                 // different ordering criteria could be used here
-                // (for example the summed sizes of the collections that result if the rule set is matched by a threshold was also tested)
+                // (for example the summed sizes of the collections that result if the rule set is matched by a
+                // threshold was also tested)
                 // -> the criteria that optimizes for the equal partitioning of rule sets gave the best results
                 .min(Comparator.comparingLong(equallyPartitionedCriteria(ruleSetSize)))
                 .orElse(null);
 
         if (entry != null) {
-            LOG.trace("Node - depth: " + depth + "; rules: " + ruleSetSize + "; threshold: " + entry.getKey() + "; maximum child size: " + maximumSize(entry) +
-                               "; lt: " + entry.getValue().lt.size() +
-                               "; eq: " + entry.getValue().eq.size() + "; gt: " + entry.getValue().gt.size() + "; na: " + entry.getValue().na.size());
+            LOG.trace("Node - depth: " + depth + "; rules: " + ruleSetSize + "; threshold: " + entry.getKey()
+                    + "; maximum child size: " + maximumSize(entry) + "; lt: "
+                    + entry.getValue().lt.size() + "; eq: "
+                    + entry.getValue().eq.size() + "; gt: "
+                    + entry.getValue().gt.size() + "; na: "
+                    + entry.getValue().na.size());
             var lt = of(entry.getValue().lt, entry.getKey().lt(bounds), depth + 1, filterService);
             var eq = of(entry.getValue().eq, entry.getKey().eq(bounds), depth + 1, filterService);
             var gt = of(entry.getValue().gt, entry.getKey().gt(bounds), depth + 1, filterService);
@@ -105,16 +103,19 @@ public abstract class Tree {
             LOG.trace("Leaf - depth: " + depth + "; rules: " + ruleSetSize);
             return leaf(rules, filterService, bounds);
         }
-
     }
 
     private static ToLongFunction<Map.Entry<Threshold, Threshold.Matches>> equallyPartitionedCriteria(int ruleSetSize) {
-        // calculates a criteria corresponding to the variance of collection sizes assuming an equal partitioning a rule set
+        // calculates a criteria corresponding to the variance of collection sizes assuming an equal partitioning a rule
+        // set
         var mean = (long) ruleSetSize / 4;
         ToLongFunction<Integer> f = i -> (i - mean) * (i - mean);
         return entry -> {
             var m = entry.getValue();
-            return f.applyAsLong(m.lt.size()) + f.applyAsLong(m.eq.size()) + f.applyAsLong(m.gt.size()) + f.applyAsLong(m.na.size());
+            return f.applyAsLong(m.lt.size())
+                    + f.applyAsLong(m.eq.size())
+                    + f.applyAsLong(m.gt.size())
+                    + f.applyAsLong(m.na.size());
         };
     }
 
@@ -141,11 +142,16 @@ public abstract class Tree {
 
         public static Info forLeaf(int ruleSetSize) {
             switch (ruleSetSize) {
-                case 0: return FOR_LEAVE_WITH_0_RULES;
-                case 1: return FOR_LEAVE_WITH_1_RULE;
-                case 2: return FOR_LEAVE_WITH_2_RULES;
-                case 3: return FOR_LEAVE_WITH_3_RULES;
-                default: return new Info(ruleSetSize);
+                case 0:
+                    return FOR_LEAVE_WITH_0_RULES;
+                case 1:
+                    return FOR_LEAVE_WITH_1_RULE;
+                case 2:
+                    return FOR_LEAVE_WITH_2_RULES;
+                case 3:
+                    return FOR_LEAVE_WITH_3_RULES;
+                default:
+                    return new Info(ruleSetSize);
             }
         }
 
@@ -156,7 +162,19 @@ public abstract class Tree {
         public final int choices;
         public final int minComp, maxComp, sumComp;
 
-        public Info(int minDepth, int maxDepth, int sumDepth, long minLeafSize, long maxLeafSize, long sumLeafSize, int nodes, int leaves, int choices, int minComp, int maxComp, int sumComp) {
+        public Info(
+                int minDepth,
+                int maxDepth,
+                int sumDepth,
+                long minLeafSize,
+                long maxLeafSize,
+                long sumLeafSize,
+                int nodes,
+                int leaves,
+                int choices,
+                int minComp,
+                int maxComp,
+                int sumComp) {
             this.minDepth = minDepth;
             this.maxDepth = maxDepth;
             this.sumDepth = sumDepth;
@@ -177,20 +195,19 @@ public abstract class Tree {
 
         @Override
         public String toString() {
-            return "Info{" +
-                   "depth(min/max/avg)=" + minDepth +
-                   "/" + maxDepth +
-                   "/" + String.format("%.2f", (double)sumDepth / leaves) +
-                   ", comp(min/max/avg)=" + minComp +
-                   "/" + maxComp +
-                   "/" + String.format("%.2f", (double)sumComp / leaves) +
-                   ", ruleSetSize(min/max/avg)=" + minLeafSize +
-                   "/" + maxLeafSize +
-                   "/" + String.format("%.2f", (double) sumLeafSize / leaves) +
-                   ", nodes=" + nodes +
-                   ", leaves=" + leaves +
-                   ", choices=" + choices +
-                   '}';
+            return "Info{" + "depth(min/max/avg)="
+                    + minDepth + "/"
+                    + maxDepth + "/"
+                    + String.format("%.2f", (double) sumDepth / leaves) + ", comp(min/max/avg)="
+                    + minComp + "/"
+                    + maxComp + "/"
+                    + String.format("%.2f", (double) sumComp / leaves) + ", ruleSetSize(min/max/avg)="
+                    + minLeafSize + "/"
+                    + maxLeafSize + "/"
+                    + String.format("%.2f", (double) sumLeafSize / leaves) + ", nodes="
+                    + nodes + ", leaves="
+                    + leaves + ", choices="
+                    + choices + '}';
         }
     }
 
@@ -214,8 +231,7 @@ public abstract class Tree {
                     lt.info.choices + eq.info.choices + gt.info.choices,
                     1 + Math.min(Math.min(lt.info.minComp, eq.info.minComp), gt.info.minComp),
                     1 + Math.max(Math.max(lt.info.maxComp, eq.info.maxComp), gt.info.maxComp),
-                    sumComp
-            );
+                    sumComp);
             return new Node.WithoutChoice(info, threshold, lt, eq, gt);
 
         } else {
@@ -224,22 +240,32 @@ public abstract class Tree {
             // the na subtree is also traversed for all requests that are lt, eq, or gt than the threshold
             // -> the fraction of these additionally traverses is "nonNaLeaves / leaves"
             // -> boost the sum of comparisons of the na subtree by that factor
-            var naBoost = 1.0 + (double)nonNaLeaves / leaves;
-            var sumComp = leaves + lt.info.sumComp + eq.info.sumComp + gt.info.sumComp + (int)(naBoost * na.info.sumComp);
+            var naBoost = 1.0 + (double) nonNaLeaves / leaves;
+            var sumComp =
+                    leaves + lt.info.sumComp + eq.info.sumComp + gt.info.sumComp + (int) (naBoost * na.info.sumComp);
             var info = new Info(
-                    1 + Math.min(Math.min(Math.min(lt.info.minDepth, eq.info.minDepth), gt.info.minDepth), na.info.minDepth),
-                    1 + Math.max(Math.max(Math.max(lt.info.maxDepth, eq.info.maxDepth), gt.info.maxDepth), na.info.maxDepth),
+                    1
+                            + Math.min(
+                                    Math.min(Math.min(lt.info.minDepth, eq.info.minDepth), gt.info.minDepth),
+                                    na.info.minDepth),
+                    1
+                            + Math.max(
+                                    Math.max(Math.max(lt.info.maxDepth, eq.info.maxDepth), gt.info.maxDepth),
+                                    na.info.maxDepth),
                     leaves + lt.info.sumDepth + eq.info.sumDepth + gt.info.sumDepth + na.info.sumDepth,
-                    Math.min(Math.min(Math.min(lt.info.minLeafSize, eq.info.minLeafSize), gt.info.minLeafSize), na.info.minLeafSize),
-                    Math.max(Math.max(Math.max(lt.info.maxLeafSize, eq.info.maxLeafSize), gt.info.maxLeafSize), na.info.maxLeafSize),
+                    Math.min(
+                            Math.min(Math.min(lt.info.minLeafSize, eq.info.minLeafSize), gt.info.minLeafSize),
+                            na.info.minLeafSize),
+                    Math.max(
+                            Math.max(Math.max(lt.info.maxLeafSize, eq.info.maxLeafSize), gt.info.maxLeafSize),
+                            na.info.maxLeafSize),
                     lt.info.sumLeafSize + eq.info.sumLeafSize + gt.info.sumLeafSize + na.info.sumLeafSize,
                     1 + lt.info.nodes + eq.info.nodes + gt.info.nodes + na.info.nodes,
                     leaves,
                     1 + lt.info.choices + eq.info.choices + gt.info.choices + na.info.choices,
                     1 + Math.min(Math.min(lt.info.minComp, eq.info.minComp), gt.info.minComp) + na.info.minComp,
                     1 + Math.max(Math.max(lt.info.maxComp, eq.info.maxComp), gt.info.maxComp) + na.info.maxComp,
-                    sumComp
-            );
+                    sumComp);
             return new Node.WithChoice(info, threshold, lt, eq, gt, na);
         }
     }
@@ -306,7 +332,7 @@ public abstract class Tree {
      */
     protected abstract Classifiers classifiers(ClassificationRequest request);
 
-    public static abstract class Node extends Tree {
+    public abstract static class Node extends Tree {
 
         public final Threshold threshold;
 
@@ -320,7 +346,7 @@ public abstract class Tree {
             return false;
         }
 
-        public final static class WithoutChoice extends Node {
+        public static final class WithoutChoice extends Node {
             public final Tree lt, eq, gt;
 
             public WithoutChoice(Info info, Threshold threshold, Tree lt, Tree eq, Tree gt) {
@@ -350,14 +376,11 @@ public abstract class Tree {
 
             @Override
             public String toString() {
-                return "WithoutChoice{" +
-                       "threshold=" + threshold +
-                       ", info=" + info +
-                       '}';
+                return "WithoutChoice{" + "threshold=" + threshold + ", info=" + info + '}';
             }
         }
 
-        public final static class WithChoice extends Node {
+        public static final class WithChoice extends Node {
             public final Tree lt, eq, gt, na;
 
             public WithChoice(Info info, Threshold threshold, Tree lt, Tree eq, Tree gt, Tree na) {
@@ -399,10 +422,7 @@ public abstract class Tree {
 
             @Override
             public String toString() {
-                return "WithChoice{" +
-                       "threshold=" + threshold +
-                       ", info=" + info +
-                       '}';
+                return "WithChoice{" + "threshold=" + threshold + ", info=" + info + '}';
             }
         }
     }
@@ -414,8 +434,7 @@ public abstract class Tree {
         } else if (ruleSet.size() == 1) {
             return new Leaf.WithClassifiers(ruleSet.get(0).createClassifier(filterService, bounds));
         } else {
-            var sorted = ruleSet
-                    .stream()
+            var sorted = ruleSet.stream()
                     .map(r -> r.createClassifier(filterService, bounds))
                     .sorted()
                     .collect(Collectors.toList());
@@ -423,7 +442,7 @@ public abstract class Tree {
         }
     }
 
-    public static abstract class Leaf extends Tree {
+    public abstract static class Leaf extends Tree {
 
         public static final Leaf EMPTY = new Empty();
 
@@ -431,7 +450,7 @@ public abstract class Tree {
             super(info);
         }
 
-        public final static class Empty extends Leaf {
+        public static final class Empty extends Leaf {
             public Empty() {
                 super(Info.forLeaf(0));
             }
@@ -457,7 +476,7 @@ public abstract class Tree {
             }
         }
 
-        public final static class WithClassifiers extends Leaf {
+        public static final class WithClassifiers extends Leaf {
             public final List<Classifier> classifiers;
 
             public WithClassifiers(List<Classifier> classifiers) {
@@ -491,12 +510,9 @@ public abstract class Tree {
 
             @Override
             public String toString() {
-                return "WithClassifiers{" +
-                       "classifiers=" + classifiers +
-                       '}';
+                return "WithClassifiers{" + "classifiers=" + classifiers + '}';
             }
         }
-
     }
 
     /**
@@ -508,7 +524,6 @@ public abstract class Tree {
          * @return the next classifier or {@code null} if no more classifiers are available
          */
         Classifier next();
-
     }
 
     public static Classifiers merge(Classifiers i1, Classifiers i2) {
@@ -581,8 +596,11 @@ public abstract class Tree {
 
     public interface Visitor<T> {
         T visit(Node.WithChoice node);
+
         T visit(Node.WithoutChoice node);
+
         T visit(Leaf.Empty leaf);
+
         T visit(Leaf.WithClassifiers leaf);
     }
 }

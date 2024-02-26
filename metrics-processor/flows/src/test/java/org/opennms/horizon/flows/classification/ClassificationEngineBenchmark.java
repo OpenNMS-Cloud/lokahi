@@ -1,32 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -39,10 +36,6 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.opennms.horizon.flows.classification.csv.CsvImporter;
 import org.opennms.horizon.flows.classification.internal.DefaultClassificationEngine;
 import org.opennms.horizon.flows.classification.persistence.api.Rule;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Use the Java Microbenchmarking Harness (JMH) to measure classification performance.
@@ -66,11 +59,9 @@ public class ClassificationEngineBenchmark {
     }
 
     public static List<Rule> getRules(String resource) throws IOException {
-        final var rules = CsvImporter.parseCSV(
-            ClassificationEngineBenchmark.class.getResourceAsStream(resource),
-            true);
+        final var rules = CsvImporter.parseCSV(ClassificationEngineBenchmark.class.getResourceAsStream(resource), true);
         int cnt = 0;
-        for (var r: rules) {
+        for (var r : rules) {
             r.setPosition(cnt++);
         }
         return rules;
@@ -91,8 +82,12 @@ public class ClassificationEngineBenchmark {
         @Setup
         public void setup() throws InterruptedException, IOException {
             var rules = getRules(ruleSet);
-            classificationEngine = new DefaultClassificationEngine(() -> rules, org.mockito.Mockito.mock(FilterService.class));
-            classificationRequests = RandomClassificationEngineTest.streamOfclassificationRequests(rules, 123456l).skip(index * BATCH_SIZE).limit(BATCH_SIZE).collect(Collectors.toList());
+            classificationEngine =
+                    new DefaultClassificationEngine(() -> rules, org.mockito.Mockito.mock(FilterService.class));
+            classificationRequests = RandomClassificationEngineTest.streamOfclassificationRequests(rules, 123456l)
+                    .skip(index * BATCH_SIZE)
+                    .limit(BATCH_SIZE)
+                    .collect(Collectors.toList());
         }
 
         public List<ClassificationRequest> requests() {
@@ -102,7 +97,6 @@ public class ClassificationEngineBenchmark {
         public ClassificationEngine classificationEngine() {
             return classificationEngine;
         }
-
     }
 
     @Benchmark
@@ -111,10 +105,9 @@ public class ClassificationEngineBenchmark {
     @Measurement(iterations = 2)
     public void classify(BState state, Blackhole blackhole) {
         var classificationEngine = state.classificationEngine();
-        for (var cr: state.requests()) {
+        for (var cr : state.requests()) {
             var app = classificationEngine.classify(cr);
             blackhole.consume(app);
         }
     }
-
 }

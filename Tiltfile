@@ -392,6 +392,7 @@ local_resource(
     ignore=['**/target','**/dependency-reduced-pom.xml'],
     labels=['shared'],
     resource_deps=['parent-pom'],
+    trigger_mode=TRIGGER_MODE_MANUAL,
 )
 
 k8s_resource(
@@ -538,7 +539,7 @@ jib_project(
 ### Minion ###
 custom_build(
     'opennms/lokahi-minion',
-    'mvn install -f minion -Dapplication.docker.image=$EXPECTED_REF -DskipUTs=true -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
+    'mvn clean install -f minion -Dapplication.docker.image=$EXPECTED_REF -DskipUTs=true -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )

@@ -1,32 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.traps;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.opennms.horizon.events.EventConstants;
@@ -34,10 +30,6 @@ import org.opennms.horizon.events.xml.Parm;
 import org.opennms.horizon.shared.snmp.SnmpUtils;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SnmpValueFactory;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 
 public class SyntaxToEventTest {
 
@@ -104,7 +96,7 @@ public class SyntaxToEventTest {
         assertEquals(EventConstants.XML_ENCODING_MAC_ADDRESS, parm.getValue().getEncoding());
         assertEquals("01:02:03:04:05:06", parm.getValue().getContent());
 
-        macAddr = new byte[]{(byte) 0x80, (byte) 0x81, (byte) 0x8C, (byte) 0x8F, (byte) 0xFF, (byte) 0x05};
+        macAddr = new byte[] {(byte) 0x80, (byte) 0x81, (byte) 0x8C, (byte) 0x8F, (byte) 0xFF, (byte) 0x05};
 
         octetString = valueFactory.getOctetString(macAddr);
 
@@ -114,7 +106,7 @@ public class SyntaxToEventTest {
         assertEquals(EventConstants.XML_ENCODING_MAC_ADDRESS, parm.getValue().getEncoding());
         assertEquals("80:81:8C:8F:FF:05", parm.getValue().getContent());
 
-        macAddr = new byte[]{0101, 0101, 0101, 0101, 0101, 0101};
+        macAddr = new byte[] {0101, 0101, 0101, 0101, 0101, 0101};
 
         octetString = valueFactory.getOctetString(macAddr);
 
@@ -145,7 +137,7 @@ public class SyntaxToEventTest {
         assertEquals(EventConstants.XML_ENCODING_BASE64, parm.getValue().getEncoding());
         assertEquals("TV/xlQ==", parm.getValue().getContent());
 
-        byte[] macAddr = new byte[]{(byte) 0x4c, (byte) 0x66, (byte) 0x41, (byte) 0xd9, (byte) 0x9a, (byte) 0xf6};
+        byte[] macAddr = new byte[] {(byte) 0x4c, (byte) 0x66, (byte) 0x41, (byte) 0xd9, (byte) 0x9a, (byte) 0xf6};
 
         octetString = valueFactory.getOctetString(macAddr);
 

@@ -1,47 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.factory.dnsresolver;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import org.xbill.DNS.ReverseMap;
 
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.netty.channel.AddressedEnvelope;
 import io.netty.channel.EventLoopGroup;
@@ -59,7 +40,16 @@ import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
 import io.netty.resolver.dns.DnsNameResolverTimeoutException;
 import io.netty.util.concurrent.Future;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
+import org.xbill.DNS.ReverseMap;
 
 /**
  * Asynchronous resolution using Netty.
@@ -86,9 +76,11 @@ public class NettyResolverContext implements DnsResolver {
     }
 
     public void init() {
-        group = new NioEventLoopGroup(0, new ThreadFactoryBuilder()
-                .setNameFormat("NettyDnsResolver-NIO-Event-Loop-" + idx + "-%d")
-                .build());
+        group = new NioEventLoopGroup(
+                0,
+                new ThreadFactoryBuilder()
+                        .setNameFormat("NettyDnsResolver-NIO-Event-Loop-" + idx + "-%d")
+                        .build());
 
         resolver = new DnsNameResolverBuilder(group.next())
                 .channelType(NioDatagramChannel.class)
@@ -118,14 +110,14 @@ public class NettyResolverContext implements DnsResolver {
         final Future<InetAddress> requestFuture = resolver.resolve(hostname);
         requestFuture.addListener(responseFuture -> {
             try {
-                InetAddress addr = (InetAddress)responseFuture.get();
+                InetAddress addr = (InetAddress) responseFuture.get();
                 future.complete(Optional.ofNullable(addr));
             } catch (InterruptedException e) {
                 future.completeExceptionally(e);
             } catch (ExecutionException e) {
                 final DnsNameResolverTimeoutException timeoutException = Throwables.getCausalChain(e).stream()
                         .filter((DnsNameResolverTimeoutException.class)::isInstance)
-                        .map(ex -> (DnsNameResolverTimeoutException)ex)
+                        .map(ex -> (DnsNameResolverTimeoutException) ex)
                         .findFirst()
                         .orElse(null);
 
@@ -164,7 +156,7 @@ public class NettyResolverContext implements DnsResolver {
             // Try and find a hostname, or return an empty optional if none was found
             final Optional<String> cachedHostname = entries.stream()
                     .filter(e -> e instanceof ExtendedDnsCacheEntry)
-                    .map(e -> ((ExtendedDnsCacheEntry)e).hostnameFromPtrRecord())
+                    .map(e -> ((ExtendedDnsCacheEntry) e).hostnameFromPtrRecord())
                     .filter(Objects::nonNull)
                     .findFirst();
             if (cachedHostname.isPresent()) {
@@ -178,10 +170,12 @@ public class NettyResolverContext implements DnsResolver {
 
         // Limit # of concurrent calls using the bulkhead
         bulkhead.acquirePermission();
-        final Future<AddressedEnvelope<DnsResponse, InetSocketAddress>> requestFuture = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.PTR, DnsRecord.CLASS_IN));
+        final Future<AddressedEnvelope<DnsResponse, InetSocketAddress>> requestFuture =
+                resolver.query(new DefaultDnsQuestion(name, DnsRecordType.PTR, DnsRecord.CLASS_IN));
         requestFuture.addListener(responseFuture -> {
             try {
-                final AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = (AddressedEnvelope<DnsResponse, InetSocketAddress>) responseFuture.get();
+                final AddressedEnvelope<DnsResponse, InetSocketAddress> envelope =
+                        (AddressedEnvelope<DnsResponse, InetSocketAddress>) responseFuture.get();
                 // This shouldn't happen, but just to be safe
                 if (envelope == null) {
                     future.completeExceptionally(new Exception("Got a null envelope!"));
@@ -191,7 +185,11 @@ public class NettyResolverContext implements DnsResolver {
                     final DnsResponse response = envelope.content();
                     if (response.code() != DnsResponseCode.NOERROR) {
                         // Cache the failure (will only be cached if negative-ttl is > 0)
-                        cache.cache(name, null, new Exception("Request failed with response code: " + response.code()), group.next());
+                        cache.cache(
+                                name,
+                                null,
+                                new Exception("Request failed with response code: " + response.code()),
+                                group.next());
                         future.complete(Optional.empty());
                         return;
                     }

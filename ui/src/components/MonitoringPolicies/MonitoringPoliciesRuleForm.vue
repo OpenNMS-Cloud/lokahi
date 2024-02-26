@@ -216,7 +216,7 @@ const countAlertsAndOpenDeleteModal = async () => {
   openModal()
 }
 
-const deleteMsg = computed(() => 
+const deleteMsg = computed(() =>
   `Deleting rule ${store.selectedRule?.name} removes ${store.numOfAlertsForRule} associated alerts. Do you wish to proceed?`
 )
 </script>

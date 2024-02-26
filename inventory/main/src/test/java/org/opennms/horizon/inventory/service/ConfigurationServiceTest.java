@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,8 +27,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +40,6 @@ import org.opennms.horizon.inventory.dto.ConfigurationDTO;
 import org.opennms.horizon.inventory.mapper.ConfigurationMapper;
 import org.opennms.horizon.inventory.model.Configuration;
 import org.opennms.horizon.inventory.repository.ConfigurationRepository;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ConfigurationServiceTest {
     private ConfigurationRepository mockConfigurationRepo;
@@ -67,13 +58,13 @@ public class ConfigurationServiceTest {
     public void setUP() {
         mockConfigurationRepo = mock(ConfigurationRepository.class);
         ConfigurationMapper mapper = Mappers.getMapper(ConfigurationMapper.class);
-        service = new ConfigurationService(mockConfigurationRepo, mapper){};
+        service = new ConfigurationService(mockConfigurationRepo, mapper) {};
         testConfiguration = ConfigurationDTO.newBuilder()
-            .setLocation(location)
-            .setTenantId(tenantId)
-            .setKey(key)
-            .setValue(value)
-            .build();
+                .setLocation(location)
+                .setTenantId(tenantId)
+                .setKey(key)
+                .setValue(value)
+                .build();
         configArgCaptor = ArgumentCaptor.forClass(Configuration.class);
     }
 
@@ -89,9 +80,14 @@ public class ConfigurationServiceTest {
         verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
         verify(mockConfigurationRepo).save(configArgCaptor.capture());
         Configuration result = configArgCaptor.getValue();
-        assertThat(result).isNotNull()
-            .extracting(Configuration::getTenantId, Configuration::getLocation, Configuration::getKey, Configuration::getValue)
-            .containsExactly(tenantId, location, key, new ObjectMapper().readTree(value));
+        assertThat(result)
+                .isNotNull()
+                .extracting(
+                        Configuration::getTenantId,
+                        Configuration::getLocation,
+                        Configuration::getKey,
+                        Configuration::getValue)
+                .containsExactly(tenantId, location, key, new ObjectMapper().readTree(value));
     }
 
     @Test
@@ -103,11 +99,16 @@ public class ConfigurationServiceTest {
         configuration.setId(1L);
         configuration.setValue(new ObjectMapper().readTree(value));
         doReturn(Optional.of(configuration)).when(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
-        Configuration result = service.createSingle (testConfiguration);
-        assertThat(result).isNotNull()
-            .extracting(Configuration::getId, Configuration::getTenantId, Configuration::getLocation, Configuration::getKey,
-                Configuration::getValue)
-            .containsExactly(1L, tenantId, location, key, new ObjectMapper().readTree(value));
+        Configuration result = service.createSingle(testConfiguration);
+        assertThat(result)
+                .isNotNull()
+                .extracting(
+                        Configuration::getId,
+                        Configuration::getTenantId,
+                        Configuration::getLocation,
+                        Configuration::getKey,
+                        Configuration::getValue)
+                .containsExactly(1L, tenantId, location, key, new ObjectMapper().readTree(value));
         verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
     }
 
@@ -118,9 +119,14 @@ public class ConfigurationServiceTest {
         verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
         verify(mockConfigurationRepo).save(configArgCaptor.capture());
         Configuration result = configArgCaptor.getValue();
-        assertThat(result).isNotNull()
-            .extracting(Configuration::getTenantId, Configuration::getLocation, Configuration::getKey, Configuration::getValue)
-            .containsExactly(tenantId, location, key, new ObjectMapper().readTree(value));
+        assertThat(result)
+                .isNotNull()
+                .extracting(
+                        Configuration::getTenantId,
+                        Configuration::getLocation,
+                        Configuration::getKey,
+                        Configuration::getValue)
+                .containsExactly(tenantId, location, key, new ObjectMapper().readTree(value));
     }
 
     @Test
@@ -137,10 +143,16 @@ public class ConfigurationServiceTest {
         service.createOrUpdate(testConfiguration);
         verify(mockConfigurationRepo).save(configArgCaptor.capture());
         Configuration arg = configArgCaptor.getValue();
-        assertThat(arg).isNotNull()
-            .extracting(Configuration::getId, Configuration::getTenantId, Configuration::getLocation, Configuration::getKey,
-                Configuration::getValue)
-            .containsExactly(1L, tenantId, location, key, new ObjectMapper().readTree(value)); //updated with the new value;
+        assertThat(arg)
+                .isNotNull()
+                .extracting(
+                        Configuration::getId,
+                        Configuration::getTenantId,
+                        Configuration::getLocation,
+                        Configuration::getKey,
+                        Configuration::getValue)
+                .containsExactly(
+                        1L, tenantId, location, key, new ObjectMapper().readTree(value)); // updated with the new value;
         verify(mockConfigurationRepo).getByTenantIdAndKey(tenantId, key);
     }
 }

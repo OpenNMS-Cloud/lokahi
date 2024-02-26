@@ -23,38 +23,38 @@ interface InventoryNode {
 
 interface NewInventoryNode {
   id: number
-  ipInterfaces: [{id:number,ipAddress:string,nodeId:number,snmpPrimary:boolean}],
-  location:{id:number,location:string},
+  ipInterfaces: [{ id: number, ipAddress: string, nodeId: number, snmpPrimary: boolean }],
+  location: { id: number, location: string },
   monitoredState: string,
   monitoringLocationId: number,
   nodeLabel: string,
   scanType: string,
-  tags: [{id:number, name: string}],
+  tags: [{ id: number, name: string }],
   nodeAlias: string
 }
 
 interface RawMetric {
   metric: {
-    __name__:string,
-    instance: string, 
+    __name__: string,
+    instance: string,
     location_id: string,
-    monitor:string,
-    node_id:string,
-    system_id:string
+    monitor: string,
+    node_id: string,
+    system_id: string
   },
-  value: [number,number],
+  value: [number, number],
   values: []
 }
 
 interface RawMetrics {
-  status:string,
-  data:{
-    resultType:string,
-    result:Array<RawMetric>
+  status: string,
+  data: {
+    resultType: string,
+    result: Array<RawMetric>
   }
 }
 
-export interface InventoryItem extends NewInventoryNode{
+export interface InventoryItem extends NewInventoryNode {
   metrics?: RawMetric
 }
 

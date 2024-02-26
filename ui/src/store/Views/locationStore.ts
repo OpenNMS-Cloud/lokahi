@@ -124,7 +124,7 @@ export const useLocationStore = defineStore('locationStore', () => {
     const { showSnackbar } = useSnackbar()
     if (!selectedLocation.value) return
     const response = await locationMutations.revokeMinionCertificate(selectedLocation.value.id)
-    if(!response.value){
+    if (!response.value) {
       setCertificatePassword('')
       showSnackbar({ msg: 'Certificate successfully regenerated.'})
     }

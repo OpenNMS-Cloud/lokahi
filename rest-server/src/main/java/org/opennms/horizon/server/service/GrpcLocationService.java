@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -49,7 +42,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there is no GRPC in this code
+public class GrpcLocationService { // TODO: rename to GraphQL...Service; there is no GRPC in this code
     private final InventoryClient inventoryClient;
     private final MinionCertificateManagerClient certificateManagerClient;
     private final MonitoringLocationMapper mapper;
@@ -57,37 +50,52 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
 
     @GraphQLQuery
     public Flux<MonitoringLocation> findAllLocations(@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(inventoryClient.listLocations(headerUtil.getAuthHeader(env)).stream().map(mapper::protoToLocation).toList());
+        return Flux.fromIterable(inventoryClient.listLocations(headerUtil.getAuthHeader(env)).stream()
+                .map(mapper::protoToLocation)
+                .toList());
     }
 
     @GraphQLQuery
-    public Mono<MonitoringLocation> findLocationById(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<MonitoringLocation> findLocationById(
+            @GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToLocation(inventoryClient.getLocationById(id, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Mono<MonitoringLocation> getLocationByName(@GraphQLArgument(name = "locationName") String locationName, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToLocation(inventoryClient.getLocationByName(locationName, headerUtil.getAuthHeader(env))));
+    public Mono<MonitoringLocation> getLocationByName(
+            @GraphQLArgument(name = "locationName") String locationName,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(
+                mapper.protoToLocation(inventoryClient.getLocationByName(locationName, headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLQuery
-    public Flux<MonitoringLocation> searchLocation(@GraphQLArgument(name = "searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(inventoryClient.searchLocations(searchTerm, headerUtil.getAuthHeader(env))
-            .stream().map(mapper::protoToLocation).toList());
+    public Flux<MonitoringLocation> searchLocation(
+            @GraphQLArgument(name = "searchTerm") String searchTerm, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(inventoryClient.searchLocations(searchTerm, headerUtil.getAuthHeader(env)).stream()
+                .map(mapper::protoToLocation)
+                .toList());
     }
 
     @GraphQLMutation
-    public Mono<MonitoringLocation> createLocation(@GraphQLArgument(name = "location") MonitoringLocationCreate location, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToLocation(inventoryClient.createLocation(mapper.locationCreateToLocationCreateProto(location), headerUtil.getAuthHeader(env))));
+    public Mono<MonitoringLocation> createLocation(
+            @GraphQLArgument(name = "location") MonitoringLocationCreate location,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToLocation(inventoryClient.createLocation(
+                mapper.locationCreateToLocationCreateProto(location), headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<MonitoringLocation> updateLocation(@GraphQLArgument(name = "location") MonitoringLocationUpdate monitoringLocation, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Mono.just(mapper.protoToLocation(inventoryClient.updateLocation(mapper.locationUpdateToLocationProto(monitoringLocation), headerUtil.getAuthHeader(env))));
+    public Mono<MonitoringLocation> updateLocation(
+            @GraphQLArgument(name = "location") MonitoringLocationUpdate monitoringLocation,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(mapper.protoToLocation(inventoryClient.updateLocation(
+                mapper.locationUpdateToLocationProto(monitoringLocation), headerUtil.getAuthHeader(env))));
     }
 
     @GraphQLMutation
-    public Mono<Boolean> deleteLocation(@GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
+    public Mono<Boolean> deleteLocation(
+            @GraphQLArgument(name = "id") long id, @GraphQLEnvironment ResolutionEnvironment env) {
         var accessToken = headerUtil.getAuthHeader(env);
         var tenantId = headerUtil.extractTenant(env);
 
@@ -99,5 +107,4 @@ public class GrpcLocationService {  // TODO: rename to GraphQL...Service; there 
         certificateManagerClient.revokeCertificate(tenantId, id, accessToken);
         return Mono.just(status);
     }
-
 }

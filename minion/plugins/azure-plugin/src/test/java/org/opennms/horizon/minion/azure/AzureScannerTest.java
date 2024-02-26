@@ -1,8 +1,36 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.azure;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -27,14 +55,6 @@ import org.opennms.horizon.shared.azure.http.dto.publicipaddresses.PublicIpAddre
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureResourceGroups;
 import org.opennms.horizon.shared.azure.http.dto.resourcegroup.AzureValue;
 import org.opennms.horizon.shared.azure.http.dto.resources.AzureResources;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 public class AzureScannerTest {
     private static final String TEST_CLIENT_ID = "test-client-id";
@@ -70,37 +90,54 @@ public class AzureScannerTest {
         scanner = new AzureScanner(mockAzureHttpClient);
         token = getAzureOAuthToken();
 
-        when(mockAzureHttpClient.login(TEST_DIRECTORY_ID, TEST_CLIENT_ID,
-            TEST_CLIENT_SECRET, TEST_TIMEOUT_MS, TEST_RETRIES)).thenReturn(token);
+        when(mockAzureHttpClient.login(
+                        TEST_DIRECTORY_ID, TEST_CLIENT_ID, TEST_CLIENT_SECRET, TEST_TIMEOUT_MS, TEST_RETRIES))
+                .thenReturn(token);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testScan() throws Exception {
         AzureResourceGroups azureResourceGroups = getAzureResourceGroups();
-        when(mockAzureHttpClient.getResourceGroups(token, TEST_SUBSCRIPTION_ID, TEST_TIMEOUT_MS, TEST_RETRIES)).thenReturn(azureResourceGroups);
+        when(mockAzureHttpClient.getResourceGroups(token, TEST_SUBSCRIPTION_ID, TEST_TIMEOUT_MS, TEST_RETRIES))
+                .thenReturn(azureResourceGroups);
 
         AzureResources azureResources = getAzureResources("Microsoft.Compute/virtualMachines");
-        when(mockAzureHttpClient.getResources(token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES)).thenReturn(azureResources);
+        when(mockAzureHttpClient.getResources(
+                        token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES))
+                .thenReturn(azureResources);
 
         AzureNetworkInterfaces azureNetworkInterfaces = getAzureNetworkInterfaces();
-        when(mockAzureHttpClient.getNetworkInterfaces(token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES)).thenReturn(azureNetworkInterfaces);
+        when(mockAzureHttpClient.getNetworkInterfaces(
+                        token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES))
+                .thenReturn(azureNetworkInterfaces);
 
         AzurePublicIpAddresses azurePublicIpAddresses = getAzurePublicIpAddresses();
-        when(mockAzureHttpClient.getPublicIpAddresses(token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES)).thenReturn(azurePublicIpAddresses);
+        when(mockAzureHttpClient.getPublicIpAddresses(
+                        token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP, TEST_TIMEOUT_MS, TEST_RETRIES))
+                .thenReturn(azurePublicIpAddresses);
 
         AzureInstanceView instanceView = new AzureInstanceView();
         instanceView.setOsName(TEST_OS);
         instanceView.setOsVersion(TEST_OS_VERSION);
-        when(mockAzureHttpClient.getInstanceView(token, TEST_SUBSCRIPTION_ID, TEST_RESOURCE_GROUP,
-            azureResources.getValue().get(0).getName(), TEST_TIMEOUT_MS, TEST_RETRIES))
-            .thenReturn(instanceView);
+        when(mockAzureHttpClient.getInstanceView(
+                        token,
+                        TEST_SUBSCRIPTION_ID,
+                        TEST_RESOURCE_GROUP,
+                        azureResources.getValue().get(0).getName(),
+                        TEST_TIMEOUT_MS,
+                        TEST_RETRIES))
+                .thenReturn(instanceView);
 
         AzureScanRequest request = AzureScanRequest.newBuilder()
-            .setClientId(TEST_CLIENT_ID).setClientSecret(TEST_CLIENT_SECRET)
-            .setSubscriptionId(TEST_SUBSCRIPTION_ID).setDirectoryId(TEST_DIRECTORY_ID)
-            .setActiveDiscoveryId(TEST_ACTIVE_DISCOVERY_ID).setRetries(TEST_RETRIES)
-            .setTimeoutMs(TEST_TIMEOUT_MS).build();
+                .setClientId(TEST_CLIENT_ID)
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setSubscriptionId(TEST_SUBSCRIPTION_ID)
+                .setDirectoryId(TEST_DIRECTORY_ID)
+                .setActiveDiscoveryId(TEST_ACTIVE_DISCOVERY_ID)
+                .setRetries(TEST_RETRIES)
+                .setTimeoutMs(TEST_TIMEOUT_MS)
+                .build();
 
         CompletableFuture<ScanResultsResponse> future = scanner.scan(Any.pack(request));
         ScanResultsResponse response = future.get(FUTURE_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -108,7 +145,8 @@ public class AzureScannerTest {
         Message results = response.getResults();
 
         Descriptors.Descriptor descriptorForType = results.getDescriptorForType();
-        Descriptors.FieldDescriptor resultsField = descriptorForType.findFieldByNumber(AzureScanResponse.RESULTS_FIELD_NUMBER);
+        Descriptors.FieldDescriptor resultsField =
+                descriptorForType.findFieldByNumber(AzureScanResponse.RESULTS_FIELD_NUMBER);
         List<AzureScanItem> resultsList = (List<AzureScanItem>) results.getField(resultsField);
 
         assertEquals(1, resultsList.size());
@@ -150,8 +188,8 @@ public class AzureScannerTest {
 
     private AzureResources getAzureResources(String resourceType) {
         AzureResources azureResources = new AzureResources();
-        org.opennms.horizon.shared.azure.http.dto.resources.AzureValue azureValue
-            = new org.opennms.horizon.shared.azure.http.dto.resources.AzureValue();
+        org.opennms.horizon.shared.azure.http.dto.resources.AzureValue azureValue =
+                new org.opennms.horizon.shared.azure.http.dto.resources.AzureValue();
         azureValue.setId(TEST_RESOURCE_ID);
         azureValue.setName(TEST_RESOURCE_NAME);
         azureValue.setType(resourceType);

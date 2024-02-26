@@ -1,35 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2002-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events;
-
-import org.opennms.horizon.events.xml.Value;
-import org.opennms.horizon.shared.snmp.SnmpValue;
 
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -37,6 +27,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import org.opennms.horizon.events.xml.Value;
+import org.opennms.horizon.shared.snmp.SnmpValue;
 
 /**
  * This class holds all OpenNMS events related constants - the UEIs, parm
@@ -48,7 +40,6 @@ public abstract class EventConstants {
      * database timestamp using the PostgreSQL to_timestamp() built-in function.
      */
     public static final String POSTGRES_DATE_FORMAT = "\'Dy Mon DD HH24:MI:SS Tz YYYY\'";
-
 
     //
     // The eventUEIs used by OpenNMS
@@ -108,22 +99,22 @@ public abstract class EventConstants {
      * The node added event UEI.
      */
     public static final String NODE_ADDED_EVENT_UEI = "uei.opennms.org/nodes/nodeAdded";
-    
+
     /**
      * The node updated event UEI (added for the ProvisioningAdapter integration).
      */
     public static final String NODE_UPDATED_EVENT_UEI = "uei.opennms.org/nodes/nodeUpdated";
 
-
     /**
      * The node location changed event UEI.
      */
     public static final String NODE_LOCATION_CHANGED_EVENT_UEI = "uei.opennms.org/nodes/nodeLocationChanged";
-    
-	/**
-	 * The node category membership changed UEI.
-	 */
-    public static final String NODE_CATEGORY_MEMBERSHIP_CHANGED_EVENT_UEI = "uei.opennms.org/nodes/nodeCategoryMembershipChanged";
+
+    /**
+     * The node category membership changed UEI.
+     */
+    public static final String NODE_CATEGORY_MEMBERSHIP_CHANGED_EVENT_UEI =
+            "uei.opennms.org/nodes/nodeCategoryMembershipChanged";
 
     /**
      * The node gained interface event UEI.
@@ -173,27 +164,32 @@ public abstract class EventConstants {
     /**
      * The SNMP interface operStatus testing event UEI.
      */
-    public static final String SNMP_INTERFACE_OPER_TESTING_EVENT_UEI = "uei.opennms.org/nodes/snmp/interfaceOperTesting";
+    public static final String SNMP_INTERFACE_OPER_TESTING_EVENT_UEI =
+            "uei.opennms.org/nodes/snmp/interfaceOperTesting";
 
     /**
      * The SNMP interface operStatus unknown event UEI.
      */
-    public static final String SNMP_INTERFACE_OPER_UNKNOWN_EVENT_UEI = "uei.opennms.org/nodes/snmp/interfaceOperUnknown";
+    public static final String SNMP_INTERFACE_OPER_UNKNOWN_EVENT_UEI =
+            "uei.opennms.org/nodes/snmp/interfaceOperUnknown";
 
     /**
      * The SNMP interface operStatus dormant event UEI.
      */
-    public static final String SNMP_INTERFACE_OPER_DORMANT_EVENT_UEI = "uei.opennms.org/nodes/snmp/interfaceOperDormant";
+    public static final String SNMP_INTERFACE_OPER_DORMANT_EVENT_UEI =
+            "uei.opennms.org/nodes/snmp/interfaceOperDormant";
 
     /**
      * The SNMP interface operStatus notPresent event UEI.
      */
-    public static final String SNMP_INTERFACE_OPER_NOT_PRESENT_EVENT_UEI = "uei.opennms.org/nodes/snmp/interfaceOperNotPresent";
+    public static final String SNMP_INTERFACE_OPER_NOT_PRESENT_EVENT_UEI =
+            "uei.opennms.org/nodes/snmp/interfaceOperNotPresent";
 
     /**
      * The SNMP interface operStatus lowerLayerDown event UEI.
      */
-    public static final String SNMP_INTERFACE_OPER_LOWER_LAYER_DOWN_EVENT_UEI = "uei.opennms.org/nodes/snmp/interfaceOperLowerLayerDown";
+    public static final String SNMP_INTERFACE_OPER_LOWER_LAYER_DOWN_EVENT_UEI =
+            "uei.opennms.org/nodes/snmp/interfaceOperLowerLayerDown";
 
     /**
      * The node down event UEI.
@@ -288,12 +284,14 @@ public abstract class EventConstants {
     /**
      * ThresholdEvaluatorRearmingAbsoluteChange exceeded UEI.
      */
-    public static final String REARMING_ABSOLUTE_CHANGE_EXCEEDED_EVENT_UEI = "uei.opennms.org/threshold/rearmingAbsoluteChangeExceeded";
-    
+    public static final String REARMING_ABSOLUTE_CHANGE_EXCEEDED_EVENT_UEI =
+            "uei.opennms.org/threshold/rearmingAbsoluteChangeExceeded";
+
     /**
      * ThresholdEvaluatorRearmingAbsoluteChange exceeded UEI.
      */
-    public static final String REARMING_ABSOLUTE_CHANGE_REARM_EVENT_UEI = "uei.opennms.org/threshold/rearmingAbsoluteChangeRearmed";
+    public static final String REARMING_ABSOLUTE_CHANGE_REARM_EVENT_UEI =
+            "uei.opennms.org/threshold/rearmingAbsoluteChangeRearmed";
 
     /**
      * The interface reparented event.
@@ -318,12 +316,14 @@ public abstract class EventConstants {
     /**
      * The primary SNMP interface changed event.
      */
-    public static final String PRIMARY_SNMP_INTERFACE_CHANGED_EVENT_UEI = "uei.opennms.org/nodes/primarySnmpInterfaceChanged";
+    public static final String PRIMARY_SNMP_INTERFACE_CHANGED_EVENT_UEI =
+            "uei.opennms.org/nodes/primarySnmpInterfaceChanged";
 
     /**
      * The reinitialize primary SNMP interface event.
      */
-    public static final String REINITIALIZE_PRIMARY_SNMP_INTERFACE_EVENT_UEI = "uei.opennms.org/nodes/reinitializePrimarySnmpInterface";
+    public static final String REINITIALIZE_PRIMARY_SNMP_INTERFACE_EVENT_UEI =
+            "uei.opennms.org/nodes/reinitializePrimarySnmpInterface";
 
     /**
      * The configure SNMP event.
@@ -348,18 +348,18 @@ public abstract class EventConstants {
     /**
      * The suspend polling service event UEI
      */
-    public static final String SUSPEND_POLLING_SERVICE_EVENT_UEI = "uei.opennms.org/internal/poller/suspendPollingService";
+    public static final String SUSPEND_POLLING_SERVICE_EVENT_UEI =
+            "uei.opennms.org/internal/poller/suspendPollingService";
 
     /**
      * The resume polling service event UEI.
      */
-
-    public static final String RESUME_POLLING_SERVICE_EVENT_UEI = "uei.opennms.org/internal/poller/resumePollingService";
+    public static final String RESUME_POLLING_SERVICE_EVENT_UEI =
+            "uei.opennms.org/internal/poller/resumePollingService";
 
     /**
      * The rescan completed UEI.
      */
-
     public static final String RESCAN_COMPLETED_EVENT_UEI = "uei.opennms.org/internal/capsd/rescanCompleted";
 
     /**
@@ -372,7 +372,6 @@ public abstract class EventConstants {
      */
     public static final String RTC_UNSUBSCRIBE_EVENT_UEI = "uei.opennms.org/internal/rtc/unsubscribe";
 
-    
     /**
      * An event used by queued to indicate that data for certain rrds should be immediately flushed to the disk.
      */
@@ -389,26 +388,26 @@ public abstract class EventConstants {
      */
     public static final String ASSET_INFO_CHANGED_EVENT_UEI = "uei.opennms.org/nodes/assetInfoChanged";
 
-	/**
-        * The scheduled-outages configuration was changed by the user via the web UI (or manually, for that matter).
-        */
+    /**
+     * The scheduled-outages configuration was changed by the user via the web UI (or manually, for that matter).
+     */
     public static final String SCHEDOUTAGES_CHANGED_EVENT_UEI = "uei.opennms.org/internal/schedOutagesChanged";
-    
+
     /**
      * The threshold config was changed by the user via the web UI, or manually.
      */
     public static final String THRESHOLDCONFIG_CHANGED_EVENT_UEI = "uei.opennms.org/internal/thresholdConfigChange";
-       
+
     /**
      * The event config was changed by the user via the web UI, or manually, and should be reloaded.
      */
     public static final String EVENTSCONFIG_CHANGED_EVENT_UEI = "uei.opennms.org/internal/eventsConfigChange";
-    
+
     /**
      * The Snmp Poller config was changed by the user via the web UI, or manually, and should be reloaded.
      */
     public static final String SNMPPOLLERCONFIG_CHANGED_EVENT_UEI = "uei.opennms.org/internal/reloadSnmpPollerConfig";
-    
+
     /**
      * Reload Vacuumd configuration UEI.
      */
@@ -426,45 +425,48 @@ public abstract class EventConstants {
     /** Constant <code>RELOAD_DAEMON_CONFIG_FAILED_UEI="uei.opennms.org/internal/reloadDaemonCo"{trunked}</code> */
     public static final String RELOAD_DAEMON_CONFIG_FAILED_UEI = "uei.opennms.org/internal/reloadDaemonConfigFailed";
     /** Constant <code>RELOAD_DAEMON_CONFIG_SUCCESSFUL_UEI="uei.opennms.org/internal/reloadDaemonCo"{trunked}</code> */
-    public static final String RELOAD_DAEMON_CONFIG_SUCCESSFUL_UEI = "uei.opennms.org/internal/reloadDaemonConfigSuccessful";
+    public static final String RELOAD_DAEMON_CONFIG_SUCCESSFUL_UEI =
+            "uei.opennms.org/internal/reloadDaemonConfigSuccessful";
     /** Constant <code>PARM_DAEMON_NAME="daemonName"</code> */
     public static final String PARM_DAEMON_NAME = "daemonName";
     /** Constant <code>PARM_CONFIG_FILE_NAME="configFile"</code> */
     public static final String PARM_CONFIG_FILE_NAME = "configFile";
 
-
-    public static final String CONFIG_UPDATED_UEI  = "uei.opennms.org/internal/configUpdated";
+    public static final String CONFIG_UPDATED_UEI = "uei.opennms.org/internal/configUpdated";
     public static final String PARM_CONFIG_NAME = "configName";
-
 
     /*
      * Reportd UEIs.
      */
-    
+
     public static final String REPORTD_RUN_REPORT = "uei.opennms.org/reportd/runReport";
     /** Constant <code>PARM_REPORT_NAME="reportName"</code> */
     public static final String PARM_REPORT_NAME = "reportName";
+
     public static final String REPORT_RUN_FAILED_UEI = "uei.opennms.org/reportd/reportRunFailed";
     public static final String REPORT_DELIVERY_FAILED_UEI = "uei.opennms.org/reportd/reportDeliveryFailed";
-    
-    public static final String PERSPECTIVE_NODE_LOST_SERVICE_UEI = "uei.opennms.org/perspective/nodes/nodeLostService";
-    public static final String PERSPECTIVE_NODE_REGAINED_SERVICE_UEI = "uei.opennms.org/perspective/nodes/nodeRegainedService";
-    /** Constant <code>LOCATION_MONITOR_REGISTERED_UEI="uei.opennms.org/remote/locationMonitorR"{trunked}</code> */
-    public static final String LOCATION_MONITOR_REGISTERED_UEI="uei.opennms.org/remote/locationMonitorRegistered";
-    /** Constant <code>LOCATION_MONITOR_STARTED_UEI="uei.opennms.org/remote/locationMonitorS"{trunked}</code> */
-    public static final String LOCATION_MONITOR_STARTED_UEI="uei.opennms.org/remote/locationMonitorStarted";
-    /** Constant <code>LOCATION_MONITOR_STOPPED_UEI="uei.opennms.org/remote/locationMonitorS"{trunked}</code> */
-    public static final String LOCATION_MONITOR_STOPPED_UEI="uei.opennms.org/remote/locationMonitorStopped";
-    /** Constant <code>LOCATION_MONITOR_PAUSED_UEI="uei.opennms.org/remote/locationMonitorP"{trunked}</code> */
-    public static final String LOCATION_MONITOR_PAUSED_UEI="uei.opennms.org/remote/locationMonitorPaused";
-    /** Constant <code>LOCATION_MONITOR_DISCONNECTED_UEI="uei.opennms.org/remote/locationMonitorD"{trunked}</code> */
-    public static final String LOCATION_MONITOR_DISCONNECTED_UEI="uei.opennms.org/remote/locationMonitorDisconnected";
-    /** Constant <code>LOCATION_MONITOR_RECONNECTED_UEI="uei.opennms.org/remote/locationMonitorR"{trunked}</code> */
-    public static final String LOCATION_MONITOR_RECONNECTED_UEI="uei.opennms.org/remote/locationMonitorReconnected";
-    public static final String LOCATION_MONITOR_CONNECTION_ADDRESS_CHANGED_UEI="uei.opennms.org/remote/locationMonitorConnectionAddressChanged";
 
-    public static final String REMOTE_SUCCESSFUL_SCAN_REPORT_UEI="uei.opennms.org/remote/successfulScanReport";
-    public static final String REMOTE_UNSUCCESSFUL_SCAN_REPORT_UEI="uei.opennms.org/remote/unsuccessfulScanReport";
+    public static final String PERSPECTIVE_NODE_LOST_SERVICE_UEI = "uei.opennms.org/perspective/nodes/nodeLostService";
+    public static final String PERSPECTIVE_NODE_REGAINED_SERVICE_UEI =
+            "uei.opennms.org/perspective/nodes/nodeRegainedService";
+    /** Constant <code>LOCATION_MONITOR_REGISTERED_UEI="uei.opennms.org/remote/locationMonitorR"{trunked}</code> */
+    public static final String LOCATION_MONITOR_REGISTERED_UEI = "uei.opennms.org/remote/locationMonitorRegistered";
+    /** Constant <code>LOCATION_MONITOR_STARTED_UEI="uei.opennms.org/remote/locationMonitorS"{trunked}</code> */
+    public static final String LOCATION_MONITOR_STARTED_UEI = "uei.opennms.org/remote/locationMonitorStarted";
+    /** Constant <code>LOCATION_MONITOR_STOPPED_UEI="uei.opennms.org/remote/locationMonitorS"{trunked}</code> */
+    public static final String LOCATION_MONITOR_STOPPED_UEI = "uei.opennms.org/remote/locationMonitorStopped";
+    /** Constant <code>LOCATION_MONITOR_PAUSED_UEI="uei.opennms.org/remote/locationMonitorP"{trunked}</code> */
+    public static final String LOCATION_MONITOR_PAUSED_UEI = "uei.opennms.org/remote/locationMonitorPaused";
+    /** Constant <code>LOCATION_MONITOR_DISCONNECTED_UEI="uei.opennms.org/remote/locationMonitorD"{trunked}</code> */
+    public static final String LOCATION_MONITOR_DISCONNECTED_UEI = "uei.opennms.org/remote/locationMonitorDisconnected";
+    /** Constant <code>LOCATION_MONITOR_RECONNECTED_UEI="uei.opennms.org/remote/locationMonitorR"{trunked}</code> */
+    public static final String LOCATION_MONITOR_RECONNECTED_UEI = "uei.opennms.org/remote/locationMonitorReconnected";
+
+    public static final String LOCATION_MONITOR_CONNECTION_ADDRESS_CHANGED_UEI =
+            "uei.opennms.org/remote/locationMonitorConnectionAddressChanged";
+
+    public static final String REMOTE_SUCCESSFUL_SCAN_REPORT_UEI = "uei.opennms.org/remote/successfulScanReport";
+    public static final String REMOTE_UNSUCCESSFUL_SCAN_REPORT_UEI = "uei.opennms.org/remote/unsuccessfulScanReport";
 
     /** Constant <code>RELOAD_IMPORT_UEI="uei.opennms.org/internal/importer/reloa"{trunked}</code> */
     public static final String RELOAD_IMPORT_UEI = "uei.opennms.org/internal/importer/reloadImport";
@@ -478,12 +480,13 @@ public abstract class EventConstants {
     public static final String PROVISIONING_ADAPTER_FAILED = "uei.opennms.org/provisioner/provisioningAdapterFailed";
 
     /** Constant <code>PROVISION_SCAN_COMPLETE_UEI="uei.opennms.org/internal/provisiond/nod"{trunked}</code> */
-    public static final String PROVISION_SCAN_COMPLETE_UEI="uei.opennms.org/internal/provisiond/nodeScanCompleted";
+    public static final String PROVISION_SCAN_COMPLETE_UEI = "uei.opennms.org/internal/provisiond/nodeScanCompleted";
     /** Constant <code>PROVISION_SCAN_ABORTED_UEI="uei.opennms.org/internal/provisiond/nod"{trunked}</code> */
-    public static final String PROVISION_SCAN_ABORTED_UEI="uei.opennms.org/internal/provisiond/nodeScanAborted";
+    public static final String PROVISION_SCAN_ABORTED_UEI = "uei.opennms.org/internal/provisiond/nodeScanAborted";
 
-    public static final String PROVISION_SCHEDULED_NODE_SCAN_STARTED ="uei.opennms.org/internal/provisiond/scheduledNodeScanStarted";
-    
+    public static final String PROVISION_SCHEDULED_NODE_SCAN_STARTED =
+            "uei.opennms.org/internal/provisiond/scheduledNodeScanStarted";
+
     /** Constant <code>PARM_FAILURE_MESSAGE="failureMessage"</code> */
     public static final String PARM_FAILURE_MESSAGE = "failureMessage";
 
@@ -494,7 +497,7 @@ public abstract class EventConstants {
     public static final String PARM_IMPORT_RESOURCE = "importResource";
 
     public static final String PARM_IMPORT_RESCAN_EXISTING = "importRescanExisting";
-    
+
     /** Constant <code>PARM_ALARM_ID="alertId"</code> */
     public static final String PARM_ALARM_ID = "alertId";
     /** Constant <code>PARM_ALARM_UEI="alertUei"</code> */
@@ -512,31 +515,37 @@ public abstract class EventConstants {
     public static final String TROUBLETICKET_CLOSE_UEI = "uei.opennms.org/troubleTicket/close";
     /** Constant <code>TROUBLETICKET_CANCEL_UEI="uei.opennms.org/troubleTicket/cancel"</code> */
     public static final String TROUBLETICKET_CANCEL_UEI = "uei.opennms.org/troubleTicket/cancel";
-    
+
     /** Constant <code>TL1_AUTONOMOUS_MESSAGE_UEI="uei.opennms.org/api/tl1d/message/autono"{trunked}</code> */
     public static final String TL1_AUTONOMOUS_MESSAGE_UEI = "uei.opennms.org/api/tl1d/message/autonomous";
 
     /** Constant <code>RANCID_DOWNLOAD_SUCCESS_UEI="uei.opennms.org/standard/rancid/traps/r"{trunked}</code> */
-    public static final String RANCID_DOWNLOAD_SUCCESS_UEI="uei.opennms.org/standard/rancid/traps/rancidTrapDownloadSuccess";
+    public static final String RANCID_DOWNLOAD_SUCCESS_UEI =
+            "uei.opennms.org/standard/rancid/traps/rancidTrapDownloadSuccess";
     /** Constant <code>RANCID_DOWNLOAD_FAILURE_UEI="uei.opennms.org/standard/rancid/traps/r"{trunked}</code> */
-    public static final String RANCID_DOWNLOAD_FAILURE_UEI="uei.opennms.org/standard/rancid/traps/rancidTrapDownloadFailure";
+    public static final String RANCID_DOWNLOAD_FAILURE_UEI =
+            "uei.opennms.org/standard/rancid/traps/rancidTrapDownloadFailure";
     /** Constant <code>RANCID_GROUP_PROCESSING_COMPLETED_UEI="uei.opennms.org/standard/rancid/traps/r"{trunked}</code> */
-    public static final String RANCID_GROUP_PROCESSING_COMPLETED_UEI="uei.opennms.org/standard/rancid/traps/rancidTrapGroupProcessingCompleted";
+    public static final String RANCID_GROUP_PROCESSING_COMPLETED_UEI =
+            "uei.opennms.org/standard/rancid/traps/rancidTrapGroupProcessingCompleted";
 
     /** Constant <code>TOPOLOGY_LINK_DOWN_EVENT_UEI="uei.opennms.org/internal/topology/linkDown"{trunked}</code> */
     public static final String TOPOLOGY_LINK_DOWN_EVENT_UEI = "uei.opennms.org/internal/topology/linkDown";
     /** Constant <code>TOPOLOGY_LINK_UP_EVENT_UEI="uei.opennms.org/internal/topology/linkUp"{trunked}</code> */
     public static final String TOPOLOGY_LINK_UP_EVENT_UEI = "uei.opennms.org/internal/topology/linkUp";
 
-    public static final String HARDWARE_INVENTORY_FAILED_UEI = "uei.opennms.org/internal/discovery/hardwareInventoryFailed";
-    public static final String HARDWARE_INVENTORY_SUCCESSFUL_UEI = "uei.opennms.org/internal/discovery/hardwareInventorySuccessful";
+    public static final String HARDWARE_INVENTORY_FAILED_UEI =
+            "uei.opennms.org/internal/discovery/hardwareInventoryFailed";
+    public static final String HARDWARE_INVENTORY_SUCCESSFUL_UEI =
+            "uei.opennms.org/internal/discovery/hardwareInventorySuccessful";
 
     public static final String KSC_REPORT_UPDATED_UEI = "uei.opennms.org/internal/kscReportUpdated";
     public static final String PARAM_REPORT_TITLE = "reportTitle";
     public static final String PARAM_REPORT_GRAPH_COUNT = "graphCount";
 
     public static final String MONITORING_SYSTEM_ADDED_UEI = "uei.opennms.org/internal/monitoringSystemAdded";
-    public static final String MONITORING_SYSTEM_LOCATION_CHANGED_UEI = "uei.opennms.org/internal/monitoringSystemLocationChanged";
+    public static final String MONITORING_SYSTEM_LOCATION_CHANGED_UEI =
+            "uei.opennms.org/internal/monitoringSystemLocationChanged";
     public static final String MONITORING_SYSTEM_DELETED_UEI = "uei.opennms.org/internal/monitoringSystemDeleted";
     public static final String PARAM_MONITORING_SYSTEM_TYPE = "monitoringSystemType";
     public static final String PARAM_MONITORING_SYSTEM_ID = "monitoringSystemId";
@@ -568,7 +577,7 @@ public abstract class EventConstants {
      * suppression of a notification.
      */
     public static final String PARM_CRITICAL_PATH_NOTICE_SUPRESSED = "noticeSupressed";
-    
+
     /**
      * The nodeSysName from the node table when sent as an event parm.
      */
@@ -716,72 +725,72 @@ public abstract class EventConstants {
      * The parameter name for the "SNMP security name string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_SECURITY_NAME = "securityName";
-    
+
     /**
      * The parameter name for the "SNMP security level string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_SECURITY_LEVEL = "securityLevel";
-    
+
     /**
      * The parameter name for the "SNMP auth passphrase string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_AUTH_PASSPHRASE = "authPassphrase";
-    
+
     /**
      * The parameter name for the "SNMP auth protocol string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_AUTH_PROTOCOL = "authProtocol";
-    
+
     /**
      * The parameter name for the "SNMP engine id string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_ENGINE_ID = "engineId";
-    
+
     /**
      * The parameter name for the "SNMP context engine id string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_CONTEXT_ENGINE_ID = "contextEngineId";
-    
+
     /**
      * The parameter name for the "SNMP enterprise id string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_ENTERPRISE_ID = "enterpriseId";
-    
+
     /**
      * The parameter name for the "SNMP context name string" when sent as an event parameter.
      */
-    public static final String PARM_SNMP_CONTEXT_NAME = "contextName"; 
-    
+    public static final String PARM_SNMP_CONTEXT_NAME = "contextName";
+
     /**
      * The parameter name for the "SNMP privacy passphrase string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_PRIVACY_PASSPHRASE = "privPassphrase";
-    
+
     /**
      * The parameter name for the "SNMP privacy protocol string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_PRIVACY_PROTOCOL = "privProtocol";
-    
+
     /**
      * The parameter name for the "SNMP max repetitions string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_MAX_REPETITIONS = "maxRepetitions";
-    
+
     /**
      * The parameter name for the "SNMP max request size string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_MAX_REQUEST_SIZE = "maxRequestSize";
-    
+
     /**
      * The parameter name for the "SNMP max vars per pdu string" when sent as an event parameter.
      */
     public static final String PARM_SNMP_MAX_VARS_PER_PDU = "maxVarsPerPdu";
-    
+
     /**
      * The parameter name for the "SNMP proxy host string" when sent as an event parameter.
      */
-    public static final String PARM_SNMP_PROXY_HOST= "proxyHost";
-    
+    public static final String PARM_SNMP_PROXY_HOST = "proxyHost";
+
     /**
      * The first IP address in a range of IP addresses when sent as an event
      * parm.
@@ -800,12 +809,12 @@ public abstract class EventConstants {
      */
     @Deprecated
     public static final String PARM_COMMUNITY_STRING = "communityString";
-    
+
     /**
      * The SNMP read community string when sent as an event parm.
      */
     public static final String PARM_SNMP_READ_COMMUNITY_STRING = "readCommunityString";
-    
+
     /**
      * The SNMP write community string when sent as an event parm.
      */
@@ -872,13 +881,13 @@ public abstract class EventConstants {
      * Used for retaining the reason from a monitor determines SERVICE_UNAVAILABLE
      */
     public static final String PARM_LOSTSERVICE_REASON = "eventReason";
-    
+
     /**
      * Used for setting the value for  PARM_LOSTSERVICE_REASON when the lost
      * service is due to a critical path outage
      */
     public static final String PARM_VALUE_PATHOUTAGE = "pathOutage";
-    
+
     /**
      * Parms used for passive status events sent to the PassiveServiceKeeper
      */
@@ -900,7 +909,7 @@ public abstract class EventConstants {
     public static final String PARM_FOREIGN_ID = "foreignId";
     /** Constant <code>PARM_RESCAN_EXISTING="rescanExisting"</code> */
     public static final String PARM_RESCAN_EXISTING = "rescanExisting";
-    
+
     /**
      * Parms used for configureSnmp events
      */
@@ -916,32 +925,32 @@ public abstract class EventConstants {
     public static final String PARM_LOCATION_MONITOR_ID = "locationMonitorId";
     /** Constant <code>PARM_LOCATION="location"</code> */
     public static final String PARM_LOCATION = "location";
-    
+
     /**
      * Parm use for promoteEnqueuedData event
      */
     public static final String PARM_FILES_TO_PROMOTE = "filesToPromote";
-    
+
     /**
      * Parameter used in event SNMP poller definition
-     */ 
-    public static final String PARM_SNMP_INTERFACE_IFINDEX="snmpifindex";
+     */
+    public static final String PARM_SNMP_INTERFACE_IFINDEX = "snmpifindex";
 
     /** Constant <code>PARM_SNMP_INTERFACE_IP="ipaddr"</code> */
-    public static final String PARM_SNMP_INTERFACE_IP="ipaddr"; 
+    public static final String PARM_SNMP_INTERFACE_IP = "ipaddr";
 
     /** Constant <code>PARM_SNMP_INTERFACE_NAME="snmpifname"</code> */
-    public static final String PARM_SNMP_INTERFACE_NAME="snmpifname";
+    public static final String PARM_SNMP_INTERFACE_NAME = "snmpifname";
 
     /** Constant <code>PARM_SNMP_INTERFACE_DESC="snmpifdescr"</code> */
-    public static final String PARM_SNMP_INTERFACE_DESC="snmpifdescr";
+    public static final String PARM_SNMP_INTERFACE_DESC = "snmpifdescr";
 
     /** Constant <code>PARM_SNMP_INTERFACE_ALIAS="snmpifalias"</code> */
-    public static final String PARM_SNMP_INTERFACE_ALIAS="snmpifalias";
+    public static final String PARM_SNMP_INTERFACE_ALIAS = "snmpifalias";
 
     /** Constant <code>PARM_SNMP_INTERFACE_MASK="mask"</code> */
-    public static final String PARM_SNMP_INTERFACE_MASK="mask";
-    
+    public static final String PARM_SNMP_INTERFACE_MASK = "mask";
+
     //
     // End event parms
     //
@@ -971,12 +980,12 @@ public abstract class EventConstants {
      * Used for indicating a reason message in an event or alert.
      */
     public static final String PARM_REASON = "reason";
-    
+
     /**
      * Used for indication the first endpoint to a map link.
      */
     public static final String PARM_ENDPOINT1 = "endPoint1";
-    
+
     /**
      * Used for indication the second endpoint to a map link.
      */
@@ -991,7 +1000,8 @@ public abstract class EventConstants {
     //
     // for Bsmd
     //
-    public static final String BUSINESS_SERVICE_OPERATIONAL_STATUS_CHANGED_UEI = "uei.opennms.org/bsm/serviceOperationalStatusChanged";
+    public static final String BUSINESS_SERVICE_OPERATIONAL_STATUS_CHANGED_UEI =
+            "uei.opennms.org/bsm/serviceOperationalStatusChanged";
     public static final String BUSINESS_SERVICE_PROBLEM_UEI = "uei.opennms.org/bsm/serviceProblem";
     public static final String BUSINESS_SERVICE_PROBLEM_RESOLVED_UEI = "uei.opennms.org/bsm/serviceProblemResolved";
     public static final String BUSINESS_SERVICE_DELETED_EVENT_UEI = "uei.opennms.org/internal/serviceDeleted";
@@ -1062,7 +1072,7 @@ public abstract class EventConstants {
     public static final String XML_ENCODING_MAC_ADDRESS = "macAddress";
 
     /** Constant <code>OID_SNMP_IFINDEX</code> */
-   public static final String OID_SNMP_IFINDEX_STRING = ".1.3.6.1.2.1.2.2.1.1";
+    public static final String OID_SNMP_IFINDEX_STRING = ".1.3.6.1.2.1.2.2.1.1";
 
     /**
      * An utility method to parse a string into a 'Date' instance. Note that the
@@ -1090,44 +1100,42 @@ public abstract class EventConstants {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(date.toInstant().atZone(ZoneId.systemDefault()));
     }
 
-	/**
-	 * Converts the value of a parm ('Value') of the instance to a string
-	 *
-	 * @param pvalue a {@link Value} object.
-	 * @return a {@link String} object.
-	 */
-	public static String getValueAsString(Value pvalue) {
-		if (pvalue == null)
-			return null;
-		
-		if (pvalue.getContent() == null)
-			return null;
+    /**
+     * Converts the value of a parm ('Value') of the instance to a string
+     *
+     * @param pvalue a {@link Value} object.
+     * @return a {@link String} object.
+     */
+    public static String getValueAsString(Value pvalue) {
+        if (pvalue == null) return null;
 
-		String result = "";
-		String encoding = pvalue.getEncoding();
-		if (encoding.equals(EventConstants.XML_ENCODING_TEXT)) {
-			result = pvalue.getContent();
-		} else if (encoding.equals(EventConstants.XML_ENCODING_BASE64)) {
-			byte[] bytes = Base64.decodeBase64(pvalue.getContent().toCharArray());
-			result = "0x"+toHexString(bytes);
-		} else if (encoding.equals(EventConstants.XML_ENCODING_MAC_ADDRESS)) {
-			result = pvalue.getContent();
-		} else {
-			throw new IllegalStateException("Unknown encoding for parm value: " + encoding);
-		}
-		
-		return result.trim();
-	}
-	
-	public static String toHexString(byte[] data) {
-		final StringBuilder b = new StringBuilder();
-		for (int i = 0; i < data.length; ++i) {
-			final int x = (int) data[i] & 0xff;
-			if (x < 16) b.append("0");
-			b.append(Integer.toString(x, 16).toLowerCase());
-		}
-		return b.toString();
-	}
+        if (pvalue.getContent() == null) return null;
+
+        String result = "";
+        String encoding = pvalue.getEncoding();
+        if (encoding.equals(EventConstants.XML_ENCODING_TEXT)) {
+            result = pvalue.getContent();
+        } else if (encoding.equals(EventConstants.XML_ENCODING_BASE64)) {
+            byte[] bytes = Base64.decodeBase64(pvalue.getContent().toCharArray());
+            result = "0x" + toHexString(bytes);
+        } else if (encoding.equals(EventConstants.XML_ENCODING_MAC_ADDRESS)) {
+            result = pvalue.getContent();
+        } else {
+            throw new IllegalStateException("Unknown encoding for parm value: " + encoding);
+        }
+
+        return result.trim();
+    }
+
+    public static String toHexString(byte[] data) {
+        final StringBuilder b = new StringBuilder();
+        for (int i = 0; i < data.length; ++i) {
+            final int x = (int) data[i] & 0xff;
+            if (x < 16) b.append("0");
+            b.append(Integer.toString(x, 16).toLowerCase());
+        }
+        return b.toString();
+    }
 
     //
     // For Trapd
@@ -1149,32 +1157,25 @@ public abstract class EventConstants {
         String result = null;
 
         if (XML_ENCODING_TEXT.equals(encoding)) {
-            if (value instanceof String)
-                result = (String) value;
-            else if (value instanceof Number)
-                result = value.toString();
-            else if (value instanceof SnmpValue)
-                result = ((SnmpValue)value).toString();
+            if (value instanceof String) result = (String) value;
+            else if (value instanceof Number) result = value.toString();
+            else if (value instanceof SnmpValue) result = ((SnmpValue) value).toString();
         } else if (XML_ENCODING_BASE64.equals(encoding)) {
-            if (value instanceof String)
-                result = new String(Base64.encodeBase64(((String) value).getBytes()));
+            if (value instanceof String) result = new String(Base64.encodeBase64(((String) value).getBytes()));
             else if (value instanceof Number) {
-                
+
                 byte[] ibuf = null;
-                if (value instanceof BigInteger)
-                    ibuf = ((BigInteger) value).toByteArray();
-                else
-                    ibuf = BigInteger.valueOf(((Number) value).longValue()).toByteArray();
+                if (value instanceof BigInteger) ibuf = ((BigInteger) value).toByteArray();
+                else ibuf = BigInteger.valueOf(((Number) value).longValue()).toByteArray();
 
                 result = new String(Base64.encodeBase64(ibuf));
-            }
-            else if (value instanceof SnmpValue) {
-                SnmpValue snmpValue = (SnmpValue)value;
+            } else if (value instanceof SnmpValue) {
+                SnmpValue snmpValue = (SnmpValue) value;
                 result = new String(Base64.encodeBase64(snmpValue.getBytes()));
             }
         } else if (XML_ENCODING_MAC_ADDRESS.equals(encoding)) {
             if (value instanceof SnmpValue) {
-                SnmpValue snmpValue = (SnmpValue)value;
+                SnmpValue snmpValue = (SnmpValue) value;
                 final StringBuilder macAddress = new StringBuilder();
                 byte[] bytes = snmpValue.getBytes();
                 for (int i = 0; i < bytes.length; i++) {
@@ -1184,11 +1185,10 @@ public abstract class EventConstants {
                 result = macAddress.toString();
             }
         }
-        
+
         if (result == null)
-            throw new IllegalArgumentException("unable to encode "+value+" of type "+value.getClass());
+            throw new IllegalArgumentException("unable to encode " + value + " of type " + value.getClass());
 
         return result;
     }
-
 }

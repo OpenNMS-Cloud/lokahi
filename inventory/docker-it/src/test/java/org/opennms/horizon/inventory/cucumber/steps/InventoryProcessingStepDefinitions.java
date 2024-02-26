@@ -1,32 +1,32 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.cucumber.steps;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
@@ -37,6 +37,13 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -70,21 +77,6 @@ import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
 public class InventoryProcessingStepDefinitions {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryProcessingStepDefinitions.class);
 
@@ -105,25 +97,22 @@ public class InventoryProcessingStepDefinitions {
     private KafkaConsumerRunner kafkaConsumerRunner;
     private final String tagTopic = "tag-operation";
 
-
-
     public enum PublishType {
         UPDATE,
         REMOVE
     }
 
-//========================================
-// Constructor
-//----------------------------------------
+    // ========================================
+    // Constructor
+    // ----------------------------------------
 
     public InventoryProcessingStepDefinitions(InventoryBackgroundHelper inventoryBackgroundHelper) {
         this.backgroundHelper = inventoryBackgroundHelper;
     }
 
-
-//========================================
-// Step Definitions
-//----------------------------------------
+    // ========================================
+    // Step Definitions
+    // ----------------------------------------
 
     @Given("External GRPC Port in system property {string}")
     public void externalGRPCPortInSystemProperty(String propertyName) {
@@ -141,8 +130,7 @@ public class InventoryProcessingStepDefinitions {
     }
 
     @Given("Grpc location named {string}")
-    public void grpcLocation(String location) {
-    }
+    public void grpcLocation(String location) {}
 
     @Given("Minion at location named {string} with system ID {string}")
     public void minionAtLocationWithSystemId(String location, String systemId) {
@@ -158,7 +146,6 @@ public class InventoryProcessingStepDefinitions {
         backgroundHelper.createGrpcConnectionForInventory();
     }
 
-
     @Given("send heartbeat message to Kafka topic {string}")
     public void sendHeartbeatMessageToKafkaTopic(String topic) {
         Properties producerConfig = new Properties();
@@ -168,18 +155,21 @@ public class InventoryProcessingStepDefinitions {
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
             long millis = System.currentTimeMillis();
             TenantLocationSpecificHeartbeatMessage heartbeatMessage =
-                TenantLocationSpecificHeartbeatMessage.newBuilder()
-                    .setTenantId(backgroundHelper.getTenantId())
-                    .setLocationId(locationId)
-                    .setIdentity(Identity.newBuilder().setSystemId(systemId).build())
-                    .setTimestamp(Timestamp.newBuilder().setSeconds(millis / 1000).setNanos((int) ((millis % 1000) * 1000000)).build())
-                    .build();
+                    TenantLocationSpecificHeartbeatMessage.newBuilder()
+                            .setTenantId(backgroundHelper.getTenantId())
+                            .setLocationId(locationId)
+                            .setIdentity(
+                                    Identity.newBuilder().setSystemId(systemId).build())
+                            .setTimestamp(Timestamp.newBuilder()
+                                    .setSeconds(millis / 1000)
+                                    .setNanos((int) ((millis % 1000) * 1000000))
+                                    .build())
+                            .build();
             var producerRecord = new ProducerRecord<String, byte[]>(topic, heartbeatMessage.toByteArray());
 
             kafkaProducer.send(producerRecord);
         }
     }
-
 
     @Then("verify Monitoring system is created with system id {string} with location named {string}")
     public void verifyMonitoringSystemIsCreatedWithSystemIdWithLocationNamed(String systemId, String location) {
@@ -187,24 +177,30 @@ public class InventoryProcessingStepDefinitions {
         var monitoringLocation = monitoringLocationStub.getLocationByName(StringValue.of(location));
         assertEquals(location, monitoringLocation.getLocation());
         var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
-        await().pollInterval(1, TimeUnit.SECONDS).atMost(15, TimeUnit.SECONDS)
-            .until(() -> {
-                try {
-                    return monitoringSystemStub.getMonitoringSystemByQuery(
-                            MonitoringSystemQuery
-                                .newBuilder()
-                                .setLocation(location)
-                                .setSystemId(systemId)
-                                .build())
-                        .getSystemId();
-                } catch (Exception e) {
-                   return "";
-                }
-            }, Matchers.equalTo(systemId));
+        await().pollInterval(1, TimeUnit.SECONDS)
+                .atMost(15, TimeUnit.SECONDS)
+                .until(
+                        () -> {
+                            try {
+                                return monitoringSystemStub
+                                        .getMonitoringSystemByQuery(MonitoringSystemQuery.newBuilder()
+                                                .setLocation(location)
+                                                .setSystemId(systemId)
+                                                .build())
+                                        .getSystemId();
+                            } catch (Exception e) {
+                                return "";
+                            }
+                        },
+                        Matchers.equalTo(systemId));
 
-        var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList();
-        var monitoringSystems = systems.stream().filter( msId -> msId.getSystemId().equals(systemId) &&
-            msId.getMonitoringLocationId() == monitoringLocation.getId()).toList();
+        var systems = monitoringSystemStub
+                .listMonitoringSystem(Empty.newBuilder().build())
+                .getSystemsList();
+        var monitoringSystems = systems.stream()
+                .filter(msId -> msId.getSystemId().equals(systemId)
+                        && msId.getMonitoringLocationId() == monitoringLocation.getId())
+                .toList();
         assertFalse(monitoringSystems.isEmpty());
         var monitoringSystem = monitoringSystems.get(0);
         assertEquals(backgroundHelper.getTenantId(), monitoringSystem.getTenantId());
@@ -213,37 +209,49 @@ public class InventoryProcessingStepDefinitions {
 
     @Then("verify Monitoring system is removed with system id {string}")
     public void verifyMonitoringSystemIsRemovedWithSystemId(String systemId) {
-        await().atMost(30, TimeUnit.SECONDS).pollDelay(10L, TimeUnit.MILLISECONDS).until(() -> {
-            var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
-            var systems = monitoringSystemStub.listMonitoringSystem(Empty.newBuilder().build()).getSystemsList()
-                .stream().filter(s -> systemId.equals(s.getSystemId())).toList();
-            assertEquals(0, systems.size());
-        });
+        await().atMost(30, TimeUnit.SECONDS)
+                .pollDelay(10L, TimeUnit.MILLISECONDS)
+                .until(() -> {
+                    var monitoringSystemStub = backgroundHelper.getMonitoringSystemStub();
+                    var systems =
+                            monitoringSystemStub
+                                    .listMonitoringSystem(Empty.newBuilder().build())
+                                    .getSystemsList()
+                                    .stream()
+                                    .filter(s -> systemId.equals(s.getSystemId()))
+                                    .toList();
+                    assertEquals(0, systems.size());
+                });
     }
 
     @Then("verify Monitoring location is created with location {string}")
     public void verifyMonitoringLocationIsCreatedWithLocation(String location) {
         var monitoringLocationStub = backgroundHelper.getMonitoringLocationStub();
         await().pollInterval(5, TimeUnit.SECONDS)
-            .atMost(30, TimeUnit.SECONDS).until(() ->
-                    monitoringLocationStub.getLocationByName(StringValue.newBuilder().setValue(location).build()).getLocation(),
-                Matchers.notNullValue());
-        var locationDTO = monitoringLocationStub.getLocationByName(StringValue.newBuilder().setValue(location).build());
+                .atMost(30, TimeUnit.SECONDS)
+                .until(
+                        () -> monitoringLocationStub
+                                .getLocationByName(StringValue.newBuilder()
+                                        .setValue(location)
+                                        .build())
+                                .getLocation(),
+                        Matchers.notNullValue());
+        var locationDTO = monitoringLocationStub.getLocationByName(
+                StringValue.newBuilder().setValue(location).build());
         assertEquals(location, locationDTO.getLocation());
         assertEquals(backgroundHelper.getTenantId(), locationDTO.getTenantId());
     }
 
     @Then("verify the device has an interface with the given IP address")
     public void verifyTheDeviceHasAnInterfaceWithTheGivenIPAddress() {
-        NodeDTO nodeDTO =
-            backgroundHelper.getNodeServiceBlockingStub()
+        NodeDTO nodeDTO = backgroundHelper
+                .getNodeServiceBlockingStub()
                 .withInterceptors()
                 .getNodeById(Int64Value.of(node.getId()));
 
         assertNotNull(nodeDTO);
-        assertTrue(
-            nodeDTO.getIpInterfacesList().stream().anyMatch((ele) -> ele.getIpAddress().equals(newDeviceIpAddress))
-        );
+        assertTrue(nodeDTO.getIpInterfacesList().stream()
+                .anyMatch((ele) -> ele.getIpAddress().equals(newDeviceIpAddress)));
     }
 
     @Given("Label {string}")
@@ -260,7 +268,11 @@ public class InventoryProcessingStepDefinitions {
     @Then("add a new device")
     public void addANewDevice() {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocationId(locationId).setManagementIp(newDeviceIpAddress).build());
+        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(label)
+                .setLocationId(locationId)
+                .setManagementIp(newDeviceIpAddress)
+                .build());
         assertNotNull(node);
     }
 
@@ -269,7 +281,9 @@ public class InventoryProcessingStepDefinitions {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
 
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-            .setIpAddress(newDeviceIpAddress).setLocationId(locationId).build());
+                .setIpAddress(newDeviceIpAddress)
+                .setLocationId(locationId)
+                .build());
 
         assertNotNull(nodeId);
 
@@ -301,13 +315,12 @@ public class InventoryProcessingStepDefinitions {
     public void verifyThatTheNewNodeIsInTheListReturnedFromInventory() {
         assertFalse(nodeList.getNodesList().isEmpty());
 
-        var nodeOptional = nodeList.getNodesList().stream().filter(
-                nodeDTO ->
-                    (
-                        (nodeDTO.getNodeLabel().equals(label)) &&
-                            (nodeDTO.getIpInterfacesList().stream().anyMatch(ipInterfaceDTO -> ipInterfaceDTO.getIpAddress().equals(newDeviceIpAddress))))
-            )
-            .findFirst();
+        var nodeOptional = nodeList.getNodesList().stream()
+                .filter(nodeDTO -> ((nodeDTO.getNodeLabel().equals(label))
+                        && (nodeDTO.getIpInterfacesList().stream()
+                                .anyMatch(ipInterfaceDTO ->
+                                        ipInterfaceDTO.getIpAddress().equals(newDeviceIpAddress)))))
+                .findFirst();
 
         assertTrue(nodeOptional.isPresent());
 
@@ -318,8 +331,11 @@ public class InventoryProcessingStepDefinitions {
     @Given("add a new device with label {string} and ip address {string} and location named {string}")
     public void addANewDeviceWithLabelAndIpAddressAndLocation(String label, String ipAddress, String location) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocationId(backgroundHelper.findLocationId(location))
-            .setManagementIp(ipAddress).build());
+        var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(label)
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .setManagementIp(ipAddress)
+                .build());
         assertNotNull(nodeDto);
     }
 
@@ -327,18 +343,24 @@ public class InventoryProcessingStepDefinitions {
     public void verifyThatANewNodeIsCreatedWithLocationAndIpAddress(String location, String ipAddress) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
+                .setIpAddress(ipAddress)
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .build());
         assertNotNull(nodeId);
         var node = nodeServiceBlockingStub.getNodeById(nodeId);
         assertNotNull(node);
     }
 
     @Then("verify adding existing device with label {string} and ip address {string} and location {string} will fail")
-    public void verifyAddingExistingDeviceWithLabelAndIpAddressAndLocationWillFail(String label, String ipAddress, String location) {
+    public void verifyAddingExistingDeviceWithLabelAndIpAddressAndLocationWillFail(
+            String label, String ipAddress, String location) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         try {
-            var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(label).setLocationId(location)
-                .setManagementIp(ipAddress).build());
+            var nodeDto = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                    .setLabel(label)
+                    .setLocationId(location)
+                    .setManagementIp(ipAddress)
+                    .build());
             fail();
         } catch (Exception e) {
             // left intentionally empty
@@ -359,7 +381,9 @@ public class InventoryProcessingStepDefinitions {
     public void lookupNodeWithLocationAndIpAddress(String location, String ipAddress) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-            .setIpAddress(ipAddress).setLocationId(backgroundHelper.findLocationId(location)).build());
+                .setIpAddress(ipAddress)
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .build());
         nodeIdCreated = nodeId;
         assertNotNull(nodeId);
 
@@ -368,9 +392,9 @@ public class InventoryProcessingStepDefinitions {
         assertNotNull(node);
     }
 
-
     @Then("send Device Detection to Kafka topic {string} for an ip address {string} at location {string}")
-    public void sendDeviceDetectionToKafkaTopicForAnIpAddressAtLocation(String kafkaTopic, String ipAddress, String location) {
+    public void sendDeviceDetectionToKafkaTopicForAnIpAddressAtLocation(
+            String kafkaTopic, String ipAddress, String location) {
         Properties producerConfig = new Properties();
         producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
@@ -379,30 +403,29 @@ public class InventoryProcessingStepDefinitions {
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
 
             NodeScanResult nodeScanResult = NodeScanResult.newBuilder()
-                .setNodeId(nodeIdCreated.getValue())
-                .addDetectorResult(ServiceResult.newBuilder()
-                    .setService(ServiceType.ICMP)
-                    .setIpAddress(ipAddress)
-                    .setStatus(true).build())
-                .addDetectorResult(ServiceResult.newBuilder()
-                    .setService(ServiceType.SNMP)
-                    .setIpAddress(ipAddress)
-                    .setStatus(true).build())
-                .build();
-
-            TaskResult taskResult =
-                TaskResult.newBuilder()
-                    .setIdentity(
-                        org.opennms.taskset.contract.Identity.newBuilder()
-                            .setSystemId(systemId)
-                            .build()
-                    )
-                    .setScannerResponse(ScannerResponse.newBuilder()
-                        .setResult(Any.pack(nodeScanResult)).build())
+                    .setNodeId(nodeIdCreated.getValue())
+                    .addDetectorResult(ServiceResult.newBuilder()
+                            .setService(ServiceType.ICMP)
+                            .setIpAddress(ipAddress)
+                            .setStatus(true)
+                            .build())
+                    .addDetectorResult(ServiceResult.newBuilder()
+                            .setService(ServiceType.SNMP)
+                            .setIpAddress(ipAddress)
+                            .setStatus(true)
+                            .build())
                     .build();
 
-            TenantLocationSpecificTaskSetResults taskSetResults =
-                TenantLocationSpecificTaskSetResults.newBuilder()
+            TaskResult taskResult = TaskResult.newBuilder()
+                    .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
+                            .setSystemId(systemId)
+                            .build())
+                    .setScannerResponse(ScannerResponse.newBuilder()
+                            .setResult(Any.pack(nodeScanResult))
+                            .build())
+                    .build();
+
+            TenantLocationSpecificTaskSetResults taskSetResults = TenantLocationSpecificTaskSetResults.newBuilder()
                     .setTenantId(backgroundHelper.getTenantId())
                     .setLocationId(backgroundHelper.findLocationId(location))
                     .addResults(taskResult)
@@ -410,13 +433,14 @@ public class InventoryProcessingStepDefinitions {
 
             var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, taskSetResults.toByteArray());
 
-            // producerRecord.headers().add(GrpcConstants.TENANT_ID_KEY, backgroundHelper.getTenantId().getBytes(StandardCharsets.UTF_8));
-            // producerRecord.headers().add(GrpcConstants.LOCATION_KEY, backgroundHelper.getLocation().getBytes(StandardCharsets.UTF_8));
+            // producerRecord.headers().add(GrpcConstants.TENANT_ID_KEY,
+            // backgroundHelper.getTenantId().getBytes(StandardCharsets.UTF_8));
+            // producerRecord.headers().add(GrpcConstants.LOCATION_KEY,
+            // backgroundHelper.getLocation().getBytes(StandardCharsets.UTF_8));
 
             kafkaProducer.send(producerRecord);
         }
     }
-
 
     @Given("Subscribe to kafka topic {string}")
     public void subscribeToKafkaTopic(String topic) {
@@ -429,7 +453,7 @@ public class InventoryProcessingStepDefinitions {
         long nodeId = node.getId();
         String taskIdPattern = "nodeScan=node_id/" + nodeId;
         await().atMost(timeout, TimeUnit.MILLISECONDS)
-            .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
+                .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
     }
 
     @Given("Device Task IP address = {string}")
@@ -456,19 +480,20 @@ public class InventoryProcessingStepDefinitions {
     @Then("verify the task set update is published for device with task suffix {string} within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedForDeviceWithTaskSuffixWithinMs(String taskNameSuffix, int timeout) {
         String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskNameSuffix;
-        await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2000, TimeUnit.MILLISECONDS)
-            .pollInterval(2000, TimeUnit.MILLISECONDS)
-            .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
+        await().atMost(timeout, TimeUnit.MILLISECONDS)
+                .pollDelay(2000, TimeUnit.MILLISECONDS)
+                .pollInterval(2000, TimeUnit.MILLISECONDS)
+                .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
     }
 
     @Then("verify the task set update is published with removal of task with suffix {string} within {int}ms")
     public void verifyTheTaskSetUpdateIsPublishedWithRemovalOfTaskWithSuffixWithinMs(String taskSuffix, int timeout) {
         String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskSuffix;
-        await().atMost(timeout, TimeUnit.MILLISECONDS).pollDelay(2000, TimeUnit.MILLISECONDS)
-            .pollInterval(2000, TimeUnit.MILLISECONDS)
-            .until(() -> matchesTaskPatternForDelete(taskIdPattern).get(), Matchers.is(true));
+        await().atMost(timeout, TimeUnit.MILLISECONDS)
+                .pollDelay(2000, TimeUnit.MILLISECONDS)
+                .pollInterval(2000, TimeUnit.MILLISECONDS)
+                .until(() -> matchesTaskPatternForDelete(taskIdPattern).get(), Matchers.is(true));
     }
-
 
     private AtomicBoolean matchesTaskPattern(String taskIdPattern, PublishType publishType) {
         AtomicBoolean matched = new AtomicBoolean(false);
@@ -484,23 +509,30 @@ public class InventoryProcessingStepDefinitions {
         }
         LOG.info("taskIdPattern = {}, publish type = {}, Tasks :  {}", taskIdPattern, publishType, tasks);
         for (UpdateTasksRequest task : tasks) {
-            var addTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasAddTask).collect(Collectors.toList());
-            var removeTasks = task.getUpdateList().stream().filter(UpdateSingleTaskOp::hasRemoveTask).collect(Collectors.toList());
+            var addTasks = task.getUpdateList().stream()
+                    .filter(UpdateSingleTaskOp::hasAddTask)
+                    .collect(Collectors.toList());
+            var removeTasks = task.getUpdateList().stream()
+                    .filter(UpdateSingleTaskOp::hasRemoveTask)
+                    .collect(Collectors.toList());
             if (publishType.equals(PublishType.UPDATE)) {
-                boolean matchForTaskId = addTasks.stream().anyMatch(updateSingleTaskOp ->
-                    updateSingleTaskOp.getAddTask().getTaskDefinition().getId().matches(taskIdPattern));
+                boolean matchForTaskId = addTasks.stream().anyMatch(updateSingleTaskOp -> updateSingleTaskOp
+                        .getAddTask()
+                        .getTaskDefinition()
+                        .getId()
+                        .matches(taskIdPattern));
                 if (matchForTaskId) {
                     matched.set(true);
                 }
             }
             if (publishType.equals(PublishType.REMOVE)) {
-                boolean matchForTaskId = removeTasks.stream().anyMatch(updateSingleTaskOp ->
-                    updateSingleTaskOp.getRemoveTask().getTaskId().matches(taskIdPattern));
+                boolean matchForTaskId = removeTasks.stream()
+                        .anyMatch(updateSingleTaskOp ->
+                                updateSingleTaskOp.getRemoveTask().getTaskId().matches(taskIdPattern));
                 if (matchForTaskId) {
                     matched.set(true);
                 }
             }
-
         }
         return matched;
     }
@@ -516,19 +548,20 @@ public class InventoryProcessingStepDefinitions {
     @Then("shutdown kafka consumer")
     public void shutdownKafkaConsumer() {
         kafkaConsumerRunner.shutdown();
-        await().atMost(3, TimeUnit.SECONDS).until(() -> kafkaConsumerRunner.isShutdown().get(), Matchers.is(true));
+        await().atMost(3, TimeUnit.SECONDS)
+                .until(() -> kafkaConsumerRunner.isShutdown().get(), Matchers.is(true));
     }
 
     @Given("A new monitoring policy with tags {string}")
     public void aNewMonitoringPolicyWithTags(final String tags) {
         final var tagService = this.backgroundHelper.getTagServiceBlockingStub();
         final var tagListBuilder = TagOperationList.newBuilder();
-        for (final var tag :  tags.split(",")) {
+        for (final var tag : tags.split(",")) {
             var tagBuilder = TagOperationProto.newBuilder()
-                .setTenantId(backgroundHelper.getTenantId())
-                .setTagName(tag)
-                .setOperation(Operation.ASSIGN_TAG)
-                .addMonitoringPolicyId(9999);
+                    .setTenantId(backgroundHelper.getTenantId())
+                    .setTagName(tag)
+                    .setOperation(Operation.ASSIGN_TAG)
+                    .addMonitoringPolicyId(9999);
             tagListBuilder.addTags(tagBuilder);
         }
 
@@ -538,15 +571,24 @@ public class InventoryProcessingStepDefinitions {
         producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
 
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
-            var producerRecord = new ProducerRecord<String, byte[]>(tagTopic, tagListBuilder.build().toByteArray());
+            var producerRecord = new ProducerRecord<String, byte[]>(
+                    tagTopic, tagListBuilder.build().toByteArray());
             kafkaProducer.send(producerRecord);
         }
         var expectedTags = tags.split(",");
         await().atMost(10, TimeUnit.SECONDS).until(() -> {
-            return tagService.getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
-                .setEntityId(TagEntityIdDTO.newBuilder().setMonitoringPolicyId(9999).build())
-                .setParams(TagListParamsDTO.newBuilder().setSearchTerm(expectedTags[0]).build()).build()).getTagsList().size() > 0;
+            return tagService
+                            .getTagsByEntityId(ListTagsByEntityIdParamsDTO.newBuilder()
+                                    .setEntityId(TagEntityIdDTO.newBuilder()
+                                            .setMonitoringPolicyId(9999)
+                                            .build())
+                                    .setParams(TagListParamsDTO.newBuilder()
+                                            .setSearchTerm(expectedTags[0])
+                                            .build())
+                                    .build())
+                            .getTagsList()
+                            .size()
+                    > 0;
         });
-
     }
 }

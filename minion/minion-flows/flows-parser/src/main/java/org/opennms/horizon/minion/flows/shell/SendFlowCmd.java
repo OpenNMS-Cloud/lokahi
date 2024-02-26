@@ -1,47 +1,38 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.shell;
 
-import lombok.Setter;
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
+import static com.google.common.io.ByteStreams.toByteArray;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import static com.google.common.io.ByteStreams.toByteArray;
+import lombok.Setter;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Shell command to send flow data for testing purposes.
@@ -58,7 +49,10 @@ public class SendFlowCmd implements Action {
     @Option(name = "-p", aliases = "--port", description = "port to send to, default: 50000")
     int port = 50000;
 
-    @Option(name = "-f", aliases = "--file", description = "file containing flow data, default: netflow9_test_valid01.dat")
+    @Option(
+            name = "-f",
+            aliases = "--file",
+            description = "file containing flow data, default: netflow9_test_valid01.dat")
     String file = "netflow9_test_valid01.dat";
 
     @Override
@@ -70,7 +64,8 @@ public class SendFlowCmd implements Action {
         } else if (this.getClass().getResource("/flows/" + file) != null) {
             dataToSend = toByteArray(this.getClass().getResourceAsStream("/flows/" + file));
         } else {
-            System.out.printf("Can not read file %s. Please enter a valid file, e.g. 'netflow9_test_valid01.dat'.%n", file);
+            System.out.printf(
+                    "Can not read file %s. Please enter a valid file, e.g. 'netflow9_test_valid01.dat'.%n", file);
             return null;
         }
 

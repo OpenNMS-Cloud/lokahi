@@ -1,10 +1,30 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.ipc.grpc.server.manager.rpcstreaming.impl;
 
 import static org.opennms.horizon.shared.ipc.rpc.api.RpcModule.MINION_HEADERS_MODULE;
 
 import com.google.common.base.Strings;
 import io.grpc.stub.StreamObserver;
-
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
@@ -52,8 +72,7 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             ExecutorService responseHandlerExecutor,
             MinionManager minionManager,
             TenantIDGrpcServerInterceptor tenantIDGrpcServerInterceptor,
-            LocationServerInterceptor locationServerInterceptor
-            ) {
+            LocationServerInterceptor locationServerInterceptor) {
 
         this.streamObserver = streamObserver;
         this.onCompleted = onCompleted;
@@ -87,7 +106,11 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
             boolean added = rpcConnectionTracker.addConnection(tenantId, location, systemId, streamObserver);
 
             if (added) {
-                log.info("Added RPC handler for minion: tenantId={}; locationId={}; systemId={};", tenantId, location, systemId);
+                log.info(
+                        "Added RPC handler for minion: tenantId={}; locationId={}; systemId={};",
+                        tenantId,
+                        location,
+                        systemId);
 
                 // Notify the MinionManager of the addition
                 MinionInfo minionInfo = new MinionInfo();
@@ -113,9 +136,9 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
         onCompleted.accept(streamObserver);
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void asyncQueueHandleResponse(RpcResponseProto message) {
         responseHandlerExecutor.execute(() -> syncHandleResponse(message));
@@ -132,8 +155,11 @@ public class MinionRpcStreamConnectionImpl implements MinionRpcStreamConnection 
         if (responseHandler != null) {
             responseHandler.sendResponse(message);
         } else {
-            log.debug("Received a response for request for module: {} with RpcId:{}, but no outstanding request was found with this id." +
-                    "The request may have timed out", message.getModuleId(), message.getRpcId());
+            log.debug(
+                    "Received a response for request for module: {} with RpcId:{}, but no outstanding request was found with this id."
+                            + "The request may have timed out",
+                    message.getModuleId(),
+                    message.getRpcId());
         }
     }
 }

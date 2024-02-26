@@ -1,36 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2016-2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.ipc.sink.aggregation;
 
 import com.google.common.util.concurrent.Striped;
 import com.google.protobuf.Message;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,7 +33,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
-
 import org.opennms.horizon.shared.ipc.sink.api.AggregationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +66,8 @@ public class Aggregator<S extends Message, T extends Message, U> implements Auto
      * more in terms of memory.
      */
     private static final int NUM_STRIPE_LOCKS = Optional.ofNullable(System.getProperty(NUM_STRIPE_LOCKS_SYS_PROP))
-        .map(Integer::parseInt)
-        .orElse(DEFAULT_NUM_STRIPE_LOCKS);
+            .map(Integer::parseInt)
+            .orElse(DEFAULT_NUM_STRIPE_LOCKS);
 
     private final AggregationPolicy<S, T, U> aggregationPolicy;
 
@@ -92,9 +83,7 @@ public class Aggregator<S extends Message, T extends Message, U> implements Auto
 
     private final Striped<Lock> lockStripes = Striped.lock(NUM_STRIPE_LOCKS);
 
-    public Aggregator(final String id,
-                      final AggregationPolicy<S, T, U> policy,
-                      final MessageSender<T> sender) {
+    public Aggregator(final String id, final AggregationPolicy<S, T, U> policy, final MessageSender<T> sender) {
         this.aggregationPolicy = Objects.requireNonNull(policy);
         this.sender = Objects.requireNonNull(sender);
         completionSize = aggregationPolicy.getCompletionSize();
@@ -103,20 +92,26 @@ public class Aggregator<S extends Message, T extends Message, U> implements Auto
         if (completionIntervalMs > 0) {
             // Periodically verify the buckets, and flush those that are older than completionIntervalMs
             flushTimer = new Timer(String.format("AggregatorFlush-%s", id));
-            flushTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        Aggregator.this.flush();
-                    } catch (final InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                    } catch (Throwable t) {
-                        // The timer may abort if we throw, so we catch here to make
-                        // sure that the timer keeps running
-                        LOG.error("An error occurred while flushing one or more aggregates in module '{}'.", id, t);
-                    }
-                }
-            }, completionIntervalMs, completionIntervalMs);
+            flushTimer.scheduleAtFixedRate(
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            try {
+                                Aggregator.this.flush();
+                            } catch (final InterruptedException ex) {
+                                Thread.currentThread().interrupt();
+                            } catch (Throwable t) {
+                                // The timer may abort if we throw, so we catch here to make
+                                // sure that the timer keeps running
+                                LOG.error(
+                                        "An error occurred while flushing one or more aggregates in module '{}'.",
+                                        id,
+                                        t);
+                            }
+                        }
+                    },
+                    completionIntervalMs,
+                    completionIntervalMs);
         } else {
             flushTimer = null;
         }
@@ -238,5 +233,4 @@ public class Aggregator<S extends Message, T extends Message, U> implements Auto
     public interface MessageSender<T> {
         void send(final T t) throws InterruptedException;
     }
-    
 }

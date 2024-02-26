@@ -1,9 +1,9 @@
 import { ValidationError } from 'yup'
 
 /**
-* 
+*
 * @param err Yup Validation Error(s)
-* @returns a record of our validation errors, 
+* @returns a record of our validation errors,
 *          ready to be used in the FE as a basic dictionary instead of being Yup specific.
 */
 export const validationErrorsToStringRecord = <T>(err: ValidationError): T => {

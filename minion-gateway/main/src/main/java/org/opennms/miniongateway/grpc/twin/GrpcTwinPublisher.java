@@ -1,33 +1,38 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.twin;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
@@ -39,7 +44,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
 import org.apache.ignite.Ignite;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.cloud.grpc.minion.CloudToMinionMessage;
@@ -52,35 +56,21 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanBuilder;
-import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-
 public class GrpcTwinPublisher extends AbstractTwinPublisher implements OutgoingMessageFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(GrpcTwinPublisher.class);
     private Multimap<TenantKey, AdapterObserver> sinkStreamsByLocation = LinkedListMultimap.create();
     private Map<TenantKey, AdapterObserver> sinkStreamsBySystemId = new HashMap<>();
-    private final ThreadFactory twinRpcThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("twin-rpc-handler-%d")
-            .build();
+    private final ThreadFactory twinRpcThreadFactory =
+            new ThreadFactoryBuilder().setNameFormat("twin-rpc-handler-%d").build();
     private final ExecutorService twinRpcExecutor = Executors.newCachedThreadPool(twinRpcThreadFactory);
 
     private final Tracer tracer;
     private final boolean debugSpanFullMessage;
     private final boolean debugSpanContent;
 
-    public GrpcTwinPublisher(Ignite ignite, final Tracer tracer, boolean debugSpanFullMessage, boolean debugSpanContent) {
+    public GrpcTwinPublisher(
+            Ignite ignite, final Tracer tracer, boolean debugSpanFullMessage, boolean debugSpanContent) {
         super(ignite);
         this.tracer = tracer;
         this.debugSpanFullMessage = debugSpanFullMessage;
@@ -92,7 +82,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         sendTwinResponseForSink(sinkUpdate.getTenantId(), locationId, mapTwinResponse(sinkUpdate));
     }
 
-    private synchronized boolean sendTwinResponseForSink(String tenantId, String location, TwinResponseProto twinResponseProto) {
+    private synchronized boolean sendTwinResponseForSink(
+            String tenantId, String location, TwinResponseProto twinResponseProto) {
         if (sinkStreamsByLocation.isEmpty()) {
             return false;
         }
@@ -100,15 +91,22 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
             Object[] diagnosticCtx = {tenantId, twinResponseProto.getConsumerKey(), location};
             if (Strings.isBlank(location)) {
                 // theoretical broadcast scenario - no location given, so we send update to all locations
-                LOG.debug("Sending sink update for tenant {} with key {} in all locations", tenantId, twinResponseProto.getConsumerKey());
+                LOG.debug(
+                        "Sending sink update for tenant {} with key {} in all locations",
+                        tenantId,
+                        twinResponseProto.getConsumerKey());
                 for (Entry<TenantKey, AdapterObserver> entry : new ArrayList<>(sinkStreamsByLocation.entries())) {
                     if (tenantId.equals(entry.getKey().getTenantId())) {
                         AdapterObserver stream = entry.getValue();
                         try {
-                            LOG.debug("Sending sink update for tenant {}, key {}, location {}, system id {}", diagnosticCtx);
+                            LOG.debug(
+                                    "Sending sink update for tenant {}, key {}, location {}, system id {}",
+                                    diagnosticCtx);
                             stream.onNext(twinResponseProto);
                         } catch (StatusRuntimeException e) {
-                            LOG.debug("Failed to send sink update for tenant {}, key {}, location {}, system id {}", diagnosticCtx);
+                            LOG.debug(
+                                    "Failed to send sink update for tenant {}, key {}, location {}, system id {}",
+                                    diagnosticCtx);
                             stream.complete();
                         }
                     }
@@ -153,13 +151,17 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         private final Logger logger = LoggerFactory.getLogger(AdapterObserver.class);
         private final StreamObserver<CloudToMinionMessage> delegate;
         private Runnable completionCallback;
-        //private final Tracer tracer;
+        // private final Tracer tracer;
         private final Attributes attributes;
         private SpanContext streamSpanContext;
 
-        AdapterObserver(StreamObserver<CloudToMinionMessage> delegate, Tracer tracer, SpanContext streamSpanContext, Attributes streamAttributes) {
+        AdapterObserver(
+                StreamObserver<CloudToMinionMessage> delegate,
+                Tracer tracer,
+                SpanContext streamSpanContext,
+                Attributes streamAttributes) {
             this.delegate = delegate;
-            //this.tracer = tracer;
+            // this.tracer = tracer;
             this.streamSpanContext = streamSpanContext;
             this.attributes = streamAttributes;
         }
@@ -171,12 +173,12 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         @Override
         public void onNext(TwinResponseProto value) {
             SpanBuilder spanBuilder = tracer.spanBuilder("CloudToMinionMessage send " + value.getConsumerKey())
-                .setSpanKind(SpanKind.PRODUCER)
-                .setAllAttributes(this.attributes)
-                .setAttribute("consumer_key", value.getConsumerKey())
-                .setAttribute("is_patch", value.getIsPatchObject())
-                .setAttribute("session_id", value.getSessionId())
-                .setAttribute("version", value.getVersion());
+                    .setSpanKind(SpanKind.PRODUCER)
+                    .setAllAttributes(this.attributes)
+                    .setAttribute("consumer_key", value.getConsumerKey())
+                    .setAttribute("is_patch", value.getIsPatchObject())
+                    .setAttribute("session_id", value.getSessionId())
+                    .setAttribute("version", value.getVersion());
 
             if (debugSpanFullMessage) {
                 spanBuilder.setAttribute("message", value.toString());
@@ -185,7 +187,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
                 spanBuilder.setAttribute("twin_object", value.getTwinObject().toStringUtf8());
             }
 
-            // When we get our original task-set, it is triggered from this span for the incoming connection, so don't add the link
+            // When we get our original task-set, it is triggered from this span for the incoming connection, so don't
+            // add the link
             if (!Span.current().getSpanContext().equals(this.streamSpanContext)) {
                 spanBuilder.addLink(this.streamSpanContext);
             }
@@ -219,9 +222,7 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         }
 
         private CloudToMinionMessage map(TwinResponseProto value) {
-            return CloudToMinionMessage.newBuilder()
-                .setTwinResponse(value)
-                .build();
+            return CloudToMinionMessage.newBuilder().setTwinResponse(value).build();
         }
 
         @Override
@@ -233,8 +234,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
                 return false;
             }
             AdapterObserver that = (AdapterObserver) o;
-            return Objects.equals(delegate, that.delegate) && Objects.equals(
-                completionCallback, that.completionCallback);
+            return Objects.equals(delegate, that.delegate)
+                    && Objects.equals(completionCallback, that.completionCallback);
         }
 
         @Override
@@ -243,9 +244,13 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
         }
     }
 
-
     @Override
-    public void create(String systemId, String tenantId, String location, SpanContext streamSpanContext, StreamObserver<CloudToMinionMessage> streamObserver) {
+    public void create(
+            String systemId,
+            String tenantId,
+            String location,
+            SpanContext streamSpanContext,
+            StreamObserver<CloudToMinionMessage> streamObserver) {
         TenantKey systemIdKey = new TenantKey(tenantId, systemId);
         TenantKey locationKey = new TenantKey(tenantId, location);
         if (sinkStreamsBySystemId.containsKey(systemIdKey)) {
@@ -254,10 +259,10 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
             sinkStream.onCompleted(); // force termination of session.
         }
         var streamAttributes = Attributes.builder()
-            .put("user", tenantId)
-            .put("location", location)
-            .put("systemId", systemId)
-            .build();
+                .put("user", tenantId)
+                .put("location", location)
+                .put("systemId", systemId)
+                .build();
         AdapterObserver delegate = new AdapterObserver(streamObserver, tracer, streamSpanContext, streamAttributes);
         delegate.setCompletionCallback(() -> {
             sinkStreamsByLocation.remove(locationKey, delegate);
@@ -270,7 +275,8 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
 
         forEachSession(tenantId, ((sessionKey, twinTracker) -> {
             if (sessionKey.locationId == null || sessionKey.locationId.equals(locationKey.getKey())) {
-                TwinUpdate twinUpdate = new TwinUpdate(sessionKey.key, sessionKey.tenantId, sessionKey.locationId, twinTracker.getObj());
+                TwinUpdate twinUpdate = new TwinUpdate(
+                        sessionKey.key, sessionKey.tenantId, sessionKey.locationId, twinTracker.getObj());
                 twinUpdate.setSessionId(twinTracker.getSessionId());
                 twinUpdate.setVersion(twinTracker.getVersion());
                 twinUpdate.setPatch(false);
@@ -279,5 +285,4 @@ public class GrpcTwinPublisher extends AbstractTwinPublisher implements Outgoing
             }
         }));
     }
-
 }

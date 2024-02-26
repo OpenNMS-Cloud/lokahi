@@ -1,4 +1,34 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.notifications;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +40,12 @@ import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.stub.MetadataUtils;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -53,27 +89,13 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.StreamSupport;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @CucumberContextConfiguration
 @SpringBootTest
 @EnableAutoConfiguration
 @EmbeddedKafka(partitions = 1)
-@TestPropertySource(properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", locations = "classpath:application.yml")
+@TestPropertySource(
+        properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
+        locations = "classpath:application.yml")
 @ContextConfiguration(initializers = {SpringContextTestInitializer.class})
 public class NotificationCucumberTestSteps extends GrpcTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(NotificationCucumberTestSteps.class);
@@ -121,9 +143,8 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         afterTest();
     }
 
-
     @Given("clean setup")
-    public void clean(){
+    public void clean() {
         jdbcTemplate.execute("delete from pager_duty_config");
         jdbcTemplate.execute("delete from monitoring_policy");
         caught = null;
@@ -134,12 +155,13 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         prepareServer();
         serviceStub = NotificationServiceGrpc.newBlockingStub(channel);
     }
+
     @Given("kafka setup")
     public void setupKafka() {
         Map<String, Object> producerConfig = new HashMap<>(KafkaTestUtils.producerProps(embeddedKafkaBroker));
 
-        DefaultKafkaProducerFactory<String, byte[]> kafkaProducerFactory
-            = new DefaultKafkaProducerFactory<>(producerConfig, new StringSerializer(), new ByteArraySerializer());
+        DefaultKafkaProducerFactory<String, byte[]> kafkaProducerFactory =
+                new DefaultKafkaProducerFactory<>(producerConfig, new StringSerializer(), new ByteArraySerializer());
         kafkaProducer = kafkaProducerFactory.createProducer();
     }
 
@@ -152,7 +174,8 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     @Given("Integration {string} key set to {string} via grpc with token tenant {string}")
-    public void setIntegrationKeyGrpcDifferentTenant(String tenantId, String key, String differentTenantId) throws VerificationException {
+    public void setIntegrationKeyGrpcDifferentTenant(String tenantId, String key, String differentTenantId)
+            throws VerificationException {
         caught = null;
         try {
             saveConfigWithDifferentTokenTenant(tenantId, key, differentTenantId);
@@ -167,35 +190,44 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         saveConfig(tenantId, secondKey);
 
         verify(spyInterceptor, times(2)).verifyAccessToken(authHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+        verify(spyInterceptor, times(2))
+                .interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     @Given("Integration {string} key set to {string}, then Integration {string} key set to {string} via grpc")
-    public void setIntegrationKeyGrpcTwiceWithDifferentTenants(String tenantId, String key, String otherTenantId, String secondKey) throws VerificationException {
+    public void setIntegrationKeyGrpcTwiceWithDifferentTenants(
+            String tenantId, String key, String otherTenantId, String secondKey) throws VerificationException {
         saveConfig(tenantId, key);
         saveConfig(otherTenantId, secondKey);
 
         verify(spyInterceptor, times(1)).verifyAccessToken(authHeader);
         verify(spyInterceptor, times(1)).verifyAccessToken(differentTenantHeader);
-        verify(spyInterceptor, times(2)).interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
+        verify(spyInterceptor, times(2))
+                .interceptCall(any(ServerCall.class), any(Metadata.class), any(ServerCallHandler.class));
     }
 
     private void saveConfig(String tenantId, String key) {
         String header = getAuthHeader(tenantId);
-        PagerDutyConfigDTO config = PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).setTenantId(tenantId).build();
+        PagerDutyConfigDTO config = PagerDutyConfigDTO.newBuilder()
+                .setIntegrationKey(key)
+                .setTenantId(tenantId)
+                .build();
 
-        serviceStub.withInterceptors(MetadataUtils
-                .newAttachHeadersInterceptor(createAuthHeader(header)))
-            .postPagerDutyConfig(config);
+        serviceStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(header)))
+                .postPagerDutyConfig(config);
     }
 
     private void saveConfigWithDifferentTokenTenant(String tenantId, String key, String tokenTenantId) {
         String header = getAuthHeader(tokenTenantId);
-        PagerDutyConfigDTO config = PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).setTenantId(tenantId).build();
+        PagerDutyConfigDTO config = PagerDutyConfigDTO.newBuilder()
+                .setIntegrationKey(key)
+                .setTenantId(tenantId)
+                .build();
 
-        serviceStub.withInterceptors(MetadataUtils
-                .newAttachHeadersInterceptor(createAuthHeader(header)))
-            .postPagerDutyConfig(config);
+        serviceStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createAuthHeader(header)))
+                .postPagerDutyConfig(config);
     }
 
     private String getAuthHeader(String tenantId) {
@@ -209,10 +241,11 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     @Given("Integration key set to {string} without tenantId")
-    public void setIntegrationKey(String key){
+    public void setIntegrationKey(String key) {
         caught = null;
         try {
-            PagerDutyConfigDTO configDTO = PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).build();
+            PagerDutyConfigDTO configDTO =
+                    PagerDutyConfigDTO.newBuilder().setIntegrationKey(key).build();
             notificationService.postPagerDutyConfig(configDTO);
         } catch (Exception e) {
             caught = e;
@@ -225,7 +258,13 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     }
 
     private void postAlert(String tenantId, long monitoringPolicyId) {
-        alert = Alert.newBuilder().setSeverity(Severity.MAJOR).setLogMessage("Hello").setDescription("Alarm!").setTenantId(tenantId).addMonitoringPolicyId(monitoringPolicyId).build();
+        alert = Alert.newBuilder()
+                .setSeverity(Severity.MAJOR)
+                .setLogMessage("Hello")
+                .setDescription("Alarm!")
+                .setTenantId(tenantId)
+                .addMonitoringPolicyId(monitoringPolicyId)
+                .build();
         notificationService.postNotification(alert);
     }
 
@@ -253,7 +292,8 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
 
     @Then("verify pager duty rest method is called {int} times")
     public void verifyPagerDutyAPICalled(int count) {
-        verify(restTemplate, times(count)).exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
+        verify(restTemplate, times(count))
+                .exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
     }
 
     @Given("Alert posted via service with no config with tenant {string} with monitoring policy ID {long}")
@@ -279,44 +319,53 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
     @Given("first attempt to post to PagerDuty will fail but should retry")
     public void mockPagerDutyFailOnce() {
         when(restTemplate.exchange(any(), any(), any(), any(Class.class)))
-            .thenThrow(new RestClientResponseException("Failed", HttpStatus.BAD_GATEWAY, "Failed", null, null, null))
-            .thenReturn(ResponseEntity.ok(null));
+                .thenThrow(
+                        new RestClientResponseException("Failed", HttpStatus.BAD_GATEWAY, "Failed", null, null, null))
+                .thenReturn(ResponseEntity.ok(null));
     }
 
     @Given("the following monitoring policies sent via Kafka")
     public void addMonitoringPolicies(DataTable table) {
         table.asLists().forEach((row) -> {
             MonitorPolicyProto proto = MonitorPolicyProto.newBuilder()
-                .setId(Long.parseLong(row.get(0)))
-                .setTenantId(row.get(1))
-                .setNotifyByPagerDuty(Boolean.parseBoolean(row.get(2)))
-                .setNotifyByEmail(Boolean.parseBoolean(row.get(3)))
-                .setNotifyByWebhooks(Boolean.parseBoolean(row.get(4)))
-                .build();
+                    .setId(Long.parseLong(row.get(0)))
+                    .setTenantId(row.get(1))
+                    .setNotifyByPagerDuty(Boolean.parseBoolean(row.get(2)))
+                    .setNotifyByEmail(Boolean.parseBoolean(row.get(3)))
+                    .setNotifyByWebhooks(Boolean.parseBoolean(row.get(4)))
+                    .build();
             ProducerRecord<String, byte[]> record = new ProducerRecord<>(monitoringPolicyTopic, proto.toByteArray());
             kafkaProducer.send(record);
         });
         kafkaProducer.flush();
     }
 
-
     @Then("verify {string} has a monitoring policy with ID {long} and the following enabled")
     @WithTenant(tenantIdArg = 0)
     public void verifyMonitoringPolicy(String tenant, long id, List<String> enabledNotifications) {
         Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            List<MonitoringPolicy> monitoringPolicy = monitoringPolicyRepository.findByTenantIdAndIdIn(tenant, List.of(id));
+            List<MonitoringPolicy> monitoringPolicy =
+                    monitoringPolicyRepository.findByTenantIdAndIdIn(tenant, List.of(id));
             assertEquals(1, monitoringPolicy.size());
 
-            assertEquals(enabledNotifications.contains("PagerDuty"), monitoringPolicy.get(0).isNotifyByPagerDuty());
-            assertEquals(enabledNotifications.contains("email"), monitoringPolicy.get(0).isNotifyByEmail());
-            assertEquals(enabledNotifications.contains("webhooks"), monitoringPolicy.get(0).isNotifyByWebhooks());
+            assertEquals(
+                    enabledNotifications.contains("PagerDuty"),
+                    monitoringPolicy.get(0).isNotifyByPagerDuty());
+            assertEquals(
+                    enabledNotifications.contains("email"),
+                    monitoringPolicy.get(0).isNotifyByEmail());
+            assertEquals(
+                    enabledNotifications.contains("webhooks"),
+                    monitoringPolicy.get(0).isNotifyByWebhooks());
         });
     }
 
     @Given("{string} has a monitoring policy with ID {long}")
     @WithTenant(tenantIdArg = 0)
     public void waitForMonitoringPolicy(String tenant, long id) {
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !monitoringPolicyRepository.findByTenantIdAndIdIn(tenant, List.of(id)).isEmpty());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !monitoringPolicyRepository
+                .findByTenantIdAndIdIn(tenant, List.of(id))
+                .isEmpty());
     }
 
     @Given("{string} has email {string}")
@@ -330,16 +379,20 @@ public class NotificationCucumberTestSteps extends GrpcTestBase {
         // Mailhog exposes an API with all emails recieved
         Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpGet get = new HttpGet(String.format(
-                "http://%s:%d/api/v2/messages",
-                SpringContextTestInitializer.mailhog.getHost(),
-                SpringContextTestInitializer.mailhog.getMappedPort(SpringContextTestInitializer.MAILHOG_WEB_PORT)
-            ));
+                    "http://%s:%d/api/v2/messages",
+                    SpringContextTestInitializer.mailhog.getHost(),
+                    SpringContextTestInitializer.mailhog.getMappedPort(SpringContextTestInitializer.MAILHOG_WEB_PORT)));
 
-            JsonNode nodes = new ObjectMapper().readTree(httpClient.execute(get).getEntity().getContent());
+            JsonNode nodes = new ObjectMapper()
+                    .readTree(httpClient.execute(get).getEntity().getContent());
             assertEquals(1, nodes.get("total").asInt());
             JsonNode content = nodes.get("items").get(0).get("Content");
             // Check the email is addressed to the tenant, and the body and subject aren't empty.
-            assertEquals(List.of(email), StreamSupport.stream(content.get("Headers").get("To").spliterator(), false).map(JsonNode::asText).toList());
+            assertEquals(
+                    List.of(email),
+                    StreamSupport.stream(content.get("Headers").get("To").spliterator(), false)
+                            .map(JsonNode::asText)
+                            .toList());
             assertNotEquals("", content.get("Headers").get("Subject").get(0).asText());
             assertNotEquals("", content.get("Body").asText());
         });

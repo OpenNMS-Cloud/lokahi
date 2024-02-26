@@ -1,5 +1,27 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.integration;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.dataplatform.flows.document.FlowDocument;
 import org.opennms.dataplatform.flows.document.NodeInfo;
@@ -9,8 +31,6 @@ import org.opennms.horizon.flows.grpc.client.IngestorClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class FlowRepositoryImpl implements FlowRepository {
@@ -27,28 +47,26 @@ public class FlowRepositoryImpl implements FlowRepository {
             return;
         }
 
-        List<FlowDocument> listDataPlatformFlowDocuments =
-            enrichedFlows.stream().map(doc -> this.mapFlowDocument(doc, enrichedFlowsLog)).toList();
+        List<FlowDocument> listDataPlatformFlowDocuments = enrichedFlows.stream()
+                .map(doc -> this.mapFlowDocument(doc, enrichedFlowsLog))
+                .toList();
 
         StoreFlowDocumentsRequest storeFlowDocumentsRequest = StoreFlowDocumentsRequest.newBuilder()
-            .addAllDocuments(listDataPlatformFlowDocuments)
-            .build();
+                .addAllDocuments(listDataPlatformFlowDocuments)
+                .build();
 
-        ingestorClient.sendData(
-            storeFlowDocumentsRequest,
-            enrichedFlowsLog.getTenantId()
-        );
+        ingestorClient.sendData(storeFlowDocumentsRequest, enrichedFlowsLog.getTenantId());
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     // NOTE: this will hopefully be simplified in the future
-    private FlowDocument mapFlowDocument(org.opennms.horizon.flows.document.FlowDocument flowDocument,
-                                         TenantLocationSpecificFlowDocumentLog flowsLog) {
-        FlowDocument result =
-            FlowDocument.newBuilder()
+    private FlowDocument mapFlowDocument(
+            org.opennms.horizon.flows.document.FlowDocument flowDocument,
+            TenantLocationSpecificFlowDocumentLog flowsLog) {
+        FlowDocument result = FlowDocument.newBuilder()
                 .setTimestamp(flowDocument.getTimestamp())
                 .setNumBytes(flowDocument.getNumBytes())
                 .setDirectionValue(flowDocument.getDirection().getNumber())
@@ -82,15 +100,9 @@ public class FlowRepositoryImpl implements FlowRepository {
                 .setTos(flowDocument.getTos())
                 .setNetflowVersionValue(flowDocument.getNetflowVersion().getNumber())
                 .setVlan(flowDocument.getVlan())
-                .setSrcNode(
-                    mapNodeInfoToDataPlatform(flowDocument.getSrcNode())
-                )
-                .setExporterNode(
-                    mapNodeInfoToDataPlatform(flowDocument.getExporterNode())
-                )
-                .setDestNode(
-                    mapNodeInfoToDataPlatform(flowDocument.getDestNode())
-                )
+                .setSrcNode(mapNodeInfoToDataPlatform(flowDocument.getSrcNode()))
+                .setExporterNode(mapNodeInfoToDataPlatform(flowDocument.getExporterNode()))
+                .setDestNode(mapNodeInfoToDataPlatform(flowDocument.getDestNode()))
                 .setApplication(flowDocument.getApplication())
                 .setHost(flowDocument.getHost())
                 .setSrcLocalityValue(flowDocument.getSrcLocality().getNumber())
@@ -110,8 +122,7 @@ public class FlowRepositoryImpl implements FlowRepository {
     }
 
     private NodeInfo mapNodeInfoToDataPlatform(org.opennms.horizon.flows.document.NodeInfo src) {
-        NodeInfo result =
-            NodeInfo.newBuilder()
+        NodeInfo result = NodeInfo.newBuilder()
                 .setForeignSource(src.getForeignSource())
                 .setForeignId(src.getForeignId())
                 .setNodeId(src.getNodeId())

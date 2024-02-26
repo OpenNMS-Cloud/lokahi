@@ -1,41 +1,43 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.notifications.service;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.testing.assertj.TracesAssert;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -50,20 +52,11 @@ import org.opennms.horizon.notifications.exceptions.NotificationException;
 import org.opennms.horizon.notifications.model.MonitoringPolicy;
 import org.opennms.horizon.notifications.repository.MonitoringPolicyRepository;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationServiceImplTest {
     @RegisterExtension
     static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
+
     private final Tracer tracer = otelTesting.getOpenTelemetry().getTracer("test");
 
     @InjectMocks
@@ -92,11 +85,13 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setNotifyByPagerDuty(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
-            .thenReturn(List.of(monitoringPolicy));
+                .thenReturn(List.of(monitoringPolicy));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
-        // We need to explicitly start a span because we don't have the one that is auto-created by the agent instrumentation
+        // We need to explicitly start a span because we don't have the one that is auto-created by the agent
+        // instrumentation
         var span = tracer.spanBuilder("postNotification").startSpan();
         try (var ignored = span.makeCurrent()) {
             notificationService.postNotification(alert);
@@ -109,7 +104,8 @@ public class NotificationServiceImplTest {
 
         TracesAssert.assertThat(otelTesting.getSpans()).hasSize(1);
         var firstSpan = otelTesting.getSpans().get(0);
-        Assert.assertEquals("user attribute (tenant)", "T1", firstSpan.getAttributes().get(AttributeKey.stringKey("user")));
+        Assert.assertEquals(
+                "user attribute (tenant)", "T1", firstSpan.getAttributes().get(AttributeKey.stringKey("user")));
     }
 
     @Test
@@ -119,9 +115,10 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setId(1);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
-            .thenReturn(List.of(monitoringPolicy));
+                .thenReturn(List.of(monitoringPolicy));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
         notificationService.postNotification(alert);
 
@@ -132,9 +129,11 @@ public class NotificationServiceImplTest {
     @Test
     public void testNotificationNoPolicy() throws NotificationException {
         // Either the alert didn't specify the notification policy, or we're unable to find the specified one, no-op.
-        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn(anyString(), anyList())).thenReturn(List.of());
+        Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn(anyString(), anyList()))
+                .thenReturn(List.of());
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
         notificationService.postNotification(alert);
 
@@ -150,11 +149,12 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setNotifyByPagerDuty(true);
         monitoringPolicy.setNotifyByEmail(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
-            .thenReturn(List.of(monitoringPolicy));
+                .thenReturn(List.of(monitoringPolicy));
         List<String> adminEmail = List.of("admin@email");
         Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(adminEmail);
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
         doThrow(new NotificationAPIException("Foo")).when(pagerDutyAPI).postNotification(any());
         doThrow(new NotificationAPIException("Foo")).when(emailAPI).sendEmail(any(), any(), any());
 
@@ -177,9 +177,12 @@ public class NotificationServiceImplTest {
         m2.setNotifyByPagerDuty(true);
 
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L, 2L)))
-            .thenReturn(List.of(m1, m2));
+                .thenReturn(List.of(m1, m2));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addAllMonitoringPolicyId(List.of(1L, 2L)).build();
+        Alert alert = Alert.newBuilder()
+                .setTenantId("T1")
+                .addAllMonitoringPolicyId(List.of(1L, 2L))
+                .build();
 
         notificationService.postNotification(alert);
 
@@ -193,11 +196,12 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setNotifyByEmail(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
-            .thenReturn(List.of(monitoringPolicy));
+                .thenReturn(List.of(monitoringPolicy));
         String adminEmail = "admin@email";
         Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(List.of(adminEmail));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
         Mockito.when(velocity.populateTemplate(adminEmail, alert)).thenReturn("Alert email");
 
         notificationService.postNotification(alert);
@@ -213,11 +217,12 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setTenantId("T1");
         monitoringPolicy.setNotifyByEmail(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
-            .thenReturn(List.of(monitoringPolicy));
+                .thenReturn(List.of(monitoringPolicy));
         List<String> adminEmail = Collections.emptyList();
         Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(adminEmail);
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
 
         notificationService.postNotification(alert);
 
@@ -233,11 +238,12 @@ public class NotificationServiceImplTest {
         monitoringPolicy.setNotifyByPagerDuty(true);
         monitoringPolicy.setNotifyByEmail(true);
         Mockito.when(monitoringPolicyRepository.findByTenantIdAndIdIn("T1", List.of(1L)))
-            .thenReturn(List.of(monitoringPolicy));
+                .thenReturn(List.of(monitoringPolicy));
         String adminEmail = "admin@email";
         Mockito.when(keyCloakAPI.getTenantEmailAddresses("T1")).thenReturn(List.of(adminEmail));
 
-        Alert alert = Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
+        Alert alert =
+                Alert.newBuilder().setTenantId("T1").addMonitoringPolicyId(1).build();
         Mockito.when(velocity.populateTemplate(adminEmail, alert)).thenReturn("Alert email");
 
         notificationService.postNotification(alert);

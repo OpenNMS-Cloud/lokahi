@@ -1,56 +1,51 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minioncertverifier.controller;
-
-import org.junit.jupiter.api.Test;
-import org.opennms.horizon.minioncertmanager.proto.IsCertificateValidResponse;
-import org.opennms.horizon.minioncertverifier.parser.BasicDnParser;
-import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Test;
+import org.opennms.horizon.minioncertmanager.proto.IsCertificateValidResponse;
+import org.opennms.horizon.minioncertverifier.parser.BasicDnParser;
+import org.springframework.http.HttpStatus;
+
 class CertificateControllerTest {
     private MinionCertificateManagerClient client = mock(MinionCertificateManagerClient.class);
 
     private CertificateController controller = new CertificateController(new BasicDnParser(), client);
 
-    private String pem = "-----BEGIN%20CERTIFICATE-----%0AMIIDYjCCAkoCFGqSEKVzzGJvXIxidPBLyMJwc5GoMA0GCSqGSIb3DQEBCwUAMDAx%0AEjAQBgNVBAMMCWNsaWVudC1jYTENMAsGA1UECgwEVGVzdDELMAkGA1UEBhMCVVMw%0AHhcNMjMwNjI2MTY1MDA1WhcNMzMwNjIzMTY1MDA1WjCBqjELMAkGA1UEBhMCQ0Ex%0AHTAbBgNVBAgMFERvTm90VXNlSW5Qcm9kdWN0aW9uMR0wGwYDVQQHDBREb05vdFVz%0AZUluUHJvZHVjdGlvbjEQMA4GA1UECgwHT3Blbk5NUzEjMCEGA1UEAwwab3Blbm5t%0Acy1taW5pb24tc3NsLWdhdGV3YXkxDDAKBgNVBAsMA0w6MzEYMBYGA1UECwwPVDpv%0AcGVubm1zLXByaW1lMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhuvt%0AKvqS4qP5LwoTRTuxBKNmlZIvmfn6iwk2MjXkt9PRWRvLWprxtDmg5Hx%2Byy5XAlmW%0ARY3bY6iZerxX4zDShG1iXTLI2ak27JMTYSY48%2FbyOFRibdDrT71EKQdIvWs0ogFO%0Ajr40gNtle94JptvajOVymX6wLm33K0NIePehxa0%2FW4XP%2B5QA5IPW2Xaqqr7vZWod%0AHB5QR%2Fe1vUVym1zT9nxg9lVWclqHvoSKc9D1NZ%2FFQLBJ1JvdCXtUcW%2FmA%2BNI9TE4%0AMu86oxoQhsHXLGeGdiQbh8e66SHM4sFUUgh4nkQQ2q24Ai8FhvfsAwJDpVkyIR7K%0AOYJef5kWdxm%2FMxL1NQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAuaxuM76pQJ2d1%0AHHFpOtEv3PAi36hw0yGj%2BfNFMXEtUKxlD50dlDCitFh59Igf6%2BAazTShbYkfmHKJ%0AYc%2B051wNs0TJC1wZAtc7dbsgSOY028sW6eirujq17k37rEhT3kDVcw7Vd9l01jmx%0ANg%2BDxOT%2B2EOgJVBZKou493BAGdKbaJozTDjAOFSNy6XU%2Bk9gSDs%2Brj1Cpjvo%2FtSJ%0AvwtwNp7Fvwy3%2BQsWy7PmWjcDxypEXbQX8T41Keo5rUbT2F2zkJ%2Bj18O7JyCzwRiE%0Af4kAiXbFHMm1GxHP6JshUapP%2BHV2iFOspBrghiHnj33Y6nl%2Bp0Xdl1m5DirstCk9%0APIZPVgyl%0A-----END%20CERTIFICATE-----%0A";
+    private String pem =
+            "-----BEGIN%20CERTIFICATE-----%0AMIIDYjCCAkoCFGqSEKVzzGJvXIxidPBLyMJwc5GoMA0GCSqGSIb3DQEBCwUAMDAx%0AEjAQBgNVBAMMCWNsaWVudC1jYTENMAsGA1UECgwEVGVzdDELMAkGA1UEBhMCVVMw%0AHhcNMjMwNjI2MTY1MDA1WhcNMzMwNjIzMTY1MDA1WjCBqjELMAkGA1UEBhMCQ0Ex%0AHTAbBgNVBAgMFERvTm90VXNlSW5Qcm9kdWN0aW9uMR0wGwYDVQQHDBREb05vdFVz%0AZUluUHJvZHVjdGlvbjEQMA4GA1UECgwHT3Blbk5NUzEjMCEGA1UEAwwab3Blbm5t%0Acy1taW5pb24tc3NsLWdhdGV3YXkxDDAKBgNVBAsMA0w6MzEYMBYGA1UECwwPVDpv%0AcGVubm1zLXByaW1lMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhuvt%0AKvqS4qP5LwoTRTuxBKNmlZIvmfn6iwk2MjXkt9PRWRvLWprxtDmg5Hx%2Byy5XAlmW%0ARY3bY6iZerxX4zDShG1iXTLI2ak27JMTYSY48%2FbyOFRibdDrT71EKQdIvWs0ogFO%0Ajr40gNtle94JptvajOVymX6wLm33K0NIePehxa0%2FW4XP%2B5QA5IPW2Xaqqr7vZWod%0AHB5QR%2Fe1vUVym1zT9nxg9lVWclqHvoSKc9D1NZ%2FFQLBJ1JvdCXtUcW%2FmA%2BNI9TE4%0AMu86oxoQhsHXLGeGdiQbh8e66SHM4sFUUgh4nkQQ2q24Ai8FhvfsAwJDpVkyIR7K%0AOYJef5kWdxm%2FMxL1NQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAuaxuM76pQJ2d1%0AHHFpOtEv3PAi36hw0yGj%2BfNFMXEtUKxlD50dlDCitFh59Igf6%2BAazTShbYkfmHKJ%0AYc%2B051wNs0TJC1wZAtc7dbsgSOY028sW6eirujq17k37rEhT3kDVcw7Vd9l01jmx%0ANg%2BDxOT%2B2EOgJVBZKou493BAGdKbaJozTDjAOFSNy6XU%2Bk9gSDs%2Brj1Cpjvo%2FtSJ%0AvwtwNp7Fvwy3%2BQsWy7PmWjcDxypEXbQX8T41Keo5rUbT2F2zkJ%2Bj18O7JyCzwRiE%0Af4kAiXbFHMm1GxHP6JshUapP%2BHV2iFOspBrghiHnj33Y6nl%2Bp0Xdl1m5DirstCk9%0APIZPVgyl%0A-----END%20CERTIFICATE-----%0A";
 
     private String serialNumber = "6A9210A573CC626F5C8C6274F04BC8C2707391A8";
 
     @Test
     void checkValidCertificate() {
         when(client.isCertValid(serialNumber))
-            .thenReturn(IsCertificateValidResponse.newBuilder().setIsValid(true).build());
+                .thenReturn(
+                        IsCertificateValidResponse.newBuilder().setIsValid(true).build());
 
         var result = controller.validate(pem);
 
@@ -77,7 +72,9 @@ class CertificateControllerTest {
     @Test
     void checkExpiredCertificate() {
         when(client.isCertValid(serialNumber))
-            .thenReturn(IsCertificateValidResponse.newBuilder().setIsValid(false).build());
+                .thenReturn(IsCertificateValidResponse.newBuilder()
+                        .setIsValid(false)
+                        .build());
 
         var result = controller.validate(pem);
 
@@ -86,9 +83,11 @@ class CertificateControllerTest {
 
     @Test
     void checkMissingValueCertificate() {
-        var missingLocationPem = "-----BEGIN%20CERTIFICATE-----%0AMIIDCTCCAfECFGRtqrAwfc04UwROh5Cr9jOzmAZBMA0GCSqGSIb3DQEBCwUAMDAx%0AEjAQBgNVBAMMCWNsaWVudC1jYTENMAsGA1UECgwEVGVzdDELMAkGA1UEBhMCVVMw%0AHhcNMjMwNjI5MDIwODM1WhcNMzMwNjI2MDIwODM1WjBSMQswCQYDVQQGEwJDQTEL%0AMAkGA1UECAwCT04xDzANBgNVBAcMBk90dGF3YTEQMA4GA1UECgwHb3Blbm5tczET%0AMBEGA1UECwwKVDp0ZW5hbnQwMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC%0AggEBANoW2itSUsJfVdUAsoO6GB4yKccJPLr4gjHmmCWAet4ojp9swINNq7WRrTi%2B%0ArHT7cZx4mgc7L%2BMiHFbmEbkUwNixEbF18dhM3iWfSD1uu55HywSKchFaGU1%2FnCDV%0AS7wJEr1Ku%2FP8gN5uHg6g4RYi5ummbh1lQldg1MCue1nUJt%2BQnd533VimnMP5fxCc%0AEyx0MIVuif%2BfbzAZjBFW%2FGe2Eiznqb%2Fmqo%2F27JAagRd9M5C22tgfVD5bwLBETAU8%0AAfqCVW1wwX9o6iG%2ByqqDoGT2xGkRCpUdr6QVbDHTnxaL2zPItK0x1cZ2up1QoLAr%0A9GGHQZIlP0E4FQtk21Nl9u%2Fc6oECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAajgb%0A4QhQs6QdJ9Mog1d5t1wCmJ4qtiiSM%2FEK2CVhVjSPZbdBUbx0rBP7qyPvDzR8GS8m%0AC%2FbiZl5PjnzSJyqZq%2B4DlazrzLwj4ncTnnBUucXGZLBqDsSrVY7fYrok%2FaR%2Fn7Om%0AmMsWqWLu%2F4ttG2OpNJwdsy%2FeIhcO89XIk8XKtSVcx4sjM36Bh4F6U6o0rUxHNosw%0AzWm%2FdfUQg2Mmv1Pd92nZlgN8WH0P1KLD7c69%2BYucN%2FxENWzkFp6AJb0cNdvgZgKr%0A5pIq2v6dRJJYb806kyd8pjpLCbD7XgqDhvJT3CSZixnqvUTHx0AgMbdie%2B8qg4IJ%0AZmTzcw4Nm1pywf2hZQ%3D%3D%0A-----END%20CERTIFICATE-----";
+        var missingLocationPem =
+                "-----BEGIN%20CERTIFICATE-----%0AMIIDCTCCAfECFGRtqrAwfc04UwROh5Cr9jOzmAZBMA0GCSqGSIb3DQEBCwUAMDAx%0AEjAQBgNVBAMMCWNsaWVudC1jYTENMAsGA1UECgwEVGVzdDELMAkGA1UEBhMCVVMw%0AHhcNMjMwNjI5MDIwODM1WhcNMzMwNjI2MDIwODM1WjBSMQswCQYDVQQGEwJDQTEL%0AMAkGA1UECAwCT04xDzANBgNVBAcMBk90dGF3YTEQMA4GA1UECgwHb3Blbm5tczET%0AMBEGA1UECwwKVDp0ZW5hbnQwMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC%0AggEBANoW2itSUsJfVdUAsoO6GB4yKccJPLr4gjHmmCWAet4ojp9swINNq7WRrTi%2B%0ArHT7cZx4mgc7L%2BMiHFbmEbkUwNixEbF18dhM3iWfSD1uu55HywSKchFaGU1%2FnCDV%0AS7wJEr1Ku%2FP8gN5uHg6g4RYi5ummbh1lQldg1MCue1nUJt%2BQnd533VimnMP5fxCc%0AEyx0MIVuif%2BfbzAZjBFW%2FGe2Eiznqb%2Fmqo%2F27JAagRd9M5C22tgfVD5bwLBETAU8%0AAfqCVW1wwX9o6iG%2ByqqDoGT2xGkRCpUdr6QVbDHTnxaL2zPItK0x1cZ2up1QoLAr%0A9GGHQZIlP0E4FQtk21Nl9u%2Fc6oECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAajgb%0A4QhQs6QdJ9Mog1d5t1wCmJ4qtiiSM%2FEK2CVhVjSPZbdBUbx0rBP7qyPvDzR8GS8m%0AC%2FbiZl5PjnzSJyqZq%2B4DlazrzLwj4ncTnnBUucXGZLBqDsSrVY7fYrok%2FaR%2Fn7Om%0AmMsWqWLu%2F4ttG2OpNJwdsy%2FeIhcO89XIk8XKtSVcx4sjM36Bh4F6U6o0rUxHNosw%0AzWm%2FdfUQg2Mmv1Pd92nZlgN8WH0P1KLD7c69%2BYucN%2FxENWzkFp6AJb0cNdvgZgKr%0A5pIq2v6dRJJYb806kyd8pjpLCbD7XgqDhvJT3CSZixnqvUTHx0AgMbdie%2B8qg4IJ%0AZmTzcw4Nm1pywf2hZQ%3D%3D%0A-----END%20CERTIFICATE-----";
         when(client.isCertValid("646DAAB0307DCD3853044E8790ABF633B3980641"))
-            .thenReturn(IsCertificateValidResponse.newBuilder().setIsValid(true).build());
+                .thenReturn(
+                        IsCertificateValidResponse.newBuilder().setIsValid(true).build());
 
         var result = controller.validate(missingLocationPem);
 

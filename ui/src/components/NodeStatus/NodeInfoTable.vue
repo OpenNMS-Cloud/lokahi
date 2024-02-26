@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 const nodeStatusStore = useNodeStatusStore()
-  
+
 const nodeData = computed(() => {
   return {
     node: nodeStatusStore.fetchedData?.node

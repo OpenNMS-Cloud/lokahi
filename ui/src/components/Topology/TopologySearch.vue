@@ -18,7 +18,7 @@
     </FeatherChip>
   </FeatherChipList>
 </template>
-  
+
 <script setup lang="ts">
 import { debounce } from 'lodash'
 import { useTopologyStore } from '@/store/Views/topologyStore'

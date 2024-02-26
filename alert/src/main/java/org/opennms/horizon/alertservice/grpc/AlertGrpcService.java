@@ -354,7 +354,6 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     }
 
     @Override
-    @Transactional
     public void alertCounts(
             com.google.protobuf.Empty request,
             io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.AlertCount> responseObserver) {

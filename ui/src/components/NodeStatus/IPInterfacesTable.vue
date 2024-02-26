@@ -1,10 +1,40 @@
 <template>
-  <TableCard>
+  <TableCard class="ip-interfaces-container">
     <div class="header">
       <div class="title-container">
         <span class="title">
           {{ nodeStatusStore.isAzure ? 'Network Interfaces' : 'IP Interfaces' }}
         </span>
+      </div>
+      <div class="action-container">
+        <div class="search-container">
+          <FeatherInput
+            :label="searchLabel"
+            v-model.trim="searchVal"
+            type="search"
+            data-test="search-input"
+          >
+            <template #pre>
+              <FeatherIcon :icon="fsIcons.Search" />
+            </template>
+          </FeatherInput>
+        </div>
+        <div class="download-csv">
+          <FeatherButton
+              primary
+              icon="Download"
+            >
+              <FeatherIcon :icon="fsIcons.DownloadFile"> </FeatherIcon>
+            </FeatherButton>
+        </div>
+        <div class="refresh">
+          <FeatherButton
+              primary
+              icon="Refresh"
+            >
+              <FeatherIcon :icon="fsIcons.Refresh"> </FeatherIcon>
+            </FeatherButton>
+        </div>
       </div>
     </div>
     <div class="container">
@@ -14,24 +44,24 @@
       >
         <thead>
           <tr>
-            <th scope="col">IP Address</th>
-            <th scope="col" v-if="nodeStatusStore.isAzure">Private IP ID</th>
-            <th scope="col" v-if="nodeStatusStore.isAzure">Interface Name</th>
-            <th scope="col" v-if="nodeStatusStore.isAzure">Public IP</th>
-            <th scope="col" v-if="nodeStatusStore.isAzure">Public IP ID</th>
-            <th scope="col" v-if="nodeStatusStore.isAzure">Graphs</th>
-            <th scope="col" v-if="nodeStatusStore.isAzure">Location</th>
-            <th scope="col" v-if="!nodeStatusStore.isAzure">IP Hostname</th>
-            <th scope="col" v-if="!nodeStatusStore.isAzure">Netmask</th>
-            <th scope="col" v-if="!nodeStatusStore.isAzure">Primary</th>
-          </tr>
+              <FeatherSortHeader
+                v-for="col of columns"
+                :key="col.label"
+                scope="col"
+                :property="col.id"
+                :sort="(sort as any)[col.id]"
+                v-on:sort-changed="sortChanged"
+              >
+                {{ col.label }}
+              </FeatherSortHeader>
+            </tr>
         </thead>
         <TransitionGroup
           name="data-table"
           tag="tbody"
         >
           <tr
-            v-for="ipInterface in nodeStatusStore.node.ipInterfaces"
+            v-for="ipInterface in pageObjects"
             :key="ipInterface.id"
           >
             <td>{{ ipInterface.ipAddress }}</td>
@@ -58,6 +88,15 @@
           </tr>
         </TransitionGroup>
       </table>
+      <FeatherPagination
+      v-model="page"
+      :pageSize="pageSize"
+      :total="total"
+      @update:modelValue="updatePage"
+      @update:pageSize="updatePageSize"
+      class="ip-interfaces-pagination py-2"
+      v-if="hasIPInterfaces"
+    ></FeatherPagination>
     </div>
   </TableCard>
   <NodeStatusMetricsModal ref="metricsModal" />
@@ -66,8 +105,100 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import Traffic from '@featherds/icon/action/Workflow'
+import { FeatherPagination } from '@featherds/pagination'
+import DownloadFile from '@featherds/icon/action/DownloadFile'
+import Refresh from '@featherds/icon/navigation/Refresh'
+import Search from '@featherds/icon/action/Search'
+import { SORT } from '@featherds/table'
 const nodeStatusStore = useNodeStatusStore()
 const metricsModal = ref()
+
+const fsIcons = markRaw({
+  DownloadFile,
+  Refresh,
+  Search
+})
+
+const sort = reactive({
+  ipAddress: SORT.NONE,
+  privateIpId: SORT.NONE,
+  interfaceName: SORT.NONE,
+  publicIpId: SORT.NONE,
+  publicIpAddress: SORT.NONE,
+  location: SORT.NONE,
+  hostname: SORT.NONE,
+  netmask: SORT.NONE,
+  snmpPrimary: SORT.NONE
+}) as any
+
+const page = ref(0)
+const pageSize = ref(0)
+const total = ref(0)
+const pageObjects = ref([] as any[])
+const searchLabel = ref('Search IP Interfaces')
+const searchVal = ref('')
+const columns = computed(() => {
+  if (nodeStatusStore.isAzure) {
+    return [
+      { id: 'ipAddress', label: 'IP Address' },
+      { id: 'privateIpId', label: 'Private IP ID' },
+      { id: 'interfaceName', label: 'Interface Name' },
+      { id: 'publicIpId', label: 'Public IP ID' },
+      { id: 'publicIpAddress', label: 'Graphs' },
+      { id: 'location', label: 'Location' }
+    ]
+  } else {
+    return [
+      { id: 'ipAddress', label: 'IP Address' },
+      { id: 'hostname', label: 'IP Hostname' },
+      { id: 'netmask', label: 'Netmask' },
+      { id: 'snmpPrimary', label: 'Primary' }
+    ]
+  }
+})
+const hasIPInterfaces = computed(() => {
+  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
+})
+
+const ipInterfaces = computed(() => {
+  return hasIPInterfaces.value ? nodeStatusStore.node.ipInterfaces : []
+})
+
+watch(() => hasIPInterfaces.value, () => {
+  if (hasIPInterfaces.value) {
+    page.value = 1
+    pageSize.value = 10
+    total.value = ipInterfaces.value?.length ?? 0
+    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], page.value, pageSize.value)
+  }
+})
+
+// Function to retrieve objects for a given page
+const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
+  const startIndex = (pageNumber - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  return array.slice(startIndex, endIndex)
+}
+
+const sortChanged = (sortObj: Record<string, string>) => {
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+  sort[sortObj.property] = sortObj.value
+}
+
+const updatePage = (v: number) => {
+  if (hasIPInterfaces.value) {
+    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], v, pageSize.value)
+  }
+}
+
+const updatePageSize = (v: number) => {
+  if (hasIPInterfaces.value) {
+    pageSize.value = v
+    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], page.value, v)
+  }
+}
 
 const icons = markRaw({
   Traffic
@@ -83,6 +214,7 @@ const icons = markRaw({
 .header {
   display: flex;
   justify-content: space-between;
+  padding: 0px 10px;
   .title-container {
     display: flex;
     .title {
@@ -91,11 +223,26 @@ const icons = markRaw({
       margin-top: 2px;
     }
   }
+  .action-container{
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    width: 30%;
+    >.search-container{
+      width: 80%;
+      margin-right: 5px;
+      :deep(.label-border) {
+        width: 110px !important;
+      }
+    }
+  }
 }
 
 .container {
   display: block;
   overflow-x: auto;
+  padding: 0px 15px;
+
   table {
     width: 100%;
     @include table.table;
@@ -110,6 +257,11 @@ const icons = markRaw({
         padding: 0px 5px 0px 5px;
       }
     }
+  }
+
+  :deep(.ip-interfaces-pagination) {
+    border: none;
+    padding: 20px 0px;
   }
 }
 </style>

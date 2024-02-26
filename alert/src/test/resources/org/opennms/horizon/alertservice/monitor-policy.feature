@@ -87,3 +87,7 @@ Feature: Monitor policy gRPC Functionality
     Then List policy should contain 1
     Then List alerts for the tenant, until JSON response matches the following JSON path expressions
       | alerts.size() == 0     |
+
+  Scenario: All Event Definitions are loaded by default
+    Given Tenant id "any-tenant"
+    Then Validate whether we have loaded all event definitions of size greater than or equal to 17267

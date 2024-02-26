@@ -50,7 +50,7 @@
             applied.&lt;/p>
         </logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%parm[daemonName]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%parm[daemonName]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/internal/reloadDaemonConfigSuccessful</uei>
@@ -63,7 +63,7 @@
             applied.&lt;/p>
         </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/internal/reloadDaemonConfigFailed:%dpname%:%parm[daemonName]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/internal/reloadDaemonConfigFailed:%dpname%:%parm[daemonName]%" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/internal/thresholdConfigChange</uei>
@@ -131,6 +131,6 @@
             &lt;p>&quot;%parm[configUser]%&quot; changed entity %nodelabel%_%interface% from source: %parm[configSource]% &lt;/a>&lt;/p>
         </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

@@ -28,7 +28,7 @@ the notification indicates which process crashed.&lt;/p>&lt;table>
 			procName=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -60,7 +60,7 @@ which process exited.&lt;/p>&lt;table>
 			procName=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -85,7 +85,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			cpuUtil trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -109,7 +109,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			pagingActivity trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -133,7 +133,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			smartError trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -162,7 +162,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			systemVersion=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -186,7 +186,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			bypassMode trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -210,7 +210,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			raidError trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -234,7 +234,7 @@ above the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			storeCorruption trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -259,7 +259,7 @@ optimized&lt;/p>&lt;table>&lt;/table></descr>
 			admissionMemError trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -284,7 +284,7 @@ optimized&lt;/p>&lt;table>&lt;/table></descr>
 			admissionConnError trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -308,7 +308,7 @@ optimized&lt;/p>&lt;table>&lt;/table></descr>
 			haltError trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -333,7 +333,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			serviceError trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -357,7 +357,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			scheduledJobError trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -381,7 +381,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			confModeEnter trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -405,7 +405,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			confModeExit trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/confModeEnter:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/confModeEnter:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -429,7 +429,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			linkError trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -453,7 +453,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			nfsV2V4 trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -477,7 +477,7 @@ Please consult the log file&lt;/p>&lt;table>&lt;/table></descr>
 			powerSupplyError trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -502,7 +502,7 @@ not have been optimized because of this.&lt;/p>&lt;table>&lt;/table></descr>
 			asymRouteError trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -526,7 +526,7 @@ not have been optimized because of this.&lt;/p>&lt;table>&lt;/table></descr>
 			fanError trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -550,7 +550,7 @@ not have been optimized because of this.&lt;/p>&lt;table>&lt;/table></descr>
 			memoryError trap received&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -575,7 +575,7 @@ the details in the alarm report on the web UI&lt;/p>&lt;table>&lt;/table></descr
 			ipmi trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -599,7 +599,7 @@ the details in the alarm report on the web UI&lt;/p>&lt;table>&lt;/table></descr
 			configChange trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -623,7 +623,7 @@ the details in the alarm report on the web UI&lt;/p>&lt;table>&lt;/table></descr
 			datastoreWrapped trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -647,7 +647,7 @@ the details in the alarm report on the web UI&lt;/p>&lt;table>&lt;/table></descr
 			temperatureWarning trap received&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -671,7 +671,7 @@ the details in the alarm report on the web UI&lt;/p>&lt;table>&lt;/table></descr
 			temperatureCritical trap received&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -696,7 +696,7 @@ within the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			cpuUtilClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/cpuUtil:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/cpuUtil:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -720,7 +720,7 @@ within the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			pagingActivityClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/pagingActivity:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/pagingActivity:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -749,7 +749,7 @@ within the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			systemVersion=%parm[#1]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/peerVersionMismatch:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/peerVersionMismatch:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -773,7 +773,7 @@ within the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			bypassModeClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/bypassMode:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/bypassMode:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -797,7 +797,7 @@ within the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			raidErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/raidError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/raidError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -821,7 +821,7 @@ within the acceptable threshold&lt;/p>&lt;table>&lt;/table></descr>
 			storeCorruptionClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/storeCorruption:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/storeCorruption:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -846,7 +846,7 @@ and the optimization service is running normally&lt;/p>&lt;table>&lt;/table></de
 			admissionMemErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/admissionMemError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/admissionMemError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -871,7 +871,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			admissionConnErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/admissionConnError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/admissionConnError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -895,7 +895,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			haltErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/haltError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/haltError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -919,7 +919,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			serviceErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/serviceError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/serviceError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -943,7 +943,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			linkErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/linkError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/linkError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -967,7 +967,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			nfsV2V4Clear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/nfsV2V4:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/nfsV2V4:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -991,7 +991,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			powerSupplyErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/powerSupplyError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/powerSupplyError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1015,7 +1015,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			asymRouteErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/asymRouteError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/asymRouteError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1039,7 +1039,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			fanErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/fanError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/fanError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1063,7 +1063,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			memoryErrorClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/memoryError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/memoryError:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1087,7 +1087,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			ipmiClear trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/ipmi:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/ipmi:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1111,7 +1111,7 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			temperatureNormal trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/temperatureWarning:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/temperatureWarning:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1135,6 +1135,6 @@ and the service is running normally&lt;/p>&lt;table>&lt;/table></descr>
 			temperatureNonCritical trap received&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/temperatureCritical:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="2" clear-key="uei.opennms.org/vendor/riverbed/steelhead/traps/temperatureCritical:%dpname%:%nodeid%:%interface%" auto-clean="false"/>
    </event>
 </events>

@@ -8,7 +8,7 @@
             &lt;p>The report with name %parm[reportName]% failed to run.&lt;/p>
         </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[reportName]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[reportName]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/reportd/reportDeliveryFailed</uei>
@@ -20,6 +20,6 @@
             &lt;p>The report with name %parm[reportName]% could not be delivered.&lt;/p>
         </logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[reportName]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%nodeid%:%dpname%:%parm[reportName]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

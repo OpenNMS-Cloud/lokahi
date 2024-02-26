@@ -7,7 +7,7 @@
             %service% outage identified on interface %interface% from location %parm[perspective]% with reason code: %parm[eventReason]%.
         </logmsg>
         <severity>Minor</severity>
-        <alarm-data reduction-key="%uei%:%parm[perspective]%:%nodeid%:%interface%:%service%" alarm-type="1" auto-clean="false"/>
+        <alert-data reduction-key="%uei%:%parm[perspective]%:%nodeid%:%interface%:%service%" alert-type="1" auto-clean="false"/>
     </event>
     <event>
         <uei>uei.opennms.org/perspective/nodes/nodeRegainedService</uei>
@@ -18,6 +18,6 @@
             %service% outage identified on interface %interface% from location %parm[perspective]% has cleared.
         </logmsg>
         <severity>Normal</severity>
-        <alarm-data reduction-key="%uei%:%parm[perspective]%:%nodeid%:%interface%:%service%" alarm-type="2" clear-key="uei.opennms.org/perspective/nodes/nodeLostService:%parm[perspective]%:%nodeid%:%interface%:%service%" auto-clean="false"/>
+        <alert-data reduction-key="%uei%:%parm[perspective]%:%nodeid%:%interface%:%service%" alert-type="2" clear-key="uei.opennms.org/perspective/nodes/nodeLostService:%parm[perspective]%:%nodeid%:%interface%:%service%" auto-clean="false"/>
     </event>
 </events>

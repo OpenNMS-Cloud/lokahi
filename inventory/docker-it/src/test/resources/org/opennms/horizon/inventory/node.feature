@@ -32,3 +32,6 @@ Feature: Node
     Then verify that a new node is created with node_alias "node-alias"
     Then fetch a list of nodes by node node_alias with search term "node-alias"
 
+  Scenario: Add a node
+    Given a new node with node_alias "node", label "label", ip address "127.0.0.1" in location named "Default"
+    Then fetch the list of nodes response not equal to 0

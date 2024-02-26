@@ -117,4 +117,5 @@ service NodeService {
   rpc startNodeScanByIds(NodeIdList) returns(google.protobuf.BoolValue) {};
   rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
+  rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
 }

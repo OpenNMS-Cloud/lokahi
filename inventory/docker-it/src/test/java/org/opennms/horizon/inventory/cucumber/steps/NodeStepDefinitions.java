@@ -22,6 +22,7 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Empty;
@@ -200,6 +201,14 @@ public class NodeStepDefinitions {
     @Then("verify the list of nodes is empty")
     public void verifyTheListOfNodesIsEmpty() {
         assertEquals(0, fetchedNodeList.getNodesCount());
+    }
+
+    @Then("fetch the list of nodes response not equal to {int}")
+    public void countTheListOfNodes(int size) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        long count =
+                nodeServiceBlockingStub.getNodeCount(Empty.newBuilder().build()).getValue();
+        assertTrue(count > size);
     }
 
     @Then("verify node topic has {int} messages with tenant {string}")

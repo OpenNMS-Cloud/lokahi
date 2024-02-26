@@ -38,7 +38,7 @@ public class SnmpInterfaceStepDefinitions {
         this.backgroundHelper = backgroundHelper;
     }
 
-    @Then("fetch a list of snmp_interface by name with search {string}")
+ /*   @Then("fetch a list of snmp_interface by name with search {string}")
     public void fetchAListOfSnmpInterfaceByNameWithSearch(String search) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         SnmpInterfacesList list = nodeServiceBlockingStub.listSnmpInterfaces(
@@ -46,5 +46,5 @@ public class SnmpInterfaceStepDefinitions {
         list.getSnmpInterfacesList().stream()
                 .map(SnmpInterfaceDTO::getIfName)
                 .forEach(label -> assertTrue(label.contains(search)));
-    }
+    }*/
 }

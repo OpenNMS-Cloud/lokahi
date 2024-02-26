@@ -19,21 +19,11 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.server.model.alerts;
+package org.opennms.horizon.server.mapper.alert;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.opennms.horizon.alerts.proto.EventType;
+import org.opennms.horizon.server.model.alerts.EventDefinitionsByVendor;
 
-@Getter
-@Setter
-public class AlertEventDefinition {
-    private Long id;
-    private String uei;
-    private String name;
-    private String reductionKey;
-    private String clearKey;
-    private EventType eventType;
-    private String vendor;
-    private String enterpriseId;
+public interface EventDefinitionByVendorMapper {
+
+    EventDefinitionsByVendor protoToEventDefinition(org.opennms.horizon.alerts.proto.EventDefinitionsByVendor proto);
 }

@@ -25,12 +25,11 @@ import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
-import org.opennms.horizon.alerts.proto.EventDefinitionByVendor;
+import org.opennms.horizon.alerts.proto.EventDefinitionsByVendor;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsResponse;
 import org.opennms.horizon.alerts.proto.ListEventDefinitionsByVendor;
@@ -41,6 +40,9 @@ import org.opennms.horizon.alertservice.mapper.EventDefinitionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -102,9 +104,12 @@ public class AlertEventDefinitionGrpcService
                     // Only filter events with reduction key
                     .filter(alertEventDefinitionProto ->
                             Strings.isNotBlank(alertEventDefinitionProto.getReductionKey()))
-                    .map(eventDef -> EventDefinitionByVendor.newBuilder()
-                            .setVendor(eventDef.getVendor())
-                            .setEventDefinition(eventDef)
+                    .collect(Collectors.groupingBy(AlertEventDefinitionProto::getVendor))
+                    .entrySet()
+                    .stream()
+                    .map((entry) -> EventDefinitionsByVendor.newBuilder()
+                            .setVendor(entry.getKey())
+                            .addAllEventDefinition(entry.getValue())
                             .build())
                     .toList();
             responseObserver.onNext(ListEventDefinitionsByVendor.newBuilder()

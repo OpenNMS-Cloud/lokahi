@@ -321,13 +321,13 @@ message VendorList {
   repeated string  vendor = 1;
 }
 
-message EventDefinitionByVendor {
+message EventDefinitionsByVendor {
   string  vendor = 1;
-  AlertEventDefinitionProto eventDefinition = 2;
+  repeated AlertEventDefinitionProto eventDefinition = 2;
 }
 
 message ListEventDefinitionsByVendor {
-  repeated  EventDefinitionByVendor eventDefinitionByVendor = 1;
+  repeated  EventDefinitionsByVendor eventDefinitionByVendor = 1;
 }
 
 service AlertEventDefinitionService {

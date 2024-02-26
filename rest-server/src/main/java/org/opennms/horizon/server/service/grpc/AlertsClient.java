@@ -51,9 +51,11 @@ import org.opennms.horizon.alerts.proto.Severity;
 import org.opennms.horizon.alerts.proto.TimeRangeFilter;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
+import org.opennms.horizon.server.mapper.alert.EventDefinitionByVendorMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
 import org.opennms.horizon.server.model.alerts.AlertCount;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
+import org.opennms.horizon.server.model.alerts.EventDefinitionsByVendor;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -65,6 +67,7 @@ public class AlertsClient {
     private final MonitorPolicyMapper policyMapper;
     private final AlertEventDefinitionMapper alertEventDefinitionMapper;
     private final AlertsCountMapper alertsCountMapper;
+    private final EventDefinitionByVendorMapper eventDefinitionByVendorMapper;
 
     private AlertServiceGrpc.AlertServiceBlockingStub alertStub;
     private MonitorPolicyServiceGrpc.MonitorPolicyServiceBlockingStub policyStub;
@@ -263,6 +266,36 @@ public class AlertsClient {
                 // TODO: Remove this limitation of having name in event def to use all event def in LOK-2288
                 .filter(eventDefProto -> Strings.isNotBlank(eventDefProto.getName()))
                 .map(alertEventDefinitionMapper::protoToAlertEventDefinition)
+                .toList();
+    }
+
+    public List<EventDefinitionsByVendor> listAlertEventDefinitionsByVendor(EventType eventType, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+
+        var request = ListAlertEventDefinitionsRequest.newBuilder()
+                .setEventType(eventType)
+                .build();
+
+        return alertEventDefinitionStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listAlertEventDefinitionsByVendor(request)
+                .getEventDefinitionByVendorList()
+                .stream()
+                .map(eventDefinitionByVendorMapper::protoToEventDefinition)
+                .toList();
+    }
+
+    public List<String> listVendors(String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return alertEventDefinitionStub
+                .withInterceptors((MetadataUtils.newAttachHeadersInterceptor(metadata)))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .listVendors(Empty.getDefaultInstance())
+                .getVendorList()
+                .stream()
                 .toList();
     }
 

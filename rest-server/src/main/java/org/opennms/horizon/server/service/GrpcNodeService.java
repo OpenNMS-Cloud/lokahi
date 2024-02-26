@@ -1,8 +1,8 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
- *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
  * TOG licenses this file to You under the GNU Affero General
  * Public License Version 3 (the "License") or (at your option)
@@ -37,30 +37,23 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
-
 import org.opennms.horizon.server.mapper.IpInterfaceMapper;
 import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
+import org.opennms.horizon.server.model.inventory.IpInterface;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.inventory.NodeUpdate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
-import org.opennms.horizon.server.model.inventory.IpInterface;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -227,16 +220,15 @@ public class GrpcNodeService {
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 
-
-
-
     @GraphQLQuery(name = "listIpInterfacesByNodeSearch")
-    public Flux<IpInterface> searchIpInterfaceByNodeAndSearchTerm(@GraphQLEnvironment ResolutionEnvironment env,
-                                                                  @GraphQLArgument(name = "nodeId") Long nodeId,
-                                                                  @GraphQLArgument(name = "searchTerm") String searchTerm) {
+    public Flux<IpInterface> searchIpInterfaceByNodeAndSearchTerm(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm) {
 
-        return  Flux.fromIterable(client.listIpInterfacesByNodeSearch(nodeId,searchTerm,headerUtil.getAuthHeader(env)).stream().map(ipInterfaceMapper::protoToIpInterface).toList());
+        return Flux.fromIterable(
+                client.listIpInterfacesByNodeSearch(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                        .map(ipInterfaceMapper::protoToIpInterface)
+                        .toList());
     }
-
-
 }

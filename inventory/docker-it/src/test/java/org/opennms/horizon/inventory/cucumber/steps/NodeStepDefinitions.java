@@ -31,7 +31,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import java.util.List;
-import io.cucumber.java.en.When;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
@@ -39,13 +38,16 @@ import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.RetryUtils;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaTestHelper;
-import org.opennms.horizon.inventory.dto.*;
+import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
+import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.dto.IpInterfaceList;
+import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
+import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 public class NodeStepDefinitions {
@@ -57,7 +59,6 @@ public class NodeStepDefinitions {
 
     private IpInterfaceList ipInterfaceList;
     private String nodeTopic;
-
 
     private Exception lastException;
 
@@ -310,21 +311,23 @@ public class NodeStepDefinitions {
     }
 
     @Given("a new node with IpInterface along with node label {string} ip address {string} in location named {string}")
-    public void aNewNodeWithIpInterfaceAlongWithNodeLabelIpAddressInLocationNamed(String nodeLabel, String ipAddress, String loccation) {
+    public void aNewNodeWithIpInterfaceAlongWithNodeLabelIpAddressInLocationNamed(
+            String nodeLabel, String ipAddress, String loccation) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder().setLabel(nodeLabel)
-            .setManagementIp(ipAddress)
-            .setLocationId(backgroundHelper.findLocationId(loccation))
-            .build());
+        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(nodeLabel)
+                .setManagementIp(ipAddress)
+                .setLocationId(backgroundHelper.findLocationId(loccation))
+                .build());
     }
 
     @Then("verify that a new node is created with the ip address {string}")
     public void verifyThatANewNodeIsCreatedWithTheIpAddress(String ipAddress) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
-            .filter(fetched -> ipAddress.equals(fetched.getIpInterfaces(0).getIpAddress()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Node " + ipAddress + " not found"));
+                .filter(fetched -> ipAddress.equals(fetched.getIpInterfaces(0).getIpAddress()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Node " + ipAddress + " not found"));
 
         assertEquals(ipAddress, node.getIpInterfaces(0).getIpAddress());
     }
@@ -333,20 +336,20 @@ public class NodeStepDefinitions {
     public void fetchAListOfIpInterfacesByNodeUsingSearchTerm(String searchTerm) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
-            .filter(fetch -> fetch.getIpInterfacesList().stream()
-                .anyMatch(ipInterface -> searchTerm.equals(ipInterface.getIpAddress())
-                    || ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase())))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
+                .filter(fetch -> fetch.getIpInterfacesList().stream()
+                        .anyMatch(ipInterface -> searchTerm.equals(ipInterface.getIpAddress())
+                                || ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase())))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
 
-
-        ipInterfaceList = nodeServiceBlockingStub.listSearchIpInterfaceByQuery(SearchIpInterfaceQuery.newBuilder().setNodeId(node.getId()).setSearchTerm(searchTerm).build());
+        ipInterfaceList = nodeServiceBlockingStub.listSearchIpInterfaceByQuery(SearchIpInterfaceQuery.newBuilder()
+                .setNodeId(node.getId())
+                .setSearchTerm(searchTerm)
+                .build());
     }
 
     @Then("verify the list of IpInterfaces has size greater than {int}")
     public void verifyTheListOfIpInterfacesHasSizeGreaterThan(int size) {
         assertTrue(ipInterfaceList.getIpInterfaceCount() > size);
     }
-
-
 }

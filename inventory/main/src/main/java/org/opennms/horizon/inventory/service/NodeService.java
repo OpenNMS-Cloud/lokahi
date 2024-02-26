@@ -38,18 +38,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
-import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
+import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -95,8 +95,6 @@ public class NodeService {
     private final TagPublisher tagPublisher;
     private final TagRepository tagRepository;
     private final IpInterfaceMapper ipInterfaceMapper;
-
-
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -390,19 +388,21 @@ public class NodeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(
+            String tenantId, Long nodeId, String searchIpInterfaceTerm) {
+        List<IpInterface> ipInterfaces = null;
+        InetAddress addr = null;
+        if (searchIpInterfaceTerm.contains(".")) {
+            addr = InetAddressUtils.addr(searchIpInterfaceTerm);
+        }
 
-   @Transactional(readOnly = true)
-    public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(String tenantId, Long nodeId, String searchIpInterfaceTerm) {
-           List<IpInterface> ipInterfaces =null;
-            InetAddress addr = null;
-            if(searchIpInterfaceTerm.contains(".")){
-                 addr = InetAddressUtils.addr(searchIpInterfaceTerm);
-            }
-
-         ipInterfaces = ipInterfaceRepository.findBytenantIdAndSearchIpInterfacesTerm(tenantId, nodeId, addr, searchIpInterfaceTerm).stream().toList();
+        ipInterfaces =
+                ipInterfaceRepository
+                        .findBytenantIdAndSearchIpInterfacesTerm(tenantId, nodeId, addr, searchIpInterfaceTerm)
+                        .stream()
+                        .toList();
 
         return ipInterfaces.stream().map(ipInterfaceMapper::modelToDTO).collect(Collectors.toList());
     }
-
-
 }

@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.server.rpcrequest;
 
 import com.google.protobuf.AbstractMessageLite;
@@ -47,7 +68,8 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
     private transient Random random;
 
     @Override
-    public @NotNull Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, @Nullable RouterTaskData arg) throws IgniteException {
+    public @NotNull Map<? extends ComputeJob, ClusterNode> map(List<ClusterNode> subgrid, @Nullable RouterTaskData arg)
+            throws IgniteException {
         UUID gatewayNodeId = null;
         Map<ComputeJob, ClusterNode> map = new HashMap<>();
         try {
@@ -58,12 +80,14 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
             if (!target.getSystemId().isBlank()) {
                 gatewayNodeId = minionLookupService.findGatewayNodeWithId(tenantId, target.getSystemId());
             } else {
-                gatewayNodeId = shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, target.getLocationId()));
+                gatewayNodeId =
+                        shuffle(minionLookupService.findGatewayNodeWithLocation(tenantId, target.getLocationId()));
             }
 
             ClusterNode routingNode;
             if (gatewayNodeId == null || (routingNode = findNode(gatewayNodeId, subgrid)) == null) {
-                // throw new IgniteException("Could not find active connection for location=" + request.getLocation() + " and systemId=" + request.getSystemId());
+                // throw new IgniteException("Could not find active connection for location=" + request.getLocation() +
+                // " and systemId=" + request.getSystemId());
                 map.put(new FailedJob(request), ignite.cluster().localNode());
             } else {
                 map.put(new RoutingJob(request), routingNode);
@@ -99,8 +123,10 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
             return ComputeJobResultPolicy.WAIT;
         }
 
-        ComputeJobResult errorResult =
-            rcvd.stream().filter((result) -> (result.getException() != null)).findFirst().orElse(null);
+        ComputeJobResult errorResult = rcvd.stream()
+                .filter((result) -> (result.getException() != null))
+                .findFirst()
+                .orElse(null);
 
         if (errorResult != null) {
             throw errorResult.getException();
@@ -163,7 +189,9 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
                         logger.debug("Received answer for rpc request " + request.getRpcId());
                     }
                 });
-                return responseFuture.thenApply(AbstractMessageLite::toByteArray).get();
+                return responseFuture
+                        .thenApply(AbstractMessageLite::toByteArray)
+                        .get();
             } catch (InterruptedException e) {
                 throw new IgniteException("Failed to dispatch request", e);
             } catch (ExecutionException e) {
@@ -172,7 +200,6 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
             }
         }
     }
-
 
     public static class FailedJob implements ComputeJob {
 
@@ -183,14 +210,13 @@ public class RpcRequestRouterIgniteTask implements ComputeTask<RouterTaskData, b
         }
 
         @Override
-        public void cancel() {
-
-        }
+        public void cancel() {}
 
         @Override
         public Object execute() throws IgniteException {
             MinionIdentity identity = request.getIdentity();
-            throw new IgniteException("Could not find active connection for tenantId=" + identity.getTenantId() + ", locationId=" + identity.getLocationId() + " and systemId=" + identity.getSystemId());
+            throw new IgniteException("Could not find active connection for tenantId=" + identity.getTenantId()
+                    + ", locationId=" + identity.getLocationId() + " and systemId=" + identity.getSystemId());
         }
     }
 }

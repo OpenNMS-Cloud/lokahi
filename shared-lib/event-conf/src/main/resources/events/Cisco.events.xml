@@ -30,7 +30,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Accounting File Size exceeds threshold.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -63,7 +63,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Accounting File Size at maximum.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -825,7 +825,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Utilization over threshold.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1090,7 +1090,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Device over-voltage.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1499,7 +1499,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: BSTUN Peer State Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2501,7 +2501,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Critical Call Manager failure.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2533,7 +2533,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Phone failed to communicate with Call Manager.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2565,7 +2565,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Phone successfully registered with Call Manager.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -2611,7 +2611,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Gateway has failed to communicate with Call Manager.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ccmGatewayFailed:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ccmGatewayFailed:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2653,7 +2653,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Gateway has failed to communicate with Call Manager.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2687,7 +2687,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">Cisco Event: Call Manager Resource Out Error.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2717,7 +2717,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Call Manager: No Route.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2764,7 +2764,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Call Manager Skinny Gateway has changed state,&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ccmGatewayLayer2Change:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ccmGatewayLayer2Change:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2807,7 +2807,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Call Manager Skinny Gateway has changed state,&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#2]%:%parm[#3]%:%parm[#4]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2859,7 +2859,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Interface Link Quality Degraded.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2896,7 +2896,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Interface Link Quality Degraded.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -2996,7 +2996,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: VTAM attempted to open SAP that was already open.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3029,7 +3029,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Connection Limit Exceeded.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3328,7 +3328,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DLSW Transport Connection changed state.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3357,7 +3357,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DLSW Circuit Connection changed state.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3386,7 +3386,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DLSW Transport Connection Rejected.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -3414,7 +3414,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DLSW Transport Connection Protocol Violation.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -3441,7 +3441,7 @@
  ciscoDlswTConnOperRemoteTAddr&lt;/b>&lt;/td>&lt;td>%parm[#2]%&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DLSW Transport Connection now connected.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoDlswTrapTConnDown:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoDlswTrapTConnDown:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -3469,7 +3469,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DLSW Transport Connection is disconnected.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -3715,7 +3715,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU PU State Change Trap.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3756,7 +3756,7 @@
  puAlreadyActive(6)&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU PU Activation Failure.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3790,7 +3790,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU PU State Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3830,7 +3830,7 @@
  puAlreadyActive(6)&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU PU Activation Failure.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3866,7 +3866,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU LU State Changed.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3907,7 +3907,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU LU Activation Failure.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3947,7 +3947,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU LU State Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -3997,7 +3997,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: DSPU SAP State Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4158,7 +4158,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: FRU Inserted.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" clear-key="uei.opennms.org/vendor/Cisco/traps/cefcFRURemoved:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" clear-key="uei.opennms.org/vendor/Cisco/traps/cefcFRURemoved:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4186,7 +4186,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: FRU Removed.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4224,7 +4224,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Sensor has reached Threshold.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#1]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#1]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4267,7 +4267,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Sensor has recovered from crossing Threshold.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#3]%" clear-key="uei.opennms.org/vendor/Cisco/traps/entSensorThresholdNotification:%dpname%:%nodeid%:%parm[name-#3]%" alarm-type="2" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[name-#3]%" clear-key="uei.opennms.org/vendor/Cisco/traps/entSensorThresholdNotification:%dpname%:%nodeid%:%parm[name-#3]%" alert-type="2" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4296,7 +4296,7 @@
  &lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Device is shutting down.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4333,7 +4333,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Device Voltage Alert.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4370,7 +4370,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Device Temperature Alert.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4404,7 +4404,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Device Fan Alert.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4438,7 +4438,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Device Redundant Power Supply Alert.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4763,7 +4763,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: FASTHUB POST Failed.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4789,7 +4789,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: FASTHUB Redundant Power Source Failed.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -4817,7 +4817,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: FASTHUB IP Address Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5056,7 +5056,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Flash Copy Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5089,7 +5089,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Flash Partitioning Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5124,7 +5124,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Flash Miscellaneous Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5219,7 +5219,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Configuration Reload Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5527,7 +5527,7 @@
          <decode varbindvalue="5" varbinddecodedstring="standby"/>
          <decode varbindvalue="6" varbinddecodedstring="active"/>
       </varbindsdecode>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5552,7 +5552,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: CSU/DSU Change in T1 Loop Status.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5576,7 +5576,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: CSU/DSU Change in Sw56k Loop Status.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -5751,7 +5751,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Crypto Session Establishment Test Completed.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6389,7 +6389,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: ISDN Call Information: %parm[#5]%.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6433,7 +6433,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: ISDN Call Detail: %parm[#5]%.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -6464,7 +6464,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: ISDN Loop Status Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7173,7 +7173,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: OAM Loopback Calls Completed.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7499,7 +7499,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: PING MIB Ping Completion.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7681,7 +7681,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Repeater Illegal Source Address.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7811,7 +7811,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: LS1010 Chassis Failure Notification.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7835,7 +7835,7 @@
  &lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: LS1010 Chassis Change Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -7865,7 +7865,7 @@
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: RSRB Peer State Change Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8085,7 +8085,7 @@
  &lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SIBU Console Logon Intruder Alert.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8235,7 +8235,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SNA LLC Status Change.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8427,7 +8427,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: STACK FDDI LER Alarm on.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -8460,7 +8460,7 @@
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: STACK FDDI LER Alarm off.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/lerAlarmOn:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/lerAlarmOn:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -8617,7 +8617,7 @@ Up.&lt;/p></logmsg>
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: STACK Chassis Alarm On.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8656,7 +8656,7 @@ Up.&lt;/p></logmsg>
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: STACK Chassis Alarm Off.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/chassisAlarmOn:%dpname%:%nodeid%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/chassisAlarmOn:%dpname%:%nodeid%" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -8688,7 +8688,7 @@ Up.&lt;/p></logmsg>
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: STACK IP Permit Denied.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8896,7 +8896,7 @@ Up.&lt;/p></logmsg>
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: STUN Peer State Change Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -8975,7 +8975,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9017,7 +9017,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9059,7 +9059,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9101,7 +9101,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9143,7 +9143,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9185,7 +9185,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9227,7 +9227,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9269,7 +9269,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9307,7 +9307,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: SYSLOG Notification: %parm[#4]%.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -9893,7 +9893,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: VLAN Membership Change Notification: %parm[#1]%.&lt;/p></logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -10123,7 +10123,7 @@ Up.&lt;/p></logmsg>
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: VOICE Poor Quality Notification.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11428,7 +11428,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Ethernet Switch failed log on attempt.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11456,7 +11456,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Ethernet Switch failed POST.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11485,7 +11485,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Ethernet Switch Address Violation.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11514,7 +11514,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Ethernet Switch Broadcast Storm.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11540,7 +11540,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: Ethernet Switch Redundent Power Supply Error.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11592,7 +11592,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: MADGER SW Power Supply Fan has Failed.&lt;/p></logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11617,7 +11617,7 @@ Up.&lt;/p></logmsg>
  &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: MADGER SW External Fan has Failed.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11645,7 +11645,7 @@ Up.&lt;/p></logmsg>
  &lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: MADGER SW Port Failed.&lt;/p></logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -11673,7 +11673,7 @@ Up.&lt;/p></logmsg>
  &lt;/td;>&lt;/tr>&lt;/table></descr>
       <logmsg dest="logndisplay">&lt;p>Cisco Event: MADGER SW Port Test Failed.&lt;/p></logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -14390,7 +14390,7 @@ when the port comes out of blocking&lt;/p>&lt;table>
             This was for ifIndex: %parm[#1]%, ifDescr: %parm[#2]%.&lt;/p></descr>
       <logmsg dest="logndisplay">Cisco Link Down Trap: %parm[#2]%, ifIndex: %parm[#1]%.</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="1"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="1"/>
    </event>
    <event>
       <mask>
@@ -14409,7 +14409,7 @@ when the port comes out of blocking&lt;/p>&lt;table>
             This was for ifIndex: %parm[#1]%, ifDescr: %parm[#2]%.&lt;/p></descr>
       <logmsg dest="logndisplay">Cisco Link Up Trap: %parm[#2]%, ifIndex: %parm[#1]%.</logmsg>
       <severity>Cleared</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%dpname%:%nodeid%:%interface%:%parm[#1]%"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/vendor/cisco/traps/SNMP_Link_Down:%dpname%:%nodeid%:%interface%:%parm[#1]%"/>
    </event>
    <event>
       <mask>

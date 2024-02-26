@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.icmp.jna;
 
 import static org.opennms.horizon.shared.icmp.PingConstants.DEFAULT_PACKET_SIZE;
@@ -37,17 +30,15 @@ import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.concurrent.Callable;
-
-import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.horizon.shared.icmp.ParallelPingResponseCallback;
 import org.opennms.horizon.shared.icmp.PingResponseCallback;
 import org.opennms.horizon.shared.icmp.Pinger;
 import org.opennms.horizon.shared.icmp.SinglePingResponseCallback;
+import org.opennms.horizon.shared.logging.Logging;
 import org.opennms.protocols.rt.IDBasedRequestLocator;
 import org.opennms.protocols.rt.RequestTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Main
@@ -64,22 +55,27 @@ public class JnaPinger implements Pinger {
 
     /**
      * Initializes this singleton
-     * @throws Exception 
+     * @throws Exception
      */
     private synchronized void initialize() throws Exception {
         if (m_pingTracker != null) return;
         try {
             m_messenger = new JnaIcmpMessenger(m_pingerId);
-            m_pingTracker = Logging.withPrefix("icmp", new Callable<RequestTracker<JnaPingRequest,JnaPingReply>>() {
-                @Override public RequestTracker<JnaPingRequest, JnaPingReply> call() throws Exception {
-                    return new RequestTracker<JnaPingRequest, JnaPingReply>("JNA-ICMP-"+m_pingerId, m_messenger, new IDBasedRequestLocator<JnaPingRequestId, JnaPingRequest, JnaPingReply>());
+            m_pingTracker = Logging.withPrefix("icmp", new Callable<RequestTracker<JnaPingRequest, JnaPingReply>>() {
+                @Override
+                public RequestTracker<JnaPingRequest, JnaPingReply> call() throws Exception {
+                    return new RequestTracker<JnaPingRequest, JnaPingReply>(
+                            "JNA-ICMP-" + m_pingerId,
+                            m_messenger,
+                            new IDBasedRequestLocator<JnaPingRequestId, JnaPingRequest, JnaPingReply>());
                 }
             });
             m_pingTracker.start();
         } catch (final IOException e) {
             final String errorMessage = e.getMessage().toLowerCase();
             if (errorMessage.contains("permission denied") || errorMessage.contains("operation not permitted")) {
-                LOG.error("Permission error received while attempting to open ICMP socket. See https://wiki.opennms.org/wiki/ICMP for information on configuring ICMP for non-root.");
+                LOG.error(
+                        "Permission error received while attempting to open ICMP socket. See https://wiki.opennms.org/wiki/ICMP for information on configuring ICMP for non-root.");
             }
             throw e;
         }
@@ -129,7 +125,14 @@ public class JnaPinger implements Pinger {
      * @throws java.lang.Exception if any.
      */
     @Override
-    public void ping(final InetAddress host, final long timeout, final int retries, final int packetsize, final int sequenceId, final PingResponseCallback cb) throws Exception {
+    public void ping(
+            final InetAddress host,
+            final long timeout,
+            final int retries,
+            final int packetsize,
+            final int sequenceId,
+            final PingResponseCallback cb)
+            throws Exception {
         initialize();
         m_pingTracker.sendRequest(new JnaPingRequest(host, m_pingerId, sequenceId, timeout, retries, packetsize, cb));
     }
@@ -145,11 +148,17 @@ public class JnaPinger implements Pinger {
      * @throws java.lang.Exception if any.
      */
     @Override
-    public void ping(final InetAddress host, final long timeout, final int retries, final int sequenceId, final PingResponseCallback cb) throws Exception {
+    public void ping(
+            final InetAddress host,
+            final long timeout,
+            final int retries,
+            final int sequenceId,
+            final PingResponseCallback cb)
+            throws Exception {
         initialize();
-        m_pingTracker.sendRequest(new JnaPingRequest(host, m_pingerId, sequenceId, timeout, retries, DEFAULT_PACKET_SIZE, cb));
+        m_pingTracker.sendRequest(
+                new JnaPingRequest(host, m_pingerId, sequenceId, timeout, retries, DEFAULT_PACKET_SIZE, cb));
     }
-
 
     /**
      * This method is used to ping a remote host to test for ICMP support. If
@@ -168,7 +177,8 @@ public class JnaPinger implements Pinger {
      * @throws java.lang.Exception if any.
      */
     @Override
-    public Number ping(final InetAddress host, final long timeout, final int retries, final int packetsize) throws Exception {
+    public Number ping(final InetAddress host, final long timeout, final int retries, final int packetsize)
+            throws Exception {
         final SinglePingResponseCallback cb = new SinglePingResponseCallback(host);
         ping(host, timeout, retries, packetsize, 1, cb);
         cb.waitFor();
@@ -225,13 +235,16 @@ public class JnaPinger implements Pinger {
      *     echo reply, it will contain a number, otherwise a null value.
      */
     @Override
-    public List<Number> parallelPing(final InetAddress host, final int count, final long timeout, final long pingInterval, final int size) throws Exception {
+    public List<Number> parallelPing(
+            final InetAddress host, final int count, final long timeout, final long pingInterval, final int size)
+            throws Exception {
         initialize();
         final ParallelPingResponseCallback cb = new ParallelPingResponseCallback(count);
 
         final long threadId = JnaPingRequest.getNextTID();
         for (int seqNum = 0; seqNum < count; seqNum++) {
-            final JnaPingRequest request = new JnaPingRequest(host, m_pingerId, seqNum, threadId, timeout == 0? DEFAULT_TIMEOUT : timeout, 0, size, cb);
+            final JnaPingRequest request = new JnaPingRequest(
+                    host, m_pingerId, seqNum, threadId, timeout == 0 ? DEFAULT_TIMEOUT : timeout, 0, size, cb);
             m_pingTracker.sendRequest(request);
             Thread.sleep(pingInterval);
         }
@@ -253,7 +266,8 @@ public class JnaPinger implements Pinger {
      *     echo reply, it will contain a number, otherwise a null value.
      */
     @Override
-    public List<Number> parallelPing(final InetAddress host, final int count, final long timeout, final long pingInterval) throws Exception {
+    public List<Number> parallelPing(
+            final InetAddress host, final int count, final long timeout, final long pingInterval) throws Exception {
         return parallelPing(host, count, timeout, pingInterval, DEFAULT_PACKET_SIZE);
     }
 
@@ -268,5 +282,4 @@ public class JnaPinger implements Pinger {
         initialize();
         m_messenger.setTrafficClass(tc);
     }
-
 }

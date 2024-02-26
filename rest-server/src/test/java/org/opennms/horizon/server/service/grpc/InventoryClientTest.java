@@ -1,32 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.grpc;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
@@ -40,6 +41,10 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,19 +65,6 @@ import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 public class InventoryClientTest {
     @Rule
     public static final GrpcCleanupRule grpcCleanUp = new GrpcCleanupRule();
@@ -88,87 +80,108 @@ public class InventoryClientTest {
     public static void startGrpc() throws IOException {
         mockInterceptor = new MockServerInterceptor();
 
-        mockLocationService = mock(MonitoringLocationServiceGrpc.MonitoringLocationServiceImplBase.class, delegatesTo(
-            new MonitoringLocationServiceGrpc.MonitoringLocationServiceImplBase() {
-                @Override
-                public void listLocations(Empty request, StreamObserver<MonitoringLocationList> responseObserver) {
-                    responseObserver.onNext(MonitoringLocationList.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+        mockLocationService = mock(
+                MonitoringLocationServiceGrpc.MonitoringLocationServiceImplBase.class,
+                delegatesTo(new MonitoringLocationServiceGrpc.MonitoringLocationServiceImplBase() {
+                    @Override
+                    public void listLocations(Empty request, StreamObserver<MonitoringLocationList> responseObserver) {
+                        responseObserver.onNext(
+                                MonitoringLocationList.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-               @Override
-                public void getLocationById(Int64Value request, StreamObserver<MonitoringLocationDTO> responseObserver) {
-                    responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+                    @Override
+                    public void getLocationById(
+                            Int64Value request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+                        responseObserver.onNext(
+                                MonitoringLocationDTO.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void listLocationsByIds(IdList request, StreamObserver<MonitoringLocationList> responseObserver) {
-                    responseObserver.onNext(MonitoringLocationList.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+                    @Override
+                    public void listLocationsByIds(
+                            IdList request, StreamObserver<MonitoringLocationList> responseObserver) {
+                        responseObserver.onNext(
+                                MonitoringLocationList.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void createLocation(MonitoringLocationCreateDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
-                    responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+                    @Override
+                    public void createLocation(
+                            MonitoringLocationCreateDTO request,
+                            StreamObserver<MonitoringLocationDTO> responseObserver) {
+                        responseObserver.onNext(
+                                MonitoringLocationDTO.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void updateLocation(MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
-                    responseObserver.onNext(MonitoringLocationDTO.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+                    @Override
+                    public void updateLocation(
+                            MonitoringLocationDTO request, StreamObserver<MonitoringLocationDTO> responseObserver) {
+                        responseObserver.onNext(
+                                MonitoringLocationDTO.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void deleteLocation(Int64Value request, StreamObserver<BoolValue> responseObserver) {
-                    responseObserver.onNext(BoolValue.of(true));
-                    responseObserver.onCompleted();
-                }
-            }));
-        mockNodeService = mock(NodeServiceGrpc.NodeServiceImplBase.class, delegatesTo(
-            new NodeServiceGrpc.NodeServiceImplBase(){
-                @Override
-                public void createNode(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
-                    responseObserver.onNext(NodeDTO.newBuilder()
-                        .setNodeLabel(request.getLabel()).build());
-                    responseObserver.onCompleted();
-                }
+                    @Override
+                    public void deleteLocation(Int64Value request, StreamObserver<BoolValue> responseObserver) {
+                        responseObserver.onNext(BoolValue.of(true));
+                        responseObserver.onCompleted();
+                    }
+                }));
+        mockNodeService =
+                mock(NodeServiceGrpc.NodeServiceImplBase.class, delegatesTo(new NodeServiceGrpc.NodeServiceImplBase() {
+                    @Override
+                    public void createNode(NodeCreateDTO request, StreamObserver<NodeDTO> responseObserver) {
+                        responseObserver.onNext(NodeDTO.newBuilder()
+                                .setNodeLabel(request.getLabel())
+                                .build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void listNodes(Empty request, StreamObserver<NodeList> responseObserver) {
-                    responseObserver.onNext(NodeList.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+                    @Override
+                    public void listNodes(Empty request, StreamObserver<NodeList> responseObserver) {
+                        responseObserver.onNext(NodeList.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void getNodeById(Int64Value request, StreamObserver<NodeDTO> responseObserver) {
-                    responseObserver.onNext(NodeDTO.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
-            }));
+                    @Override
+                    public void getNodeById(Int64Value request, StreamObserver<NodeDTO> responseObserver) {
+                        responseObserver.onNext(NodeDTO.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
+                }));
 
-        mockSystemService = mock(MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase.class, delegatesTo(
-            new MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase() {
-                @Override
-                public void listMonitoringSystem(Empty request, StreamObserver<MonitoringSystemList> responseObserver) {
-                    responseObserver.onNext(MonitoringSystemList.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
+        mockSystemService = mock(
+                MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase.class,
+                delegatesTo(new MonitoringSystemServiceGrpc.MonitoringSystemServiceImplBase() {
+                    @Override
+                    public void listMonitoringSystem(
+                            Empty request, StreamObserver<MonitoringSystemList> responseObserver) {
+                        responseObserver.onNext(
+                                MonitoringSystemList.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void getMonitoringSystemById(Int64Value request, StreamObserver<MonitoringSystemDTO> responseObserver) {
-                    responseObserver.onNext(MonitoringSystemDTO.newBuilder().build());
-                    responseObserver.onCompleted();
-                }
-            }));
+                    @Override
+                    public void getMonitoringSystemById(
+                            Int64Value request, StreamObserver<MonitoringSystemDTO> responseObserver) {
+                        responseObserver.onNext(MonitoringSystemDTO.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
+                }));
 
-        grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest").intercept(mockInterceptor)
-            .addService(mockLocationService)
-            .addService(mockSystemService)
-            .addService(mockNodeService)
-            .directExecutor().build().start());
-        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest").directExecutor().build());
+        grpcCleanUp.register(InProcessServerBuilder.forName("InventoryClientTest")
+                .intercept(mockInterceptor)
+                .addService(mockLocationService)
+                .addService(mockSystemService)
+                .addService(mockNodeService)
+                .directExecutor()
+                .build()
+                .start());
+        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("InventoryClientTest")
+                .directExecutor()
+                .build());
         client = new InventoryClient(channel, 5000);
         client.initialStubs();
     }
@@ -184,7 +197,7 @@ public class InventoryClientTest {
 
     @Test
     void testListLocation() {
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
         List<MonitoringLocationDTO> result = client.listLocations(accessToken + methodName);
         assertThat(result).isEmpty();
@@ -195,9 +208,11 @@ public class InventoryClientTest {
 
     @Test
     void testListLocationsByIds() {
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         List<Long> ids = Arrays.asList(1L, 2L);
-        List<DataLoaderFactory.Key> keys = ids.stream().map(id -> new DataLoaderFactory.Key(id, accessToken + methodName)).collect(Collectors.toList());
+        List<DataLoaderFactory.Key> keys = ids.stream()
+                .map(id -> new DataLoaderFactory.Key(id, accessToken + methodName))
+                .collect(Collectors.toList());
         ArgumentCaptor<IdList> captor = ArgumentCaptor.forClass(IdList.class);
         List<MonitoringLocationDTO> result = client.listLocationsByIds(keys);
         assertThat(result).isEmpty();
@@ -211,7 +226,7 @@ public class InventoryClientTest {
     @Test
     void testGetLocationById() {
         long locationId = 100L;
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
         MonitoringLocationDTO result = client.getLocationById(locationId, accessToken + methodName);
         assertThat(result).isNotNull();
@@ -222,8 +237,9 @@ public class InventoryClientTest {
 
     @Test
     void testCreateNewNode() {
-        NodeCreateDTO createDTO = NodeCreateDTO.newBuilder().setLabel("test-node").build();
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        NodeCreateDTO createDTO =
+                NodeCreateDTO.newBuilder().setLabel("test-node").build();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<NodeCreateDTO> captor = ArgumentCaptor.forClass(NodeCreateDTO.class);
         NodeDTO result = client.createNewNode(createDTO, accessToken + methodName);
         assertThat(result).isNotNull();
@@ -235,7 +251,7 @@ public class InventoryClientTest {
 
     @Test
     void testListNodes() {
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
         List<NodeDTO> result = client.listNodes(accessToken + methodName);
         assertThat(result).isEmpty();
@@ -247,7 +263,7 @@ public class InventoryClientTest {
     @Test
     void testGetNodeById() {
         long locationId = 100L;
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
         NodeDTO result = client.getNodeById(locationId, accessToken + methodName);
         assertThat(result).isNotNull();
@@ -258,7 +274,7 @@ public class InventoryClientTest {
 
     @Test
     void testListMonitoringSystem() {
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Empty> captor = ArgumentCaptor.forClass(Empty.class);
         List<MonitoringSystemDTO> result = client.listMonitoringSystems(accessToken + methodName);
         assertThat(result).isEmpty();
@@ -271,7 +287,7 @@ public class InventoryClientTest {
     void testGetMonitoringSystemBySystemId() {
         String systemId = "test-system-id-123";
         long id = 1234L;
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
         MonitoringSystemDTO result = client.getSystemBySystemId(id, accessToken + methodName);
         assertThat(result).isNotNull();
@@ -282,8 +298,10 @@ public class InventoryClientTest {
 
     @Test
     void testCreateLocation() {
-        MonitoringLocationCreateDTO createDTO = MonitoringLocationCreateDTO.newBuilder().setLocation("test-location").build();
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        MonitoringLocationCreateDTO createDTO = MonitoringLocationCreateDTO.newBuilder()
+                .setLocation("test-location")
+                .build();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<MonitoringLocationCreateDTO> captor = ArgumentCaptor.forClass(MonitoringLocationCreateDTO.class);
         MonitoringLocationDTO result = client.createLocation(createDTO, accessToken + methodName);
         assertThat(result).isNotNull();
@@ -294,8 +312,9 @@ public class InventoryClientTest {
 
     @Test
     void testUpdateLocation() {
-        MonitoringLocationDTO updateDTO = MonitoringLocationDTO.newBuilder().setLocation("test-location").build();
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        MonitoringLocationDTO updateDTO =
+                MonitoringLocationDTO.newBuilder().setLocation("test-location").build();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<MonitoringLocationDTO> captor = ArgumentCaptor.forClass(MonitoringLocationDTO.class);
         MonitoringLocationDTO result = client.updateLocation(updateDTO, accessToken + methodName);
         assertThat(result).isNotNull();
@@ -307,7 +326,7 @@ public class InventoryClientTest {
     @Test
     void testDeleteLocation() {
         long locationId = 1L;
-        String methodName = new Object(){}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<Int64Value> captor = ArgumentCaptor.forClass(Int64Value.class);
         client.deleteLocation(locationId, accessToken + methodName);
         verify(mockLocationService).deleteLocation(captor.capture(), any());
@@ -317,8 +336,10 @@ public class InventoryClientTest {
 
     private static class MockServerInterceptor implements ServerInterceptor {
         private String authHeader;
+
         @Override
-        public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+        public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
+                ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
             authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
             return next.startCall(call, headers);
         }
@@ -326,9 +347,9 @@ public class InventoryClientTest {
         public String getAuthHeader() {
             return authHeader;
         }
+
         public void reset() {
             authHeader = null;
         }
     }
-
 }

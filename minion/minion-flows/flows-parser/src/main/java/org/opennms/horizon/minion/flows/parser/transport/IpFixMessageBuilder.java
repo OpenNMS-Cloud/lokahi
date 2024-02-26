@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2020 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser.transport;
 
 import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.first;
@@ -38,22 +31,19 @@ import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.set
 import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.setIntValue;
 import static org.opennms.horizon.minion.flows.parser.transport.MessageUtils.setLongValue;
 
+import com.google.common.primitives.UnsignedLong;
+import com.google.protobuf.UInt32Value;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
-
-import com.google.common.primitives.UnsignedLong;
-import com.google.protobuf.UInt32Value;
-
-import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
-import org.opennms.horizon.minion.flows.parser.ie.Value;
+import lombok.NoArgsConstructor;
 import org.opennms.horizon.flows.document.Direction;
 import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.flows.document.NetflowVersion;
 import org.opennms.horizon.flows.document.SamplingAlgorithm;
-
-import lombok.NoArgsConstructor;
+import org.opennms.horizon.minion.flows.parser.RecordEnrichment;
+import org.opennms.horizon.minion.flows.parser.ie.Value;
 
 @NoArgsConstructor
 public class IpFixMessageBuilder implements MessageBuilder {
@@ -123,7 +113,6 @@ public class IpFixMessageBuilder implements MessageBuilder {
         UInt32Value egressPhysicalInterface = null;
         UInt32Value inputSnmp = null;
         UInt32Value outputSnmp = null;
-
 
         for (Value<?> value : values) {
             switch (value.getName()) {
@@ -368,91 +357,79 @@ public class IpFixMessageBuilder implements MessageBuilder {
         // Set output interface
         first(egressPhysicalInterface, outputSnmp).ifPresent(builder::setOutputSnmpIfindex);
 
-        first(octetDeltaCount, postOctetDeltaCount, layer2OctetDeltaCount, postLayer2OctetDeltaCount,
-                transportOctetDeltaCount)
-                .ifPresent(bytes ->
-                    builder.setNumBytes(setLongValue(bytes))
-                );
+        first(
+                        octetDeltaCount,
+                        postOctetDeltaCount,
+                        layer2OctetDeltaCount,
+                        postLayer2OctetDeltaCount,
+                        transportOctetDeltaCount)
+                .ifPresent(bytes -> builder.setNumBytes(setLongValue(bytes)));
 
-        first(destinationIPv6Address,
-                destinationIPv4Address).ifPresent(ipAddress -> {
+        first(destinationIPv6Address, destinationIPv4Address).ifPresent(ipAddress -> {
             builder.setDstAddress(ipAddress.getHostAddress());
             enrichment.getHostnameFor(ipAddress).ifPresent(builder::setDstHostname);
         });
 
-        first(destinationIPv6PrefixLength,
-                destinationIPv4PrefixLength)
+        first(destinationIPv6PrefixLength, destinationIPv4PrefixLength)
                 .ifPresent(prefixLen -> builder.setDstMaskLen(setIntValue(prefixLen.intValue())));
 
+        first(ipNextHopIPv6Address, ipNextHopIPv4Address, bgpNextHopIPv6Address, bgpNextHopIPv4Address)
+                .ifPresent(ipAddress -> {
+                    builder.setNextHopAddress(ipAddress.getHostAddress());
+                    enrichment.getHostnameFor(ipAddress).ifPresent(builder::setNextHopHostname);
+                });
 
-        first(ipNextHopIPv6Address,
-                ipNextHopIPv4Address,
-                bgpNextHopIPv6Address,
-                bgpNextHopIPv4Address).ifPresent(ipAddress -> {
-            builder.setNextHopAddress(ipAddress.getHostAddress());
-            enrichment.getHostnameFor(ipAddress).ifPresent(builder::setNextHopHostname);
-        });
-
-        first(sourceIPv6Address,
-                sourceIPv4Address).ifPresent(ipAddress -> {
+        first(sourceIPv6Address, sourceIPv4Address).ifPresent(ipAddress -> {
             builder.setSrcAddress(ipAddress.getHostAddress());
             enrichment.getHostnameFor(ipAddress).ifPresent(builder::setSrcHostname);
         });
 
-        first(sourceIPv6PrefixLength,
-                sourceIPv4PrefixLength)
+        first(sourceIPv6PrefixLength, sourceIPv4PrefixLength)
                 .ifPresent(prefixLen -> builder.setSrcMaskLen(setIntValue(prefixLen.intValue())));
 
         first(vlanId, postVlanId, dot1qVlanId, dot1qCustomerVlanId, postDot1qVlanId, postDot1qCustomerVlanId)
                 .ifPresent(vlan -> builder.setVlan(setIntValue(vlan.intValue())));
 
-        long timeStamp = exportTime  != null ? exportTime * 1000 : 0;
+        long timeStamp = exportTime != null ? exportTime * 1000 : 0;
         builder.setTimestamp(timeStamp);
 
         // Set first switched
-        Long flowStartDelta = flowStartDeltaMicroseconds != null ?
-                flowStartDeltaMicroseconds + timeStamp : null;
-        Long systemInitTime = systemInitTimeMilliseconds != null ?
-                systemInitTimeMilliseconds.toEpochMilli() : null;
-        Long flowStart = flowStartSysUpTime != null && systemInitTime != null ?
-                flowStartSysUpTime + systemInitTime : null;
+        Long flowStartDelta = flowStartDeltaMicroseconds != null ? flowStartDeltaMicroseconds + timeStamp : null;
+        Long systemInitTime = systemInitTimeMilliseconds != null ? systemInitTimeMilliseconds.toEpochMilli() : null;
+        Long flowStart =
+                flowStartSysUpTime != null && systemInitTime != null ? flowStartSysUpTime + systemInitTime : null;
 
-        Optional<Long> firstSwitchedInMilli = first(flowStartSeconds,
-                flowStartMilliseconds,
-                flowStartMicroseconds,
-                flowStartNanoseconds).map(Instant::toEpochMilli);
+        Optional<Long> firstSwitchedInMilli = first(
+                        flowStartSeconds, flowStartMilliseconds, flowStartMicroseconds, flowStartNanoseconds)
+                .map(Instant::toEpochMilli);
         if (firstSwitchedInMilli.isPresent()) {
             builder.setFirstSwitched(setLongValue(firstSwitchedInMilli.get()));
         } else {
-            first(flowStartDelta,
-                    flowStart).ifPresent(firstSwitched -> builder.setFirstSwitched(setLongValue(firstSwitched))
-            );
+            first(flowStartDelta, flowStart)
+                    .ifPresent(firstSwitched -> builder.setFirstSwitched(setLongValue(firstSwitched)));
         }
 
         // Set lastSwitched
-        Long flowEndDelta = flowEndDeltaMicroseconds != null ?
-                flowEndDeltaMicroseconds + timeStamp : null;
-        Long flowEnd = flowEndSysUpTime != null && systemInitTime != null ?
-                flowEndSysUpTime + systemInitTime : null;
+        Long flowEndDelta = flowEndDeltaMicroseconds != null ? flowEndDeltaMicroseconds + timeStamp : null;
+        Long flowEnd = flowEndSysUpTime != null && systemInitTime != null ? flowEndSysUpTime + systemInitTime : null;
 
-        Optional<Long> lastSwitchedInMilli = first(flowEndSeconds,
-                flowEndMilliseconds,
-                flowEndMicroseconds,
-                flowEndNanoseconds).map(Instant::toEpochMilli);
+        Optional<Long> lastSwitchedInMilli = first(
+                        flowEndSeconds, flowEndMilliseconds, flowEndMicroseconds, flowEndNanoseconds)
+                .map(Instant::toEpochMilli);
 
-        if(lastSwitchedInMilli.isPresent()) {
+        if (lastSwitchedInMilli.isPresent()) {
             builder.setLastSwitched(setLongValue(lastSwitchedInMilli.get()));
         } else {
-            first(flowEndDelta,
-                    flowEnd).ifPresent(lastSwitchedValue -> builder.setLastSwitched(setLongValue(lastSwitchedValue)));
+            first(flowEndDelta, flowEnd)
+                    .ifPresent(lastSwitchedValue -> builder.setLastSwitched(setLongValue(lastSwitchedValue)));
         }
 
-        first(packetDeltaCount, postPacketDeltaCount, transportPacketDeltaCount).ifPresent(packets -> 
-            builder.setNumPackets(setLongValue(packets)));
+        first(packetDeltaCount, postPacketDeltaCount, transportPacketDeltaCount)
+                .ifPresent(packets -> builder.setNumPackets(setLongValue(packets)));
 
         SamplingAlgorithm sampling = SamplingAlgorithm.UNDEFINED_SAMPLING_ALGORITHM;
-        final Integer deprecatedSamplingAlgorithm = first(samplingAlgorithm, samplerMode)
-                .map(Long::intValue).orElse(null);
+        final Integer deprecatedSamplingAlgorithm =
+                first(samplingAlgorithm, samplerMode).map(Long::intValue).orElse(null);
         if (deprecatedSamplingAlgorithm != null) {
             if (deprecatedSamplingAlgorithm == 1) {
                 sampling = SamplingAlgorithm.SYSTEMATIC_COUNT_BASED_SAMPLING;
@@ -495,7 +472,8 @@ public class IpFixMessageBuilder implements MessageBuilder {
         builder.setSamplingAlgorithm(sampling);
 
         final Double deprecatedSamplingInterval = first(samplingInterval, samplerRandomInterval)
-                .map(Long::doubleValue).orElse(null);
+                .map(Long::doubleValue)
+                .orElse(null);
 
         if (deprecatedSamplingInterval != null) {
             builder.setSamplingInterval(setDoubleValue(deprecatedSamplingInterval));
@@ -505,17 +483,15 @@ public class IpFixMessageBuilder implements MessageBuilder {
                     case 0:
                         break;
                     case 1: {
-                        double interval = samplingFlowInterval != null ?
-                                          samplingFlowInterval.doubleValue() : 1.0;
-                        double spacing = samplingFlowSpacing != null ?
-                                         samplingFlowSpacing.doubleValue() : 0.0;
+                        double interval = samplingFlowInterval != null ? samplingFlowInterval.doubleValue() : 1.0;
+                        double spacing = samplingFlowSpacing != null ? samplingFlowSpacing.doubleValue() : 0.0;
                         double samplingIntervalValue = interval + spacing / interval;
                         builder.setSamplingInterval(setDoubleValue(samplingIntervalValue));
                         break;
                     }
                     case 2: {
-                        double interval = flowSamplingTimeInterval != null ?
-                                          flowSamplingTimeInterval.doubleValue() : 1.0;
+                        double interval =
+                                flowSamplingTimeInterval != null ? flowSamplingTimeInterval.doubleValue() : 1.0;
                         double samplingIntervalValue = interval + 1.0;
                         builder.setSamplingInterval(setDoubleValue(samplingIntervalValue));
                         break;
@@ -535,11 +511,21 @@ public class IpFixMessageBuilder implements MessageBuilder {
                     case 5:
                     case 6:
                     case 7: {
-                        UnsignedLong selectedRangeMin = hashSelectedRangeMin != null ? UnsignedLong.fromLongBits(hashSelectedRangeMin) : UnsignedLong.ZERO;
-                        UnsignedLong selectedRangeMax = hashSelectedRangeMax != null ? UnsignedLong.fromLongBits(hashSelectedRangeMax) : UnsignedLong.MAX_VALUE;
-                        UnsignedLong outputRangeMin = hashOutputRangeMin != null ? UnsignedLong.fromLongBits(hashOutputRangeMin) : UnsignedLong.ZERO;
-                        UnsignedLong outputRangeMax = hashOutputRangeMax != null ? UnsignedLong.fromLongBits(hashOutputRangeMax) : UnsignedLong.MAX_VALUE;
-                        double samplingIntervalValue = (outputRangeMax.minus(outputRangeMin)).dividedBy(selectedRangeMax.minus(selectedRangeMin)).doubleValue();
+                        UnsignedLong selectedRangeMin = hashSelectedRangeMin != null
+                                ? UnsignedLong.fromLongBits(hashSelectedRangeMin)
+                                : UnsignedLong.ZERO;
+                        UnsignedLong selectedRangeMax = hashSelectedRangeMax != null
+                                ? UnsignedLong.fromLongBits(hashSelectedRangeMax)
+                                : UnsignedLong.MAX_VALUE;
+                        UnsignedLong outputRangeMin = hashOutputRangeMin != null
+                                ? UnsignedLong.fromLongBits(hashOutputRangeMin)
+                                : UnsignedLong.ZERO;
+                        UnsignedLong outputRangeMax = hashOutputRangeMax != null
+                                ? UnsignedLong.fromLongBits(hashOutputRangeMax)
+                                : UnsignedLong.MAX_VALUE;
+                        double samplingIntervalValue = (outputRangeMax.minus(outputRangeMin))
+                                .dividedBy(selectedRangeMax.minus(selectedRangeMin))
+                                .doubleValue();
                         builder.setSamplingInterval(setDoubleValue(samplingIntervalValue));
                         break;
                     }
@@ -575,8 +561,10 @@ public class IpFixMessageBuilder implements MessageBuilder {
 
     static void buildDeltaSwitched(FlowDocument.Builder builder, Long flowActiveTimeout, Long flowInactiveTimeout) {
         Timeout timeout = new Timeout(flowActiveTimeout, flowInactiveTimeout);
-        timeout.setFirstSwitched(builder.hasFirstSwitched() ? builder.getFirstSwitched().getValue() : null);
-        timeout.setLastSwitched(builder.hasLastSwitched() ? builder.getLastSwitched().getValue() : null);
+        timeout.setFirstSwitched(
+                builder.hasFirstSwitched() ? builder.getFirstSwitched().getValue() : null);
+        timeout.setLastSwitched(
+                builder.hasLastSwitched() ? builder.getLastSwitched().getValue() : null);
         timeout.setNumBytes(builder.getNumBytes().getValue());
         timeout.setNumPackets(builder.getNumPackets().getValue());
         Long deltaSwitched = timeout.getDeltaSwitched();

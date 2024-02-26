@@ -1,5 +1,31 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -9,12 +35,6 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class SnmpInterfaceServiceTest {
 
@@ -62,12 +82,7 @@ public class SnmpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testSnmpInterfaceList =
-            List.of(
-                testSnmpInterface1,
-                testSnmpInterface2,
-                testSnmpInterface3
-            );
+        var testSnmpInterfaceList = List.of(testSnmpInterface1, testSnmpInterface2, testSnmpInterface3);
         Mockito.when(mockSnmpInterfaceRepository.findByTenantId(TEST_TENANT_ID)).thenReturn(testSnmpInterfaceList);
         Mockito.when(mockSnmpInterfaceMapper.modelToDTO(testSnmpInterface1)).thenReturn(testSnmpInterfaceDTO1);
         Mockito.when(mockSnmpInterfaceMapper.modelToDTO(testSnmpInterface2)).thenReturn(testSnmpInterfaceDTO2);
@@ -92,7 +107,8 @@ public class SnmpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockSnmpInterfaceRepository.findByNodeIdAndTenantIdAndIfIndex(1313, TEST_TENANT_ID, 1)).thenReturn(Optional.of(testSnmpInterface1));
+        Mockito.when(mockSnmpInterfaceRepository.findByNodeIdAndTenantIdAndIfIndex(1313, TEST_TENANT_ID, 1))
+                .thenReturn(Optional.of(testSnmpInterface1));
 
         //
         // Execute
@@ -112,17 +128,14 @@ public class SnmpInterfaceServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        Mockito.when(mockSnmpInterfaceRepository.findByNodeIdAndTenantIdAndIfIndex(1313, TEST_TENANT_ID, 1)).thenReturn(Optional.empty());
-        Mockito.when(mockSnmpInterfaceMapper.scanResultToModel(testSnmpInterfaceResult)).thenReturn(testSnmpInterface1);
-        Mockito.when(mockSnmpInterfaceRepository.save(
-            Mockito.argThat(
-                argument -> (
-                    (argument == testSnmpInterface1) &&
-                    (argument.getNode() == testNode) &&
-                    (Objects.equals(TEST_TENANT_ID, argument.getTenantId()))
-                )
-            )
-        )).thenReturn(testSnmpInterface2);
+        Mockito.when(mockSnmpInterfaceRepository.findByNodeIdAndTenantIdAndIfIndex(1313, TEST_TENANT_ID, 1))
+                .thenReturn(Optional.empty());
+        Mockito.when(mockSnmpInterfaceMapper.scanResultToModel(testSnmpInterfaceResult))
+                .thenReturn(testSnmpInterface1);
+        Mockito.when(mockSnmpInterfaceRepository.save(Mockito.argThat(argument -> ((argument == testSnmpInterface1)
+                        && (argument.getNode() == testNode)
+                        && (Objects.equals(TEST_TENANT_ID, argument.getTenantId()))))))
+                .thenReturn(testSnmpInterface2);
 
         //
         // Execute

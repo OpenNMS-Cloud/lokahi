@@ -22,7 +22,7 @@
             %interface%.
         </logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%id%:%generic%:%specific%" alarm-type="3"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%id%:%generic%:%specific%" alert-type="3"/>
    </event>
    <event>
       <uei>uei.opennms.org/default/event</uei>
@@ -33,7 +33,7 @@
       <logmsg dest="logndisplay">An event with no matching configuration was received from interface %interface%.
         </logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alert-type="3"/>
    </event>
    <event>
       <mask>
@@ -73,6 +73,6 @@
             args: %parm[all]%
         </logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%source%:%snmphost%:%id%:%generic%:%specific%" alarm-type="3" auto-clean="true"/>
+      <alert-data reduction-key="%source%:%snmphost%:%id%:%generic%:%specific%" alert-type="3" auto-clean="true"/>
    </event>
 </events>

@@ -1,35 +1,29 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.tsdata.collector;
 
 import com.google.protobuf.Any;
+import java.io.IOException;
+import java.util.Objects;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +33,6 @@ import org.opennms.taskset.contract.CollectorResponse;
 import org.opennms.taskset.contract.Identity;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.TaskResult;
-
-import java.io.IOException;
-import java.util.Objects;
 
 public class TaskSetCollectorResultProcessorTest {
 
@@ -61,17 +52,11 @@ public class TaskSetCollectorResultProcessorTest {
         mockTaskSetCollectorSnmpResponseProcessor = Mockito.mock(TaskSetCollectorSnmpResponseProcessor.class);
         mockTaskSetCollectorAzureResponseProcessor = Mockito.mock(TaskSetCollectorAzureResponseProcessor.class);
 
-        testTaskResult =
-            TaskResult.newBuilder()
-                .setIdentity(
-                    Identity.newBuilder()
-                        .setSystemId("x-system-id-x")
-                        .build()
-                )
+        testTaskResult = TaskResult.newBuilder()
+                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x").build())
                 .build();
 
-        var templateCollectoResponse =
-            CollectorResponse.newBuilder()
+        var templateCollectoResponse = CollectorResponse.newBuilder()
                 .setIpAddress("x-ip-address-x")
                 .setNodeId(131313L)
                 .build();
@@ -79,30 +64,27 @@ public class TaskSetCollectorResultProcessorTest {
         // Don't need any real type of result, just need the result field to be set.
         var testResultAny = Any.getDefaultInstance();
 
-        testCollectorResponseAzure =
-            templateCollectoResponse.toBuilder()
+        testCollectorResponseAzure = templateCollectoResponse.toBuilder()
                 .setMonitorType(MonitorType.AZURE)
                 .setResult(testResultAny)
                 .build();
 
-        testCollectorResponseSnmp =
-            templateCollectoResponse.toBuilder()
+        testCollectorResponseSnmp = templateCollectoResponse.toBuilder()
                 .setMonitorType(MonitorType.SNMP)
                 .setResult(testResultAny)
                 .build();
 
-        testCollectorResponseMissingResult =
-            templateCollectoResponse.toBuilder()
+        testCollectorResponseMissingResult = templateCollectoResponse.toBuilder()
                 .setMonitorType(MonitorType.SNMP)
                 .build();
 
-        testCollectorResponseUnrecognizedMonitorType =
-            templateCollectoResponse.toBuilder()
+        testCollectorResponseUnrecognizedMonitorType = templateCollectoResponse.toBuilder()
                 .setMonitorType(MonitorType.UNKNOWN)
                 .setResult(testResultAny)
                 .build();
 
-        target = new TaskSetCollectorResultProcessor(mockTaskSetCollectorSnmpResponseProcessor, mockTaskSetCollectorAzureResponseProcessor);
+        target = new TaskSetCollectorResultProcessor(
+                mockTaskSetCollectorSnmpResponseProcessor, mockTaskSetCollectorAzureResponseProcessor);
     }
 
     @Test
@@ -120,18 +102,13 @@ public class TaskSetCollectorResultProcessorTest {
         // Verify the Results
         //
         Mockito.verify(mockTaskSetCollectorAzureResponseProcessor)
-            .processAzureCollectorResponse(
-                Mockito.eq("x-tenant-id-x"),
-                Mockito.eq("x-location-x"),
-                Mockito.same(testCollectorResponseAzure),
-                Mockito.eq(new String[]{
-                    "x-ip-address-x",
-                    "x-location-x",
-                    "x-system-id-x",
-                    MonitorType.AZURE.name(),
-                    "131313"
-                })
-            );
+                .processAzureCollectorResponse(
+                        Mockito.eq("x-tenant-id-x"),
+                        Mockito.eq("x-location-x"),
+                        Mockito.same(testCollectorResponseAzure),
+                        Mockito.eq(new String[] {
+                            "x-ip-address-x", "x-location-x", "x-system-id-x", MonitorType.AZURE.name(), "131313"
+                        }));
     }
 
     @Test
@@ -149,11 +126,8 @@ public class TaskSetCollectorResultProcessorTest {
         // Verify the Results
         //
         Mockito.verify(mockTaskSetCollectorSnmpResponseProcessor)
-            .processSnmpCollectorResponse(
-                Mockito.eq("x-tenant-id-x"),
-                Mockito.eq("x-location-x"),
-                Mockito.same(testTaskResult)
-            );
+                .processSnmpCollectorResponse(
+                        Mockito.eq("x-tenant-id-x"), Mockito.eq("x-location-x"), Mockito.same(testTaskResult));
     }
 
     @Test
@@ -166,12 +140,14 @@ public class TaskSetCollectorResultProcessorTest {
             //
             // Execute
             //
-            target.processCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseMissingResult);
+            target.processCollectorResponse(
+                    "x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseMissingResult);
 
             //
             // Verify the Results
             //
-            Assertions.assertTrue(logCaptor.getLogEvents().stream().anyMatch(logEvent -> Objects.equals("No result in response", logEvent.getMessage())));
+            Assertions.assertTrue(logCaptor.getLogEvents().stream()
+                    .anyMatch(logEvent -> Objects.equals("No result in response", logEvent.getMessage())));
         }
     }
 
@@ -185,12 +161,14 @@ public class TaskSetCollectorResultProcessorTest {
             //
             // Execute
             //
-            target.processCollectorResponse("x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseUnrecognizedMonitorType);
+            target.processCollectorResponse(
+                    "x-tenant-id-x", "x-location-x", testTaskResult, testCollectorResponseUnrecognizedMonitorType);
 
             //
             // Verify the Results
             //
-            Assertions.assertTrue(logCaptor.getLogEvents().stream().anyMatch(logEvent -> Objects.equals("Unrecognized monitor type", logEvent.getMessage())));
+            Assertions.assertTrue(logCaptor.getLogEvents().stream()
+                    .anyMatch(logEvent -> Objects.equals("Unrecognized monitor type", logEvent.getMessage())));
         }
     }
 }

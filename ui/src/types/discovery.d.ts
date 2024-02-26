@@ -18,10 +18,10 @@ export interface DiscoveryInput extends IKey {
 export interface DiscoveryTrapMeta {
   communityStrings?: string;
   udpPorts?: string;
-  toggle?: {toggle:boolean,id: number};
+  toggle?: { toggle: boolean, id: number };
 }
 
-export interface DiscoverySNMPMeta extends DiscoveryTrapMeta{
+export interface DiscoverySNMPMeta extends DiscoveryTrapMeta {
   ipRanges?: string;
 }
 
@@ -102,31 +102,34 @@ export interface DiscoveryStore {
 export interface ServerDiscovery {
   discoveryType?: string;
   details?: {
-    id?: number, tags?:Array<Tag>, 
-    ipAddresses?: Array<string>,locations?:Array<Location>,
-    locationId:string,name:string,
-    clientId?:string,
-    directoryId?:string,
-    subscriptionId?:string,
-    clientSecret?:string,
+    id?: number,
+    tags?: Array<Tag>,
+    ipAddresses?: Array<string>,
+    locations?: Array<Location>,
+    locationId: string,
+    name: string,
+    clientId?: string,
+    directoryId?: string,
+    subscriptionId?: string,
+    clientSecret?: string,
     snmpConfig?: {
       ports: Array<string>,
-      readCommunities:Array<string>,
-    }}
+      readCommunities: Array<string>,
+    } }
 }
 
 export interface PassiveServerDiscovery {
-  id?: any; 
+  id?: any;
   locationId?: string | undefined;
-  name?: string | undefined; 
-  snmpCommunities?: string[] | undefined; 
-  snmpPorts?: number[] | undefined; toggle: boolean; 
+  name?: string | undefined;
+  snmpCommunities?: string[] | undefined;
+  snmpPorts?: number[] | undefined; toggle: boolean;
   tags?: Array<Tag>;
 }
 
 export interface ServerDiscoveries {
-  listActiveDiscovery?:Array<ServerDiscovery>;
-  passiveDiscoveries?:Array<PassiveServerDiscovery>;
+  listActiveDiscovery?: Array<ServerDiscovery>;
+  passiveDiscoveries?: Array<PassiveServerDiscovery>;
 }
 
 export interface IcmpActiveDiscoveryPlusTags extends IcmpActiveDiscovery {

@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
+import { InventoryMapper } from '@/mappers'
 import { InventoryItem, NewInventoryNode, RawMetrics } from '@/types/inventory'
 import { Tag } from '@/types/graphql'
 import { useTagStore } from '../Components/tagStore'
 import { useInventoryQueries } from '../Queries/inventoryQueries'
-import { InventoryMapper } from '@/mappers'
-
 
 export const useInventoryStore = defineStore('inventoryStore', {
   state: () => ({
@@ -23,12 +22,12 @@ export const useInventoryStore = defineStore('inventoryStore', {
     isEditMode: false
   }),
   actions: {
-    init(){
+    init() {
       this.loading = true
       const {buildNetworkInventory, receivedNetworkInventory} = useInventoryQueries()
       receivedNetworkInventory(this.receivedNetworkInventory as any)
       buildNetworkInventory()
-      this.loadingTimeout = window.setTimeout(() => {this.loading = false},3000)
+      this.loadingTimeout = window.setTimeout(() => { this.loading = false }, 3000)
     },
     async filterNodesByTags() {
       const {getNodesByTags} = useInventoryQueries()
@@ -44,8 +43,8 @@ export const useInventoryStore = defineStore('inventoryStore', {
       const b = InventoryMapper.fromServer(nodes.value?.findAllNodesByNodeLabelSearch as Array<NewInventoryNode>, nodes.value?.allMetrics as RawMetrics)
       this.nodes = b.nodes
     },
-    receivedNetworkInventory(d: {findAllNodes:Array<NewInventoryNode>,allMetrics: RawMetrics}) {
-      const b= InventoryMapper.fromServer(d.findAllNodes,d.allMetrics)
+    receivedNetworkInventory(d: { findAllNodes: Array<NewInventoryNode>, allMetrics: RawMetrics }) {
+      const b = InventoryMapper.fromServer(d.findAllNodes, d.allMetrics)
       this.nodes = b.nodes
       window.clearTimeout(this.loadingTimeout)
       this.loading = false

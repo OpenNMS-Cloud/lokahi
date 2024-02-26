@@ -25,15 +25,11 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
 @XmlSchema(
-           namespace = "http://xmlns.opennms.org/xsd/eventconf",
-           elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
-           xmlns={
-                   @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/eventconf")
-           }
-        )
-@XmlJavaTypeAdapter(value= StringTrimAdapter.class,type=String.class)
+        namespace = "http://xmlns.opennms.org/xsd/eventconf",
+        elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED,
+        xmlns = {@XmlNs(prefix = "", namespaceURI = "http://xmlns.opennms.org/xsd/eventconf")})
+@XmlJavaTypeAdapter(value = StringTrimAdapter.class, type = String.class)
 package org.opennms.horizon.events.conf.xml;
 
 import org.opennms.horizon.events.util.StringTrimAdapter;
@@ -41,4 +37,3 @@ import org.opennms.horizon.events.util.StringTrimAdapter;
 import jakarta.xml.bind.annotation.XmlNs;
 import jakarta.xml.bind.annotation.XmlSchema;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-

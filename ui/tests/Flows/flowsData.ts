@@ -15,12 +15,12 @@ export const FlowsState = {
     dataStyle: {
       selectedItem: 'table'
     },
-    //Application AutoComplete
+    // Application AutoComplete
     applications: [] as IAutocompleteItemType[],
     selectedApplications: [],
     isApplicationsLoading: false,
     filteredApplications: [] as IAutocompleteItemType[],
-    //Exporter AutoComplete
+    // Exporter AutoComplete
     exporters: [] as IAutocompleteItemType[],
     selectedExporters: [],
     isExportersLoading: false,

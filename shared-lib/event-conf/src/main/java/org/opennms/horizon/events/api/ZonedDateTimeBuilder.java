@@ -1,36 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.api;
-
-import org.opennms.horizon.events.YearGuesser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -40,18 +29,21 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.opennms.horizon.events.YearGuesser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is basically a {@link Calendar.Builder} replacement that
  * builds Java 8 {@link ZonedDateTime} instances.
- * 
+ *
  * @author Seth
  */
 public class ZonedDateTimeBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZonedDateTimeBuilder.class);
 
-    private static final Map<String,String> TIME_ZONE_MAPPINGS = new HashMap<>();
+    private static final Map<String, String> TIME_ZONE_MAPPINGS = new HashMap<>();
 
     static {
         // Add all of the standard (?) Java short IDs
@@ -69,12 +61,12 @@ public class ZonedDateTimeBuilder {
         TIME_ZONE_MAPPINGS.put("ACDT", "+10:30");
         TIME_ZONE_MAPPINGS.put("ACST", "+09:30");
         // Acre Time
-        //TIME_ZONE_MAPPINGS.put("ACT", "-05:00");
+        // TIME_ZONE_MAPPINGS.put("ACT", "-05:00");
         // Australian Central Time
         TIME_ZONE_MAPPINGS.put("ACT", "Australia/Darwin");
         TIME_ZONE_MAPPINGS.put("ACWST", "+08:45");
         // Arabia Daylight Time
-        //TIME_ZONE_MAPPINGS.put("ADT", "+03:00");
+        // TIME_ZONE_MAPPINGS.put("ADT", "+03:00");
         // Atlantic Daylight Time
         TIME_ZONE_MAPPINGS.put("ADT", "-03:00");
         TIME_ZONE_MAPPINGS.put("AEDT", "+11:00");
@@ -87,21 +79,21 @@ public class ZonedDateTimeBuilder {
         // Amazon Summer Time
         TIME_ZONE_MAPPINGS.put("AMST", "-03:00");
         // Armenia Summer Time (unused)
-        //TIME_ZONE_MAPPINGS.put("AMST", "+05:00");
+        // TIME_ZONE_MAPPINGS.put("AMST", "+05:00");
         // Amazon Time
         TIME_ZONE_MAPPINGS.put("AMT", "-04:00");
         // Armenia Time (unused)
-        //TIME_ZONE_MAPPINGS.put("AMT", "+04:00");
+        // TIME_ZONE_MAPPINGS.put("AMT", "+04:00");
         TIME_ZONE_MAPPINGS.put("ANAST", "+12:00");
         TIME_ZONE_MAPPINGS.put("ANAT", "+12:00");
         TIME_ZONE_MAPPINGS.put("AQTT", "+05:00");
         TIME_ZONE_MAPPINGS.put("ART", "-03:00");
         // Arabia Standard Time
-        //TIME_ZONE_MAPPINGS.put("AST", "+03:00");
+        // TIME_ZONE_MAPPINGS.put("AST", "+03:00");
         // Atlantic Standard Time
         TIME_ZONE_MAPPINGS.put("AST", "-04:00");
         // I'm going to just ignore this since it is covered by AST/ADT
-        //TIME_ZONE_MAPPINGS.put("AT", "-04:00 / -3:00");
+        // TIME_ZONE_MAPPINGS.put("AT", "-04:00 / -3:00");
         TIME_ZONE_MAPPINGS.put("AWDT", "+09:00");
         TIME_ZONE_MAPPINGS.put("AWST", "+08:00");
         TIME_ZONE_MAPPINGS.put("AZOST", "+00:00");
@@ -115,9 +107,9 @@ public class ZonedDateTimeBuilder {
         TIME_ZONE_MAPPINGS.put("BRST", "-02:00");
         TIME_ZONE_MAPPINGS.put("BRT", "-03:00");
         // Bangladesh Standard Time
-        //TIME_ZONE_MAPPINGS.put("BST", "+06:00");
+        // TIME_ZONE_MAPPINGS.put("BST", "+06:00");
         // Bougainville Standard Time
-        //TIME_ZONE_MAPPINGS.put("BST", "+11:00");
+        // TIME_ZONE_MAPPINGS.put("BST", "+11:00");
         // British Summer Time
         TIME_ZONE_MAPPINGS.put("BST", "+01:00");
         TIME_ZONE_MAPPINGS.put("BTT", "+06:00");
@@ -128,7 +120,7 @@ public class ZonedDateTimeBuilder {
         // Central Daylight Time
         TIME_ZONE_MAPPINGS.put("CDT", "-05:00");
         // Cuba Daylight Time
-        //TIME_ZONE_MAPPINGS.put("CDT", "-04:00");
+        // TIME_ZONE_MAPPINGS.put("CDT", "-04:00");
         TIME_ZONE_MAPPINGS.put("CEST", "+02:00");
         TIME_ZONE_MAPPINGS.put("CET", "+01:00");
         TIME_ZONE_MAPPINGS.put("CHADT", "+13:45");
@@ -145,9 +137,9 @@ public class ZonedDateTimeBuilder {
         // Central Standard Time
         TIME_ZONE_MAPPINGS.put("CST", "-06:00");
         // China Standard Time
-        //TIME_ZONE_MAPPINGS.put("CST", "+08:00");
+        // TIME_ZONE_MAPPINGS.put("CST", "+08:00");
         // Cuba Standard Time
-        //TIME_ZONE_MAPPINGS.put("CST", "-05:00");
+        // TIME_ZONE_MAPPINGS.put("CST", "-05:00");
         TIME_ZONE_MAPPINGS.put("CT", "America/Chicago");
         TIME_ZONE_MAPPINGS.put("CVT", "-01:00");
         TIME_ZONE_MAPPINGS.put("CXT", "+07:00");
@@ -184,7 +176,7 @@ public class ZonedDateTimeBuilder {
         // Gulf Standard Time
         TIME_ZONE_MAPPINGS.put("GST", "+04:00");
         // South Georgia Time
-        //TIME_ZONE_MAPPINGS.put("GST", "-02:00");
+        // TIME_ZONE_MAPPINGS.put("GST", "-02:00");
         TIME_ZONE_MAPPINGS.put("GYT", "-04:00");
         TIME_ZONE_MAPPINGS.put("H", "+08:00");
         TIME_ZONE_MAPPINGS.put("HADT", "-09:00");
@@ -203,9 +195,9 @@ public class ZonedDateTimeBuilder {
         // India Standard Time
         TIME_ZONE_MAPPINGS.put("IST", "+05:30");
         // Irish Standard Time
-        //TIME_ZONE_MAPPINGS.put("IST", "+01:00");
+        // TIME_ZONE_MAPPINGS.put("IST", "+01:00");
         // Israel Standard Time
-        //TIME_ZONE_MAPPINGS.put("IST", "+02:00");
+        // TIME_ZONE_MAPPINGS.put("IST", "+02:00");
         TIME_ZONE_MAPPINGS.put("JST", "+09:00");
         TIME_ZONE_MAPPINGS.put("K", "+10:00");
         TIME_ZONE_MAPPINGS.put("KGT", "+06:00");
@@ -269,7 +261,7 @@ public class ZonedDateTimeBuilder {
         // Paraguay Time
         TIME_ZONE_MAPPINGS.put("PYT", "-04:00");
         // Pyongyang Time
-        //TIME_ZONE_MAPPINGS.put("PYT", "+08:30");
+        // TIME_ZONE_MAPPINGS.put("PYT", "+08:30");
         TIME_ZONE_MAPPINGS.put("Q", "-04:00");
         TIME_ZONE_MAPPINGS.put("QYZT", "+06:00");
         TIME_ZONE_MAPPINGS.put("R", "-05:00");
@@ -323,7 +315,7 @@ public class ZonedDateTimeBuilder {
         TIME_ZONE_MAPPINGS.put("WIT", "+09:00");
         TIME_ZONE_MAPPINGS.put("WITA", "+08:00");
         // West Samoa Time
-        //TIME_ZONE_MAPPINGS.put("WST", "+14:00");
+        // TIME_ZONE_MAPPINGS.put("WST", "+14:00");
         // Western Sahara Summer Time
         TIME_ZONE_MAPPINGS.put("WST", "+01:00");
         TIME_ZONE_MAPPINGS.put("WT", "+00:00");
@@ -423,14 +415,14 @@ public class ZonedDateTimeBuilder {
     /**
      * Build the {@link ZonedDateTime} instance. The following fields
      * are required to generate a datestamp:
-     * 
+     *
      * <ul>
      * <li>month</li>
      * <li>dayOfMonth</li>
      * </ul>
-     * 
+     *
      * <p>If missing:</p>
-     * 
+     *
      * <ul>
      * <li>year will be assumed to be within the last 12 months
      * or slightly in the future (if the current month is December)</li>
@@ -438,7 +430,7 @@ public class ZonedDateTimeBuilder {
      * <li>time zone will be assumed to be the system time zone
      * ({@link ZoneId#systemDefault()})</li>
      * </ul>
-     * 
+     *
      * @return
      */
     public ZonedDateTime build() {
@@ -447,34 +439,53 @@ public class ZonedDateTimeBuilder {
                 if (m_minute != null) {
                     if (m_second != null) {
                         if (m_nanosecond != null) {
-                            return ZonedDateTime.of(getBestYear(), m_month, m_dayOfMonth, m_hourOfDay == null ? 0 : m_hourOfDay, m_minute, m_second, m_nanosecond, getBestZoneId());
+                            return ZonedDateTime.of(
+                                    getBestYear(),
+                                    m_month,
+                                    m_dayOfMonth,
+                                    m_hourOfDay == null ? 0 : m_hourOfDay,
+                                    m_minute,
+                                    m_second,
+                                    m_nanosecond,
+                                    getBestZoneId());
                         } else {
-                            return ZonedDateTime.of(getBestYear(), m_month, m_dayOfMonth, m_hourOfDay, m_minute, m_second, 0, getBestZoneId());
+                            return ZonedDateTime.of(
+                                    getBestYear(),
+                                    m_month,
+                                    m_dayOfMonth,
+                                    m_hourOfDay,
+                                    m_minute,
+                                    m_second,
+                                    0,
+                                    getBestZoneId());
                         }
                     } else {
-                        return ZonedDateTime.of(getBestYear(), m_month, m_dayOfMonth, m_hourOfDay, m_minute, 0, 0, getBestZoneId());
+                        return ZonedDateTime.of(
+                                getBestYear(), m_month, m_dayOfMonth, m_hourOfDay, m_minute, 0, 0, getBestZoneId());
                     }
                 } else {
-                    return ZonedDateTime.of(getBestYear(), m_month, m_dayOfMonth, m_hourOfDay, 0, 0, 0, getBestZoneId());
+                    return ZonedDateTime.of(
+                            getBestYear(), m_month, m_dayOfMonth, m_hourOfDay, 0, 0, 0, getBestZoneId());
                 }
             } else {
                 return ZonedDateTime.of(getBestYear(), m_month, m_dayOfMonth, 0, 0, 0, 0, getBestZoneId());
             }
         } else {
-            throw new DateTimeException("Insufficient fields to produce a ZonedDateTime: month and dayOfMonth are required");
+            throw new DateTimeException(
+                    "Insufficient fields to produce a ZonedDateTime: month and dayOfMonth are required");
         }
     }
 
     /**
      * <p>If some fields have not been set,
-     * intelligently set them so that we generate a observed 
-     * datestamp that is less than or slightly greater than 
-     * {@link System#currentTimeMillis()} (due to clock skew). 
-     * For instance, around midnight on Dec 31, 2017, we do not 
-     * want to generate datestamps of Dec 31, 2018 at the instant 
-     * that {@link LocalDateTime#now()} starts returning a 
+     * intelligently set them so that we generate a observed
+     * datestamp that is less than or slightly greater than
+     * {@link System#currentTimeMillis()} (due to clock skew).
+     * For instance, around midnight on Dec 31, 2017, we do not
+     * want to generate datestamps of Dec 31, 2018 at the instant
+     * that {@link LocalDateTime#now()} starts returning a
      * January 1, 2018 datestamp.</p>
-     * 
+     *
      * @return
      */
     private int getBestYear() {
@@ -487,11 +498,16 @@ public class ZonedDateTimeBuilder {
 
         // get LocalDateTime
         LocalDateTime dateTimeWithoutYear = LocalDateTime.of(
-                toValueOr0(m_year), toValueOr1(getMonth()), toValueOr1(getDayOfMonth()),
-                toValueOr0(getHourOfDay()), toValueOr0(getMinute()),
-                toValueOr0(getSecond()), 0);
+                toValueOr0(m_year),
+                toValueOr1(getMonth()),
+                toValueOr1(getDayOfMonth()),
+                toValueOr0(getHourOfDay()),
+                toValueOr0(getMinute()),
+                toValueOr0(getSecond()),
+                0);
 
-        return YearGuesser.guessYearForDate(dateTimeWithoutYear, localReferenceTime).getYear();
+        return YearGuesser.guessYearForDate(dateTimeWithoutYear, localReferenceTime)
+                .getYear();
     }
 
     private static Integer toValueOr0(Integer integer) {
@@ -505,7 +521,7 @@ public class ZonedDateTimeBuilder {
     /**
      * Return the specified ZoneId or {@link ZoneId#systemDefault()}
      * if none has been specified.
-     * 
+     *
      * @return
      */
     protected ZoneId getBestZoneId() {

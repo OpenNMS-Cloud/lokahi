@@ -52,7 +52,7 @@ traps.&lt;/p>&lt;table>
 			alarmRisingThreshold=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="1" auto-clean="true"/>
    </event>
    <event>
       <mask>
@@ -107,6 +107,6 @@ traps.&lt;/p>&lt;table>
 			alarmFallingThreshold=%parm[#5]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="2" clear-key="uei.opennms.org/standard/rfc2819/traps/risingAlarm:%dpname%:%nodeid%:%parm[#1]%" auto-clean="true"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alert-type="2" clear-key="uei.opennms.org/standard/rfc2819/traps/risingAlarm:%dpname%:%nodeid%:%parm[#1]%" auto-clean="true"/>
    </event>
 </events>

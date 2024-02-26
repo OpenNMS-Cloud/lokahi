@@ -59,7 +59,7 @@ const inventoryStore = useInventoryStore()
 const tagQueries = useTagQueries()
 const tagStore = useTagStore()
 
-const { isAutoCompleteOpen, closeAutocomplete, wrapperClicked, onFocusLost, itemClicked, textChanged, inputValue } = 
+const { isAutoCompleteOpen, closeAutocomplete, wrapperClicked, onFocusLost, itemClicked, textChanged, inputValue } =
   useAtomicAutocomplete(tagQueries.getTagsSearch, () => tagQueries.tagsSearched.length, tagStore.addNewTag)
 
 defineProps({

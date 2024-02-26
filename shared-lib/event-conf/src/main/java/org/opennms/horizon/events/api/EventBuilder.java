@@ -1,33 +1,32 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2006-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.api;
 
+import java.net.InetAddress;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import org.opennms.horizon.events.EventConstants;
 import org.opennms.horizon.events.util.StringUtils;
 import org.opennms.horizon.events.xml.AlertData;
@@ -44,13 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
-
-import java.net.InetAddress;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 /**
  * <p>EventBuilder class.</p>
@@ -104,11 +96,10 @@ public class EventBuilder {
         checkForIllegalUei();
     }
 
-
-    protected void checkForIllegalUei(){
-        if(EventConstants.NODE_LABEL_CHANGED_EVENT_UEI.equals(this.m_event.getUei())){
-            LOG.warn("The use of EventBuilder is deprecated for UEI="+EventConstants.NODE_LABEL_CHANGED_EVENT_UEI
-                    +", use NodeLabelChangedEventBuilder instead");
+    protected void checkForIllegalUei() {
+        if (EventConstants.NODE_LABEL_CHANGED_EVENT_UEI.equals(this.m_event.getUei())) {
+            LOG.warn("The use of EventBuilder is deprecated for UEI=" + EventConstants.NODE_LABEL_CHANGED_EVENT_UEI
+                    + ", use NodeLabelChangedEventBuilder instead");
         }
     }
 
@@ -145,7 +136,7 @@ public class EventBuilder {
         Event event = getEvent();
 
         Events events = new Events();
-        events.setEvent(new Event[]{event});
+        events.setEvent(new Event[] {event});
 
         Header header = new Header();
         header.setCreated(StringUtils.toStringEfficiently(event.getCreationTime()));
@@ -162,7 +153,6 @@ public class EventBuilder {
         return this;
     }
 
-
     /**
      * <p>setTime</p>
      *
@@ -170,8 +160,8 @@ public class EventBuilder {
      * @return a {@link EventBuilder} object.
      */
     public EventBuilder setTime(final Date date) {
-       m_event.setTime(date);
-       return this;
+        m_event.setTime(date);
+        return this;
     }
 
     protected ZonedDateTimeBuilder getZonedDateTimeBuilder() {
@@ -233,7 +223,6 @@ public class EventBuilder {
     public EventBuilder setSource(final String source) {
         m_event.setSource(source);
         return this;
-        
     }
 
     /**
@@ -257,7 +246,7 @@ public class EventBuilder {
         m_event.setHost(hostname);
         return this;
     }
-    
+
     /**
      * <p>setInterface</p>
      *
@@ -300,37 +289,36 @@ public class EventBuilder {
     public EventBuilder addParam(final String parmName, final String val) {
         return addParam(parmName, val, null, null);
     }
-    
+
     public EventBuilder addParam(final String parmName, final String val, final String type, final String encoding) {
         if (parmName != null) {
             Value value = new Value();
             value.setContent(val);
-            
+
             if (type != null) {
                 value.setType(type);
             }
-            
+
             if (encoding != null) {
                 value.setEncoding(encoding);
             }
-            
+
             Parm parm = new Parm();
             parm.setParmName(parmName);
             parm.setValue(value);
-            
+
             addParam(parm);
         }
-        
+
         return this;
     }
 
-    
     public EventBuilder addParam(final Parm parm) {
         m_event.addParm(parm);
 
         return this;
     }
-    
+
     /**
      * <p>addParam</p>
      *
@@ -352,7 +340,7 @@ public class EventBuilder {
 
         return this;
     }
-    
+
     /**
      * <p>setParam</p>
      *
@@ -365,9 +353,9 @@ public class EventBuilder {
             return addParam(parmName, val);
         }
 
-        for(final Parm parm : m_event.getParmCollection()) {
+        for (final Parm parm : m_event.getParmCollection()) {
             if (parm.getParmName().equals(parmName)) {
-            	final Value value = new Value();
+                final Value value = new Value();
                 value.setContent(val);
                 parm.setValue(value);
                 return this;
@@ -398,7 +386,7 @@ public class EventBuilder {
     public EventBuilder addParam(final String parmName, final double val) {
         return addParam(parmName, Double.toString(val));
     }
-    
+
     /**
      * <p>addParam</p>
      *
@@ -409,7 +397,7 @@ public class EventBuilder {
     public EventBuilder addParam(final String parmName, final long val) {
         return addParam(parmName, Long.toString(val));
     }
-    
+
     /**
      * <p>addParam</p>
      *
@@ -420,7 +408,7 @@ public class EventBuilder {
     public EventBuilder addParam(final String parmName, final int val) {
         return addParam(parmName, Integer.toString(val));
     }
-    
+
     /**
      * <p>addParam</p>
      *
@@ -431,7 +419,7 @@ public class EventBuilder {
     public EventBuilder addParam(final String parmName, final char ch) {
         return addParam(parmName, Character.toString(ch));
     }
-    
+
     /**
      * <p>addParam</p>
      *
@@ -442,7 +430,6 @@ public class EventBuilder {
     public EventBuilder addParam(final String parmName, final Collection<String> vals) {
         final String val = org.springframework.util.StringUtils.collectionToCommaDelimitedString(vals);
         return addParam(parmName, val);
-        
     }
 
     /**
@@ -457,51 +444,50 @@ public class EventBuilder {
         }
         return this;
     }
-//
-//    /**
-//     * <p>setNode</p>
-//     *
-//     * @param node a {@link org.opennms.netmgt.model.OnmsNode} object.
-//     * @return a {@link EventBuilder} object.
-//     */
-//    public EventBuilder setNode(final OnmsNode node) {
-//        if (node != null) {
-//            m_event.setNodeid(node.getId().longValue());
-//        }
-//        return this;
-//    }
-//
-//    /**
-//     * <p>setIpInterface</p>
-//     *
-//     * @param iface a {@link org.opennms.netmgt.model.OnmsIpInterface} object.
-//     * @return a {@link EventBuilder} object.
-//     */
-//    public EventBuilder setIpInterface(final OnmsIpInterface iface) {
-//        if (iface != null) {
-//            if (iface.getNode() != null) {
-//                m_event.setNodeid(iface.getNode().getId().longValue());
-//            }
-//            m_event.setInterfaceAddress(iface.getIpAddress());
-//        }
-//        return this;
-//    }
-//
-//    /**
-//     * <p>setMonitoredService</p>
-//     *
-//     * @param monitoredService a {@link org.opennms.netmgt.model.OnmsMonitoredService} object.
-//     * @return a {@link EventBuilder} object.
-//     */
-//    public EventBuilder setMonitoredService(final OnmsMonitoredService monitoredService) {
-//        if (monitoredService != null) {
-//            m_event.setNodeid(monitoredService.getNodeId().longValue());
-//            m_event.setInterfaceAddress(monitoredService.getIpAddress());
-//            m_event.setService(monitoredService.getServiceName());
-//        }
-//        return this;
-//    }
-
+    //
+    //    /**
+    //     * <p>setNode</p>
+    //     *
+    //     * @param node a {@link org.opennms.netmgt.model.OnmsNode} object.
+    //     * @return a {@link EventBuilder} object.
+    //     */
+    //    public EventBuilder setNode(final OnmsNode node) {
+    //        if (node != null) {
+    //            m_event.setNodeid(node.getId().longValue());
+    //        }
+    //        return this;
+    //    }
+    //
+    //    /**
+    //     * <p>setIpInterface</p>
+    //     *
+    //     * @param iface a {@link org.opennms.netmgt.model.OnmsIpInterface} object.
+    //     * @return a {@link EventBuilder} object.
+    //     */
+    //    public EventBuilder setIpInterface(final OnmsIpInterface iface) {
+    //        if (iface != null) {
+    //            if (iface.getNode() != null) {
+    //                m_event.setNodeid(iface.getNode().getId().longValue());
+    //            }
+    //            m_event.setInterfaceAddress(iface.getIpAddress());
+    //        }
+    //        return this;
+    //    }
+    //
+    //    /**
+    //     * <p>setMonitoredService</p>
+    //     *
+    //     * @param monitoredService a {@link org.opennms.netmgt.model.OnmsMonitoredService} object.
+    //     * @return a {@link EventBuilder} object.
+    //     */
+    //    public EventBuilder setMonitoredService(final OnmsMonitoredService monitoredService) {
+    //        if (monitoredService != null) {
+    //            m_event.setNodeid(monitoredService.getNodeId().longValue());
+    //            m_event.setInterfaceAddress(monitoredService.getIpAddress());
+    //            m_event.setService(monitoredService.getServiceName());
+    //        }
+    //        return this;
+    //    }
 
     /**
      * <p>setSnmpVersion</p>
@@ -510,85 +496,82 @@ public class EventBuilder {
      * @return a {@link EventBuilder} object.
      */
     public EventBuilder setSnmpVersion(final String version) {
-    	ensureSnmp();
-    	m_event.getSnmp().setVersion(version);
-		return this;
-	}
-
-	private void ensureSnmp() {
-		if (m_event.getSnmp() == null) {
-			m_event.setSnmp(new Snmp());
-		}
-		
-	}
-	
-	public EventBuilder setCommunity(final String community) {
-	    ensureSnmp();
-	    m_event.getSnmp().setCommunity(community);
-	    return this;
-	}
-
-	/**
-	 * <p>setEnterpriseId</p>
-	 *
-	 * @param enterprise a {@link String} object.
-	 * @return a {@link EventBuilder} object.
-	 */
-	public EventBuilder setEnterpriseId(final String enterprise) {
-		ensureSnmp();
-		m_event.getSnmp().setId(enterprise);
-		return this;
-	}
-
-	public EventBuilder setTrapOID(final String trapOID) {
-	    ensureSnmp();;
-	    m_event.getSnmp().setTrapOID(trapOID);
-	    return this;
+        ensureSnmp();
+        m_event.getSnmp().setVersion(version);
+        return this;
     }
 
-	/**
-	 * <p>setGeneric</p>
-	 *
-	 * @param generic a int.
-	 * @return a {@link EventBuilder} object.
-	 */
-	public EventBuilder setGeneric(final int generic) {
-		ensureSnmp();
-		m_event.getSnmp().setGeneric(generic);
-		return this;
-	}
+    private void ensureSnmp() {
+        if (m_event.getSnmp() == null) {
+            m_event.setSnmp(new Snmp());
+        }
+    }
 
-	/**
-	 * <p>setSpecific</p>
-	 *
-	 * @param specific a int.
-	 * @return a {@link EventBuilder} object.
-	 */
-	public EventBuilder setSpecific(final int specific) {
-		ensureSnmp();
-		m_event.getSnmp().setSpecific(specific);
-		return this;
-	}
+    public EventBuilder setCommunity(final String community) {
+        ensureSnmp();
+        m_event.getSnmp().setCommunity(community);
+        return this;
+    }
 
-	/**
-	 * <p>setSnmpHost</p>
-	 *
-	 * @param snmpHost a {@link String} object.
-	 * @return a {@link EventBuilder} object.
-	 */
-	public EventBuilder setSnmpHost(final String snmpHost) {
-		m_event.setSnmphost(snmpHost);
-		return this;
-		
-	}
-	
+    /**
+     * <p>setEnterpriseId</p>
+     *
+     * @param enterprise a {@link String} object.
+     * @return a {@link EventBuilder} object.
+     */
+    public EventBuilder setEnterpriseId(final String enterprise) {
+        ensureSnmp();
+        m_event.getSnmp().setId(enterprise);
+        return this;
+    }
+
+    public EventBuilder setTrapOID(final String trapOID) {
+        ensureSnmp();
+        ;
+        m_event.getSnmp().setTrapOID(trapOID);
+        return this;
+    }
+
+    /**
+     * <p>setGeneric</p>
+     *
+     * @param generic a int.
+     * @return a {@link EventBuilder} object.
+     */
+    public EventBuilder setGeneric(final int generic) {
+        ensureSnmp();
+        m_event.getSnmp().setGeneric(generic);
+        return this;
+    }
+
+    /**
+     * <p>setSpecific</p>
+     *
+     * @param specific a int.
+     * @return a {@link EventBuilder} object.
+     */
+    public EventBuilder setSpecific(final int specific) {
+        ensureSnmp();
+        m_event.getSnmp().setSpecific(specific);
+        return this;
+    }
+
+    /**
+     * <p>setSnmpHost</p>
+     *
+     * @param snmpHost a {@link String} object.
+     * @return a {@link EventBuilder} object.
+     */
+    public EventBuilder setSnmpHost(final String snmpHost) {
+        m_event.setSnmphost(snmpHost);
+        return this;
+    }
+
     public EventBuilder setSnmpTimeStamp(final long timeStamp) {
         ensureSnmp();
         m_event.getSnmp().setTimeStamp(timeStamp);
         return this;
     }
-
-
 
     /**
      * <p>setField</p>
@@ -612,7 +595,7 @@ public class EventBuilder {
             }
         }
     }
-    
+
     private void ensureLogmsg() {
         if (m_event.getLogmsg() == null) {
             m_event.setLogmsg(new Logmsg());
@@ -665,21 +648,18 @@ public class EventBuilder {
         return this;
     }
 
-	public EventBuilder setUuid(final String uuid) {
-		m_event.setUuid(uuid);
-		return this;
-	}
+    public EventBuilder setUuid(final String uuid) {
+        m_event.setUuid(uuid);
+        return this;
+    }
 
-	public EventBuilder setDistPoller(final String distPoller) {
-		m_event.setDistPoller(distPoller);
-		return this;
-	}
+    public EventBuilder setDistPoller(final String distPoller) {
+        m_event.setDistPoller(distPoller);
+        return this;
+    }
 
-	public EventBuilder setMasterStation(final String masterStation) {
-		m_event.setMasterStation(masterStation);
-		return this;
-	}
-
-
-
+    public EventBuilder setMasterStation(final String masterStation) {
+        m_event.setMasterStation(masterStation);
+        return this;
+    }
 }

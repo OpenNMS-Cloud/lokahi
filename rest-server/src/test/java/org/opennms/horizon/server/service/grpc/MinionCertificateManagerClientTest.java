@@ -1,32 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.grpc;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
@@ -38,6 +39,7 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
+import java.io.IOException;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -45,20 +47,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opennms.horizon.minioncertmanager.proto.EmptyResponse;
-import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.opennms.horizon.minioncertmanager.proto.GetMinionCertificateResponse;
 import org.opennms.horizon.minioncertmanager.proto.MinionCertificateManagerGrpc;
+import org.opennms.horizon.minioncertmanager.proto.MinionCertificateRequest;
 import org.opennms.horizon.shared.constants.GrpcConstants;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class MinionCertificateManagerClientTest {
     @Rule
@@ -73,28 +65,38 @@ public class MinionCertificateManagerClientTest {
     public static void startGrpc() throws IOException {
         mockInterceptor = new MockServerInterceptor();
 
-        mockMCMService = mock(MinionCertificateManagerGrpc.MinionCertificateManagerImplBase.class, delegatesTo(
-            new MinionCertificateManagerGrpc.MinionCertificateManagerImplBase() {
-                @Override
-                public void getMinionCert(MinionCertificateRequest request, StreamObserver<GetMinionCertificateResponse> responseObserver) {
-                    responseObserver.onNext(GetMinionCertificateResponse.newBuilder()
-                        .setCertificate(ByteString.copyFromUtf8("test"))
-                        .setPassword("password")
-                        .build());
-                    responseObserver.onCompleted();
-                }
+        mockMCMService = mock(
+                MinionCertificateManagerGrpc.MinionCertificateManagerImplBase.class,
+                delegatesTo(new MinionCertificateManagerGrpc.MinionCertificateManagerImplBase() {
+                    @Override
+                    public void getMinionCert(
+                            MinionCertificateRequest request,
+                            StreamObserver<GetMinionCertificateResponse> responseObserver) {
+                        responseObserver.onNext(GetMinionCertificateResponse.newBuilder()
+                                .setCertificate(ByteString.copyFromUtf8("test"))
+                                .setPassword("password")
+                                .build());
+                        responseObserver.onCompleted();
+                    }
 
-                @Override
-                public void revokeMinionCert(MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
-                    responseObserver.onNext(EmptyResponse.newBuilder()
-                        .build());
-                    responseObserver.onCompleted();
-                }
-            }));
+                    @Override
+                    public void revokeMinionCert(
+                            MinionCertificateRequest request, StreamObserver<EmptyResponse> responseObserver) {
+                        responseObserver.onNext(EmptyResponse.newBuilder().build());
+                        responseObserver.onCompleted();
+                    }
+                }));
 
-        grpcCleanUp.register(InProcessServerBuilder.forName("MinionCertificateManagerClientTest").intercept(mockInterceptor)
-            .addService(mockMCMService).directExecutor().build().start());
-        ManagedChannel channel = grpcCleanUp.register(InProcessChannelBuilder.forName("MinionCertificateManagerClientTest").directExecutor().build());
+        grpcCleanUp.register(InProcessServerBuilder.forName("MinionCertificateManagerClientTest")
+                .intercept(mockInterceptor)
+                .addService(mockMCMService)
+                .directExecutor()
+                .build()
+                .start());
+        ManagedChannel channel =
+                grpcCleanUp.register(InProcessChannelBuilder.forName("MinionCertificateManagerClientTest")
+                        .directExecutor()
+                        .build());
         client = new MinionCertificateManagerClient(channel, 1000L);
         client.initialStubs();
     }
@@ -108,8 +110,7 @@ public class MinionCertificateManagerClientTest {
 
     @Test
     void testGetMinionCert() {
-        String methodName = new Object() {
-        }.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
         GetMinionCertificateResponse result = client.getMinionCert("tenantId", 333L, accessToken + methodName);
         Assertions.assertFalse(result.getPassword().isEmpty());
@@ -120,20 +121,20 @@ public class MinionCertificateManagerClientTest {
 
     @Test
     void testRevoke() {
-        String methodName = new Object() {
-        }.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         ArgumentCaptor<MinionCertificateRequest> captor = ArgumentCaptor.forClass(MinionCertificateRequest.class);
         client.revokeCertificate("tenantId", 333L, accessToken + methodName);
         verify(mockMCMService).revokeMinionCert(captor.capture(), any());
         assertThat(captor.getValue()).isNotNull();
         assertThat(mockInterceptor.getAuthHeader()).isEqualTo(accessToken + methodName);
     }
-    
+
     private static class MockServerInterceptor implements ServerInterceptor {
         private String authHeader;
 
         @Override
-        public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+        public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
+                ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
             authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
             return next.startCall(call, headers);
         }

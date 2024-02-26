@@ -1,7 +1,34 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.ignite;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import org.apache.ignite.lang.IgniteFuture;
 import org.apache.ignite.spi.IgniteSpiContext;
 import org.apache.ignite.spi.IgniteSpiException;
@@ -20,175 +47,162 @@ import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
-
-import static com.codahale.metrics.MetricRegistry.name;
-
 public class IgniteMetricsAdapter implements MetricExporterSpi, MetricsProvider, Runnable {
 
-  private final Logger logger = LoggerFactory.getLogger(IgniteMetricsAdapter.class);
-  private final MetricRegistry metrics = new MetricRegistry();
-  private final IpcIdentity identity;
+    private final Logger logger = LoggerFactory.getLogger(IgniteMetricsAdapter.class);
+    private final MetricRegistry metrics = new MetricRegistry();
+    private final IpcIdentity identity;
 
-  private AtomicBoolean connected = new AtomicBoolean();
-  private AtomicBoolean work = new AtomicBoolean();
-  private ReadOnlyMetricManager registry;
+    private AtomicBoolean connected = new AtomicBoolean();
+    private AtomicBoolean work = new AtomicBoolean();
+    private ReadOnlyMetricManager registry;
 
-  public IgniteMetricsAdapter(IpcIdentity identity) {
-    this.identity = identity;
-  }
-
-  @Override
-  public void setMetricRegistry(ReadOnlyMetricManager registry) {
-    this.registry = registry;
-  }
-
-  @Override
-  public void setExportFilter(Predicate<ReadOnlyMetricRegistry> filter) {
-
-  }
-
-  @Override
-  public String getName() {
-    return "metrics-bridge";
-  }
-
-  @Override
-  public Map<String, Object> getNodeAttributes() throws IgniteSpiException {
-    return Collections.emptyMap();
-  }
-
-  @Override
-  public void spiStart(@Nullable String igniteInstanceName) throws IgniteSpiException {
-    metrics.gauge(connectedMetricName(), () -> new Gauge<Boolean>() {
-      @Override
-      public Boolean getValue() {
-        return connected.get();
-      }
-    });
-  }
-
-  @Override
-  public void onContextInitialized(IgniteSpiContext spiCtx) throws IgniteSpiException {
-
-  }
-
-  @Override
-  public void onContextDestroyed() {
-
-  }
-
-  @Override
-  public void spiStop() throws IgniteSpiException {
-    metrics.remove(connectedMetricName());
-  }
-
-  @Override
-  public void onClientDisconnected(IgniteFuture<?> reconnectFut) {
-    connected.set(false);
-  }
-
-  @Override
-  public void onClientReconnected(boolean clusterRestarted) {
-    connected.set(true);
-  }
-
-  @Override
-  public MetricRegistry getMetrics() {
-    return metrics;
-  }
-
-  private void refreshMetrics() {
-    if (registry == null) {
-      return;
+    public IgniteMetricsAdapter(IpcIdentity identity) {
+        this.identity = identity;
     }
 
-    registry.forEach(metricRegistry -> {
-      metricRegistry.forEach(metric -> {
-        String metricName = name("minion", identity.getId(), "ignite", metric.name());
-        if (!metrics.getMetrics().containsKey(metricName)) {
-          com.codahale.metrics.Metric bridge = bridge(metric);
-          if (bridge != null) {
-            logger.debug("Registered metric {}: {}", metric.name(), metric.description());
-            metrics.register(metricName, bridge);
-          }
+    @Override
+    public void setMetricRegistry(ReadOnlyMetricManager registry) {
+        this.registry = registry;
+    }
+
+    @Override
+    public void setExportFilter(Predicate<ReadOnlyMetricRegistry> filter) {}
+
+    @Override
+    public String getName() {
+        return "metrics-bridge";
+    }
+
+    @Override
+    public Map<String, Object> getNodeAttributes() throws IgniteSpiException {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public void spiStart(@Nullable String igniteInstanceName) throws IgniteSpiException {
+        metrics.gauge(connectedMetricName(), () -> new Gauge<Boolean>() {
+            @Override
+            public Boolean getValue() {
+                return connected.get();
+            }
+        });
+    }
+
+    @Override
+    public void onContextInitialized(IgniteSpiContext spiCtx) throws IgniteSpiException {}
+
+    @Override
+    public void onContextDestroyed() {}
+
+    @Override
+    public void spiStop() throws IgniteSpiException {
+        metrics.remove(connectedMetricName());
+    }
+
+    @Override
+    public void onClientDisconnected(IgniteFuture<?> reconnectFut) {
+        connected.set(false);
+    }
+
+    @Override
+    public void onClientReconnected(boolean clusterRestarted) {
+        connected.set(true);
+    }
+
+    @Override
+    public MetricRegistry getMetrics() {
+        return metrics;
+    }
+
+    private void refreshMetrics() {
+        if (registry == null) {
+            return;
         }
-      });
-    });
-  }
 
-  private com.codahale.metrics.Metric bridge(Metric metric) {
-    if (metric instanceof BooleanMetric) {
-      return new Gauge<>() {
-        @Override
-        public Boolean getValue() {
-          return ((BooleanMetric) metric).value();
-        }
-      };
+        registry.forEach(metricRegistry -> {
+            metricRegistry.forEach(metric -> {
+                String metricName = name("minion", identity.getId(), "ignite", metric.name());
+                if (!metrics.getMetrics().containsKey(metricName)) {
+                    com.codahale.metrics.Metric bridge = bridge(metric);
+                    if (bridge != null) {
+                        logger.debug("Registered metric {}: {}", metric.name(), metric.description());
+                        metrics.register(metricName, bridge);
+                    }
+                }
+            });
+        });
     }
-    if (metric instanceof IntMetric) {
-      return new Gauge<>() {
-        @Override
-        public Integer getValue() {
-          return ((IntMetric) metric).value();
-        }
-      };
-    }
-    if (metric instanceof LongMetric) {
-      return new Gauge<>() {
-        @Override
-        public Long getValue() {
-          return ((LongMetric) metric).value();
-        }
-      };
-    }
-    if (metric instanceof DoubleMetric) {
-      return new Gauge<>() {
-        @Override
-        public Double getValue() {
-          return ((DoubleMetric) metric).value();
-        }
-      };
-    }
-    if (metric instanceof BooleanMetric) {
-      return new Gauge<>() {
-        @Override
-        public Boolean getValue() {
-          return ((BooleanMetric) metric).value();
-        }
-      };
-    }
-    return null;
-  }
 
-  @NotNull
-  private String connectedMetricName() {
-    return name("minion", identity.getId(), "connected");
-  }
-
-  public void start() throws Exception {
-    work.set(true);
-    Thread thread = new Thread(this, "ignite-metrics-refresher");
-    thread.setDaemon(true);
-    thread.start();
-  }
-
-  public void stop() {
-    work.set(false);
-  }
-
-  public void run() {
-    while (work.get()) {
-      refreshMetrics();
-      try {
-        Thread.sleep(30_000);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        logger.error("Failed to sleep refreshing metrics", e);
-      }
+    private com.codahale.metrics.Metric bridge(Metric metric) {
+        if (metric instanceof BooleanMetric) {
+            return new Gauge<>() {
+                @Override
+                public Boolean getValue() {
+                    return ((BooleanMetric) metric).value();
+                }
+            };
+        }
+        if (metric instanceof IntMetric) {
+            return new Gauge<>() {
+                @Override
+                public Integer getValue() {
+                    return ((IntMetric) metric).value();
+                }
+            };
+        }
+        if (metric instanceof LongMetric) {
+            return new Gauge<>() {
+                @Override
+                public Long getValue() {
+                    return ((LongMetric) metric).value();
+                }
+            };
+        }
+        if (metric instanceof DoubleMetric) {
+            return new Gauge<>() {
+                @Override
+                public Double getValue() {
+                    return ((DoubleMetric) metric).value();
+                }
+            };
+        }
+        if (metric instanceof BooleanMetric) {
+            return new Gauge<>() {
+                @Override
+                public Boolean getValue() {
+                    return ((BooleanMetric) metric).value();
+                }
+            };
+        }
+        return null;
     }
-  }
+
+    @NotNull
+    private String connectedMetricName() {
+        return name("minion", identity.getId(), "connected");
+    }
+
+    public void start() throws Exception {
+        work.set(true);
+        Thread thread = new Thread(this, "ignite-metrics-refresher");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public void stop() {
+        work.set(false);
+    }
+
+    public void run() {
+        while (work.get()) {
+            refreshMetrics();
+            try {
+                Thread.sleep(30_000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("Failed to sleep refreshing metrics", e);
+            }
+        }
+    }
 }

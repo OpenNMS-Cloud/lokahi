@@ -1,36 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017-2021 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification.internal.decision;
-
-import org.opennms.horizon.flows.classification.ClassificationRequest;
-import org.opennms.horizon.flows.classification.IpAddr;
-import org.opennms.horizon.flows.classification.internal.value.IpValue;
-import org.opennms.horizon.flows.classification.internal.value.PortValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +28,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import org.opennms.horizon.flows.classification.ClassificationRequest;
+import org.opennms.horizon.flows.classification.IpAddr;
+import org.opennms.horizon.flows.classification.internal.value.IpValue;
+import org.opennms.horizon.flows.classification.internal.value.PortValue;
 
 /**
  * Represents a threshold that divides rules sets during decision tree construction
@@ -54,7 +47,11 @@ public abstract class Threshold<T extends Comparable<T>> {
     public static class Matches {
         public final List<PreprocessedRule> lt, eq, gt, na;
 
-        public Matches(List<PreprocessedRule> lt, List<PreprocessedRule> eq, List<PreprocessedRule> gt, List<PreprocessedRule> na) {
+        public Matches(
+                List<PreprocessedRule> lt,
+                List<PreprocessedRule> eq,
+                List<PreprocessedRule> gt,
+                List<PreprocessedRule> na) {
             this.lt = lt;
             this.eq = eq;
             this.gt = gt;
@@ -69,7 +66,8 @@ public abstract class Threshold<T extends Comparable<T>> {
         LT,
         EQ,
         GT,
-        NA // indicates that a classification request can not be compared to a threshold because it does not have a corresponding value
+        NA // indicates that a classification request can not be compared to a threshold because it does not have a
+        // corresponding value
     }
 
     /**
@@ -91,10 +89,7 @@ public abstract class Threshold<T extends Comparable<T>> {
     protected final Function<Bounds, Bound<T>> getBound;
     private final BiFunction<Bounds, Bound<T>, Bounds> setBound;
 
-    public Threshold(
-            Function<Bounds, Bound<T>> getBound,
-            BiFunction<Bounds, Bound<T>, Bounds> setBound
-    ) {
+    public Threshold(Function<Bounds, Bound<T>> getBound, BiFunction<Bounds, Bound<T>, Bounds> setBound) {
         this.getBound = getBound;
         this.setBound = setBound;
     }
@@ -181,15 +176,12 @@ public abstract class Threshold<T extends Comparable<T>> {
      */
     protected abstract Match match(PreprocessedRule rule, Bounds bounds);
 
-    public final static class Protocol extends Threshold<Integer> {
+    public static final class Protocol extends Threshold<Integer> {
 
         private final int protocol;
 
         public Protocol(int protocol) {
-            super(
-                    bs -> bs.protocol,
-                    (bs, b) -> new Bounds(b, bs.srcPort, bs.dstPort, bs.srcAddr, bs.dstAddr)
-            );
+            super(bs -> bs.protocol, (bs, b) -> new Bounds(b, bs.srcPort, bs.dstPort, bs.srcAddr, bs.dstAddr));
             this.protocol = protocol;
         }
 
@@ -250,11 +242,8 @@ public abstract class Threshold<T extends Comparable<T>> {
 
         @Override
         public String toString() {
-            return "Protocol{" +
-                   "protocol=" + protocol +
-                   '}';
+            return "Protocol{" + "protocol=" + protocol + '}';
         }
-
     }
 
     public abstract static class Port extends Threshold<Integer> {
@@ -267,8 +256,7 @@ public abstract class Threshold<T extends Comparable<T>> {
                 BiFunction<Bounds, Bound<Integer>, Bounds> setBound,
                 int port,
                 Function<PreprocessedRule, PortValue> getRulePort,
-                Function<ClassificationRequest, Integer> getRequestPort
-        ) {
+                Function<ClassificationRequest, Integer> getRequestPort) {
             super(getBound, setBound);
             this.port = port;
             this.getRulePort = getRulePort;
@@ -333,45 +321,39 @@ public abstract class Threshold<T extends Comparable<T>> {
         }
     }
 
-    public final static class SrcPort extends Port {
+    public static final class SrcPort extends Port {
         public SrcPort(int port) {
             super(
                     bs -> bs.srcPort,
                     (bs, b) -> new Bounds(bs.protocol, b, bs.dstPort, bs.srcAddr, bs.dstAddr),
                     port,
                     pr -> pr.srcPort,
-                    ClassificationRequest::getSrcPort
-            );
+                    ClassificationRequest::getSrcPort);
         }
 
         @Override
         public String toString() {
-            return "SrcPort{" +
-                   "port=" + port +
-                   '}';
+            return "SrcPort{" + "port=" + port + '}';
         }
     }
 
-    public final static class DstPort extends Port {
+    public static final class DstPort extends Port {
         public DstPort(int port) {
             super(
                     bs -> bs.dstPort,
                     (bs, b) -> new Bounds(bs.protocol, bs.srcPort, b, bs.srcAddr, bs.dstAddr),
                     port,
                     pr -> pr.dstPort,
-                    ClassificationRequest::getDstPort
-            );
+                    ClassificationRequest::getDstPort);
         }
 
         @Override
         public String toString() {
-            return "DstPort{" +
-                   "port=" + port +
-                   '}';
+            return "DstPort{" + "port=" + port + '}';
         }
     }
 
-    public static abstract class Address extends Threshold<IpAddr> {
+    public abstract static class Address extends Threshold<IpAddr> {
         protected final IpAddr address;
         private final Function<PreprocessedRule, IpValue> getRuleAddress;
         private final Function<ClassificationRequest, IpAddr> getRequestAddress;
@@ -381,8 +363,7 @@ public abstract class Threshold<T extends Comparable<T>> {
                 BiFunction<Bounds, Bound<IpAddr>, Bounds> setBound,
                 IpAddr address,
                 Function<PreprocessedRule, IpValue> getRuleAddress,
-                Function<ClassificationRequest, IpAddr> getRequestAddress
-        ) {
+                Function<ClassificationRequest, IpAddr> getRequestAddress) {
             super(getBound, setBound);
             this.address = address;
             this.getRuleAddress = getRuleAddress;
@@ -448,42 +429,35 @@ public abstract class Threshold<T extends Comparable<T>> {
         }
     }
 
-    public final static class SrcAddress extends Address {
+    public static final class SrcAddress extends Address {
         public SrcAddress(IpAddr address) {
             super(
                     bs -> bs.srcAddr,
                     (bs, b) -> new Bounds(bs.protocol, bs.srcPort, bs.dstPort, b, bs.dstAddr),
                     address,
                     pr -> pr.srcAddr,
-                    ClassificationRequest::getSrcAddress
-            );
+                    ClassificationRequest::getSrcAddress);
         }
 
         @Override
         public String toString() {
-            return "SrcAddress{" +
-                   "address=" + address +
-                   '}';
+            return "SrcAddress{" + "address=" + address + '}';
         }
     }
 
-    public final static class DstAddress extends Address {
+    public static final class DstAddress extends Address {
         public DstAddress(IpAddr address) {
             super(
                     bs -> bs.dstAddr,
                     (bs, b) -> new Bounds(bs.protocol, bs.srcPort, bs.dstPort, bs.srcAddr, b),
                     address,
                     pr -> pr.dstAddr,
-                    ClassificationRequest::getDstAddress
-            );
+                    ClassificationRequest::getDstAddress);
         }
 
         @Override
         public String toString() {
-            return "DstAddress{" +
-                   "address=" + address +
-                   '}';
+            return "DstAddress{" + "address=" + address + '}';
         }
     }
-
 }

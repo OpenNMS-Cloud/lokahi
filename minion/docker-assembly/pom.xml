@@ -1,166 +1,186 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>minion</artifactId>
-        <groupId>org.opennms.lokahi.minion</groupId>
-        <version>0.1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opennms.lokahi.minion</groupId>
+    <artifactId>minion</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>docker-assembly</artifactId>
+  <artifactId>docker-assembly</artifactId>
 
-    <name>OpenNMS Lokahi :: Minion :: Docker</name>
-    <description>Create docker image for the application.</description>
+  <name>OpenNMS Lokahi :: Minion :: Docker</name>
+  <description>Create docker image for the application.</description>
 
-    <properties>
-        <skip-docker-image-build>false</skip-docker-image-build>
-        <application.docker.image.skipPush>false</application.docker.image.skipPush>
-    </properties>
+  <properties>
+    <skip-docker-image-build>false</skip-docker-image-build>
+    <application.docker.image.skipPush>false</application.docker.image.skipPush>
+  </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>assembly</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
-            <type>tar.gz</type>
-            <!--<classifier>tar.gz</classifier>-->
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>assembly</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+      <type>tar.gz</type>
+      <!--<classifier>tar.gz</classifier>-->
+    </dependency>
+  </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.github.git-commit-id</groupId>
-                <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>6.0.0</version>
-                <executions>
-                    <execution>
-                        <id>git-initialize</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                    </execution>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.directory}/git/org.opennms.version.cfg</generateGitPropertiesFilename>
-                    <dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
-                    <dateFormatTimeZone>UTC</dateFormatTimeZone>
-                </configuration>
-            </plugin>
-            <!--                                  -->
-            <!-- COPY AND UNPACK THE TGZ ASSEMBLY -->
-            <!--  FOR USE WITH THE DOCKERFILE     -->
-            <!--                                  -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.opennms.lokahi.minion</groupId>
-                                    <artifactId>assembly</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-agent</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>io.opentelemetry.javaagent</groupId>
-                                    <artifactId>opentelemetry-javaagent</artifactId>
-                                    <version>${opentelemetry.version}</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${application.jib.extra.root}/agent</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
+        <version>6.0.0</version>
+        <configuration>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>${project.build.directory}/git/org.opennms.version.cfg</generateGitPropertiesFilename>
+          <dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
+          <dateFormatTimeZone>UTC</dateFormatTimeZone>
+        </configuration>
+        <executions>
+          <execution>
+            <id>git-initialize</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <!--                                  -->
+      <!-- COPY AND UNPACK THE TGZ ASSEMBLY -->
+      <!--  FOR USE WITH THE DOCKERFILE     -->
+      <!--                                  -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.opennms.lokahi.minion</groupId>
+                  <artifactId>assembly</artifactId>
+                  <version>${project.version}</version>
+                  <type>tar.gz</type>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-agent</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>io.opentelemetry.javaagent</groupId>
+                  <artifactId>opentelemetry-javaagent</artifactId>
+                  <version>${opentelemetry.version}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <stripVersion>true</stripVersion>
+              <outputDirectory>${application.jib.extra.root}/agent</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-            <!-- BUILD THE DOCKER IMAGE -->
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <skip>${skip-docker-image-build}</skip>
-                    <showLogs>true</showLogs>
-                    <images>
-                        <image>
-                            <name>${application.docker.image}</name>
-                            <build>
-                                <dockerFileDir>app</dockerFileDir>
-                                <filter>@</filter>
-                                <assemblies>
-                                    <!-- COPY the assembly contents to the docker build directory under subdirectory "worK" -->
-                                    <assembly>
-                                        <name>work</name>
-                                        <inline>
-                                            <id>copy-archive</id>
-                                            <fileSets>
-                                                <fileSet>
-                                                    <directory>${project.build.directory}/dependency/assembly-${project.version}</directory>
-                                                    <outputDirectory>karaf</outputDirectory>
-                                                </fileSet>
-                                                <fileSet>
-                                                    <directory>${project.basedir}/src/main/docker/entrypoint</directory>
-                                                    <outputDirectory>entrypoint</outputDirectory>
-                                                </fileSet>
-                                                <fileSet>
-                                                    <directory>${application.jib.extra.root}/agent</directory>
-                                                    <outputDirectory>agent</outputDirectory>
-                                                </fileSet>
-                                                <fileSet>
-                                                    <directory>${project.build.directory}/git</directory>
-                                                    <outputDirectory>karaf/etc</outputDirectory>
-                                                </fileSet>
-                                            </fileSets>
-                                        </inline>
-                                    </assembly>
-                                </assemblies>
-                                <skipPush>${application.docker.image.skipPush}</skipPush> <!-- only applies to the push goal - not the build goal -->
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+      <!-- BUILD THE DOCKER IMAGE -->
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <skip>${skip-docker-image-build}</skip>
+          <showLogs>true</showLogs>
+          <images>
+            <image>
+              <name>${application.docker.image}</name>
+              <build>
+                <dockerFileDir>app</dockerFileDir>
+                <filter>@</filter>
+                <assemblies>
+                  <!-- COPY the assembly contents to the docker build directory under subdirectory "worK" -->
+                  <assembly>
+                    <name>work</name>
+                    <inline>
+                      <id>copy-archive</id>
+                      <fileSets>
+                        <fileSet>
+                          <directory>${project.build.directory}/dependency/assembly-${project.version}</directory>
+                          <outputDirectory>karaf</outputDirectory>
+                        </fileSet>
+                        <fileSet>
+                          <directory>${project.basedir}/src/main/docker/entrypoint</directory>
+                          <outputDirectory>entrypoint</outputDirectory>
+                        </fileSet>
+                        <fileSet>
+                          <directory>${application.jib.extra.root}/agent</directory>
+                          <outputDirectory>agent</outputDirectory>
+                        </fileSet>
+                        <fileSet>
+                          <directory>${project.build.directory}/git</directory>
+                          <outputDirectory>karaf/etc</outputDirectory>
+                        </fileSet>
+                      </fileSets>
+                    </inline>
+                  </assembly>
+                </assemblies>
+                <skipPush>${application.docker.image.skipPush}</skipPush>
+                <!-- only applies to the push goal - not the build goal -->
+              </build>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

@@ -1,37 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp.snmp4j;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import org.opennms.horizon.shared.snmp.AbstractSnmpValue;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
@@ -50,106 +42,105 @@ import org.snmp4j.smi.Variable;
 
 public class Snmp4JValue extends AbstractSnmpValue {
     private final Variable m_value;
-    
+
     public Snmp4JValue(final Variable value) {
         if (value == null) {
             throw new NullPointerException("value attribute cannot be null");
         }
         m_value = value;
     }
-    
+
     Snmp4JValue(final int syntax, final byte[] initialBytes) {
         final byte[] bytes = initialBytes == null ? null : initialBytes.clone();
         switch (syntax) {
-        case SMIConstants.SYNTAX_INTEGER: {
-            m_value = new Integer32(new BigInteger(bytes).intValue());
-            break;
-        }
-        case SMIConstants.SYNTAX_COUNTER32: {
-            m_value = new Counter32(new BigInteger(bytes).longValue());
-            break;
-        }
-        case SMIConstants.SYNTAX_COUNTER64: {
-            m_value = new Counter64(new BigInteger(bytes).longValue());
-            break;
-        }
-        case SMIConstants.SYNTAX_TIMETICKS: {
-            m_value = new TimeTicks(new BigInteger(bytes).longValue());
-            break;
-        }
-        case SMIConstants.SYNTAX_UNSIGNED_INTEGER32: {
-            m_value = new UnsignedInteger32(new BigInteger(bytes).longValue());
-            break;
-        }
-        case SMIConstants.SYNTAX_IPADDRESS: {
-            try {
-                m_value = new IpAddress(InetAddress.getByAddress(bytes));
-            } catch (final UnknownHostException e) {
-                throw new IllegalArgumentException("unable to create InetAddress from bytes: "+e.getMessage());
+            case SMIConstants.SYNTAX_INTEGER: {
+                m_value = new Integer32(new BigInteger(bytes).intValue());
+                break;
             }
-            break;
-        }
-        case SMIConstants.SYNTAX_OBJECT_IDENTIFIER: {
-            m_value = new OID(new String(bytes));
-            break;
-        }
-        case SMIConstants.SYNTAX_OCTET_STRING: {
-            m_value = new OctetString(bytes);
-            break;
-        }
-        case SMIConstants.SYNTAX_OPAQUE: {
-            m_value = new Opaque(bytes);
-            break;
-        }
-        case SMIConstants.EXCEPTION_END_OF_MIB_VIEW: {
-        	m_value = Null.endOfMibView;
-        	break;
-        }
-        case SMIConstants.EXCEPTION_NO_SUCH_INSTANCE: {
-        	m_value = Null.noSuchInstance;
-        	break;
-        }
-        case SMIConstants.EXCEPTION_NO_SUCH_OBJECT: {
-        	m_value = Null.noSuchObject;
-        	break;
-        }
-        case SMIConstants.SYNTAX_NULL: {
-            m_value = new Null();
-            break;
-        }
-        default:
-            throw new IllegalArgumentException("invalid syntax "+syntax);
+            case SMIConstants.SYNTAX_COUNTER32: {
+                m_value = new Counter32(new BigInteger(bytes).longValue());
+                break;
+            }
+            case SMIConstants.SYNTAX_COUNTER64: {
+                m_value = new Counter64(new BigInteger(bytes).longValue());
+                break;
+            }
+            case SMIConstants.SYNTAX_TIMETICKS: {
+                m_value = new TimeTicks(new BigInteger(bytes).longValue());
+                break;
+            }
+            case SMIConstants.SYNTAX_UNSIGNED_INTEGER32: {
+                m_value = new UnsignedInteger32(new BigInteger(bytes).longValue());
+                break;
+            }
+            case SMIConstants.SYNTAX_IPADDRESS: {
+                try {
+                    m_value = new IpAddress(InetAddress.getByAddress(bytes));
+                } catch (final UnknownHostException e) {
+                    throw new IllegalArgumentException("unable to create InetAddress from bytes: " + e.getMessage());
+                }
+                break;
+            }
+            case SMIConstants.SYNTAX_OBJECT_IDENTIFIER: {
+                m_value = new OID(new String(bytes));
+                break;
+            }
+            case SMIConstants.SYNTAX_OCTET_STRING: {
+                m_value = new OctetString(bytes);
+                break;
+            }
+            case SMIConstants.SYNTAX_OPAQUE: {
+                m_value = new Opaque(bytes);
+                break;
+            }
+            case SMIConstants.EXCEPTION_END_OF_MIB_VIEW: {
+                m_value = Null.endOfMibView;
+                break;
+            }
+            case SMIConstants.EXCEPTION_NO_SUCH_INSTANCE: {
+                m_value = Null.noSuchInstance;
+                break;
+            }
+            case SMIConstants.EXCEPTION_NO_SUCH_OBJECT: {
+                m_value = Null.noSuchObject;
+                break;
+            }
+            case SMIConstants.SYNTAX_NULL: {
+                m_value = new Null();
+                break;
+            }
+            default:
+                throw new IllegalArgumentException("invalid syntax " + syntax);
         }
         if (m_value == null) {
             throw new IllegalArgumentException("value object created from syntax " + syntax + " is null");
         }
-
     }
-    
+
     @Override
     public byte[] getBytes() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_INTEGER:
-        case SMIConstants.SYNTAX_COUNTER32:
-        case SMIConstants.SYNTAX_COUNTER64:
-        case SMIConstants.SYNTAX_TIMETICKS:
-        case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
-            return toBigInteger().toByteArray();
-        case SMIConstants.SYNTAX_IPADDRESS:
-            return toInetAddress().getAddress();
-        case SMIConstants.SYNTAX_OBJECT_IDENTIFIER:
-            return toSnmpObjId().toString().getBytes();
-        case SMIConstants.SYNTAX_OCTET_STRING:
-            return ((OctetString)m_value).getValue();
-        case SMIConstants.SYNTAX_OPAQUE:
-            return((Opaque)m_value).getValue();
-        case SMIConstants.EXCEPTION_END_OF_MIB_VIEW:
-        case SMIConstants.EXCEPTION_NO_SUCH_INSTANCE:
-        case SMIConstants.EXCEPTION_NO_SUCH_OBJECT:
-        case SMIConstants.SYNTAX_NULL:
-            return new byte[0];
-        default:
-            throw new IllegalArgumentException("cannot convert "+m_value+" to a byte array");
+            case SMIConstants.SYNTAX_INTEGER:
+            case SMIConstants.SYNTAX_COUNTER32:
+            case SMIConstants.SYNTAX_COUNTER64:
+            case SMIConstants.SYNTAX_TIMETICKS:
+            case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
+                return toBigInteger().toByteArray();
+            case SMIConstants.SYNTAX_IPADDRESS:
+                return toInetAddress().getAddress();
+            case SMIConstants.SYNTAX_OBJECT_IDENTIFIER:
+                return toSnmpObjId().toString().getBytes();
+            case SMIConstants.SYNTAX_OCTET_STRING:
+                return ((OctetString) m_value).getValue();
+            case SMIConstants.SYNTAX_OPAQUE:
+                return ((Opaque) m_value).getValue();
+            case SMIConstants.EXCEPTION_END_OF_MIB_VIEW:
+            case SMIConstants.EXCEPTION_NO_SUCH_INSTANCE:
+            case SMIConstants.EXCEPTION_NO_SUCH_OBJECT:
+            case SMIConstants.SYNTAX_NULL:
+                return new byte[0];
+            default:
+                throw new IllegalArgumentException("cannot convert " + m_value + " to a byte array");
         }
     }
 
@@ -157,57 +148,57 @@ public class Snmp4JValue extends AbstractSnmpValue {
     public int getType() {
         return m_value.getSyntax();
     }
-    
+
     @Override
     public boolean isEndOfMib() {
         return m_value.getSyntax() == SMIConstants.EXCEPTION_END_OF_MIB_VIEW;
     }
-    
+
     @Override
     public boolean isNumeric() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_INTEGER:
-        case SMIConstants.SYNTAX_COUNTER32:
-        case SMIConstants.SYNTAX_COUNTER64:
-        case SMIConstants.SYNTAX_TIMETICKS:
-        case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
-            return true;
-        default:
-            return false;
+            case SMIConstants.SYNTAX_INTEGER:
+            case SMIConstants.SYNTAX_COUNTER32:
+            case SMIConstants.SYNTAX_COUNTER64:
+            case SMIConstants.SYNTAX_TIMETICKS:
+            case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
+                return true;
+            default:
+                return false;
         }
     }
-    
+
     @Override
     public int toInt() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_COUNTER64:
-            return (int)((Counter64)m_value).getValue();
-        case SMIConstants.SYNTAX_INTEGER:
-            return ((Integer32)m_value).getValue();
-        case SMIConstants.SYNTAX_COUNTER32:
-        case SMIConstants.SYNTAX_TIMETICKS:
-        case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
-            return (int)((UnsignedInteger32)m_value).getValue();
-        default:
-            return Integer.parseInt(m_value.toString());
+            case SMIConstants.SYNTAX_COUNTER64:
+                return (int) ((Counter64) m_value).getValue();
+            case SMIConstants.SYNTAX_INTEGER:
+                return ((Integer32) m_value).getValue();
+            case SMIConstants.SYNTAX_COUNTER32:
+            case SMIConstants.SYNTAX_TIMETICKS:
+            case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
+                return (int) ((UnsignedInteger32) m_value).getValue();
+            default:
+                return Integer.parseInt(m_value.toString());
         }
     }
-    
+
     @Override
     public long toLong() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_COUNTER64:
-            return ((Counter64)m_value).getValue();
-        case SMIConstants.SYNTAX_INTEGER:
-            return ((Integer32)m_value).getValue();
-        case SMIConstants.SYNTAX_COUNTER32:
-        case SMIConstants.SYNTAX_TIMETICKS:
-        case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
-            return ((UnsignedInteger32)m_value).getValue();
-        case SMIConstants.SYNTAX_OCTET_STRING:
-            return (convertStringToLong());
-        default:
-            return Long.parseLong(m_value.toString());
+            case SMIConstants.SYNTAX_COUNTER64:
+                return ((Counter64) m_value).getValue();
+            case SMIConstants.SYNTAX_INTEGER:
+                return ((Integer32) m_value).getValue();
+            case SMIConstants.SYNTAX_COUNTER32:
+            case SMIConstants.SYNTAX_TIMETICKS:
+            case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
+                return ((UnsignedInteger32) m_value).getValue();
+            case SMIConstants.SYNTAX_OCTET_STRING:
+                return (convertStringToLong());
+            default:
+                return Long.parseLong(m_value.toString());
         }
     }
 
@@ -218,23 +209,23 @@ public class Snmp4JValue extends AbstractSnmpValue {
     @Override
     public String toDisplayString() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_OBJECT_IDENTIFIER :
-            return SnmpObjId.get(((OID)m_value).getValue()).toString();
-        case SMIConstants.SYNTAX_TIMETICKS :
-            return Long.toString(toLong());
-        case SMIConstants.SYNTAX_OCTET_STRING :
-            return toStringDottingCntrlChars(((OctetString)m_value).getValue());
-        case SMIConstants.SYNTAX_NULL:
-        	return "";
-        default :
-            return m_value.toString();
+            case SMIConstants.SYNTAX_OBJECT_IDENTIFIER:
+                return SnmpObjId.get(((OID) m_value).getValue()).toString();
+            case SMIConstants.SYNTAX_TIMETICKS:
+                return Long.toString(toLong());
+            case SMIConstants.SYNTAX_OCTET_STRING:
+                return toStringDottingCntrlChars(((OctetString) m_value).getValue());
+            case SMIConstants.SYNTAX_NULL:
+                return "";
+            default:
+                return m_value.toString();
         }
     }
 
     private String toStringDottingCntrlChars(final byte[] value) {
         final byte[] results = new byte[value.length];
         for (int i = 0; i < value.length; i++) {
-            results[i] = Character.isISOControl((char)value[i]) ? (byte)'.' : value[i];
+            results[i] = Character.isISOControl((char) value[i]) ? (byte) '.' : value[i];
         }
         return new String(results);
     }
@@ -243,22 +234,22 @@ public class Snmp4JValue extends AbstractSnmpValue {
     public InetAddress toInetAddress() {
         switch (m_value.getSyntax()) {
             case SMIConstants.SYNTAX_IPADDRESS:
-                return ((IpAddress)m_value).getInetAddress();
+                return ((IpAddress) m_value).getInetAddress();
             default:
-                throw new IllegalArgumentException("cannot convert "+m_value+" to an InetAddress"); 
+                throw new IllegalArgumentException("cannot convert " + m_value + " to an InetAddress");
         }
     }
 
     @Override
     public String toHexString() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_OCTET_STRING:
-            return ((OctetString)m_value).toHexString().replaceAll(":", "");
-        default:
-                throw new IllegalArgumentException("cannot convert "+m_value+" to a HexString");
+            case SMIConstants.SYNTAX_OCTET_STRING:
+                return ((OctetString) m_value).toHexString().replaceAll(":", "");
+            default:
+                throw new IllegalArgumentException("cannot convert " + m_value + " to a HexString");
         }
     }
-        
+
     @Override
     public String toString() {
         return toDisplayString();
@@ -267,48 +258,48 @@ public class Snmp4JValue extends AbstractSnmpValue {
     @Override
     public BigInteger toBigInteger() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_COUNTER64:
-            final Counter64 cnt = (Counter64)m_value;
-            if (cnt.getValue() > 0) {
-                return BigInteger.valueOf(cnt.getValue());
-            } else {
-                return new BigInteger(cnt.toString());
-            }
-        case SMIConstants.SYNTAX_INTEGER:
-            return BigInteger.valueOf(((Integer32)m_value).getValue());
-        case SMIConstants.SYNTAX_COUNTER32:
-        case SMIConstants.SYNTAX_TIMETICKS:
-        case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
-            return BigInteger.valueOf(((UnsignedInteger32)m_value).getValue());
-        default:
-            return new BigInteger(m_value.toString());
+            case SMIConstants.SYNTAX_COUNTER64:
+                final Counter64 cnt = (Counter64) m_value;
+                if (cnt.getValue() > 0) {
+                    return BigInteger.valueOf(cnt.getValue());
+                } else {
+                    return new BigInteger(cnt.toString());
+                }
+            case SMIConstants.SYNTAX_INTEGER:
+                return BigInteger.valueOf(((Integer32) m_value).getValue());
+            case SMIConstants.SYNTAX_COUNTER32:
+            case SMIConstants.SYNTAX_TIMETICKS:
+            case SMIConstants.SYNTAX_UNSIGNED_INTEGER32:
+                return BigInteger.valueOf(((UnsignedInteger32) m_value).getValue());
+            default:
+                return new BigInteger(m_value.toString());
         }
     }
 
     @Override
     public SnmpObjId toSnmpObjId() {
         switch (m_value.getSyntax()) {
-        case SMIConstants.SYNTAX_OBJECT_IDENTIFIER:
-            return SnmpObjId.get(((OID)m_value).getValue());
-        default:
-                throw new IllegalArgumentException("cannot convert "+m_value+" to an SnmpObjId");
+            case SMIConstants.SYNTAX_OBJECT_IDENTIFIER:
+                return SnmpObjId.get(((OID) m_value).getValue());
+            default:
+                throw new IllegalArgumentException("cannot convert " + m_value + " to an SnmpObjId");
         }
     }
-    
+
     @Override
     public boolean isDisplayable() {
         if (isNumeric()) {
             return true;
         }
-        
+
         if (getType() == SnmpValue.SNMP_OBJECT_IDENTIFIER || getType() == SnmpValue.SNMP_IPADDRESS) {
             return true;
         }
-        
+
         if (getType() == SnmpValue.SNMP_OCTET_STRING) {
             return allBytesDisplayable(getBytes());
         }
-        
+
         return false;
     }
 
@@ -324,29 +315,27 @@ public class Snmp4JValue extends AbstractSnmpValue {
     @Override
     public boolean isError() {
         switch (getType()) {
-        case SnmpValue.SNMP_NO_SUCH_INSTANCE:
-        case SnmpValue.SNMP_NO_SUCH_OBJECT:
-            return true;
-        default:
-            return false;
+            case SnmpValue.SNMP_NO_SUCH_INSTANCE:
+            case SnmpValue.SNMP_NO_SUCH_OBJECT:
+                return true;
+            default:
+                return false;
         }
-        
     }
 
     @Override
     public int hashCode() {
         if (m_value == null) return 5231;
-    	return m_value.hashCode();
+        return m_value.hashCode();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
-    	   if (obj == null) return false;
-    	   if (obj == this) return true;
-    	   if (obj.getClass() != getClass()) return false;
+        if (obj == null) return false;
+        if (obj == this) return true;
+        if (obj.getClass() != getClass()) return false;
 
-    	   final Snmp4JValue that = (Snmp4JValue)obj;
-    	   return this.m_value == null ? that.m_value == null : this.m_value.equals(that.m_value);
+        final Snmp4JValue that = (Snmp4JValue) obj;
+        return this.m_value == null ? that.m_value == null : this.m_value.equals(that.m_value);
     }
-    
 }

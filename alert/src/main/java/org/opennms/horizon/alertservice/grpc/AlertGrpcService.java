@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.alertservice.grpc;
 
 import com.google.protobuf.Timestamp;
@@ -34,6 +27,19 @@ import com.google.rpc.Status;
 import io.grpc.Context;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertError;
@@ -59,20 +65,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -113,23 +105,32 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage;
             if (filterNodeIds.isEmpty()) {
                 alertPage = lookupTenantId
-                    .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), pageRequest, tenantId))
-                    .orElseThrow();
+                        .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndTenantId(
+                                severities, timeRange.get(0), timeRange.get(1), pageRequest, tenantId))
+                        .orElseThrow();
             } else {
                 alertPage = lookupTenantId
-                    .map(tenantId -> alertRepository.findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(severities, timeRange.get(0), timeRange.get(1), ManagedObjectType.NODE, filterNodeIds, pageRequest, tenantId))
-                    .orElseThrow();
+                        .map(tenantId -> alertRepository
+                                .findBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(
+                                        severities,
+                                        timeRange.get(0),
+                                        timeRange.get(1),
+                                        ManagedObjectType.NODE,
+                                        filterNodeIds,
+                                        pageRequest,
+                                        tenantId))
+                        .orElseThrow();
             }
 
             Set<String> nodeIds = getNodeIds(alertPage);
             var nodes = getNodeLabels(nodeIds, lookupTenantId.get());
 
             List<Alert> alerts = alertPage.getContent().stream()
-                .map(dbAlert -> getEnrichAlertProto(nodes, dbAlert))
-                .toList();
+                    .map(dbAlert -> getEnrichAlertProto(nodes, dbAlert))
+                    .toList();
 
-            ListAlertsResponse.Builder responseBuilder = ListAlertsResponse.newBuilder()
-                .addAllAlerts(alerts);
+            ListAlertsResponse.Builder responseBuilder =
+                    ListAlertsResponse.newBuilder().addAllAlerts(alerts);
 
             // If there is a next page, add the page number to the response's next_page_token field
             if (alertPage.hasNext()) {
@@ -147,7 +148,12 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
-            responseObserver.onNext(ListAlertsResponse.newBuilder().addAllAlerts(Collections.emptyList()).setError(AlertError.newBuilder().setError(TENANT_ID_NOT_FOUND).build()).build());
+            responseObserver.onNext(ListAlertsResponse.newBuilder()
+                    .addAllAlerts(Collections.emptyList())
+                    .setError(AlertError.newBuilder()
+                            .setError(TENANT_ID_NOT_FOUND)
+                            .build())
+                    .build());
             responseObserver.onCompleted();
         }
     }
@@ -155,7 +161,8 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     private Alert getEnrichAlertProto(Map<Long, Node> nodes, org.opennms.horizon.alertservice.db.entity.Alert dbAlert) {
         var alertBuilder = Alert.newBuilder(alertMapper.toProto(dbAlert));
         alertBuilder.addRuleName(dbAlert.getAlertCondition().getRule().getName());
-        alertBuilder.addPolicyName(dbAlert.getAlertCondition().getRule().getPolicy().getName());
+        alertBuilder.addPolicyName(
+                dbAlert.getAlertCondition().getRule().getPolicy().getName());
 
         if (ManagedObjectType.NODE.equals(dbAlert.getManagedObjectType())) {
             String strNodeId = dbAlert.getManagedObjectInstance();
@@ -165,8 +172,9 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
                     Node node = nodes.get(nodeId);
                     alertBuilder.setNodeName(node.getNodeLabel());
                     if (node.getMonitoringLocationId() != 0) {
-                        locationRepository.findByIdAndTenantId(node.getMonitoringLocationId(), node.getTenantId())
-                            .ifPresent(l -> alertBuilder.setLocation(l.getLocationName()));
+                        locationRepository
+                                .findByIdAndTenantId(node.getMonitoringLocationId(), node.getTenantId())
+                                .ifPresent(l -> alertBuilder.setLocation(l.getLocationName()));
                     }
                 }
             } catch (NumberFormatException ex) {
@@ -178,7 +186,7 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
 
     private Map<Long, Node> getNodeLabels(Set<String> nodeIds, String tenantId) {
         Map<Long, Node> nodes = new HashMap<>();
-        for (String strNodeId:nodeIds) {
+        for (String strNodeId : nodeIds) {
             try {
                 long nodeId = Long.parseLong(strNodeId);
                 Optional<Node> node = nodeRepository.findByIdAndTenantId(nodeId, tenantId);
@@ -192,25 +200,27 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
 
     private Set<String> getNodeIds(Page<org.opennms.horizon.alertservice.db.entity.Alert> alerts) {
         return alerts.getContent().stream()
-            .filter(alert -> ManagedObjectType.NODE.equals(alert.getManagedObjectType()))
-            .map(alert -> alert.getManagedObjectInstance())
-            .collect(Collectors.toSet());
+                .filter(alert -> ManagedObjectType.NODE.equals(alert.getManagedObjectType()))
+                .map(alert -> alert.getManagedObjectInstance())
+                .collect(Collectors.toSet());
     }
 
     @Override
     public void deleteAlert(AlertRequest request, StreamObserver<DeleteAlertResponse> responseObserver) {
         var deleteAlertResponse = DeleteAlertResponse.newBuilder();
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        request.getAlertIdList().forEach(
-            alertId -> {
-                boolean success = alertService.deleteByIdAndTenantId(alertId, tenantId);
-                if (success) {
-                    deleteAlertResponse.addAlertId(alertId).build();
-                } else {
-                    AlertError alertError = AlertError.newBuilder().setAlertId(alertId).setError("Couldn't delete alert").build();
-                    deleteAlertResponse.addAlertError(alertError);
-                }
-            });
+        request.getAlertIdList().forEach(alertId -> {
+            boolean success = alertService.deleteByIdAndTenantId(alertId, tenantId);
+            if (success) {
+                deleteAlertResponse.addAlertId(alertId).build();
+            } else {
+                AlertError alertError = AlertError.newBuilder()
+                        .setAlertId(alertId)
+                        .setError("Couldn't delete alert")
+                        .build();
+                deleteAlertResponse.addAlertError(alertError);
+            }
+        });
 
         responseObserver.onNext(deleteAlertResponse.build());
         responseObserver.onCompleted();
@@ -220,17 +230,18 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     public void acknowledgeAlert(AlertRequest request, StreamObserver<AlertResponse> responseObserver) {
         var alertResponse = AlertResponse.newBuilder();
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        request.getAlertIdList().forEach(
-            alertId -> {
-                Optional<Alert> alert = alertService.acknowledgeByIdAndTenantId(alertId, tenantId);
-                if(alert.isPresent()) {
-                    alertResponse.addAlert(alert.get());
-                }
-                else {
-                    AlertError alertError = AlertError.newBuilder().setAlertId(alertId).setError("Couldn't acknowledged alert").build();
-                    alertResponse.addAlertError(alertError);
-                }
-            });
+        request.getAlertIdList().forEach(alertId -> {
+            Optional<Alert> alert = alertService.acknowledgeByIdAndTenantId(alertId, tenantId);
+            if (alert.isPresent()) {
+                alertResponse.addAlert(alert.get());
+            } else {
+                AlertError alertError = AlertError.newBuilder()
+                        .setAlertId(alertId)
+                        .setError("Couldn't acknowledged alert")
+                        .build();
+                alertResponse.addAlertError(alertError);
+            }
+        });
 
         responseObserver.onNext(alertResponse.build());
         responseObserver.onCompleted();
@@ -240,17 +251,18 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     public void unacknowledgeAlert(AlertRequest request, StreamObserver<AlertResponse> responseObserver) {
         var alertResponse = AlertResponse.newBuilder();
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        request.getAlertIdList().forEach(
-            alertId -> {
-                Optional<Alert> alert = alertService.unacknowledgeByIdAndTenantId(alertId, tenantId);
-                if(alert.isPresent()) {
-                    alertResponse.addAlert(alert.get());
-                }
-                else {
-                    AlertError alertError = AlertError.newBuilder().setAlertId(alertId).setError("Couldn't unacknowledged alert").build();
-                    alertResponse.addAlertError(alertError);
-                }
-            });
+        request.getAlertIdList().forEach(alertId -> {
+            Optional<Alert> alert = alertService.unacknowledgeByIdAndTenantId(alertId, tenantId);
+            if (alert.isPresent()) {
+                alertResponse.addAlert(alert.get());
+            } else {
+                AlertError alertError = AlertError.newBuilder()
+                        .setAlertId(alertId)
+                        .setError("Couldn't unacknowledged alert")
+                        .build();
+                alertResponse.addAlertError(alertError);
+            }
+        });
 
         responseObserver.onNext(alertResponse.build());
         responseObserver.onCompleted();
@@ -260,17 +272,18 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     public void clearAlert(AlertRequest request, StreamObserver<AlertResponse> responseObserver) {
         var alertResponse = AlertResponse.newBuilder();
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        request.getAlertIdList().forEach(
-            alertId -> {
-                Optional<Alert> alert = alertService.clearByIdAndTenantId(alertId, tenantId);
-                if(alert.isPresent()) {
-                    alertResponse.addAlert(alert.get());
-                }
-                else {
-                    AlertError alertError = AlertError.newBuilder().setAlertId(alertId).setError("Couldn't clear alert").build();
-                    alertResponse.addAlertError(alertError);
-                }
-            });
+        request.getAlertIdList().forEach(alertId -> {
+            Optional<Alert> alert = alertService.clearByIdAndTenantId(alertId, tenantId);
+            if (alert.isPresent()) {
+                alertResponse.addAlert(alert.get());
+            } else {
+                AlertError alertError = AlertError.newBuilder()
+                        .setAlertId(alertId)
+                        .setError("Couldn't clear alert")
+                        .build();
+                alertResponse.addAlertError(alertError);
+            }
+        });
 
         responseObserver.onNext(alertResponse.build());
         responseObserver.onCompleted();
@@ -280,17 +293,18 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     public void escalateAlert(AlertRequest request, StreamObserver<AlertResponse> responseObserver) {
         var alertResponse = AlertResponse.newBuilder();
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        request.getAlertIdList().forEach(
-            alertId -> {
-                Optional<Alert> alert = alertService.escalateByIdAndTenantId(alertId, tenantId);
-                if(alert.isPresent()) {
-                    alertResponse.addAlert(alert.get());
-                }
-                else {
-                    AlertError alertError = AlertError.newBuilder().setAlertId(alertId).setError("Couldn't escalate alert").build();
-                    alertResponse.addAlertError(alertError);
-                }
-            });
+        request.getAlertIdList().forEach(alertId -> {
+            Optional<Alert> alert = alertService.escalateByIdAndTenantId(alertId, tenantId);
+            if (alert.isPresent()) {
+                alertResponse.addAlert(alert.get());
+            } else {
+                AlertError alertError = AlertError.newBuilder()
+                        .setAlertId(alertId)
+                        .setError("Couldn't escalate alert")
+                        .build();
+                alertResponse.addAlertError(alertError);
+            }
+        });
 
         responseObserver.onNext(alertResponse.build());
         responseObserver.onCompleted();
@@ -306,24 +320,40 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
         try {
             int count;
             if (nodeIds.isEmpty()) {
-                count = tenantLookup.lookupTenantId(Context.current())
-                    .map(tenantId -> alertRepository.countBySeverityInAndLastEventTimeBetweenAndTenantId(severities, timeRange.get(0), timeRange.get(1), tenantId))
-                    .orElseThrow();
+                count = tenantLookup
+                        .lookupTenantId(Context.current())
+                        .map(tenantId -> alertRepository.countBySeverityInAndLastEventTimeBetweenAndTenantId(
+                                severities, timeRange.get(0), timeRange.get(1), tenantId))
+                        .orElseThrow();
             } else {
-                count = tenantLookup.lookupTenantId(Context.current())
-                    .map(tenantId -> alertRepository.countBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(severities, timeRange.get(0), timeRange.get(1), ManagedObjectType.NODE, nodeIds, tenantId))
-                    .orElseThrow();
+                count = tenantLookup
+                        .lookupTenantId(Context.current())
+                        .map(tenantId -> alertRepository
+                                .countBySeverityInAndLastEventTimeBetweenAndManagedObjectTypeAndManagedObjectInstanceInAndTenantId(
+                                        severities,
+                                        timeRange.get(0),
+                                        timeRange.get(1),
+                                        ManagedObjectType.NODE,
+                                        nodeIds,
+                                        tenantId))
+                        .orElseThrow();
             }
-            responseObserver.onNext(CountAlertResponse.newBuilder().setCount(count).build());
+            responseObserver.onNext(
+                    CountAlertResponse.newBuilder().setCount(count).build());
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
-            responseObserver.onNext(CountAlertResponse.newBuilder().setCount(-1).setError(AlertError.newBuilder().setError(TENANT_ID_NOT_FOUND)).build());
+            responseObserver.onNext(CountAlertResponse.newBuilder()
+                    .setCount(-1)
+                    .setError(AlertError.newBuilder().setError(TENANT_ID_NOT_FOUND))
+                    .build());
             responseObserver.onCompleted();
         }
     }
+
     @Override
-    public void alertCounts(com.google.protobuf.Empty request,
-                            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.AlertCount> responseObserver) {
+    public void alertCounts(
+            com.google.protobuf.Empty request,
+            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.AlertCount> responseObserver) {
         try {
             String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
             var alertCount = alertService.getAlertsCount(tenantId);
@@ -331,16 +361,17 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             responseObserver.onCompleted();
         } catch (NoSuchElementException e) {
             var status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(TENANT_ID_NOT_FOUND).build();
+                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                    .setMessage(TENANT_ID_NOT_FOUND)
+                    .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         } catch (Exception e) {
             responseObserver.onError(e);
         }
-
     }
 
-    private void getFilter(ListAlertsRequest request, List<Date> timeRange, List<Severity> severities, List<String> nodeIds) {
+    private void getFilter(
+            ListAlertsRequest request, List<Date> timeRange, List<Severity> severities, List<String> nodeIds) {
         Optional<String> lookupTenantId = tenantLookup.lookupTenantId(Context.current());
         request.getFiltersList().forEach(filter -> {
             if (filter.hasSeverity()) {
@@ -352,8 +383,8 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             }
             if (filter.hasNodeLabel()) {
                 List<Node> nodes = lookupTenantId
-                    .map(tenantId -> nodeRepository.findAllByNodeLabelAndTenantId(filter.getNodeLabel(), tenantId))
-                    .orElseThrow();
+                        .map(tenantId -> nodeRepository.findAllByNodeLabelAndTenantId(filter.getNodeLabel(), tenantId))
+                        .orElseThrow();
 
                 for (Node node : nodes) {
                     nodeIds.add(String.valueOf(node.getId()));

@@ -4,10 +4,10 @@ import { CreateMonitorPolicyDocument, DeletePolicyByIdDocument, DeleteRuleByIdDo
 
 export const useMonitoringPoliciesMutations = defineStore('monitoringPoliciesMutations', () => {
   const { execute: addMonitoringPolicy, error, isFetching } = useMutation(CreateMonitorPolicyDocument)
-  
-  const { execute: deleteMonitoringPolicy, isFetching: deleteIsFetching } = useMutation(DeletePolicyByIdDocument) 
 
-  const { execute: deleteRule, isFetching: deleteRuleIsFetching } = useMutation(DeleteRuleByIdDocument) 
+  const { execute: deleteMonitoringPolicy, isFetching: deleteIsFetching } = useMutation(DeletePolicyByIdDocument)
+
+  const { execute: deleteRule, isFetching: deleteRuleIsFetching } = useMutation(DeleteRuleByIdDocument)
 
   return {
     addMonitoringPolicy,

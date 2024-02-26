@@ -1,161 +1,179 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.opennms.lokahi.minion</groupId>
-        <artifactId>minion-gateway-wiremock</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>minion-gateway-wiremock-main</artifactId>
+  <parent>
+    <groupId>org.opennms.lokahi.minion</groupId>
+    <artifactId>minion-gateway-wiremock</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+  </parent>
 
-    <name>OpenNMS Lokahi :: Minion :: TestTools :: Minion Gateway Wiremock :: Main</name>
-    <description>
-        Main executable for the Minion Gateway WireMock.
-    </description>
+  <artifactId>minion-gateway-wiremock-main</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
 
-    <properties>
-        <java.version>17</java.version>
-        <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
-        <mock-gateway.docker.image.name>opennms/lokahi-mock-minion-gateway</mock-gateway.docker.image.name>
-        <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
-    </properties>
+  <name>OpenNMS Lokahi :: Minion :: TestTools :: Minion Gateway Wiremock :: Main</name>
+  <description>Main executable for the Minion Gateway WireMock.</description>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+  <properties>
+    <java.version>17</java.version>
+    <mock-gateway.docker.image>${mock-gateway.docker.image.name}:${mock-gateway.docker.image.tag}</mock-gateway.docker.image>
+    <mock-gateway.docker.image.name>opennms/lokahi-mock-minion-gateway</mock-gateway.docker.image.name>
+    <mock-gateway.docker.image.tag>latest</mock-gateway.docker.image.tag>
+  </properties>
 
+  <dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.opennms.lokahi.shared</groupId>
-            <artifactId>lokahi-shaded-grpc-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.lokahi.minion</groupId>
-            <artifactId>minion-gateway-wiremock-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.lokahi.shared</groupId>
-            <artifactId>ipc-grpc-contract</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java-util</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-services</artifactId>
-            <version>${grpc.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
+  </dependencyManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>${lombok.binding.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
-                <configuration>
-                    <layout>ZIP</layout>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>build-docker-image</id>
-                        <phase>install</phase>
-                        <goals>
-                            <!-- Always dockerBuild - no need to push (at least for now) -->
-                            <goal>dockerBuild</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <to>
-                        <image>${mock-gateway.docker.image}</image>
-                    </to>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.opennms.lokahi.shared</groupId>
+      <artifactId>lokahi-shaded-grpc-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>minion-gateway-wiremock-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.shared</groupId>
+      <artifactId>ipc-grpc-contract</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java-util</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-netty-shaded</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-services</artifactId>
+      <version>${grpc.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>${lombok.binding.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot.version}</version>
+        <configuration>
+          <layout>ZIP</layout>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <configuration>
+          <to>
+            <image>${mock-gateway.docker.image}</image>
+          </to>
+        </configuration>
+        <executions>
+          <execution>
+            <id>build-docker-image</id>
+            <goals>
+              <!-- Always dockerBuild - no need to push (at least for now) -->
+              <goal>dockerBuild</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

@@ -1,34 +1,32 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2017-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows.classification.internal;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRequest;
 import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
@@ -38,13 +36,6 @@ import org.opennms.horizon.flows.classification.internal.decision.Tree;
 import org.opennms.horizon.flows.classification.persistence.api.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A classification engine that uses a decision tree to select applicable classification rules.
@@ -57,16 +48,20 @@ public class DefaultClassificationEngine implements ClassificationEngine {
 
     private static Logger LOG = LoggerFactory.getLogger(DefaultClassificationEngine.class);
 
-    private final AtomicReference<TreeAndInvalidRules> treeAndInvalidRules = new AtomicReference<>(new TreeAndInvalidRules(Tree.EMPTY, Collections.emptyList()));
+    private final AtomicReference<TreeAndInvalidRules> treeAndInvalidRules =
+            new AtomicReference<>(new TreeAndInvalidRules(Tree.EMPTY, Collections.emptyList()));
 
     private final ClassificationRuleProvider ruleProvider;
     private final FilterService filterService;
 
-    public DefaultClassificationEngine(final ClassificationRuleProvider ruleProvider, final FilterService filterService) throws InterruptedException {
+    public DefaultClassificationEngine(final ClassificationRuleProvider ruleProvider, final FilterService filterService)
+            throws InterruptedException {
         this(ruleProvider, filterService, true);
     }
 
-    public DefaultClassificationEngine(final ClassificationRuleProvider ruleProvider, final FilterService filterService, final boolean initialize) throws InterruptedException {
+    public DefaultClassificationEngine(
+            final ClassificationRuleProvider ruleProvider, final FilterService filterService, final boolean initialize)
+            throws InterruptedException {
         this.ruleProvider = Objects.requireNonNull(ruleProvider);
         this.filterService = Objects.requireNonNull(filterService);
         if (initialize) {
@@ -100,22 +95,36 @@ public class DefaultClassificationEngine implements ClassificationEngine {
         var elapsed = System.currentTimeMillis() - start;
         if (LOG.isInfoEnabled()) {
             var sb = new StringBuilder();
-            sb
-                    .append("calculated flow classification decision tree\n")
-                    .append("time (ms): " + elapsed).append('\n')
-                    .append("rules    : " + rules.size() + " (including reversed rules: " + preprocessedRules.size() + ")").append('\n')
-                    .append("leaves   : " + tree.info.leaves).append('\n')
-                    .append("nodes    : " + tree.info.nodes).append('\n')
-                    .append("choices  : " + tree.info.choices).append(" (nodes with rules that ignore the aspect of the node's threshold)\n")
-                    .append("minDepth : " + tree.info.minDepth).append('\n')
-                    .append("maxDepth : " + tree.info.maxDepth).append('\n')
-                    .append("avgDepth : " + (double) tree.info.sumDepth / tree.info.leaves).append('\n')
-                    .append("minComp  : " + tree.info.minComp).append('\n')
-                    .append("maxComp  : " + tree.info.maxComp).append('\n')
-                    .append("avgComp  : " + (double) tree.info.sumComp / tree.info.leaves).append('\n')
-                    .append("minLeafSize : " + tree.info.minLeafSize).append('\n')
-                    .append("maxLeafSize : " + tree.info.maxLeafSize).append('\n')
-                    .append("avgLeafSize : " + (double) tree.info.sumLeafSize / tree.info.leaves).append('\n');
+            sb.append("calculated flow classification decision tree\n")
+                    .append("time (ms): " + elapsed)
+                    .append('\n')
+                    .append("rules    : " + rules.size() + " (including reversed rules: " + preprocessedRules.size()
+                            + ")")
+                    .append('\n')
+                    .append("leaves   : " + tree.info.leaves)
+                    .append('\n')
+                    .append("nodes    : " + tree.info.nodes)
+                    .append('\n')
+                    .append("choices  : " + tree.info.choices)
+                    .append(" (nodes with rules that ignore the aspect of the node's threshold)\n")
+                    .append("minDepth : " + tree.info.minDepth)
+                    .append('\n')
+                    .append("maxDepth : " + tree.info.maxDepth)
+                    .append('\n')
+                    .append("avgDepth : " + (double) tree.info.sumDepth / tree.info.leaves)
+                    .append('\n')
+                    .append("minComp  : " + tree.info.minComp)
+                    .append('\n')
+                    .append("maxComp  : " + tree.info.maxComp)
+                    .append('\n')
+                    .append("avgComp  : " + (double) tree.info.sumComp / tree.info.leaves)
+                    .append('\n')
+                    .append("minLeafSize : " + tree.info.minLeafSize)
+                    .append('\n')
+                    .append("maxLeafSize : " + tree.info.maxLeafSize)
+                    .append('\n')
+                    .append("avgLeafSize : " + (double) tree.info.sumLeafSize / tree.info.leaves)
+                    .append('\n');
             LOG.info(sb.toString());
         }
 
@@ -125,7 +134,8 @@ public class DefaultClassificationEngine implements ClassificationEngine {
     }
 
     private void fireClassificationReloadedListeners(final List<Rule> rules) {
-        for(final ClassificationRulesReloadedListener classificationRulesReloadedListener : this.classificationRulesReloadedListeners) {
+        for (final ClassificationRulesReloadedListener classificationRulesReloadedListener :
+                this.classificationRulesReloadedListeners) {
             classificationRulesReloadedListener.classificationRulesReloaded(rules);
         }
     }
@@ -147,17 +157,20 @@ public class DefaultClassificationEngine implements ClassificationEngine {
     private static class TreeAndInvalidRules {
         private final Tree tree;
         private final List<Rule> invalidRules;
+
         public TreeAndInvalidRules(Tree tree, List<Rule> invalidRules) {
             this.tree = tree;
             this.invalidRules = invalidRules;
         }
     }
 
-    public void addClassificationRulesReloadedListener(final ClassificationEngine.ClassificationRulesReloadedListener classificationRulesReloadedListener) {
+    public void addClassificationRulesReloadedListener(
+            final ClassificationEngine.ClassificationRulesReloadedListener classificationRulesReloadedListener) {
         this.classificationRulesReloadedListeners.add(classificationRulesReloadedListener);
     }
 
-    public void removeClassificationRulesReloadedListener(final ClassificationRulesReloadedListener classificationRulesReloadedListener) {
+    public void removeClassificationRulesReloadedListener(
+            final ClassificationRulesReloadedListener classificationRulesReloadedListener) {
         this.classificationRulesReloadedListeners.remove(classificationRulesReloadedListener);
     }
 }

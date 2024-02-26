@@ -1,33 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2016-2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.ipc.sink.common;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+import com.google.protobuf.Message;
+import com.swrve.ratelimitedlogger.RateLimitedLog;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
@@ -35,7 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncPolicy;
 import org.opennms.horizon.shared.ipc.sink.api.MessageDispatcher;
@@ -44,11 +40,6 @@ import org.opennms.horizon.shared.ipc.sink.api.SendQueueFactory;
 import org.opennms.horizon.shared.logging.LogPreservingThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
-import com.google.protobuf.Message;
-import com.swrve.ratelimitedlogger.RateLimitedLog;
 
 public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implements AsyncDispatcher<S> {
 
@@ -62,31 +53,37 @@ public class AsyncDispatcherImpl<W, S extends Message, T extends Message> implem
     private final AsyncPolicy asyncPolicy;
 
     private final AtomicInteger activeDispatchers = new AtomicInteger(0);
-    
-    private final RateLimitedLog RATE_LIMITED_LOGGER = RateLimitedLog
-            .withRateLimit(LOG)
-            .maxRate(5).every(Duration.ofSeconds(30))
+
+    private final RateLimitedLog RATE_LIMITED_LOGGER = RateLimitedLog.withRateLimit(LOG)
+            .maxRate(5)
+            .every(Duration.ofSeconds(30))
             .build();
 
     private final ExecutorService executor;
 
-    public AsyncDispatcherImpl(final DispatcherState<W, S, T> state,
-                               final SendQueueFactory sendQueueFactory,
-                               final Consumer<byte[]> sender) throws IOException {
+    public AsyncDispatcherImpl(
+            final DispatcherState<W, S, T> state,
+            final SendQueueFactory sendQueueFactory,
+            final Consumer<byte[]> sender)
+            throws IOException {
         this.sendQueue = sendQueueFactory.createQueue(state.getModule().getId());
 
-        this.messageDispatcher = AbstractMessageDispatcherFactory.createMessageDispatcher(state, this.sendQueue::enqueue);
+        this.messageDispatcher =
+                AbstractMessageDispatcherFactory.createMessageDispatcher(state, this.sendQueue::enqueue);
 
         this.sender = Objects.requireNonNull(sender);
 
         this.asyncPolicy = state.getModule().getAsyncPolicy();
 
-        state.getMetrics().register(MetricRegistry.name(state.getModule().getId(), "queue-size"),
-                (Gauge<Integer>) activeDispatchers::get);
+        state.getMetrics().register(MetricRegistry.name(state.getModule().getId(), "queue-size"), (Gauge<Integer>)
+                activeDispatchers::get);
 
-        executor = Executors.newFixedThreadPool(state.getModule().getAsyncPolicy().getNumThreads(),
-                new LogPreservingThreadFactory(WHAT_IS_DEFAULT_INSTANCE_ID + ".Sink.AsyncDispatcher." +
-                        state.getModule().getId(), Integer.MAX_VALUE));
+        executor = Executors.newFixedThreadPool(
+                state.getModule().getAsyncPolicy().getNumThreads(),
+                new LogPreservingThreadFactory(
+                        WHAT_IS_DEFAULT_INSTANCE_ID + ".Sink.AsyncDispatcher."
+                                + state.getModule().getId(),
+                        Integer.MAX_VALUE));
 
         startDrainingQueue();
     }

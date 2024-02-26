@@ -40,7 +40,7 @@
         </div>
       </TableCard>
     </section>
-  </div> 
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -75,7 +75,7 @@ const alertData = ref<any[]>([
   line-height: 20px;
   letter-spacing: 0.28px;
 }
- 
+
 .node-component-content {
   display: flex;
   flex-direction: row;

@@ -1,35 +1,35 @@
 /*
- * This file is part of OpenNMS(R).
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
  */
-
 package org.opennms.horizon.events.traps;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,15 +42,6 @@ import org.opennms.horizon.events.xml.Events;
 import org.opennms.horizon.events.xml.Log;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
-
-import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TrapsConsumerTest {
 
@@ -71,8 +62,7 @@ public class TrapsConsumerTest {
         mockTrapLogProtoToXmlMapper = Mockito.mock(TrapLogProtoToEventLogXmlMapper.class);
         mockEventLogXmlToProtoMapper = Mockito.mock(EventLogXmlToProtoMapper.class);
 
-        baseTestTrapLogDTO =
-            TenantLocationSpecificTrapLogDTO.newBuilder()
+        baseTestTrapLogDTO = TenantLocationSpecificTrapLogDTO.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
                 .setTrapAddress("x-trap-address-x")
@@ -94,31 +84,22 @@ public class TrapsConsumerTest {
         // Setup Test Data and Interactions
         //
         TrapDTO suspectTrapDTO =
-            TrapDTO.newBuilder()
-                .setAgentAddress("x-agent-address-x")
-                .build();
+                TrapDTO.newBuilder().setAgentAddress("x-agent-address-x").build();
 
         TenantLocationSpecificTrapLogDTO testTrapLogDTO =
-            baseTestTrapLogDTO.toBuilder()
-                .addTrapDTO(suspectTrapDTO)
-                .build();
+                baseTestTrapLogDTO.toBuilder().addTrapDTO(suspectTrapDTO).build();
 
         Log testXmlEventLog = new Log();
         Events events = new Events();
         testXmlEventLog.setEvents(events);
 
-        Event testEvent =
-            Event.newBuilder()
-                .setNodeId(1)
-                .build();
+        Event testEvent = Event.newBuilder().setNodeId(1).build();
 
-        EventLog testProtoEventLog =
-            EventLog.newBuilder()
-                .addEvents(testEvent)
-                .build();
+        EventLog testProtoEventLog = EventLog.newBuilder().addEvents(testEvent).build();
 
         Mockito.when(mockTrapLogProtoToXmlMapper.convert(testTrapLogDTO)).thenReturn(testXmlEventLog);
-        Mockito.when(mockEventLogXmlToProtoMapper.convert(testXmlEventLog, "x-tenant-id-x")).thenReturn(testProtoEventLog);
+        Mockito.when(mockEventLogXmlToProtoMapper.convert(testXmlEventLog, "x-tenant-id-x"))
+                .thenReturn(testProtoEventLog);
 
         byte[] testKafkaPayload = testTrapLogDTO.toByteArray();
 
@@ -140,19 +121,12 @@ public class TrapsConsumerTest {
         // Setup Test Data and Interactions
         //
         TrapDTO suspectTrapDTO =
-            TrapDTO.newBuilder()
-                .setAgentAddress("x-agent-address-x")
-                .build();
+                TrapDTO.newBuilder().setAgentAddress("x-agent-address-x").build();
 
-        TenantLocationSpecificTrapLogDTO testTrapLogDTO =
-            baseTestTrapLogDTO.toBuilder()
+        TenantLocationSpecificTrapLogDTO testTrapLogDTO = baseTestTrapLogDTO.toBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
-                .setIdentity(
-                    Identity.newBuilder()
-                        .setSystemId("x-system-id-x")
-                        .build()
-                )
+                .setIdentity(Identity.newBuilder().setSystemId("x-system-id-x").build())
                 .addTrapDTO(suspectTrapDTO)
                 .build();
 
@@ -168,21 +142,15 @@ public class TrapsConsumerTest {
         testXmlEventLog.setEvents(events);
         events.addEvent(testXmlEvent);
 
-        Event testEvent =
-            Event.newBuilder()
-                .setNodeId(-1)
-                .build();
+        Event testEvent = Event.newBuilder().setNodeId(-1).build();
 
-        EventLog testProtoEventLog =
-            EventLog.newBuilder()
-                .addEvents(testEvent)
-                .build();
+        EventLog testProtoEventLog = EventLog.newBuilder().addEvents(testEvent).build();
 
         Mockito.when(mockTrapLogProtoToXmlMapper.convert(testTrapLogDTO)).thenReturn(testXmlEventLog);
-        Mockito.when(mockEventLogXmlToProtoMapper.convert(testXmlEventLog, "x-tenant-id-x")).thenReturn(testProtoEventLog);
+        Mockito.when(mockEventLogXmlToProtoMapper.convert(testXmlEventLog, "x-tenant-id-x"))
+                .thenReturn(testProtoEventLog);
 
         byte[] testKafkaPayload = testTrapLogDTO.toByteArray();
-
 
         //
         // Execute
@@ -203,25 +171,21 @@ public class TrapsConsumerTest {
         //
         byte[] testKafkaPayload = "BAD-PROTO".getBytes(StandardCharsets.UTF_8);
 
-
         try (var logCaptor = LogCaptor.forClass(TrapsConsumer.class)) {
             //
             // Execute
             //
-           target.consume(testKafkaPayload);
+            target.consume(testKafkaPayload);
 
             //
             // Verify the Results
             //
             Predicate<LogEvent> matcher =
-                (logEvent) -> (
-                        Objects.equals("Error while parsing traps", logEvent.getMessage()) &&
-                        (logEvent.getArguments().size() == 0) &&
-                        ( logEvent.getThrowable().orElse(null) instanceof InvalidProtocolBufferException)
-                    );
+                    (logEvent) -> (Objects.equals("Error while parsing traps", logEvent.getMessage())
+                            && (logEvent.getArguments().size() == 0)
+                            && (logEvent.getThrowable().orElse(null) instanceof InvalidProtocolBufferException));
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
         }
     }
-
 }

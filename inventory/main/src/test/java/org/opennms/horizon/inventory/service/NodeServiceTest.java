@@ -1,34 +1,52 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+import java.net.InetAddress;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
@@ -62,35 +80,9 @@ import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
 import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.taskset.contract.ScanType;
 
-import java.net.InetAddress;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 public class NodeServiceTest {
 
-    private final static String TENANT_ID = "test-tenant";
+    private static final String TENANT_ID = "test-tenant";
 
     private NodeService nodeService;
     private NodeRepository mockNodeRepository;
@@ -114,19 +106,19 @@ public class NodeServiceTest {
         tagRepository = mock(TagRepository.class);
         mockTagPublisher = mock(TagPublisher.class);
 
-
-        nodeService = new NodeService(mockNodeRepository,
-            mockMonitoringLocationRepository,
-            mockIpInterfaceRepository,
-            mockConfigUpdateService,
-            mock(CollectorTaskSetService.class),
-            mock(MonitorTaskSetService.class),
-            mock(ScannerTaskSetService.class),
-            mock(TaskSetPublisher.class),
-            tagService,
-            nodeMapper,
-            mockTagPublisher,
-            tagRepository
+        nodeService = new NodeService(
+                mockNodeRepository,
+                mockMonitoringLocationRepository,
+                mockIpInterfaceRepository,
+                mockConfigUpdateService,
+                mock(CollectorTaskSetService.class),
+                mock(MonitorTaskSetService.class),
+                mock(ScannerTaskSetService.class),
+                mock(TaskSetPublisher.class),
+                tagService,
+                nodeMapper,
+                mockTagPublisher,
+                tagRepository
             ,ipInterfaceMapper);
 
         Node node = new Node();
@@ -134,7 +126,7 @@ public class NodeServiceTest {
     }
 
     @AfterEach
-    public void afterTest(){
+    public void afterTest() {
         verifyNoMoreInteractions(mockMonitoringLocationRepository);
         verifyNoMoreInteractions(mockIpInterfaceRepository);
     }
@@ -142,8 +134,8 @@ public class NodeServiceTest {
     @Test
     public void deleteNodeNotExist() {
         assertThatThrownBy(() -> nodeService.deleteNode(1))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Node with ID : 1doesn't exist");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Node with ID : 1doesn't exist");
         verify(mockNodeRepository).findById(any());
     }
 
@@ -182,21 +174,27 @@ public class NodeServiceTest {
         ml.setTenantId(tenant);
         ml.setLocation("location 5678L");
 
-        when(mockMonitoringLocationRepository.findByIdAndTenantId(5678L, tenant)).thenReturn(Optional.of(ml));
+        when(mockMonitoringLocationRepository.findByIdAndTenantId(5678L, tenant))
+                .thenReturn(Optional.of(ml));
 
         NodeCreateDTO nodeCreateDTO = NodeCreateDTO.newBuilder()
-            .setLabel("Label")
-            .setLocationId("5678")
-            .setManagementIp("127.0.0.1")
-            .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
-            .build();
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(5678L), eq(tenant),eq(ScanType.NODE_SCAN));
+                .setLabel("Label")
+                .setLocationId("5678")
+                .setManagementIp("127.0.0.1")
+                .addTags(TagCreateDTO.newBuilder().setName("tag-name").build())
+                .build();
+        doReturn(Optional.empty())
+                .when(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(5678L), eq(tenant), eq(ScanType.NODE_SCAN));
 
         nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenant);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).findByIdAndTenantId(5678L, tenant);
-        verify(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(5678L), eq(tenant), eq(ScanType.NODE_SCAN));
+        verify(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(5678L), eq(tenant), eq(ScanType.NODE_SCAN));
         // Check the default state
         assertEquals(MonitoredState.DETECTED, nodeCreateDTO.getMonitoredState());
     }
@@ -206,21 +204,28 @@ public class NodeServiceTest {
         String tenantId = "ANY";
 
         NodeCreateDTO nodeCreateDTO = NodeCreateDTO.newBuilder()
-            .setLabel("Label")
-            .setLocationId("1234")
-            .setManagementIp("127.0.0.1")
-            .build();
+                .setLabel("Label")
+                .setLocationId("1234")
+                .setManagementIp("127.0.0.1")
+                .build();
 
-        doReturn(Optional.of(new MonitoringLocation())).when(mockMonitoringLocationRepository).findByIdAndTenantId(1234, tenantId);
+        doReturn(Optional.of(new MonitoringLocation()))
+                .when(mockMonitoringLocationRepository)
+                .findByIdAndTenantId(1234, tenantId);
 
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(1234L), eq(tenantId), eq(ScanType.NODE_SCAN));
+        doReturn(Optional.empty())
+                .when(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(1234L), eq(tenantId), eq(ScanType.NODE_SCAN));
 
         nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenantId);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
         verify(mockMonitoringLocationRepository).findByIdAndTenantId(1234L, tenantId);
         verify(mockConfigUpdateService, timeout(5000).times(0)).sendConfigUpdate(eq(tenantId), any());
-        verify(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(1234L), eq(tenantId), eq(ScanType.NODE_SCAN));
+        verify(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(1234L), eq(tenantId), eq(ScanType.NODE_SCAN));
     }
 
     @Test
@@ -231,12 +236,13 @@ public class NodeServiceTest {
         ml.setId(101010L);
         ml.setTenantId(tenant);
         ml.setLocation(location);
-        when(mockMonitoringLocationRepository.findByIdAndTenantId(Long.parseLong(location), tenant)).thenReturn(Optional.of(ml));
+        when(mockMonitoringLocationRepository.findByIdAndTenantId(Long.parseLong(location), tenant))
+                .thenReturn(Optional.of(ml));
 
         NodeCreateDTO nodeCreateDTO = NodeCreateDTO.newBuilder()
-            .setLabel("Label")
-            .setLocationId(location)
-            .build();
+                .setLabel("Label")
+                .setLocationId(location)
+                .build();
 
         nodeService.createNode(nodeCreateDTO, ScanType.NODE_SCAN, tenant);
         verify(mockNodeRepository).save(any(Node.class));
@@ -247,18 +253,23 @@ public class NodeServiceTest {
     @Test
     public void createNodeWithLocationTestLocationExist() throws EntityExistException, LocationNotFoundException {
         NodeCreateDTO nodeCreate = NodeCreateDTO.newBuilder()
-            .setLabel("test-node")
-            .setLocationId("321")
-            .setManagementIp("127.0.0.1").build();
+                .setLabel("test-node")
+                .setLocationId("321")
+                .setManagementIp("127.0.0.1")
+                .build();
         MonitoringLocation location = new MonitoringLocation();
         doReturn(Optional.of(location)).when(mockMonitoringLocationRepository).findByIdAndTenantId(321L, TENANT_ID);
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(321L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
+        doReturn(Optional.empty())
+                .when(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(321L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
         nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, TENANT_ID);
         verify(mockMonitoringLocationRepository).findByIdAndTenantId(321, TENANT_ID);
         verify(mockNodeRepository).save(any(Node.class));
         verify(mockIpInterfaceRepository).save(any(IpInterface.class));
-        verify(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(321L), eq(
-            TENANT_ID), eq(ScanType.NODE_SCAN));
+        verify(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(321L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
     }
 
     @Test
@@ -267,18 +278,28 @@ public class NodeServiceTest {
         ml.setTenantId(TENANT_ID);
         ml.setLocation("US-West-1");
         NodeCreateDTO nodeCreate = NodeCreateDTO.newBuilder()
-            .setLabel("test-node")
-            .setLocationId("1020")
-            .setManagementIp("127.0.0.1").build();
-        doReturn(Optional.empty()).when(mockMonitoringLocationRepository).findByLocationAndTenantId("US-West-1", TENANT_ID);
-        doReturn(new MonitoringLocation()).when(mockMonitoringLocationRepository).save(any(MonitoringLocation.class));
-        doReturn(Optional.empty()).when(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(1020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
+                .setLabel("test-node")
+                .setLocationId("1020")
+                .setManagementIp("127.0.0.1")
+                .build();
+        doReturn(Optional.empty())
+                .when(mockMonitoringLocationRepository)
+                .findByLocationAndTenantId("US-West-1", TENANT_ID);
+        doReturn(new MonitoringLocation())
+                .when(mockMonitoringLocationRepository)
+                .save(any(MonitoringLocation.class));
+        doReturn(Optional.empty())
+                .when(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(1020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
         assertThatThrownBy(() -> nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, TENANT_ID))
-            .isInstanceOf(LocationNotFoundException.class);
+                .isInstanceOf(LocationNotFoundException.class);
         verify(mockMonitoringLocationRepository).findByIdAndTenantId(1020L, TENANT_ID);
-//        verify(mockNodeRepository).save(any(Node.class));
-//        verify(mockIpInterfaceRepository).save(any(IpInterface.class));
-        verify(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(1020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
+        //        verify(mockNodeRepository).save(any(Node.class));
+        //        verify(mockIpInterfaceRepository).save(any(IpInterface.class));
+        verify(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(1020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
     }
 
     @Test
@@ -307,20 +328,33 @@ public class NodeServiceTest {
         node3.setMonitoringLocation(location2);
         node3.setCreateTime(LocalDateTime.now());
 
-        doReturn(List.of(node1, node2, node3)).when(mockNodeRepository).findByIdInAndTenantId(List.of(1L, 2L, 3L), TENANT_ID);
+        doReturn(List.of(node1, node2, node3))
+                .when(mockNodeRepository)
+                .findByIdInAndTenantId(List.of(1L, 2L, 3L), TENANT_ID);
 
         Map<Long, List<NodeDTO>> result = nodeService.listNodeByIds(List.of(1L, 2L, 3L), TENANT_ID);
-        assertThat(result).asInstanceOf(InstanceOfAssertFactories.MAP).hasSize(2)
-            .containsKeys(location1.getId(), location2.getId())
-            .extractingByKey(location1.getId())
-            .asList().hasSize(2).extracting("nodeLabel_").containsExactly(node1.getNodeLabel(), node2.getNodeLabel());
-        assertThat(result.get(location2.getId())).asList().hasSize(1).extracting("nodeLabel_").containsExactly(node3.getNodeLabel());
+        assertThat(result)
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
+                .hasSize(2)
+                .containsKeys(location1.getId(), location2.getId())
+                .extractingByKey(location1.getId())
+                .asList()
+                .hasSize(2)
+                .extracting("nodeLabel_")
+                .containsExactly(node1.getNodeLabel(), node2.getNodeLabel());
+        assertThat(result.get(location2.getId()))
+                .asList()
+                .hasSize(1)
+                .extracting("nodeLabel_")
+                .containsExactly(node3.getNodeLabel());
         verify(mockNodeRepository).findByIdInAndTenantId(List.of(1L, 2L, 3L), TENANT_ID);
     }
 
     @Test
     public void testListNodesByIdsEmpty() {
-        doReturn(Collections.emptyList()).when(mockNodeRepository).findByIdInAndTenantId(List.of(1L, 2L, 3L), TENANT_ID);
+        doReturn(Collections.emptyList())
+                .when(mockNodeRepository)
+                .findByIdInAndTenantId(List.of(1L, 2L, 3L), TENANT_ID);
         Map<Long, List<NodeDTO>> result = nodeService.listNodeByIds(List.of(1L, 2L, 3L), TENANT_ID);
         assertThat(result).isEmpty();
         verify(mockNodeRepository).findByIdInAndTenantId(List.of(1L, 2L, 3L), TENANT_ID);
@@ -332,15 +366,20 @@ public class NodeServiceTest {
         IpInterface ipInterface = new IpInterface();
         ipInterface.setNode(node);
         NodeCreateDTO nodeCreate = NodeCreateDTO.newBuilder()
-            .setLabel("test-node")
-            .setManagementIp("127.0.0.1")
-            .setLocationId("2020")
-            .build();
-        doReturn(Optional.of(ipInterface)).when(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(2020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
+                .setLabel("test-node")
+                .setManagementIp("127.0.0.1")
+                .setLocationId("2020")
+                .build();
+        doReturn(Optional.of(ipInterface))
+                .when(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(2020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
         assertThatThrownBy(() -> nodeService.createNode(nodeCreate, ScanType.NODE_SCAN, TENANT_ID))
-            .isInstanceOf(EntityExistException.class)
-            .hasMessageContaining("already exists in the system ");
-        verify(mockIpInterfaceRepository).findByIpLocationIdTenantAndScanType(any(InetAddress.class), eq(2020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
+                .isInstanceOf(EntityExistException.class)
+                .hasMessageContaining("already exists in the system ");
+        verify(mockIpInterfaceRepository)
+                .findByIpLocationIdTenantAndScanType(
+                        any(InetAddress.class), eq(2020L), eq(TENANT_ID), eq(ScanType.NODE_SCAN));
         verifyNoInteractions(mockNodeRepository);
         verifyNoInteractions(mockMonitoringLocationRepository);
         verifyNoInteractions(tagService);
@@ -354,24 +393,21 @@ public class NodeServiceTest {
         //
         Node testNode = new Node();
         NodeInfoResult testNodeInfoResult =
-            NodeInfoResult.newBuilder()
-                .setSystemName("x-system-name-x")
-                .build();
+                NodeInfoResult.newBuilder().setSystemName("x-system-name-x").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        IpInterfaceMapper ipInterfaceMapper = mock(IpInterfaceMapper.class);
-
-        nodeService = new NodeService(mockNodeRepository,
-            mockMonitoringLocationRepository,
-            mockIpInterfaceRepository,
-            mockConfigUpdateService,
-            mock(CollectorTaskSetService.class),
-            mock(MonitorTaskSetService.class),
-            mock(ScannerTaskSetService.class),
-            mock(TaskSetPublisher.class),
-            tagService,
-            nodeMapper,
-            mockTagPublisher,
-            tagRepository
+        nodeService = new NodeService(
+                mockNodeRepository,
+                mockMonitoringLocationRepository,
+                mockIpInterfaceRepository,
+                mockConfigUpdateService,
+                mock(CollectorTaskSetService.class),
+                mock(MonitorTaskSetService.class),
+                mock(ScannerTaskSetService.class),
+                mock(TaskSetPublisher.class),
+                tagService,
+                nodeMapper,
+                mockTagPublisher,
+                tagRepository
             ,ipInterfaceMapper);
 
         //
@@ -393,24 +429,21 @@ public class NodeServiceTest {
         //
         Node testNode = new Node();
         NodeInfoResult testNodeInfoResult =
-            NodeInfoResult.newBuilder()
-                .setSystemName("")
-                .build();
+                NodeInfoResult.newBuilder().setSystemName("").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        IpInterfaceMapper ipInterfaceMapper = mock(IpInterfaceMapper.class);
-
-        nodeService = new NodeService(mockNodeRepository,
-            mockMonitoringLocationRepository,
-            mockIpInterfaceRepository,
-            mockConfigUpdateService,
-            mock(CollectorTaskSetService.class),
-            mock(MonitorTaskSetService.class),
-            mock(ScannerTaskSetService.class),
-            mock(TaskSetPublisher.class),
-            tagService,
-            nodeMapper,
-            mockTagPublisher,
-            tagRepository
+        nodeService = new NodeService(
+                mockNodeRepository,
+                mockMonitoringLocationRepository,
+                mockIpInterfaceRepository,
+                mockConfigUpdateService,
+                mock(CollectorTaskSetService.class),
+                mock(MonitorTaskSetService.class),
+                mock(ScannerTaskSetService.class),
+                mock(TaskSetPublisher.class),
+                tagService,
+                nodeMapper,
+                mockTagPublisher,
+                tagRepository
             ,ipInterfaceMapper);
 
         //
@@ -433,24 +466,21 @@ public class NodeServiceTest {
         Node testNode = new Node();
         testNode.setNodeLabel("x-existing-label-x");
         NodeInfoResult testNodeInfoResult =
-            NodeInfoResult.newBuilder()
-                .setSystemName("x-system-name-x")
-                .build();
+                NodeInfoResult.newBuilder().setSystemName("x-system-name-x").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        IpInterfaceMapper ipInterfaceMapper = mock(IpInterfaceMapper.class);
-
-        nodeService = new NodeService(mockNodeRepository,
-            mockMonitoringLocationRepository,
-            mockIpInterfaceRepository,
-            mockConfigUpdateService,
-            mock(CollectorTaskSetService.class),
-            mock(MonitorTaskSetService.class),
-            mock(ScannerTaskSetService.class),
-            mock(TaskSetPublisher.class),
-            tagService,
-            nodeMapper,
-            mockTagPublisher,
-            tagRepository
+        nodeService = new NodeService(
+                mockNodeRepository,
+                mockMonitoringLocationRepository,
+                mockIpInterfaceRepository,
+                mockConfigUpdateService,
+                mock(CollectorTaskSetService.class),
+                mock(MonitorTaskSetService.class),
+                mock(ScannerTaskSetService.class),
+                mock(TaskSetPublisher.class),
+                tagService,
+                nodeMapper,
+                mockTagPublisher,
+                tagRepository
             ,ipInterfaceMapper);
 
         //
@@ -468,20 +498,19 @@ public class NodeServiceTest {
     @Test
     public void testUpdateMonitoredStatus() {
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        IpInterfaceMapper ipInterfaceMapper = mock(IpInterfaceMapper.class);
-
-        nodeService = new NodeService(mockNodeRepository,
-            mockMonitoringLocationRepository,
-            mockIpInterfaceRepository,
-            mockConfigUpdateService,
-            mock(CollectorTaskSetService.class),
-            mock(MonitorTaskSetService.class),
-            mock(ScannerTaskSetService.class),
-            mock(TaskSetPublisher.class),
-            tagService,
-            nodeMapper,
-            mockTagPublisher,
-            tagRepository
+        nodeService = new NodeService(
+                mockNodeRepository,
+                mockMonitoringLocationRepository,
+                mockIpInterfaceRepository,
+                mockConfigUpdateService,
+                mock(CollectorTaskSetService.class),
+                mock(MonitorTaskSetService.class),
+                mock(ScannerTaskSetService.class),
+                mock(TaskSetPublisher.class),
+                tagService,
+                nodeMapper,
+                mockTagPublisher,
+                tagRepository
             ,ipInterfaceMapper);
 
         final var testNode = new Node();
@@ -498,27 +527,33 @@ public class NodeServiceTest {
         final var tagMonitoredWithDefaultTag = new Tag();
         tagMonitoredWithDefaultTag.setName("default");
 
-        when(this.mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId())).thenReturn(Optional.of(testNode));
-        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of());
+        when(this.mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
+                .thenReturn(Optional.of(testNode));
+        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId()))
+                .thenReturn(List.of());
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.DETECTED, testNode.getMonitoredState());
 
-        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored));
+        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId()))
+                .thenReturn(List.of(tagMonitored));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
-        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagUnmonitored));
+        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId()))
+                .thenReturn(List.of(tagUnmonitored));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.UNMONITORED, testNode.getMonitoredState());
 
-        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitored, tagUnmonitored));
+        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId()))
+                .thenReturn(List.of(tagMonitored, tagUnmonitored));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
 
-        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId())).thenReturn(List.of(tagMonitoredWithDefaultTag));
+        when(this.tagRepository.findByTenantIdAndNodeId(testNode.getTenantId(), testNode.getId()))
+                .thenReturn(List.of(tagMonitoredWithDefaultTag));
         when(this.mockNodeRepository.findById(testNode.getId())).thenReturn(Optional.of(testNode));
         nodeService.updateNodeMonitoredState(testNode.getId(), testNode.getTenantId());
         assertEquals(MonitoredState.MONITORED, testNode.getMonitoredState());
@@ -541,13 +576,13 @@ public class NodeServiceTest {
 
         var updateNodeAlias = "BBB";
         var nodeUpdateRequest = NodeUpdateDTO.newBuilder()
-            .setId(testNode.getId())
-            .setTenantId(testNode.getTenantId())
-            .setNodeAlias(updateNodeAlias)
-            .build();
+                .setId(testNode.getId())
+                .setTenantId(testNode.getTenantId())
+                .setNodeAlias(updateNodeAlias)
+                .build();
 
         when(mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
-            .thenReturn(Optional.of(testNode));
+                .thenReturn(Optional.of(testNode));
         doAnswer(returnsFirstArg()).when(mockNodeRepository).save(any());
 
         var testNodeId = nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId());
@@ -568,14 +603,16 @@ public class NodeServiceTest {
         testNode.setId(42);
         testNode.setNodeAlias("AAA");
 
-        var updateNodeAlias = "BBB";        var otherNodeUpdateRequest = NodeUpdateDTO.newBuilder()
-            .setId(55)
-            .setTenantId(testNode.getTenantId())
-            .setNodeAlias(updateNodeAlias)
-            .build();
+        var updateNodeAlias = "BBB";
+        var otherNodeUpdateRequest = NodeUpdateDTO.newBuilder()
+                .setId(55)
+                .setTenantId(testNode.getTenantId())
+                .setNodeAlias(updateNodeAlias)
+                .build();
 
-        var exception = Assert.assertThrows(InventoryRuntimeException.class,
-            () -> nodeService.updateNode(otherNodeUpdateRequest, otherNodeUpdateRequest.getTenantId()));
+        var exception = Assert.assertThrows(
+                InventoryRuntimeException.class,
+                () -> nodeService.updateNode(otherNodeUpdateRequest, otherNodeUpdateRequest.getTenantId()));
         assertEquals("Node with ID " + otherNodeUpdateRequest.getId() + " not found", exception.getMessage());
     }
 
@@ -588,24 +625,25 @@ public class NodeServiceTest {
         testNode.setId(42);
         testNode.setNodeAlias("AAA");
         when(mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
-            .thenReturn(Optional.of(testNode));
+                .thenReturn(Optional.of(testNode));
 
         Node node2 = new Node();
         node2.setId(99);
         node2.setNodeAlias(updateNodeAlias);
         List<Node> nodes = Arrays.asList(testNode, node2);
         when(mockNodeRepository.findByNodeAliasAndTenantId(updateNodeAlias, testNode.getTenantId()))
-            .thenReturn(nodes);
+                .thenReturn(nodes);
 
         // test
         var nodeUpdateRequest = NodeUpdateDTO.newBuilder()
-            .setId(testNode.getId())
-            .setTenantId(testNode.getTenantId())
-            .setNodeAlias(updateNodeAlias)
-            .build();
+                .setId(testNode.getId())
+                .setTenantId(testNode.getTenantId())
+                .setNodeAlias(updateNodeAlias)
+                .build();
 
-        var exception = Assert.assertThrows(InventoryRuntimeException.class,
-            () -> nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId()));
+        var exception = Assert.assertThrows(
+                InventoryRuntimeException.class,
+                () -> nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId()));
 
         // verify
         assertEquals("Duplicate node alias with name " + updateNodeAlias, exception.getMessage());
@@ -624,18 +662,17 @@ public class NodeServiceTest {
         updatedNode.setId(testNode.getId());
         updatedNode.setNodeAlias(updateNodeAlias);
         when(mockNodeRepository.findByIdAndTenantId(testNode.getId(), testNode.getTenantId()))
-            .thenReturn(Optional.of(testNode));
-        when(mockNodeRepository.save(any(Node.class)))
-            .thenReturn(updatedNode);
+                .thenReturn(Optional.of(testNode));
+        when(mockNodeRepository.save(any(Node.class))).thenReturn(updatedNode);
 
         // test
         var nodeUpdateRequest = NodeUpdateDTO.newBuilder()
-            .setId(testNode.getId())
-            .setTenantId(testNode.getTenantId())
-            .setNodeAlias(updateNodeAlias)
-            .build();
+                .setId(testNode.getId())
+                .setTenantId(testNode.getTenantId())
+                .setNodeAlias(updateNodeAlias)
+                .build();
 
-        long updatedNodeId =  nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId());
+        long updatedNodeId = nodeService.updateNode(nodeUpdateRequest, nodeUpdateRequest.getTenantId());
 
         // verify
         verify(mockNodeRepository, times(0)).findByNodeAliasAndTenantId(any(), any());

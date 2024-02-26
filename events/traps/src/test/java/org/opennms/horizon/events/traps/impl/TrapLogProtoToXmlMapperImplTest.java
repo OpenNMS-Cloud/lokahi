@@ -1,5 +1,32 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.traps.impl;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.net.InetAddress;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +39,6 @@ import org.opennms.horizon.events.xml.Log;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapDTO;
 
-import java.net.InetAddress;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 public class TrapLogProtoToXmlMapperImplTest {
 
     private EventFactory mockEventFactory;
@@ -30,7 +50,6 @@ public class TrapLogProtoToXmlMapperImplTest {
     private TenantLocationSpecificTrapLogDTO testTenantLocationSpecificTrapLogDTO;
     private Event testXmlEvent;
 
-
     private TrapLogProtoToEventLogXmlMapperImpl target;
 
     @BeforeEach
@@ -39,18 +58,11 @@ public class TrapLogProtoToXmlMapperImplTest {
         mockInetAddressFunction = Mockito.mock(Function.class);
         testInetAddress = Mockito.mock(InetAddress.class);
 
-        testTrapDTO =
-            TrapDTO.newBuilder()
-                .setCommunity("x-community-x")
-                .build();
+        testTrapDTO = TrapDTO.newBuilder().setCommunity("x-community-x").build();
 
-        testIdentity =
-            Identity.newBuilder()
-                .setSystemId("x-system-id-x")
-                .build();
+        testIdentity = Identity.newBuilder().setSystemId("x-system-id-x").build();
 
-        testTenantLocationSpecificTrapLogDTO =
-            TenantLocationSpecificTrapLogDTO.newBuilder()
+        testTenantLocationSpecificTrapLogDTO = TenantLocationSpecificTrapLogDTO.newBuilder()
                 .setTenantId("x-tenant-id-x")
                 .setLocationId("x-location-x")
                 .setIdentity(testIdentity)
@@ -61,7 +73,9 @@ public class TrapLogProtoToXmlMapperImplTest {
         testXmlEvent = new Event();
 
         Mockito.when(mockInetAddressFunction.apply("1.2.3.4")).thenReturn(testInetAddress);
-        Mockito.when(mockEventFactory.createEventFrom(testTrapDTO, "x-system-id-x", "x-location-x", testInetAddress, "x-tenant-id-x")).thenReturn(testXmlEvent);
+        Mockito.when(mockEventFactory.createEventFrom(
+                        testTrapDTO, "x-system-id-x", "x-location-x", testInetAddress, "x-tenant-id-x"))
+                .thenReturn(testXmlEvent);
 
         target = new TrapLogProtoToEventLogXmlMapperImpl();
 
@@ -74,7 +88,6 @@ public class TrapLogProtoToXmlMapperImplTest {
         //
         // Setup Test Data and Interactions
         //
-
 
         //
         // Execute
@@ -94,7 +107,9 @@ public class TrapLogProtoToXmlMapperImplTest {
         // Setup Test Data and Interactions
         //
         Mockito.reset(mockEventFactory);
-        Mockito.when(mockEventFactory.createEventFrom(testTrapDTO, "x-system-id-x", "x-location-x", testInetAddress, "x-tenant-id-x")).thenReturn(null);
+        Mockito.when(mockEventFactory.createEventFrom(
+                        testTrapDTO, "x-system-id-x", "x-location-x", testInetAddress, "x-tenant-id-x"))
+                .thenReturn(null);
 
         //
         // Execute
@@ -115,7 +130,9 @@ public class TrapLogProtoToXmlMapperImplTest {
         var testException = new RuntimeException("x-test-exception-x");
 
         Mockito.reset(mockEventFactory);
-        Mockito.when(mockEventFactory.createEventFrom(testTrapDTO, "x-system-id-x", "x-location-x", testInetAddress, "x-tenant-id-x")).thenThrow(testException);
+        Mockito.when(mockEventFactory.createEventFrom(
+                        testTrapDTO, "x-system-id-x", "x-location-x", testInetAddress, "x-tenant-id-x"))
+                .thenThrow(testException);
 
         //
         // Execute
@@ -130,12 +147,10 @@ public class TrapLogProtoToXmlMapperImplTest {
             // Verify the Results
             //
             Predicate<LogEvent> matcher =
-                (logEvent) -> (
-                        Objects.equals("Unexpected error processing trap: {}", logEvent.getMessage()) &&
-                        (logEvent.getArguments().size() == 1) &&
-                        ( logEvent.getArguments().get(0) == testTrapDTO ) &&
-                        ( logEvent.getThrowable().orElse(null) == testException )
-                    );
+                    (logEvent) -> (Objects.equals("Unexpected error processing trap: {}", logEvent.getMessage())
+                            && (logEvent.getArguments().size() == 1)
+                            && (logEvent.getArguments().get(0) == testTrapDTO)
+                            && (logEvent.getThrowable().orElse(null) == testException));
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
             assertEquals(0, result.getEvents().getEventCount());

@@ -1,8 +1,37 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.testtool.miniongateway.wiremock.ipc;
 
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.cloud.grpc.minion.CloudServiceGrpc;
@@ -15,15 +44,6 @@ import org.opennms.cloud.grpc.minion.SinkMessage;
 import org.opennms.horizon.testtool.miniongateway.wiremock.api.MockGrpcServiceApi;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Component
 @Slf4j
 public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase implements MockGrpcServiceApi {
@@ -33,19 +53,20 @@ public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase impl
     private final Map<String, StreamObserver<CloudToMinionMessage>> cloudToMinionStreamMap = new ConcurrentHashMap<>();
 
     private final Set<Identity> connectedMinions = Collections.synchronizedSet(new HashSet<>());
+
     @Getter
     private final List<SinkMessage> receivedSinkMessages = new CopyOnWriteArrayList<>();
 
-//========================================
-// INTERFACE
-//----------------------------------------
+    // ========================================
+    // INTERFACE
+    // ----------------------------------------
 
     @Override
     public void sendMessageToLocation(CloudToMinionMessage message) {
         var streamObserverList = cloudToLocationStreamMap;
         int seq = roundRobinCounter.getAndIncrement();
 
-        var streamObserver= streamObserverList.get(seq % streamObserverList.size());
+        var streamObserver = streamObserverList.get(seq % streamObserverList.size());
         streamObserver.onNext(message);
     }
 
@@ -64,9 +85,9 @@ public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase impl
         return new LinkedList<>(connectedMinions);
     }
 
-//========================================
-// GRPC Service Endpoints
-//----------------------------------------
+    // ========================================
+    // GRPC Service Endpoints
+    // ----------------------------------------
 
     @Override
     public void cloudToMinionMessages(Identity minionIdentity, StreamObserver<CloudToMinionMessage> streamObserver) {
@@ -84,9 +105,10 @@ public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase impl
         return new StreamObserver<>() {
             @Override
             public void onNext(MinionToCloudMessage value) {
-                log.info("Have minion-to-cloud-message from module {}: twin-request.consumer-key={}",
-                    value.getSinkMessage().getModuleId(),
-                    value.getTwinRequest().getConsumerKey());
+                log.info(
+                        "Have minion-to-cloud-message from module {}: twin-request.consumer-key={}",
+                        value.getSinkMessage().getModuleId(),
+                        value.getTwinRequest().getConsumerKey());
                 receivedSinkMessages.add(value.getSinkMessage());
             }
 
@@ -96,9 +118,7 @@ public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase impl
             }
 
             @Override
-            public void onCompleted() {
-
-            }
+            public void onCompleted() {}
         };
     }
 
@@ -115,9 +135,7 @@ public class MockCloudService extends CloudServiceGrpc.CloudServiceImplBase impl
             }
 
             @Override
-            public void onCompleted() {
-
-            }
+            public void onCompleted() {}
         };
     }
 }

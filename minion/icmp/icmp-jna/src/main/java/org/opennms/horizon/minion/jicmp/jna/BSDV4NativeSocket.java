@@ -1,41 +1,33 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.jicmp.jna;
-
-import java.io.IOException;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
+import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 /**
  * UnixNativeSocketFactory
@@ -44,74 +36,84 @@ import com.sun.jna.ptr.IntByReference;
  */
 public class BSDV4NativeSocket extends NativeDatagramSocket {
 
-	static {
-		Native.register((String)null);
-	}
+    static {
+        Native.register((String) null);
+    }
 
-	private static final int IP_TOS = 3;
-	private int m_sock;
+    private static final int IP_TOS = 3;
+    private int m_sock;
 
-	public BSDV4NativeSocket(final int family, final int type, final int protocol, final int listenPort) throws Exception {
-		m_sock = socket(family, type, protocol);
-                final bsd_sockaddr_in in_addr = new bsd_sockaddr_in(listenPort);
-                bind(m_sock, in_addr, in_addr.size());
-	}
+    public BSDV4NativeSocket(final int family, final int type, final int protocol, final int listenPort)
+            throws Exception {
+        m_sock = socket(family, type, protocol);
+        final bsd_sockaddr_in in_addr = new bsd_sockaddr_in(listenPort);
+        bind(m_sock, in_addr, in_addr.size());
+    }
 
-	public native int bind(int socket, bsd_sockaddr_in address, int address_len) throws LastErrorException;
-	public native int socket(int domain, int type, int protocol) throws LastErrorException;
-	public native int setsockopt(int socket, int level, int option_name, Pointer value, int option_len);
-	public native int sendto(int socket, Buffer buffer, int buflen, int flags, bsd_sockaddr_in dest_addr, int dest_addr_len) throws LastErrorException;
-	public native int recvfrom(int socket, Buffer buffer, int buflen, int flags, bsd_sockaddr_in in_addr, int[] in_addr_len) throws LastErrorException;
-	public native int close(int socket) throws LastErrorException;
+    public native int bind(int socket, bsd_sockaddr_in address, int address_len) throws LastErrorException;
 
-	@Override
-	public void setTrafficClass(final int tc) throws IOException {
-	    final IntByReference tc_ptr = new IntByReference(tc);
-            try {
-                setsockopt(getSock(), IPPROTO_IP, IP_TOS, tc_ptr.getPointer(), Pointer.SIZE);
-            } catch (final LastErrorException e) {
-                throw new IOException("setsockopt: " + strerror(e.getErrorCode()));
-            }
-	}
+    public native int socket(int domain, int type, int protocol) throws LastErrorException;
 
-	@Override
-	public void allowFragmentation(final boolean frag) throws IOException {
-	    allowFragmentation(IPPROTO_IP, IP_MTU_DISCOVER, frag);
-	}
+    public native int setsockopt(int socket, int level, int option_name, Pointer value, int option_len);
 
-	@Override
-	public int receive(final NativeDatagramPacket p) {
-		final bsd_sockaddr_in in_addr = new bsd_sockaddr_in();
-		final int[] szRef = new int[] { in_addr.size() };
-		final ByteBuffer buf = p.getContent();
-		final int socket = getSock();
+    public native int sendto(
+            int socket, Buffer buffer, int buflen, int flags, bsd_sockaddr_in dest_addr, int dest_addr_len)
+            throws LastErrorException;
 
-		SocketUtils.assertSocketValid(socket);
-		final int n = recvfrom(socket, buf, buf.capacity(), 0, in_addr, szRef);
-		p.setLength(n);
-		p.setAddress(in_addr.getAddress());
-		p.setPort(in_addr.getPort());
+    public native int recvfrom(
+            int socket, Buffer buffer, int buflen, int flags, bsd_sockaddr_in in_addr, int[] in_addr_len)
+            throws LastErrorException;
 
-		return n;
-	}
+    public native int close(int socket) throws LastErrorException;
 
-	@Override
-	public int send(final NativeDatagramPacket p) {
-		final bsd_sockaddr_in destAddr = new bsd_sockaddr_in(p.getAddress(), p.getPort());
-		final ByteBuffer buf = p.getContent();
-		final int socket = getSock();
-		SocketUtils.assertSocketValid(socket);
-		return sendto(socket, buf, buf.remaining(), 0, destAddr, destAddr.size());
-	}
+    @Override
+    public void setTrafficClass(final int tc) throws IOException {
+        final IntByReference tc_ptr = new IntByReference(tc);
+        try {
+            setsockopt(getSock(), IPPROTO_IP, IP_TOS, tc_ptr.getPointer(), Pointer.SIZE);
+        } catch (final LastErrorException e) {
+            throw new IOException("setsockopt: " + strerror(e.getErrorCode()));
+        }
+    }
 
-	@Override
-	public void close() {
-		close(m_sock);
-		m_sock = -1;
-	}
+    @Override
+    public void allowFragmentation(final boolean frag) throws IOException {
+        allowFragmentation(IPPROTO_IP, IP_MTU_DISCOVER, frag);
+    }
 
-	@Override
-	public int getSock() {
-	    return m_sock;
-	}
+    @Override
+    public int receive(final NativeDatagramPacket p) {
+        final bsd_sockaddr_in in_addr = new bsd_sockaddr_in();
+        final int[] szRef = new int[] {in_addr.size()};
+        final ByteBuffer buf = p.getContent();
+        final int socket = getSock();
+
+        SocketUtils.assertSocketValid(socket);
+        final int n = recvfrom(socket, buf, buf.capacity(), 0, in_addr, szRef);
+        p.setLength(n);
+        p.setAddress(in_addr.getAddress());
+        p.setPort(in_addr.getPort());
+
+        return n;
+    }
+
+    @Override
+    public int send(final NativeDatagramPacket p) {
+        final bsd_sockaddr_in destAddr = new bsd_sockaddr_in(p.getAddress(), p.getPort());
+        final ByteBuffer buf = p.getContent();
+        final int socket = getSock();
+        SocketUtils.assertSocketValid(socket);
+        return sendto(socket, buf, buf.remaining(), 0, destAddr, destAddr.size());
+    }
+
+    @Override
+    public void close() {
+        close(m_sock);
+        m_sock = -1;
+    }
+
+    @Override
+    public int getSock() {
+        return m_sock;
+    }
 }

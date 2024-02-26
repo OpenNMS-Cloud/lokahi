@@ -3,37 +3,36 @@
     <div class="column-left">
       <div class="card">
         <NodeSystemInformation />
-      </div> 
+      </div>
       <div class="card">
         <NodeTags />
-      </div> 
+      </div>
       <div class="card">
         <NodeMonitoringPolicies />
-      </div> 
+      </div>
       <div class="card">
         <NodeDiscoveries />
-      </div> 
+      </div>
     </div>
     <div class="column-right">
       <div class="card">
         <NodeAlerts />
-      </div> 
+      </div>
       <div class="card">
         <NodeGraph
           title="CPU Utilization"
         />
-      </div> 
+      </div>
       <div class="card">
         <NodeGraph
           title="Memory Utilization"
         />
-      </div> 
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-
 
 </script>
 
@@ -43,18 +42,9 @@
 @use '@/styles/mediaQueriesMixins';
 @use '@featherds/styles/mixins/typography';
 
-/*
-.ctrls {
-  display: flex;
-  justify-content: end;
-  padding: var(variables.$spacing-s) 0;
-  min-width: vars.$min-width-smallest-screen;
-}
-*/
 
 .cards {
   display: flex;
-  //flex-flow: row wrap;
   gap: 1%;
   margin-top: 1em;
 

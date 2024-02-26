@@ -46,7 +46,7 @@ reconfigured VPC at this ATM Interface.&lt;/p>&lt;table>
                         atmfVpcOperStatus=%parm[#3]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -101,6 +101,6 @@ Interface.&lt;/p>&lt;table>
                         atmfVccOperStatus=%parm[#4]%&lt;/p>
                 </logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alert-type="3" auto-clean="false"/>
    </event>
 </events>

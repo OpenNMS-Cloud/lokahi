@@ -6,7 +6,7 @@
     <section class="node-component-content">
       <div>Graph goes here</div>
     </section>
-  </div> 
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -37,7 +37,7 @@ defineProps<{
   line-height: 20px;
   letter-spacing: 0.28px;
 }
- 
+
 .node-component-content {
   display: flex;
   flex-direction: row;

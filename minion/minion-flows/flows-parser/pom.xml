@@ -1,36 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ - Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ - contributor license agreements.  See the LICENSE.md file
+ - distributed with this work for additional information
+ - regarding copyright ownership.
+ -
+ - TOG licenses this file to You under the GNU Affero General
+ - Public License Version 3 (the "License") or (at your option)
+ - any later version.  You may not use this file except in
+ - compliance with the License.  You may obtain a copy of the
+ - License at:
+ -
+ -      https://www.gnu.org/licenses/agpl-3.0.txt
+ -
+ - Unless required by applicable law or agreed to in writing,
+ - software distributed under the License is distributed on an
+ - "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ - either express or implied.  See the License for the specific
+ - language governing permissions and limitations under the
+ - License.
+ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
-      <groupId>org.opennms.lokahi.minion</groupId>
-      <artifactId>minion-flows</artifactId>
+    <groupId>org.opennms.lokahi.minion</groupId>
+    <artifactId>minion-flows</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
   <artifactId>flows-parser</artifactId>
-  <name>OpenNMS Lokahi :: Minion :: Flows :: Parser</name>
   <packaging>bundle</packaging>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>${skipTests}</skipTests>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
-                        <Karaf-Commands>org.opennms.horizon.minion.flows.shell.*</Karaf-Commands>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <name>OpenNMS Lokahi :: Minion :: Flows :: Parser</name>
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -38,127 +37,149 @@
       <version>1.9.0</version>
     </dependency>
     <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>osgi.core</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.opennms.lokahi.shared</groupId>
-        <artifactId>flows</artifactId>
-        <version>${project.version}</version>
-        <scope>compile</scope>
+      <groupId>org.opennms.lokahi.shared</groupId>
+      <artifactId>flows</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
-        <groupId>org.opennms.lokahi.shared</groupId>
-        <artifactId>ipc-api</artifactId>
-        <version>${project.version}</version>
+      <groupId>org.opennms.lokahi.shared</groupId>
+      <artifactId>ipc-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.opennms.lokahi.minion</groupId>
-        <artifactId>plugins-api</artifactId>
-        <version>${project.version}</version>
-        <scope>compile</scope>
+      <groupId>org.opennms.lokahi.minion</groupId>
+      <artifactId>plugins-api</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <!-- Test -->
     <dependency>
-        <groupId>org.awaitility</groupId>
-        <artifactId>awaitility</artifactId>
-        <version>4.2.0</version>
-        <scope>test</scope>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>4.2.0</version>
+      <scope>test</scope>
     </dependency>
 
-      <dependency>
-          <groupId>io.netty</groupId>
-          <artifactId>netty-all</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>io.netty</groupId>
-          <artifactId>netty-buffer</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>io.github.resilience4j</groupId>
-          <artifactId>resilience4j-bulkhead</artifactId>
-          <version>${resilience4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>io.github.resilience4j</groupId>
-          <artifactId>resilience4j-core</artifactId>
-          <version>${resilience4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>io.github.resilience4j</groupId>
-          <artifactId>resilience4j-circuitbreaker</artifactId>
-          <version>${resilience4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.dnsjava</artifactId>
-          <version>3.5.2_1</version>
-      </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-buffer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-bulkhead</artifactId>
+      <version>${resilience4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-core</artifactId>
+      <version>${resilience4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-circuitbreaker</artifactId>
+      <version>${resilience4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.dnsjava</artifactId>
+      <version>3.5.2_1</version>
+    </dependency>
 
-      <dependency>
+    <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.jsr305</artifactId>
       <version>3.0.2_1</version>
       <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>io.vavr</groupId>
-          <artifactId>vavr</artifactId>
-          <version>0.10.0</version>
-      </dependency>
-      <dependency>
-          <groupId>io.vavr</groupId>
-          <artifactId>vavr-match</artifactId>
-          <version>0.10.4</version>
-      </dependency>
-      <dependency>
-          <groupId>com.github.ben-manes.caffeine</groupId>
-          <artifactId>caffeine</artifactId>
-          <version>3.1.2</version>
-      </dependency>
-      <dependency>
-          <groupId>io.dropwizard.metrics</groupId>
-          <artifactId>metrics-core</artifactId>
-          <version>${dropwizard.metrics.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>io.dropwizard.metrics</groupId>
-          <artifactId>metrics-jmx</artifactId>
-          <version>${dropwizard.metrics.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>com.swrve</groupId>
-          <artifactId>rate-limited-logger</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-core</artifactId>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.karaf.shell</groupId>
-          <artifactId>org.apache.karaf.shell.core</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.opennms.lokahi.shared</groupId>
-          <artifactId>lokahi-common-utils</artifactId>
-          <version>${project.version}</version>
-          <scope>compile</scope>
-      </dependency>
+    </dependency>
+    <dependency>
+      <groupId>io.vavr</groupId>
+      <artifactId>vavr</artifactId>
+      <version>0.10.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vavr</groupId>
+      <artifactId>vavr-match</artifactId>
+      <version>0.10.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>${dropwizard.metrics.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jmx</artifactId>
+      <version>${dropwizard.metrics.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.swrve</groupId>
+      <artifactId>rate-limited-logger</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.shell</groupId>
+      <artifactId>org.apache.karaf.shell.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.lokahi.shared</groupId>
+      <artifactId>lokahi-common-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>${skipTests}</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
+            <Karaf-Commands>org.opennms.horizon.minion.flows.shell.*</Karaf-Commands>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

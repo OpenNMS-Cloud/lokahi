@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.metrics.linux;
 
 import java.io.BufferedReader;
@@ -23,56 +44,53 @@ import lombok.extern.slf4j.Slf4j;
  *       lo: 42483875821 60427385    0    0    0     0          0         0 42483875821 60427385    0    0    0     0       0          0
  *   enp42s0: 1986914701387 3096125226    0 2468    0     0          0   1341512 981280814993 2726199798    0    0    0     0       0          0
  */
-//@Component
+// @Component
 @Slf4j
 public class NetworkInterfaceMetricReporterService {
     public static final int DEFAULT_REPORT_INTERVAL = 30_000;
-    public static final String[] PROC_NET_DEV_FIELDS =
-            {
-                    "dev",
-                    "rx-bytes",
-                    "rx-pkts",
-                    "rx-errs",
-                    "rx-drop",
-                    "rx-fifo",
-                    "rx-frame",
-                    "rx-compressed",
-                    "rx-multicast",
-                    "tx-bytes",
-                    "tx-pkts",
-                    "tx-errs",
-                    "tx-drop",
-                    "tx-fifo",
-                    "tx-colls",
-                    "tx-carrier",
-                    "tx-compressed"
-            };
-
+    public static final String[] PROC_NET_DEV_FIELDS = {
+        "dev",
+        "rx-bytes",
+        "rx-pkts",
+        "rx-errs",
+        "rx-drop",
+        "rx-fifo",
+        "rx-frame",
+        "rx-compressed",
+        "rx-multicast",
+        "tx-bytes",
+        "tx-pkts",
+        "tx-errs",
+        "tx-drop",
+        "tx-fifo",
+        "tx-colls",
+        "tx-carrier",
+        "tx-compressed"
+    };
 
     private Thread runnerThread;
 
-    //TODO: move to blueprint
-//    @Value("${poc.network.stat.devs:#{null}}")
+    // TODO: move to blueprint
+    //    @Value("${poc.network.stat.devs:#{null}}")
     private Set<String> reportDevices;
 
-//    @Value("${poc.network.stat.enable:false}")
+    //    @Value("${poc.network.stat.enable:false}")
     private boolean enable;
 
-//    @Value("${poc.network.stat.interval:" + DEFAULT_REPORT_INTERVAL + "}")
+    //    @Value("${poc.network.stat.interval:" + DEFAULT_REPORT_INTERVAL + "}")
     private int reportInterval;
 
     private boolean shutdown = false;
 
     private Map<String, Map<String, Long>> previousStats;
 
+    // ========================================
+    // Lifecycle
+    // ----------------------------------------
 
-//========================================
-// Lifecycle
-//----------------------------------------
-
-//    @PostConstruct
+    //    @PostConstruct
     public void start() {
-        if (! enable) {
+        if (!enable) {
             return;
         }
 
@@ -81,7 +99,7 @@ public class NetworkInterfaceMetricReporterService {
         runnerThread.start();
     }
 
-//    @PreDestroy
+    //    @PreDestroy
     public void shutdown() {
         shutdown = true;
 
@@ -90,9 +108,9 @@ public class NetworkInterfaceMetricReporterService {
         }
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void run() {
         while (!shutdown) {
@@ -158,7 +176,6 @@ public class NetworkInterfaceMetricReporterService {
         String label = "NET-STATS";
         if (deltaInd) {
             label = "NET-STATS-DELTA";
-
         }
         log.info("{}: dev={}; {}", label, ifName, buffer);
     }
@@ -221,7 +238,7 @@ public class NetworkInterfaceMetricReporterService {
         while (cur < parts.length) {
             String value = parts[cur].trim();
 
-            if (! value.isBlank()) {
+            if (!value.isBlank()) {
                 String fieldName;
                 if (cur < PROC_NET_DEV_FIELDS.length) {
                     fieldName = PROC_NET_DEV_FIELDS[cur];
@@ -231,7 +248,8 @@ public class NetworkInterfaceMetricReporterService {
 
                 long longValue = safeParseLong(value);
 
-                Map<String, Long> metricsForInterface = metrics.computeIfAbsent(ifName, (name) -> new TreeMap<String, Long>());
+                Map<String, Long> metricsForInterface =
+                        metrics.computeIfAbsent(ifName, (name) -> new TreeMap<String, Long>());
                 metricsForInterface.put(fieldName, longValue);
             }
 

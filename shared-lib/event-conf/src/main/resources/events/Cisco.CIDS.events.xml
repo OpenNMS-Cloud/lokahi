@@ -81,7 +81,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsAlertVictimAddress=%parm[#11]%&lt;/p>
 		</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -165,7 +165,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsAlertVictimAddress=%parm[#11]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -249,7 +249,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsAlertVictimAddress=%parm[#11]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -333,7 +333,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsAlertVictimAddress=%parm[#11]%&lt;/p>
 		</logmsg>
       <severity>Major</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -413,7 +413,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsAlertVictimAddress=%parm[#11]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#5]%:%parm[#7]%:%parm[#8]%:%parm[#10]%:%parm[#11]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -492,7 +492,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -571,7 +571,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -650,7 +650,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -729,7 +729,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -808,7 +808,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -887,7 +887,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -966,7 +966,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1045,7 +1045,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1124,7 +1124,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1203,7 +1203,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1282,7 +1282,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1361,7 +1361,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Minor</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1440,7 +1440,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1519,7 +1519,7 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
    <event>
       <mask>
@@ -1594,6 +1594,6 @@ activity has been detected on a monitored network.&lt;/p>&lt;table>
 			cidsErrorMessage=%parm[#7]%&lt;/p>
 		</logmsg>
       <severity>Indeterminate</severity>
-      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alarm-type="1" auto-clean="false"/>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#4]%:%parm[#6]%" alert-type="1" auto-clean="false"/>
    </event>
 </events>

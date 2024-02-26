@@ -1,37 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.events.conf.xml;
-
-
-import org.opennms.horizon.events.util.ValidateUsing;
-import org.opennms.horizon.events.util.ConfigUtils;
-import org.opennms.horizon.events.util.NullStringAdapter;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -41,12 +29,15 @@ import jakarta.xml.bind.annotation.XmlValue;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.Objects;
+import org.opennms.horizon.events.util.ConfigUtils;
+import org.opennms.horizon.events.util.NullStringAdapter;
+import org.opennms.horizon.events.util.ValidateUsing;
 
 /**
  * The forwarding information for this event - state determines
  * if event is forwarded, mechanism determines how event is forwarded
  */
-@XmlRootElement(name="forward")
+@XmlRootElement(name = "forward")
 @XmlAccessorType(XmlAccessType.NONE)
 @ValidateUsing("eventconf.xsd")
 public class Forward implements Serializable {
@@ -56,10 +47,10 @@ public class Forward implements Serializable {
     @XmlJavaTypeAdapter(NullStringAdapter.class)
     private String m_content;
 
-    @XmlAttribute(name="state", required=false)
+    @XmlAttribute(name = "state", required = false)
     private StateType m_state;
 
-    @XmlAttribute(name="mechanism", required=false)
+    @XmlAttribute(name = "mechanism", required = false)
     private MechanismType m_mechanism;
 
     public String getContent() {
@@ -67,11 +58,11 @@ public class Forward implements Serializable {
     }
 
     public MechanismType getMechanism() {
-        return m_mechanism == null? MechanismType.SNMPUDP : m_mechanism; // Defaults to snmpudp in the XSD
+        return m_mechanism == null ? MechanismType.SNMPUDP : m_mechanism; // Defaults to snmpudp in the XSD
     }
 
     public StateType getState() {
-        return m_state == null? StateType.OFF : m_state; // Defaults to off in the XSD
+        return m_state == null ? StateType.OFF : m_state; // Defaults to off in the XSD
     }
 
     public void setContent(final String content) {
@@ -98,11 +89,10 @@ public class Forward implements Serializable {
         }
         if (obj instanceof Forward) {
             final Forward that = (Forward) obj;
-            return Objects.equals(this.m_content, that.m_content) &&
-                    Objects.equals(this.m_state, that.m_state) &&
-                    Objects.equals(this.m_mechanism, that.m_mechanism);
+            return Objects.equals(this.m_content, that.m_content)
+                    && Objects.equals(this.m_state, that.m_state)
+                    && Objects.equals(this.m_mechanism, that.m_mechanism);
         }
         return false;
     }
-
 }

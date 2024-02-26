@@ -136,6 +136,14 @@ const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: string) => ({ name: tag, id: tag })))
+const route = useRoute()
+
+watchEffect(() => {
+  if (store.monitoringPolicies.length > 0 && route?.params?.id) {
+    const filteredPolicy = store.monitoringPolicies.find((item: Policy) => item.id === Number(route.params.id))
+    populateForm(filteredPolicy as Policy)
+  }
+})
 
 const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   if (policy?.id) {
@@ -145,7 +153,7 @@ const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   openModal()
 }
 
-const deleteMsg = computed(() => 
+const deleteMsg = computed(() =>
   `Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
 )
 </script>

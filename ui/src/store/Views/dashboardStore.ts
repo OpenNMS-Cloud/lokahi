@@ -76,7 +76,7 @@ export const useDashboardStore = defineStore('dashboardStore', {
           page
         }
       }
-  
+
       this.getTopNNodes()
     },
     setTopNNodesTableSort(sortObj: Record<string, string>) {

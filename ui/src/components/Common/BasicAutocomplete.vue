@@ -1,22 +1,22 @@
-<!-- 
+<!--
   Autocomplete search upon text entering in the input box. Search on input focus is disabled to prevent having a too long list.
-  
+
   - Props
     - items-selected: list of items to be saved
     - get-items: method to call to get the list; endpoint query.
     - items: results from the endpoint query
     - render-type: single (default) | multi.
-      - multi: 
+      - multi:
         - does not allow to add new value if not exists in the list
     - preselectedItems: the list of items that was previously selected
-  
+
   - Options
     - allow-new: to add new value, if not exists in the list (applicable only to 'single' render-type)
-  
+
   TODO:
     - buggy with allow-new option and mouse clicking
       - when mouse clicks on existing item on the list, the new event is also triggered (@new="addValue")
-      - probable cause: the `NEW` item is on focus 
+      - probable cause: the `NEW` item is on focus
       - ok when using arrow up/down and enter key to select item
  -->
 <template>

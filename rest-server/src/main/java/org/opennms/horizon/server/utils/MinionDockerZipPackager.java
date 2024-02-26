@@ -1,37 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.utils;
 
 import com.google.protobuf.ByteString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,13 +30,15 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MinionDockerZipPackager {
     private static final Logger LOG = LoggerFactory.getLogger(MinionDockerZipPackager.class);
 
     public static byte[] generateZip(ByteString certificate, String locationName, String password) throws IOException {
         try (var bytesOut = new ByteArrayOutputStream();
-        var zipOutStream = new ZipOutputStream(bytesOut)) {
+                var zipOutStream = new ZipOutputStream(bytesOut)) {
             var minionName = "minion1-" + locationName;
             ZipEntry entry = new ZipEntry("storage/" + minionName + ".p12");
 
@@ -90,8 +82,8 @@ public class MinionDockerZipPackager {
         if (dockerCompose == null || dockerCompose.isBlank()) {
             dockerCompose = "run-minion-docker-compose.yaml";
         }
-        InputStream dockerStream = MinionDockerZipPackager.class.getClassLoader()
-            .getResourceAsStream(dockerCompose);
+        InputStream dockerStream =
+                MinionDockerZipPackager.class.getClassLoader().getResourceAsStream(dockerCompose);
         if (dockerStream == null) {
             throw new IOException("Unable to load docker compose file from resources");
         }
@@ -101,8 +93,10 @@ public class MinionDockerZipPackager {
             minionEndpoint = "";
         }
 
-        String dockerTxt = new BufferedReader(new InputStreamReader(dockerStream)).lines()
-            .parallel().collect(Collectors.joining("\n"));
+        String dockerTxt = new BufferedReader(new InputStreamReader(dockerStream))
+                .lines()
+                .parallel()
+                .collect(Collectors.joining("\n"));
         dockerTxt = dockerTxt.replace("[KEYSTORE_PASSWORD]", password);
         dockerTxt = dockerTxt.replace("[MINION_NAME]", minionName);
         dockerTxt = dockerTxt.replace("[MINION_ENDPOINT]", minionEndpoint);
@@ -112,15 +106,14 @@ public class MinionDockerZipPackager {
 
     private static byte[] loadFile(String fileName) throws IOException {
 
-        var  inputStream = MinionDockerZipPackager.class.getClassLoader()
-            .getResourceAsStream(fileName);
+        var inputStream = MinionDockerZipPackager.class.getClassLoader().getResourceAsStream(fileName);
         if (inputStream == null) {
-            throw new IOException("Unable to load " + fileName +  " from resources");
+            throw new IOException("Unable to load " + fileName + " from resources");
         }
-        String fileAsText = new BufferedReader(new InputStreamReader(inputStream)).lines()
-            .parallel().collect(Collectors.joining("\n"));
+        String fileAsText = new BufferedReader(new InputStreamReader(inputStream))
+                .lines()
+                .parallel()
+                .collect(Collectors.joining("\n"));
         return fileAsText.getBytes();
     }
-
-
 }

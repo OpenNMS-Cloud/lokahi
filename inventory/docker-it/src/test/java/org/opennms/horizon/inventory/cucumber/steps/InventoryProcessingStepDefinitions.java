@@ -22,12 +22,9 @@
 package org.opennms.horizon.inventory.cucumber.steps;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.gson.Gson;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
@@ -526,9 +523,10 @@ public class InventoryProcessingStepDefinitions {
             ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofSeconds(10));
 
             for (ConsumerRecord<String, byte[]> record : records) {
-                String message = new String(record.value(), StandardCharsets.UTF_8);
-                LOG.info("Message");
-                LOG.info(message);
+                String message = "";
+                message = new String(record.value(), StandardCharsets.UTF_8);
+                SnmpInterfaceResult snmp = new Gson().fromJson(message, SnmpInterfaceResult.class);
+                assertTrue(snmp.getPhysicalAddr().equals("127.0.0.1"));
             }
         }
     }

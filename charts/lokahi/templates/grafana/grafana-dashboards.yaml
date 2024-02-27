@@ -1,0 +1,17 @@
+{{- if .Values.Grafana.Enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.Grafana.ServiceName }}-dashboards
+  labels:
+    app: {{ .Values.Grafana.ServiceName }}
+  namespace: {{ .Release.Namespace }}
+data:
+  # Note: putting all dashboards in a single ConfigMap is an issue
+  # when removing dashboards, but we can clean this up later.
+  # "A recommendation is to use one configmap per dashboard, as a
+  # reduction of multiple dashboards inside one configmap is currently
+  # not properly mirrored in grafana."
+  # -- https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md#sidecar-for-dashboards
+  {{- (.Files.Glob "dashboards/*.json").AsConfig | nindent 2 }}
+{{- end }}

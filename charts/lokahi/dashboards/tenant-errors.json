@@ -1,0 +1,140 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 253,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 25,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "key": "Q-1708d96c-97e9-46dd-9d3e-c90631ef1cad-0",
+          "limit": 20,
+          "query": "{span.user =~ \"$tenant\"} \n&& {\n  status = error\n  /* Ignore known issues */\n  && !(.service.name = \"opennms-minion-gateway\" && span.rpc.grpc.status_code = 1)\n  && !(span.rpc.service = \"minion_gateway.RpcRequestService\" && span.rpc.grpc.status_code = 14)\n  /* Ignore noisy error spans for things that we don't consider to be an error */\n  && !(span.rpc.service = \"opennms.inventory.NodeService\" && span.rpc.grpc.status_code = 5)\n  && !(name =~ \"SELECT.*\") /* Can't use span.otel.library.name != \"io.opentelemetry.hibernate-6.0\" because of https://github.com/grafana/tempo/issues/2189 */\n}",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "New Panel",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "hs-tenant-metrics"
+        },
+        "definition": "label_values(tenant)",
+        "description": "Tenant Identifier",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Tenant ID",
+        "multi": false,
+        "name": "tenant",
+        "options": [],
+        "query": {
+          "query": "label_values(tenant)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Tenant Errors (traces)",
+  "uid": "aeacbeb3-6911-47ba-ba1b-4ed8f2583c32",
+  "version": 6,
+  "weekStart": ""
+}

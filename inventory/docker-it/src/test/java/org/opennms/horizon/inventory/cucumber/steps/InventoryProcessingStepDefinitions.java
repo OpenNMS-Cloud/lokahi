@@ -37,17 +37,27 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -68,6 +78,7 @@ import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
+import org.opennms.node.scan.contract.SnmpInterfaceResult;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.ScannerResponse;
 import org.opennms.taskset.contract.TaskResult;
@@ -96,6 +107,8 @@ public class InventoryProcessingStepDefinitions {
     private MonitorType monitorType;
     private KafkaConsumerRunner kafkaConsumerRunner;
     private final String tagTopic = "tag-operation";
+    private String kafkaBootstrapUrl;
+    private static KafkaConsumer<String, byte[]> kafkaConsumer;
 
     public enum PublishType {
         UPDATE,
@@ -439,6 +452,90 @@ public class InventoryProcessingStepDefinitions {
             // backgroundHelper.getLocation().getBytes(StandardCharsets.UTF_8));
 
             kafkaProducer.send(producerRecord);
+        }
+    }
+
+    @Then(
+            "send Device Detection to Kafka topic {string} for an ip address {string} at location {string} with snmp_interface")
+    public void sendDeviceDetectionToKafkaTopicForAnIpAddressAtLocationAddSnmp(
+            String kafkaTopic, String ipAddress, String location) {
+        Properties producerConfig = new Properties();
+        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
+        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
+
+        try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
+
+            SnmpInterfaceResult snmp = SnmpInterfaceResult.newBuilder()
+                    .setIfSpeed(1L)
+                    .setIfAdminStatus(1)
+                    .setIfAlias("alias")
+                    .setIfDescr("desc")
+                    .setIfIndex(1)
+                    .setIfType(1)
+                    .setPhysicalAddr("127.0.0.1")
+                    .setIfName("name")
+                    .setIfOperatorStatus(1)
+                    .build();
+            NodeScanResult nodeScanResult = NodeScanResult.newBuilder()
+                    .setNodeId(nodeIdCreated.getValue())
+                    .addDetectorResult(ServiceResult.newBuilder()
+                            .setService(ServiceType.SNMP)
+                            .setIpAddress(ipAddress)
+                            .setStatus(true)
+                            .build())
+                    .addSnmpInterfaces(snmp)
+                    .build();
+
+            TaskResult taskResult = TaskResult.newBuilder()
+                    .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
+                            .setSystemId(systemId)
+                            .build())
+                    .setScannerResponse(ScannerResponse.newBuilder()
+                            .setResult(Any.pack(nodeScanResult))
+                            .build())
+                    .build();
+
+            TenantLocationSpecificTaskSetResults taskSetResults = TenantLocationSpecificTaskSetResults.newBuilder()
+                    .setTenantId(backgroundHelper.getTenantId())
+                    .setLocationId(backgroundHelper.findLocationId(location))
+                    .addResults(taskResult)
+                    .build();
+
+            var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, taskSetResults.toByteArray());
+
+            // producerRecord.headers().add(GrpcConstants.TENANT_ID_KEY,
+            // backgroundHelper.getTenantId().getBytes(StandardCharsets.UTF_8));
+            // producerRecord.headers().add(GrpcConstants.LOCATION_KEY,
+            // backgroundHelper.getLocation().getBytes(StandardCharsets.UTF_8));
+
+            kafkaProducer.send(producerRecord);
+        }
+    }
+
+    @Given("verify message in system property {string} with Kafka topic {string}")
+    public void verifyMessageInConsumer(String systemPropertyName, String topic) {
+        kafkaBootstrapUrl = System.getProperty(systemPropertyName);
+        LOG.info("Using Kafka Bootstrap URL {}", kafkaBootstrapUrl);
+        if (kafkaConsumer == null && StringUtils.isNotEmpty(kafkaBootstrapUrl)) {
+            Properties consumerConfig = new Properties();
+            consumerConfig.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapUrl);
+            consumerConfig.setProperty(
+                    ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            consumerConfig.setProperty(
+                    ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+            consumerConfig.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "inventory-test");
+            consumerConfig.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
+            consumerConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            kafkaConsumer = new KafkaConsumer<>(consumerConfig);
+            kafkaConsumer.subscribe(Arrays.asList(topic));
+            ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofSeconds(10));
+
+            for (ConsumerRecord<String, byte[]> record : records) {
+                String message = new String(record.value(), StandardCharsets.UTF_8);
+                LOG.info("Message");
+                LOG.info(message);
+            }
         }
     }
 

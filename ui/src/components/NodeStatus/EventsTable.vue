@@ -48,7 +48,7 @@
           </tr>
         </thead>
         <TransitionGroup name="data-table" tag="tbody" v-if="hasEvents">
-          <tr v-for="event in selectNodeByEvents" :key="event.id as number" data-test="data-item">
+          <tr v-for="event in nodeByEventSelected" :key="event.id as number" data-test="data-item">
             <td>{{ fnsFormat(event.producedTime, 'M/dd/yyyy HH:mm:ssxxx') }}</td>
             <td>{{ event.uei }}</td>
             <td>{{ event.ipAddress }}</td>
@@ -66,9 +66,8 @@
           v-model="pageInfo.page"
           :pageSize="pageInfo.pageSize"
           :total="pageInfo.total"
-          @update:modelValue="updatePage"
-          @update:pageSize="updatePageSize"
-          class="events-pagination"
+          @update:model-value="onPageChanged"
+          @update:pageSize="onPageSizeChnaged"
           data-test="pagination"
           v-if="hasEvents"
         />
@@ -86,7 +85,7 @@ import Search from '@featherds/icon/action/Search'
 
 const nodeStatusStore = useNodeStatusStore()
 const searchEvents = ref('')
-const selectNodeByEvents = ref([] as any[])
+const nodeByEventSelected = ref([] as any[])
 const isMounted = ref(false)
 const icons = markRaw({
   DownloadFile,
@@ -138,26 +137,26 @@ const hasEvents = computed(() => nodeData.value.events.length > 0)
 watch(() => [nodeData.value,  isMounted.value], () => {
   if (hasEvents.value && isMounted) {
     pageInfo.total = nodeData.value.events.length || 0
-    onSelectNodeByALerts(nodeData.value.events, pageInfo.page, pageInfo.pageSize)
+    onNodeByEventSelected(nodeData.value.events, pageInfo.page, pageInfo.pageSize)
   }
 })
 
-const onSelectNodeByALerts = (array: Array<any>, pageNumber: number, pageSize: number) => {
+const onNodeByEventSelected= (events: Array<any>, pageNumber: number, pageSize: number) => {
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
-  selectNodeByEvents.value = array.slice(startIndex, endIndex)
+  nodeByEventSelected.value = events.slice(startIndex, endIndex)
 }
 
-const updatePage = (v: number) => {
+const onPageChanged = (v: number) => {
   if (hasEvents) {
-    onSelectNodeByALerts(nodeData.value.events, v, pageInfo.pageSize)
+    onNodeByEventSelected(nodeData.value.events, v, pageInfo.pageSize)
   }
 }
 
-const updatePageSize = (v: number) => {
+const onPageSizeChnaged = (v: number) => {
   if (hasEvents) {
     pageInfo.pageSize = v
-    onSelectNodeByALerts(nodeData.value.events, pageInfo.page, v)
+    onNodeByEventSelected(nodeData.value.events, pageInfo.page, v)
   }
 }
 
@@ -222,7 +221,7 @@ onBeforeUnmount(() => {
     }
   }
 }
-.events-pagination {
+.feather-pagination {
   border: none;
   padding: 20px 0px;
   :deep(.per-page-text), :deep(.page-size-select) {

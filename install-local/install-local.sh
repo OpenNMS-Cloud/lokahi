@@ -239,10 +239,6 @@ echo "NAMESPACE=${NAMESPACE}"
 
 # Swap Domain in YAML files
 mkdir -p tmp
-cat install-local-onms-instance.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance.yaml
-cat install-local-onms-instance-custom-images.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance-custom-images.yaml
 cat ./../charts/lokahi/values.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/values.yaml
 cat install-local-opennms-lokahi-values.yaml | \

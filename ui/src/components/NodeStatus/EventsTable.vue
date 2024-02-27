@@ -66,7 +66,7 @@
           v-model="pageInfo.page"
           :pageSize="pageInfo.pageSize"
           :total="pageInfo.total"
-          @update:model-value="onPageChanged"
+          @update:modelValue="onPageChanged"
           @update:pageSize="onPageSizeChnaged"
           data-test="pagination"
           v-if="hasEvents"
@@ -141,7 +141,7 @@ watch(() => [nodeData.value,  isMounted.value], () => {
   }
 })
 
-const onNodeByEventSelected= (events: Array<any>, pageNumber: number, pageSize: number) => {
+const onNodeByEventSelected = (events: Array<any>, pageNumber: number, pageSize: number) => {
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
   nodeByEventSelected.value = events.slice(startIndex, endIndex)

@@ -503,12 +503,6 @@ public class InventoryProcessingStepDefinitions {
                     .build();
 
             var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, taskSetResults.toByteArray());
-
-            // producerRecord.headers().add(GrpcConstants.TENANT_ID_KEY,
-            // backgroundHelper.getTenantId().getBytes(StandardCharsets.UTF_8));
-            // producerRecord.headers().add(GrpcConstants.LOCATION_KEY,
-            // backgroundHelper.getLocation().getBytes(StandardCharsets.UTF_8));
-
             kafkaProducer.send(producerRecord);
         }
     }

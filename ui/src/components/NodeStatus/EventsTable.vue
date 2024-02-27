@@ -67,7 +67,7 @@
           :pageSize="pageInfo.pageSize"
           :total="pageInfo.total"
           @update:modelValue="onPageChanged"
-          @update:pageSize="onPageSizeChnaged"
+          @update:pageSize="onPageSizeChanged"
           data-test="pagination"
           v-if="hasEvents"
         />
@@ -153,7 +153,7 @@ const onPageChanged = (v: number) => {
   }
 }
 
-const onPageSizeChnaged = (v: number) => {
+const onPageSizeChanged = (v: number) => {
   if (hasEvents) {
     pageInfo.pageSize = v
     onNodeByEventSelected(nodeData.value.events, pageInfo.page, v)

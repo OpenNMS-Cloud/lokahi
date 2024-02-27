@@ -1,5 +1,5 @@
-hostname: onmshs
-port: 443 #set depending on tls.enabled and the ingress ports, do not change
+hostname: onmshs.local
+port: 1443 #set depending on tls.enabled and the ingress ports, do not change
 protocol: https #set depending on tls.enabled, do not change
 OpenNMS: # we might be able to remove this
   global:
@@ -16,6 +16,7 @@ grafana:
   imageShortName: lokahi-grafana
   imagePullPolicy: IfNotPresent
   initContainerimage: busybox
+  autoAssignOrgRole: Admin  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#auto_assign_org_role
   resources:
     limits:
       cpu: 500m
@@ -24,7 +25,7 @@ grafana:
       cpu: 100m
       memory: 100Mi
 citus:
-  enabled: false
+  enabled: true
   workersEnabled: true
   serviceName: postgres
   adminUser: desenv
@@ -44,6 +45,12 @@ nodeRestrictions: # will be applied to every pod in the instance
   enabled: false
   key: kubernetes.azure.com/scalesetpriority
   value: spot
+
+keycloak:
+  path: /auth
+  port: 8080
+  serviceName: onms-keycloak
+  realmName: opennms
 
 prometheus:
   enabled: true

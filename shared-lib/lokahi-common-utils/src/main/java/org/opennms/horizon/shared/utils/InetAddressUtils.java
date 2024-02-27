@@ -636,4 +636,13 @@ public abstract class InetAddressUtils {
 
         return formatter.format(displaySpeed) + " " + units;
     }
+
+    public static boolean isValidIpAddress(String ipAddress) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+            return inetAddress instanceof java.net.Inet4Address || inetAddress instanceof java.net.Inet6Address;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

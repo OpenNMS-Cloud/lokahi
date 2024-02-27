@@ -393,7 +393,7 @@ public class NodeService {
             String tenantId, Long nodeId, String searchIpInterfaceTerm) {
         List<IpInterface> ipInterfaces = null;
         InetAddress addr = null;
-        if (searchIpInterfaceTerm.contains(".")) {
+        if (InetAddressUtils.isValidIpAddress(searchIpInterfaceTerm)) {
             addr = InetAddressUtils.addr(searchIpInterfaceTerm);
         }
 

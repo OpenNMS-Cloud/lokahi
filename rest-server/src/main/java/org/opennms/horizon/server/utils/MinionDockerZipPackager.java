@@ -95,7 +95,7 @@ public class MinionDockerZipPackager {
 
         String minionEndpointPort = System.getenv("MINION_ENDPOINT_PORT");
         if (minionEndpointPort == null) {
-            minionEndpointPort = "443";
+            minionEndpointPort = "1443";
         }
 
         String dockerTxt = new BufferedReader(new InputStreamReader(dockerStream))

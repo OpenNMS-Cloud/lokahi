@@ -37,17 +37,17 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
 import org.opennms.horizon.server.config.DataLoaderFactory;
-import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.mapper.IpInterfaceMapper;
+import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
+import org.opennms.horizon.server.model.inventory.IpInterface;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.inventory.NodeUpdate;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
-import org.opennms.horizon.server.model.inventory.IpInterface;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -220,12 +220,15 @@ public class GrpcNodeService {
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 
-
     @GraphQLQuery(name = "listIpInterfacesByNodeSearch")
-    public Flux<IpInterface> searchIpInterfaceByNodeAndSearchTerm(@GraphQLEnvironment ResolutionEnvironment env,
-                                                                  @GraphQLArgument(name = "nodeId") Long nodeId,
-                                                                  @GraphQLArgument(name = "searchTerm") String searchTerm) {
+    public Flux<IpInterface> searchIpInterfaceByNodeAndSearchTerm(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm) {
 
-        return  Flux.fromIterable(client.listIpInterfacesByNodeSearch(nodeId,searchTerm,headerUtil.getAuthHeader(env)).stream().map(ipInterfaceMapper::protoToIpInterface).toList());
+        return Flux.fromIterable(
+                client.listIpInterfacesByNodeSearch(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                        .map(ipInterfaceMapper::protoToIpInterface)
+                        .toList());
     }
 }

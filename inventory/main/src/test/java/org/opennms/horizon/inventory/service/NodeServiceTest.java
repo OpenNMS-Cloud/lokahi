@@ -64,8 +64,8 @@ import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
-import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
+import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
@@ -97,7 +97,7 @@ public class NodeServiceTest {
     @BeforeEach
     void prepareTest() {
         NodeMapper nodeMapper = Mappers.getMapper(NodeMapper.class);
-        IpInterfaceMapper ipInterfaceMapper  = Mappers.getMapper(IpInterfaceMapper.class);
+        IpInterfaceMapper ipInterfaceMapper = Mappers.getMapper(IpInterfaceMapper.class);
 
         mockNodeRepository = mock(NodeRepository.class);
         mockMonitoringLocationRepository = mock(MonitoringLocationRepository.class);
@@ -120,7 +120,7 @@ public class NodeServiceTest {
                 nodeMapper,
                 mockTagPublisher,
                 tagRepository,
-            ipInterfaceMapper);
+                ipInterfaceMapper);
 
         Node node = new Node();
         doReturn(node).when(mockNodeRepository).save(any(node.getClass()));
@@ -410,7 +410,7 @@ public class NodeServiceTest {
                 nodeMapper,
                 mockTagPublisher,
                 tagRepository,
-            ipInterfaceMapper);
+                ipInterfaceMapper);
 
         //
         // Execute
@@ -447,7 +447,7 @@ public class NodeServiceTest {
                 nodeMapper,
                 mockTagPublisher,
                 tagRepository,
-            ipInterfaceMapper);
+                ipInterfaceMapper);
 
         //
         // Execute
@@ -485,7 +485,7 @@ public class NodeServiceTest {
                 nodeMapper,
                 mockTagPublisher,
                 tagRepository,
-            ipInterfaceMapper);
+                ipInterfaceMapper);
 
         //
         // Execute
@@ -516,7 +516,7 @@ public class NodeServiceTest {
                 nodeMapper,
                 mockTagPublisher,
                 tagRepository,
-            ipInterfaceMapper);
+                ipInterfaceMapper);
 
         final var testNode = new Node();
         testNode.setTenantId("onms");

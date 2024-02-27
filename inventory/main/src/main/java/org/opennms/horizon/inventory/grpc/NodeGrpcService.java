@@ -46,17 +46,17 @@ import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.IpInterfaceList;
 import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
-import org.opennms.horizon.inventory.dto.IpInterfaceList;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
-import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
@@ -483,29 +483,34 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     }
 
     @Override
-    public void listSearchIpInterfaceByQuery(SearchIpInterfaceQuery request, StreamObserver<IpInterfaceList> responseObserver) {
+    public void listSearchIpInterfaceByQuery(
+            SearchIpInterfaceQuery request, StreamObserver<IpInterfaceList> responseObserver) {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
-        tenantIdOptional.ifPresentOrElse(tenantId -> {
-            try {
-                List<IpInterfaceDTO> ipInterfaceList = nodeService.listSearchIpInterfacesByQuery(tenantId,request.getNodeId() ,request.getSearchTerm());
-                responseObserver.onNext(IpInterfaceList.newBuilder().addAllIpInterface(ipInterfaceList).build());
-                responseObserver.onCompleted();
-            } catch (Exception e) {
+        tenantIdOptional.ifPresentOrElse(
+                tenantId -> {
+                    try {
+                        List<IpInterfaceDTO> ipInterfaceList = nodeService.listSearchIpInterfacesByQuery(
+                                tenantId, request.getNodeId(), request.getSearchTerm());
+                        responseObserver.onNext(IpInterfaceList.newBuilder()
+                                .addAllIpInterface(ipInterfaceList)
+                                .build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
 
-                Status status = Status.newBuilder()
-                    .setCode(Code.INTERNAL_VALUE)
-                    .setMessage(e.getMessage())
-                    .build();
-                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            }
-        }, () -> {
-
-            Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage(EMPTY_TENANT_ID_MSG)
-                .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        });
+                        Status status = Status.newBuilder()
+                                .setCode(Code.INTERNAL_VALUE)
+                                .setMessage(e.getMessage())
+                                .build();
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    }
+                },
+                () -> {
+                    Status status = Status.newBuilder()
+                            .setCode(Code.INVALID_ARGUMENT_VALUE)
+                            .setMessage(EMPTY_TENANT_ID_MSG)
+                            .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                });
     }
 }

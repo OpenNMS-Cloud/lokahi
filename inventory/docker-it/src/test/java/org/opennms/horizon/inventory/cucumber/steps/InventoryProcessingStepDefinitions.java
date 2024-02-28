@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -37,6 +38,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +61,7 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
@@ -523,14 +526,26 @@ public class InventoryProcessingStepDefinitions {
             kafkaConsumer = new KafkaConsumer<>(consumerConfig);
             kafkaConsumer.subscribe(Arrays.asList(topic));
             ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofSeconds(10));
-
+            ByteString b;
             for (ConsumerRecord<String, byte[]> record : records) {
                 try {
                     TenantLocationSpecificTaskSetResults results =
                             TenantLocationSpecificTaskSetResults.parseFrom(record.value());
                     LOG.info("Consuming record {}", results);
+                    b = results.getResultsList()
+                            .get(0)
+                            .getScannerResponse()
+                            .getResult()
+                            .getValue();
+                    String st = b.toString("UTF-8");
+                    String phyAdd = st.replaceAll("[^a-zA-Z0-9 .-]", "");
+                    LOG.info(phyAdd);
+                    Assert.assertTrue(phyAdd.contains("127.0.0.1"));
+
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

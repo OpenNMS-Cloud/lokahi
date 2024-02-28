@@ -89,8 +89,6 @@ const searchEvents = ref('')
 
 const paginatedEvents = ref([] as any[])
 
-const isMounted = ref(false)
-
 const icons = markRaw({
   DownloadFile,
   Refresh,
@@ -108,10 +106,6 @@ const columns = [
 const emptyListContent = {
   msg: 'No results found.'
 }
-
-onMounted(() => {
-  isMounted.value = true
-})
 
 const sort: Record<string, string>  = reactive({
   time: SORT.NONE,
@@ -141,11 +135,19 @@ const eventData = computed(() => {
 })
 const hasEvents = computed(() => eventData.value.events.length > 0)
 
-watch(() => [eventData.value,  isMounted.value], () => {
-  if (hasEvents.value && isMounted) {
+const updateEvents = () => {
+  if (hasEvents.value) {
     pageInfo.total = eventData.value.events.length || 0
-    updatePaginatedEvents(eventData.value.events, pageInfo.page, pageInfo.pageSize)
+    updatePaginatedEvents([...eventData.value.events], pageInfo.page, pageInfo.pageSize)
   }
+}
+
+onBeforeMount(() => {
+  updateEvents()
+})
+
+watch(() => eventData.value, () => {
+  updateEvents()
 })
 
 const updatePaginatedEvents = (events: Array<any>, pageNumber: number, pageSize: number) => {
@@ -167,9 +169,6 @@ const onPageSizeChanged = (v: number) => {
   }
 }
 
-onBeforeUnmount(() => {
-  isMounted.value = false
-})
 </script>
 
 <style lang="scss" scoped>

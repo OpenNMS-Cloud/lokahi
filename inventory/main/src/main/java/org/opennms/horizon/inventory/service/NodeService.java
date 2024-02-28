@@ -393,7 +393,7 @@ public class NodeService {
             String tenantId, Long nodeId, String searchIpInterfaceTerm) {
         List<IpInterface> ipInterfaces = null;
         InetAddress addr = null;
-        if (InetAddressUtils.isValidIpAddress(searchIpInterfaceTerm)) {
+        if (InetAddressUtils.isValidIpv4OrIpv6Address(searchIpInterfaceTerm)) {
             addr = InetAddressUtils.addr(searchIpInterfaceTerm);
         }
 

@@ -31,6 +31,7 @@
           <FeatherButton
               primary
               icon="Refresh"
+              @click.prevent="refresh"
             >
               <FeatherIcon :icon="fsIcons.Refresh"> </FeatherIcon>
             </FeatherButton>
@@ -111,7 +112,9 @@ import Refresh from '@featherds/icon/navigation/Refresh'
 import Search from '@featherds/icon/action/Search'
 import { SORT } from '@featherds/table'
 import { sortBy } from 'lodash'
+import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 const nodeStatusStore = useNodeStatusStore()
+const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
 
 const fsIcons = markRaw({
@@ -233,6 +236,10 @@ const updatePageSize = (v: number) => {
 onBeforeUnmount(() => {
   isMounted.value = false
 })
+
+const refresh = () => {
+  nodeStatusQueries.fetchNodeStatus()
+}
 const icons = markRaw({
   Traffic
 })

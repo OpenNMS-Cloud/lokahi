@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: keycloak
+  name: {{ .Values.keycloak.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - port: {{ .Values.keycloak.port }}
+      name: http
+      protocol: TCP
+      targetPort: {{ .Values.keycloak.port }}
+    - port: {{ .Values.keycloak.httpsPort }}
+      name: https
+      protocol: TCP
+      targetPort: {{ .Values.keycloak.httpsPort }}
+    - port: 7800
+      name: discovery
+      protocol: TCP
+      targetPort: 7800
+  selector:
+    app: {{ .Values.keycloak.serviceName }}
+  sessionAffinity: None
+  type: ClusterIP

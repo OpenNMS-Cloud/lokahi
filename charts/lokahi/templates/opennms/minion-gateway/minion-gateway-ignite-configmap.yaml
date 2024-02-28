@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: minion-gateway-ignite-config
   labels:
-    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+    app: {{ .Values.OpenNMS.minionGateway.serviceName }}
   namespace: {{ .Release.Namespace }}
 data:
   ignite-cache-config.xml: |

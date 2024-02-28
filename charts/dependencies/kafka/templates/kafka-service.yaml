@@ -1,0 +1,22 @@
+{{ if .Values.kafka.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kafka
+  name: {{ .Values.kafka.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: {{ .Values.kafka.port }}
+      name: client
+      protocol: TCP
+      targetPort: {{ .Values.kafka.port }}
+    - port: {{ .Values.kafka.controllerPort }}
+      name: controller
+      protocol: TCP
+      targetPort: {{ .Values.kafka.controllerPort }}
+  selector:
+    app: {{ .Values.kafka.serviceName }}
+  type: ClusterIP
+{{ end }}

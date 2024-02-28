@@ -1,4 +1,4 @@
-{{- if .Values.Ingress.Enabled }}
+{{- if .Values.ingress.enabled }}
 # Source: ingress-nginx/templates/controller-service.yaml
 apiVersion: v1
 kind: Service

@@ -118,4 +118,8 @@ const content = 'mainContent'
 svg[aria-label='Map'] {
   margin-top: -5px;
 }
+// Temporary fix until Feather library has been updated.
+a.feather-vertical-app-bar-item.selected:visited {
+  color: var(--feather-surface-dark) !important;
+}
 </style>

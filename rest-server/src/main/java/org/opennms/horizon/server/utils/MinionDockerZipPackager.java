@@ -93,6 +93,11 @@ public class MinionDockerZipPackager {
             minionEndpoint = "";
         }
 
+        String minionEndpointPort = System.getenv("MINION_ENDPOINT_PORT");
+        if (minionEndpointPort == null) {
+            minionEndpointPort = "1443";
+        }
+
         String dockerTxt = new BufferedReader(new InputStreamReader(dockerStream))
                 .lines()
                 .parallel()
@@ -100,6 +105,7 @@ public class MinionDockerZipPackager {
         dockerTxt = dockerTxt.replace("[KEYSTORE_PASSWORD]", password);
         dockerTxt = dockerTxt.replace("[MINION_NAME]", minionName);
         dockerTxt = dockerTxt.replace("[MINION_ENDPOINT]", minionEndpoint);
+        dockerTxt = dockerTxt.replace("[MINION_ENDPOINT_PORT]", minionEndpointPort);
         dockerTxt = dockerTxt.replace("[CERT_FILE]", minionName + ".p12");
         return dockerTxt.getBytes();
     }

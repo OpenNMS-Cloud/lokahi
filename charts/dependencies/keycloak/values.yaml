@@ -1,0 +1,58 @@
+hostname: onmshs
+port: 443 #set depending on tls.enabled and the ingress ports, do not change
+protocol: https #set depending on tls.enabled, do not change
+OpenNMS: # we might be able to remove this
+  global:
+    image:
+      repository: opennms
+      tag: latest
+    enableJsonLogging: false
+    openTelemetry:
+      otlpTracesEndpoint: null
+      env:
+        OTEL_PROPAGATORS: tracecontext,baggage,jaeger
+citus:
+  enabled: false
+  adminUser: desenv
+  adminPassword: notset
+keycloak:
+  path: /auth
+  imageShortName: lokahi-keycloak
+  imagePullPolicy: IfNotPresent
+  port: 8080
+  httpsPort: 8443
+  hostnamePort: ~
+  hostnameAdminUrl: ~
+  replicas: 1
+  serviceName: onms-keycloak
+  tlsSecretName:
+  databaseSchemaName: "keycloak"
+  databaseName: "desenv"
+  databaseHost: "postgres"
+  resources:
+    limits:
+      cpu: "1"
+      memory: 2Gi
+    requests:
+      cpu: "1"
+      memory: 1Gi
+  adminUsername: admin
+  adminPassword: notset
+  realmName: opennms
+  dynamicRealmConfig: true
+  privateRepoEnabled: false
+  configmapName: keycloak-realm-configmap
+  environment: {}
+kafka:
+  enabled: true
+  serviceName: onms-kafka
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot
+tls:
+  enabled: true
+  # When Certificate Generation option is set to false you need to manually prepare secrets which are referred by
+  # this helm chart. This includes creation of tls certificates for ingress but also for mutual tls between minions and
+  # minion-gateway service
+  certificateGeneration: false

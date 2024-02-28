@@ -1,0 +1,68 @@
+{{ if .Values.cortex.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cortex.serviceName }}
+  labels:
+    app: {{ .Values.cortex.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.cortex.serviceName }}
+  template:
+    metadata:
+      labels:
+        appdomain: opennms
+        app: {{ .Values.cortex.serviceName }}
+      annotations:
+        # roll the deployment when the cortex configmap changes
+        checksum/cortex-configmap: {{ include (print $.Template.BasePath "/cortex-configmap.yaml") . | sha256sum }}
+        kubectl.kubernetes.io/default-container: "{{ .Values.cortex.serviceName }}"
+    spec:
+      {{- if .Values.nodeRestrictions.enabled }}
+      nodeSelector:
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}
+      tolerations:
+        - effect: "NoSchedule"
+          key: "{{ .Values.nodeRestrictions.key }}"
+          operator: "Equal"
+          value: {{ .Values.nodeRestrictions.value }}
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: "{{ .Values.nodeRestrictions.key }}"
+                    operator: In
+                    values:
+                      - {{ .Values.nodeRestrictions.value }}
+      {{- end }}
+      volumes:
+        - name: cortex-config-volume
+          configMap:
+            name: cortex-config-map
+        - name: cortex-rules-volume
+          emptyDir: {}
+      containers:
+        - name: {{ .Values.cortex.serviceName }}
+          image: {{ .Values.cortex.image }}
+          args: ["-config.file=/etc/cortex.yml"]
+          ports:
+            - containerPort: {{ .Values.cortex.port }}
+          resources:
+            limits:
+              cpu: {{ .Values.cortex.resources.limits.cpu }}
+              memory: {{ .Values.cortex.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.cortex.resources.requests.cpu }}
+              memory: {{ .Values.cortex.resources.requests.memory }}
+          volumeMounts:
+            - name: cortex-config-volume
+              mountPath: "/etc/cortex.yml"
+              subPath: "cortex.yml"
+            - name: cortex-rules-volume
+              mountPath: /tmp/cortex/rules
+{{ end }}

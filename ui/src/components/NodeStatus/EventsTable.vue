@@ -175,6 +175,9 @@ const sortChanged = (sortObj: Record<string, string>) => {
     }
   }
 
+  pageInfo.page = 1
+  pageInfo.total = sorted?.length
+
   updatePaginatedEvents(sorted, pageInfo.page, pageInfo.pageSize)
   for (const prop in sort) {
     sort[prop] = SORT.NONE

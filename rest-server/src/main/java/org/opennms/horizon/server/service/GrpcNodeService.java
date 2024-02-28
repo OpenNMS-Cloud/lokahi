@@ -197,8 +197,10 @@ public class GrpcNodeService {
 
     @GraphQLQuery(name = "getSnmpInterfaces")
     public Flux<SnmpInterface> getSnmpInterfaces(
-            @GraphQLArgument(name = "search") String search, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.listSnmpInterfaces(search, headerUtil.getAuthHeader(env)).stream()
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listSnmpInterfaces(searchTerm,nodeId, headerUtil.getAuthHeader(env)).stream()
                 .map(snmpInterfaceMapper::protobufToSnmpInterface)
                 .toList());
     }

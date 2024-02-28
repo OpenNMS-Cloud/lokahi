@@ -29,28 +29,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class SnmpInterfaceSpecifications {
 
-    public static Specification<SnmpInterface> hasName(String search) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_NAME), "%" + search + "%");
+    public static Specification<SnmpInterface> hasName(String search, Long nodeId) {
+
+        return (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_NAME), "%" + search + "%"),
+                criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), nodeId));
     }
 
-    public static Specification<SnmpInterface> hasDesc(String search) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_DESCR), "%" + search + "%");
+    public static Specification<SnmpInterface> hasDesc(String search, Long nodeId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_DESCR), "%" + search + "%"),
+                criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), nodeId));
     }
 
-    public static Specification<SnmpInterface> hasAlias(String search) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_ALIAS), "%" + search + "%");
+    public static Specification<SnmpInterface> hasAlias(String search, Long nodeId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_ALIAS), "%" + search + "%"),
+                criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), nodeId));
     }
 
-    public static Specification<SnmpInterface> hasPhysicalAddress(String search) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_PHY_ADDR), "%" + search + "%");
-    }
-
-    public static Specification<SnmpInterface> hasNodeId(String search) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), Long.valueOf(search));
+    public static Specification<SnmpInterface> hasPhysicalAddress(String search, Long nodeId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_PHY_ADDR), "%" + search + "%"),
+                criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), nodeId));
     }
 }

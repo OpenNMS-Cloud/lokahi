@@ -537,10 +537,11 @@ public class InventoryClient {
                 .getValue();
     }
 
-    public List<SnmpInterfaceDTO> listSnmpInterfaces(String search, String accessToken) {
+    public List<SnmpInterfaceDTO> listSnmpInterfaces(String searchTerm,Long nodeId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
-        SearchBy query = SearchBy.newBuilder().setSearch(search).build();
+        SearchBy query = SearchBy.newBuilder().setSearchTerm(searchTerm)
+            .setNodeId(nodeId).build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .listSnmpInterfaces(query)

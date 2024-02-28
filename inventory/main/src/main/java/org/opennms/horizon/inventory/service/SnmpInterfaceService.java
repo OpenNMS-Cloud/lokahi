@@ -23,7 +23,6 @@ package org.opennms.horizon.inventory.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.SearchBy;
@@ -68,25 +67,13 @@ public class SnmpInterfaceService {
 
     public List<SnmpInterfaceDTO> searchBy(SearchBy searchBy) {
 
-        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-        boolean isNumber = pattern.matcher(searchBy.getSearch()).matches();
-        if (isNumber) {
-            List<SnmpInterface> list =
-                    modelRepo.findAll(Specification.where(SnmpInterfaceSpecifications.hasNodeId(searchBy.getSearch())));
-            return list.stream()
-                    .map(mapper::modelToDTO)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } else {
-            List<SnmpInterface> list =
-                    modelRepo.findAll(Specification.where(SnmpInterfaceSpecifications.hasName(searchBy.getSearch()))
-                            .or(SnmpInterfaceSpecifications.hasAlias(searchBy.getSearch()))
-                            .or(SnmpInterfaceSpecifications.hasDesc(searchBy.getSearch()))
-                            .or(SnmpInterfaceSpecifications.hasPhysicalAddress(searchBy.getSearch())));
-            return list.stream()
-                    .map(mapper::modelToDTO)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        }
+        List<SnmpInterface> list = modelRepo.findAll(
+                Specification.where(SnmpInterfaceSpecifications.hasName(searchBy.getSearchTerm(), searchBy.getNodeId()))
+                        .or(SnmpInterfaceSpecifications.hasAlias(searchBy.getSearchTerm(), searchBy.getNodeId()))
+                        .or(SnmpInterfaceSpecifications.hasDesc(searchBy.getSearchTerm(), searchBy.getNodeId())
+                                .or(SnmpInterfaceSpecifications.hasPhysicalAddress(
+                                        searchBy.getSearchTerm(), searchBy.getNodeId()))));
+
+        return list.stream().map(mapper::modelToDTO).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

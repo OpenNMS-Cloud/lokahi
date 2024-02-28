@@ -132,7 +132,7 @@
         <spring-security.version>6.0.1</spring-security.version>
         <spring-kafka.version>3.0.1</spring-kafka.version>
         <sonar-maven.version>3.9.1.2184</sonar-maven.version>
-        <swagger.version>2.1.1</swagger.version>
+        <swagger.version>2.2.20</swagger.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok.binding.version>0.2.0</lombok.binding.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>

@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import useSpinner from '@/composables/useSpinner'
-const { isActive } = useSpinner()
+const { isActive } = toRefs(useSpinner())
 </script>
 
 <style scoped lang="scss">

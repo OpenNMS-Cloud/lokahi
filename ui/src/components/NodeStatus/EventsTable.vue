@@ -166,14 +166,14 @@ const onPageSizeChanged = (v: number) => {
 const sortChanged = (sortObj: Record<string, string>) => {
 
   let sorted = [...eventData.value.events] as any
- 
+
   if (sortObj.value === 'asc' || sortObj.value === 'desc') {
     sorted = sortBy(sorted, sortObj.property)
 
     if (sortObj.value === 'desc') {
       sorted.reverse()
     }
-  } 
+  }
 
   updatePaginatedEvents(sorted, pageInfo.page, pageInfo.pageSize)
   for (const prop in sort) {

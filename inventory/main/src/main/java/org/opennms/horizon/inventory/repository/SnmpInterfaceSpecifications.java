@@ -48,4 +48,9 @@ public class SnmpInterfaceSpecifications {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_PHY_ADDR), "%" + search + "%");
     }
+
+    public static Specification<SnmpInterface> hasNodeId(String search) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), Long.valueOf(search));
+    }
 }

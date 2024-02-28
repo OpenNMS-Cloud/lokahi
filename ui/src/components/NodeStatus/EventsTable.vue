@@ -2,7 +2,7 @@
   <TableCard>
    <div>
     <section class="feather-row">
-      <h3 data-test="heading" class="feather-col-6 title">Lastest Events</h3>
+      <h3 data-test="heading" class="feather-col-6 title">Latest Events</h3>
       <div class="btns action-container feather-col-6">
         <div class="search-container">
           <FeatherInput
@@ -48,7 +48,7 @@
           </tr>
         </thead>
         <TransitionGroup name="data-table" tag="tbody" v-if="hasEvents">
-          <tr v-for="event in nodeByEventSelected" :key="event.id as number" data-test="data-item">
+          <tr v-for="event in paginatedEvents" :key="event.id as number" data-test="data-item">
             <td>{{ fnsFormat(event.producedTime, 'M/dd/yyyy HH:mm:ssxxx') }}</td>
             <td>{{ event.uei }}</td>
             <td>{{ event.ipAddress }}</td>
@@ -79,36 +79,46 @@
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
-import {format as fnsFormat} from 'date-fns'
+import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
 
 const nodeStatusStore = useNodeStatusStore()
+
 const searchEvents = ref('')
-const nodeByEventSelected = ref([] as any[])
+
+const paginatedEvents = ref([] as any[])
+
 const isMounted = ref(false)
+
 const icons = markRaw({
   DownloadFile,
   Refresh,
   Search
 })
+
 const searchLabel = 'Search IP Interfaces'
+
 const columns = [
   { id: 'time', label: 'Time' },
   { id: 'uei', label: 'UEI' },
   { id: 'Ipaddress', label: 'IP Address' }
 ]
+
 const emptyListContent = {
   msg: 'No results found.'
 }
+
 onMounted(() => {
   isMounted.value = true
 })
+
 const sort: Record<string, string>  = reactive({
   time: SORT.NONE,
   uei: SORT.NONE,
   Ipaddress: SORT.NONE
 })
+
 const sortChanged = (sortObj: Record<string, string>) => {
   for (const prop in sort) {
     sort[prop] = SORT.NONE
@@ -116,47 +126,44 @@ const sortChanged = (sortObj: Record<string, string>) => {
   sort[sortObj.property] = sortObj.value
 }
 
-// Pagination
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const pageInfo = reactive({
   page: 1,
   pageSize: 10,
   total: 0
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const nodeData = computed(() => {
+const eventData = computed(() => {
   const events = nodeStatusStore.fetchedData?.events || []
   pageInfo.total = events.length || 0
   return {
     events
   }
 })
-const hasEvents = computed(() => nodeData.value.events.length > 0)
+const hasEvents = computed(() => eventData.value.events.length > 0)
 
-watch(() => [nodeData.value,  isMounted.value], () => {
+watch(() => [eventData.value,  isMounted.value], () => {
   if (hasEvents.value && isMounted) {
-    pageInfo.total = nodeData.value.events.length || 0
-    onNodeByEventSelected(nodeData.value.events, pageInfo.page, pageInfo.pageSize)
+    pageInfo.total = eventData.value.events.length || 0
+    updatePaginatedEvents(eventData.value.events, pageInfo.page, pageInfo.pageSize)
   }
 })
 
-const onNodeByEventSelected = (events: Array<any>, pageNumber: number, pageSize: number) => {
+const updatePaginatedEvents = (events: Array<any>, pageNumber: number, pageSize: number) => {
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
-  nodeByEventSelected.value = events.slice(startIndex, endIndex)
+  paginatedEvents.value = events.slice(startIndex, endIndex)
 }
 
 const onPageChanged = (v: number) => {
   if (hasEvents) {
-    onNodeByEventSelected(nodeData.value.events, v, pageInfo.pageSize)
+    updatePaginatedEvents(eventData.value.events, v, pageInfo.pageSize)
   }
 }
 
 const onPageSizeChanged = (v: number) => {
   if (hasEvents) {
     pageInfo.pageSize = v
-    onNodeByEventSelected(nodeData.value.events, pageInfo.page, v)
+    updatePaginatedEvents(eventData.value.events, pageInfo.page, v)
   }
 }
 

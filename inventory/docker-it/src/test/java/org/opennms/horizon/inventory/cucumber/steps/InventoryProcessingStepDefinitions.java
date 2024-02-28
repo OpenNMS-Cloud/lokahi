@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.gson.Gson;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
@@ -38,27 +37,18 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
 import org.opennms.cloud.grpc.minion.Identity;
@@ -512,27 +502,8 @@ public class InventoryProcessingStepDefinitions {
     public void verifyMessageInConsumer(String systemPropertyName, String topic) {
         kafkaBootstrapUrl = System.getProperty(systemPropertyName);
         LOG.info("Using Kafka Bootstrap URL {}", kafkaBootstrapUrl);
-        if (kafkaConsumer == null && StringUtils.isNotEmpty(kafkaBootstrapUrl)) {
-            Properties consumerConfig = new Properties();
-            consumerConfig.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapUrl);
-            consumerConfig.setProperty(
-                    ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-            consumerConfig.setProperty(
-                    ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-            consumerConfig.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "inventory-test");
-            consumerConfig.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
-            consumerConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            kafkaConsumer = new KafkaConsumer<>(consumerConfig);
-            kafkaConsumer.subscribe(Arrays.asList(topic));
-            ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofSeconds(10));
-
-            for (ConsumerRecord<String, byte[]> record : records) {
-                String message = "";
-                message = new String(record.value(), StandardCharsets.UTF_8);
-                SnmpInterfaceResult snmp = new Gson().fromJson(message, SnmpInterfaceResult.class);
-                assertTrue(snmp.getPhysicalAddr().equals("127.0.0.1"));
-            }
-        }
+        kafkaConsumerRunner = new KafkaConsumerRunner(kafkaBootstrapUrl, topic);
+        Executors.newSingleThreadExecutor().execute(kafkaConsumerRunner);
     }
 
     @Given("Subscribe to kafka topic {string}")

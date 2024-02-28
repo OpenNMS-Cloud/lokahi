@@ -21,8 +21,15 @@
  */
 package org.opennms.horizon.server.mapper.alert;
 
+import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.NullValueCheckStrategy;
 import org.opennms.horizon.server.model.alerts.EventDefinitionsByVendor;
 
+@Mapper(
+        componentModel = "spring",
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+        collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 public interface EventDefinitionByVendorMapper {
 
     EventDefinitionsByVendor protoToEventDefinition(org.opennms.horizon.alerts.proto.EventDefinitionsByVendor proto);

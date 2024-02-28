@@ -148,7 +148,13 @@ public class GrpcConfig {
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public AlertsClient createAlertsClient(@Qualifier("alerts") ManagedChannel channel) {
-        return new AlertsClient(channel, deadline, policyMapper, alertEventDefinitionMapper, alertsCountMapper, eventDefinitionByVendorMapper);
+        return new AlertsClient(
+                channel,
+                deadline,
+                policyMapper,
+                alertEventDefinitionMapper,
+                alertsCountMapper,
+                eventDefinitionByVendorMapper);
     }
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")

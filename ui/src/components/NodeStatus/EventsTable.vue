@@ -163,25 +163,17 @@ const onPageSizeChanged = (v: number) => {
   }
 }
 
-
 const sortChanged = (sortObj: Record<string, string>) => {
 
-  const eventsData = [...eventData.value.events]
-  let sorted: any
-
+  let sorted = [...eventData.value.events] as any
+ 
   if (sortObj.value === 'asc' || sortObj.value === 'desc') {
-    sorted = sortBy(eventsData, sortObj.property)
+    sorted = sortBy(sorted, sortObj.property)
 
     if (sortObj.value === 'desc') {
       sorted.reverse()
     }
-  } else {
-    sorted = eventsData
-  }
-  
-  pageInfo.page = 1
-  pageInfo.pageSize = 10
-  pageInfo.total = eventsData?.length
+  } 
 
   updatePaginatedEvents(sorted, pageInfo.page, pageInfo.pageSize)
   for (const prop in sort) {

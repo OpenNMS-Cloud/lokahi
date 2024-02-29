@@ -2,7 +2,39 @@
   <TableCard>
     <div class="header">
       <div class="title-container">
-        <span class="title"> SNMP Interfaces </span>
+        <span class="title">
+          SNMP Interfaces
+        </span>
+      </div>
+      <div class="action-container">
+        <div class="search-container">
+          <FeatherInput
+            :label="searchLabel"
+            v-model.trim="searchVal"
+            type="search"
+            data-test="search-input"
+          >
+            <template #pre>
+              <FeatherIcon :icon="icons.Search" />
+            </template>
+          </FeatherInput>
+        </div>
+        <div class="download-csv">
+          <FeatherButton
+              primary
+              icon="Download"
+            >
+              <FeatherIcon :icon="icons.DownloadFile"> </FeatherIcon>
+            </FeatherButton>
+        </div>
+        <div class="refresh">
+          <FeatherButton
+              primary
+              icon="Refresh"
+            >
+              <FeatherIcon :icon="icons.Refresh"> </FeatherIcon>
+            </FeatherButton>
+        </div>
       </div>
     </div>
     <div class="container">
@@ -13,17 +45,16 @@
       >
         <thead>
           <tr>
-            <th scope="col">Alias</th>
-            <th scope="col">IP Addr</th>
-            <th scope="col">Graphs</th>
-            <th scope="col">Physical Addr</th>
-            <th scope="col">Index</th>
-            <th scope="col">Desc</th>
-            <th scope="col">Type</th>
-            <th scope="col">Name</th>
-            <th scope="col">Speed</th>
-            <th scope="col">Admin Status</th>
-            <th scope="col">Operator Status</th>
+            <FeatherSortHeader
+                v-for="col of columns"
+                :key="col.label"
+                scope="col"
+                :property="col.id"
+                :sort="(sort as any)[col.id]"
+                v-on:sort-changed="sortChanged"
+                >
+                {{ col.label }}
+              </FeatherSortHeader>
           </tr>
         </thead>
         <TransitionGroup
@@ -101,10 +132,15 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useFlowsStore } from '@/store/Views/flowsStore'
-import { Exporter, SnmpInterface } from '@/types/graphql'
+import { Exporter } from '@/types/graphql'
 import { DeepPartial } from '@/types'
 import Traffic from '@featherds/icon/action/Workflow'
 import Flows from '@featherds/icon/action/SendWorkflow'
+import DownloadFile from '@featherds/icon/action/DownloadFile'
+import Refresh from '@featherds/icon/navigation/Refresh'
+import Search from '@featherds/icon/action/Search'
+import { SORT } from '@featherds/table'
+import { sortBy } from 'lodash'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -114,7 +150,8 @@ const page = ref(0)
 const pageSize = ref(0)
 const total = ref(0)
 const pageObjects = ref([] as any[])
-const searchLabel = ref('Search IP Interfaces')
+const clonedInterfaces = ref([] as any[])
+const searchLabel = ref('Search SNMP Interfaces')
 const searchVal = ref('')
 const isMounted = ref(false)
 const metricsModal = ref()
@@ -132,8 +169,37 @@ const hasSNMPInterfaces = computed(() => {
 })
 const icons = markRaw({
   Traffic,
-  Flows
+  Flows,
+  DownloadFile,
+  Refresh,
+  Search
 })
+const columns = [
+  { id: 'ifAlias', label: 'Alias' },
+  { id: 'ipAddress', label: 'IP Addr' },
+  { id: 'graphs', label: 'Graphs' },
+  { id: 'physicalAddr', label: 'Physical Addr' },
+  { id: 'ifIndex', label: 'Index' },
+  { id: 'ifDescr', label: 'Desc' },
+  { id: 'ifType', label: 'Type' },
+  { id: 'ifName', label: 'Name' },
+  { id: 'ifSpeed', label: 'Speed' },
+  { id: 'ifAdminStatus', label: 'Admin Status' },
+  { id: 'ifOperatorStatus', label: 'Operator Status' }
+]
+const sort = reactive({
+  ifAlias: SORT.NONE,
+  ipAddress: SORT.NONE,
+  graphs: SORT.NONE,
+  physicalAddr: SORT.NONE,
+  ifIndex: SORT.NONE,
+  ifDescr: SORT.NONE,
+  ifType: SORT.NONE,
+  ifName: SORT.NONE,
+  ifSpeed: SORT.NONE,
+  ifAdminStatus: SORT.NONE,
+  ifOperatorStatus: SORT.NONE
+}) as any
 
 onMounted(() => {
   isMounted.value = true
@@ -144,6 +210,7 @@ watch(() => [snmpInterfaces.value], () => {
     page.value = 1
     pageSize.value = 10
     total.value = snmpInterfaces.value.length
+    clonedInterfaces.value = snmpInterfaces.value
     pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
 })
@@ -153,16 +220,35 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   const endIndex = startIndex + pageSize
   return array.slice(startIndex, endIndex)
 }
+const sortChanged = (sortObj: Record<string, string>) => {
+  let sorted = snmpInterfaces.value
+  if (sortObj.property !== 'graphs' && sortObj.value === 'asc') {
+    sorted = sortBy(snmpInterfaces.value, sortObj.property)
+  }
+  if (sortObj.property !== 'graphs' && sortObj.value === 'desc') {
+    sorted = sortBy(snmpInterfaces.value, sortObj.property).reverse()
+  }
+  clonedInterfaces.value = sorted
+
+  page.value = 1
+
+  pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
+
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+  sort[sortObj.property] = sortObj.value
+}
 const updatePage = (v: number) => {
   if (hasSNMPInterfaces.value) {
     total.value = snmpInterfaces.value.length
-    pageObjects.value = getPageObjects(snmpInterfaces.value, v, pageSize.value)
+    pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
 const updatePageSize = (v: number) => {
   if (hasSNMPInterfaces.value) {
     pageSize.value = v
-    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, v)
+    pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {
@@ -193,6 +279,7 @@ onBeforeUnmount(() => {
 .header {
   display: flex;
   justify-content: space-between;
+  padding: 0px 10px;
   .title-container {
     display: flex;
     .title {
@@ -201,11 +288,26 @@ onBeforeUnmount(() => {
       margin-top: 2px;
     }
   }
+  .action-container{
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    width: 30%;
+    >.search-container{
+      width: 80%;
+      margin-right: 5px;
+      :deep(.label-border) {
+        width: 130px !important;
+      }
+    }
+  }
 }
 
 .container {
   display: block;
   overflow-x: auto;
+  padding: 0px 15px;
+
   table {
     width: 100%;
     @include table.table;
@@ -220,6 +322,11 @@ onBeforeUnmount(() => {
         padding: 0px 5px 0px 5px;
       }
     }
+  }
+
+  :deep(.ip-interfaces-pagination) {
+    border: none;
+    padding: 20px 0px;
   }
 }
 </style>

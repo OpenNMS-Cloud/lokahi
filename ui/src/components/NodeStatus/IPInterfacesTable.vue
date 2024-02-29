@@ -220,7 +220,6 @@ const sortChanged = (sortObj: Record<string, string>) => {
   clonedInterfaces.value = sorted
 
   page.value = 1
-  total.value = ipInterfaces.value.length
 
   pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
   for (const prop in sort) {

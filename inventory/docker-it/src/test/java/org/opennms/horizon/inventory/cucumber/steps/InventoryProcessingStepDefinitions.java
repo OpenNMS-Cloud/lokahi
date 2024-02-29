@@ -37,7 +37,9 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,18 +50,22 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.logging.log4j.util.Strings;
 import org.hamcrest.Matchers;
 import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
-import org.opennms.horizon.inventory.dto.*;
-import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
+import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
+import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
+import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.inventory.dto.NodeIdQuery;
+import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
+import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
-import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
@@ -72,6 +78,7 @@ import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 
 public class InventoryProcessingStepDefinitions {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryProcessingStepDefinitions.class);
@@ -612,12 +619,7 @@ public class InventoryProcessingStepDefinitions {
 
                 String tenantId = message.getTenantId();
                 String locationId = message.getLocationId();
-
-                if (Strings.isEmpty(tenantId)) {
-                    throw new InventoryRuntimeException("Missing tenant id");
-                }
-
-                for (TaskResult taskResult : message.getResultsList()) {
+                   for (TaskResult taskResult : message.getResultsList()) {
                     LOG.info(
                             "Received taskset results from minion with tenantId={}; locationId={}",
                             tenantId,

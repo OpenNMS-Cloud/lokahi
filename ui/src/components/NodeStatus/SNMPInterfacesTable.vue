@@ -150,7 +150,6 @@ const page = ref(0)
 const pageSize = ref(0)
 const total = ref(0)
 const pageObjects = ref([] as any[])
-const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search SNMP Interfaces')
 const searchVal = ref('')
 const isMounted = ref(false)
@@ -210,7 +209,6 @@ watch(() => [snmpInterfaces.value], () => {
     page.value = 1
     pageSize.value = 10
     total.value = snmpInterfaces.value.length
-    clonedInterfaces.value = snmpInterfaces.value
     pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
 })
@@ -221,19 +219,6 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   return array.slice(startIndex, endIndex)
 }
 const sortChanged = (sortObj: Record<string, string>) => {
-  let sorted = snmpInterfaces.value
-  if (sortObj.property !== 'graphs' && sortObj.value === 'asc') {
-    sorted = sortBy(snmpInterfaces.value, sortObj.property)
-  }
-  if (sortObj.property !== 'graphs' && sortObj.value === 'desc') {
-    sorted = sortBy(snmpInterfaces.value, sortObj.property).reverse()
-  }
-  clonedInterfaces.value = sorted
-
-  page.value = 1
-
-  pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
-
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
@@ -242,13 +227,13 @@ const sortChanged = (sortObj: Record<string, string>) => {
 const updatePage = (v: number) => {
   if (hasSNMPInterfaces.value) {
     total.value = snmpInterfaces.value.length
-    pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
+    pageObjects.value = getPageObjects(snmpInterfaces.value, v, pageSize.value)
   }
 }
 const updatePageSize = (v: number) => {
   if (hasSNMPInterfaces.value) {
     pageSize.value = v
-    pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, v)
   }
 }
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {

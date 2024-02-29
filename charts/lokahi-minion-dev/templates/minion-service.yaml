@@ -1,0 +1,20 @@
+{{- if .Values.OpenNMS.minion.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.OpenNMS.minion.serviceName }}
+  labels:
+    app: {{ .Values.OpenNMS.minion.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.OpenNMS.minion.sshPort }}
+      protocol: TCP
+      name: ssh
+    - port: {{ .Values.OpenNMS.minion.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Values.OpenNMS.minion.serviceName }}
+{{- end }}

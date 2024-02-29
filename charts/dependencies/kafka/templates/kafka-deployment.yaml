@@ -1,0 +1,98 @@
+{{ if .Values.kafka.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.kafka.serviceName }}
+  labels:
+    app: kafka
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.kafka.serviceName }}
+  replicas: {{ .Values.kafka.replicas }}
+  template:
+    metadata:
+      labels:
+        appdomain: opennms
+        app: {{ .Values.kafka.serviceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.kafka.serviceName }}"
+    spec:
+      {{- if .Values.nodeRestrictions.enabled }}
+      nodeSelector:                                                                                    
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
+      tolerations:
+        - effect: "NoSchedule"                                                                         
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
+          operator: "Equal"
+          value: {{ .Values.nodeRestrictions.value }} 
+      affinity: 
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:                                             
+          - weight: 1                                                                                  
+            preference:                                                                                
+              matchExpressions:                                                                        
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
+                operator: In
+                values:                                                                                
+                - {{ .Values.nodeRestrictions.value }}                                                 
+      {{- end }}
+      containers:
+        - name: {{ .Values.kafka.serviceName }}
+          image: {{ .Values.kafka.image }}
+          imagePullPolicy: {{ .Values.kafka.imagePullPolicy }}
+          env:
+            - name: BITNAMI_DEBUG
+              value: "true"
+            - name: KAFKA_ENABLE_KRAFT
+              value: "yes"
+            - name: KAFKA_CFG_BROKER_ID
+              value: "1"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CLIENT:PLAINTEXT,LOCALCLIENT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: KAFKA_CFG_LISTENERS
+              value: "CLIENT://:{{ .Values.kafka.port }},CONTROLLER://:{{ .Values.kafka.controllerPort }},LOCALCLIENT://:{{ .Values.kafka.localPort }}"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "CLIENT://{{ .Values.kafka.serviceName }}:{{ .Values.kafka.port }},LOCALCLIENT://localhost:{{ .Values.kafka.localPort }}"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "CLIENT"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "1@localhost:{{ .Values.kafka.controllerPort }}"
+          resources:
+            limits:
+              cpu: "{{ .Values.kafka.resources.limits.cpu }}"
+              memory: "{{ .Values.kafka.resources.limits.memory }}"
+            requests:
+              cpu: "{{ .Values.kafka.resources.requests.cpu }}"
+              memory: "{{ .Values.kafka.resources.requests.memory }}"
+          ports:
+            - name: client
+              containerPort: {{ .Values.kafka.port }}
+            - name: controller
+              containerPort: {{ .Values.kafka.controllerPort }}
+            - name: local
+              containerPort: {{ .Values.kafka.localPort }}
+          livenessProbe:
+            failureThreshold: 15
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: client
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 15
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: client
+            timeoutSeconds: 5
+{{ end }}

@@ -1,8 +1,7 @@
-Host: onmshs
-Port: 443 #set depending on TLS.Enabled and the Ingress ports, do not change
-Protocol: https #set depending on TLS.Enabled, do not change
-OpenShift: false
-OpenNMS:
+hostname: onmshs
+port: 443 #set depending on tls.enabled and the ingress ports, do not change
+protocol: https #set depending on tls.enabled, do not change
+OpenNMS: # we might be able to remove this
   global:
     image:
       repository: opennms
@@ -16,65 +15,65 @@ OpenNMS:
       otlpTracesEndpoint: null
       env:
         OTEL_PROPAGATORS: tracecontext,baggage,jaeger
-  API:
-    Path: /api
-    ServiceName: opennms-rest-server
-    ImageShortName: lokahi-rest-server
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 2Gi # MaxRAMPercentage=50,avg-usage=245MB
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    PrivateRepoEnabled: false
-    FlowsUrl: SOME-EXTERNAL-FLOW-SERVER:80
-    FlowsTlsEnabled: false
-    CertificateManagerUrl: ""
-    PackagedMinionFile: run-minion-docker-compose.yaml
-    MinionEndpoint: host.docker.internal
-    IntrospectionEnabled: false
-    MaxAliasOccurrence: 5
-    MaxComplexity: 60
-    MaxDirectiveOccurrence: 5
-    MaxFieldOccurrence: 5
-    MaxQueryDepth: 5
-    PlaygroundGuiEnabled: false
-  MetricsProcessor:
-    ServiceName: opennms-metrics-processor
-    ImageShortName: lokahi-metrics-processor
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=400MB
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    PrivateRepoEnabled: false
-    FlowIngestorUrl: SOME-EXTERNAL-FLOW-SERVER:80
-    FlowTlsEnabled: false
+  api:
+    path: /api
+    serviceName: opennms-rest-server
+    imageShortName: lokahi-rest-server
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: 2Gi # MaxRAMPercentage=50,avg-usage=245MB
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    privateRepoEnabled: false
+    flowsUrl: SOME-EXTERNAL-FLOW-SERVER:80
+    flowsTlsEnabled: false
+    certificateManagerUrl: ""
+    packagedminionFile: run-minion-docker-compose.yaml
+    minionEndpoint: host.docker.internal
+    introspectionEnabled: false
+    maxAliasOccurrence: 5
+    maxComplexity: 60
+    maxDirectiveOccurrence: 5
+    maxFieldOccurrence: 5
+    maxQueryDepth: 5
+    playgroundGuiEnabled: false
+  metricsProcessor:
+    serviceName: opennms-metrics-processor
+    imageShortName: lokahi-metrics-processor
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi # MaxRAMPercentage=50,avg-usage=400MB
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    privateRepoEnabled: false
+    flowIngestorUrl: SOME-EXTERNAL-FLOW-SERVER:80
+    flowTlsEnabled: false
     kafkaSecretName: ~
-  UI:
-    Path: /
-    ServiceName: opennms-ui
-    TlsSecretName: opennms-ui-certificate
-    ImageShortName: lokahi-ui
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Port: 8080
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 256Mi
-    PrivateRepoEnabled: false
-    IngressAnnotations:
+  ui:
+    path: /
+    serviceName: opennms-ui
+    tlsSecretName: opennms-ui-certificate
+    imageShortName: lokahi-ui
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    resources:
+      limits:
+        cpu: "1"
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    privateRepoEnabled: false
+    ingressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         add_header X-Content-Type-Options "nosniff";
         add_header X-Frame-Options "sameorigin";
@@ -84,48 +83,48 @@ OpenNMS:
       nginx.ingress.kubernetes.io/large-client-header-buffers: 4 16k
       nginx.ingress.kubernetes.io/proxy-body-size: 4m
       nginx.ingress.kubernetes.io/proxy-buffer-size: 6k
-  Minion:
-    Enabled: false
-    ServiceName: opennms-minion
-    ImageShortName: lokahi-minion
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Port: 8181
-    SshPort: 8101
+  minion:
+    enabled: false
+    serviceName: opennms-minion
+    imageShortName: lokahi-minion
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    port: 8181
+    sshPort: 8101
     TrapsListenerPort: 1162
-    Netflow5ListenerPort: 8877
-    Netflow9ListenerPort: 4729
-    NetflowListenerPort: 9999
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    ExtraVolumes: []
-    ExtraMounts: []
-    ExtraInitContainers: []
+    netflow5ListenerPort: 8877
+    netflow9ListenerPort: 4729
+    netflowListenerPort: 9999
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    extraVolumes: []
+    extraMounts: []
+    extraInitContainers: []
     addDefaultLocation: false
-  MinionGateway:
-    ServiceName: opennms-minion-gateway
-    TlsSecretName: opennms-minion-gateway-certificate
-    ImageShortName: lokahi-minion-gateway
-    ImagePullPolicy: IfNotPresent
-    InternalGrpcPort: 8991
-    Replicas: 1
-    UseKubernetes: "true"
-    DbName: "desenv"
-    DbSchemaName: "minion_gateway"
-    DbHost: "postgres"
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=40 for heap (avg-usage=480MB) plus up to 2GB off-heap (4 Ignite Data Regions)
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    IngressAnnotations:
+  minionGateway:
+    serviceName: opennms-minion-gateway
+    tlsSecretName: opennms-minion-gateway-certificate
+    imageShortName: lokahi-minion-gateway
+    imagePullPolicy: IfNotPresent #move to global
+    internalGrpcPort: 8991
+    replicas: 1
+    useKubernetes: "true"
+    databaseName: "desenv" #move to global
+    databaseSchemaName: "minion_gateway"
+    databaseHost: "postgres" #move to global and add ability to override
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi # MaxRAMPercentage=40 for heap (avg-usage=480MB) plus up to 2GB off-heap (4 Ignite Data Regions)
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    ingressAnnotations:
       nginx.ingress.kubernetes.io/proxy-body-size: "0" # To avoid HTTP 413 and "client intended to send too large chunked body: X bytes while sending request to upstream"
       nginx.ingress.kubernetes.io/auth-tls-secret: default/client-root-ca-certificate
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
@@ -137,59 +136,59 @@ OpenNMS:
         grpc_read_timeout "1200s";
         grpc_send_timeout "1200s";
         client_body_timeout "1200s";
-    PrivateRepoEnabled: false
+    privateRepoEnabled: false #move to global
+    kafkaSecretName: ~ #move to global
+  inventory:
+    serviceName: opennms-inventory
+    imageShortName: lokahi-inventory
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    databaseName: "desenv"
+    databaseSchemaName: "inventory"
+    databaseHost: "postgres"
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi # MaxRAMPercentage=50,avg-usage=620MB
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    encryptionKey: ~
+    privateRepoEnabled: false
     kafkaSecretName: ~
-  Inventory:
-    ServiceName: opennms-inventory
-    ImageShortName: lokahi-inventory
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    DbName: "desenv"
-    DbSchemaName: "inventory"
-    DbHost: "postgres"
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=620MB
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    EncryptionKey: ~
-    PrivateRepoEnabled: false
+  alert:
+    serviceName: opennms-alert
+    imageShortName: lokahi-alert
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    databaseName: "desenv"
+    databaseSchemaName: "alert"
+    databaseHost: "postgres"
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi # MaxRAMPercentage=50,avg-usage=480MB
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    privateRepoEnabled: false
     kafkaSecretName: ~
-  Alert:
-    ServiceName: opennms-alert
-    ImageShortName: lokahi-alert
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    DbName: "desenv"
-    DbSchemaName: "alert"
-    DbHost: "postgres"
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=480MB
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    PrivateRepoEnabled: false
-    kafkaSecretName: ~
-  Notification:
-    ServiceName: opennms-notifications
-    ImageShortName: lokahi-notification
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    DbName: "desenv"
-    DbSchemaName: "notification"
-    DbHost: "postgres"
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=450MB
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    PrivateRepoEnabled: false
+  notification:
+    serviceName: opennms-notifications
+    imageShortName: lokahi-notification
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    databaseName: "desenv"
+    databaseSchemaName: "notification"
+    databaseHost: "postgres"
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi # MaxRAMPercentage=50,avg-usage=450MB
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    privateRepoEnabled: false
     kafkaSecretName: ~
     retry:
       delay: 1000
@@ -200,220 +199,118 @@ OpenNMS:
     baseUrl:
       url: "onmshs.local:1443"
       appendTenantId: false
-  Events:
-    ServiceName: opennms-events
-    ImageShortName: lokahi-events
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    DbName: "desenv"
-    DbSchemaName: "events"
-    DbHost: "postgres"
-    Resources:
-      Limits:
-        Cpu: "2"
-        Memory: 4Gi # MaxRAMPercentage=50,avg-usage=550MB
-      Requests:
-        Cpu: "1"
-        Memory: 2Gi
-    PrivateRepoEnabled: false
-  DataChoices:
-    ServiceName: opennms-datachoices
-    ImageShortName: lokahi-datachoices
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    DbName: "desenv"
-    DbSchemaName: "datachoices"
-    DbHost: "postgres"
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 1Gi
-      Requests:
-        Cpu: "1"
-        Memory: 1Gi
-    PrivateRepoEnabled: false
-  MinionCertificateManager:
-    Enabled: false
-    ServiceName: opennms-minion-certificate-manager
-    CaSecretName: ""
-    MtlsSecretName: opennms-minion-certificate
-    ImageShortName: lokahi-minion-certificate-manager
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    VolumeSize: 1Gi
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 1Gi
-      Requests:
-        Cpu: "1"
-        Memory: 1Gi
-    PrivateRepoEnabled: false
-  MinionCertificateVerifier:
-    ServiceName: opennms-minion-certificate-verifier
-    ImageShortName: lokahi-minion-certificate-verifier
-    ImagePullPolicy: IfNotPresent
-    Replicas: 1
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 1Gi # MaxRAMPercentage=50,avg-usage=245MB
-      Requests:
-        Cpu: "1"
-        Memory: 1Gi
-    PrivateRepoEnabled: false
-    CertificateManagerUrl: ""
-Citus:
-  Enabled: false
-  WorkersEnabled: true
-  ServiceName: postgres
-  PgBouncerPort: 30099
-  CoordinatorVolumeSize: 4Gi
-  WorkerVolumeSize: 2Gi
-  AdminUser: desenv
-  AdminPassword: notset
-  OpenNMSPassword: notset
-  KeycloakPassword: notset
-  InventoryPassword: notset
-  AlertPassword: notset
-  EventsPassword: notset
-  DataChoicesPassword: notset
-  MinionGatewayPassword: notset
-  NotificationPassword: notset
-  GrafanaPassword: notset
-Keycloak:
-  Path: /auth
-  ImageShortName: lokahi-keycloak
-  ImagePullPolicy: IfNotPresent
-  Port: 8080
-  HttpsPort: 8443
-  HostnamePort: ~
-  HostnameAdminUrl: ~
-  Replicas: 1
-  ServiceName: onms-keycloak
-  TlsSecretName:
-  DbSchemaName: "keycloak"
-  DbName: "desenv"
-  DbHost: "postgres"
-  Resources:
-    Limits:
-      Cpu: "1"
-      Memory: 2Gi
-    Requests:
-      Cpu: "1"
-      Memory: 1Gi
-  AdminUsername: admin
-  AdminPassword: notset
-  RealmName: opennms
-  DynamicRealmConfig: true
-  PrivateRepoEnabled: false
-  ConfigmapName: keycloak-realm-configmap
-  Environment: {}
-Grafana:
-  Enabled: true
-  Path: /grafana
-  Port: 3000
-  Replicas: 1
-  DbHost: "postgres"
-  ServiceName: grafana
-  ImageShortName: lokahi-grafana
-  ImagePullPolicy: IfNotPresent
-  InitContainerImage: busybox
-  Resources:
-    Limits:
-      Cpu: 500m
-      Memory: 1Gi
-    Requests:
-      Cpu: 100m
-      Memory: 100Mi
-Cortex:
-  Enabled: true
-  ServiceName: cortex
-  Port: 9000
-  Image: cortexproject/cortex:v1.14.0
-  Resources:
-    Limits:
-      Cpu: "1"
-      Memory: 512Mi
-    Requests:
-      Cpu: 100m
-      Memory: 100Mi
-CortexClient:
-  HostRead: cortex
-  HostWrite: cortex
-  PathRead: /prometheus/api/v1
-  PathWrite: /api/v1/push
-  Protocol: http
-  PortRead: 9000
-  PortWrite: 9000
-Kafka:
-  Enabled: true
-  ServiceName: onms-kafka
-  Image: bitnami/kafka:3.3.2-debian-11-r28 # latest 3.3.2 version not affected by https://github.com/bitnami/containers/issues/33271
-  ImagePullPolicy: IfNotPresent
-  Replicas: 1
-  Port: 9092
-  ControllerPort: 9093
-  LocalPort: 59092
-  Resources:
-    Limits:
-      Cpu: "2"
-      Memory: 2Gi
-    Requests:
-      Cpu: 500m
-      Memory: 512Mi
-  VolumeSize: 10Gi
-MailServer:
-  Enabled: false
-  ServiceName: mail-server
-  Image: mailhog/mailhog:v1.0.1
-  ImagePullPolicy: IfNotPresent
-  Replicas: 1
-  Port: 8025
-  SmtpPort: 1025
-  Resources:
-    Limits:
-      Cpu: 100m
-      Memory: 200Mi
-    Requests:
-      Cpu: 100m
-      Memory: 100Mi
-NodeRestrictions: # will be applied to every pod in the instance
-  Enabled: false
-  Key: kubernetes.azure.com/scalesetpriority
-  Value: spot
-TLS:
-  Enabled: true
+  events:
+    serviceName: opennms-events
+    imageShortName: lokahi-events
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    databaseName: "desenv"
+    databaseSchemaName: "events"
+    databaseHost: "postgres"
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi # MaxRAMPercentage=50,avg-usage=550MB
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    privateRepoEnabled: false
+  dataChoices:
+    serviceName: opennms-datachoices
+    imageShortName: lokahi-datachoices
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    databaseName: "desenv"
+    databaseSchemaName: "datachoices"
+    databaseHost: "postgres"
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi
+    privateRepoEnabled: false
+  minionCertificateManager:
+    enabled: false
+    serviceName: opennms-minion-certificate-manager
+    caSecretName: ""
+    mtlsSecretName: opennms-minion-certificate
+    imageShortName: lokahi-minion-certificate-manager
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    volumeSize: 1Gi
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi
+    privateRepoEnabled: false
+  minionCertificateVerifier:
+    serviceName: opennms-minion-certificate-verifier
+    imageShortName: lokahi-minion-certificate-verifier
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi # MaxRAMPercentage=50,avg-usage=245MB
+      requests:
+        cpu: "1"
+        memory: 1Gi
+    privateRepoEnabled: false
+    certificateManagerUrl: ""
+citus:
+  enabled: false
+  adminUser: desenv
+  adminPassword: notset
+keycloak:
+  path: /auth
+  port: 8080
+  httpsPort: 8443
+  serviceName: onms-keycloak
+  realmName: opennms
+grafana:
+  enabled: true
+  path: /grafana
+  port: 3000
+  serviceName: grafana
+cortexClient:
+  hostRead: cortex
+  hostWrite: cortex
+  pathRead: /prometheus/api/v1
+  pathWrite: /api/v1/push
+  protocol: http
+  portRead: 9000
+  portWrite: 9000
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot
+tls:
+  enabled: true
   # When Certificate Generation option is set to false you need to manually prepare secrets which are referred by
-  # this helm chart. This includes creation of TLS certificates for ingress but also for mutual tls between minions and
+  # this helm chart. This includes creation of tls certificates for ingress but also for mutual tls between minions and
   # minion-gateway service
-  CertificateGeneration: false
+  certificateGeneration: false
 
-Ingress:
-  Enabled: false
-  DefaultEndpointsEnabled: true
-  HttpPort: 80
-  HttpsPort: 443
-  ControllerImage: registry.k8s.io/ingress-nginx/controller:v1.7.0@sha256:7612338342a1e7b8090bef78f2a04fffcadd548ccaabe8a47bf7758ff549a5f7
-  SecretJobImage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
-  WebhookPatchJobImage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+ingress:
+  enabled: false
+  defaultEndpointsEnabled: true
+  httpPort: 80
+  httpsPort: 443
+  controllerimage: registry.k8s.io/ingress-nginx/controller:v1.7.0@sha256:7612338342a1e7b8090bef78f2a04fffcadd548ccaabe8a47bf7758ff549a5f7
+  secretJobimage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+  webhookPatchJobimage: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
 
-CustomErrors:
-  Image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4
-  Debug: true
+customErrors:
+  image: quay.io/kubernetes-ingress-controller/custom-error-pages:0.4
+  debug: true
 
-Prometheus:
-  Enabled: true
-  Path: /prometheus
-  ServiceName: prometheus
-  Port: 9090
-  Image: prom/prometheus:v2.39.1
-  ImagePullPolicy: IfNotPresent
-  Replicas: 1
-  Resources:
-    Limits:
-      Cpu: "1"
-      Memory: 512Mi
-    Requests:
-      Cpu: 100m
-      Memory: 100Mi
+prometheus:
+  enabled: true
+  path: /prometheus
+  serviceName: prometheus
+  port: 9090

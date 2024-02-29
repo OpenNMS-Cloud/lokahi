@@ -1,13 +1,13 @@
-{{ if .Values.OpenShift }}
+{{- if eq (include "onOpenShift" .) "true" }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: opennms-ui-route
   namespace: {{ .Release.Namespace }}
 spec:
-  host: {{ .Values.Host }}.apps-crc.testing
-  path: {{ .Values.OpenNMS.UI.Path }}  
+  host: {{ .Values.hostname }}.apps-crc.testing
+  path: {{ .Values.OpenNMS.ui.path }}  
   to:
     kind: Service
-    name: {{ .Values.OpenNMS.UI.ServiceName }}
-{{ end }}
+    name: {{ .Values.OpenNMS.ui.serviceName }}
+{{- end }}

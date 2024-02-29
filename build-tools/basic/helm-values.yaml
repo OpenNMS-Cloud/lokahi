@@ -1,137 +1,118 @@
-Namespace: tilt-instance
-Host: onmshs.local
-HostIp: 127.0.0.1
-Port: 1443
-Protocol: https
-TLS:
-  Enabled: True
-  CertificateGeneration: true
+hostname: onmshs.local
+port: 1443
+protocol: https
+tls:
+  enabled: True
+  certificateGeneration: true
   Cert:
     Name: opennms-ui-certificate
-Keycloak:
-  AdminPassword: admin
-  HostnamePort: 1443
-  HostnameAdminUrl: https://localhost:1443/auth
+keycloak:
+  adminPassword: admin
+  hostnamePort: 1443
+  hostnameAdminUrl: https://localhost:1443/auth
 
 OpenNMS:
-  API:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  UI:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-    IngressAnnotations:
+  api:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  ui:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ingressAnnotations:
       cert-manager.io/cluster-issuer: opennms-ca
-  Minion:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  MinionGateway:
+  minion:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minionGateway:
     SecretName: opennms-minion-gateway-certificate
-    Resources:
-      Limits:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minionCertificateManager:
+    enabled: true
+    caSecretName: root-ca-certificate
+    mtlsSecretName: client-root-ca-certificate
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minionCertificateVerifier:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  inventory:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  notification:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  events:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
         Cpu: '0'
         Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  MinionCertificateManager:
-    Enabled: true
-    CaSecretName: root-ca-certificate
-    MtlsSecretName: client-root-ca-certificate
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  MinionCertificateVerifier:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Inventory:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Notification:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Events:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  DataChoices:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Core:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: 4Gi
-      Requests:
-        Cpu: '0'
-        Memory: 2Gi
-Grafana:
-  Resources:
-    Limits:
-      Cpu: 500m
-      Memory: 1Gi
-    Requests:
-      Cpu: 100m
-      Memory: 100Mi
-Prometheus:
-  Server:
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
-  PushGateway:
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
-Kafka:
-  LocalPort: 24092
+  dataChoices:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+grafana:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+prometheus:
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+kafka:
+  localPort: 24092

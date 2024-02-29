@@ -1,4 +1,4 @@
-{{- if .Values.Ingress.Enabled }}
+{{- if .Values.ingress.enabled }}
 # Source: ingress-nginx/templates/controller-service.yaml
 apiVersion: v1
 kind: Service
@@ -15,12 +15,12 @@ spec:
   ports:
     - appProtocol: http
       name: http
-      port: {{ .Values.Ingress.HttpPort }}
+      port: {{ .Values.ingress.httpPort }}
       protocol: TCP
       targetPort: http
     - appProtocol: https
       name: https
-      port: {{ .Values.Ingress.HttpsPort }}
+      port: {{ .Values.ingress.httpsPort }}
       protocol: TCP
       targetPort: https
   selector:

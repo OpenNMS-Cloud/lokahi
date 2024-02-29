@@ -1,47 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.OpenNMS.UI.ServiceName }}
+  name: {{ .Values.OpenNMS.ui.serviceName }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.OpenNMS.UI.ServiceName }}
-    app.kubernetes.io/name: {{ .Values.OpenNMS.UI.ServiceName }}
+    app: {{ .Values.OpenNMS.ui.serviceName }}
+    app.kubernetes.io/name: {{ .Values.OpenNMS.ui.serviceName }}
   annotations:
     autoupdate: "true"
 spec:
-  replicas: {{ .Values.OpenNMS.UI.Replicas }}
+  replicas: {{ .Values.OpenNMS.ui.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.OpenNMS.UI.ServiceName }}
+      app: {{ .Values.OpenNMS.ui.serviceName }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.OpenNMS.UI.ServiceName }}
+        app: {{ .Values.OpenNMS.ui.serviceName }}
       annotations:
-        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.UI.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.ui.serviceName }}"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
       tolerations:
         - effect: "NoSchedule"                                                                         
-          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }} 
+          value: {{ .Values.nodeRestrictions.value }} 
       affinity: 
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:                                             
           - weight: 1                                                                                  
             preference:                                                                                
               matchExpressions:                                                                        
-              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
                 operator: In
                 values:                                                                                
-                - {{ .Values.NodeRestrictions.Value }}                                                 
+                - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       terminationGracePeriodSeconds: 120
-      {{- if .Values.OpenNMS.UI.PrivateRepoEnabled }}
+      {{- if .Values.OpenNMS.ui.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}
@@ -49,19 +49,19 @@ spec:
         - name: nginx-cache-volume
           emptyDir: {}
       containers:
-        - name: {{ .Values.OpenNMS.UI.ServiceName }}
-          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.UI) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.UI.ImagePullPolicy }}
+        - name: {{ .Values.OpenNMS.ui.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.ui) | quote }}
+          imagePullPolicy: {{ .Values.OpenNMS.ui.imagePullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.OpenNMS.UI.Port }}
+              containerPort: {{ .Values.OpenNMS.ui.port }}
           resources:
             limits:
-              cpu: "{{ .Values.OpenNMS.UI.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.OpenNMS.UI.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.OpenNMS.ui.resources.limits.cpu }}"
+              memory: "{{ .Values.OpenNMS.ui.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.OpenNMS.UI.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.OpenNMS.UI.Resources.Requests.Memory }}"
+              cpu: "{{ .Values.OpenNMS.ui.resources.requests.cpu }}"
+              memory: "{{ .Values.OpenNMS.ui.resources.requests.memory }}"
           {{/*  TODO    livenessProbe:*/}}
           {{/*          readinessProbe:*/}}
           {{/*          startupProbe:*/}}

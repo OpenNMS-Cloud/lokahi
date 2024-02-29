@@ -1,52 +1,52 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.OpenNMS.Inventory.ServiceName }}
+  name: {{ .Values.OpenNMS.inventory.serviceName }}
   labels:
-    app: {{ .Values.OpenNMS.Inventory.ServiceName }}
+    app: {{ .Values.OpenNMS.inventory.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.OpenNMS.Inventory.ServiceName }}
-  replicas: {{ .Values.OpenNMS.Inventory.Replicas }}
+      app: {{ .Values.OpenNMS.inventory.serviceName }}
+  replicas: {{ .Values.OpenNMS.inventory.replicas }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.OpenNMS.Inventory.ServiceName }}
+        app: {{ .Values.OpenNMS.inventory.serviceName }}
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
-        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.Inventory.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.inventory.serviceName }}"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
       tolerations:
         - effect: "NoSchedule"                                                                         
-          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }} 
+          value: {{ .Values.nodeRestrictions.value }} 
       affinity: 
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:                                             
           - weight: 1                                                                                  
             preference:                                                                                
               matchExpressions:                                                                        
-              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
                 operator: In
                 values:                                                                                
-                - {{ .Values.NodeRestrictions.Value }}                                                 
+                - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
         - name: spring-boot-app-config-volume
           configMap:
             name: spring-boot-app-config
-      {{- if .Values.Citus.Enabled }}
+      {{- if .Values.citus.enabled }}
       initContainers:
         - name: wait-for-db
           image: postgres:16-alpine
@@ -55,21 +55,21 @@ spec:
           - -c
           - | 
             set -x;
-            while ! psql -U {{ .Values.Citus.AdminUser }} -h postgres -c 'select 1'; do
+            while ! psql -U {{ .Values.citus.adminUser }} -h postgres -c 'select 1'; do
               echo "Waiting for DB to be available"
               sleep 10
             done
             echo "Database is available"
       {{- end }}
       containers:
-        - name: {{ .Values.OpenNMS.Inventory.ServiceName }}
-          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Inventory) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.Inventory.ImagePullPolicy }}
+        - name: {{ .Values.OpenNMS.inventory.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.inventory) | quote }}
+          imagePullPolicy: {{ .Values.OpenNMS.inventory.imagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://{{ .Values.OpenNMS.Inventory.DbHost }}:5432/{{ .Values.OpenNMS.Inventory.DbName }}?currentSchema={{ .Values.OpenNMS.Inventory.DbSchemaName }}"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.inventory.databaseHost }}:5432/{{ .Values.OpenNMS.inventory.databaseName }}?currentSchema={{ .Values.OpenNMS.inventory.databaseSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -83,21 +83,21 @@ spec:
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: KEYCLOAK_BASE_URL
-              value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
+              value: "http://{{ .Values.keycloak.serviceName }}:8080/auth/"
             - name: KEYCLOAK_REALM
-              value: "{{ .Values.Keycloak.RealmName }}"
+              value: "{{ .Values.keycloak.realmName }}"
             - name: INVENTORY_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
                   key: encryptionKey
-                  name: {{ .Values.OpenNMS.Inventory.ServiceName }}-encryption-key
+                  name: {{ .Values.OpenNMS.inventory.serviceName }}-encryption-key
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
-            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.Inventory) | nindent 12 }}
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.inventory) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.Inventory | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.inventory | indent 10 }}
           ports:
             - name: http
               containerPort: 8080
@@ -128,12 +128,12 @@ spec:
             failureThreshold: 250
           resources:
             limits:
-              cpu: "{{ .Values.OpenNMS.Inventory.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.OpenNMS.Inventory.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.OpenNMS.inventory.resources.limits.cpu }}"
+              memory: "{{ .Values.OpenNMS.inventory.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.OpenNMS.Inventory.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.OpenNMS.Inventory.Resources.Requests.Memory }}"
-      {{- if .Values.OpenNMS.Inventory.PrivateRepoEnabled }}
+              cpu: "{{ .Values.OpenNMS.inventory.resources.requests.cpu }}"
+              memory: "{{ .Values.OpenNMS.inventory.resources.requests.memory }}"
+      {{- if .Values.OpenNMS.inventory.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

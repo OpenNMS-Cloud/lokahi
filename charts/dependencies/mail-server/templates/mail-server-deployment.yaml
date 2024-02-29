@@ -1,0 +1,57 @@
+{{- if .Values.mailServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mailServer.serviceName }}
+  labels:
+    app: {{ .Values.mailServer.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.mailServer.serviceName }}
+  replicas: {{ .Values.mailServer.replicas }}
+  template:
+    metadata:
+      labels:
+        appdomain: opennms
+        app: {{ .Values.mailServer.serviceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.mailServer.serviceName }}"
+    spec:
+      {{- if .Values.nodeRestrictions.enabled }}
+      nodeSelector:                                                                                    
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
+      tolerations:
+        - effect: "NoSchedule"                                                                         
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
+          operator: "Equal"
+          value: {{ .Values.nodeRestrictions.value }} 
+      affinity: 
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:                                             
+          - weight: 1                                                                                  
+            preference:                                                                                
+              matchExpressions:                                                                        
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
+                operator: In
+                values:                                                                                
+                - {{ .Values.nodeRestrictions.value }}                                                 
+      {{- end }}
+      containers:
+        - name: {{ .Values.mailServer.serviceName }}
+          imagePullPolicy: {{ .Values.mailServer.imagePullPolicy }}
+          image: {{ .Values.mailServer.image }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.mailServer.port }}
+            - name: smtp
+              containerPort: {{ .Values.mailServer.smtpPort }}
+          resources:
+            limits:
+              cpu: "{{ .Values.mailServer.resources.limits.cpu }}"
+              memory: "{{ .Values.mailServer.resources.limits.memory }}"
+            requests:
+              cpu: "{{ .Values.mailServer.resources.requests.cpu }}"
+              memory: "{{ .Values.mailServer.resources.requests.memory }}"
+{{- end }}

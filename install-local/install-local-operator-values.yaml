@@ -8,6 +8,6 @@ Operator:
     requests:
       cpu: 100m
       memory: 500Mi
-TLS:
-  Enabled: false
+tls:
+  enabled: false
 

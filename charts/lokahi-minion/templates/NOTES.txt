@@ -1,0 +1,7 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+{{- if .Values.OpenNMS.minion.id }}
+Minion ID: {{.Values.OpenNMS.minion.id }}
+{{- end }}

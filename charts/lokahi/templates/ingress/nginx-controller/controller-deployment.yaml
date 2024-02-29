@@ -1,4 +1,4 @@
-{{- if .Values.Ingress.Enabled }}
+{{- if .Values.ingress.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,24 +32,24 @@ spec:
       annotations:
         kubectl.kubernetes.io/default-container: "controller"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}
       tolerations:
         - effect: "NoSchedule"
-          key: "{{ .Values.NodeRestrictions.Key }}"
+          key: "{{ .Values.nodeRestrictions.key }}"
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }}
+          value: {{ .Values.nodeRestrictions.value }}
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
             preference:
               matchExpressions:
-              - key: "{{ .Values.NodeRestrictions.Key }}"
+              - key: "{{ .Values.nodeRestrictions.key }}"
                 operator: In
                 values:
-                - {{ .Values.NodeRestrictions.Value }}
+                - {{ .Values.nodeRestrictions.value }}
       {{- end }}
       dnsPolicy: ClusterFirst
       containers:
@@ -61,8 +61,8 @@ spec:
         - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
         - --watch-ingress-without-class=true
         - --publish-status-address=localhost
-        - --http-port={{ .Values.Ingress.HttpPort }}
-        - --https-port={{ .Values.Ingress.HttpsPort }}
+        - --http-port={{ .Values.ingress.httpPort }}
+        - --https-port={{ .Values.ingress.httpsPort }}
         - --validating-webhook=:8443
         - --validating-webhook-certificate=/usr/local/certificates/cert
         - --validating-webhook-key=/usr/local/certificates/key
@@ -77,7 +77,7 @@ spec:
               fieldPath: metadata.namespace
         - name: LD_PRELOAD
           value: /usr/local/lib/libmimalloc.so
-        image: {{ .Values.Ingress.ControllerImage }}
+        image: {{ .Values.ingress.controllerimage }}
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
@@ -96,12 +96,12 @@ spec:
           timeoutSeconds: 1
         name: controller
         ports:
-        - containerPort: {{ .Values.Ingress.HttpPort }}
-          hostPort: {{ .Values.Ingress.HttpPort }}
+        - containerPort: {{ .Values.ingress.httpPort }}
+          hostPort: {{ .Values.ingress.httpPort }}
           name: http
           protocol: TCP
-        - containerPort: {{ .Values.Ingress.HttpsPort }}
-          hostPort: {{ .Values.Ingress.HttpsPort }}
+        - containerPort: {{ .Values.ingress.httpsPort }}
+          hostPort: {{ .Values.ingress.httpsPort }}
           name: https
           protocol: TCP
         - containerPort: 8443

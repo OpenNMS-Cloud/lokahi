@@ -1,0 +1,17 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.prometheus.serviceName }}
+  name: {{ .Values.prometheus.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.prometheus.port }}
+      protocol: TCP
+      name: prometheus-http
+  selector:
+    app: {{ .Values.prometheus.serviceName }}
+{{- end }}

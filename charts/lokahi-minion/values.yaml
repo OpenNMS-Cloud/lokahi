@@ -1,0 +1,43 @@
+hostname: onmshs.local
+port: 443 #set depending on tls.enabled and the ingress ports, do not change
+protocol: https #set depending on tls.enabled, do not change
+OpenNMS: # we might be able to remove this
+  global:
+    image:
+      repository: opennms
+      tag: latest
+    openTelemetry:
+      otlpTracesEndpoint: null
+      env:
+        OTEL_PROPAGATORS: tracecontext,baggage,jaeger
+  minion:
+    # Manually set an ID for Minion
+    id: ""
+    customCertificateAuthority: false
+    grpcClientKeystorePassword: ""
+    serviceName: opennms-minion
+    imageShortName: lokahi-minion
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    port: 8181
+    sshPort: 8101
+    trapsListenerPort: 1162
+    netflow5ListenerPort: 8877
+    netflow9ListenerPort: 4729
+    netflowListenerPort: 9999
+    # If we are running inside the cluster, we need to set this value to the internal nginx controller service name
+    gatewayHost: ""
+    resources:
+      limits:
+        cpu: "2"
+        memory: 1Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi
+    extraVolumes: []
+    extraMounts: []
+    extraInitContainers: []
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot

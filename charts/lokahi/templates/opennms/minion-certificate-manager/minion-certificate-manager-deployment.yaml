@@ -1,54 +1,54 @@
-{{- if .Values.OpenNMS.MinionCertificateManager.Enabled }}
+{{- if .Values.OpenNMS.minionCertificateManager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+  name: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
   labels:
-    app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+    app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+      app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
   strategy:
     type: Recreate
-  replicas: {{ .Values.OpenNMS.MinionCertificateManager.Replicas }}
+  replicas: {{ .Values.OpenNMS.minionCertificateManager.replicas }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+        app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
       annotations:
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
-        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minionCertificateManager.serviceName }}"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
       tolerations:
         - effect: "NoSchedule"                                                                         
-          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }} 
+          value: {{ .Values.nodeRestrictions.value }} 
       affinity: 
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:                                             
           - weight: 1                                                                                  
             preference:                                                                                
               matchExpressions:                                                                        
-              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
                 operator: In
                 values:                                                                                
-                - {{ .Values.NodeRestrictions.Value }}                                                 
+                - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
         - name: certificate-secrets
           secret:
-            secretName: {{ .Values.OpenNMS.MinionCertificateManager.CaSecretName }}
+            secretName: {{ .Values.OpenNMS.minionCertificateManager.caSecretName }}
         - name: minion-certificate-manager-secrets
           secret:
-            secretName: {{ .Values.OpenNMS.MinionCertificateManager.MtlsSecretName }}
+            secretName: {{ .Values.OpenNMS.minionCertificateManager.mtlsSecretName }}
         - name: spring-boot-app-config-volume
           configMap:
             name: spring-boot-app-config
@@ -56,21 +56,21 @@ spec:
           persistentVolumeClaim:
             claimName: minion-certificate-manager-pvc
       containers:
-        - name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
-          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionCertificateManager) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.MinionCertificateManager.ImagePullPolicy }}
+        - name: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.minionCertificateManager) | quote }}
+          imagePullPolicy: {{ .Values.OpenNMS.minionCertificateManager.imagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: KEYCLOAK_BASE_URL
-              value: "http://{{ .Values.Keycloak.ServiceName }}:8080/auth/"
+              value: "http://{{ .Values.keycloak.serviceName }}:8080/auth/"
             - name: KEYCLOAK_REALM
-              value: "{{ .Values.Keycloak.RealmName }}"
+              value: "{{ .Values.keycloak.realmName }}"
             - name: GRPC_SERVER_PORT
               value: "8990"
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
-            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionCertificateManager) | nindent 12 }}
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.minionCertificateManager) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
@@ -90,12 +90,12 @@ spec:
               mountPath: "/app/rocks-db"
           resources:
             limits:
-              cpu: "{{ .Values.OpenNMS.MinionCertificateManager.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.OpenNMS.MinionCertificateManager.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.OpenNMS.minionCertificateManager.resources.limits.cpu }}"
+              memory: "{{ .Values.OpenNMS.minionCertificateManager.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.OpenNMS.MinionCertificateManager.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.OpenNMS.MinionCertificateManager.Resources.Requests.Memory }}"
-      {{- if .Values.OpenNMS.MinionCertificateManager.PrivateRepoEnabled }}
+              cpu: "{{ .Values.OpenNMS.minionCertificateManager.resources.requests.cpu }}"
+              memory: "{{ .Values.OpenNMS.minionCertificateManager.resources.requests.memory }}"
+      {{- if .Values.OpenNMS.minionCertificateManager.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

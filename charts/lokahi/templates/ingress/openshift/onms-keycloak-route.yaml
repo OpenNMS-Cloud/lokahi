@@ -1,13 +1,13 @@
-{{ if .Values.OpenShift }}
-piVersion: route.openshift.io/v1
+{{- if eq (include "onOpenShift" .) "true" }}
+apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: opennms-keycloak-route
   namespace: {{ .Release.Namespace }}
 spec:
-  host: {{ .Values.Host }}.apps-crc.testing
-  path: {{ .Values.Keycloak.Path }}  
+  host: {{ .Values.hostname }}.apps-crc.testing
+  path: {{ .Values.keycloak.path }}  
   to:
     kind: Service
-    name: {{ .Values.Keycloak.ServiceName }}
-{{ end }}
+    name: {{ .Values.keycloak.serviceName }}
+{{- end }}

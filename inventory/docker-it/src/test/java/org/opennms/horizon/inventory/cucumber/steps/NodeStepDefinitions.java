@@ -339,7 +339,7 @@ public class NodeStepDefinitions {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
 
-        ipInterfaceList = nodeServiceBlockingStub.listSearchIpInterfaceByQuery(SearchIpInterfaceQuery.newBuilder()
+        ipInterfaceList = nodeServiceBlockingStub.searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
                 .setNodeId(node.getId())
                 .setSearchTerm(searchTerm)
                 .build());

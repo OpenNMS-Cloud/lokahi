@@ -391,18 +391,22 @@ public class NodeService {
     @Transactional(readOnly = true)
     public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(
             String tenantId, Long nodeId, String searchIpInterfaceTerm) {
-        List<IpInterface> ipInterfaces = null;
-        InetAddress addr = null;
-        if (InetAddressUtils.isValidIpv4OrIpv6Address(searchIpInterfaceTerm)) {
-            addr = InetAddressUtils.addr(searchIpInterfaceTerm);
-        }
 
-        ipInterfaces =
-                ipInterfaceRepository
-                        .findBytenantIdAndSearchIpInterfacesTerm(tenantId, nodeId, addr, searchIpInterfaceTerm)
-                        .stream()
+        List<IpInterface> ipInterfaces =
+                ipInterfaceRepository.findAllByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId).stream()
                         .toList();
 
+        ipInterfaces = filterByIpAddress(ipInterfaces, searchIpInterfaceTerm);
         return ipInterfaces.stream().map(ipInterfaceMapper::modelToDTO).collect(Collectors.toList());
+    }
+
+    private List<IpInterface> filterByIpAddress(List<IpInterface> ipInterfaces, String searchTerm) {
+        return ipInterfaces.stream()
+                .filter(ipInterface -> {
+                    return ipInterface.getIpAddress().toString().contains(searchTerm)
+                            || (ipInterface.getHostname() != null
+                                    && ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase()));
+                })
+                .collect(Collectors.toList());
     }
 }

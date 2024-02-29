@@ -546,7 +546,7 @@ public class InventoryClient {
                 .build();
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-                .listSearchIpInterfaceByQuery(query)
+                .searchIpInterfaces(query)
                 .getIpInterfaceList();
     }
 }

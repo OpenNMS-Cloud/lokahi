@@ -44,7 +44,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -66,8 +65,8 @@ import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
-import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 import org.opennms.inventory.types.ServiceType;
+import org.opennms.node.scan.contract.IpInterfaceResult;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
@@ -99,8 +98,7 @@ public class InventoryProcessingStepDefinitions {
     private MonitorType monitorType;
     private KafkaConsumerRunner kafkaConsumerRunner;
     private final String tagTopic = "tag-operation";
-    private String kafkaBootstrapUrl;
-    private static KafkaConsumer<String, byte[]> kafkaConsumer;
+    private NodeScanResult nodeScanResult;
 
     public enum PublishType {
         UPDATE,
@@ -447,61 +445,95 @@ public class InventoryProcessingStepDefinitions {
         }
     }
 
-    @Then(
-            "send Device Detection to Kafka topic {string} for an ip address {string} at location {string} with system id {string} with snmp_interface")
-    public void sendDeviceDetectionToKafkaTopicForAnIpAddressAtLocationAddSnmp(
-            String kafkaTopic, String ipAddress, String location, String systemId) {
+    @Then("Add a device with IP address = {string} with label {string}")
+    public void addADeviceWithIPAddressWithLabel(String ipAddress, String label) {
+
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        var nodeId = nodeServiceBlockingStub.getNodeIdFromQuery(NodeIdQuery.newBuilder()
-                .setIpAddress(ipAddress)
-                .setLocationId(backgroundHelper.findLocationId(location))
+        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(label)
+                .setLocationId(locationId)
+                .setManagementIp(ipAddress)
                 .build());
+        assertNotNull(node);
+    }
+
+    @Then("verify the device has an interface with the IpAddress {string}")
+    public void verifyTheDeviceHasAnInterfaceWithTheIpAddress(String ipAddress) {
+        NodeDTO nodeDTO = backgroundHelper
+                .getNodeServiceBlockingStub()
+                .withInterceptors()
+                .getNodeById(Int64Value.of(node.getId()));
+
+        assertNotNull(nodeDTO);
+        assertTrue(nodeDTO.getIpInterfacesList().stream()
+                .anyMatch((ele) -> ele.getIpAddress().equals(ipAddress)));
+    }
+
+    @Given("Node Scan results with IpInterfaces {string} and SnmpInterfaces with ifName {string}")
+    public void nodeScanResultsWithIpInterfacesAndSnmpInterfacesWithIfName(String ipAddress, String ifName) {
+
+        nodeScanResult = NodeScanResult.newBuilder()
+                .setNodeId(node.getId())
+                .addIpInterfaces(
+                        IpInterfaceResult.newBuilder().setIpAddress(ipAddress).build())
+                .addSnmpInterfaces(SnmpInterfaceResult.newBuilder()
+                        .setIfName(ifName)
+                        .setIfAlias(ifName)
+                        .setIfIndex(1)
+                        .setIfType(1)
+                        .setIfDescr(ifName)
+                        .setIfSpeed(1000000)
+                        .build())
+                .build();
+    }
+
+    @Then("Send node scan results to kafka topic {string}")
+    public void sendNodeScanResultsToKafkaTopic(String topic) {
+        TaskResult taskResult = TaskResult.newBuilder()
+                .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
+                        .setSystemId(systemId)
+                        .build())
+                .setScannerResponse(ScannerResponse.newBuilder()
+                        .setResult(Any.pack(nodeScanResult))
+                        .build())
+                .build();
+
+        TenantLocationSpecificTaskSetResults taskSetResults = TenantLocationSpecificTaskSetResults.newBuilder()
+                .setTenantId(backgroundHelper.getTenantId())
+                .setLocationId(backgroundHelper.findLocationId(node.getLocation()))
+                .addResults(taskResult)
+                .build();
+
+        var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());
+
         Properties producerConfig = new Properties();
         producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
         producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
-
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
-
-            SnmpInterfaceResult snmp = SnmpInterfaceResult.newBuilder()
-                    .setIfSpeed(1L)
-                    .setIfAdminStatus(1)
-                    .setIfAlias("alias")
-                    .setIfDescr("desc")
-                    .setIfIndex(1)
-                    .setIfType(1)
-                    .setPhysicalAddr("127.0.0.1")
-                    .setIfName("name")
-                    .setIfOperatorStatus(1)
-                    .build();
-            NodeScanResult nodeScanResult = NodeScanResult.newBuilder()
-                    .setNodeId(nodeId.getValue())
-                    .addDetectorResult(ServiceResult.newBuilder()
-                            .setService(ServiceType.SNMP)
-                            .setIpAddress(ipAddress)
-                            .setStatus(true)
-                            .build())
-                    .addSnmpInterfaces(snmp)
-                    .build();
-
-            TaskResult taskResult = TaskResult.newBuilder()
-                    .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
-                            .setSystemId(systemId)
-                            .build())
-                    .setScannerResponse(ScannerResponse.newBuilder()
-                            .setResult(Any.pack(nodeScanResult))
-                            .build())
-                    .build();
-
-            TenantLocationSpecificTaskSetResults taskSetResults = TenantLocationSpecificTaskSetResults.newBuilder()
-                    .setTenantId(backgroundHelper.getTenantId())
-                    .setLocationId(backgroundHelper.findLocationId(location))
-                    .addResults(taskResult)
-                    .build();
-
-            var producerRecord = new ProducerRecord<String, byte[]>(kafkaTopic, taskSetResults.toByteArray());
             kafkaProducer.send(producerRecord);
         }
+    }
+
+    @Then("verify node has IpInterface {string} and SnmpInterface with ifName {string}")
+    public void verifyNodeHasIpInterfaceAndSnmpInterfaceWithIfName(String ipAddress, String ifName) {
+
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        await().atMost(10, TimeUnit.SECONDS)
+                .pollDelay(1, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .until(
+                        () ->
+                                nodeServiceBlockingStub
+                                        .getNodeById(Int64Value.of(node.getId()))
+                                        .getIpInterfacesList()
+                                        .stream()
+                                        .anyMatch(ipInterfaceDTO ->
+                                                ipInterfaceDTO.getIpAddress().equals(ipAddress)),
+                        Matchers.is(true));
+
+        assertTrue(nodeServiceBlockingStub.getNodeById(Int64Value.of(node.getId())).getSnmpInterfacesList().stream()
+                .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)));
     }
 
     @Given("Subscribe to kafka topic {string}")
@@ -546,16 +578,6 @@ public class InventoryProcessingStepDefinitions {
                 .pollDelay(2000, TimeUnit.MILLISECONDS)
                 .pollInterval(2000, TimeUnit.MILLISECONDS)
                 .until(() -> matchesTaskPatternForUpdate(taskIdPattern).get(), Matchers.is(true));
-    }
-
-    @Then("verify the task set update is published for device with task suffix {string} within {int}ms with snmp")
-    public void verifyTheTaskSetUpdateIsPublishedForDeviceWithTaskSuffixWithinMsSNMP(
-            String taskNameSuffix, int timeout) {
-        String taskIdPattern = "nodeId:\\d+/ip=" + taskIpAddress + "/" + taskNameSuffix;
-        await().atMost(timeout, TimeUnit.MILLISECONDS)
-                .pollDelay(2000, TimeUnit.MILLISECONDS)
-                .pollInterval(2000, TimeUnit.MILLISECONDS)
-                .until(() -> matchesTaskPatternForUpdateSnmp(taskIdPattern).get(), Matchers.is(true));
     }
 
     @Then("verify the task set update is published with removal of task with suffix {string} within {int}ms")
@@ -609,48 +631,8 @@ public class InventoryProcessingStepDefinitions {
         return matched;
     }
 
-    private AtomicBoolean matchesTaskPatternSnmp(String taskIdPattern, PublishType publishType) {
-        AtomicBoolean matched = new AtomicBoolean(false);
-        var list = kafkaConsumerRunner.getValues();
-        var tasks = new ArrayList<UpdateTasksRequest>();
-        for (byte[] data : list) {
-            try {
-                TenantLocationSpecificTaskSetResults message = TenantLocationSpecificTaskSetResults.parseFrom(data);
-
-                String tenantId = message.getTenantId();
-                String locationId = message.getLocationId();
-                for (TaskResult taskResult : message.getResultsList()) {
-                    LOG.info(
-                            "Received taskset results from minion with tenantId={}; locationId={}",
-                            tenantId,
-                            locationId);
-                    if (taskResult.hasScannerResponse()) {
-                        ScannerResponse response = taskResult.getScannerResponse();
-                        Object scanResult = ProtobufUtil.convertAnyToModel(response);
-                        NodeScanResult res = (NodeScanResult) scanResult;
-                        var optional = res.getSnmpInterfacesList().stream()
-                                .filter(snmpInterfaceResult ->
-                                        snmpInterfaceResult.getPhysicalAddr().equals("127.0.0.1"))
-                                .findFirst();
-                        assertTrue(optional.isPresent());
-                        matched.set(true);
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Error while processing kafka message for TaskResults: ", e);
-            }
-        }
-        LOG.info("taskIdPattern = {}, publish type = {}, Tasks :  {}", taskIdPattern, publishType, tasks);
-
-        return matched;
-    }
-
     AtomicBoolean matchesTaskPatternForUpdate(String taskIdPattern) {
         return matchesTaskPattern(taskIdPattern, PublishType.UPDATE);
-    }
-
-    AtomicBoolean matchesTaskPatternForUpdateSnmp(String taskIdPattern) {
-        return matchesTaskPatternSnmp(taskIdPattern, PublishType.UPDATE);
     }
 
     AtomicBoolean matchesTaskPatternForDelete(String taskIdPattern) {

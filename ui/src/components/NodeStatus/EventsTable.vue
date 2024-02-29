@@ -96,7 +96,7 @@ const icons = markRaw({
   Search
 })
 
-const searchLabel = 'Search IP Interfaces'
+const searchLabel = 'Search Events'
 
 const columns = [
   { id: 'time', label: 'Time' },

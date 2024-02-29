@@ -488,7 +488,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
      * @param responseObserver
      */
     @Override
-    public void getDiscoveriesByNodeId(Int64Value request, StreamObserver<ActiveDiscoveryList> responseObserver) {
+    public void getDiscoveriesByNode(Int64Value request, StreamObserver<ActiveDiscoveryList> responseObserver) {
 
         Optional<NodeDTO> node = tenantLookup
                 .lookupTenantId(Context.current())

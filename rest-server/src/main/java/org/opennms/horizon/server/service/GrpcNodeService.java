@@ -108,11 +108,11 @@ public class GrpcNodeService {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
     }
 
-    @GraphQLQuery(name = "getDiscoveriesByNodeId")
-    public Flux<ActiveDiscovery> getDiscoveriesByNodeId(
+    @GraphQLQuery(name = "getDiscoveriesByNode")
+    public Flux<ActiveDiscovery> getDiscoveriesByNode(
             @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(
-                client.getDiscoveriesByNodeId(id, headerUtil.getAuthHeader(env)).getActiveDiscoveriesList().stream()
+                client.getDiscoveriesByNode(id, headerUtil.getAuthHeader(env)).getActiveDiscoveriesList().stream()
                         .map(activeDiscoveryMapper::dtoToActiveDiscovery)
                         .toList());
     }

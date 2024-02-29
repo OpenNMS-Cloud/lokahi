@@ -235,12 +235,12 @@ public class InventoryClient {
                 .getNodeById(Int64Value.of(id));
     }
 
-    public ActiveDiscoveryList getDiscoveriesByNodeId(long id, String accessToken) {
+    public ActiveDiscoveryList getDiscoveriesByNode(long id, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-                .getDiscoveriesByNodeId(Int64Value.of(id));
+                .getDiscoveriesByNode(Int64Value.of(id));
     }
 
     public List<MonitoringLocationDTO> listLocations(String accessToken) {

@@ -126,8 +126,8 @@ public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationServ
                             .build());
             repository.deleteById(icmpActiveDiscovery.getId());
             // updating nodes containing discovery id
-            List<Node> nodeList =
-                    new ArrayList<>(); // nodeRepository.findByTenantIdAndDiscoveryIdsContain(tenantId, id);
+            List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
+                .filter(node -> node.getDiscoveryIds().contains(id)).toList();
             nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
             nodeRepository.saveAll(nodeList);
             return true;

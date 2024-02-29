@@ -66,6 +66,7 @@ import org.opennms.horizon.inventory.dto.TagListParamsDTO;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
+import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 import org.opennms.inventory.types.ServiceType;
 import org.opennms.node.scan.contract.NodeScanResult;
 import org.opennms.node.scan.contract.ServiceResult;
@@ -78,7 +79,6 @@ import org.opennms.taskset.service.contract.UpdateSingleTaskOp;
 import org.opennms.taskset.service.contract.UpdateTasksRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opennms.horizon.shared.protobuf.util.ProtobufUtil;
 
 public class InventoryProcessingStepDefinitions {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryProcessingStepDefinitions.class);
@@ -619,7 +619,7 @@ public class InventoryProcessingStepDefinitions {
 
                 String tenantId = message.getTenantId();
                 String locationId = message.getLocationId();
-                   for (TaskResult taskResult : message.getResultsList()) {
+                for (TaskResult taskResult : message.getResultsList()) {
                     LOG.info(
                             "Received taskset results from minion with tenantId={}; locationId={}",
                             tenantId,

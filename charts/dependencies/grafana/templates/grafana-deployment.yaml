@@ -1,0 +1,104 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.grafana.serviceName }}
+  name: {{ .Values.grafana.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.grafana.serviceName }}
+  template:
+    metadata:
+      labels:
+        appdomain: opennms
+        app: {{ .Values.grafana.serviceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.grafana.serviceName }}"
+    spec:
+      {{- if .Values.nodeRestrictions.enabled }}
+      nodeSelector:                                                                                    
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}
+      tolerations:
+        - effect: "NoSchedule"
+          key: "{{ .Values.nodeRestrictions.key }}"
+          operator: "Equal"
+          value: {{ .Values.nodeRestrictions.value }}
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: "{{ .Values.nodeRestrictions.key }}"
+                operator: In
+                values:
+                - {{ .Values.nodeRestrictions.value }}
+      {{- end }}
+      volumes:
+        - name: grafana-config
+          secret:
+            secretName: {{ .Values.grafana.serviceName }}
+            defaultMode: 420
+      {{- if .Values.citus.enabled }}
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16-alpine
+          args:
+          - /bin/sh
+          - -c
+          - | 
+            set -x;
+            while ! psql -U {{ .Values.citus.adminUser }} -h postgres -c 'select 1'; do
+              echo "Waiting for DB to be available"
+              sleep 10
+            done
+            echo "Database is available"
+      {{- end }}
+      containers:
+        - name: {{ .Values.grafana.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.grafana) | quote }}
+          imagePullPolicy: {{ .Values.grafana.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.grafana.port }}
+          volumeMounts:
+            - name: grafana-config
+              mountPath: "/etc/grafana/provisioning/datasources/default.yml"
+              subPath: "default.yml"
+            - name: grafana-config
+              mountPath: "/etc/grafana/grafana.ini"
+              subPath: "grafana.ini"
+            - name: grafana-config
+              mountPath: "/etc/grafana/provisioning/dashboards/dashboard.yml"
+              subPath: "dashboard.yml"
+            - name: grafana-config
+              mountPath: "/usr/share/grafana/public/dashboards/opennms-entities.json"
+              subPath: "opennms-entities.json"
+            {{- if .Values.prometheus.enabled }}
+            - name: grafana-config
+              mountPath: "/usr/share/grafana/public/dashboards/opennms-tenant-metrics.json"
+              subPath: "opennms-tenant-metrics.json"
+            {{- end }}
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /robots.txt
+              port: {{ .Values.grafana.port }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            tcpSocket:
+              port: {{ .Values.grafana.port }}
+          resources:
+            limits:
+              cpu: "{{ .Values.grafana.resources.limits.cpu }}"
+              memory: "{{ .Values.grafana.resources.limits.memory }}"
+            requests:
+              cpu: "{{ .Values.grafana.resources.requests.cpu }}"
+              memory: "{{ .Values.grafana.resources.requests.memory }}"
+{{- end }}

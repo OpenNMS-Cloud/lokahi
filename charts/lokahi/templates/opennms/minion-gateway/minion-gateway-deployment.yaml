@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+  name: {{ .Values.OpenNMS.minionGateway.serviceName }}
   labels:
     ignite-cluster: core
-    app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+    app: {{ .Values.OpenNMS.minionGateway.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
-  replicas: {{ .Values.OpenNMS.MinionGateway.Replicas }}
+      app: {{ .Values.OpenNMS.minionGateway.serviceName }}
+  replicas: {{ .Values.OpenNMS.minionGateway.replicas }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
+        app: {{ .Values.OpenNMS.minionGateway.serviceName }}
         ignite-cluster: core
       annotations:
         prometheus.io/scrape: "true"
@@ -23,27 +23,27 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
-        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minionGateway.serviceName }}"
     spec:
-      serviceAccountName: {{ .Values.OpenNMS.MinionGateway.ServiceName }}-sa
-      {{- if .Values.NodeRestrictions.Enabled }}
+      serviceAccountName: {{ .Values.OpenNMS.minionGateway.serviceName }}-sa
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}
       tolerations:
         - effect: "NoSchedule"
-          key: "{{ .Values.NodeRestrictions.Key }}"
+          key: "{{ .Values.nodeRestrictions.key }}"
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }}
+          value: {{ .Values.nodeRestrictions.value }}
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
             preference:
               matchExpressions:
-              - key: "{{ .Values.NodeRestrictions.Key }}"
+              - key: "{{ .Values.nodeRestrictions.key }}"
                 operator: In
                 values:
-                - {{ .Values.NodeRestrictions.Value }}
+                - {{ .Values.nodeRestrictions.value }}
       {{- end }}
       volumes:
         - name: minion-gateway-ignite-config-volume
@@ -55,9 +55,9 @@ spec:
           configMap:
             name: spring-boot-app-config
       containers:
-        - name: {{ .Values.OpenNMS.MinionGateway.ServiceName }}
-          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionGateway) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.MinionGateway.ImagePullPolicy }}
+        - name: {{ .Values.OpenNMS.minionGateway.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.minionGateway) | quote }}
+          imagePullPolicy: {{ .Values.OpenNMS.minionGateway.imagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-Djava.net.preferIPv4Stack=true -XX:MaxRAMPercentage=40 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -XX:MaxDirectMemorySize=768m"  # FIXME: Permanent debug port, enable only for dev mode
@@ -72,29 +72,29 @@ spec:
                   name: postgres
                   key: minionGatewayPwd
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://{{ .Values.OpenNMS.MinionGateway.DbHost }}:5432/{{ .Values.OpenNMS.MinionGateway.DbName }}?currentSchema={{ .Values.OpenNMS.MinionGateway.DbSchemaName }}"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.minionGateway.databaseHost }}:5432/{{ .Values.OpenNMS.minionGateway.databaseName }}?currentSchema={{ .Values.OpenNMS.minionGateway.databaseSchemaName }}"
             - name: IGNITE_USE_KUBERNETES
-              value: "{{ .Values.OpenNMS.MinionGateway.UseKubernetes }}"
+              value: "{{ .Values.OpenNMS.minionGateway.useKubernetes }}"
             - name: IGNITE_KUBERNETES_SERVICE_NAME
-              value: "{{ .Values.OpenNMS.MinionGateway.ServiceName }}"
+              value: "{{ .Values.OpenNMS.minionGateway.serviceName }}"
             - name: IGNITE_KUBERNETES_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
-            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.MinionGateway) | nindent 12 }}
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.minionGateway) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.MinionGateway | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.minionGateway | indent 10 }}
           ports:
             - name: http
               containerPort: 8080
             - name: grpc
               containerPort: 8990
             - name: internal-grpc
-              containerPort: {{ .Values.OpenNMS.MinionGateway.InternalGrpcPort }}
+              containerPort: {{ .Values.OpenNMS.minionGateway.internalGrpcPort }}
             - name: ig-client
               containerPort: 10800
             - name: ig-discovery
@@ -130,12 +130,12 @@ spec:
             failureThreshold: 250
           resources:
             limits:
-              cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.OpenNMS.MinionGateway.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.OpenNMS.minionGateway.resources.limits.cpu }}"
+              memory: "{{ .Values.OpenNMS.minionGateway.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.OpenNMS.MinionGateway.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.OpenNMS.MinionGateway.Resources.Requests.Memory }}"
-      {{- if .Values.OpenNMS.MinionGateway.PrivateRepoEnabled }}
+              cpu: "{{ .Values.OpenNMS.minionGateway.resources.requests.cpu }}"
+              memory: "{{ .Values.OpenNMS.minionGateway.resources.requests.memory }}"
+      {{- if .Values.OpenNMS.minionGateway.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

@@ -1,4 +1,4 @@
-{{- if .Values.TLS.CertificateGeneration }}
+{{- if .Values.tls.certificateGeneration }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -22,7 +22,7 @@ data:
   tls.crt: >-
     {{b64enc $ca.Cert }}
   tls.key: >-
-    {{b64enc $ca.Key }}
+    {{b64enc $ca.key }}
   {{- end }}
 
 {{- end }}

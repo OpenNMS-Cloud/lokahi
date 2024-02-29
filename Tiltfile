@@ -368,11 +368,67 @@ if is_devmode_enabled(metricsServerDevmodeKey):
 
 k8s_yaml(
     helm(
+        'charts/dependencies/citus',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/cortex',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/grafana',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/kafka',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/keycloak',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/mail-server',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/prometheus',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+
+k8s_yaml(
+    helm(
         'charts/lokahi',
         values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
     )
 )
 
+k8s_yaml(
+    helm(
+        'charts/lokahi-minion-dev',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
 # Builds #
 ## Shared ##
 local_resource(

@@ -194,18 +194,96 @@ install_nginx () {
     --wait --timeout "${TIMEOUT}"
 }
 
-install_helm_chart_custom_images () {
+install_helm_chart () {
   echo
   echo ________________Installing Lokahi________________
   echo
 
   install_nginx
+
+  if ! time helm upgrade -i citus ./../charts/dependencies/citus \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+  
+  if ! time helm upgrade -i cortex ./../charts/dependencies/cortex \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i grafana ./../charts/dependencies/grafana \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i kafka ./../charts/dependencies/kafka \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i keycloak ./../charts/dependencies/keycloak \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i mailserver ./../charts/dependencies/mail-server \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i prometheus ./../charts/dependencies/prometheus \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
   if ! time helm upgrade -i lokahi ./../charts/lokahi \
-  -f ./tmp/install-local-opennms-lokahi-custom-images-values.yaml \
-  --namespace $NAMESPACE \
-  --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
-  --set OpenNMS.global.image.tag=${IMAGE_TAG} \
-  --wait --timeout "${TIMEOUT}"; then
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
+    helm_debug
+  fi
+
+  if ! time helm upgrade -i lokahiminion ./../charts/lokahi-minion-dev \
+      -f ./tmp/install-local-lokahi-values.yaml \
+      --namespace $NAMESPACE \
+      --create-namespace \
+      --set OpenNMS.global.image.repository=${IMAGE_PREFIX} \
+      --set OpenNMS.global.image.tag=${IMAGE_TAG} \
+      --wait --timeout "${TIMEOUT}"; then
     helm_debug
   fi
 
@@ -243,12 +321,8 @@ cat install-local-onms-instance.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance.yaml
 cat install-local-onms-instance-custom-images.yaml | \
   sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-onms-instance-custom-images.yaml
-cat ./../charts/lokahi/values.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/values.yaml
-cat install-local-opennms-lokahi-values.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-lokahi-values.yaml
-cat install-local-opennms-lokahi-custom-images-values.yaml | \
-  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-opennms-lokahi-custom-images-values.yaml
+cat install-local-lokahi-values.yaml | \
+  sed "s/onmshs/$DOMAIN/g" | sed "s/\$NAMESPACE/$NAMESPACE/g" > tmp/install-local-lokahi-values.yaml
 
 # Select Context, Create Cluster, and Deploy
 if [ $CONTEXT == "local" ]; then
@@ -261,8 +335,7 @@ if [ $CONTEXT == "local" ]; then
   echo
   echo ________________Installing Lokahi________________
   echo
-  install_nginx
-  time helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --wait --timeout "${TIMEOUT}"
+  install_helm_chart
 
   cluster_ready_check
 
@@ -284,7 +357,7 @@ elif [ "$CONTEXT" == "custom-images" ]; then
 
   echo "FINISHED LOADING IMAGES INTO KIND AT $(date)"
 
-  install_helm_chart_custom_images
+  install_helm_chart
 
   cluster_ready_check
 
@@ -296,7 +369,7 @@ elif [ "$CONTEXT" == "cicd" ]; then
   create_ssl_cert_secret
 
   # assumes remote docker registry, no need to load images into cluster
-  install_helm_chart_custom_images
+  install_helm_chart
 
   # output values from the release to help with debugging pipelines
   helm get values lokahi --namespace $NAMESPACE
@@ -308,8 +381,7 @@ elif [ $CONTEXT == "existing-k8s" ]; then
   echo
   echo ________________Installing Lokahi________________
   echo
-  install_nginx
-  time helm upgrade -i lokahi ./../charts/lokahi -f ./tmp/install-local-opennms-lokahi-values.yaml --namespace $NAMESPACE --create-namespace --wait --timeout "${TIMEOUT}"
+  install_helm_chart
 
   cluster_ready_check
 

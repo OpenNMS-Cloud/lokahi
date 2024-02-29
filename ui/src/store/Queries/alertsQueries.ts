@@ -4,12 +4,22 @@ import {
   AlertCountsDocument,
   AlertsListDocument,
   CountAlertsDocument,
+  ListAlertResponse,
   TimeRange
 } from '@/types/graphql'
 import { AlertsFilters, Pagination } from '@/types/alerts'
 
+export const defaultListAlertResponse = () => {
+  return {
+    alerts: [],
+    lastPage: 0,
+    nextPage: 0,
+    totalAlerts: 0
+  } as ListAlertResponse
+}
+
 export const useAlertsQueries = defineStore('alertsQueries', () => {
-  const fetchAlertsData = ref({})
+  const fetchAlertsData = ref({} as ListAlertResponse)
   const fetchCountAlertsData = ref(0)
 
   const fetchAlerts = async (alertsFilters: AlertsFilters, pagination: Pagination) => {
@@ -30,7 +40,11 @@ export const useAlertsQueries = defineStore('alertsQueries', () => {
 
     await execute()
 
-    fetchAlertsData.value = data.value?.findAllAlerts || {}
+    if (data.value?.findAllAlerts) {
+      fetchAlertsData.value = { ...data.value.findAllAlerts } as ListAlertResponse
+    } else {
+      fetchAlertsData.value = defaultListAlertResponse()
+    }
   }
 
   const fetchCountAlerts = async (severityFilters = [] as string[], timeRange = TimeRange.All) => {

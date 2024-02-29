@@ -49,7 +49,7 @@
               v-model="alertsStore.alertsFilter.nodeLabel"
               label="Search Alerts"
               type="search"
-              @update:model-value="searchAlertsListener"
+              @update:model-value="onSearchAlerts"
               class="search-alerts-input"
               data-test="search-filter"
             />
@@ -60,7 +60,7 @@
             <div class="select-all-checkbox-btns">
               <FeatherCheckbox
                 v-model="isAllAlertsSelected"
-                @update:model-value="allAlertsCheckboxHandler"
+                @update:model-value="onSelectAllAlertsCheck"
                 :disabled="isAlertsListEmpty"
                 data-test="select-all-checkbox"
                 >Select All</FeatherCheckbox
@@ -68,14 +68,14 @@
               <FeatherButton
                 v-if="atLeastOneAlertSelected"
                 text
-                @click="clearAlertsHandler"
+                @click="onClearAlerts"
                 data-test="clear-btn"
                 >clear</FeatherButton
               >
               <FeatherButton
                 v-if="atLeastOneAlertSelected"
                 text
-                @click="acknowledgeAlertsHandler"
+                @click="onAcknowledgeAlerts"
                 data-test="acknowledge-btn"
                 >acknowledge</FeatherButton
               >
@@ -88,9 +88,10 @@
               data-test="list-count"
             />
           </div>
+          <Spinner />
           <AlertsCardList
             :alerts="alerts"
-            @alert-selected="alertSelectedListener"
+            @alertSelected="onAlertSelected"
             data-test="alerts-list"
           />
           <div
@@ -101,8 +102,9 @@
               v-model="page"
               :pageSize="pageSize"
               :total="total"
-              @update:model-value="alertsStore.setPage"
-              @update:pageSize="alertsStore.setPageSize"
+              :pageSizes="[10, 20, 50]"
+              @update:model-value="onPageChanged"
+              @update:pageSize="onPageSizeChanged"
               data-test="pagination"
             />
           </div>
@@ -113,39 +115,56 @@
 </template>
 
 <script lang="ts" setup>
-import { TimeRange } from '@/types/graphql'
+import useSpinner from '@/composables/useSpinner'
 import { useAlertsStore } from '@/store/Views/alertsStore'
-import { IAlert } from '@/types/alerts'
 import { fncArgVoid } from '@/types'
+import { IAlert } from '@/types/alerts'
+import { TimeRange } from '@/types/graphql'
 
 const alertsStore = useAlertsStore()
+const { startSpinner, stopSpinner } = useSpinner()
 
+// current page of alert data (and selection status) to display in the table
 const alerts = ref([] as IAlert[])
-watchEffect(() => {
-  alerts.value = alertsStore.alertsList?.alerts?.map((a: IAlert) => ({ ...a, isSelected: false })) || []
-})
+const isAllAlertsSelected = ref(false)
 
 const isAlertsListEmpty = computed(() => alertsStore.isAlertsListEmpty)
-
-const page = alertsStore.alertsPagination.page
+const page = computed(() => alertsStore.alertsPagination.page || 1)
 const pageSize = computed(() => alertsStore.alertsPagination.pageSize)
-const total = computed(() => alertsStore.alertsPagination.total)
 const atLeastOneAlertSelected = computed(() => alerts.value.some((a: IAlert) => a.isSelected))
+const total = computed(() => alertsStore.alertsPagination.total)
 
-const isAllAlertsSelected = ref(false)
-const allAlertsCheckboxHandler = (isSelected: boolean | undefined) => {
-  alerts.value = alerts.value.map((a: IAlert) => ({
-    ...a,
-    isSelected
-  }))
-
-  alertsStore.setAlertsSelected(isSelected as boolean)
+// For now, we clear all selected items when the user pages. Need to decide on exact selection behavior.
+// This behavior ensures only visible items are selected, so the user is not surprised
+// when selected but not visible items are cleared/acked.
+const onPageChanged = (p: number) => {
+  startSpinner()
+  alertsStore.setAllAlertsSelected(false)
+  alertsStore.setPage(p)
 }
 
-const alertSelectedListener = (id: number) => {
+const onPageSizeChanged = (p: number) => {
+  startSpinner()
+  alertsStore.setAllAlertsSelected(false)
+  alertsStore.setPageSize(p)
+}
+
+const onSelectAllAlertsCheck = (isSelected: boolean | undefined) => {
+  alerts.value = alerts.value.map((a: IAlert) => ({
+    ...a,
+    isSelected: isSelected || false
+  }))
+
+  alertsStore.setAllAlertsSelected(isSelected || false)
+}
+
+const onAlertSelected = (id: number) => {
+  let newSelectedValue = false
+
   alerts.value = alerts.value.map((a: IAlert) => {
     if (a.databaseId === id) {
       a.isSelected = !a.isSelected // toggle selection
+      newSelectedValue = a.isSelected
     }
 
     return a
@@ -153,22 +172,24 @@ const alertSelectedListener = (id: number) => {
 
   isAllAlertsSelected.value = alerts.value.every(({ isSelected }) => isSelected)
 
-  alertsStore.setAlertsSelected(id)
+  alertsStore.setAlertSelected(id, newSelectedValue)
 }
 
-const clearAlertsHandler = () => {
-  alertsStore.clearSelectedAlerts()
+const onClearAlerts = async () => {
+  await alertsStore.clearSelectedAlerts()
 
+  alertsStore.setAllAlertsSelected(false)
   isAllAlertsSelected.value = false
 }
 
-const acknowledgeAlertsHandler = () => {
-  alertsStore.acknowledgeSelectedAlerts()
+const onAcknowledgeAlerts = async () => {
+  await alertsStore.acknowledgeSelectedAlerts()
 
+  alertsStore.setAllAlertsSelected(false)
   isAllAlertsSelected.value = false
 }
 
-const searchAlertsListener: fncArgVoid = (val: string | null) => {
+const onSearchAlerts: fncArgVoid = (val: string | null) => {
   if (val) {
     alertsStore.alertsFilter.nodeLabel = val
   } else {
@@ -176,6 +197,21 @@ const searchAlertsListener: fncArgVoid = (val: string | null) => {
   }
   alertsStore.resetPaginationAndFetchAlerts()
 }
+
+watch(() => [alertsStore.alertsPagination, alertsStore.alertsList], () => {
+  // refresh our alert data when the store is updated, adding selection state
+  alerts.value = alertsStore.alertsList?.alerts?.map((a: IAlert) => ({ ...a, isSelected: alertsStore.isAlertSelected(a.databaseId) })) || []
+  isAllAlertsSelected.value = alerts.value.every(({ isSelected }) => isSelected === true)
+  stopSpinner()
+})
+
+onMounted(() => {
+  stopSpinner()
+})
+
+onBeforeRouteLeave(() => {
+  stopSpinner()
+})
 </script>
 
 <style lang="scss" scoped>

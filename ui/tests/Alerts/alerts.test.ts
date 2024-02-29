@@ -1,17 +1,18 @@
-import mount from '../mountWithPiniaVillus'
+import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
 import Alerts from '@/containers/Alerts.vue'
 import { useAlertsStore } from '@/store/Views/alertsStore'
+import { getAlert } from '../fixture/alerts'
 
 let wrapper: any
 
 describe('Alerts', () => {
   afterAll(() => {
-    wrapper.unmount()
+    wrapper?.unmount()
   })
 
   describe('Required elements', () => {
     beforeAll(() => {
-      wrapper = mount({
+      wrapper = mountWithPiniaVillus({
         component: Alerts
       })
     })
@@ -44,12 +45,20 @@ describe('Alerts', () => {
 
   describe('Alerts list not empty', () => {
     beforeAll(async () => {
-      wrapper = mount({
+      wrapper = mountWithPiniaVillus({
         component: Alerts
       })
 
+      const alertList = {
+        alerts: [getAlert()],
+        lastPage: -1,
+        nextPage: 1,
+        totalAlerts: 1
+      }
+
       const alertsStore = useAlertsStore()
-      alertsStore.isAlertsListEmpty = false
+      alertsStore.alertsList = alertList
+
       await wrapper.vm.$nextTick()
     })
 
@@ -87,7 +96,7 @@ describe('Alerts', () => {
 
   describe('Alerts list empty', () => {
     beforeAll(() => {
-      wrapper = mount({
+      wrapper = mountWithPiniaVillus({
         component: Alerts
       })
     })

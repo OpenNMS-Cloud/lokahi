@@ -1,10 +1,10 @@
-{{- if .Values.OpenNMS.MinionCertificateManager.Enabled }}
+{{- if .Values.OpenNMS.minionCertificateManager.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+  name: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
   labels:
-    app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+    app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
@@ -13,5 +13,5 @@ spec:
       protocol: TCP
       name: grpc
   selector:
-    app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+    app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
 {{- end }}

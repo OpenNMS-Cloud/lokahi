@@ -1,15 +1,15 @@
-{{- if .Values.OpenNMS.MinionCertificateManager.Enabled }}
+{{- if .Values.OpenNMS.minionCertificateManager.enabled }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   namespace: {{ .Release.Namespace }}
   name: minion-certificate-manager-pvc
   labels:
-    app: {{ .Values.OpenNMS.MinionCertificateManager.ServiceName }}
+    app: {{ .Values.OpenNMS.minionCertificateManager.serviceName }}
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.OpenNMS.MinionCertificateManager.VolumeSize }}
+      storage: {{ .Values.OpenNMS.minionCertificateManager.volumeSize }}
 {{- end }}

@@ -1,0 +1,16 @@
+{{- if .Values.citus.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.citus.serviceName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: citus
+spec:
+  selector:
+    app: citus
+  clusterIP: None
+  ports:
+  - port: 5432
+    name: postgres
+{{- end }}

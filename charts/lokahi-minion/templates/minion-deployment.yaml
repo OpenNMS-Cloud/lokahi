@@ -19,11 +19,6 @@ spec:
         linkerd.io/inject: enabled
         kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.minion.serviceName }}"
     spec:
-      #hostAliases:
-      #- ip: "192.168.1.4"
-      #  hostnames:
-      #  - "{{ .Values.hostname }}"
-      #  - "minion.{{ .Values.hostname }}"
       serviceAccountName: {{ .Values.OpenNMS.minion.serviceName }}-sa
       {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
@@ -49,8 +44,6 @@ spec:
           secret:
             defaultMode: 420
             secretName: minion-app-secrets
-        #- name: maven-volume
-        #  emptyDir: {}
         {{- if .Values.OpenNMS.minion.extraVolumes }}
           {{ toYaml .Values.OpenNMS.minion.extraVolumes | nindent 8 }}
         {{- end }}
@@ -138,8 +131,6 @@ spec:
               subPath: "CA.cert"
               mountPath: "/opt/karaf/certs/CA.cert"
             {{- end}}
-            #- name: maven-volume
-            #  mountPath: /.m2
             {{- if .Values.OpenNMS.minion.extraMounts }}
               {{ toYaml .Values.OpenNMS.minion.extraMounts | nindent 12 }}
             {{- end }}

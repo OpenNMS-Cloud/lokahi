@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: {{ .Values.OpenNMS.API.ServiceName }}
-  name: {{ .Values.OpenNMS.API.ServiceName }}
+    app: {{ .Values.OpenNMS.api.serviceName }}
+  name: {{ .Values.OpenNMS.api.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -11,5 +11,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ .Values.OpenNMS.API.ServiceName }}
+    app: {{ .Values.OpenNMS.api.serviceName }}
   type: NodePort

@@ -1,0 +1,33 @@
+OpenNMS: # we might be able to remove this
+  global:
+    image:
+      repository: opennms
+      tag: latest
+    openTelemetry:
+      otlpTracesEndpoint: null
+      env:
+        OTEL_PROPAGATORS: tracecontext,baggage,jaeger
+cortex:
+  enabled: true
+  serviceName: cortex
+  port: 9000
+  image: cortexproject/cortex:v1.14.0
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+cortexClient:
+  hostRead: cortex
+  hostWrite: cortex
+  pathRead: /prometheus/api/v1
+  pathWrite: /api/v1/push
+  protocol: http
+  portRead: 9000
+  portWrite: 9000
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot

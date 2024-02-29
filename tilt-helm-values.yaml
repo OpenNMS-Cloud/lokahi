@@ -1,84 +1,82 @@
-Namespace: tilt-instance
-Host: onmshs.local
-HostIp: 127.0.0.1
-Port: 1443
-Protocol: https
-TLS:
-  Enabled: True
-  CertificateGeneration: false
-  Cert:
+hostname: onmshs.local
+port: 1443
+protocol: https
+tls:
+  enabled: True
+  certificateGeneration: false
+  cert:
     Name: opennms-ui-certificate
-Keycloak:
-  AdminPassword: admin
-  HostnamePort: 1443
-  HostnameAdminUrl: https://onmshs.local:1443/auth
+keycloak:
+  adminPassword: admin
+  hostnamePort: 1443
+  hostnameAdminUrl: https://onmshs.local:1443/auth
 
-MailServer:
-  Enabled: true
+mailServer:
+  enabled: true
 
-Citus:
-  Enabled: true
+citus:
+  enabled: true
 
 OpenNMS:
   global:
     openTelemetry:
       otlpTracesEndpoint: "http://tempo:4317"
-  Alert:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  API:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-    CorsAllowed: true
-    PlaygroundGuiEnabled: true
-    IntrospectionEnabled: true
-  UI:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-    IngressAnnotations:
+  alert:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  api:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    corsAllowed: true
+    playgroundGuiEnabled: true
+    introspectionEnabled: true
+  ui:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ingressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: ~
-  MetricsProcessor:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Minion:
-    Enabled: true
+  metricsProcessor:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minion:
+    enabled: true
     addDefaultLocation: true
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  MinionGateway:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-    IngressAnnotations:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minionGateway:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    ingressAnnotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         # This adds the tenant-id and location to the response headers sent to the client so we can use them in
         # logging. This is bit circuitous, and it is unnecessary to send these to the client, but this was a way I
@@ -99,90 +97,73 @@ OpenNMS:
     env:
       DEBUG_SPAN_FULL_MESSAGE: "true"
       DEBUG_SPAN_CONTENT: "true"
-  MinionCertificateManager:
-    Enabled: true
-    CaSecretName: root-ca-certificate
-    MtlsSecretName: client-root-ca-certificate
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  MinionCertificateVerifier:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Inventory:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Notification:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Events:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  DataChoices:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: '0'
-      Requests:
-        Cpu: '0'
-        Memory: '0'
-  Core:
-    Resources:
-      Limits:
-        Cpu: '0'
-        Memory: 4Gi
-      Requests:
-        Cpu: '0'
-        Memory: 2Gi
-Grafana:
-  Resources:
-    Limits:
-      Cpu: 500m
-      Memory: 1Gi
-    Requests:
-      Cpu: 100m
-      Memory: 100Mi
+  minionCertificateManager:
+    enabled: true
+    caSecretName: root-ca-certificate
+    mtlsSecretName: client-root-ca-certificate
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  minionCertificateVerifier:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  inventory:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  notification:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  events:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+  dataChoices:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+grafana:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   autoAssignOrgRole: Admin  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#auto_assign_org_role
-Prometheus:
-  Server:
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
-  PushGateway:
-    Resources:
-      Limits:
-        Cpu: "1"
-        Memory: 512Mi
-      Requests:
-        Cpu: 100m
-        Memory: 100Mi
-Kafka:
-  LocalPort: 24092
+prometheus:
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+kafka:
+  localPort: 24092

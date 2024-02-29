@@ -1,0 +1,166 @@
+{{- if .Values.citus.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: citus-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: citus-worker
+  serviceName: citus-worker
+  replicas: 2
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      name: citus-worker
+      labels:
+        app: citus-worker
+    spec:
+      securityContext:
+        fsGroup: 999
+      ##########################################
+      #         reset key perm
+      initContainers:
+      - name: set-key-ownership
+        image: alpine:3.16
+        command:
+        - sh
+        - -c
+        - |
+          cp /root-key/* /key
+          chown -R :70 /key
+          chmod 0440 /key/*
+          ls -lashn /key
+        volumeMounts:
+        - mountPath: /key
+          name: citus-cert
+        - mountPath: /root-key
+          name: root-cert
+      - name: init
+        image: alpine:3.16
+        command: ["sh", "-c", "chmod 777 /var/lib/postgresql"]
+        volumeMounts:
+          - mountPath: /var/lib/postgresql
+            name: data
+      ##########################################
+      #         main container
+      containers:
+      - name: postgres
+        image: citusdata/citus:12.1-alpine
+        args:
+        - sh
+        - -c
+        - |
+          sh <<'SH' &
+          node_name=${HOSTNAME}.citus-worker.${POD_NAMESPACE}.svc.cluster.local;
+
+          echo [$(date -Iseconds)] Wait pg_isready;
+          timeout 5m sh -c 'until pg_isready -U desenv --timeout=5 --quiet; do sleep 2; done;';
+          pg_isready -U desenv --quiet || { echo pg not ready; kill -9 1; exit 1; };
+          echo [$(date -Iseconds)] pg is ready;
+          # wait for extension
+          sleep 5;
+
+          echo [$(date -Iseconds)] Wait name resolve ${node_name};
+          timeout 10m sh -c "until nslookup ${node_name} > /dev/null; do sleep 2; done;";
+
+{{- if .Values.citus.workersEnabled }}
+          echo [$(date -Iseconds)] Wait manager;
+          timeout 5m sh -c "until psql 'host={{ .Values.citus.serviceName }} user=desenv' -c 'SELECT citus_is_coordinator()'; do sleep 2; done;";
+          psql 'host={{ .Values.citus.serviceName }} user=desenv' -c 'SELECT citus_is_coordinator()' || { echo Manager not ready; kill -9 1; exit 1; }
+
+          # Wait and retry as the DNS name may take longer to be available on the coordinator
+          echo [$(date -Iseconds)] citus_add_node ${node_name};
+          timeout 5m sh -c "until psql 'host={{ .Values.citus.serviceName }} user=desenv' -c \"SELECT * from citus_add_node('${node_name}', 5432);\"; do sleep 5; done" || {
+            echo citus_add_node failed;
+            kill -9 1;
+          }
+{{- end }}
+          SH
+
+          su-exec postgres "/usr/local/bin/docker-entrypoint.sh" "postgres" \
+            -c ssl=on -c ssl_cert_file=/etc/citus-cert/tls.crt -c ssl_key_file=/etc/citus-cert/tls.key \
+            -c config_file=/etc/postgres/postgresql.conf \
+            -c hba_file=/etc/postgres/pg_hba.conf \
+          ;
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: password
+        - name: POSTGRES_USER
+          value: desenv
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: password
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+          subPath: pgdata
+        - name: citus-cert
+          mountPath: "/etc/citus-cert"
+          readOnly: true
+        - name: conf
+          mountPath: "/etc/postgres"
+          readOnly: true
+
+        securityContext:
+          runAsUser: 0
+
+        startupProbe:
+          exec:
+            command:
+            - 'pg_isready'
+            - '-U'
+            - 'desenv'
+            - '--timeout=5'
+            - '--quiet'
+
+        livenessProbe:
+          exec:
+            command:
+            - 'pg_isready'
+            - '-U'
+            - 'desenv'
+            - '--timeout=5'
+            - '--quiet'
+          periodSeconds: 30
+          initialDelaySeconds: 30
+
+      volumes:
+      - name: conf
+        configMap:
+          name: citus-conf
+      - name: citus-cert
+        emptyDir:
+          sizeLimit: "1Gi"
+      - name: root-cert
+        secret:
+          secretName: citus-cert
+          defaultMode: 0440
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: citus-worker
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.citus.workerVolumeSize }}
+{{- end }}

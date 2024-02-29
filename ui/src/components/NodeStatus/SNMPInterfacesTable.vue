@@ -31,7 +31,7 @@
           tag="tbody"
         >
           <tr
-            v-for="snmpInterface in nodeStatusStore.node.snmpInterfaces"
+            v-for="snmpInterface in pageObjects"
             :key="snmpInterface.id"
           >
             <td>{{ snmpInterface.ifAlias }}</td>
@@ -78,6 +78,21 @@
           </tr>
         </TransitionGroup>
       </table>
+      <div v-if="!hasSNMPInterfaces">
+        <EmptyList
+          :content="emptyListContent"
+          data-test="empty-list"
+        />
+      </div>
+      <FeatherPagination
+      v-model="page"
+      :pageSize="pageSize"
+      :total="total"
+      @update:modelValue="updatePage"
+      @update:pageSize="updatePageSize"
+      class="ip-interfaces-pagination py-2"
+      v-if="hasSNMPInterfaces"
+    ></FeatherPagination>
     </div>
   </TableCard>
   <NodeStatusMetricsModal ref="metricsModal" />
@@ -86,7 +101,7 @@
 <script lang="ts" setup>
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useFlowsStore } from '@/store/Views/flowsStore'
-import { Exporter } from '@/types/graphql'
+import { Exporter, SnmpInterface } from '@/types/graphql'
 import { DeepPartial } from '@/types'
 import Traffic from '@featherds/icon/action/Workflow'
 import Flows from '@featherds/icon/action/SendWorkflow'
@@ -95,13 +110,61 @@ const router = useRouter()
 const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
 
+const page = ref(0)
+const pageSize = ref(0)
+const total = ref(0)
+const pageObjects = ref([] as any[])
+const searchLabel = ref('Search IP Interfaces')
+const searchVal = ref('')
+const isMounted = ref(false)
 const metricsModal = ref()
-
+const emptyListContent = {
+  msg: 'No results found.'
+}
+const snmpInterfaces = computed(() => {
+  if (nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0 && isMounted.value) {
+    return nodeStatusStore.node.snmpInterfaces
+  }
+  return []
+})
+const hasSNMPInterfaces = computed(() => {
+  return snmpInterfaces.value && snmpInterfaces.value.length > 0 && isMounted.value
+})
 const icons = markRaw({
   Traffic,
   Flows
 })
 
+onMounted(() => {
+  isMounted.value = true
+})
+
+watch(() => [snmpInterfaces.value], () => {
+  if (snmpInterfaces.value?.length && isMounted.value) {
+    page.value = 1
+    pageSize.value = 10
+    total.value = snmpInterfaces.value.length
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
+  }
+})
+// Function to retrieve objects for a given page
+const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
+  const startIndex = (pageNumber - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  return array.slice(startIndex, endIndex)
+}
+const updatePage = (v: number) => {
+  if (hasSNMPInterfaces.value) {
+    total.value = snmpInterfaces.value.length
+    pageObjects.value = getPageObjects(snmpInterfaces.value, v, pageSize.value)
+  }
+}
+const updatePageSize = (v: number) => {
+  if (hasSNMPInterfaces.value) {
+    pageSize.value = v
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, v)
+  }
+}
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {
   const { id: nodeId, nodeLabel } = nodeStatusStore.node
 
@@ -116,6 +179,9 @@ const routeToFlows = (exporter: DeepPartial<Exporter>) => {
   ]
   router.push('/flows').catch(() => 'Route to /flows unsuccessful.')
 }
+onBeforeUnmount(() => {
+  isMounted.value = false
+})
 </script>
 
 <style lang="scss" scoped>

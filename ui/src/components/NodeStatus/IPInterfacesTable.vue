@@ -89,6 +89,12 @@
           </tr>
         </TransitionGroup>
       </table>
+      <div v-if="!hasIPInterfaces">
+        <EmptyList
+          :content="emptyListContent"
+          data-test="empty-list"
+        />
+      </div>
       <FeatherPagination
       v-model="page"
       :pageSize="pageSize"
@@ -143,6 +149,9 @@ const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
 const isMounted = ref(false)
+const emptyListContent = {
+  msg: 'No results found.'
+}
 onMounted(() => {
   isMounted.value = true
 })
@@ -185,7 +194,7 @@ const columns = computed(() => {
     ]
   }
 })
-watch([() => ipInterfaces.value, () => isMounted.value], () => {
+watch(() => [ipInterfaces.value, isMounted.value], () => {
   if (ipInterfaces.value?.length && isMounted.value) {
     page.value = 1
     pageSize.value = 10
@@ -201,18 +210,16 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   return array.slice(startIndex, endIndex)
 }
 const sortChanged = (sortObj: Record<string, string>) => {
-  let sorted = [] as any
+  let sorted = ipInterfaces.value
   if (sortObj.value === 'asc') {
     sorted = sortBy(ipInterfaces.value, sortObj.property)
-  } else if (sortObj.value === 'desc') {
+  }
+  if (sortObj.value === 'desc') {
     sorted = sortBy(ipInterfaces.value, sortObj.property).reverse()
-  } else {
-    sorted = ipInterfaces.value
   }
   clonedInterfaces.value = sorted
 
   page.value = 1
-  pageSize.value = 10
   total.value = ipInterfaces.value.length
 
   pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)

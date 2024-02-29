@@ -36,18 +36,12 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.server.config.DataLoaderFactory;
 import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
-import org.opennms.horizon.server.model.inventory.DownloadFormat;
-import org.opennms.horizon.server.model.inventory.MonitoringLocation;
-import org.opennms.horizon.server.model.inventory.Node;
-import org.opennms.horizon.server.model.inventory.NodeCreate;
-import org.opennms.horizon.server.model.inventory.NodeUpdate;
-import org.opennms.horizon.server.model.inventory.SnmpInterface;
-import org.opennms.horizon.server.model.inventory.TopNNode;
-import org.opennms.horizon.server.model.inventory.TopNResponse;
+import org.opennms.horizon.server.model.inventory.*;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
@@ -205,6 +199,22 @@ public class GrpcNodeService {
                 .toList());
     }
 
+    @GraphQLQuery(name = "downloadSnmpInterfaces")
+    public Mono<SnmpInterfaceResponse> downloadSnmpInterfaces(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        List<SnmpInterfaceDTO> list = client.listSnmpInterfaces(searchTerm, nodeId, headerUtil.getAuthHeader(env));
+
+        try {
+            return Mono.just(generateDownloadableSnmpResponse(list, downloadFormat));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to download Snmp List");
+        }
+    }
+
     private static TopNResponse generateDownloadableTopNResponse(
             List<TopNNode> topNNodes, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
@@ -226,6 +236,49 @@ public class GrpcNodeService {
             }
             csvPrinter.flush();
             return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
+    }
+
+    private static SnmpInterfaceResponse generateDownloadableSnmpResponse(
+            List<SnmpInterfaceDTO> snmpInterfaceDTOS, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                    .setHeader(
+                            "ID",
+                            "Node Id",
+                            "Alias",
+                            "Description",
+                            "Admin status",
+                            "Index",
+                            "Name",
+                            "Tenant id",
+                            "Operator status",
+                            "Speed",
+                            "Type")
+                    .build();
+
+            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
+            for (SnmpInterfaceDTO dto : snmpInterfaceDTOS) {
+                csvPrinter.printRecord(
+                        dto.getId(),
+                        dto.getNodeId(),
+                        dto.getIfAlias(),
+                        dto.getIfDescr(),
+                        dto.getIfAdminStatus(),
+                        dto.getIfIndex(),
+                        dto.getIfName(),
+                        dto.getTenantId(),
+                        dto.getIfOperatorStatus(),
+                        dto.getIfSpeed(),
+                        dto.getIfType());
+            }
+            csvPrinter.flush();
+            return new SnmpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }

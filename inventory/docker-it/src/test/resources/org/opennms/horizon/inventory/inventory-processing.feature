@@ -53,8 +53,6 @@ Feature: Inventory Processing
     Then verify the task set update is published for device with task suffix "icmp-monitor" within 30000ms
     Then verify the task set update is published for device with task suffix "snmp-monitor" within 30000ms
     Then verify the task set update is published for device with task suffix "snmp-collector" within 30000ms
-    Then send Device Detection to Kafka topic "internal-event" for an ip address "192.168.30.1" at location "MINION" with snmp_interface
-    Then verify message in system property "kafka.bootstrap-servers" with Kafka topic "internal-event"
     Then shutdown kafka consumer
 
 
@@ -66,6 +64,15 @@ Feature: Inventory Processing
     Then verify the task set update is published with removal of task with suffix "icmp-monitor" within 30000ms
     Then verify the task set update is published with removal of task with suffix "snmp-monitor" within 30000ms
     Then verify the task set update is published with removal of task with suffix "snmp-collector" within 30000ms
+    Then shutdown kafka consumer
+
+  Scenario: Add detect Snmp Interfaces
+    Given Device IP Address "192.168.40.1" in location named "MINION"
+    Given Device Task IP address = "192.168.40.1"
+    Given Subscribe to kafka topic "internal-event"
+    Then add a new device with label "test-label" and ip address "192.168.40.1" and location named "MINION"
+    Then send Device Detection to Kafka topic "internal-event" for an ip address "192.168.40.1" at location "MINION" with system id "MINION-TEST-1" with snmp_interface
+    Then verify the task set update is published for device with task suffix "snmp-monitor" within 30000ms with snmp
     Then shutdown kafka consumer
 # TBD888 - Test multi-tenancy
 # TBD888 - Test Flows and Traps Configs published

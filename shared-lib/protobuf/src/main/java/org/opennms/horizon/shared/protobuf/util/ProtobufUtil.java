@@ -21,12 +21,15 @@
  */
 package org.opennms.horizon.shared.protobuf.util;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.opennms.node.scan.contract.NodeScanResult;
+import org.opennms.taskset.contract.ScannerResponse;
 
 public class ProtobufUtil {
     private ProtobufUtil() {
@@ -44,6 +47,21 @@ public class ProtobufUtil {
         }
         JsonFormat.parser().ignoringUnknownFields().merge(json, builder);
         return (T) builder.build();
+    }
+
+    public static Object convertAnyToModel(ScannerResponse message) {
+        Any any = message.getResult();
+
+        try {
+            if (any.is(NodeScanResult.class)) {
+                return any.unpack(NodeScanResult.class);
+            } else {
+                throw new IllegalArgumentException("Unknown message type stored in Any");
+            }
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String toJson(MessageOrBuilder messageOrBuilder) throws InvalidProtocolBufferException {

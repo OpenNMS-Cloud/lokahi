@@ -54,14 +54,7 @@ import org.opennms.cloud.grpc.minion.Identity;
 import org.opennms.horizon.grpc.heartbeat.contract.TenantLocationSpecificHeartbeatMessage;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
-import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
-import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdQuery;
-import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
-import org.opennms.horizon.inventory.dto.TagListParamsDTO;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
@@ -532,7 +525,13 @@ public class InventoryProcessingStepDefinitions {
                                                 ipInterfaceDTO.getIpAddress().equals(ipAddress)),
                         Matchers.is(true));
 
-        assertTrue(nodeServiceBlockingStub.getNodeById(Int64Value.of(node.getId())).getSnmpInterfacesList().stream()
+        assertTrue(nodeServiceBlockingStub
+                .listSnmpInterfaces(SearchBy.newBuilder()
+                        .setNodeId(Int64Value.of(node.getId()).getValue())
+                        .setSearchTerm(ifName)
+                        .build())
+                .getSnmpInterfacesList()
+                .stream()
                 .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)));
     }
 

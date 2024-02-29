@@ -678,20 +678,33 @@ public class InventoryProcessingStepDefinitions {
         assertTrue(nodeServiceBlockingStub.getNodeById(Int64Value.of(node.getId())).getSnmpInterfacesList().stream()
                 .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)));
     }
+
     @Then("verify node has SnmpInterface with ifName {string}")
     public void verifyNodeHasIpInterfaceAndSnmpInterfaceWithIfName(String ifName) {
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         await().atMost(10, TimeUnit.SECONDS)
-            .pollDelay(1, TimeUnit.SECONDS)
-            .pollInterval(2, TimeUnit.SECONDS)
-            .until(
-                () ->
-                    nodeServiceBlockingStub.listSnmpInterfaces(SearchBy.newBuilder().setNodeId(node.getId()).setSearchTerm(ifName).build()).getSnmpInterfacesList().stream()
-                        .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)),
-                Matchers.is(true));
+                .pollDelay(1, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .until(
+                        () -> nodeServiceBlockingStub
+                                .listSnmpInterfaces(SearchBy.newBuilder()
+                                        .setNodeId(node.getId())
+                                        .setSearchTerm(ifName)
+                                        .build())
+                                .getSnmpInterfacesList()
+                                .stream()
+                                .anyMatch(snmpInterfaceDTO ->
+                                        snmpInterfaceDTO.getIfName().equals(ifName)),
+                        Matchers.is(true));
 
-        assertTrue(nodeServiceBlockingStub.listSnmpInterfaces(SearchBy.newBuilder().setNodeId(node.getId()).setSearchTerm(ifName).build()).getSnmpInterfacesList().stream()
-            .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)));
+        assertTrue(nodeServiceBlockingStub
+                .listSnmpInterfaces(SearchBy.newBuilder()
+                        .setNodeId(node.getId())
+                        .setSearchTerm(ifName)
+                        .build())
+                .getSnmpInterfacesList()
+                .stream()
+                .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)));
     }
 }

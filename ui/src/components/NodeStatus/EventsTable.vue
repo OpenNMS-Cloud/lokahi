@@ -82,6 +82,7 @@ import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
+import { sortBy } from 'lodash'
 
 const nodeStatusStore = useNodeStatusStore()
 
@@ -95,7 +96,7 @@ const icons = markRaw({
   Search
 })
 
-const searchLabel = 'Search IP Interfaces'
+const searchLabel = 'Search Events'
 
 const columns = [
   { id: 'time', label: 'Time' },
@@ -112,13 +113,6 @@ const sort: Record<string, string>  = reactive({
   uei: SORT.NONE,
   Ipaddress: SORT.NONE
 })
-
-const sortChanged = (sortObj: Record<string, string>) => {
-  for (const prop in sort) {
-    sort[prop] = SORT.NONE
-  }
-  sort[sortObj.property] = sortObj.value
-}
 
 const pageInfo = reactive({
   page: 1,
@@ -169,6 +163,27 @@ const onPageSizeChanged = (v: number) => {
   }
 }
 
+const sortChanged = (sortObj: Record<string, string>) => {
+
+  let sorted = [...eventData.value.events] as any
+
+  if (sortObj.value === 'asc' || sortObj.value === 'desc') {
+    sorted = sortBy(sorted, sortObj.property)
+
+    if (sortObj.value === 'desc') {
+      sorted.reverse()
+    }
+  }
+
+  pageInfo.page = 1
+  pageInfo.total = sorted?.length
+
+  updatePaginatedEvents(sorted, pageInfo.page, pageInfo.pageSize)
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+  sort[sortObj.property] = sortObj.value
+}
 </script>
 
 <style lang="scss" scoped>

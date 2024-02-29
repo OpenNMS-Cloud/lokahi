@@ -396,11 +396,11 @@ public class NodeService {
                 ipInterfaceRepository.findAllByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId).stream()
                         .toList();
 
-        ipInterfaces = filterByIpAddress(ipInterfaces, searchIpInterfaceTerm);
+        ipInterfaces = filterByIpAddressORHostName(ipInterfaces, searchIpInterfaceTerm);
         return ipInterfaces.stream().map(ipInterfaceMapper::modelToDTO).collect(Collectors.toList());
     }
 
-    private List<IpInterface> filterByIpAddress(List<IpInterface> ipInterfaces, String searchTerm) {
+    private List<IpInterface> filterByIpAddressORHostName(List<IpInterface> ipInterfaces, String searchTerm) {
         return ipInterfaces.stream()
                 .filter(ipInterface -> {
                     return ipInterface.getIpAddress().toString().contains(searchTerm)

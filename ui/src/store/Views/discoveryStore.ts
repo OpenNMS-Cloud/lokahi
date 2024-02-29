@@ -126,9 +126,10 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.deleteModalOpen = true
     },
     editDiscovery(item: any) {
+      this.validationErrors = {}
       this.discoveryFormActive = true
       this.discoveryTypePageActive = false
-      this.selectedDiscovery = {...item}
+      this.selectedDiscovery = { ...item }
     },
     async searchForLocation(searchVal: string) {
       const discoveryQueries = useDiscoveryQueries()
@@ -142,6 +143,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       this.selectedDiscovery.locations = foundLocation ? [foundLocation] : undefined
       this.foundLocations = []
       this.locationSearch = ''
+
       if (this.validateOnKeyUp) {
         this.validateDiscovery()
       }
@@ -221,9 +223,22 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
       await this.init()
       this.loading = false
     },
+    customValidator(discovery: NewOrUpdatedDiscovery) {
+      // check if discovery name is a duplicate, using only client side data
+      const id = discovery.id || 0
+      const name = (discovery.name || '').toLowerCase()
+
+      if (name && this.loadedDiscoveries.some(d => (d.id != id) && d.name && d.name.toLowerCase() === name)) {
+        throw {
+          message: 'Duplicate discovery name.',
+          path: 'name'
+        }
+      }
+    },
     async validateDiscovery() {
-      const {isValid, validationErrors} = await clientToServerValidation(this.selectedDiscovery)
+      const { isValid, validationErrors } = await clientToServerValidation(this.selectedDiscovery, this.customValidator)
       this.validationErrors = validationErrors
+
       return isValid
     },
     async saveSelectedDiscovery() {
@@ -239,6 +254,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         } else {
           await discoveryMutations.createOrUpdateDiscovery({request: discoveryFromClientToServer(this.selectedDiscovery)})
         }
+
         await this.init()
 
         if (
@@ -250,9 +266,11 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
 
         this.validateOnKeyUp = false
       } else {
-        if (toRaw(this.validationErrors).name) {
+        const nameError = toRaw(this.validationErrors).name
+        if (nameError && !nameError.toLowerCase().includes('duplicate')) {
           this.setSelectedDiscoveryValue('name', '')
         }
+
         if (toRaw(this.validationErrors).clientId) {
           this.setMetaSelectedDiscoveryValue('clientId', '')
         }
@@ -267,6 +285,7 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         }
         this.validateOnKeyUp = true
       }
+
       this.loading = false
     }
   }

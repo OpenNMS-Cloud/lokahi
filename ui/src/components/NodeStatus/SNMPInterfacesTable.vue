@@ -206,7 +206,7 @@ const updateSNMPInterfaces = () => {
 onMounted(() => {
   updateSNMPInterfaces()
 })
-watch(() => [snmpInterfaces.value], () => {
+watch(() => snmpInterfaces.value, () => {
   updateSNMPInterfaces()
 })
 // Function to retrieve objects for a given page

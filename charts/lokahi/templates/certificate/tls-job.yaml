@@ -1,0 +1,31 @@
+{{- if not .Values.customDomain.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tls-secret
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    metadata:
+      name: tls-secret
+    spec:
+      containers:
+      - name: kubectl-container
+        image: bitnami/kubectl
+        command:
+          - "/bin/sh"
+          - "-c"
+          - |
+            apk add --no-cache openssl
+            mkdir -p /tmp/secrets
+            cd /tmp/secrets
+            time=$(({{ .Values.certificates.duration }}/24))
+            openssl genrsa -out ca.key 2048
+            openssl req -new -x509 -days $time -key ca.key -subj "/CN={{ .Values.certificates.commonName }}/O=Test/C=US" -out ca.crt
+            chmod 644 ca.key ca.crt
+            kubectl create secret tls root-ca-certificate --cert /tmp/secrets/ca.crt --key /tmp/secrets/ca.key
+      restartPolicy: Never
+{{- end }}
+
+
+

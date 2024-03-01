@@ -1,0 +1,43 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: opennms-ca-issuer
+  namespace: {{ .Release.Namespace }}
+spec:
+  ca:
+    secretName: root-ca-certificate
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: opennms-ui-certificate
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: opennms-ui-certificate
+  duration: {{ .Values.certificates.duration}}h
+  renewBefore: {{ .Values.certificates.renewBefore}}h
+  isCA: false
+  commonName: {{ .Values.certificates.commonName }} 
+  dnsNames:
+    - {{ .Values.hostname }} 
+  issuerRef:
+    name: opennms-ca-issuer
+    kind: Issuer
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: opennms-minion-gateway-certificate
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: opennms-minion-gateway-certificate
+  duration: {{ .Values.certificates.duration}}h
+  renewBefore: {{ .Values.certificates.renewBefore}}h
+  isCA: false
+  commonName: {{ .Values.certificates.commonName }}
+  dnsNames:
+    - minion.{{ .Values.hostname }}
+  issuerRef:
+    name: opennms-ca-issuer
+    kind: Issuer

@@ -314,3 +314,13 @@ prometheus:
   path: /prometheus
   serviceName: prometheus
   port: 9090
+
+certificates:
+  duration: 8760
+  renewBefore: 24
+  commonName: opennms-prime
+
+customDomain:
+ enabled: false
+ crt: certs/tls.crt
+ key: certs/tls.key

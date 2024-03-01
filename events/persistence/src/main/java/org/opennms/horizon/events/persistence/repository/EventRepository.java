@@ -24,10 +24,11 @@ package org.opennms.horizon.events.persistence.repository;
 import java.util.List;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     List<Event> findAllByTenantId(String tenantId);
 
     List<Event> findAllByTenantIdAndNodeId(String tenantId, long nodeId);

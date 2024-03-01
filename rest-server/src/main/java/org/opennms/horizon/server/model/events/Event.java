@@ -35,4 +35,7 @@ public class Event {
     private long producedTime;
     private List<EventParameter> eventParams;
     private EventInfo eventInfo;
+    private String description;
+    private String locationName;
+    private String logMessage;
 }

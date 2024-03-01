@@ -22,10 +22,14 @@
 package org.opennms.horizon.events.persistence.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.opennms.horizon.events.persistence.mapper.EventMapper;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
+import org.opennms.horizon.events.persistence.util.SearchEventsSpecification;
 import org.opennms.horizon.events.proto.Event;
+import org.opennms.horizon.events.proto.EventsSearchBy;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -49,4 +53,15 @@ public class EventService {
                 .map(eventMapper::modelToDtoWithParams)
                 .collect(Collectors.toList());
     }
+
+
+    public List<Event> searchEvents(EventsSearchBy searchBy)  {
+       return eventRepository.findAll(Specification.where(SearchEventsSpecification.hasDescription(searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasLocationName(searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasLogMessage(searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasEventsUei(searchBy.getNodeId(),searchBy.getSearchTerm())))
+           .stream().map(eventMapper::modelToDtoWithParams).filter(Objects::nonNull).collect(Collectors.toList());
+
+    }
+
 }

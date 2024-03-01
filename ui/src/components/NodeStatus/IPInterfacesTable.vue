@@ -110,15 +110,15 @@
 </template>
 
 <script lang="ts" setup>
+import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
-import Traffic from '@featherds/icon/action/Workflow'
-import { FeatherPagination } from '@featherds/pagination'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
-import Refresh from '@featherds/icon/navigation/Refresh'
 import Search from '@featherds/icon/action/Search'
+import Traffic from '@featherds/icon/action/Workflow'
+import Refresh from '@featherds/icon/navigation/Refresh'
+import { FeatherPagination } from '@featherds/pagination'
 import { SORT } from '@featherds/table'
 import { sortBy } from 'lodash'
-import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 const nodeStatusStore = useNodeStatusStore()
 const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
@@ -141,25 +141,21 @@ const sort = reactive({
   snmpPrimary: SORT.NONE
 }) as any
 
-const page = ref(0)
-const pageSize = ref(0)
+const page = ref(1)
+const pageSize = ref(10)
 const total = ref(0)
 const pageObjects = ref([] as any[])
 const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
-const isMounted = ref(false)
 const emptyListContent = {
   msg: 'No results found.'
 }
-onMounted(() => {
-  isMounted.value = true
-})
 const isAzure = computed(() => {
   return nodeStatusStore.isAzure
 })
 const hasIPInterfaces = computed(() => {
-  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0 && isMounted.value
+  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
 })
 const ipInterfaces = computed(() => {
   if (hasIPInterfaces.value) {
@@ -194,14 +190,18 @@ const columns = computed(() => {
     ]
   }
 })
-watch(() => [ipInterfaces.value, isMounted.value], () => {
-  if (ipInterfaces.value?.length && isMounted.value) {
-    page.value = 1
-    pageSize.value = 10
+const updateIpInterfaces = () => {
+  if (hasIPInterfaces.value) {
     total.value = ipInterfaces.value.length
     clonedInterfaces.value = ipInterfaces.value
     pageObjects.value = getPageObjects(ipInterfaces.value, page.value, pageSize.value)
   }
+}
+onMounted(() => {
+  updateIpInterfaces()
+})
+watch(() => [ipInterfaces.value], () => {
+  updateIpInterfaces()
 })
 // Function to retrieve objects for a given page
 const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
@@ -239,9 +239,6 @@ const updatePageSize = (v: number) => {
     pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
-onBeforeUnmount(() => {
-  isMounted.value = false
-})
 
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()

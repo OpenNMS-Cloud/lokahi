@@ -130,41 +130,39 @@
 </template>
 
 <script lang="ts" setup>
-import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useFlowsStore } from '@/store/Views/flowsStore'
-import { Exporter } from '@/types/graphql'
+import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { DeepPartial } from '@/types'
-import Traffic from '@featherds/icon/action/Workflow'
-import Flows from '@featherds/icon/action/SendWorkflow'
+import { Exporter } from '@/types/graphql'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
-import Refresh from '@featherds/icon/navigation/Refresh'
 import Search from '@featherds/icon/action/Search'
+import Flows from '@featherds/icon/action/SendWorkflow'
+import Traffic from '@featherds/icon/action/Workflow'
+import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
-import { sortBy } from 'lodash'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
 
-const page = ref(0)
-const pageSize = ref(0)
+const page = ref(1)
+const pageSize = ref(10)
 const total = ref(0)
 const pageObjects = ref([] as any[])
 const searchLabel = ref('Search SNMP Interfaces')
 const searchVal = ref('')
-const isMounted = ref(false)
 const metricsModal = ref()
 const emptyListContent = {
   msg: 'No results found.'
 }
 const snmpInterfaces = computed(() => {
-  if (nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0 && isMounted.value) {
+  if (nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0) {
     return nodeStatusStore.node.snmpInterfaces
   }
   return []
 })
 const hasSNMPInterfaces = computed(() => {
-  return snmpInterfaces.value && snmpInterfaces.value.length > 0 && isMounted.value
+  return snmpInterfaces.value && snmpInterfaces.value.length > 0
 })
 const icons = markRaw({
   Traffic,
@@ -199,18 +197,17 @@ const sort = reactive({
   ifAdminStatus: SORT.NONE,
   ifOperatorStatus: SORT.NONE
 }) as any
-
-onMounted(() => {
-  isMounted.value = true
-})
-
-watch(() => [snmpInterfaces.value], () => {
-  if (snmpInterfaces.value?.length && isMounted.value) {
-    page.value = 1
-    pageSize.value = 10
+const updateSNMPInterfaces = () => {
+  if (hasSNMPInterfaces.value) {
     total.value = snmpInterfaces.value.length
     pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
+}
+onMounted(() => {
+  updateSNMPInterfaces()
+})
+watch(() => [snmpInterfaces.value], () => {
+  updateSNMPInterfaces()
 })
 // Function to retrieve objects for a given page
 const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
@@ -250,9 +247,6 @@ const routeToFlows = (exporter: DeepPartial<Exporter>) => {
   ]
   router.push('/flows').catch(() => 'Route to /flows unsuccessful.')
 }
-onBeforeUnmount(() => {
-  isMounted.value = false
-})
 </script>
 
 <style lang="scss" scoped>

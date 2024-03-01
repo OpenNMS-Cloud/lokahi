@@ -95,6 +95,7 @@ public class NodeServiceTest {
     private TagService tagService;
     private TagRepository tagRepository;
     private TagPublisher mockTagPublisher;
+    private ActiveDiscoveryMapper activeDiscoveryMapper;
 
     @BeforeEach
     void prepareTest() {
@@ -107,7 +108,7 @@ public class NodeServiceTest {
         tagService = mock(TagService.class);
         tagRepository = mock(TagRepository.class);
         mockTagPublisher = mock(TagPublisher.class);
-        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
+        activeDiscoveryMapper = mock(ActiveDiscoveryMapper.class);
 
         nodeService = new NodeService(
                 mockNodeRepository,
@@ -398,7 +399,7 @@ public class NodeServiceTest {
         NodeInfoResult testNodeInfoResult =
                 NodeInfoResult.newBuilder().setSystemName("x-system-name-x").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
+        activeDiscoveryMapper = mock(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,
@@ -435,7 +436,7 @@ public class NodeServiceTest {
         NodeInfoResult testNodeInfoResult =
                 NodeInfoResult.newBuilder().setSystemName("").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
+        activeDiscoveryMapper = mock(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,
@@ -473,7 +474,7 @@ public class NodeServiceTest {
         NodeInfoResult testNodeInfoResult =
                 NodeInfoResult.newBuilder().setSystemName("x-system-name-x").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
+        activeDiscoveryMapper = mock(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,
@@ -504,7 +505,7 @@ public class NodeServiceTest {
     @Test
     public void testUpdateMonitoredStatus() {
         NodeMapper nodeMapper = mock(NodeMapper.class);
-        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
+        activeDiscoveryMapper = mock(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,

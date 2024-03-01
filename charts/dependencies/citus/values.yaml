@@ -1,0 +1,24 @@
+OpenNMS: # we might be able to remove this
+  global:
+    image:
+      repository: opennms
+      tag: latest
+  
+citus:
+  enabled: false
+  workersEnabled: true
+  serviceName: postgres
+  pgBouncerPort: 30099
+  coordinatorvolumeSize: 4Gi
+  workerVolumeSize: 2Gi
+  adminUser: desenv
+  adminPassword: notset
+  openNMSPassword: notset
+  keycloakPassword: notset
+  inventoryPassword: notset
+  alertPassword: notset
+  eventsPassword: notset
+  dataChoicesPassword: notset
+  minionGatewayPassword: notset
+  notificationPassword: notset
+  grafanaPassword: notset

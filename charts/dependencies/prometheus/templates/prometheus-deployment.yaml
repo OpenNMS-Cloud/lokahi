@@ -1,0 +1,71 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.prometheus.serviceName }}
+  labels:
+    app: {{ .Values.prometheus.serviceName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.prometheus.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.prometheus.serviceName }}
+  template:
+    metadata:
+      labels:
+        appdomain: opennms
+        app: {{ .Values.prometheus.serviceName }}
+      annotations:
+        kubectl.kubernetes.io/default-container: "{{ .Values.prometheus.serviceName }}"
+    spec:
+      serviceAccountName: {{ .Values.prometheus.serviceName }}-sa
+      {{- if .Values.nodeRestrictions.enabled }}
+      nodeSelector:
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}
+      tolerations:
+        - effect: "NoSchedule"
+          key: "{{ .Values.nodeRestrictions.key }}"
+          operator: "Equal"
+          value: {{ .Values.nodeRestrictions.value }}
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: "{{ .Values.nodeRestrictions.key }}"
+                    operator: In
+                    values:
+                      - {{ .Values.nodeRestrictions.value }}
+      {{- end }}
+      volumes:
+        - name: prometheus-config-volume
+          configMap:
+            name: prometheus-config-map
+      containers:
+        - name: {{ .Values.prometheus.serviceName }}
+          image: {{ .Values.prometheus.image }}
+          ports:
+            - containerPort: {{ .Values.prometheus.port }}
+          resources:
+            limits:
+              cpu: {{ .Values.prometheus.resources.limits.cpu }}
+              memory: {{ .Values.prometheus.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.prometheus.resources.requests.cpu }}
+              memory: {{ .Values.prometheus.resources.requests.memory }}
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: "/etc/prometheus/prometheus.yml"
+              subPath: "prometheus.yml"
+          args:
+            # Keep the image built-in arguments (anyone know a future-proof way?)
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --web.console.libraries=/usr/share/prometheus/console_libraries
+            - --web.console.templates=/usr/share/prometheus/consoles
+            # Add the prefix /prometheus to the URLs so the paths going through the ingress will work
+            - --web.external-url=/prometheus
+            - --web.enable-remote-write-receiver
+{{- end }}

@@ -1,4 +1,4 @@
-{{- if .Values.Ingress.Enabled }}
+{{- if .Values.ingress.enabled }}
 # Source: ingress-nginx/templates/controller-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

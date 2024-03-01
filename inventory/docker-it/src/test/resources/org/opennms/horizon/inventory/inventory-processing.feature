@@ -67,3 +67,14 @@ Feature: Inventory Processing
     Then shutdown kafka consumer
 # TBD888 - Test multi-tenancy
 # TBD888 - Test Flows and Traps Configs published
+
+  @node-scan-interfaces
+  Scenario: Validate Node Scan processing adds IpInterfaces SnmpInterfaces and SystemInfo
+    Given Minion at location named "MINION" with system ID "MINION-TEST-1"
+    Then Add a device with IP address = "192.168.1.1" with label "test-label"
+    Then verify the device has an interface with the IpAddress "192.168.1.1"
+    Given Node Scan results with IpInterfaces "192.168.1.45" and SnmpInterfaces with ifName "eth0"
+    Then  Send node scan results to kafka topic "task-set.results"
+    Then verify node has IpInterface "192.168.1.45" and SnmpInterface with ifName "eth0"
+
+

@@ -1,52 +1,52 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.OpenNMS.Notification.ServiceName }}
+  name: {{ .Values.OpenNMS.notification.serviceName }}
   labels:
-    app: {{ .Values.OpenNMS.Notification.ServiceName }}
+    app: {{ .Values.OpenNMS.notification.serviceName }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.OpenNMS.Notification.ServiceName }}
-  replicas: {{ .Values.OpenNMS.Notification.Replicas }}
+      app: {{ .Values.OpenNMS.notification.serviceName }}
+  replicas: {{ .Values.OpenNMS.notification.replicas }}
   template:
     metadata:
       labels:
         appdomain: opennms
-        app: {{ .Values.OpenNMS.Notification.ServiceName }}
+        app: {{ .Values.OpenNMS.notification.serviceName }}
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
         # roll the deployment when the Spring boot environment variable configmap changes
         checksum/spring-boot-env-configmap: {{ include (print $.Template.BasePath "/opennms/spring-boot-env-configmap.yaml") . | sha256sum }}
-        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.Notification.ServiceName }}"
+        kubectl.kubernetes.io/default-container: "{{ .Values.OpenNMS.notification.serviceName }}"
     spec:
-      {{- if .Values.NodeRestrictions.Enabled }}
+      {{- if .Values.nodeRestrictions.enabled }}
       nodeSelector:                                                                                    
-        {{ .Values.NodeRestrictions.Key }}: {{ .Values.NodeRestrictions.Value }}                       
+        {{ .Values.nodeRestrictions.key }}: {{ .Values.nodeRestrictions.value }}                       
       tolerations:
         - effect: "NoSchedule"                                                                         
-          key: "{{ .Values.NodeRestrictions.Key }}"                                                    
+          key: "{{ .Values.nodeRestrictions.key }}"                                                    
           operator: "Equal"
-          value: {{ .Values.NodeRestrictions.Value }} 
+          value: {{ .Values.nodeRestrictions.value }} 
       affinity: 
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:                                             
           - weight: 1                                                                                  
             preference:                                                                                
               matchExpressions:                                                                        
-              - key: "{{ .Values.NodeRestrictions.Key }}"                                              
+              - key: "{{ .Values.nodeRestrictions.key }}"                                              
                 operator: In
                 values:                                                                                
-                - {{ .Values.NodeRestrictions.Value }}                                                 
+                - {{ .Values.nodeRestrictions.value }}                                                 
       {{- end }}
       volumes:
         - name: spring-boot-app-config-volume
           configMap:
             name: spring-boot-app-config
-      {{- if .Values.Citus.Enabled }}
+      {{- if .Values.citus.enabled }}
       initContainers:
         - name: wait-for-db
           image: postgres:16-alpine
@@ -55,23 +55,23 @@ spec:
           - -c
           - | 
             set -x;
-            while ! psql -U {{ .Values.Citus.AdminUser }} -h postgres -c 'select 1'; do
+            while ! psql -U {{ .Values.citus.adminUser }} -h postgres -c 'select 1'; do
               echo "Waiting for DB to be available"
               sleep 10
             done
             echo "Database is available"
       {{- end }}
       containers:
-        - name: {{ .Values.OpenNMS.Notification.ServiceName }}
-          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.Notification) | quote }}
-          imagePullPolicy: {{ .Values.OpenNMS.Notification.ImagePullPolicy }}
+        - name: {{ .Values.OpenNMS.notification.serviceName }}
+          image: {{ include "lokahi.image" (dict "Values" .Values "thisService" .Values.OpenNMS.notification) | quote }}
+          imagePullPolicy: {{ .Values.OpenNMS.notification.imagePullPolicy }}
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:MaxRAMPercentage=50 -javaagent:agent/opentelemetry-javaagent.jar -agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y"  # FIXME: Permanent debug port, enable only for dev mode
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.OpenNMS.global.kafkaClient.bootstrapServers }}"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://{{ .Values.OpenNMS.Notification.DbHost }}:5432/{{ .Values.OpenNMS.Notification.DbName }}?currentSchema={{ .Values.OpenNMS.Notification.DbSchemaName }}"
+              value: "jdbc:postgresql://{{ .Values.OpenNMS.notification.databaseHost }}:5432/{{ .Values.OpenNMS.notification.databaseName }}?currentSchema={{ .Values.OpenNMS.notification.databaseSchemaName }}"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -83,50 +83,50 @@ spec:
                   name: postgres
                   key: notificationPwd
             - name: SPRING_MAIL_FROM
-              value: "{{ .Values.OpenNMS.Notification.mailFrom }}"
+              value: "{{ .Values.OpenNMS.notification.mailFrom }}"
             - name: HORIZON_EMAIL_RETRY_DELAY
-              value: "{{ .Values.OpenNMS.Notification.retry.delay }}"
+              value: "{{ .Values.OpenNMS.notification.retry.delay }}"
             - name: HORIZON_EMAIL_RETRY_MAXDELAY
-              value: "{{ .Values.OpenNMS.Notification.retry.maxDelay }}"
+              value: "{{ .Values.OpenNMS.notification.retry.maxDelay }}"
             - name: HORIZON_EMAIL_RETRY_MULTIPLIER
-              value: "{{ .Values.OpenNMS.Notification.retry.multiplier }}"
+              value: "{{ .Values.OpenNMS.notification.retry.multiplier }}"
             - name: HORIZON_EMAIL_RETRY_MAX
-              value: "{{ .Values.OpenNMS.Notification.retry.max }}"
+              value: "{{ .Values.OpenNMS.notification.retry.max }}"
             - name: LOKAHI_BASEURL_URL
-              value: "{{ .Values.OpenNMS.Notification.baseUrl.url }}"
+              value: "{{ .Values.OpenNMS.notification.baseUrl.url }}"
             - name: LOKAHI_BASEURL_APPENDTENANTID
-              value: "{{ .Values.OpenNMS.Notification.baseUrl.appendTenantId }}"
-            {{- if .Values.OpenNMS.Notification.acsConnectionSecretName }}
+              value: "{{ .Values.OpenNMS.notification.baseUrl.appendTenantId }}"
+            {{- if .Values.OpenNMS.notification.acsConnectionSecretName }}
             - name: SPRING_MAIL_ACS_CONNECTION_STRING # spring.mail.acs-connection-string
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.OpenNMS.Notification.acsConnectionSecretName }}
+                  name: {{ .Values.OpenNMS.notification.acsConnectionSecretName }}
                   key: connection-string
             {{- else }}
             - name: SPRING_MAIL_HOST
-              value: "{{ .Values.OpenNMS.Notification.smtpHost }}"
+              value: "{{ .Values.OpenNMS.notification.smtpHost }}"
             - name: SPRING_MAIL_PORT
-              value: "{{ .Values.OpenNMS.Notification.smtpPort }}"
+              value: "{{ .Values.OpenNMS.notification.smtpPort }}"
             {{- end }}
             - name: HORIZON_KEYCLOAK_BASE_URL
-              value: "http://{{ .Values.Keycloak.ServiceName }}:{{ .Values.Keycloak.Port }}{{ .Values.Keycloak.Path }}/"
+              value: "http://{{ .Values.keycloak.serviceName }}:{{ .Values.keycloak.port }}{{ .Values.keycloak.path }}/"
             - name: HORIZON_KEYCLOAK_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.Keycloak.ServiceName }}-initial-admin
+                  name: {{ .Values.keycloak.serviceName }}-initial-admin
                   key: username
             - name: HORIZON_KEYCLOAK_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.Keycloak.ServiceName }}-initial-admin
+                  name: {{ .Values.keycloak.serviceName }}-initial-admin
                   key: password
             # Do not put any env variables below this. The lokahi.development.env include should be last
             # in the 'env' section so variables can be overridden with Helm chart values when needed.
-            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.Notification) | nindent 12 }}
+            {{- include "lokahi.deployment.env" (dict "Values" .Values "thisService" .Values.OpenNMS.notification) | nindent 12 }}
           envFrom:
           - configMapRef:
               name: spring-boot-env
-          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.Notification | indent 10 }}
+          {{- include "lokahi.kafkaSecretFrom" .Values.OpenNMS.notification | indent 10 }}
           ports:
             - name: grpc
               containerPort: 6565
@@ -157,12 +157,12 @@ spec:
             failureThreshold: 250
           resources:
             limits:
-              cpu: "{{ .Values.OpenNMS.Notification.Resources.Limits.Cpu }}"
-              memory: "{{ .Values.OpenNMS.Notification.Resources.Limits.Memory }}"
+              cpu: "{{ .Values.OpenNMS.notification.resources.limits.cpu }}"
+              memory: "{{ .Values.OpenNMS.notification.resources.limits.memory }}"
             requests:
-              cpu: "{{ .Values.OpenNMS.Notification.Resources.Requests.Cpu }}"
-              memory: "{{ .Values.OpenNMS.Notification.Resources.Requests.Memory }}"
-      {{- if .Values.OpenNMS.Notification.PrivateRepoEnabled }}
+              cpu: "{{ .Values.OpenNMS.notification.resources.requests.cpu }}"
+              memory: "{{ .Values.OpenNMS.notification.resources.requests.memory }}"
+      {{- if .Values.OpenNMS.notification.privateRepoEnabled }}
       imagePullSecrets:
         - name: image-credentials
       {{- end }}

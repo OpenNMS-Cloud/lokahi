@@ -3,7 +3,7 @@
     <div class="header">
       <div class="title-container">
         <span class="title">
-          {{ nodeStatusStore.isAzure ? 'Network Interfaces' : 'IP Interfaces' }}
+          {{ isAzure ? 'Network Interfaces' : 'IP Interfaces' }}
         </span>
       </div>
       <div class="action-container">
@@ -31,6 +31,7 @@
           <FeatherButton
               primary
               icon="Refresh"
+              @click.prevent="refresh"
             >
               <FeatherIcon :icon="fsIcons.Refresh"> </FeatherIcon>
             </FeatherButton>
@@ -65,11 +66,11 @@
             :key="ipInterface.id"
           >
             <td>{{ ipInterface.ipAddress }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.privateIpId }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.interfaceName }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress }}</td>
-            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpId }}</td>
-            <td v-if="nodeStatusStore.isAzure">
+            <td v-if="isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.privateIpId }}</td>
+            <td v-if="isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.interfaceName }}</td>
+            <td v-if="isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpAddress }}</td>
+            <td v-if="isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.publicIpId }}</td>
+            <td v-if="isAzure">
               <FeatherTooltip
                 title="Traffic"
               >
@@ -81,10 +82,10 @@
                 </FeatherButton>
               </FeatherTooltip>
             </td>
-            <td v-if="nodeStatusStore.isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.location }}</td>
-            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.hostname }}</td>
-            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.netmask }}</td>
-            <td v-if="!nodeStatusStore.isAzure">{{ ipInterface.snmpPrimary }}</td>
+            <td v-if="isAzure">{{ nodeStatusStore.node.azureInterfaces.get(ipInterface.azureInterfaceId)?.location }}</td>
+            <td v-if="!isAzure">{{ ipInterface.hostname }}</td>
+            <td v-if="!isAzure">{{ ipInterface.netmask }}</td>
+            <td v-if="!isAzure">{{ ipInterface.snmpPrimary }}</td>
           </tr>
         </TransitionGroup>
       </table>
@@ -110,7 +111,10 @@ import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import Search from '@featherds/icon/action/Search'
 import { SORT } from '@featherds/table'
+import { sortBy } from 'lodash'
+import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 const nodeStatusStore = useNodeStatusStore()
+const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
 
 const fsIcons = markRaw({
@@ -135,10 +139,35 @@ const page = ref(0)
 const pageSize = ref(0)
 const total = ref(0)
 const pageObjects = ref([] as any[])
+const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
+const isAzure = computed(() => {
+  return nodeStatusStore.isAzure
+})
+const hasIPInterfaces = computed(() => {
+  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0 && isMounted.value
+})
+const ipInterfaces = computed(() => {
+  if (hasIPInterfaces.value) {
+    let interfaces = [] as any[]
+    if (isAzure.value) {
+      nodeStatusStore?.node?.ipInterfaces?.forEach(element => {
+        interfaces.push(nodeStatusStore.node.azureInterfaces.get(element.azureInterfaceId))
+      })
+    } else {
+      interfaces = nodeStatusStore.node.ipInterfaces ?? []
+    }
+    return interfaces
+  }
+  return []
+})
 const columns = computed(() => {
-  if (nodeStatusStore.isAzure) {
+  if (isAzure.value) {
     return [
       { id: 'ipAddress', label: 'IP Address' },
       { id: 'privateIpId', label: 'Private IP ID' },
@@ -156,50 +185,61 @@ const columns = computed(() => {
     ]
   }
 })
-const hasIPInterfaces = computed(() => {
-  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
-})
-
-const ipInterfaces = computed(() => {
-  return hasIPInterfaces.value ? nodeStatusStore.node.ipInterfaces : []
-})
-
-watch(() => hasIPInterfaces.value, () => {
-  if (hasIPInterfaces.value) {
+watch([() => ipInterfaces.value, () => isMounted.value], () => {
+  if (ipInterfaces.value?.length && isMounted.value) {
     page.value = 1
     pageSize.value = 10
-    total.value = ipInterfaces.value?.length ?? 0
-    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], page.value, pageSize.value)
+    total.value = ipInterfaces.value.length
+    clonedInterfaces.value = ipInterfaces.value
+    pageObjects.value = getPageObjects(ipInterfaces.value, page.value, pageSize.value)
   }
 })
-
 // Function to retrieve objects for a given page
 const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
   const startIndex = (pageNumber - 1) * pageSize
   const endIndex = startIndex + pageSize
   return array.slice(startIndex, endIndex)
 }
-
 const sortChanged = (sortObj: Record<string, string>) => {
+  let sorted = [] as any
+  if (sortObj.value === 'asc') {
+    sorted = sortBy(ipInterfaces.value, sortObj.property)
+  } else if (sortObj.value === 'desc') {
+    sorted = sortBy(ipInterfaces.value, sortObj.property).reverse()
+  } else {
+    sorted = ipInterfaces.value
+  }
+  clonedInterfaces.value = sorted
+
+  page.value = 1
+  pageSize.value = 10
+  total.value = ipInterfaces.value.length
+
+  pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
   sort[sortObj.property] = sortObj.value
 }
-
 const updatePage = (v: number) => {
   if (hasIPInterfaces.value) {
-    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], v, pageSize.value)
+    total.value = ipInterfaces.value.length
+    pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
-
 const updatePageSize = (v: number) => {
   if (hasIPInterfaces.value) {
     pageSize.value = v
-    pageObjects.value = getPageObjects(ipInterfaces.value ?? [], page.value, v)
+    pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
+onBeforeUnmount(() => {
+  isMounted.value = false
+})
 
+const refresh = () => {
+  nodeStatusQueries.fetchNodeStatus()
+}
 const icons = markRaw({
   Traffic
 })

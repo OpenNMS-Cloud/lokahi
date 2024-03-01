@@ -67,7 +67,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -374,7 +373,6 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     }
 
     @Override
-    @Transactional
     public void getAlertsByNode(AlertRequestByNode request, StreamObserver<ListAlertsResponse> responseObserver) {
 
         int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;

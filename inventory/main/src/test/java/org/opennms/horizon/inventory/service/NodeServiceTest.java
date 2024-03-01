@@ -94,7 +94,6 @@ public class NodeServiceTest {
     private ConfigUpdateService mockConfigUpdateService;
     private TagService tagService;
     private TagRepository tagRepository;
-    private ActiveDiscoveryMapper activeDiscoveryMapper;
     private TagPublisher mockTagPublisher;
 
     @BeforeEach
@@ -399,6 +398,7 @@ public class NodeServiceTest {
         NodeInfoResult testNodeInfoResult =
                 NodeInfoResult.newBuilder().setSystemName("x-system-name-x").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
+        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,
@@ -435,6 +435,7 @@ public class NodeServiceTest {
         NodeInfoResult testNodeInfoResult =
                 NodeInfoResult.newBuilder().setSystemName("").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
+        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,
@@ -472,6 +473,7 @@ public class NodeServiceTest {
         NodeInfoResult testNodeInfoResult =
                 NodeInfoResult.newBuilder().setSystemName("x-system-name-x").build();
         NodeMapper nodeMapper = mock(NodeMapper.class);
+        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,
@@ -502,6 +504,7 @@ public class NodeServiceTest {
     @Test
     public void testUpdateMonitoredStatus() {
         NodeMapper nodeMapper = mock(NodeMapper.class);
+        ActiveDiscoveryMapper activeDiscoveryMapper = Mappers.getMapper(ActiveDiscoveryMapper.class);
         nodeService = new NodeService(
                 mockNodeRepository,
                 mockMonitoringLocationRepository,

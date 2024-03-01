@@ -1,5 +1,11 @@
 <template>
   <div class="full-page-container">
+    <InventoryTagModal
+      :visible="tagStore.isVisible"
+      :title="''"
+      :node="tagStore.activeNode"
+      :closeModal="tagStore.closeModal"
+    />
     <div class="header-wrapper">
       <div class="header">
         <div class="pre-title">Node Status</div>
@@ -83,6 +89,7 @@ import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useInventoryStore } from '@/store/Views/inventoryStore'
 import { useTagStore } from '@/store/Components/tagStore'
+import { NewInventoryNode } from '@/types'
 
 const nodeStatusStore = useNodeStatusStore()
 const queries = useNodeStatusQueries()
@@ -91,14 +98,16 @@ const { openModal, closeModal, isVisible } = useModal()
 const inventoryStore = useInventoryStore()
 const tagStore  = useTagStore()
 const onManageTags = () => {
-  console.log('Manage Tags clicked')
+  tagStore.openModal()
 }
 
 const updateFilteredTags = (nodeId: number) => {
   if (nodeId) {
     const filteredNodes = inventoryStore?.nodes?.filter((node) => node?.id === nodeId)
+    const [selectedNode] = filteredNodes
     const filteredTags = filteredNodes?.[0]?.tags || []
 
+    tagStore.setActiveNode(selectedNode as NewInventoryNode)
     tagStore.setFilteredTags(filteredTags)
   } else {
     tagStore.setFilteredTags([])

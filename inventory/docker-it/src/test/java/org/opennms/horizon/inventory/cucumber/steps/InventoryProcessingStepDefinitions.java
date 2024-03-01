@@ -101,6 +101,7 @@ public class InventoryProcessingStepDefinitions {
     private final String tagTopic = "tag-operation";
 
     private NodeScanResult nodeScanResult;
+    private NodeScanResult nodeScanForIpInterfaces;
 
     public enum PublishType {
         UPDATE,
@@ -715,5 +716,77 @@ public class InventoryProcessingStepDefinitions {
                 .getIpInterfaceList()
                 .stream()
                 .anyMatch(ipInterfaceDTO -> (ipInterfaceDTO.getIpAddress().equals(ipAddress))));
+    }
+
+    @Given("Node Scan results with IpInterfaces {string} and hostName {string}")
+    public void nodeScanResultsWithIpInterfacesAndHostName(String ipAddress, String hostName) {
+
+        nodeScanForIpInterfaces = NodeScanResult.newBuilder()
+                .setNodeId(node.getId())
+                .addIpInterfaces(IpInterfaceResult.newBuilder()
+                        .setIpAddress(ipAddress)
+                        .setIpHostName(hostName)
+                        .build())
+                .build();
+    }
+
+    @Then("verify node has IpInterface with hostName {string}")
+    public void verifyNodeHasIpInterfaceWithHostName(String hostName) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        await().atMost(10, TimeUnit.SECONDS)
+                .pollDelay(1, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .until(
+                        () -> nodeServiceBlockingStub
+                                .searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
+                                        .setNodeId(node.getId())
+                                        .setSearchTerm(hostName)
+                                        .build())
+                                .getIpInterfaceList()
+                                .stream()
+                                .anyMatch(ipInterfaceDTO -> (ipInterfaceDTO.getHostname() != null
+                                        && ipInterfaceDTO
+                                                .getHostname()
+                                                .toLowerCase()
+                                                .equals(hostName.toLowerCase()))),
+                        Matchers.is(true));
+
+        assertTrue(nodeServiceBlockingStub
+                .searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
+                        .setNodeId(node.getId())
+                        .setSearchTerm(hostName)
+                        .build())
+                .getIpInterfaceList()
+                .stream()
+                .anyMatch(ipInterfaceDTO -> (ipInterfaceDTO.getHostname() != null
+                        && ipInterfaceDTO.getHostname().toLowerCase().equals(hostName.toLowerCase()))));
+    }
+
+    @Then("Send node scan results to kafka topic for hostName and ipAddress {string}")
+    public void sendNodeScanResultsToKafkaTopicForHost(String topic) {
+        TaskResult taskResult = TaskResult.newBuilder()
+                .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
+                        .setSystemId(systemId)
+                        .build())
+                .setScannerResponse(ScannerResponse.newBuilder()
+                        .setResult(Any.pack(nodeScanForIpInterfaces))
+                        .build())
+                .build();
+
+        TenantLocationSpecificTaskSetResults taskSetResults = TenantLocationSpecificTaskSetResults.newBuilder()
+                .setTenantId(backgroundHelper.getTenantId())
+                .setLocationId(backgroundHelper.findLocationId(node.getLocation()))
+                .addResults(taskResult)
+                .build();
+
+        var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());
+
+        Properties producerConfig = new Properties();
+        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, backgroundHelper.getKafkaBootstrapUrl());
+        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
+        try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
+            kafkaProducer.send(producerRecord);
+        }
     }
 }

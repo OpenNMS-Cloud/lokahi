@@ -76,6 +76,8 @@ Feature: Inventory Processing
     Given Node Scan results with IpInterfaces "192.168.1.45" and SnmpInterfaces with ifName "eth0"
     Then  Send node scan results to kafka topic "task-set.results"
     Then verify node has IpInterface "192.168.1.45" and SnmpInterface with ifName "eth0"
-    Then verify node has IpInterface with ipAddress "192.168.1.45"
-
+    Given Node Scan results with IpInterfaces "192.168.1.48" and hostName "Local"
+    Then Send node scan results to kafka topic for hostName and ipAddress "task-set.results"
+    Then verify node has IpInterface with hostName "Local"
+    Then verify node has IpInterface with ipAddress "192.168.1.48"
 

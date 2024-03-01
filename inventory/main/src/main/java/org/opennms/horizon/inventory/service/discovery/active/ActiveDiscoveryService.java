@@ -22,7 +22,6 @@
 package org.opennms.horizon.inventory.service.discovery.active;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
@@ -54,7 +53,8 @@ public class ActiveDiscoveryService {
         });
         // updating nodes containing discovery id
         List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
-            .filter(node -> node.getDiscoveryIds().contains(id)).toList();
+                .filter(node -> node.getDiscoveryIds().contains(id))
+                .toList();
         nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
         nodeRepository.saveAll(nodeList);
     }

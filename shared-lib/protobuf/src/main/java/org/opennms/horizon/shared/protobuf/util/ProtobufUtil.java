@@ -48,22 +48,6 @@ public class ProtobufUtil {
         JsonFormat.parser().ignoringUnknownFields().merge(json, builder);
         return (T) builder.build();
     }
-
-    public static Object convertAnyToModel(ScannerResponse message) {
-        Any any = message.getResult();
-
-        try {
-            if (any.is(NodeScanResult.class)) {
-                return any.unpack(NodeScanResult.class);
-            } else {
-                throw new IllegalArgumentException("Unknown message type stored in Any");
-            }
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static String toJson(MessageOrBuilder messageOrBuilder) throws InvalidProtocolBufferException {
         return JsonFormat.printer().print(messageOrBuilder);
     }

@@ -13,6 +13,7 @@
             v-model.trim="searchVal"
             type="search"
             data-test="search-input"
+            @update:model-value="onSearchChange"
           >
             <template #pre>
               <FeatherIcon :icon="fsIcons.Search" />
@@ -118,7 +119,7 @@ import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { FeatherPagination } from '@featherds/pagination'
 import { SORT } from '@featherds/table'
-import { sortBy } from 'lodash'
+import { sortBy, filter, some, pick } from 'lodash'
 const nodeStatusStore = useNodeStatusStore()
 const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
@@ -148,6 +149,7 @@ const pageObjects = ref([] as any[])
 const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
+const searchableAttributes = ['ipAddress', 'hostname'];
 const emptyListContent = {
   msg: 'No results found.'
 }
@@ -229,7 +231,7 @@ const sortChanged = (sortObj: Record<string, string>) => {
 }
 const updatePage = (v: number) => {
   if (hasIPInterfaces.value) {
-    total.value = ipInterfaces.value.length
+    page.value = v
     pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
@@ -242,6 +244,33 @@ const updatePageSize = (v: number) => {
 
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
+}
+
+function onSearchChange(searchTerm: any) {
+  if (searchTerm.trim().length > 0) {
+      const searchObjects = filter(ipInterfaces.value, item => {
+      // Check if the searchTerm is found in any of the attributes
+      return some(pick(item, searchableAttributes), value => {
+        if (typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return true
+        } else if (`${value}`.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return true
+        } else {
+          return false
+        }
+      });
+    });
+
+    page.value = 1
+    total.value = searchObjects.length
+    clonedInterfaces.value = searchObjects
+    pageObjects.value = getPageObjects(searchObjects, page.value, pageSize.value)
+  } else {
+    page.value = 1
+    total.value = ipInterfaces.value.length
+    clonedInterfaces.value = ipInterfaces.value
+    pageObjects.value = getPageObjects(ipInterfaces.value, page.value, pageSize.value)
+  }
 }
 const icons = markRaw({
   Traffic

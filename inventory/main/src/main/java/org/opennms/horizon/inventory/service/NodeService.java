@@ -388,7 +388,6 @@ public class NodeService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(
             String tenantId, Long nodeId, String searchIpInterfaceTerm) {
 

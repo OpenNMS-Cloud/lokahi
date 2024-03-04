@@ -9,5 +9,6 @@ public class Constants {
     public static final String EVENTS_COL_EVENTS_UEI ="eventUei";
     public static final String EVENTS_COL_IPADDRESS="ipAddress";
     public static final String EVENTS_COL_LOCATION_NAME="locationName";
+    public static final String EVENTS_COL_TENANT_ID="tenantId";
 
 }

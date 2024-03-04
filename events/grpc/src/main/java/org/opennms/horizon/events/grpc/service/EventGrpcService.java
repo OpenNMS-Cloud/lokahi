@@ -91,7 +91,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     @Override
     public void searchEvents(EventsSearchBy request, StreamObserver<EventLog> responseObserver) {
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-        List<Event>  events = eventService.searchEvents(request);
+        List<Event>  events = eventService.searchEvents(tenantId,request);
         EventLog eventList = EventLog.newBuilder().setTenantId(tenantId).addAllEvents(events).build();
         responseObserver.onNext(eventList);
         responseObserver.onCompleted();

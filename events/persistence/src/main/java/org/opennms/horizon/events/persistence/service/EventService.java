@@ -55,11 +55,12 @@ public class EventService {
     }
 
 
-    public List<Event> searchEvents(EventsSearchBy searchBy)  {
-       return eventRepository.findAll(Specification.where(SearchEventsSpecification.hasDescription(searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasLocationName(searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasLogMessage(searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasEventsUei(searchBy.getNodeId(),searchBy.getSearchTerm())))
+    public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy)  {
+       return eventRepository.findAll(Specification.where(SearchEventsSpecification.hasDescription(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasLocationName(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasLogMessage(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasEventsUei(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
+               .or(SearchEventsSpecification.hasIpAddress(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm())))
            .stream().map(eventMapper::modelToDtoWithParams).filter(Objects::nonNull).collect(Collectors.toList());
 
     }

@@ -55,7 +55,7 @@ public class EventService {
     }
 
 
-    public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy)  {
+/*    public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy)  {
        return eventRepository.findAll(Specification.where(SearchEventsSpecification.hasDescription(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
                .or(SearchEventsSpecification.hasLocationName(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
                .or(SearchEventsSpecification.hasLogMessage(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
@@ -63,6 +63,10 @@ public class EventService {
                .or(SearchEventsSpecification.hasIpAddress(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm())))
            .stream().map(eventMapper::modelToDtoWithParams).filter(Objects::nonNull).collect(Collectors.toList());
 
-    }
+    }*/
+public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy) {
 
+    return eventRepository.findByNodeIdAndSearchTermAndTenantId(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm())
+        .stream().map(eventMapper::modelToDtoWithParams).filter(Objects::nonNull).collect(Collectors.toList());
+   }
 }

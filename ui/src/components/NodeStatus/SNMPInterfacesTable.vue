@@ -13,6 +13,7 @@
             v-model.trim="searchVal"
             type="search"
             data-test="search-input"
+            @update:model-value="onSearchChange"
           >
             <template #pre>
               <FeatherIcon :icon="icons.Search" />
@@ -140,6 +141,7 @@ import Flows from '@featherds/icon/action/SendWorkflow'
 import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
+import { filter, pick, some } from 'lodash'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -149,20 +151,22 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const pageObjects = ref([] as any[])
+const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search SNMP Interfaces')
 const searchVal = ref('')
+const searchableAttributes = ['ifName', 'ifDescr', 'ifAlias', "physicalAddr"];
 const metricsModal = ref()
 const emptyListContent = {
   msg: 'No results found.'
 }
+const hasSNMPInterfaces = computed(() => {
+  return nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0
+})
 const snmpInterfaces = computed(() => {
-  if (nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0) {
+  if (hasSNMPInterfaces.value) {
     return nodeStatusStore.node.snmpInterfaces
   }
   return []
-})
-const hasSNMPInterfaces = computed(() => {
-  return snmpInterfaces.value && snmpInterfaces.value.length > 0
 })
 const icons = markRaw({
   Traffic,
@@ -200,6 +204,7 @@ const sort = reactive({
 const updateSNMPInterfaces = () => {
   if (hasSNMPInterfaces.value) {
     total.value = snmpInterfaces.value.length
+    clonedInterfaces.value = snmpInterfaces.value
     pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
 }
@@ -223,14 +228,40 @@ const sortChanged = (sortObj: Record<string, string>) => {
 }
 const updatePage = (v: number) => {
   if (hasSNMPInterfaces.value) {
-    total.value = snmpInterfaces.value.length
-    pageObjects.value = getPageObjects(snmpInterfaces.value, v, pageSize.value)
+    page.value = v
+    pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
 const updatePageSize = (v: number) => {
   if (hasSNMPInterfaces.value) {
     pageSize.value = v
-    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, v)
+    pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
+  }
+}
+function onSearchChange(searchTerm: any) {
+  if (searchTerm.trim().length > 0) {
+      const searchObjects = filter(snmpInterfaces.value, item => {
+      // Check if the searchTerm is found in any of the attributes
+      return some(pick(item, searchableAttributes), value => {
+        if (typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return true
+        } else if (`${value}`.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return true
+        } else {
+          return false
+        }
+      });
+    });
+
+    page.value = 1
+    total.value = searchObjects.length
+    clonedInterfaces.value = searchObjects
+    pageObjects.value = getPageObjects(searchObjects, page.value, pageSize.value)
+  } else {
+    page.value = 1
+    total.value = snmpInterfaces.value.length
+    clonedInterfaces.value = snmpInterfaces.value
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
 }
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {

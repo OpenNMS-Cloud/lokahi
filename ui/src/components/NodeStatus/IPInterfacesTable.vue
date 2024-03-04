@@ -149,7 +149,7 @@ const pageObjects = ref([] as any[])
 const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
-const searchableAttributes = ['ipAddress', 'hostname'];
+const searchableAttributes = ['ipAddress', 'hostname']
 const emptyListContent = {
   msg: 'No results found.'
 }
@@ -248,7 +248,7 @@ const refresh = () => {
 
 function onSearchChange(searchTerm: any) {
   if (searchTerm.trim().length > 0) {
-      const searchObjects = filter(ipInterfaces.value, item => {
+    const searchObjects = filter(ipInterfaces.value, item => {
       // Check if the searchTerm is found in any of the attributes
       return some(pick(item, searchableAttributes), value => {
         if (typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -258,8 +258,8 @@ function onSearchChange(searchTerm: any) {
         } else {
           return false
         }
-      });
-    });
+      })
+    })
 
     page.value = 1
     total.value = searchObjects.length

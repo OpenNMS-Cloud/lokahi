@@ -446,7 +446,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     public void listSnmpInterfaces(SearchBy searchBy, StreamObserver<SnmpInterfacesList> responseObserver) {
         try {
             List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy);
-            ;
             responseObserver.onNext(
                     SnmpInterfacesList.newBuilder().addAllSnmpInterfaces(list).build());
             responseObserver.onCompleted();

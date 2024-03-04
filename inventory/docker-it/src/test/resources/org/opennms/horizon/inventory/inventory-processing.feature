@@ -76,8 +76,6 @@ Feature: Inventory Processing
     Then verify node has IpInterface "192.168.1.45" and SnmpInterface with ifName "eth0"
     Then verify node has SnmpInterface with ifName "eth0"
 
-# TBD888 - Test multi-tenancy
-# TBD888 - Test Flows and Traps Configs published
 
 
 

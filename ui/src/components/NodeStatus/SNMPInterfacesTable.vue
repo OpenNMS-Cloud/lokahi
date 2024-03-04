@@ -154,7 +154,7 @@ const pageObjects = ref([] as any[])
 const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search SNMP Interfaces')
 const searchVal = ref('')
-const searchableAttributes = ['ifName', 'ifDescr', 'ifAlias', "physicalAddr"];
+const searchableAttributes = ['ifName', 'ifDescr', 'ifAlias', 'physicalAddr']
 const metricsModal = ref()
 const emptyListContent = {
   msg: 'No results found.'
@@ -240,7 +240,7 @@ const updatePageSize = (v: number) => {
 }
 function onSearchChange(searchTerm: any) {
   if (searchTerm.trim().length > 0) {
-      const searchObjects = filter(snmpInterfaces.value, item => {
+    const searchObjects = filter(snmpInterfaces.value, item => {
       // Check if the searchTerm is found in any of the attributes
       return some(pick(item, searchableAttributes), value => {
         if (typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -250,8 +250,8 @@ function onSearchChange(searchTerm: any) {
         } else {
           return false
         }
-      });
-    });
+      })
+    })
 
     page.value = 1
     total.value = searchObjects.length

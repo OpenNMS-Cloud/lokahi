@@ -10,7 +10,7 @@
      <section class="node-labels">
       <h4 class="subhead-1">{{ node.nodeLabel }}</h4>
         <p class="subhead-2">
-          A tag is an optional label that you can associate with a node to filter and group of devices.
+          A tag is an optional label that you can associate with a node to filter and group devices.
         </p>
       <h4 class="subhead-1 existing-tags">Existing Tags</h4>
      </section>
@@ -30,7 +30,7 @@
               :results="tagQueries.tagsSearched.filter((t) => { return !tagStore.filteredTags.find((d) => d.name === t.name) }).map((d) => d.name)" :inputValue="inputValue" :textChanged="textChanged" />
     </template>
     <template #footer>
-      <FeatherButton secondary @click="closeModalHandler()">
+      <FeatherButton secondary @click="closeModalHandler">
         {{ modal.cancelLabel }}
       </FeatherButton>
       <FeatherButton primary @click="tagStore.saveFilteredTagsToNode">
@@ -83,7 +83,7 @@ const modal = ref<ModalPrimary>({
   hideTitle: true
 })
 
-const filteredTagsLength = computed(() => tagStore.filterTag.length)
+const filteredTagsLength = computed(() => tagStore.filteredTags.length)
 const originalTagsLength = computed(() => tagStore.originalTags.length)
 
 watchEffect(() => {
@@ -99,7 +99,7 @@ watchEffect(() => {
 
 const closeModalHandler = () => {
   if (filteredTagsLength.value !== originalTagsLength.value) {
-    tagStore.IsCheckedTagsList()
+    tagStore.isCheckedTagsList()
   }
   tagStore.closeModal()
 }
@@ -127,26 +127,26 @@ margin-bottom: var(--feather-spacing-s);
 
 <style lang="scss" scoped>
 
-.tag-modal-complete{
+.tag-modal-complete {
   margin-bottom: var(--feather-spacing-s);
   }
 
 .feather-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      justify-content: space-between;
-      .feather-col-6 {
-        h3 {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+    .feather-col-6 {
+      h3 {
         margin-bottom: var(--feather-spacing-m);
       }
-      :deep(.feather-icon){
+      :deep(.feather-icon) {
         width: 1.5em;
         height: 2em;
         margin-top: 5px;
       }
-      }
-  }
+    }
+}
 
 .existing-tags {
   margin-top: var(--feather-spacing-m);

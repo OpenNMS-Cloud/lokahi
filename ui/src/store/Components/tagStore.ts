@@ -31,8 +31,8 @@ export const useTagStore = defineStore('tagStore', () => {
     updateTagEditMode()
   }
 
-  const IsCheckedTagsList = () => {
-    const previousNodeTags = originalTags.value.filter((d: any) => filteredTags.value.filter((e: any) => e.id == d.id))
+  const isCheckedTagsList = () => {
+    const previousNodeTags = originalTags.value.filter((d) => filteredTags.value.some((e) => e.id === d.id))
     setFilteredTags(previousNodeTags)
   }
   
@@ -171,7 +171,7 @@ export const useTagStore = defineStore('tagStore', () => {
     updateTagEditMode,
     setFilteredTags,
     addFilteredTag,
-    IsCheckedTagsList,
+    isCheckedTagsList,
     saveFilteredTagsToNode,
     setActiveNode
   }

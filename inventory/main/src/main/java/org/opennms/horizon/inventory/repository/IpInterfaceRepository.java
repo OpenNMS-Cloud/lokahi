@@ -64,7 +64,10 @@ public interface IpInterfaceRepository extends JpaRepository<IpInterface, Long> 
 
     Optional<IpInterface> findByNodeIdAndSnmpPrimary(long nodeId, boolean snmpPrimary);
 
-    @Query("SELECT ip " + "FROM IpInterface ip " + "WHERE ip.tenantId = :tenantId " + "AND ip.node.id = :nodeId ")
+    @Query("SELECT ip FROM IpInterface ip " + "WHERE ip.tenantId = :tenantId "
+            + "AND ip.node.id = :nodeId "
+            + "AND (LOWER(ip.hostname) LIKE LOWER(CONCAT('%', :searchTerm, '%')) "
+            + "OR CAST( ip.ipAddress as string ) LIKE CONCAT('%', :searchTerm, '%'))")
     List<IpInterface> findAllByTenantIdAndNodeIdAndSearchTerm(
-            @Param("tenantId") String tenantId, @Param("nodeId") long nodeId);
+            @Param("tenantId") String tenantId, @Param("nodeId") long nodeId, @Param("searchTerm") String searchTerm);
 }

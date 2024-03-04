@@ -392,21 +392,10 @@ public class NodeService {
     public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(
             String tenantId, Long nodeId, String searchIpInterfaceTerm) {
 
-        List<IpInterface> ipInterfaces =
-                ipInterfaceRepository.findAllByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId).stream()
-                        .toList();
-
-        ipInterfaces = filterByIpAddressOrHostName(ipInterfaces, searchIpInterfaceTerm);
-        return ipInterfaces.stream().map(ipInterfaceMapper::modelToDTO).collect(Collectors.toList());
-    }
-
-    private List<IpInterface> filterByIpAddressOrHostName(List<IpInterface> ipInterfaces, String searchTerm) {
-        return ipInterfaces.stream()
-                .filter(ipInterface -> {
-                    return ipInterface.getIpAddress().toString().contains(searchTerm)
-                            || (ipInterface.getHostname() != null
-                                    && ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase()));
-                })
+        return ipInterfaceRepository
+                .findAllByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId, searchIpInterfaceTerm)
+                .stream()
+                .map(ipInterfaceMapper::modelToDTO)
                 .collect(Collectors.toList());
     }
 }

@@ -294,8 +294,8 @@ public class AlertTestSteps {
                 .setPageSize(pageSize)
                 .setPage(page)
                 .setSortAscending(true);
-        var ListAlertsResponse = clientUtils.getAlertServiceStub().getAlertsByNode(requestBuilder.build());
-        assertTrue(ListAlertsResponse.getAlertsList().size() > count);
+        var listAlertsResponse = clientUtils.getAlertServiceStub().getAlertsByNode(requestBuilder.build());
+        assertTrue(listAlertsResponse.getAlertsList().size() > count);
     }
     // ========================================
     // Internals

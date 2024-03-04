@@ -173,7 +173,11 @@ const validatorMap: Record<string, yup.Schema> = {
   [DiscoveryType.SyslogSNMPTraps]: passiveDiscoveryValidation
 }
 
-export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDiscovery) => {
+// customValidator should throw { message, path } on validation error
+export const clientToServerValidation = async (
+  selectedDiscovery: NewOrUpdatedDiscovery,
+  customValidator?: ((discovery: NewOrUpdatedDiscovery) => void)
+) => {
   const type = selectedDiscovery.type ?? ''
   const validatorToUse = validatorMap[type] ?? {validate: () => ({})}
 
@@ -182,10 +186,15 @@ export const clientToServerValidation = async (selectedDiscovery: NewOrUpdatedDi
   const convertedDiscovery = discoveryFromClientToServer(selectedDiscovery)
 
   try {
+    if (customValidator) {
+      customValidator(selectedDiscovery)
+    }
+
     await validatorToUse.validate(convertedDiscovery, { abortEarly: false })
   } catch (e) {
     validationErrors = validationErrorsToStringRecord(e as yup.ValidationError)
     isValid = false
   }
+
   return { isValid, validationErrors }
 }

@@ -2,7 +2,39 @@
   <TableCard>
     <div class="header">
       <div class="title-container">
-        <span class="title"> SNMP Interfaces </span>
+        <span class="title">
+          SNMP Interfaces
+        </span>
+      </div>
+      <div class="action-container">
+        <div class="search-container">
+          <FeatherInput
+            :label="searchLabel"
+            v-model.trim="searchVal"
+            type="search"
+            data-test="search-input"
+          >
+            <template #pre>
+              <FeatherIcon :icon="icons.Search" />
+            </template>
+          </FeatherInput>
+        </div>
+        <div class="download-csv">
+          <FeatherButton
+              primary
+              icon="Download"
+            >
+              <FeatherIcon :icon="icons.DownloadFile"> </FeatherIcon>
+            </FeatherButton>
+        </div>
+        <div class="refresh">
+          <FeatherButton
+              primary
+              icon="Refresh"
+            >
+              <FeatherIcon :icon="icons.Refresh"> </FeatherIcon>
+            </FeatherButton>
+        </div>
       </div>
     </div>
     <div class="container">
@@ -13,17 +45,16 @@
       >
         <thead>
           <tr>
-            <th scope="col">Alias</th>
-            <th scope="col">IP Addr</th>
-            <th scope="col">Graphs</th>
-            <th scope="col">Physical Addr</th>
-            <th scope="col">Index</th>
-            <th scope="col">Desc</th>
-            <th scope="col">Type</th>
-            <th scope="col">Name</th>
-            <th scope="col">Speed</th>
-            <th scope="col">Admin Status</th>
-            <th scope="col">Operator Status</th>
+            <FeatherSortHeader
+                v-for="col of columns"
+                :key="col.label"
+                scope="col"
+                :property="col.id"
+                :sort="(sort as any)[col.id]"
+                v-on:sort-changed="sortChanged"
+                >
+                {{ col.label }}
+              </FeatherSortHeader>
           </tr>
         </thead>
         <TransitionGroup
@@ -31,7 +62,7 @@
           tag="tbody"
         >
           <tr
-            v-for="snmpInterface in nodeStatusStore.node.snmpInterfaces"
+            v-for="snmpInterface in pageObjects"
             :key="snmpInterface.id"
           >
             <td>{{ snmpInterface.ifAlias }}</td>
@@ -78,30 +109,130 @@
           </tr>
         </TransitionGroup>
       </table>
+      <div v-if="!hasSNMPInterfaces">
+        <EmptyList
+          :content="emptyListContent"
+          data-test="empty-list"
+        />
+      </div>
+      <FeatherPagination
+      v-model="page"
+      :pageSize="pageSize"
+      :total="total"
+      @update:modelValue="updatePage"
+      @update:pageSize="updatePageSize"
+      class="ip-interfaces-pagination py-2"
+      v-if="hasSNMPInterfaces"
+    ></FeatherPagination>
     </div>
   </TableCard>
   <NodeStatusMetricsModal ref="metricsModal" />
 </template>
 
 <script lang="ts" setup>
-import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { useFlowsStore } from '@/store/Views/flowsStore'
-import { Exporter } from '@/types/graphql'
+import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { DeepPartial } from '@/types'
-import Traffic from '@featherds/icon/action/Workflow'
+import { Exporter } from '@/types/graphql'
+import DownloadFile from '@featherds/icon/action/DownloadFile'
+import Search from '@featherds/icon/action/Search'
 import Flows from '@featherds/icon/action/SendWorkflow'
+import Traffic from '@featherds/icon/action/Workflow'
+import Refresh from '@featherds/icon/navigation/Refresh'
+import { SORT } from '@featherds/table'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
 
+const page = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+const pageObjects = ref([] as any[])
+const searchLabel = ref('Search SNMP Interfaces')
+const searchVal = ref('')
 const metricsModal = ref()
-
+const emptyListContent = {
+  msg: 'No results found.'
+}
+const snmpInterfaces = computed(() => {
+  if (nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0) {
+    return nodeStatusStore.node.snmpInterfaces
+  }
+  return []
+})
+const hasSNMPInterfaces = computed(() => {
+  return snmpInterfaces.value && snmpInterfaces.value.length > 0
+})
 const icons = markRaw({
   Traffic,
-  Flows
+  Flows,
+  DownloadFile,
+  Refresh,
+  Search
 })
-
+const columns = [
+  { id: 'ifAlias', label: 'Alias' },
+  { id: 'ipAddress', label: 'IP Addr' },
+  { id: 'graphs', label: 'Graphs' },
+  { id: 'physicalAddr', label: 'Physical Addr' },
+  { id: 'ifIndex', label: 'Index' },
+  { id: 'ifDescr', label: 'Desc' },
+  { id: 'ifType', label: 'Type' },
+  { id: 'ifName', label: 'Name' },
+  { id: 'ifSpeed', label: 'Speed' },
+  { id: 'ifAdminStatus', label: 'Admin Status' },
+  { id: 'ifOperatorStatus', label: 'Operator Status' }
+]
+const sort = reactive({
+  ifAlias: SORT.NONE,
+  ipAddress: SORT.NONE,
+  graphs: SORT.NONE,
+  physicalAddr: SORT.NONE,
+  ifIndex: SORT.NONE,
+  ifDescr: SORT.NONE,
+  ifType: SORT.NONE,
+  ifName: SORT.NONE,
+  ifSpeed: SORT.NONE,
+  ifAdminStatus: SORT.NONE,
+  ifOperatorStatus: SORT.NONE
+}) as any
+const updateSNMPInterfaces = () => {
+  if (hasSNMPInterfaces.value) {
+    total.value = snmpInterfaces.value.length
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
+  }
+}
+onMounted(() => {
+  updateSNMPInterfaces()
+})
+watch(() => snmpInterfaces.value, () => {
+  updateSNMPInterfaces()
+})
+// Function to retrieve objects for a given page
+const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
+  const startIndex = (pageNumber - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  return array.slice(startIndex, endIndex)
+}
+const sortChanged = (sortObj: Record<string, string>) => {
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+  sort[sortObj.property] = sortObj.value
+}
+const updatePage = (v: number) => {
+  if (hasSNMPInterfaces.value) {
+    total.value = snmpInterfaces.value.length
+    pageObjects.value = getPageObjects(snmpInterfaces.value, v, pageSize.value)
+  }
+}
+const updatePageSize = (v: number) => {
+  if (hasSNMPInterfaces.value) {
+    pageSize.value = v
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, v)
+  }
+}
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {
   const { id: nodeId, nodeLabel } = nodeStatusStore.node
 
@@ -127,6 +258,7 @@ const routeToFlows = (exporter: DeepPartial<Exporter>) => {
 .header {
   display: flex;
   justify-content: space-between;
+  padding: 0px 10px;
   .title-container {
     display: flex;
     .title {
@@ -135,11 +267,26 @@ const routeToFlows = (exporter: DeepPartial<Exporter>) => {
       margin-top: 2px;
     }
   }
+  .action-container{
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    width: 30%;
+    >.search-container{
+      width: 80%;
+      margin-right: 5px;
+      :deep(.label-border) {
+        width: 130px !important;
+      }
+    }
+  }
 }
 
 .container {
   display: block;
   overflow-x: auto;
+  padding: 0px 15px;
+
   table {
     width: 100%;
     @include table.table;
@@ -154,6 +301,11 @@ const routeToFlows = (exporter: DeepPartial<Exporter>) => {
         padding: 0px 5px 0px 5px;
       }
     }
+  }
+
+  :deep(.ip-interfaces-pagination) {
+    border: none;
+    padding: 20px 0px;
   }
 }
 </style>

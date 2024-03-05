@@ -31,6 +31,11 @@ export const useTagStore = defineStore('tagStore', () => {
     updateTagEditMode()
   }
 
+  const isCheckedTagsList = () => {
+    const previousNodeTags = originalTags.value.filter((d) => filteredTags.value.some((e) => e.id === d.id))
+    setFilteredTags(previousNodeTags)
+  }
+  
   const addFilteredTag = (tag: Tag) => {
     if (!filteredTags.value.find((t) => t.name === tag.name)) {
       filteredTags.value = [...filteredTags.value].concat([tag])
@@ -162,9 +167,11 @@ export const useTagStore = defineStore('tagStore', () => {
     toggleTagsSelected,
     deactivateTag,
     filteredTags,
+    originalTags,
     updateTagEditMode,
     setFilteredTags,
     addFilteredTag,
+    isCheckedTagsList,
     saveFilteredTagsToNode,
     setActiveNode
   }

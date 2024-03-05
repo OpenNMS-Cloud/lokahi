@@ -39,5 +39,4 @@ Feature: Node
   Scenario: Search IpInterfaces by Node
     Given a new node with IpInterface along with node label "my-label" ip address "128.0.0.1" in location named "Default"
     Then verify that a new node is created with the ip address "128.0.0.1"
-    Then fetch a list of IpInterfaces by node using search term "128.0.0.1"
-    Then verify the list of IpInterfaces has size greater than 0
+    Then fetch a list of IpInterfaces by node using search term "128.0.0.1" and has size greater than 0

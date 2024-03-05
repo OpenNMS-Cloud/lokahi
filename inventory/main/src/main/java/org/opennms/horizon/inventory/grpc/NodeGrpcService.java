@@ -496,7 +496,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                                 .build());
                         responseObserver.onCompleted();
                     } catch (Exception e) {
-
+                        LOG.error("Error while searching IpInterfaces ", e);
                         Status status = Status.newBuilder()
                                 .setCode(Code.INTERNAL_VALUE)
                                 .setMessage(e.getMessage())

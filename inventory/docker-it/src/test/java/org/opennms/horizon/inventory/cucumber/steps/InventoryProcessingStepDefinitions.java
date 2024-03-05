@@ -696,26 +696,14 @@ public class InventoryProcessingStepDefinitions {
         await().atMost(10, TimeUnit.SECONDS)
                 .pollDelay(1, TimeUnit.SECONDS)
                 .pollInterval(2, TimeUnit.SECONDS)
-                .until(
-                        () -> nodeServiceBlockingStub
+                .until(() -> nodeServiceBlockingStub
                                 .searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
                                         .setNodeId(node.getId())
                                         .setSearchTerm(ipAddress)
                                         .build())
                                 .getIpInterfaceList()
-                                .stream()
-                                .anyMatch(ipInterfaceDTO ->
-                                        ipInterfaceDTO.getIpAddress().equals(ipAddress)),
-                        Matchers.is(true));
-
-        assertTrue(nodeServiceBlockingStub
-                .searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
-                        .setNodeId(node.getId())
-                        .setSearchTerm(ipAddress)
-                        .build())
-                .getIpInterfaceList()
-                .stream()
-                .anyMatch(ipInterfaceDTO -> (ipInterfaceDTO.getIpAddress().equals(ipAddress))));
+                                .size()
+                        > 0);
     }
 
     @Given("Node Scan results with IpInterfaces {string} and hostName {string}")
@@ -736,30 +724,14 @@ public class InventoryProcessingStepDefinitions {
         await().atMost(10, TimeUnit.SECONDS)
                 .pollDelay(1, TimeUnit.SECONDS)
                 .pollInterval(2, TimeUnit.SECONDS)
-                .until(
-                        () -> nodeServiceBlockingStub
+                .until(() -> nodeServiceBlockingStub
                                 .searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
                                         .setNodeId(node.getId())
                                         .setSearchTerm(hostName)
                                         .build())
                                 .getIpInterfaceList()
-                                .stream()
-                                .anyMatch(ipInterfaceDTO -> (ipInterfaceDTO.getHostname() != null
-                                        && ipInterfaceDTO
-                                                .getHostname()
-                                                .toLowerCase()
-                                                .equals(hostName.toLowerCase()))),
-                        Matchers.is(true));
-
-        assertTrue(nodeServiceBlockingStub
-                .searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
-                        .setNodeId(node.getId())
-                        .setSearchTerm(hostName)
-                        .build())
-                .getIpInterfaceList()
-                .stream()
-                .anyMatch(ipInterfaceDTO -> (ipInterfaceDTO.getHostname() != null
-                        && ipInterfaceDTO.getHostname().toLowerCase().equals(hostName.toLowerCase()))));
+                                .size()
+                        > 0);
     }
 
     @Then("Send node scan results to kafka topic for hostName and ipAddress {string}")

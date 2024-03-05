@@ -329,8 +329,8 @@ public class NodeStepDefinitions {
         assertEquals(ipAddress, node.getIpInterfaces(0).getIpAddress());
     }
 
-    @Then("fetch a list of IpInterfaces by node using search term {string}")
-    public void fetchAListOfIpInterfacesByNodeUsingSearchTerm(String searchTerm) {
+    @Then("fetch a list of IpInterfaces by node using search term {string} and has size greater than {int}")
+    public void fetchAListOfIpInterfacesByNodeUsingSearchTermAndHasSizeGreaterThan(String searchTerm, int size) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
                 .filter(fetch -> fetch.getIpInterfacesList().stream()
@@ -343,10 +343,7 @@ public class NodeStepDefinitions {
                 .setNodeId(node.getId())
                 .setSearchTerm(searchTerm)
                 .build());
-    }
 
-    @Then("verify the list of IpInterfaces has size greater than {int}")
-    public void verifyTheListOfIpInterfacesHasSizeGreaterThan(int size) {
         assertTrue(ipInterfaceList.getIpInterfaceCount() > size);
     }
 }

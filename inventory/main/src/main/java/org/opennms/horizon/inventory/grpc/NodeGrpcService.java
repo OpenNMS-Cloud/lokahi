@@ -489,7 +489,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         tenantIdOptional.ifPresentOrElse(
                 tenantId -> {
                     try {
-                        List<IpInterfaceDTO> ipInterfaceList = nodeService.listSearchIpInterfacesByQuery(
+                        List<IpInterfaceDTO> ipInterfaceList = nodeService.searchIpInterfaceByNodeAndSearchTerm(
                                 tenantId, request.getNodeId(), request.getSearchTerm());
                         responseObserver.onNext(IpInterfaceList.newBuilder()
                                 .addAllIpInterface(ipInterfaceList)

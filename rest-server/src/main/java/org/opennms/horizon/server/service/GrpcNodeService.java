@@ -227,7 +227,7 @@ public class GrpcNodeService {
             @GraphQLArgument(name = "searchTerm") String searchTerm) {
 
         return Flux.fromIterable(
-                client.listIpInterfacesByNodeSearch(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                client.searchIpInterfaceByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
                         .map(ipInterfaceMapper::protoToIpInterface)
                         .toList());
     }

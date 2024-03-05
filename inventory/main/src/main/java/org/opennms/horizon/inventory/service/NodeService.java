@@ -388,7 +388,7 @@ public class NodeService {
                 .toList();
     }
 
-    public List<IpInterfaceDTO> listSearchIpInterfacesByQuery(
+    public List<IpInterfaceDTO> searchIpInterfaceByNodeAndSearchTerm(
             String tenantId, Long nodeId, String searchIpInterfaceTerm) {
 
         return ipInterfaceRepository

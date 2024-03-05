@@ -26,10 +26,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.opennms.horizon.events.persistence.mapper.EventMapper;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
-import org.opennms.horizon.events.persistence.util.SearchEventsSpecification;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventsSearchBy;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,16 +52,6 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-
-/*    public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy)  {
-       return eventRepository.findAll(Specification.where(SearchEventsSpecification.hasDescription(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasLocationName(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasLogMessage(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasEventsUei(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm()))
-               .or(SearchEventsSpecification.hasIpAddress(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm())))
-           .stream().map(eventMapper::modelToDtoWithParams).filter(Objects::nonNull).collect(Collectors.toList());
-
-    }*/
 public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy) {
 
     return eventRepository.findByNodeIdAndSearchTermAndTenantId(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm())

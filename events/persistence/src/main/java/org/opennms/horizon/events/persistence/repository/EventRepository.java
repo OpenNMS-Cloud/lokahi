@@ -21,17 +21,15 @@
  */
 package org.opennms.horizon.events.persistence.repository;
 
-import java.net.InetAddress;
 import java.util.List;
 import org.opennms.horizon.events.persistence.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
+public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByTenantId(String tenantId);
 
     List<Event> findAllByTenantIdAndNodeId(String tenantId, long nodeId);

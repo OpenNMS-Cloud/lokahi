@@ -43,6 +43,7 @@ import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -128,8 +129,10 @@ public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationServ
             List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
                     .filter(node -> node.getDiscoveryIds().contains(id))
                     .toList();
-            nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
-            nodeRepository.saveAll(nodeList);
+            if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
+                nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+                nodeRepository.saveAll(nodeList);
+            }
             return true;
         } catch (Exception e) {
             log.error("Exception while deleting active discovery with id {}", id, e);

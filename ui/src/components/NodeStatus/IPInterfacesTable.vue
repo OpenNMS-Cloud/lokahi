@@ -120,6 +120,7 @@ import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { FeatherPagination } from '@featherds/pagination'
 import { SORT } from '@featherds/table'
+import { sortBy } from 'lodash'
 const nodeStatusStore = useNodeStatusStore()
 const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
@@ -211,33 +212,19 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   const endIndex = startIndex + pageSize
   return array.slice(startIndex, endIndex)
 }
-const sortByattributeAscending = (data: any[], attribute: string) => {
-  return data.sort((a, b) => {
-    if (a[attribute] < b[attribute]) return -1
-    if (a[attribute] > b[attribute]) return 1
-    return 0
-  })
-}
-const sortByAttributeDescending = (data: any[], attribute: string) => {
-  return data.sort((a, b) => {
-    if (a[attribute] < b[attribute]) return 1
-    if (a[attribute] > b[attribute]) return -1
-    return 0
-  })
-}
 const sortChanged = (sortObj: Record<string, string>) => {
-  let sorted = ipInterfaces.value
   if (sortObj.value === 'asc') {
-    sorted = sortByattributeAscending(ipInterfaces.value, sortObj.property)
+    clonedInterfaces.value = sortBy(ipInterfaces.value, sortObj.property)
   }
   if (sortObj.value === 'desc') {
-    sorted = sortByAttributeDescending(ipInterfaces.value, sortObj.property)
+    clonedInterfaces.value = sortBy(ipInterfaces.value, sortObj.property).reverse()
   }
-  clonedInterfaces.value = sorted
+  if (sortObj.value === 'none') {
+    clonedInterfaces.value = sortBy(ipInterfaces.value, 'id')
+  }
 
   page.value = 1
-
-  pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
+  pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, pageSize.value)
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }

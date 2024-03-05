@@ -141,6 +141,7 @@ import Flows from '@featherds/icon/action/SendWorkflow'
 import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
+import { sortBy } from 'lodash'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -220,6 +221,18 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   return array.slice(startIndex, endIndex)
 }
 const sortChanged = (sortObj: Record<string, string>) => {
+  if (sortObj.value === 'asc') {
+    clonedInterfaces.value = sortBy(snmpInterfaces.value, sortObj.property)
+  }
+  if (sortObj.value === 'desc') {
+    clonedInterfaces.value = sortBy(snmpInterfaces.value, sortObj.property).reverse()
+  }
+  if (sortObj.value === 'none') {
+    clonedInterfaces.value = sortBy(snmpInterfaces.value, 'id')
+  }
+
+  page.value = 1
+  pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, pageSize.value)
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }

@@ -35,7 +35,7 @@ export const useTagStore = defineStore('tagStore', () => {
     const previousNodeTags = originalTags.value.filter((d) => filteredTags.value.some((e) => e.id === d.id))
     setFilteredTags(previousNodeTags)
   }
-  
+
   const addFilteredTag = (tag: Tag) => {
     if (!filteredTags.value.find((t) => t.name === tag.name)) {
       filteredTags.value = [...filteredTags.value].concat([tag])

@@ -280,10 +280,10 @@
                 <artifactId>simpleclient</artifactId>
                 <version>${prometheus.version}</version>
             </dependency>
-           <dependency>
-               <groupId>javax.annotation</groupId>
-               <artifactId>javax.annotation-api</artifactId>
-               <version>${javax.annotation.version}</version>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annotation.version}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.annotation</groupId>
@@ -999,14 +999,14 @@
                         </licenseHeader>
                     </java>
                     <pom>
-                       <includes>
-                           <include>pom.xml</include>
-                       </includes>
-                       <sortPom />
-                       <licenseHeader>
-                           <file>${maven.multiModuleProjectDirectory}/spotless/header-xml.txt</file>
-                           <delimiter><![CDATA[<project]]></delimiter>
-                       </licenseHeader>
+                        <includes>
+                            <include>pom.xml</include>
+                        </includes>
+                        <sortPom />
+                        <licenseHeader>
+                            <file>${maven.multiModuleProjectDirectory}/spotless/header-xml.txt</file>
+                            <delimiter><![CDATA[<project]]></delimiter>
+                        </licenseHeader>
                     </pom>
                 </configuration>
             </plugin>

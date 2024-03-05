@@ -257,33 +257,29 @@ public class GrpcNodeService {
             StringBuilder csvData = new StringBuilder();
             var csvformat = CSVFormat.Builder.create()
                     .setHeader(
-                            "ID",
-                            "Node Id",
-                            "Alias",
-                            "Description",
-                            "Admin status",
-                            "Index",
-                            "Name",
-                            "Tenant id",
-                            "Operator status",
-                            "Speed",
-                            "Type")
+                            "ALIAS",
+                            "PHYSICAL ADDR",
+                            "INDEX",
+                            "DESC",
+                            "TYPE",
+                            "NAME",
+                            "SPEED",
+                            "ADMIN STATUS",
+                            "OPERATOR STATUS")
                     .build();
 
             CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
             for (SnmpInterfaceDTO dto : snmpInterfaceDTOS) {
                 csvPrinter.printRecord(
-                        dto.getId(),
-                        dto.getNodeId(),
                         dto.getIfAlias(),
-                        dto.getIfDescr(),
-                        dto.getIfAdminStatus(),
+                        dto.getPhysicalAddr(),
                         dto.getIfIndex(),
+                        dto.getIfDescr(),
+                        dto.getIfType(),
                         dto.getIfName(),
-                        dto.getTenantId(),
-                        dto.getIfOperatorStatus(),
                         dto.getIfSpeed(),
-                        dto.getIfType());
+                        dto.getIfAdminStatus(),
+                        dto.getIfOperatorStatus());
             }
             csvPrinter.flush();
             return new SnmpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);

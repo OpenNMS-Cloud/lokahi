@@ -60,7 +60,6 @@ import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
@@ -90,7 +89,6 @@ class NodeGrpcServiceTest {
     private NodeGrpcService target;
 
     private SnmpInterfaceService mockSnmpInterfaceService;
-    private SnmpInterfaceMapper mockSnmpInterfaceMapper;
     private Node testNode;
     private NodeDTO testNodeDTO1;
     private NodeDTO testNodeDTO2A;
@@ -151,8 +149,7 @@ class NodeGrpcServiceTest {
                 mockTenantLookup,
                 mockScannerTaskSetService,
                 mockMonitoringLocationService,
-                mockSnmpInterfaceService,
-                mockSnmpInterfaceMapper);
+                mockSnmpInterfaceService);
 
         //
         // Common test interactions

@@ -30,7 +30,6 @@ import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
-import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceSpecifications;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
@@ -41,7 +40,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SnmpInterfaceService {
     private final SnmpInterfaceRepository modelRepo;
-    private final NodeRepository nodeRepository;
     private final SnmpInterfaceMapper mapper;
 
     public List<SnmpInterfaceDTO> findByTenantId(String tenantId) {
@@ -65,15 +63,13 @@ public class SnmpInterfaceService {
                 });
     }
 
-    public List<SnmpInterfaceDTO> searchBy(SearchBy searchBy) {
+    public List<SnmpInterfaceDTO> searchBy(SearchBy searchBy, String tenantId) {
 
-        List<SnmpInterface> list = modelRepo.findAll(
-                Specification.where(SnmpInterfaceSpecifications.hasName(searchBy.getSearchTerm(), searchBy.getNodeId()))
-                        .or(SnmpInterfaceSpecifications.hasAlias(searchBy.getSearchTerm(), searchBy.getNodeId()))
-                        .or(SnmpInterfaceSpecifications.hasDesc(searchBy.getSearchTerm(), searchBy.getNodeId())
-                                .or(SnmpInterfaceSpecifications.hasPhysicalAddress(
-                                        searchBy.getSearchTerm(), searchBy.getNodeId()))));
-
-        return list.stream().map(mapper::modelToDTO).filter(Objects::nonNull).collect(Collectors.toList());
+        Specification<SnmpInterface> spec = SnmpInterfaceSpecifications.buildSpecification(
+                searchBy.getSearchTerm(), searchBy.getNodeId(), tenantId);
+        return modelRepo.findAll(spec).stream()
+                .map(mapper::modelToDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

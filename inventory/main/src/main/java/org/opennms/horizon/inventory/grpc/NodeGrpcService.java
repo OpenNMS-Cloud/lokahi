@@ -63,7 +63,6 @@ import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
-import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
@@ -98,7 +97,6 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final ScannerTaskSetService scannerService;
     private final MonitoringLocationService monitoringLocationService;
     private final SnmpInterfaceService snmpInterfaceService;
-    private final SnmpInterfaceMapper snmpInterfaceMapper;
     private final ThreadFactory threadFactory =
             new ThreadFactoryBuilder().setNameFormat("send-taskset-for-node-%d").build();
     // Add setter for unit testing
@@ -445,10 +443,15 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     @Override
     public void listSnmpInterfaces(SearchBy searchBy, StreamObserver<SnmpInterfacesList> responseObserver) {
         try {
-            List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy);
-            responseObserver.onNext(
-                    SnmpInterfacesList.newBuilder().addAllSnmpInterfaces(list).build());
-            responseObserver.onCompleted();
+            Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+            if (tenantIdOptional.isPresent()) {
+                List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy, tenantIdOptional.get());
+
+                responseObserver.onNext(SnmpInterfacesList.newBuilder()
+                        .addAllSnmpInterfaces(list)
+                        .build());
+                responseObserver.onCompleted();
+            }
         } catch (Exception e) {
             LOG.error("Error while getting snmpInterfaces", e);
             Status status = Status.newBuilder()

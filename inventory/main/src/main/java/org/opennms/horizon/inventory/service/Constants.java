@@ -32,4 +32,5 @@ public class Constants {
     public static final String SNMP_INTERFACE_COL_ALIAS = "ifAlias";
     public static final String SNMP_INTERFACE_COL_PHY_ADDR = "physicalAddr";
     public static final String SNMP_INTERFACE_COL_NODE_ID = "id";
+    public static final String SNMP_INTERFACE_COL_TENANT_ID = "tenantId";
 }

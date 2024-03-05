@@ -83,7 +83,7 @@ import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
-import { sortBy } from 'lodash'
+import { isEmpty, sortBy } from 'lodash'
 
 const nodeStatusStore = useNodeStatusStore()
 
@@ -91,7 +91,7 @@ const searchEvents = ref('')
 
 const searchableAttributes = ['uei', 'ipAddress', 'producedTime']
 
-const eventSearchedData = ref([])
+const eventSearchedData = ref([] as any[])
 
 const paginatedEvents = ref([] as any[])
 
@@ -136,7 +136,7 @@ const hasEvents = computed(() => eventData.value.events.length > 0)
 
 const updateEvents = () => {
   if (hasEvents.value) {
-    eventSearchedData.value = [...eventData.value.events] as any
+    eventSearchedData.value = [...eventData.value.events] as any[]
     pageInfo.total = eventData.value.events.length || 0
     updatePaginatedEvents(eventSearchedData.value, pageInfo.page, pageInfo.pageSize)
   }
@@ -191,15 +191,22 @@ const sortChanged = (sortObj: Record<string, string>) => {
   sort[sortObj.property] = sortObj.value
 }
 
-function onSearchChanged(searchTerm: any) {
+const onSearchChanged = (searchTerm: any) => {
+  let searchObjects
 
-  const searchObjects = eventSearchedData.value.filter((item: any) => {
-    return searchableAttributes.some((attribute) => {
-      const value = String(item[attribute]).toLowerCase()
-      return value.includes(searchTerm.toLowerCase())
+  if (isEmpty(searchTerm)) {
+    searchObjects = [...eventSearchedData.value]
+  } else {
+    const searchItem = searchTerm.toLowerCase()
+    searchObjects = eventSearchedData.value.filter((item: any) => {
+      return searchableAttributes.some((attribute) => {
+        const value = String(item[attribute]).toLowerCase()
+        return value.includes(searchItem)
+      })
     })
-  })
+  }
 
+  eventData.value.events = [...searchObjects]
   pageInfo.page = 1
   pageInfo.total = searchObjects?.length
 

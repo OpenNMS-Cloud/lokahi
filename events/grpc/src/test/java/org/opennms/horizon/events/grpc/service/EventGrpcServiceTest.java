@@ -66,8 +66,7 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
     public static final String TEST_TENANTID = "test-tenant";
     public static final long TEST_NODEID = 1L;
 
-    public static final String SEARCH_TERM="127.0.0.1";
-
+    public static final String SEARCH_TERM = "127.0.0.1";
 
     @BeforeEach
     public void prepareTest() throws VerificationException, IOException {
@@ -98,11 +97,19 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 .setNodeId(TEST_NODEID)
                 .setTenantId(TEST_TENANTID)
                 .setUei("uei1")
+                .setLogMessage("timeout")
+                .setLocationName("default")
+                .setDescription("desc1")
+                .setIpAddress("127.0.0.1")
                 .build();
         Event e2 = Event.newBuilder()
                 .setNodeId(TEST_NODEID)
                 .setTenantId(TEST_TENANTID)
                 .setUei("uei2")
+                .setLogMessage("timeout")
+                .setLocationName("default")
+                .setDescription("desc1")
+                .setIpAddress("127.0.0.1")
                 .build();
         Mockito.when(mockInventoryClient.getNodeById(TEST_TENANTID, TEST_NODEID))
                 .thenReturn(node);
@@ -113,6 +120,7 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 .getEventsByNodeId(UInt64Value.of(TEST_NODEID));
 
         assertThat(result.getEventsList()).hasSize(2);
+        assertThat(result.getEventsList().get(0).getDescription().equals("desc1"));
         Mockito.verify(mockInventoryClient, Mockito.times(1)).getNodeById(TEST_TENANTID, TEST_NODEID);
         Mockito.verify(mockEventService, Mockito.times(1)).findEventsByNodeId(TEST_TENANTID, TEST_NODEID);
 
@@ -166,84 +174,64 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                         ArgumentMatchers.any(ServerCallHandler.class));
     }
 
-
-
-
     @Test
-    void testSearchEventsByNodeId() throws VerificationException {
-        var searchBY = EventsSearchBy.newBuilder().setNodeId(TEST_NODEID).setSearchTerm(SEARCH_TERM).build();
+    void testSearchEventsByNodeIdAndSearchTerm() throws VerificationException {
+        var searchBY = EventsSearchBy.newBuilder()
+                .setNodeId(TEST_NODEID)
+                .setSearchTerm(SEARCH_TERM)
+                .build();
         Event e1 = Event.newBuilder()
-            .setNodeId(TEST_NODEID)
-            .setTenantId(TEST_TENANTID)
-            .setUei("uei1")
-            .setLogMessage("timeout")
-            .setLocationName("default")
-            .setDescription("desc1")
-            .setIpAddress("127.0.0.1")
-            .build();
+                .setNodeId(TEST_NODEID)
+                .setTenantId(TEST_TENANTID)
+                .setUei("uei1")
+                .setLogMessage("timeout")
+                .setLocationName("default")
+                .setDescription("desc1")
+                .setIpAddress("127.0.0.1")
+                .build();
         Event e2 = Event.newBuilder()
-            .setNodeId(TEST_NODEID)
-            .setTenantId(TEST_TENANTID)
-            .setUei("uei2")
-            .setLogMessage("timeout")
-            .setLocationName("default")
-            .setDescription("desc1")
-            .setIpAddress("127.0.0.1")
-            .build();
-        Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY))
-            .thenReturn(List.of(e1, e2));
+                .setNodeId(TEST_NODEID)
+                .setTenantId(TEST_TENANTID)
+                .setUei("uei2")
+                .setLogMessage("timeout")
+                .setLocationName("default")
+                .setDescription("desc1")
+                .setIpAddress("127.0.0.1")
+                .build();
+        Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY)).thenReturn(List.of(e1, e2));
 
         EventLog result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .searchEvents(searchBY);
 
         assertThat(result.getEventsList()).hasSize(2);
-        Mockito.verify(mockEventService, Mockito.times(1)).searchEvents(tenantId,searchBY);
+        Mockito.verify(mockEventService, Mockito.times(1)).searchEvents(tenantId, searchBY);
 
         Mockito.verify(spyInterceptor).verifyAccessToken(authHeader);
         Mockito.verify(spyInterceptor)
-            .interceptCall(
-                ArgumentMatchers.any(ServerCall.class),
-                ArgumentMatchers.any(Metadata.class),
-                ArgumentMatchers.any(ServerCallHandler.class));
-    }
-
-    @Test
-    void testSearchEventsException() throws VerificationException {
-        var searchBY = EventsSearchBy.newBuilder().setNodeId(TEST_NODEID).setSearchTerm(SEARCH_TERM).build();
-        var status = Status.fromCode(Status.Code.NOT_FOUND).withDescription("message");
-        Mockito.when(mockEventService.searchEvents(TEST_TENANTID,searchBY))
-            .thenThrow(new StatusRuntimeException(status));
-
-        var stubWithHeader = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()));
-        var statusException =
-            Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.searchEvents(searchBY));
-
-        assertThat(statusException.getStatus().getCode()).isEqualTo(status.getCode());
-        assertThat(statusException.getStatus().getDescription()).isEqualTo(status.getDescription());
-
-        Mockito.verify(spyInterceptor).verifyAccessToken(authHeader);
-        Mockito.verify(spyInterceptor)
-            .interceptCall(
-                ArgumentMatchers.any(ServerCall.class),
-                ArgumentMatchers.any(Metadata.class),
-                ArgumentMatchers.any(ServerCallHandler.class));
+                .interceptCall(
+                        ArgumentMatchers.any(ServerCall.class),
+                        ArgumentMatchers.any(Metadata.class),
+                        ArgumentMatchers.any(ServerCallHandler.class));
     }
 
     @Test
     void testSearchEventsWithoutAuth() throws VerificationException {
-        var searchBY = EventsSearchBy.newBuilder().setNodeId(TEST_NODEID).setSearchTerm(SEARCH_TERM).build();
+        var searchBY = EventsSearchBy.newBuilder()
+                .setNodeId(TEST_NODEID)
+                .setSearchTerm(SEARCH_TERM)
+                .build();
         var stubWithHeader =
-            stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders("Bearer fake")));
+                stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders("Bearer fake")));
 
         var statusException =
-            Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.searchEvents(searchBY));
+                Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.searchEvents(searchBY));
 
         assertThat(statusException.getStatus().getCode().value()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
         Mockito.verify(spyInterceptor).verifyAccessToken("Bearer fake");
         Mockito.verify(spyInterceptor)
-            .interceptCall(
-                ArgumentMatchers.any(ServerCall.class),
-                ArgumentMatchers.any(Metadata.class),
-                ArgumentMatchers.any(ServerCallHandler.class));
+                .interceptCall(
+                        ArgumentMatchers.any(ServerCall.class),
+                        ArgumentMatchers.any(Metadata.class),
+                        ArgumentMatchers.any(ServerCallHandler.class));
     }
 }

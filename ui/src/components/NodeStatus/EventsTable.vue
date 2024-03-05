@@ -10,6 +10,7 @@
             v-model.trim="searchEvents"
             type="search"
             data-test="search-input"
+            @update:model-value="onSearchChanged"
           >
             <template #pre>
               <FeatherIcon :icon="icons.Search" />
@@ -47,7 +48,7 @@
               </FeatherSortHeader>
           </tr>
         </thead>
-        <TransitionGroup name="data-table" tag="tbody" v-if="hasEvents">
+        <TransitionGroup name="data-table" tag="tbody" v-if="hasEvents && pageInfo.total">
           <tr v-for="event in paginatedEvents" :key="event.id as number" data-test="data-item">
             <td>{{ fnsFormat(event.producedTime, 'M/dd/yyyy HH:mm:ssxxx') }}</td>
             <td>{{ event.uei }}</td>
@@ -55,7 +56,7 @@
           </tr>
         </TransitionGroup>
       </table>
-      <div v-if="!hasEvents">
+      <div v-if="!hasEvents || pageInfo.total === 0">
         <EmptyList
           :content="emptyListContent"
           data-test="empty-list"
@@ -69,7 +70,7 @@
           @update:modelValue="onPageChanged"
           @update:pageSize="onPageSizeChanged"
           data-test="pagination"
-          v-if="hasEvents"
+          v-if="hasEvents && pageInfo.total"
         />
   </div>
   </TableCard>
@@ -87,6 +88,10 @@ import { sortBy } from 'lodash'
 const nodeStatusStore = useNodeStatusStore()
 
 const searchEvents = ref('')
+
+const searchableAttributes = ['uei', 'ipAddress', 'producedTime']
+
+const eventSearchedData = ref([] as any[])
 
 const paginatedEvents = ref([] as any[])
 
@@ -131,8 +136,9 @@ const hasEvents = computed(() => eventData.value.events.length > 0)
 
 const updateEvents = () => {
   if (hasEvents.value) {
+    eventSearchedData.value = [...eventData.value.events] as any[]
     pageInfo.total = eventData.value.events.length || 0
-    updatePaginatedEvents([...eventData.value.events], pageInfo.page, pageInfo.pageSize)
+    updatePaginatedEvents(eventSearchedData.value, pageInfo.page, pageInfo.pageSize)
   }
 }
 
@@ -184,6 +190,29 @@ const sortChanged = (sortObj: Record<string, string>) => {
   }
   sort[sortObj.property] = sortObj.value
 }
+
+const onSearchChanged = (searchTerm: any) => {
+  let searchObjects
+
+  if (searchTerm === '') {
+    searchObjects = [...eventSearchedData.value]
+  } else {
+    const searchItem = searchTerm.toLowerCase()
+    searchObjects = eventSearchedData.value.filter((item: any) => {
+      return searchableAttributes.some((attribute) => {
+        const value = String(item[attribute]).toLowerCase()
+        return value.includes(searchItem)
+      })
+    })
+  }
+
+  eventData.value.events = [...searchObjects]
+  pageInfo.page = 1
+  pageInfo.total = searchObjects?.length
+
+  updatePaginatedEvents(searchObjects, pageInfo.page, pageInfo.pageSize)
+}
+
 </script>
 
 <style lang="scss" scoped>

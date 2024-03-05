@@ -44,6 +44,7 @@
               hideLabel
               v-focus
               data-test="rule-name-input"
+              :error="store.validationErrors.ruleName"
               :readonly="store.selectedPolicy.isDefault"
             />
           </div>

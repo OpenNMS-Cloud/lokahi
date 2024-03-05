@@ -12,7 +12,8 @@ describe('Node Status Store', () => {
     vi.restoreAllMocks()
   })
 
-  it('Correctly calls the fetch exports query', async () => {
+  // Skipping this test until flows are fully enabled
+  it.skip('Correctly calls the fetch exports query', async () => {
     setActiveClient(useClient({ url: 'http://test/graphql' }))
 
     const store = useNodeStatusStore()

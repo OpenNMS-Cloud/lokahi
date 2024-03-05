@@ -22,5 +22,12 @@
 package org.opennms.horizon.server.model.alerts;
 
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
-public record EventDefinitionsByVendor(String vendor, List<AlertEventDefinition> alertEventDefinitionList) {}
+@Getter
+@Setter
+public class EventDefinitionsByVendor {
+    private String vendor;
+    private List<AlertEventDefinition> alertEventDefinitionList;
+}

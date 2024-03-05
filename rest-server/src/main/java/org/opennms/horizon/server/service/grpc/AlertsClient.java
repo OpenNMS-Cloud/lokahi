@@ -40,6 +40,7 @@ import org.opennms.horizon.alerts.proto.AlertResponse;
 import org.opennms.horizon.alerts.proto.AlertServiceGrpc;
 import org.opennms.horizon.alerts.proto.CountAlertResponse;
 import org.opennms.horizon.alerts.proto.DeleteAlertResponse;
+import org.opennms.horizon.alerts.proto.EventDefsByVendorRequest;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.Filter;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
@@ -269,22 +270,22 @@ public class AlertsClient {
                 .toList();
     }
 
-    public List<EventDefinitionsByVendor> listAlertEventDefinitionsByVendor(EventType eventType, String accessToken) {
+    public EventDefinitionsByVendor listAlertEventDefinitionsByVendor(
+            org.opennms.horizon.server.model.alerts.EventDefsByVendorRequest request, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
 
-        var request = ListAlertEventDefinitionsRequest.newBuilder()
-                .setEventType(eventType)
-                .build();
+        var requestProtoBuilder = EventDefsByVendorRequest.newBuilder()
+                .setEventType(EventType.valueOf(request.getEventType().name()));
+        if (request.getVendor() != null) {
+            requestProtoBuilder.setVendor(request.getVendor());
+        }
 
-        return alertEventDefinitionStub
+        var eventDefsByVendor = alertEventDefinitionStub
                 .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-                .listAlertEventDefinitionsByVendor(request)
-                .getEventDefinitionByVendorList()
-                .stream()
-                .map(eventDefinitionByVendorMapper::protoToEventDefinition)
-                .toList();
+                .listAlertEventDefinitionsByVendor(requestProtoBuilder.build());
+        return eventDefinitionByVendorMapper.protoToEventDefinition(eventDefsByVendor);
     }
 
     public List<String> listVendors(String accessToken) {

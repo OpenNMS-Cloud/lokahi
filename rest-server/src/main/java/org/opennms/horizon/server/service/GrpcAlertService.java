@@ -37,6 +37,7 @@ import org.opennms.horizon.server.model.alerts.AlertResponse;
 import org.opennms.horizon.server.model.alerts.CountAlertResponse;
 import org.opennms.horizon.server.model.alerts.DeleteAlertResponse;
 import org.opennms.horizon.server.model.alerts.EventDefinitionsByVendor;
+import org.opennms.horizon.server.model.alerts.EventDefsByVendorRequest;
 import org.opennms.horizon.server.model.alerts.ListAlertResponse;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
@@ -146,19 +147,19 @@ public class GrpcAlertService {
 
     @GraphQLQuery
     public Flux<AlertEventDefinition> listAlertEventDefinitions(
-            EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
+            @GraphQLArgument EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(alertsClient.listAlertEventDefinitions(eventType, headerUtil.getAuthHeader(env)));
     }
 
-    @GraphQLQuery
-    public Flux<EventDefinitionsByVendor> listEventDefinitionsByVendor(
-            EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(
-                alertsClient.listAlertEventDefinitionsByVendor(eventType, headerUtil.getAuthHeader(env)));
+    @GraphQLQuery(name = "alertEventDefsByVendor")
+    public Mono<EventDefinitionsByVendor> listEventDefinitionsByVendor(
+            @GraphQLArgument EventDefsByVendorRequest request, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Mono.just(alertsClient.listAlertEventDefinitionsByVendor(request, headerUtil.getAuthHeader(env)));
     }
 
-    @GraphQLQuery
-    public Flux<String> listVendors(EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
+    @GraphQLQuery(name = "listVendors")
+    public Flux<String> listVendors(
+            @GraphQLArgument EventType eventType, @GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(alertsClient.listVendors(headerUtil.getAuthHeader(env)));
     }
 

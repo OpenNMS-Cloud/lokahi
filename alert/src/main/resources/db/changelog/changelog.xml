@@ -35,4 +35,5 @@
     <include file="/db/changelog/hs-0.1.0/tables/drop_default_tenant.xml" />
     <include file="/db/changelog/hs-0.1.0/tables/update-event-definition-vendor-enterpriseid.xml" />
     <include file="/db/changelog/hs-0.1.0/data/event_definition_data_2.xml" />
+    <include file="/db/changelog/hs-0.1.0/tables/update-vendor-for-existing-event-defs.xml"/>
 </databaseChangeLog>

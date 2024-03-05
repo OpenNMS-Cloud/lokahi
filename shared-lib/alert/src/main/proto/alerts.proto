@@ -326,6 +326,11 @@ message EventDefinitionsByVendor {
   repeated AlertEventDefinitionProto eventDefinition = 2;
 }
 
+message EventDefsByVendorRequest {
+  EventType eventType = 1;
+  string  vendor = 2;
+}
+
 message ListEventDefinitionsByVendor {
   repeated  EventDefinitionsByVendor eventDefinitionByVendor = 1;
 }
@@ -333,5 +338,5 @@ message ListEventDefinitionsByVendor {
 service AlertEventDefinitionService {
   rpc listAlertEventDefinitions(ListAlertEventDefinitionsRequest) returns(ListAlertEventDefinitionsResponse);
   rpc listVendors(google.protobuf.Empty) returns (VendorList);
-  rpc listAlertEventDefinitionsByVendor(ListAlertEventDefinitionsRequest) returns(ListEventDefinitionsByVendor);
+  rpc listAlertEventDefinitionsByVendor(EventDefsByVendorRequest) returns(EventDefinitionsByVendor);
 }

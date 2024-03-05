@@ -26,15 +26,13 @@ import com.google.rpc.Status;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
 import org.opennms.horizon.alerts.proto.EventDefinitionsByVendor;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsResponse;
-import org.opennms.horizon.alerts.proto.ListEventDefinitionsByVendor;
 import org.opennms.horizon.alerts.proto.VendorList;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.opennms.horizon.alertservice.db.repository.EventDefinitionRepository;
@@ -92,27 +90,25 @@ public class AlertEventDefinitionGrpcService
 
     @Override
     public void listAlertEventDefinitionsByVendor(
-            org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest request,
-            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.ListEventDefinitionsByVendor>
-                    responseObserver) {
+            org.opennms.horizon.alerts.proto.EventDefsByVendorRequest request,
+            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.EventDefinitionsByVendor> responseObserver) {
 
         try {
-            List<EventDefinition> eventDefinitions = eventDefinitionRepository.findByEventType(request.getEventType());
-            var eventDefinitionListByVendor = eventDefinitions.stream()
+            List<EventDefinition> eventDefinitions;
+            if (StringUtils.isNotBlank(request.getVendor())) {
+                eventDefinitions =
+                        eventDefinitionRepository.findByEventTypeAndVendor(request.getEventType(), request.getVendor());
+            } else {
+                eventDefinitions = eventDefinitionRepository.findByEventType(request.getEventType());
+            }
+
+            var eventDefinitionList = eventDefinitions.stream()
+                    .filter(eventDefinition -> eventDefinition.getReductionKey() != null)
                     .map(eventDefinitionMapper::entityToProto)
-                    // Only filter events with reduction key
-                    .filter(alertEventDefinitionProto ->
-                            Strings.isNotBlank(alertEventDefinitionProto.getReductionKey()))
-                    .collect(Collectors.groupingBy(AlertEventDefinitionProto::getVendor))
-                    .entrySet()
-                    .stream()
-                    .map((entry) -> EventDefinitionsByVendor.newBuilder()
-                            .setVendor(entry.getKey())
-                            .addAllEventDefinition(entry.getValue())
-                            .build())
                     .toList();
-            responseObserver.onNext(ListEventDefinitionsByVendor.newBuilder()
-                    .addAllEventDefinitionByVendor(eventDefinitionListByVendor)
+            responseObserver.onNext(EventDefinitionsByVendor.newBuilder()
+                    .setVendor(request.getVendor())
+                    .addAllEventDefinition(eventDefinitionList)
                     .build());
             responseObserver.onCompleted();
         } catch (Exception e) {

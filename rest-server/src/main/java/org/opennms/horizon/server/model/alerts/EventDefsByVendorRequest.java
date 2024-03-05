@@ -19,21 +19,14 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.server.mapper.alert;
+package org.opennms.horizon.server.model.alerts;
 
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValueCheckStrategy;
-import org.opennms.horizon.server.model.alerts.EventDefinitionsByVendor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Mapper(
-        componentModel = "spring",
-        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
-        collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
-        uses = {AlertEventDefinitionMapper.class})
-public interface EventDefinitionByVendorMapper {
-
-    @Mapping(source = "eventDefinitionList", target = "alertEventDefinitionList")
-    EventDefinitionsByVendor protoToEventDefinition(org.opennms.horizon.alerts.proto.EventDefinitionsByVendor proto);
+@Getter
+@Setter
+public class EventDefsByVendorRequest {
+    private EventType eventType;
+    private String vendor;
 }

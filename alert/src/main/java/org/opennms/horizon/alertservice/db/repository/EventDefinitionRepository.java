@@ -37,4 +37,6 @@ public interface EventDefinitionRepository extends JpaRepository<EventDefinition
 
     @Query(value = "SELECT DISTINCT vendor FROM event_definition WHERE vendor IS NOT NULL", nativeQuery = true)
     List<String> findDistinctVendors();
+
+    List<EventDefinition> findByEventTypeAndVendor(EventType eventType, String vendor);
 }

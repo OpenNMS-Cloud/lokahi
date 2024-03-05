@@ -96,6 +96,8 @@ Feature: Monitor policy gRPC Functionality
     Given Tenant id "any-tenant"
     Then Validate whether we can load vendors of size greater than or equal to 175
 
+  @event-defs-by-vendor
   Scenario: Fetch event definitions for a given vendor
     Given Tenant id "any-tenant"
-    Then Fetch event defs for vendor "generic" and verify size is greater than or equal to 1
+    Then Fetch event defs for vendor "generic" and verify size is greater than or equal to 7
+    Then Fetch event defs for event type "INTERNAL" and verify size is greater than or equal to 1

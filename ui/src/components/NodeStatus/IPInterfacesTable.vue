@@ -119,7 +119,6 @@ import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { FeatherPagination } from '@featherds/pagination'
 import { SORT } from '@featherds/table'
-import { sortBy, filter, some, pick } from 'lodash'
 const nodeStatusStore = useNodeStatusStore()
 const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
@@ -211,13 +210,27 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   const endIndex = startIndex + pageSize
   return array.slice(startIndex, endIndex)
 }
+const sortByattributeAscending = (data: any[], attribute: string) => {
+  return data.sort((a, b) => {
+    if (a[attribute] < b[attribute]) return -1
+    if (a[attribute] > b[attribute]) return 1
+    return 0
+  })
+}
+const sortByAttributeDescending = (data: any[], attribute: string) => {
+  return data.sort((a, b) => {
+    if (a[attribute] < b[attribute]) return 1
+    if (a[attribute] > b[attribute]) return -1
+    return 0
+  })
+}
 const sortChanged = (sortObj: Record<string, string>) => {
   let sorted = ipInterfaces.value
   if (sortObj.value === 'asc') {
-    sorted = sortBy(ipInterfaces.value, sortObj.property)
+    sorted = sortByattributeAscending(ipInterfaces.value, sortObj.property)
   }
   if (sortObj.value === 'desc') {
-    sorted = sortBy(ipInterfaces.value, sortObj.property).reverse()
+    sorted = sortByAttributeDescending(ipInterfaces.value, sortObj.property)
   }
   clonedInterfaces.value = sorted
 
@@ -241,25 +254,20 @@ const updatePageSize = (v: number) => {
     pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
-
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
 }
-
-function onSearchChange(searchTerm: any) {
-  if (searchTerm.trim().length > 0) {
-    const searchObjects = filter(ipInterfaces.value, item => {
-      // Check if the searchTerm is found in any of the attributes
-      return some(pick(item, searchableAttributes), value => {
-        if (typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())) {
-          return true
-        } else if (`${value}`.toLowerCase().includes(searchTerm.toLowerCase())) {
-          return true
-        } else {
-          return false
-        }
-      })
+const searchPageObjects = (searchTerm: any) => {
+  return ipInterfaces.value.filter((item) => {
+    return searchableAttributes.some((attr) => {
+      const value = item[attr]
+      return value.toLowerCase().includes(searchTerm.toLowerCase())
     })
+  })
+}
+const onSearchChange = (searchTerm: any) => {
+  if (searchTerm.trim().length > 0) {
+    const searchObjects = searchPageObjects(searchTerm)
 
     page.value = 1
     total.value = searchObjects.length

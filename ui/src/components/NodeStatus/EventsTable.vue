@@ -83,7 +83,7 @@ import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
-import { isEmpty, sortBy } from 'lodash'
+import { sortBy } from 'lodash'
 
 const nodeStatusStore = useNodeStatusStore()
 
@@ -194,7 +194,7 @@ const sortChanged = (sortObj: Record<string, string>) => {
 const onSearchChanged = (searchTerm: any) => {
   let searchObjects
 
-  if (isEmpty(searchTerm)) {
+  if (searchTerm === '') {
     searchObjects = [...eventSearchedData.value]
   } else {
     const searchItem = searchTerm.toLowerCase()

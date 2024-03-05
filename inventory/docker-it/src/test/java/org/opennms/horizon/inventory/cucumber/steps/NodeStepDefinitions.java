@@ -329,20 +329,20 @@ public class NodeStepDefinitions {
         assertEquals(ipAddress, node.getIpInterfaces(0).getIpAddress());
     }
 
-    @Then("fetch a list of IpInterfaces by node using search term {string} and has size greater than {int}")
-    public void fetchAListOfIpInterfacesByNodeUsingSearchTermAndHasSizeGreaterThan(String searchTerm, int size) {
+    @Then("fetch a list of IpInterfaces by node using search term {string} that has size greater than {int}")
+    public void fetchAListOfIpInterfacesByNodeUsingSearchTermThatHasSizeGreaterThan(String searchTerm, int size) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
-                .filter(fetch -> fetch.getIpInterfacesList().stream()
-                        .anyMatch(ipInterface -> searchTerm.equals(ipInterface.getIpAddress())
-                                || ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase())))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
+            .filter(fetch -> fetch.getIpInterfacesList().stream()
+                .anyMatch(ipInterface -> searchTerm.equals(ipInterface.getIpAddress())
+                    || ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase())))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
 
         ipInterfaceList = nodeServiceBlockingStub.searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
-                .setNodeId(node.getId())
-                .setSearchTerm(searchTerm)
-                .build());
+            .setNodeId(node.getId())
+            .setSearchTerm(searchTerm)
+            .build());
 
         assertTrue(ipInterfaceList.getIpInterfaceCount() > size);
     }

@@ -67,6 +67,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -373,6 +374,7 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
     }
 
     @Override
+    @Transactional
     public void getAlertsByNode(AlertRequestByNode request, StreamObserver<ListAlertsResponse> responseObserver) {
 
         int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
@@ -390,7 +392,7 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             var alertPage = alertRepository.findAlertsByNodeId(tenantId, nodeId, pageRequest);
 
             List<Alert> alerts = alertPage.getContent().stream()
-                    .map(alert -> Alert.newBuilder(alertMapper.toProto(alert)).build())
+                    .map(this::getEnrichAlertProto)
                     .collect(Collectors.toList());
 
             ListAlertsResponse.Builder responseBuilder =
@@ -411,6 +413,31 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
                     .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }
+    }
+
+    private Alert getEnrichAlertProto(org.opennms.horizon.alertservice.db.entity.Alert dbAlert) {
+        var alertBuilder = Alert.newBuilder(alertMapper.toProto(dbAlert));
+        alertBuilder.addRuleName(dbAlert.getAlertCondition().getRule().getName());
+        alertBuilder.addPolicyName(
+                dbAlert.getAlertCondition().getRule().getPolicy().getName());
+
+        try {
+            Long nodeId = dbAlert.getNodeId();
+            var optionalNode = nodeRepository.findByIdAndTenantId(nodeId, dbAlert.getTenantId());
+            if (optionalNode.isPresent()) {
+                var node = optionalNode.get();
+                alertBuilder.setNodeName(node.getNodeLabel());
+                if (node.getMonitoringLocationId() != 0) {
+                    locationRepository
+                            .findByIdAndTenantId(node.getMonitoringLocationId(), node.getTenantId())
+                            .ifPresent(l -> alertBuilder.setLocation(l.getLocationName()));
+                }
+            }
+        } catch (Exception ex) {
+            LOG.error("Exception while retrieving node and location for alert", ex);
+        }
+
+        return alertBuilder.build();
     }
 
     private void getFilter(

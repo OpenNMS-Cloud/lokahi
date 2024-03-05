@@ -53,6 +53,8 @@ import org.opennms.horizon.server.model.inventory.TopNResponse;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -62,6 +64,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class GrpcNodeService {
     private static final String ICMP_MONITOR_TYPE = "ICMP";
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcNodeService.class);
 
     private final InventoryClient client;
     private final NodeMapper mapper;
@@ -197,8 +200,8 @@ public class GrpcNodeService {
                 });
     }
 
-    @GraphQLQuery(name = "getSnmpInterfaces")
-    public Flux<SnmpInterface> getSnmpInterfaces(
+    @GraphQLQuery(name = "searchSnmpInterfaces")
+    public Flux<SnmpInterface> searchSnmpInterfaces(
             @GraphQLArgument(name = "searchTerm") String searchTerm,
             @GraphQLArgument(name = "nodeId") Long nodeId,
             @GraphQLEnvironment ResolutionEnvironment env) {
@@ -234,15 +237,18 @@ public class GrpcNodeService {
                     .setHeader("Node Label", "Location", "Avg Response Time", "Reachability")
                     .build();
 
-            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
-            for (TopNNode topNNode : topNNodes) {
-                csvPrinter.printRecord(
-                        topNNode.getNodeLabel(),
-                        topNNode.getLocation(),
-                        topNNode.getAvgResponseTime(),
-                        topNNode.getReachability());
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (TopNNode topNNode : topNNodes) {
+                    csvPrinter.printRecord(
+                            topNNode.getNodeLabel(),
+                            topNNode.getLocation(),
+                            topNNode.getAvgResponseTime(),
+                            topNNode.getReachability());
+                }
+                csvPrinter.flush();
+            } catch (Exception e) {
+                LOG.error("Exception while printing records", e);
             }
-            csvPrinter.flush();
             return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
@@ -268,20 +274,23 @@ public class GrpcNodeService {
                             "OPERATOR STATUS")
                     .build();
 
-            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
-            for (SnmpInterfaceDTO dto : snmpInterfaceDTOs) {
-                csvPrinter.printRecord(
-                        dto.getIfAlias(),
-                        dto.getPhysicalAddr(),
-                        dto.getIfIndex(),
-                        dto.getIfDescr(),
-                        dto.getIfType(),
-                        dto.getIfName(),
-                        dto.getIfSpeed(),
-                        dto.getIfAdminStatus(),
-                        dto.getIfOperatorStatus());
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (SnmpInterfaceDTO dto : snmpInterfaceDTOs) {
+                    csvPrinter.printRecord(
+                            dto.getIfAlias(),
+                            dto.getPhysicalAddr(),
+                            dto.getIfIndex(),
+                            dto.getIfDescr(),
+                            dto.getIfType(),
+                            dto.getIfName(),
+                            dto.getIfSpeed(),
+                            dto.getIfAdminStatus(),
+                            dto.getIfOperatorStatus());
+                }
+                csvPrinter.flush();
+            } catch (Exception e) {
+                LOG.error("Exception while printing records", e);
             }
-            csvPrinter.flush();
             return new SnmpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);

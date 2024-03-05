@@ -536,7 +536,7 @@ public class InventoryClient {
                 .getValue();
     }
 
-    public List<IpInterfaceDTO> searchIpInterfaceByNodeAndSearchTerm(
+    public List<IpInterfaceDTO> searchIpInterfacesByNodeAndSearchTerm(
             Long nodeId, String ipInterfaceSearchTerm, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);

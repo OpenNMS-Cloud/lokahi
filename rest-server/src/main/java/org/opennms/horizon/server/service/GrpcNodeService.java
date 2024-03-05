@@ -221,13 +221,13 @@ public class GrpcNodeService {
     }
 
     @GraphQLQuery(name = "listIpInterfacesByNodeSearch")
-    public Flux<IpInterface> searchIpInterfaceByNodeAndSearchTerm(
+    public Flux<IpInterface> searchIpInterfacesByNodeAndSearchTerm(
             @GraphQLEnvironment ResolutionEnvironment env,
             @GraphQLArgument(name = "nodeId") Long nodeId,
             @GraphQLArgument(name = "searchTerm") String searchTerm) {
 
         return Flux.fromIterable(
-                client.searchIpInterfaceByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                client.searchIpInterfacesByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
                         .map(ipInterfaceMapper::protoToIpInterface)
                         .toList());
     }

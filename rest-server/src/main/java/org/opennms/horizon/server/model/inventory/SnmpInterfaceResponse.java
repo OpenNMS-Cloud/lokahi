@@ -27,6 +27,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class SnmpInterfaceResponse {
-    private byte[] snmpBytes;
+    private byte[] snmpInterfaceBytes;
     private DownloadFormat downloadFormat;
 }

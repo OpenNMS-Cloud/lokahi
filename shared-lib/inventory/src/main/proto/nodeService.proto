@@ -106,7 +106,7 @@ message NodeIdList {
 
 message SearchBy {
   string search_term = 1;
-  int64 node_id=2;
+  int64 node_id = 2;
 }
 message SnmpInterfacesList {
   repeated opennms.inventory.SnmpInterfaceDTO snmp_interfaces = 1;

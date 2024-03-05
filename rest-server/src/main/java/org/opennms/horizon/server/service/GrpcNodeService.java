@@ -217,9 +217,9 @@ public class GrpcNodeService {
         List<SnmpInterfaceDTO> list = client.listSnmpInterfaces(searchTerm, nodeId, headerUtil.getAuthHeader(env));
 
         try {
-            return Mono.just(generateDownloadableSnmpResponse(list, downloadFormat));
+            return Mono.just(generateDownloadableSnmpInterfaceResponse(list, downloadFormat));
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to download Snmp List");
+            throw new IllegalArgumentException("Failed to download Snmp Interface List");
         }
     }
 
@@ -248,8 +248,8 @@ public class GrpcNodeService {
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 
-    private static SnmpInterfaceResponse generateDownloadableSnmpResponse(
-            List<SnmpInterfaceDTO> snmpInterfaceDTOS, DownloadFormat downloadFormat) throws IOException {
+    private static SnmpInterfaceResponse generateDownloadableSnmpInterfaceResponse(
+            List<SnmpInterfaceDTO> snmpInterfaceDTOs, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
             downloadFormat = DownloadFormat.CSV;
         }
@@ -269,7 +269,7 @@ public class GrpcNodeService {
                     .build();
 
             CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
-            for (SnmpInterfaceDTO dto : snmpInterfaceDTOS) {
+            for (SnmpInterfaceDTO dto : snmpInterfaceDTOs) {
                 csvPrinter.printRecord(
                         dto.getIfAlias(),
                         dto.getPhysicalAddr(),

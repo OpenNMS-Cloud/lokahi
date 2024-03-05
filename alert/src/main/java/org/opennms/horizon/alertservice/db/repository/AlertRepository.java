@@ -147,8 +147,7 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     long countByTenantIdAndUnAcknowledged(@Param("tenantId") String tenantId);
 
     @Query(
-            value = "SELECT a FROM Alert a LEFT JOIN FETCH a.alertCondition " + "WHERE a.tenantId = :tenantId "
-                    + "AND a.nodeId = :nodeId ",
+            value = "SELECT a FROM Alert a " + "WHERE a.tenantId = :tenantId " + "AND a.nodeId = :nodeId ",
             countQuery =
                     "SELECT count(a) " + "FROM Alert a " + "WHERE a.tenantId = :tenantId " + "AND a.nodeId = :nodeId ")
     Page<Alert> findAlertsByNodeId(@Param("tenantId") String tenantId, @Param("nodeId") long nodeId, Pageable pageable);

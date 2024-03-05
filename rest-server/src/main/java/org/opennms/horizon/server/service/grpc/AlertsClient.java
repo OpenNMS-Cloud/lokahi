@@ -348,7 +348,7 @@ public class AlertsClient {
         final var request = AlertRequestByNode.newBuilder();
         request.setPageSize(pageSize)
                 .setPage(page)
-                .setSortBy(sortBy)
+                .setSortBy((sortBy == null) ? "id" : sortBy)
                 .setSortAscending(sortAscending)
                 .setNodeId(nodeId)
                 .build();

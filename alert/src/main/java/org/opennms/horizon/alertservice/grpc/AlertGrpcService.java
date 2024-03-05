@@ -386,8 +386,8 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
 
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
         try {
-            Page<org.opennms.horizon.alertservice.db.entity.Alert> alertPage;
-            alertPage = alertRepository.findAlertsByNodeId(tenantId, nodeId, pageRequest);
+
+            var alertPage = alertRepository.findAlertsByNodeId(tenantId, nodeId, pageRequest);
 
             List<Alert> alerts = alertPage.getContent().stream()
                     .map(alert -> Alert.newBuilder(alertMapper.toProto(alert)).build())
@@ -401,14 +401,13 @@ public class AlertGrpcService extends AlertServiceGrpc.AlertServiceImplBase {
             }
             responseBuilder.setLastPage(alertPage.getTotalPages() - 1);
             responseBuilder.setTotalAlerts(alertPage.getTotalElements());
-            ListAlertsResponse response = responseBuilder.build();
-            responseObserver.onNext(response);
+            responseObserver.onNext(responseBuilder.build());
             responseObserver.onCompleted();
         } catch (Exception e) {
             LOG.error("Error while getting alerts by nodeId {}", nodeId, e);
             Status status = Status.newBuilder()
-                    .setCode(Code.INTERNAL_VALUE)
-                    .setMessage("Error while getting alerts with nodeId {} " + nodeId + e.getMessage())
+                    .setCode(Code.NOT_FOUND_VALUE)
+                    .setMessage("Error while getting alerts")
                     .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }

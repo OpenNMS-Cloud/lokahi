@@ -134,14 +134,13 @@
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { DeepPartial } from '@/types'
-import { Exporter } from '@/types/graphql'
+import { Exporter, SnmpInterface } from '@/types/graphql'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Search from '@featherds/icon/action/Search'
 import Flows from '@featherds/icon/action/SendWorkflow'
 import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
-import { filter, pick, some } from 'lodash'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -238,20 +237,17 @@ const updatePageSize = (v: number) => {
     pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
-function onSearchChange(searchTerm: any) {
-  if (searchTerm.trim().length > 0) {
-    const searchObjects = filter(snmpInterfaces.value, item => {
-      // Check if the searchTerm is found in any of the attributes
-      return some(pick(item, searchableAttributes), value => {
-        if (typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())) {
-          return true
-        } else if (`${value}`.toLowerCase().includes(searchTerm.toLowerCase())) {
-          return true
-        } else {
-          return false
-        }
-      })
+const searchPageObjects = (searchTerm: any) => {
+  return snmpInterfaces.value.filter((item: SnmpInterface) => {
+    return searchableAttributes.some((attr) => {
+      const value = item[attr as unknown as keyof SnmpInterface]
+      return value.toLowerCase().includes(searchTerm.toLowerCase())
     })
+  })
+}
+const onSearchChange = (searchTerm: any) => {
+  if (searchTerm.trim().length > 0) {
+    const searchObjects = searchPageObjects(searchTerm)
 
     page.value = 1
     total.value = searchObjects.length

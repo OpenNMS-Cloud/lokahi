@@ -52,9 +52,13 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-public List<Event> searchEvents(String tenantId,EventsSearchBy searchBy) {
+    public List<Event> searchEvents(String tenantId, EventsSearchBy searchBy) {
 
-    return eventRepository.findByNodeIdAndSearchTermAndTenantId(tenantId,searchBy.getNodeId(),searchBy.getSearchTerm())
-        .stream().map(eventMapper::modelToDtoWithParams).filter(Objects::nonNull).collect(Collectors.toList());
-   }
+        return eventRepository
+                .findByNodeIdAndSearchTermAndTenantId(tenantId, searchBy.getNodeId(), searchBy.getSearchTerm())
+                .stream()
+                .map(eventMapper::modelToDtoWithParams)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 }

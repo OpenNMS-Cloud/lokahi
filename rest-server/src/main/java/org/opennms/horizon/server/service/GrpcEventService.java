@@ -57,10 +57,13 @@ public class GrpcEventService {
                 .toList());
     }
 
-     @GraphQLQuery(name="searchEvents")
-     public Flux<Event> searchEvents(@GraphQLArgument(name="nodeId") Long nodeId,@GraphQLArgument(name="searchTerm") String searchTerm,@GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.searchEvents(nodeId,searchTerm,headerUtil.getAuthHeader(env)).stream()
-            .map(mapper::protoToEvent)
-            .toList());
+    @GraphQLQuery(name = "searchEvents")
+    public Flux<Event> searchEvents(
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.searchEvents(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                .map(mapper::protoToEvent)
+                .toList());
     }
 }

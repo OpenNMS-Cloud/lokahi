@@ -75,13 +75,13 @@ public class EventsClient {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         EventsSearchBy searchEventsRequest = EventsSearchBy.newBuilder()
-            .setNodeId(nodeId)
-            .setSearchTerm(searchTerm)
-            .build();
+                .setNodeId(nodeId)
+                .setSearchTerm(searchTerm)
+                .build();
         return eventsStub
-            .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
-            .searchEvents(searchEventsRequest)
-            .getEventsList();
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .searchEvents(searchEventsRequest)
+                .getEventsList();
     }
 }

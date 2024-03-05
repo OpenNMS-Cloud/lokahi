@@ -35,16 +35,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByTenantIdAndNodeId(String tenantId, long nodeId);
 
     @Query("SELECT e " + "FROM Event e "
-        + " WHERE e.tenantId = :tenantId "
-        + " AND e.nodeId = :nodeId "
-        + " AND ( e.eventUei LIKE %:searchTerm% "
-        + " OR e.locationName LIKE %:searchTerm% "
-        + " OR e.description LIKE %:searchTerm% "
-        + " OR e.logMessage LIKE %:searchTerm% "
-        + " OR CAST( e.ipAddress  AS  string) LIKE %:searchTerm% )"
-        + " ORDER BY e.id")
+            + " WHERE e.tenantId = :tenantId "
+            + " AND e.nodeId = :nodeId "
+            + " AND ( e.eventUei LIKE %:searchTerm% "
+            + " OR e.locationName LIKE %:searchTerm% "
+            + " OR e.description LIKE %:searchTerm% "
+            + " OR e.logMessage LIKE %:searchTerm% "
+            + " OR CAST( e.ipAddress  AS  string) LIKE %:searchTerm% )"
+            + " ORDER BY e.id")
     List<Event> findByNodeIdAndSearchTermAndTenantId(
-        @Param("tenantId") String tenantId,
-        @Param("nodeId") Long nodeId,
-        @Param("searchTerm") String searchTerm);
+            @Param("tenantId") String tenantId, @Param("nodeId") Long nodeId, @Param("searchTerm") String searchTerm);
 }

@@ -73,13 +73,13 @@ public class Event {
     @JdbcTypeCode(SqlTypes.VARBINARY)
     private byte[] eventInfo;
 
-
     @Column(name = "location_name")
     private String locationName;
+
     @Column
     private String description;
 
-    @Column(name="log_message")
+    @Column(name = "log_message")
     private String logMessage;
 
     public EventParameters getEventParameters() {

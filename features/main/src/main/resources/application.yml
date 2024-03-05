@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: lokahi-inventory
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  liquibase:
+    change-log: db/changelog/changelog.xml
+
+  kafka:
+    bootstrap-servers: localhost:59092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+      group-id: "inventory-service"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+
+grpc:
+  server:
+    port: 6565
+    deadline: 60000
+
+  client:
+    minion-gateway:
+      host: opennms-minion-gateway
+      port: 8991
+      tlsEnabled: false
+      maxMessageSize: 10485760
+    alert:
+      url: opennms-alert:6565
+
+kafka:
+  topics:
+    minion-heartbeat: "heartbeat"
+    task-set-results: "task-set.results"
+    internal-events: "internal-event"
+    node: "node"
+    tag-operation: "tag-operation"
+    task-set-publisher: "task-set-publisher"
+  concurrency:
+    minion-heartbeat: 1
+    task-set-results: 1
+    internal-events: 1
+    tag-operation: 1
+
+
+keycloak:
+  realm: opennms
+  base-url: http://onms-keycloak:8080/auth
+
+inventory:
+  azure:
+    login-url: https://login.microsoftonline.com
+    management-url: https://management.azure.com
+    api-version: 2021-04-01
+    metrics-api-version: 2018-01-01
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always

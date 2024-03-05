@@ -113,6 +113,7 @@
 <script lang="ts" setup>
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import { IpInterface } from '@/types/graphql'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Search from '@featherds/icon/action/Search'
 import Traffic from '@featherds/icon/action/Workflow'
@@ -258,9 +259,9 @@ const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
 }
 const searchPageObjects = (searchTerm: any) => {
-  return ipInterfaces.value.filter((item) => {
+  return ipInterfaces.value.filter((item: IpInterface) => {
     return searchableAttributes.some((attr) => {
-      const value = item[attr]
+      const value = item[attr as unknown as keyof IpInterface]
       return value.toLowerCase().includes(searchTerm.toLowerCase())
     })
   })

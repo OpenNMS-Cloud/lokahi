@@ -116,7 +116,15 @@ public class NodeService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    public void updateNodeDiscoveryIds(long id, String tenantId, List<Long> discoveryIds) {
+        Optional<Node> nodeOptional = nodeRepository.findByIdAndTenantId(id, tenantId);
+        if (nodeOptional.isPresent()) {
+            final Node node =  nodeOptional.get();
+            node.setDiscoveryIds(discoveryIds);
+            nodeRepository.save(node);
+        }
+    }
+
     public List<ActiveDiscoveryDTO> getActiveDiscoveriesByIdList(String tenantId, List<Long> ids) {
         List<ActiveDiscovery> discoveries = discoveryRepository.findByTenantIdAndIdIn(tenantId, ids);
         return discoveryMapper.modelToDto(discoveries);
@@ -169,6 +177,7 @@ public class NodeService {
 
         node.setTenantId(tenantId);
         node.setNodeLabel(request.getLabel());
+        node.setDiscoveryIds(request.getDiscoveryIdsList());
         node.setScanType(scanType);
         if (request.hasMonitoredState()) {
             node.setMonitoredState(request.getMonitoredState());
@@ -226,6 +235,7 @@ public class NodeService {
                 throw new InventoryRuntimeException("Duplicate node alias with name " + alias);
             }
             node.setNodeAlias(request.getNodeAlias());
+            node.setDiscoveryIds(request.getDiscoveryIdsList());
         }
         return nodeRepository.save(node).getId();
     }

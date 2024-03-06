@@ -42,8 +42,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.Type;
 import org.opennms.horizon.inventory.component.NodeKafkaProducer;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.taskset.contract.ScanType;
@@ -63,7 +62,7 @@ public class Node {
     private String tenantId;
 
     @Column(name = "active_discovery_ids", columnDefinition = "bigint[]")
-    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Type(io.hypersistence.utils.hibernate.type.array.ListArrayType.class)
     private List<Long> discoveryIds = new ArrayList<>();
 
     @NotNull

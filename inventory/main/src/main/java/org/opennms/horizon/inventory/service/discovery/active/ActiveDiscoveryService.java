@@ -32,6 +32,7 @@ import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -53,9 +54,11 @@ public class ActiveDiscoveryService {
         });
         // updating nodes containing discovery id
         List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
-                .filter(node -> node.getDiscoveryIds().contains(id))
-                .toList();
-        nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
-        nodeRepository.saveAll(nodeList);
+            .filter(node -> node.getDiscoveryIds().contains(id))
+            .toList();
+        if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
+            nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+            nodeRepository.saveAll(nodeList);
+        }
     }
 }

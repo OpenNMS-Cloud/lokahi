@@ -77,4 +77,9 @@ Feature: Inventory Processing
     Then  Send node scan results to kafka topic "task-set.results"
     Then verify node has IpInterface "192.168.1.45" and SnmpInterface with ifName "eth0"
 
-
+  Scenario: Validate Discovery Scan processing adds discovery id to node
+    Given Minion at location named "MINION" with system ID "MINION-TEST-1"
+    Given New Active Discovery "stream-snmp" with IpAddress "192.168.1.1" and SNMP community as "stream-snmp" at location named "MINION"
+    Then create Active Discovery and validate it's created active discovery with given details.
+    Given Discovery Scan results with IpAddress "192.168.1.1"
+    Then Send discovery scan results to kafka topic "task-set.results" with location "MINION"

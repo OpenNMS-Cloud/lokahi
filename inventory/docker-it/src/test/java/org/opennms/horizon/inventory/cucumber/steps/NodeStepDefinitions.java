@@ -318,17 +318,6 @@ public class NodeStepDefinitions {
                 .build());
     }
 
-    @Then("verify that a new node is created with the ip address {string}")
-    public void verifyThatANewNodeIsCreatedWithTheIpAddress(String ipAddress) {
-        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-        NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
-                .filter(fetched -> ipAddress.equals(fetched.getIpInterfaces(0).getIpAddress()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Node " + ipAddress + " not found"));
-
-        assertEquals(ipAddress, node.getIpInterfaces(0).getIpAddress());
-    }
-
     @Then("fetch a list of IpInterfaces by node using search term {string} that has size greater than {int}")
     public void fetchAListOfIpInterfacesByNodeUsingSearchTermThatHasSizeGreaterThan(String searchTerm, int size) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();

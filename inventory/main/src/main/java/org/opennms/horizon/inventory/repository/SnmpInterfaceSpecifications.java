@@ -37,28 +37,25 @@ public class SnmpInterfaceSpecifications {
 
             if (search != null) {
 
-                Predicate condition1 = criteriaBuilder.equal(root.get(Constants.SNMP_INTERFACE_COL_NAME), search);
-                disjunction = criteriaBuilder.or(disjunction, condition1);
-
-                Predicate condition2 = criteriaBuilder.equal(root.get(Constants.SNMP_INTERFACE_COL_DESCR), search);
-                disjunction = criteriaBuilder.or(disjunction, condition2);
-
-                Predicate condition3 = criteriaBuilder.equal(root.get(Constants.SNMP_INTERFACE_COL_PHY_ADDR), search);
-                disjunction = criteriaBuilder.or(disjunction, condition3);
-
-                Predicate condition4 = criteriaBuilder.equal(root.get(Constants.SNMP_INTERFACE_COL_ALIAS), search);
-                disjunction = criteriaBuilder.or(disjunction, condition4);
+                Predicate likeName =
+                        criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_NAME), "%" + search + "%");
+                Predicate likeDesc =
+                        criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_DESCR), "%" + search + "%");
+                Predicate likePhyAddr =
+                        criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_PHY_ADDR), "%" + search + "%");
+                Predicate likeAlias =
+                        criteriaBuilder.like(root.get(Constants.SNMP_INTERFACE_COL_ALIAS), "%" + search + "%");
+                disjunction = criteriaBuilder.or(likeName, likeDesc, likePhyAddr, likeAlias);
             }
-
+            Predicate tenant = null;
             if (tenantId != null) {
-                conjunction = criteriaBuilder.and(
-                        conjunction, criteriaBuilder.equal(root.get(Constants.SNMP_INTERFACE_COL_TENANT_ID), tenantId));
+                tenant = criteriaBuilder.equal(root.get(Constants.SNMP_INTERFACE_COL_TENANT_ID), tenantId);
             }
+            Predicate node = null;
             if (nodeId != null) {
-                conjunction = criteriaBuilder.and(
-                        conjunction,
-                        criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), nodeId));
+                node = criteriaBuilder.equal(root.get("node").get(Constants.SNMP_INTERFACE_COL_NODE_ID), nodeId);
             }
+            conjunction = criteriaBuilder.and(tenant, node);
             return criteriaBuilder.and(conjunction, disjunction);
         };
     }

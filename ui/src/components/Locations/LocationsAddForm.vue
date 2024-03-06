@@ -58,7 +58,7 @@
             type="submit"
             primary
             data-test="save-button"
-            >save</ButtonWithSpinner
+            >save location</ButtonWithSpinner
           >
         </template>
       </FooterSection>

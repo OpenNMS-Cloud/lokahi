@@ -119,7 +119,7 @@ public class NodeService {
     public void updateNodeDiscoveryIds(long id, String tenantId, List<Long> discoveryIds) {
         Optional<Node> nodeOptional = nodeRepository.findByIdAndTenantId(id, tenantId);
         if (nodeOptional.isPresent()) {
-            final Node node =  nodeOptional.get();
+            final Node node = nodeOptional.get();
             node.setDiscoveryIds(discoveryIds);
             nodeRepository.save(node);
         }

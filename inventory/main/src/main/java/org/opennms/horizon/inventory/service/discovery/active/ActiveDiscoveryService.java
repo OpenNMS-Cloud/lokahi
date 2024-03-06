@@ -54,8 +54,8 @@ public class ActiveDiscoveryService {
         });
         // updating nodes containing discovery id
         List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
-            .filter(node -> node.getDiscoveryIds().contains(id))
-            .toList();
+                .filter(node -> node.getDiscoveryIds().contains(id))
+                .toList();
         if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
             nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
             nodeRepository.saveAll(nodeList);

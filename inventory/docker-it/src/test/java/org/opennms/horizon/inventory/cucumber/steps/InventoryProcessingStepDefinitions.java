@@ -695,56 +695,58 @@ public class InventoryProcessingStepDefinitions {
                 .anyMatch(snmpInterfaceDTO -> snmpInterfaceDTO.getIfName().equals(ifName)));
     }
 
-    @Given("New Active Discovery {string} with IpAddress {string} and SNMP community as {string} at location named {string}")
+    @Given(
+            "New Active Discovery {string} with IpAddress {string} and SNMP community as {string} at location named {string}")
     public void newActiveDiscoveryWithIpAddressAndSNMPCommunityAsAtLocation(
-        String name, String ipAddress, String snmpReadCommunity, String location) {
+            String name, String ipAddress, String snmpReadCommunity, String location) {
         icmpDiscovery = IcmpActiveDiscoveryCreateDTO.newBuilder()
-            .setName(name)
-            .addIpAddresses(ipAddress)
-            .setSnmpConfig(SNMPConfigDTO.newBuilder()
-                .addReadCommunity(snmpReadCommunity)
-                .build())
-            .setLocationId(backgroundHelper.findLocationId(location))
-            .build();
+                .setName(name)
+                .addIpAddresses(ipAddress)
+                .setSnmpConfig(SNMPConfigDTO.newBuilder()
+                        .addReadCommunity(snmpReadCommunity)
+                        .build())
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .build();
     }
 
     @Then("create Active Discovery and validate it's created active discovery with given details.")
     public void createActiveDiscoveryAndValidateItSCreatedActiveDiscoveryWithGivenDetails() {
         var icmpDiscoveryDto =
-            backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
+                backgroundHelper.getIcmpActiveDiscoveryServiceBlockingStub().createDiscovery(icmpDiscovery);
         activeDiscoveryId = icmpDiscoveryDto.getId();
         Assertions.assertEquals(icmpDiscovery.getLocationId(), icmpDiscoveryDto.getLocationId());
         Assertions.assertEquals(icmpDiscovery.getIpAddresses(0), icmpDiscoveryDto.getIpAddresses(0));
         Assertions.assertEquals(
-            icmpDiscovery.getSnmpConfig().getReadCommunity(0),
-            icmpDiscoveryDto.getSnmpConfig().getReadCommunity(0));
+                icmpDiscovery.getSnmpConfig().getReadCommunity(0),
+                icmpDiscoveryDto.getSnmpConfig().getReadCommunity(0));
     }
 
     @Given("Discovery Scan results with IpAddress {string}")
     public void discoveryScanResultsWithIpAddress(String ipAddress) {
 
         discoveryScanResult = DiscoveryScanResult.newBuilder()
-            .addPingResponse(PingResponse.newBuilder().setIpAddress(ipAddress).build())
-            .setActiveDiscoveryId(activeDiscoveryId)
-            .build();
+                .addPingResponse(
+                        PingResponse.newBuilder().setIpAddress(ipAddress).build())
+                .setActiveDiscoveryId(activeDiscoveryId)
+                .build();
     }
 
     @Then("Send discovery scan results to kafka topic {string} with location {string}")
     public void sendDiscoveryScanResultsToKafkaTopic(String topic, String location) {
         TaskResult taskResult = TaskResult.newBuilder()
-            .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
-                .setSystemId(systemId)
-                .build())
-            .setScannerResponse(ScannerResponse.newBuilder()
-                .setResult(Any.pack(discoveryScanResult))
-                .build())
-            .build();
+                .setIdentity(org.opennms.taskset.contract.Identity.newBuilder()
+                        .setSystemId(systemId)
+                        .build())
+                .setScannerResponse(ScannerResponse.newBuilder()
+                        .setResult(Any.pack(discoveryScanResult))
+                        .build())
+                .build();
 
         TenantLocationSpecificTaskSetResults taskSetResults = TenantLocationSpecificTaskSetResults.newBuilder()
-            .setTenantId(backgroundHelper.getTenantId())
-            .setLocationId(backgroundHelper.findLocationId(location))
-            .addResults(taskResult)
-            .build();
+                .setTenantId(backgroundHelper.getTenantId())
+                .setLocationId(backgroundHelper.findLocationId(location))
+                .addResults(taskResult)
+                .build();
 
         var producerRecord = new ProducerRecord<String, byte[]>(topic, taskSetResults.toByteArray());
 
@@ -758,31 +760,30 @@ public class InventoryProcessingStepDefinitions {
     }
 
     @Then("verify that node is created for {string} and location named {string} with discoveryId")
-    public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(
-        String ipAddress, String location) {
+    public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(String ipAddress, String location) {
         String locationId = backgroundHelper.findLocationId(location);
         await().atMost(60, TimeUnit.SECONDS)
-            .pollDelay(1, TimeUnit.SECONDS)
-            .pollInterval(2, TimeUnit.SECONDS)
-            .until(() -> {
-                try {
-                    var nodeId = backgroundHelper
-                        .getNodeServiceBlockingStub()
-                        .getNodeIdFromQuery(NodeIdQuery.newBuilder()
-                            .setLocationId(locationId)
-                            .setIpAddress(ipAddress)
-                            .build());
-                    return nodeId != null && nodeId.getValue() != 0;
-                } catch (Exception e) {
-                    return false;
-                }
-            });
+                .pollDelay(1, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .until(() -> {
+                    try {
+                        var nodeId = backgroundHelper
+                                .getNodeServiceBlockingStub()
+                                .getNodeIdFromQuery(NodeIdQuery.newBuilder()
+                                        .setLocationId(locationId)
+                                        .setIpAddress(ipAddress)
+                                        .build());
+                        return nodeId != null && nodeId.getValue() != 0;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
         var nodeId = backgroundHelper
-            .getNodeServiceBlockingStub()
-            .getNodeIdFromQuery(NodeIdQuery.newBuilder()
-                .setLocationId(locationId)
-                .setIpAddress(ipAddress)
-                .build());
+                .getNodeServiceBlockingStub()
+                .getNodeIdFromQuery(NodeIdQuery.newBuilder()
+                        .setLocationId(locationId)
+                        .setIpAddress(ipAddress)
+                        .build());
         var nodeDto = backgroundHelper.getNodeServiceBlockingStub().getNodeById(nodeId);
         // validate that node has discovery id
         Assertions.assertTrue(nodeDto.getDiscoveryIdsList().contains(activeDiscoveryId));

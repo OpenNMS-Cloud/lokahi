@@ -24,31 +24,10 @@ package org.opennms.horizon.server.model.alerts;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.opennms.horizon.alerts.proto.Severity;
 
 @Getter
 @Setter
-public class Alert {
-    private long databaseId;
-    private String uei;
-    private String reductionKey;
-    private String clearKey;
-    private AlertType type;
-    private long counter;
-    private Severity severity;
-    private String description;
-    private String logMessage;
-    private String location;
-    private ManagedObject managedObject;
-    private long firstEventTimeMs;
-    private long lastEventId;
-    private long lastUpdateTimeMs;
-    private boolean isAcknowledged;
-    private String ackUser;
-    private long ackTimeMs;
-    private String nodeName;
-    private String label;
-    private List<String> ruleNameList;
-    private List<String> policyNameList;
-    private long nodeId;
+public class EventDefinitionsByVendor {
+    private String vendor;
+    private List<AlertEventDefinition> alertEventDefinitionList;
 }

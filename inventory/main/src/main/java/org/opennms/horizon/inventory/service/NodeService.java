@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -47,6 +48,7 @@ import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
+import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
@@ -92,6 +94,7 @@ public class NodeService {
     private final NodeMapper mapper;
     private final TagPublisher tagPublisher;
     private final TagRepository tagRepository;
+    private final IpInterfaceMapper ipInterfaceMapper;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -383,5 +386,15 @@ public class NodeService {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
                 .map(mapper::modelToDTO)
                 .toList();
+    }
+
+    public List<IpInterfaceDTO> searchIpInterfacesByNodeAndSearchTerm(
+            String tenantId, Long nodeId, String searchIpInterfaceTerm) {
+
+        return ipInterfaceRepository
+                .findAllByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId, searchIpInterfaceTerm)
+                .stream()
+                .map(ipInterfaceMapper::modelToDTO)
+                .collect(Collectors.toList());
     }
 }

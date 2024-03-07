@@ -104,6 +104,11 @@ message NodeIdList {
   repeated int64 ids = 1;
 }
 
+message  SearchIpInterfaceQuery{
+  int64  node_id = 1;
+  string search_term = 2;
+}
+
 message SearchBy {
   string search_term = 1;
   int64 node_id = 2;
@@ -125,5 +130,6 @@ service NodeService {
   rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
   rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
+  rpc searchIpInterfaces(SearchIpInterfaceQuery) returns (IpInterfaceList) {};
   rpc listSnmpInterfaces(SearchBy) returns (SnmpInterfacesList) {};
 }

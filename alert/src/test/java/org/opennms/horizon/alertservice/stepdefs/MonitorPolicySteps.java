@@ -49,6 +49,7 @@ import org.junit.platform.commons.util.StringUtils;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertConditionProto;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
+import org.opennms.horizon.alerts.proto.EventDefsByVendorRequest;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
 import org.opennms.horizon.alerts.proto.ManagedObjectType;
@@ -350,5 +351,34 @@ public class MonitorPolicySteps {
                 .listAlertEventDefinitions(request)
                 .getAlertEventDefinitionsList();
         assertThat(eventDefinitionsList.size()).isGreaterThanOrEqualTo(count);
+    }
+
+    @Then("Validate whether we can load vendors of size greater than or equal to {int}")
+    public void validateWhetherWeCanLoadVendorsOfSizeGreaterThanOrEqualTo(int vendorCount) {
+
+        var vendorList = this.grpcClient.getAlertEventDefinitionStub().listVendors(Empty.getDefaultInstance());
+
+        System.out.println("Vendor list size " + vendorList.getVendorList().size());
+        assertThat(vendorList.getVendorList().size()).isGreaterThanOrEqualTo(vendorCount);
+    }
+
+    @Then("Fetch event defs for vendor {string} and verify size is greater than or equal to {int}")
+    public void fetchEventDefsForVendorAndVerifySizeIsGreaterThanOrEqualTo(String vendor, int size) {
+        EventDefsByVendorRequest request = EventDefsByVendorRequest.newBuilder()
+                .setEventType(EventType.SNMP_TRAP)
+                .setVendor(vendor)
+                .build();
+        var eventDefinitionsByVendor =
+                this.grpcClient.getAlertEventDefinitionStub().listAlertEventDefinitionsByVendor(request);
+        assertThat(eventDefinitionsByVendor.getEventDefinitionList().size()).isGreaterThanOrEqualTo(size);
+    }
+
+    @Then("Fetch event defs for event type {string} and verify size is greater than or equal to {int}")
+    public void fetchEventDefsForEventTypeAndVerifySizeIsGreaterThanOrEqualTo(String eventType, int size) {
+        EventDefsByVendorRequest request = EventDefsByVendorRequest.newBuilder()
+                .setEventType(EventType.valueOf(eventType))
+                .build();
+        var eventDefsByType = this.grpcClient.getAlertEventDefinitionStub().listAlertEventDefinitionsByVendor(request);
+        assertThat(eventDefsByType.getEventDefinitionCount()).isGreaterThanOrEqualTo(size);
     }
 }

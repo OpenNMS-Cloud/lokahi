@@ -13,6 +13,7 @@
             v-model.trim="searchVal"
             type="search"
             data-test="search-input"
+            @update:model-value="onSearchChange"
           >
             <template #pre>
               <FeatherIcon :icon="fsIcons.Search" />
@@ -112,6 +113,7 @@
 <script lang="ts" setup>
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import { IpInterface } from '@/types/graphql'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Search from '@featherds/icon/action/Search'
 import Traffic from '@featherds/icon/action/Workflow'
@@ -148,6 +150,7 @@ const pageObjects = ref([] as any[])
 const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
+const searchableAttributes = ['ipAddress', 'hostname']
 const emptyListContent = {
   msg: 'No results found.'
 }
@@ -210,18 +213,18 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   return array.slice(startIndex, endIndex)
 }
 const sortChanged = (sortObj: Record<string, string>) => {
-  let sorted = ipInterfaces.value
   if (sortObj.value === 'asc') {
-    sorted = sortBy(ipInterfaces.value, sortObj.property)
+    clonedInterfaces.value = sortBy(ipInterfaces.value, sortObj.property)
   }
   if (sortObj.value === 'desc') {
-    sorted = sortBy(ipInterfaces.value, sortObj.property).reverse()
+    clonedInterfaces.value = sortBy(ipInterfaces.value, sortObj.property).reverse()
   }
-  clonedInterfaces.value = sorted
+  if (sortObj.value === 'none') {
+    clonedInterfaces.value = sortBy(ipInterfaces.value, 'id')
+  }
 
   page.value = 1
-
-  pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
+  pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, pageSize.value)
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
@@ -229,7 +232,7 @@ const sortChanged = (sortObj: Record<string, string>) => {
 }
 const updatePage = (v: number) => {
   if (hasIPInterfaces.value) {
-    total.value = ipInterfaces.value.length
+    page.value = v
     pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
@@ -239,9 +242,31 @@ const updatePageSize = (v: number) => {
     pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
-
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
+}
+const searchPageObjects = (searchTerm: any) => {
+  return ipInterfaces.value.filter((item: IpInterface) => {
+    return searchableAttributes.some((attr) => {
+      const value = item[attr as unknown as keyof IpInterface]
+      return value.toLowerCase().includes(searchTerm.toLowerCase())
+    })
+  })
+}
+const onSearchChange = (searchTerm: any) => {
+  if (searchTerm.trim().length > 0) {
+    const searchObjects = searchPageObjects(searchTerm)
+
+    page.value = 1
+    total.value = searchObjects.length
+    clonedInterfaces.value = searchObjects
+    pageObjects.value = getPageObjects(searchObjects, page.value, pageSize.value)
+  } else {
+    page.value = 1
+    total.value = ipInterfaces.value.length
+    clonedInterfaces.value = ipInterfaces.value
+    pageObjects.value = getPageObjects(ipInterfaces.value, page.value, pageSize.value)
+  }
 }
 const icons = markRaw({
   Traffic

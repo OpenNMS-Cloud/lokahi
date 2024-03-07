@@ -42,6 +42,7 @@ import org.opennms.horizon.server.mapper.NodeMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.IpInterface;
+import org.opennms.horizon.server.model.inventory.IpInterfaceResponse;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
@@ -230,5 +231,49 @@ public class GrpcNodeService {
                 client.searchIpInterfacesByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
                         .map(ipInterfaceMapper::protoToIpInterface)
                         .toList());
+    }
+
+    @GraphQLQuery(name = "downloadSearchIpInterfacesByNodeAndSearchTerm")
+    public Mono<IpInterfaceResponse> downloadSearchIpInterfacesByNodeAndSearchTerm(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        List<IpInterface> ipInterfaces =
+                client.searchIpInterfacesByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                        .map(ipInterfaceMapper::protoToIpInterface)
+                        .toList();
+
+        try {
+            return Mono.just(downloadIpInterfacesByNodeAndSearchTerm(ipInterfaces, downloadFormat));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to download IP interfaces", e);
+        }
+    }
+
+    private static IpInterfaceResponse downloadIpInterfacesByNodeAndSearchTerm(
+            List<IpInterface> ipInterfaceList, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                    .setHeader("IP ADDRESS", "IP HOSTNAME", "NETMASK", "PRIMARY")
+                    .build();
+
+            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
+            for (IpInterface ipInterface : ipInterfaceList) {
+                csvPrinter.printRecord(
+                        ipInterface.getIpAddress(),
+                        ipInterface.getHostname(),
+                        ipInterface.getNetmask(),
+                        ipInterface.getSnmpPrimary());
+            }
+            csvPrinter.flush();
+            return new IpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 }

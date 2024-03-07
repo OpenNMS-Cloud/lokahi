@@ -64,6 +64,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
@@ -542,5 +543,19 @@ public class InventoryClient {
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .getNodeCount(Empty.newBuilder().build())
                 .getValue();
+    }
+
+    public List<IpInterfaceDTO> searchIpInterfacesByNodeAndSearchTerm(
+            Long nodeId, String ipInterfaceSearchTerm, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        SearchIpInterfaceQuery query = SearchIpInterfaceQuery.newBuilder()
+                .setNodeId(nodeId)
+                .setSearchTerm(ipInterfaceSearchTerm)
+                .build();
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .searchIpInterfaces(query)
+                .getIpInterfaceList();
     }
 }

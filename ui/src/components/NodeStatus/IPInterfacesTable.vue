@@ -13,6 +13,7 @@
             v-model.trim="searchVal"
             type="search"
             data-test="search-input"
+            @update:model-value="onSearchChange"
           >
             <template #pre>
               <FeatherIcon :icon="fsIcons.Search" />
@@ -89,6 +90,12 @@
           </tr>
         </TransitionGroup>
       </table>
+      <div v-if="!hasIPInterfaces">
+        <EmptyList
+          :content="emptyListContent"
+          data-test="empty-list"
+        />
+      </div>
       <FeatherPagination
       v-model="page"
       :pageSize="pageSize"
@@ -104,15 +111,16 @@
 </template>
 
 <script lang="ts" setup>
+import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
-import Traffic from '@featherds/icon/action/Workflow'
-import { FeatherPagination } from '@featherds/pagination'
+import { IpInterface } from '@/types/graphql'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
-import Refresh from '@featherds/icon/navigation/Refresh'
 import Search from '@featherds/icon/action/Search'
+import Traffic from '@featherds/icon/action/Workflow'
+import Refresh from '@featherds/icon/navigation/Refresh'
+import { FeatherPagination } from '@featherds/pagination'
 import { SORT } from '@featherds/table'
 import { sortBy } from 'lodash'
-import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 const nodeStatusStore = useNodeStatusStore()
 const nodeStatusQueries = useNodeStatusQueries()
 const metricsModal = ref()
@@ -135,22 +143,22 @@ const sort = reactive({
   snmpPrimary: SORT.NONE
 }) as any
 
-const page = ref(0)
-const pageSize = ref(0)
+const page = ref(1)
+const pageSize = ref(10)
 const total = ref(0)
 const pageObjects = ref([] as any[])
 const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search IP Interfaces')
 const searchVal = ref('')
-const isMounted = ref(false)
-onMounted(() => {
-  isMounted.value = true
-})
+const searchableAttributes = ['ipAddress', 'hostname']
+const emptyListContent = {
+  msg: 'No results found.'
+}
 const isAzure = computed(() => {
   return nodeStatusStore.isAzure
 })
 const hasIPInterfaces = computed(() => {
-  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0 && isMounted.value
+  return nodeStatusStore?.node?.ipInterfaces?.length && nodeStatusStore?.node?.ipInterfaces?.length > 0
 })
 const ipInterfaces = computed(() => {
   if (hasIPInterfaces.value) {
@@ -185,14 +193,18 @@ const columns = computed(() => {
     ]
   }
 })
-watch([() => ipInterfaces.value, () => isMounted.value], () => {
-  if (ipInterfaces.value?.length && isMounted.value) {
-    page.value = 1
-    pageSize.value = 10
+const updateIpInterfaces = () => {
+  if (hasIPInterfaces.value) {
     total.value = ipInterfaces.value.length
     clonedInterfaces.value = ipInterfaces.value
     pageObjects.value = getPageObjects(ipInterfaces.value, page.value, pageSize.value)
   }
+}
+onMounted(() => {
+  updateIpInterfaces()
+})
+watch(() => [ipInterfaces.value], () => {
+  updateIpInterfaces()
 })
 // Function to retrieve objects for a given page
 const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number) => {
@@ -201,21 +213,18 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   return array.slice(startIndex, endIndex)
 }
 const sortChanged = (sortObj: Record<string, string>) => {
-  let sorted = [] as any
   if (sortObj.value === 'asc') {
-    sorted = sortBy(ipInterfaces.value, sortObj.property)
-  } else if (sortObj.value === 'desc') {
-    sorted = sortBy(ipInterfaces.value, sortObj.property).reverse()
-  } else {
-    sorted = ipInterfaces.value
+    clonedInterfaces.value = sortBy(ipInterfaces.value, sortObj.property)
   }
-  clonedInterfaces.value = sorted
+  if (sortObj.value === 'desc') {
+    clonedInterfaces.value = sortBy(ipInterfaces.value, sortObj.property).reverse()
+  }
+  if (sortObj.value === 'none') {
+    clonedInterfaces.value = sortBy(ipInterfaces.value, 'id')
+  }
 
   page.value = 1
-  pageSize.value = 10
-  total.value = ipInterfaces.value.length
-
-  pageObjects.value = getPageObjects(sorted, page.value, pageSize.value)
+  pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, pageSize.value)
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
@@ -223,7 +232,7 @@ const sortChanged = (sortObj: Record<string, string>) => {
 }
 const updatePage = (v: number) => {
   if (hasIPInterfaces.value) {
-    total.value = ipInterfaces.value.length
+    page.value = v
     pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
@@ -233,12 +242,31 @@ const updatePageSize = (v: number) => {
     pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
   }
 }
-onBeforeUnmount(() => {
-  isMounted.value = false
-})
-
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
+}
+const searchPageObjects = (searchTerm: any) => {
+  return ipInterfaces.value.filter((item: IpInterface) => {
+    return searchableAttributes.some((attr) => {
+      const value = item[attr as unknown as keyof IpInterface]
+      return value.toLowerCase().includes(searchTerm.toLowerCase())
+    })
+  })
+}
+const onSearchChange = (searchTerm: any) => {
+  if (searchTerm.trim().length > 0) {
+    const searchObjects = searchPageObjects(searchTerm)
+
+    page.value = 1
+    total.value = searchObjects.length
+    clonedInterfaces.value = searchObjects
+    pageObjects.value = getPageObjects(searchObjects, page.value, pageSize.value)
+  } else {
+    page.value = 1
+    total.value = ipInterfaces.value.length
+    clonedInterfaces.value = ipInterfaces.value
+    pageObjects.value = getPageObjects(ipInterfaces.value, page.value, pageSize.value)
+  }
 }
 const icons = markRaw({
   Traffic

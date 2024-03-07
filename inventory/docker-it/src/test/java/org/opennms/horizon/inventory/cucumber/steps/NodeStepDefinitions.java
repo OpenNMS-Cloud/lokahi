@@ -38,12 +38,14 @@ import org.junit.jupiter.api.Assertions;
 import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.RetryUtils;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaTestHelper;
+import org.opennms.horizon.inventory.dto.IpInterfaceList;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 
 @Slf4j
 public class NodeStepDefinitions {
@@ -52,6 +54,7 @@ public class NodeStepDefinitions {
     private KafkaTestHelper kafkaTestHelper;
     private MonitoringLocationDTO monitoringLocation;
     private NodeList fetchedNodeList;
+    private IpInterfaceList ipInterfaceList;
     private String nodeTopic;
 
     private Exception lastException;
@@ -302,5 +305,34 @@ public class NodeStepDefinitions {
                 .filter(fetched -> aliasSearchTerm.equals(fetched.getNodeAlias()))
                 .toList();
         Assert.assertTrue(nodeList.size() > 0);
+    }
+
+    @Given("a new node with IpInterface along with node label {string} ip address {string} in location named {string}")
+    public void aNewNodeWithIpInterfaceAlongWithNodeLabelIpAddressInLocationNamed(
+            String nodeLabel, String ipAddress, String loccation) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(nodeLabel)
+                .setManagementIp(ipAddress)
+                .setLocationId(backgroundHelper.findLocationId(loccation))
+                .build());
+    }
+
+    @Then("fetch a list of IpInterfaces by node using search term {string} that has size greater than {int}")
+    public void fetchAListOfIpInterfacesByNodeUsingSearchTermThatHasSizeGreaterThan(String searchTerm, int size) {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        NodeDTO node = nodeServiceBlockingStub.listNodes(Empty.getDefaultInstance()).getNodesList().stream()
+                .filter(fetch -> fetch.getIpInterfacesList().stream()
+                        .anyMatch(ipInterface -> searchTerm.equals(ipInterface.getIpAddress())
+                                || ipInterface.getHostname().toLowerCase().contains(searchTerm.toLowerCase())))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Node " + searchTerm + " not found"));
+
+        ipInterfaceList = nodeServiceBlockingStub.searchIpInterfaces(SearchIpInterfaceQuery.newBuilder()
+                .setNodeId(node.getId())
+                .setSearchTerm(searchTerm)
+                .build());
+
+        assertTrue(ipInterfaceList.getIpInterfaceCount() > size);
     }
 }

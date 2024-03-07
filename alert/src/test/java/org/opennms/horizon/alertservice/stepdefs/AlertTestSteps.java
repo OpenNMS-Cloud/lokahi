@@ -48,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.opennms.horizon.alerts.proto.Alert;
 import org.opennms.horizon.alerts.proto.AlertRequest;
+import org.opennms.horizon.alerts.proto.AlertRequestByNode;
 import org.opennms.horizon.alerts.proto.Filter;
 import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
@@ -285,6 +286,17 @@ public class AlertTestSteps {
         assertEquals(expected, countAlertsResponse.getCount());
     }
 
+    @Then("Count alerts for the tenant on node {int} with page {int} pageSize {int} response is not equal to {int}")
+    public void countAlertsForNode(int nodeId, int page, int pageSize, int count) {
+        final var requestBuilder = AlertRequestByNode.newBuilder()
+                .setSortBy("id")
+                .setNodeId(Long.valueOf(nodeId))
+                .setPageSize(pageSize)
+                .setPage(page)
+                .setSortAscending(true);
+        var listAlertsResponse = clientUtils.getAlertServiceStub().getAlertsByNode(requestBuilder.build());
+        assertTrue(listAlertsResponse.getAlertsList().size() > count);
+    }
     // ========================================
     // Internals
     // ----------------------------------------

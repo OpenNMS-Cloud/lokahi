@@ -76,6 +76,11 @@ Feature: Inventory Processing
     Given Node Scan results with IpInterfaces "192.168.1.45" and SnmpInterfaces with ifName "eth0"
     Then  Send node scan results to kafka topic "task-set.results"
     Then verify node has IpInterface "192.168.1.45" and SnmpInterface with ifName "eth0"
+    Given Node Scan results with IpInterfaces "192.168.1.48" and hostName "Local"
+    Then Send node scan results to kafka topic for hostName and ipAddress "task-set.results"
+    Then verify node has IpInterface with hostName "Loc"
+    Then verify node has IpInterface with ipAddress "192.168.1.48"
+
 
   Scenario: Validate Discovery Scan processing adds discovery id to node
     Given Minion at location named "MINION" with system ID "MINION-TEST-1"

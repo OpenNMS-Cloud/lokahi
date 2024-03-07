@@ -65,6 +65,7 @@ public class GrpcNodeService {
 
     private final InventoryClient client;
     private final NodeMapper mapper;
+    private final IpInterfaceMapper ipInterfaceMapper;
     private final ActiveDiscoveryMapper activeDiscoveryMapper;
     private final ServerHeaderUtil headerUtil;
     private final NodeStatusService nodeStatusService;

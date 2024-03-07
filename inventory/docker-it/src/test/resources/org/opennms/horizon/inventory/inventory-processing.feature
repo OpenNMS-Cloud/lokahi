@@ -55,6 +55,12 @@ Feature: Inventory Processing
     Then verify the task set update is published for device with task suffix "snmp-collector" within 30000ms
     Then shutdown kafka consumer
 
+  Scenario: Validate Discovery Scan processing adds discovery id to node
+    Given Minion at location named "MINION" with system ID "MINION-TEST-1"
+    Given New Active Discovery "stream-snmp" with IpAddress "192.168.1.1" and SNMP community as "stream-snmp" at location named "MINION"
+    Then create Active Discovery and validate it's created active discovery with given details.
+    Given Discovery Scan results with IpAddress "192.168.1.1"
+    Then Send discovery scan results to kafka topic "task-set.results" with location "MINION"
 
   Scenario: Deletion of a device causes Task Definitions Removals to be Requested
     Given Device IP Address "192.168.30.1" in location named "MINION"

@@ -63,6 +63,7 @@ import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
+import org.opennms.horizon.inventory.dto.SearchBy;
 import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagListParamsDTO;
@@ -104,7 +105,6 @@ public class InventoryProcessingStepDefinitions {
     private MonitorType monitorType;
     private KafkaConsumerRunner kafkaConsumerRunner;
     private final String tagTopic = "tag-operation";
-
     private NodeScanResult nodeScanResult;
     private NodeScanResult nodeScanForIpInterfaces;
     private IcmpActiveDiscoveryCreateDTO icmpDiscovery;
@@ -768,6 +768,23 @@ public class InventoryProcessingStepDefinitions {
         try (KafkaProducer<String, byte[]> kafkaProducer = new KafkaProducer<>(producerConfig)) {
             kafkaProducer.send(producerRecord);
         }
+    }
+
+    @Then("verify node has SnmpInterface with ifName {string}")
+    public void verifyNodeHasIpInterfaceAndSnmpInterfaceWithIfName(String ifName) {
+
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        await().atMost(10, TimeUnit.SECONDS)
+                .pollDelay(1, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .until(() -> nodeServiceBlockingStub
+                                .listSnmpInterfaces(SearchBy.newBuilder()
+                                        .setNodeId(node.getId())
+                                        .setSearchTerm(ifName)
+                                        .build())
+                                .getSnmpInterfacesList()
+                                .size()
+                        > 0);
     }
 
     @Given(

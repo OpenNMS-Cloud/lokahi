@@ -51,7 +51,6 @@ public class SnmpInterfaceServiceTest {
     private SnmpInterfaceDTO testSnmpInterfaceDTO1;
     private SnmpInterfaceDTO testSnmpInterfaceDTO2;
     private SnmpInterfaceDTO testSnmpInterfaceDTO3;
-
     private Node testNode;
     private SnmpInterfaceResult testSnmpInterfaceResult;
 
@@ -61,7 +60,6 @@ public class SnmpInterfaceServiceTest {
     public void setUp() {
         mockSnmpInterfaceRepository = Mockito.mock(SnmpInterfaceRepository.class);
         mockSnmpInterfaceMapper = Mockito.mock(SnmpInterfaceMapper.class);
-
         testSnmpInterface1 = new SnmpInterface();
         testSnmpInterface2 = new SnmpInterface();
         testSnmpInterface3 = new SnmpInterface();

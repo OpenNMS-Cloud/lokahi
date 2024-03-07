@@ -113,6 +113,14 @@ message  SearchIpInterfaceQuery{
   string search_term = 2;
 }
 
+message SearchBy {
+  string search_term = 1;
+  int64 node_id = 2;
+}
+message SnmpInterfacesList {
+  repeated opennms.inventory.SnmpInterfaceDTO snmp_interfaces = 1;
+}
+
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
   rpc updateNode(NodeUpdateDTO) returns (google.protobuf.Int64Value) {};
@@ -128,5 +136,6 @@ service NodeService {
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
   rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
   rpc searchIpInterfaces(SearchIpInterfaceQuery) returns (IpInterfaceList) {};
+  rpc listSnmpInterfaces(SearchBy) returns (SnmpInterfacesList) {};
   rpc getDiscoveriesByNode(google.protobuf.Int64Value) returns (ActiveDiscoveryList) {};
 }

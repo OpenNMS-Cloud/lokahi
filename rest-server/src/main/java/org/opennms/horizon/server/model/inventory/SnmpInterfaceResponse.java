@@ -19,18 +19,14 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.inventory.service;
+package org.opennms.horizon.server.model.inventory;
 
-public class Constants {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    private Constants() {}
-
-    public static final int SNMP_PORT_MIN = 1;
-    public static final int SNMP_PORT_MAX = 65536;
-    public static final String SNMP_INTERFACE_COL_NAME = "ifName";
-    public static final String SNMP_INTERFACE_COL_DESCR = "ifDescr";
-    public static final String SNMP_INTERFACE_COL_ALIAS = "ifAlias";
-    public static final String SNMP_INTERFACE_COL_PHY_ADDR = "physicalAddr";
-    public static final String SNMP_INTERFACE_COL_NODE_ID = "id";
-    public static final String SNMP_INTERFACE_COL_TENANT_ID = "tenantId";
+@AllArgsConstructor
+@Getter
+public class SnmpInterfaceResponse {
+    private byte[] snmpInterfaceBytes;
+    private DownloadFormat downloadFormat;
 }

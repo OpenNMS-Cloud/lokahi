@@ -58,7 +58,10 @@ import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.SearchBy;
 import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
@@ -68,6 +71,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
@@ -96,7 +100,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final TenantLookup tenantLookup;
     private final ScannerTaskSetService scannerService;
     private final MonitoringLocationService monitoringLocationService;
-
+    private final SnmpInterfaceService snmpInterfaceService;
     private final ThreadFactory threadFactory =
             new ThreadFactoryBuilder().setNameFormat("send-taskset-for-node-%d").build();
     // Add setter for unit testing
@@ -435,6 +439,28 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
             Status status = Status.newBuilder()
                     .setCode(Code.INTERNAL_VALUE)
                     .setMessage("Error while getting node count")
+                    .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        }
+    }
+
+    @Override
+    public void listSnmpInterfaces(SearchBy searchBy, StreamObserver<SnmpInterfacesList> responseObserver) {
+        try {
+            Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+            if (tenantIdOptional.isPresent()) {
+                List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy, tenantIdOptional.get());
+
+                responseObserver.onNext(SnmpInterfacesList.newBuilder()
+                        .addAllSnmpInterfaces(list)
+                        .build());
+                responseObserver.onCompleted();
+            }
+        } catch (Exception e) {
+            LOG.error("Error while getting snmpInterfaces", e);
+            Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while getting snmpInterfaces")
                     .build();
             responseObserver.onError(StatusProto.toStatusRuntimeException(status));
         }

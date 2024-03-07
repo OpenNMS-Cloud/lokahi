@@ -56,6 +56,7 @@ import org.opennms.horizon.alerts.proto.ListAlertsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
+import org.opennms.horizon.server.mapper.alert.EventDefinitionByVendorMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
 import org.opennms.horizon.server.model.alerts.TimeRange;
 import org.opennms.horizon.shared.constants.GrpcConstants;
@@ -72,6 +73,8 @@ public class AlertsClientDeadlineTest {
     private static AlertServiceGrpc.AlertServiceImplBase mockAlertService;
     private final String accessToken = "test-token";
     private static AlertsCountMapper alertsCountMapper;
+
+    private static EventDefinitionByVendorMapper eventDefinitionByVendorMapper;
 
     @BeforeAll
     public static void startGrpc() throws IOException {
@@ -101,7 +104,13 @@ public class AlertsClientDeadlineTest {
                 .directExecutor()
                 .build());
         monitorPolicyMapper = Mappers.getMapper(MonitorPolicyMapper.class);
-        client = new AlertsClient(channel, 1000, monitorPolicyMapper, alertEventDefinitionMapper, alertsCountMapper);
+        client = new AlertsClient(
+                channel,
+                1000,
+                monitorPolicyMapper,
+                alertEventDefinitionMapper,
+                alertsCountMapper,
+                eventDefinitionByVendorMapper);
         client.initialStubs();
     }
 

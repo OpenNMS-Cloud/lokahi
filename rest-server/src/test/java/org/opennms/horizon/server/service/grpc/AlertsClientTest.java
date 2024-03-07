@@ -62,6 +62,7 @@ import org.opennms.horizon.alerts.proto.ListAlertsResponse;
 import org.opennms.horizon.alerts.proto.MonitorPolicyServiceGrpc;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
+import org.opennms.horizon.server.mapper.alert.EventDefinitionByVendorMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.TimeRange;
@@ -75,6 +76,8 @@ public class AlertsClientTest {
 
     private static AlertEventDefinitionMapper alertEventDefinitionMapper;
     private static AlertsCountMapper alertsCountMapper;
+
+    private static EventDefinitionByVendorMapper eventDefinitionByVendorMapper;
     private static AlertsClient client;
     private static MockServerInterceptor mockInterceptor;
     private static AlertServiceGrpc.AlertServiceImplBase mockAlertService;
@@ -184,7 +187,13 @@ public class AlertsClientTest {
                 .build());
         monitorPolicyMapper = Mappers.getMapper(MonitorPolicyMapper.class);
         alertEventDefinitionMapper = Mappers.getMapper(AlertEventDefinitionMapper.class);
-        client = new AlertsClient(channel, 5000, monitorPolicyMapper, alertEventDefinitionMapper, alertsCountMapper);
+        client = new AlertsClient(
+                channel,
+                5000,
+                monitorPolicyMapper,
+                alertEventDefinitionMapper,
+                alertsCountMapper,
+                eventDefinitionByVendorMapper);
         client.initialStubs();
     }
 

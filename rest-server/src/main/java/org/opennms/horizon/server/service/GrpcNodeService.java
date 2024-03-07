@@ -233,8 +233,8 @@ public class GrpcNodeService {
                         .toList());
     }
 
-    @GraphQLQuery(name = "downloadSearchIpInterfacesByNodeAndSearchTerm")
-    public Mono<IpInterfaceResponse> downloadSearchIpInterfacesByNodeAndSearchTerm(
+    @GraphQLQuery(name = "downloadIpInterfacesByNodeAndSearchTerm")
+    public Mono<IpInterfaceResponse> downloadIpInterfacesByNodeAndSearchTerm(
             @GraphQLEnvironment ResolutionEnvironment env,
             @GraphQLArgument(name = "nodeId") Long nodeId,
             @GraphQLArgument(name = "searchTerm") String searchTerm,
@@ -246,13 +246,13 @@ public class GrpcNodeService {
                         .toList();
 
         try {
-            return Mono.just(downloadIpInterfacesByNodeAndSearchTerm(ipInterfaces, downloadFormat));
+            return Mono.just(generateDownloadableIpInterfacesResponse(ipInterfaces, downloadFormat));
         } catch (IOException e) {
             throw new RuntimeException("Failed to download IP interfaces", e);
         }
     }
 
-    private static IpInterfaceResponse downloadIpInterfacesByNodeAndSearchTerm(
+    private static IpInterfaceResponse generateDownloadableIpInterfacesResponse(
             List<IpInterface> ipInterfaceList, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
             downloadFormat = DownloadFormat.CSV;

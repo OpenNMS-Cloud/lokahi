@@ -837,7 +837,7 @@ public class InventoryProcessingStepDefinitions {
     @Then("verify that node is created for {string} and location named {string} with discoveryId")
     public void verifyThatNodeIsCreatedForAndLocationWithTheTagsInPreviousScenario(String ipAddress, String location) {
         String locationId = backgroundHelper.findLocationId(location);
-        await().atMost(60, TimeUnit.SECONDS)
+        await().atMost(30, TimeUnit.SECONDS)
                 .pollDelay(1, TimeUnit.SECONDS)
                 .pollInterval(2, TimeUnit.SECONDS)
                 .until(() -> {

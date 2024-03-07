@@ -458,7 +458,7 @@ public class NodeServiceTest {
                 mockTagPublisher,
                 tagRepository,
                 ipInterfaceMapper,
-            activeDiscoveryMapper);
+                activeDiscoveryMapper);
 
         //
         // Execute
@@ -498,7 +498,7 @@ public class NodeServiceTest {
                 mockTagPublisher,
                 tagRepository,
                 ipInterfaceMapper,
-            activeDiscoveryMapper);
+                activeDiscoveryMapper);
 
         //
         // Execute
@@ -531,7 +531,7 @@ public class NodeServiceTest {
                 mockTagPublisher,
                 tagRepository,
                 ipInterfaceMapper,
-            activeDiscoveryMapper);
+                activeDiscoveryMapper);
 
         final var testNode = new Node();
         testNode.setTenantId("onms");

@@ -58,5 +58,10 @@
       <artifactId>plugins-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+      <dependency>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+          <version>${jupiter.version}</version>
+      </dependency>
   </dependencies>
 </project>

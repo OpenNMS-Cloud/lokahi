@@ -53,6 +53,7 @@
     <module>minion-flows</module>
     <module>testtools</module>
     <module>docker-it</module>
+    <module>minion-syslog</module>
   </modules>
 
   <properties>
@@ -86,7 +87,29 @@
         <version>${ignite.version}</version>
       </dependency>
 
-      <dependency>
+           <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>${javax.persistance}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${javax.xml.bind}</version>
+        </dependency>
+
+            <dependency>
+                <groupId>org.junit.vintage</groupId>
+                <artifactId>junit-vintage-engine</artifactId>
+                <version>${jupiter.version}</version>
+            </dependency>
+
+       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
         <version>${jetty.version}</version>
@@ -188,6 +211,11 @@
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.karaf.version}</version>
       </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
     </dependencies>
   </dependencyManagement>
 

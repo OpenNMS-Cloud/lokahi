@@ -1,31 +1,58 @@
 <template>
-  <div>
-    <section class="node-component-header">
-      <h3 data-test="heading" class="node-label">Recent Alerts</h3>
+  <div class="main-section">
+    <section class="feather-row">
+      <h3 data-test="heading" class="feather-col-6">Recent Alerts</h3>
+      <div class="btns feather-col-6">
+        <FeatherButton
+          primary
+          icon="Download"
+          >
+        <FeatherIcon :icon="icons.DownloadFile"> </FeatherIcon>
+          </FeatherButton>
+          <FeatherButton
+            primary
+            icon="Refresh"
+          >
+          <FeatherIcon :icon="icons.Refresh"> </FeatherIcon>
+          </FeatherButton>
+      </div>
     </section>
     <section class="node-component-content">
       <TableCard>
-        <div class="header">
-          <div class="title-container">
-            <span class="title"></span>
-          </div>
-        </div>
         <div class="container">
           <table class="data-table" aria-label="Recent Alerts Table" data-test="data-table">
             <thead>
               <tr>
-                <th scope="col">Alert Type</th>
-                <th scope="col">Severity</th>
-                <th scope="col">Date</th>
-                <th scope="col">Time</th>
+                <FeatherSortHeader
+                v-for="col of columns"
+                :key="col.label"
+                scope="col"
+                :property="col.id"
+                :sort="(sort as any)[col.id]"
+                v-on:sort-changed="sortChanged"
+              >
+                {{ col.label }}
+              </FeatherSortHeader>
               </tr>
             </thead>
             <TransitionGroup name="data-table" tag="tbody">
-              <tr v-for="alert in alertData" :key="alert.id as number" data-test="data-item">
-                <td>{{ alert.type }}</td>
-                <td>{{ alert.severity }}</td>
-                <td>{{ alert.date }}</td>
-                <td>{{ alert.time }}</td>
+              <tr v-for="alert in alertsData" :key="alert.label as string" data-test="data-item">
+                <td class="alert-type">
+                  <router-link to="#">
+                  {{ alert?.label || 'Unknown' }}
+                  </router-link>
+                </td>
+                <td>
+                  <PillColor
+                    :item="showSeverity(alert?.severity)"
+                      data-test="severity-label"
+                  />
+                </td>
+                <td  class="date headline"
+                  data-test="date"> {{ fnsFormat(alert?.lastUpdateTimeMs, 'M/dd/yyyy') }}
+                </td>
+                <td  class="time"
+                  data-test="time">{{ fnsFormat(alert?.lastUpdateTimeMs, 'HH:mm:ssxxx') }}</td>
               </tr>
             </TransitionGroup>
           </table>
@@ -44,13 +71,64 @@
 </template>
 
 <script lang="ts" setup>
+import DownloadFile from '@featherds/icon/action/DownloadFile'
+import Refresh from '@featherds/icon/navigation/Refresh'
+import { SORT } from '@featherds/table'
+import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import { IAlert } from '@/types/alerts'
+import { format as fnsFormat } from 'date-fns'
 
-const alertData = ref<any[]>([
-  { id: 1, type: 'Custom Severity 90', severity: 'Critical', date: '2/28/2023', time: '04:15.10 am est' },
-  { id: 2, type: 'Custom Severity 90', severity: 'Critical', date: '2/28/2023', time: '04:15.10 am est' },
-  { id: 3, type: 'Custom Severity 90', severity: 'Critical', date: '2/28/2023', time: '04:15.10 am est' },
-  { id: 4, type: 'Custom Severity 80', severity: 'Major', date: '2/28/2023', time: '04:15.10 am est' }
-])
+const icons = markRaw({
+  DownloadFile,
+  Refresh
+})
+
+const alertsData = ref<IAlert[]>([])
+const { fetchNodeByAlertData, getNodeByAlerts } = useNodeStatusStore()
+
+const columns = [
+  { id: 'alertType', label: 'Alert Type' },
+  { id: 'severity', label: 'Severity' },
+  { id: 'date', label: 'Date' },
+  { id: 'time', label: 'Time' }
+]
+
+const sort = reactive({
+  alertType: SORT.NONE,
+  severity: SORT.NONE,
+  data: SORT.NONE,
+  time: SORT.ASCENDING
+}) as any
+
+const sortChanged = (sortObj: Record<string, string>) => {
+
+  for (const prop in sort) {
+    sort[prop] = SORT.NONE
+  }
+  sort[sortObj.property] = sortObj.value
+}
+
+const showSeverity = (value: any) => {
+  return { style: value as string }
+}
+
+const fetchNodeByAlertsList = async () => {
+  await getNodeByAlerts()
+}
+
+onBeforeMount(() => {
+  fetchNodeByAlertsList()
+})
+
+const data = computed(() => fetchNodeByAlertData.value)
+
+const isAlertsLength = computed(() => data.value?.length > 0)
+
+watch(() => fetchNodeByAlertData.value, () => {
+  if (isAlertsLength.value) {
+    alertsData.value = [...data.value]
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -61,13 +139,17 @@ const alertData = ref<any[]>([
 @use '@featherds/table/scss/table';
 @use '@/styles/_transitionDataTable';
 
-.node-component-header {
+.main-section {
+  padding: 0 var(variables.$spacing-s) var(variables.$spacing-l) var(variables.$spacing-s);
+}
+.feather-row {
   margin-bottom: var(variables.$spacing-s);
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
+  padding-left: 0.9rem;
 }
 
 .node-component-label {
@@ -93,11 +175,12 @@ const alertData = ref<any[]>([
       background: var(variables.$background);
       text-transform: uppercase;
     }
+   tr {
     td {
       white-space: nowrap;
-      div {
-        border-radius: 5px;
-        padding: 0px 5px 0px 5px;
+    }
+    td:first-child{
+        color: var(variables.$primary);
       }
     }
   }

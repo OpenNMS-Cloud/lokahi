@@ -2,16 +2,36 @@ import { defineStore } from 'pinia'
 import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { Exporter, NodeUpdateInput, RequestCriteriaInput } from '@/types/graphql'
+import { Exporter, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
+import { AlertsFilters, Pagination } from '@/types/alerts'
+import { cloneDeep } from 'lodash'
+
+const alertsFilterDefault: AlertsFilters = {
+  timeRange: TimeRange.All,
+  nodeLabel: '',
+  severities: [],
+  sortAscending: false,
+  sortBy: 'lastEventTime',
+  nodeId: 1
+}
+
+const alertsPaginationDefault: Pagination = {
+  page: 0, // FE pagination component has base 1 (first page)
+  pageSize: 10,
+  total: 0
+}
 
 export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
+  const alertsFilter = ref(cloneDeep(alertsFilterDefault))
+  const alertsPagination = ref(cloneDeep(alertsPaginationDefault))
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
+  const fetchNodeByAlertData = ref()
+  fetchNodeByAlertData.value = computed(() => nodeStatusQueries.fetchNodeByAlertData)
   const exporters = ref<DeepPartial<Exporter>[]>([])
   const nodeId = ref()
-
   const setNodeId = (id: number) => {
     nodeStatusQueries.setNodeId(id)
     nodeId.value = id
@@ -71,6 +91,10 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     await mutations.updateNode({ node: updateInput })
   }
 
+  const getNodeByAlerts = async () => {
+    await nodeStatusQueries.getNodeByAlertsQuery(alertsFilter.value, alertsPagination.value)
+  }
+
   return {
     updateNodeAlias,
     fetchedData,
@@ -79,6 +103,8 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     fetchExporters,
     exporters,
     node,
-    nodeId
+    nodeId,
+    getNodeByAlerts,
+    fetchNodeByAlertData
   }
 })

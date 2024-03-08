@@ -20,4 +20,9 @@ interface AlertsFilters {
   sortAscending: boolean
   sortBy?: string
   nodeLabel: string
+  nodeId?: number
+}
+
+interface Variables {
+  id?: number;
 }

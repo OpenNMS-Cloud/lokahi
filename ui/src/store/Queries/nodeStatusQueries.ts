@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { Event, FindExportersForNodeStatusDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import {  AlertsNodeByDocument, Event, FindExportersForNodeStatusDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 
 export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
-  const variables = ref({})
+  const variables = ref<Variables>({})
+  const fetchNodeByAlertData = ref()
 
   const setNodeId = (id: number) => {
-    variables.value = { id }
+    variables.value.id = id
   }
 
   const { data, execute: fetchNodeStatus } = useQuery({
@@ -32,10 +34,28 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     return data
   }
 
+  const getNodeByAlertsQuery = async (sortFilter: AlertsFilters, paginationFilter: Pagination) => {
+    const { data, execute } = useQuery({
+      query: AlertsNodeByDocument,
+      variables: {
+        page: paginationFilter.page,
+        pageSize: paginationFilter.pageSize,
+        sortBy: sortFilter.sortBy,
+        sortAscending: sortFilter.sortAscending,
+        nodeId: variables.value.id
+      },
+      cachePolicy: 'network-only'
+    })
+    await execute()
+    fetchNodeByAlertData.value = data?.value?.getAlertsByNode?.alerts || []
+  }
+
   return {
     setNodeId,
     fetchedData,
     fetchExporters,
-    fetchNodeStatus
+    fetchNodeStatus,
+    getNodeByAlertsQuery,
+    fetchNodeByAlertData
   }
 })

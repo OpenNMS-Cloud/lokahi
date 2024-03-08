@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { Event, FindExportersForNodeStatusDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 
 export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   const variables = ref({})
@@ -32,10 +32,22 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     return data
   }
 
+  const downloadIpInterfaces = async (requestCriteria: DownloadIpInterfacesVariables) => {
+    const { execute, data } = useQuery({
+      query: DownloadIpInterfacesDocument,
+      variables: requestCriteria,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.downloadIpInterfacesByNodeAndSearchTerm?.ipInterfaces
+  }
+
   return {
     setNodeId,
     fetchedData,
     fetchExporters,
-    fetchNodeStatus
+    fetchNodeStatus,
+    downloadIpInterfaces
   }
 })

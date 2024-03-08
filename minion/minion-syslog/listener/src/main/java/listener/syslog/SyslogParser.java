@@ -130,7 +130,7 @@ public class SyslogParser {
     }
 
     /* override this to parse data from the matcher */
-    protected SyslogMessage parse()  {
+    protected SyslogMessage parse() throws SyslogParserException  {
         final SyslogMessage message = new SyslogMessage();
         message.setMessage(getMatcher().group().trim());
         return message;

@@ -34,6 +34,7 @@ import org.opennms.horizon.server.model.events.Event;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.model.inventory.SearchEventsResponse;
 import org.opennms.horizon.server.service.grpc.EventsClient;
+import org.opennms.horizon.server.utils.DateTimeUtil;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -102,20 +103,15 @@ public class GrpcEventService {
         if (downloadFormat.equals(DownloadFormat.CSV)) {
             StringBuilder csvData = new StringBuilder();
             var csvformat = CSVFormat.Builder.create()
-                .setHeader("ID", "Node Id", "Event UEI", "Ip Address","Produced Time","Description","Location Name","Log Message")
+                .setHeader("Time","UEI","Description")
                 .build();
 
             CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
             for (Event event : events) {
                 csvPrinter.printRecord(
-                    event.getId(),
-                    event.getNodeId(),
+                    DateTimeUtil.convertAndFormatLongDate(event.getProducedTime(), DateTimeUtil.D_MM_YYYY_HH_MM_SS_SSS),
                     event.getUei(),
-                    event.getIpAddress(),
-                    event.getProducedTime(),
-                    event.getDescription(),
-                    event.getLocationName(),
-                    event.getLogMessage());
+                    event.getDescription());
             }
             csvPrinter.flush();
             return new SearchEventsResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);

@@ -27,12 +27,10 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -218,17 +216,20 @@ public class GrpcAlertService {
 
     @GraphQLQuery(name = "downloadRecentAlertsByNode")
     public Mono<DownloadAlertsResponse> downloadRecentAlertsByNode(
-        @GraphQLArgument(name = "pageSize") Integer pageSize,
-        @GraphQLArgument(name = "page") int page,
-        @GraphQLArgument(name = "sortBy") String sortBy,
-        @GraphQLArgument(name = "sortAscending") boolean sortAscending,
-        @GraphQLArgument(name = "nodeId") long nodeId,
-        @GraphQLEnvironment ResolutionEnvironment env,
-        @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+            @GraphQLArgument(name = "pageSize") Integer pageSize,
+            @GraphQLArgument(name = "page") int page,
+            @GraphQLArgument(name = "sortBy") String sortBy,
+            @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+            @GraphQLArgument(name = "nodeId") long nodeId,
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
 
-        List<Alert> alerts = alertsClient.getAlertsByNode(
-            pageSize, page, sortBy, sortAscending, nodeId, headerUtil.getAuthHeader(env))
-            .getAlertsList().stream().map(mapper::protoToAlert).collect(Collectors.toList());
+        List<Alert> alerts = alertsClient
+                .getAlertsByNode(pageSize, page, sortBy, sortAscending, nodeId, headerUtil.getAuthHeader(env))
+                .getAlertsList()
+                .stream()
+                .map(mapper::protoToAlert)
+                .collect(Collectors.toList());
 
         try {
             return Mono.just(generateDownloadableAlertsResponse(alerts, downloadFormat));
@@ -238,23 +239,20 @@ public class GrpcAlertService {
     }
 
     private static DownloadAlertsResponse generateDownloadableAlertsResponse(
-        List<Alert> alertList, DownloadFormat downloadFormat) throws IOException {
+            List<Alert> alertList, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
             downloadFormat = DownloadFormat.CSV;
         }
         if (downloadFormat.equals(DownloadFormat.CSV)) {
             StringBuilder csvData = new StringBuilder();
             var csvformat = CSVFormat.Builder.create()
-                .setHeader("Location", "Type", "Severity", "Description")
-                .build();
+                    .setHeader("Location", "Type", "Severity", "Description")
+                    .build();
 
             try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
                 for (Alert alert : alertList) {
                     csvPrinter.printRecord(
-                        alert.getLocation(),
-                        alert.getType(),
-                        alert.getSeverity(),
-                        alert.getDescription());
+                            alert.getLocation(), alert.getType(), alert.getSeverity(), alert.getDescription());
                 }
                 csvPrinter.flush();
             } catch (Exception e) {
@@ -264,5 +262,4 @@ public class GrpcAlertService {
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
-
 }

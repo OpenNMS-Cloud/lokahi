@@ -29,6 +29,7 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -246,13 +247,18 @@ public class GrpcAlertService {
         if (downloadFormat.equals(DownloadFormat.CSV)) {
             StringBuilder csvData = new StringBuilder();
             var csvformat = CSVFormat.Builder.create()
-                    .setHeader("Location", "Type", "Severity", "Description")
+                    .setHeader("Node Name", "Alert Type", "Severity", "Description", "Date", "Time")
                     .build();
 
             try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
                 for (Alert alert : alertList) {
                     csvPrinter.printRecord(
-                            alert.getLocation(), alert.getType(), alert.getSeverity(), alert.getDescription());
+                            alert.getNodeName(),
+                            alert.getType(),
+                            alert.getSeverity(),
+                            alert.getDescription(),
+                            new SimpleDateFormat("MM/dd/yyyy").format(alert.getLastUpdateTimeMs()),
+                            new SimpleDateFormat("hh:mm:ss a z").format(alert.getLastUpdateTimeMs()));
                 }
                 csvPrinter.flush();
             } catch (Exception e) {

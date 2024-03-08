@@ -1,0 +1,17 @@
+name: 'Maven Spotless Check'
+description: 'Executes and verifies spotless checks'
+inputs:
+  working-directory:
+    description: 'The directory containing the top-level pom'
+    required: false
+    default: '.'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run mvn spotless:check
+      run: |
+        mvn -B -Dstyle.color=always \
+            spotless:check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}

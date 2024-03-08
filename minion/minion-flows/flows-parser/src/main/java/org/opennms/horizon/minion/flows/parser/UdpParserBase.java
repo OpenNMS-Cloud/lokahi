@@ -1,40 +1,38 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2018-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.flows.parser;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
+import lombok.Getter;
 import org.opennms.horizon.flows.document.FlowDocument;
 import org.opennms.horizon.minion.flows.listeners.UdpParser;
 import org.opennms.horizon.minion.flows.parser.factory.DnsResolver;
@@ -44,16 +42,8 @@ import org.opennms.horizon.minion.flows.parser.session.UdpSessionManager;
 import org.opennms.horizon.shared.ipc.rpc.IpcIdentity;
 import org.opennms.horizon.shared.ipc.sink.api.AsyncDispatcher;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-
-import io.netty.buffer.ByteBuf;
-import lombok.Getter;
-
 public abstract class UdpParserBase extends ParserBase implements UdpParser {
-    public final static long HOUSEKEEPING_INTERVAL = 60000;
+    public static final long HOUSEKEEPING_INTERVAL = 60000;
 
     private final Meter packetsReceived;
     private final Counter parserErrors;
@@ -64,32 +54,35 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
     private ScheduledFuture<?> housekeepingFuture;
     private final Duration templateTimeout = Duration.ofMinutes(30);
 
-    public UdpParserBase(final Protocol protocol,
-                         final String name,
-                         final AsyncDispatcher<FlowDocument> dispatcher,
-                         final IpcIdentity identity,
-                         final DnsResolver dnsResolver,
-                         final MetricRegistry metricRegistry) {
+    public UdpParserBase(
+            final Protocol protocol,
+            final String name,
+            final AsyncDispatcher<FlowDocument> dispatcher,
+            final IpcIdentity identity,
+            final DnsResolver dnsResolver,
+            final MetricRegistry metricRegistry) {
         super(protocol, name, dispatcher, identity, dnsResolver, metricRegistry);
 
-        this.packetsReceived = metricRegistry.meter(MetricRegistry.name("parsers",  name, "packetsReceived"));
-        this.parserErrors = metricRegistry.counter(MetricRegistry.name("parsers",  name, "parserErrors"));
+        this.packetsReceived = metricRegistry.meter(MetricRegistry.name("parsers", name, "packetsReceived"));
+        this.parserErrors = metricRegistry.counter(MetricRegistry.name("parsers", name, "parserErrors"));
 
-        String sessionCountGauge = MetricRegistry.name("parsers",  name, "sessionCount");
+        String sessionCountGauge = MetricRegistry.name("parsers", name, "sessionCount");
 
         // Register only if it's not already there in the registry.
         if (!metricRegistry.getGauges().containsKey(sessionCountGauge)) {
-            metricRegistry.register(sessionCountGauge, (Gauge<Integer>) () -> (this.sessionManager != null) ? this.sessionManager.count() : null);
+            metricRegistry.register(sessionCountGauge, (Gauge<Integer>)
+                    () -> (this.sessionManager != null) ? this.sessionManager.count() : null);
         }
     }
 
     protected abstract RecordProvider parse(final Session session, final ByteBuf buffer) throws Exception;
 
-    protected abstract UdpSessionManager.SessionKey buildSessionKey(final InetSocketAddress remoteAddress, final InetSocketAddress localAddress);
+    protected abstract UdpSessionManager.SessionKey buildSessionKey(
+            final InetSocketAddress remoteAddress, final InetSocketAddress localAddress);
 
-    public final CompletableFuture<?> parse(final ByteBuf buffer,
-                                            final InetSocketAddress remoteAddress,
-                                            final InetSocketAddress localAddress) throws Exception {
+    public final CompletableFuture<?> parse(
+            final ByteBuf buffer, final InetSocketAddress remoteAddress, final InetSocketAddress localAddress)
+            throws Exception {
         this.packetsReceived.mark();
 
         final UdpSessionManager.SessionKey sessionKey = this.buildSessionKey(remoteAddress, localAddress);
@@ -108,7 +101,8 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
     public void start(final ScheduledExecutorService executorService) {
         super.start(executorService);
         this.sessionManager = new UdpSessionManager(this.templateTimeout, this::sequenceNumberTracker);
-        this.housekeepingFuture = executorService.scheduleAtFixedRate(this.sessionManager::doHousekeeping,
+        this.housekeepingFuture = executorService.scheduleAtFixedRate(
+                this.sessionManager::doHousekeeping,
                 HOUSEKEEPING_INTERVAL,
                 HOUSEKEEPING_INTERVAL,
                 TimeUnit.MILLISECONDS);

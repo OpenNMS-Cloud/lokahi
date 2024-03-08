@@ -14,11 +14,11 @@
                         title="A Minion is a lightweight, secure collector that monitors and communicates with your network devices."
                         v-slot="{ attrs, on }"
                     >
-                        <FeatherIcon        
+                        <FeatherIcon
                             v-bind="attrs"
-                            v-on="on" 
-                            class="info-icon" 
-                            :icon="icons.InformationIcon" 
+                            v-on="on"
+                            class="info-icon"
+                            :icon="icons.InformationIcon"
                         />
                     </FeatherTooltip>
                 </h1>
@@ -134,23 +134,24 @@ import CollapsingWrapper from '../Common/CollapsingWrapper.vue'
 import { FeatherSpinner } from '@featherds/progress'
 
 defineProps({
-    visible: { type: Boolean, default: false }
+  visible: { type: Boolean, default: false }
 })
 
 const icons = markRaw({
-    DownloadIcon,
-    InformationIcon,
-    CopyIcon,
-    CheckIcon
+  DownloadIcon,
+  InformationIcon,
+  CopyIcon,
+  CheckIcon
 })
 
 const localDownloadHandler = () => {
-    welcomeStore.downloadClick();
+  welcomeStore.downloadClick()
 }
 
 const welcomeStore = useWelcomeStore()
-const { isDark } = useTheme();
+const { isDark } = useTheme()
 </script>
+
 <style lang="scss" scoped>
 @import '@featherds/styles/themes/variables';
 @import '@featherds/styles/mixins/typography';

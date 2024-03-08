@@ -1,0 +1,28 @@
+OpenNMS: # we might be able to remove this
+  global:
+    image:
+      repository: opennms
+      tag: latest
+    openTelemetry:
+      otlpTracesEndpoint: null
+      env:
+        OTEL_PROPAGATORS: tracecontext,baggage,jaeger
+mailServer:
+  enabled: false
+  serviceName: mail-server
+  image: mailhog/mailhog:v1.0.1
+  imagePullPolicy: IfNotPresent
+  replicas: 1
+  port: 8025
+  smtpPort: 1025
+  resources:
+    limits:
+      cpu: 100m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+nodeRestrictions: # will be applied to every pod in the instance
+  enabled: false
+  key: kubernetes.azure.com/scalesetpriority
+  value: spot

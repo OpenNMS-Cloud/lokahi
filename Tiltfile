@@ -368,11 +368,67 @@ if is_devmode_enabled(metricsServerDevmodeKey):
 
 k8s_yaml(
     helm(
+        'charts/dependencies/citus',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/cortex',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/grafana',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/kafka',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/keycloak',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/mail-server',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+k8s_yaml(
+    helm(
+        'charts/dependencies/prometheus',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
+
+
+k8s_yaml(
+    helm(
         'charts/lokahi',
         values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
     )
 )
 
+k8s_yaml(
+    helm(
+        'charts/lokahi-minion-dev',
+        values=['./tilt-helm-values.yaml'] + cfg.get('values', []),
+    )
+)
 # Builds #
 ## Shared ##
 local_resource(
@@ -392,6 +448,7 @@ local_resource(
     ignore=['**/target','**/dependency-reduced-pom.xml'],
     labels=['shared'],
     resource_deps=['parent-pom'],
+    trigger_mode=TRIGGER_MODE_MANUAL,
 )
 
 k8s_resource(
@@ -538,7 +595,7 @@ jib_project(
 ### Minion ###
 custom_build(
     'opennms/lokahi-minion',
-    'mvn install -f minion -Dapplication.docker.image=$EXPECTED_REF -DskipUTs=true -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
+    'mvn clean install -f minion -Dapplication.docker.image=$EXPECTED_REF -DskipUTs=true -DskipITs=true -DskipTests=true -Dfeatures.verify.skip=true',
     deps=['./minion'],
     ignore=['**/target', '**/dependency-reduced-pom.xml'],
 )

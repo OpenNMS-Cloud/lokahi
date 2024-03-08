@@ -1,33 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.taskset.worker.impl;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opennms.horizon.minion.plugin.api.CollectionRequest;
 import org.opennms.horizon.minion.plugin.api.CollectionSet;
 import org.opennms.horizon.minion.plugin.api.CollectorRequestImpl;
@@ -42,10 +38,6 @@ import org.opennms.taskset.contract.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutorLocalCollectorServiceImpl.class);
@@ -58,10 +50,11 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
     private TaskExecutionResultProcessor resultProcessor;
     private CollectorRegistry collectorRegistry;
 
-    public TaskExecutorLocalCollectorServiceImpl(TaskDefinition taskDefinition,
-                                                 OpennmsScheduler scheduler,
-                                                 TaskExecutionResultProcessor resultProcessor,
-                                                 CollectorRegistry collectorRegistry) {
+    public TaskExecutorLocalCollectorServiceImpl(
+            TaskDefinition taskDefinition,
+            OpennmsScheduler scheduler,
+            TaskExecutionResultProcessor resultProcessor,
+            CollectorRegistry collectorRegistry) {
         this.taskDefinition = taskDefinition;
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
@@ -77,7 +70,8 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
             if (whenSpec.matches("^\\d+$")) {
                 long period = Long.parseLong(taskDefinition.getSchedule());
 
-                scheduler.schedulePeriodically(taskDefinition.getId(), period, TimeUnit.MILLISECONDS, this::executeSerializedIteration);
+                scheduler.schedulePeriodically(
+                        taskDefinition.getId(), period, TimeUnit.MILLISECONDS, this::executeSerializedIteration);
             } else {
                 // Not a number, REQUIRED to be a CRON expression
                 scheduler.scheduleTaskOnCron(taskDefinition.getId(), whenSpec, this::executeSerializedIteration);
@@ -90,7 +84,6 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
             } else {
                 LOG.warn("error starting workflow {}, message = {}", taskDefinition.getId(), exc.getMessage());
             }
-
         }
     }
 
@@ -107,7 +100,9 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
                 executeIteration();
             }
         } else {
-            LOG.debug("Skipping iteration of task as prior iteration is still active: workflow-uuid={}", taskDefinition.getId());
+            LOG.debug(
+                    "Skipping iteration of task as prior iteration is still active: workflow-uuid={}",
+                    taskDefinition.getId());
         }
     }
 
@@ -117,26 +112,26 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
 
             if (serviceCollector != null) {
                 CollectionRequest collectionRequest = configureCollectionRequest(taskDefinition);
-                CompletableFuture<CollectionSet> future = serviceCollector.collect(collectionRequest, taskDefinition.getConfiguration());
+                CompletableFuture<CollectionSet> future =
+                        serviceCollector.collect(collectionRequest, taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
-                LOG.info("Skipping service collector execution; collector not found: collector=" + taskDefinition.getPluginName());
+                LOG.info("Skipping service collector execution; collector not found: collector="
+                        + taskDefinition.getPluginName());
             }
         } catch (Exception exc) {
             // TODO: throttle - we can get very large numbers of these in a short time
             if (LOG.isDebugEnabled()) {
                 LOG.debug("error executing workflow {}", taskDefinition.getId(), exc);
             } else {
-                LOG.warn("error executing workflow {}, message = {}",taskDefinition.getId(), exc.getMessage());
+                LOG.warn("error executing workflow {}, message = {}", taskDefinition.getId(), exc.getMessage());
             }
-
         }
     }
 
     private CollectionRequest configureCollectionRequest(TaskDefinition taskDefinition) {
         return CollectorRequestImpl.builder().nodeId(taskDefinition.getNodeId()).build();
     }
-
 
     private void handleExecutionComplete(CollectionSet collectionSet, Throwable exc) {
         LOG.info("Completed execution: workflow-uuid={}", taskDefinition.getId());
@@ -148,7 +143,10 @@ public class TaskExecutorLocalCollectorServiceImpl implements TaskExecutorLocalS
             if (LOG.isDebugEnabled()) {
                 LOG.debug("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
             } else {
-                LOG.warn("error executing workflow; workflow-uuid= {}, message = {}", taskDefinition.getId(), exc.getMessage());
+                LOG.warn(
+                        "error executing workflow; workflow-uuid= {}, message = {}",
+                        taskDefinition.getId(),
+                        exc.getMessage());
             }
         }
     }

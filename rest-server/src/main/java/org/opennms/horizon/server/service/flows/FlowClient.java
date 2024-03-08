@@ -1,35 +1,31 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.flows;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationFilter;
 import org.opennms.dataplatform.flows.querier.v1.ApplicationSeriesRequest;
@@ -45,10 +41,6 @@ import org.opennms.dataplatform.flows.querier.v1.TimeRangeFilter;
 import org.opennms.horizon.server.model.flows.RequestCriteria;
 import org.opennms.horizon.server.model.flows.TimeRange;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class FlowClient {
@@ -79,9 +71,9 @@ public class FlowClient {
      * @param tenantId
      * @return ListRequest.Builder
      */
-    private ListRequest.Builder createBaseListRequest(RequestCriteria requestCriteria, String tenantId, String authHeader) {
-        var listRequest = ListRequest.newBuilder()
-            .setTenantId(tenantId).setLimit(requestCriteria.getCount());
+    private ListRequest.Builder createBaseListRequest(
+            RequestCriteria requestCriteria, String tenantId, String authHeader) {
+        var listRequest = ListRequest.newBuilder().setTenantId(tenantId).setLimit(requestCriteria.getCount());
         if (requestCriteria.getTimeRange() != null) {
             listRequest.addFilters(convertTimeRage(requestCriteria.getTimeRange()));
         }
@@ -93,27 +85,30 @@ public class FlowClient {
 
     public List<Long> findExporters(RequestCriteria requestCriteria, String tenantId, String authHeader) {
         var listRequest = this.createBaseListRequest(requestCriteria, tenantId, authHeader);
-        return exporterServiceStub.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
-            .getExporterInterfaces(listRequest.build())
-            .getElementsList().stream().map(Long::parseLong).toList();
+        return exporterServiceStub
+                .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+                .getExporterInterfaces(listRequest.build())
+                .getElementsList()
+                .stream()
+                .map(Long::parseLong)
+                .toList();
     }
 
     public List<String> findApplications(RequestCriteria requestCriteria, String tenantId, String authHeader) {
         var listRequest = this.createBaseListRequest(requestCriteria, tenantId, authHeader);
         if (requestCriteria.getApplications() != null) {
-            requestCriteria.getApplications().forEach(a ->
-                listRequest.addFilters(convertApplication(a))
-            );
+            requestCriteria.getApplications().forEach(a -> listRequest.addFilters(convertApplication(a)));
         }
 
-        return applicationsServiceBlockingStub.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
-            .getApplications(listRequest.build())
-            .getElementsList();
+        return applicationsServiceBlockingStub
+                .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+                .getApplications(listRequest.build())
+                .getElementsList();
     }
 
     public Summaries getApplicationSummaries(RequestCriteria requestCriteria, String tenantId, String authHeader) {
-        var summaryRequest = ApplicationSummariesRequest.newBuilder()
-            .setTenantId(tenantId).setCount(requestCriteria.getCount());
+        var summaryRequest =
+                ApplicationSummariesRequest.newBuilder().setTenantId(tenantId).setCount(requestCriteria.getCount());
 
         summaryRequest.setIncludeOther(requestCriteria.isIncludeOther());
 
@@ -131,13 +126,15 @@ public class FlowClient {
         }
 
         return applicationsServiceBlockingStub
-            .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
-            .getApplicationSummaries(summaryRequest.build());
+                .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+                .getApplicationSummaries(summaryRequest.build());
     }
 
     public Series getApplicationSeries(RequestCriteria requestCriteria, String tenantId, String authHeader) {
         var seriesRequest = ApplicationSeriesRequest.newBuilder()
-            .setTenantId(tenantId).setStep(requestCriteria.getStep()).setCount(requestCriteria.getCount());
+                .setTenantId(tenantId)
+                .setStep(requestCriteria.getStep())
+                .setCount(requestCriteria.getCount());
 
         if (requestCriteria.getApplications() != null) {
             requestCriteria.getApplications().forEach(seriesRequest::addApplications);
@@ -152,17 +149,20 @@ public class FlowClient {
         }
 
         return applicationsServiceBlockingStub
-            .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
-            .getApplicationSeries(seriesRequest.build());
+                .withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+                .getApplicationSeries(seriesRequest.build());
     }
 
-    private Filter getExporterFilter(long id){
-        return Filter.newBuilder().setExporter(
-            ExporterFilter.newBuilder().setExporter(
-                org.opennms.dataplatform.flows.querier.v1.Exporter.newBuilder().setInterfaceId(id))).build();
+    private Filter getExporterFilter(long id) {
+        return Filter.newBuilder()
+                .setExporter(ExporterFilter.newBuilder()
+                        .setExporter(org.opennms.dataplatform.flows.querier.v1.Exporter.newBuilder()
+                                .setInterfaceId(id)))
+                .build();
     }
 
-    private List<Filter> convertExporter(org.opennms.horizon.server.model.flows.ExporterFilter exporter, String authHeader) {
+    private List<Filter> convertExporter(
+            org.opennms.horizon.server.model.flows.ExporterFilter exporter, String authHeader) {
         List<Filter> exporterList = new ArrayList<>();
         if (exporter.getIpInterfaceId() != null) {
             exporterList.add(getExporterFilter(exporter.getIpInterfaceId()));
@@ -177,18 +177,17 @@ public class FlowClient {
     }
 
     private Filter.Builder convertApplication(String application) {
-        return Filter.newBuilder().setApplication(
-            ApplicationFilter.newBuilder().setApplication(application));
+        return Filter.newBuilder().setApplication(ApplicationFilter.newBuilder().setApplication(application));
     }
 
     private Filter.Builder convertTimeRage(TimeRange timeRange) {
-        return Filter.newBuilder().setTimeRange(
-            TimeRangeFilter.newBuilder()
-                .setStartTime(Timestamp.newBuilder()
-                    .setSeconds(timeRange.getStartTime().getEpochSecond())
-                    .setNanos(timeRange.getStartTime().getNano()))
-                .setEndTime(Timestamp.newBuilder()
-                    .setSeconds(timeRange.getEndTime().getEpochSecond())
-                    .setNanos(timeRange.getEndTime().getNano())));
+        return Filter.newBuilder()
+                .setTimeRange(TimeRangeFilter.newBuilder()
+                        .setStartTime(Timestamp.newBuilder()
+                                .setSeconds(timeRange.getStartTime().getEpochSecond())
+                                .setNanos(timeRange.getStartTime().getNano()))
+                        .setEndTime(Timestamp.newBuilder()
+                                .setSeconds(timeRange.getEndTime().getEpochSecond())
+                                .setNanos(timeRange.getEndTime().getNano())));
     }
 }

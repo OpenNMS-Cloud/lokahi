@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.scheduler.impl;
 
 import com.cronutils.model.Cron;
@@ -5,12 +26,6 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
-import lombok.Getter;
-import lombok.Setter;
-import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -19,6 +34,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
+import lombok.Setter;
+import org.opennms.horizon.minion.scheduler.OpennmsScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,7 +49,8 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
 
     private Logger log = DEFAULT_LOGGER;
 
-    // Prepare the parser.  Note that the "CRON DEFINITION" specifies WHICH FIELDS (and variations on field inputs) are supported.
+    // Prepare the parser.  Note that the "CRON DEFINITION" specifies WHICH FIELDS (and variations on field inputs) are
+    // supported.
     // For now, just use the QUARTZ setting
     private CronParser cronParser = new CronParser(CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ));
 
@@ -39,18 +60,18 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
 
     private Map<String, RunningTaskInfo> scheduledTasks = new ConcurrentHashMap<>();
 
-//========================================
-// Lifecycle Management
-//----------------------------------------
+    // ========================================
+    // Lifecycle Management
+    // ----------------------------------------
 
     public void shutdown() {
         log.info("Shutting down scheduler");
         scheduledThreadPoolExecutor.shutdownNow();
     }
 
-//========================================
-// Operations
-//----------------------------------------
+    // ========================================
+    // Operations
+    // ----------------------------------------
 
     @Override
     public void scheduleTaskOnCron(String taskId, String cronExpression, Runnable operation) {
@@ -116,9 +137,9 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
         }
     }
 
-//========================================
-// Internal Operations
-//----------------------------------------
+    // ========================================
+    // Internal Operations
+    // ----------------------------------------
 
     private Future<?> scheduleNextRun(ExecutionTime executionTime, Runnable operation) {
         ZonedDateTime now = ZonedDateTime.now();
@@ -154,9 +175,9 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
         }
     }
 
-//========================================
-// Internal Classes
-//----------------------------------------
+    // ========================================
+    // Internal Classes
+    // ----------------------------------------
 
     private class RecurringCronRunner implements Runnable {
         private final ExecutionTime executionTime;
@@ -177,7 +198,7 @@ public class OpennmsSchedulerImpl implements OpennmsScheduler {
                 } catch (Exception exc) {
                     log.warn("task failure", exc);
                 } finally {
-                    if (! shutdown) {
+                    if (!shutdown) {
                         log.debug("Scheduling next execution");
                         scheduleNextRun(executionTime, this);
                     } else {

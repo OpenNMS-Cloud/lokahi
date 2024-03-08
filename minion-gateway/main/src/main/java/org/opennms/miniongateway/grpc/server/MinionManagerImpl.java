@@ -1,3 +1,24 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.miniongateway.grpc.server;
 
 import java.util.LinkedList;
@@ -24,7 +45,6 @@ import org.slf4j.LoggerFactory;
  *  - Need a router (core entry point), top level guy, "send this to X (location or id)".
  *  -   - needs to ask "is this locally connected"
  */
-
 public class MinionManagerImpl implements MinionManager {
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(MinionManagerImpl.class);
@@ -33,18 +53,24 @@ public class MinionManagerImpl implements MinionManager {
 
     private Map<TenantKey, MinionInfo> minionByIdMap = new ConcurrentHashMap<>();
     private ConcurrentLinkedQueue<MinionManagerListener> listeners = new ConcurrentLinkedQueue<>();
-    
 
     private long sequence = 0L;
 
     @Override
     public void addMinion(MinionInfo minionInfo) {
-        log.info("Minion Manager: adding minion: tenantId={}; locationId={}; systemId={}", minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
+        log.info(
+                "Minion Manager: adding minion: tenantId={}; locationId={}; systemId={}",
+                minionInfo.getTenantId(),
+                minionInfo.getLocation(),
+                minionInfo.getId());
 
         TenantKey minionKey = new TenantKey(minionInfo.getTenantId(), minionInfo.getId());
         if (minionByIdMap.containsKey(minionKey)) {
-            log.warn("Attempt to register minion with duplicate id; ignoring: tenantId={}; locationId={}; systemId={}",
-                minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
+            log.warn(
+                    "Attempt to register minion with duplicate id; ignoring: tenantId={}; locationId={}; systemId={}",
+                    minionInfo.getTenantId(),
+                    minionInfo.getLocation(),
+                    minionInfo.getId());
             return;
         }
 
@@ -55,14 +81,21 @@ public class MinionManagerImpl implements MinionManager {
 
     @Override
     public void removeMinion(MinionInfo minionInfo) {
-        log.info("Minion Manager: removing minion: tenantId={}; locationId={}; systemId={}",  minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
+        log.info(
+                "Minion Manager: removing minion: tenantId={}; locationId={}; systemId={}",
+                minionInfo.getTenantId(),
+                minionInfo.getLocation(),
+                minionInfo.getId());
 
         TenantKey minionKey = new TenantKey(minionInfo.getTenantId(), minionInfo.getId());
         MinionInfo removedMinionInfo = minionByIdMap.remove(minionKey);
 
         if (removedMinionInfo == null) {
-            log.warn("Attempt to remove minion with unknown id; ignoring: tenantId={}; locationId={}; systemId={}; ",
-                minionInfo.getTenantId(), minionInfo.getLocation(), minionInfo.getId());
+            log.warn(
+                    "Attempt to remove minion with unknown id; ignoring: tenantId={}; locationId={}; systemId={}; ",
+                    minionInfo.getTenantId(),
+                    minionInfo.getLocation(),
+                    minionInfo.getId());
             return;
         }
 
@@ -71,7 +104,10 @@ public class MinionManagerImpl implements MinionManager {
 
     @Override
     public void addMinionListener(MinionManagerListener listener) {
-        log.info("Adding minion manager listener at {}: class={}", System.identityHashCode(listener), listener.getClass().getName());
+        log.info(
+                "Adding minion manager listener at {}: class={}",
+                System.identityHashCode(listener),
+                listener.getClass().getName());
 
         listeners.add(listener);
     }

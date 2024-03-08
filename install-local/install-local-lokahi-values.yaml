@@ -1,0 +1,107 @@
+hostname: onmshs
+OpenNMS:
+  api:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  metricsprocessor:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  ui:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  minion:
+    resources:
+      limits:
+        cpu: '0'
+        memory: '0'
+      requests:
+        cpu: '0'
+        memory: '0'
+    enabled: true
+    addDefaultLocation: true
+  minionGateway:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+    ingressAnnotations:
+      nginx.ingress.kubernetes.io/auth-tls-secret: $NAMESPACE/client-root-ca-certificate
+      nginx.ingress.kubernetes.io/auth-url: "http://opennms-minion-certificate-verifier.$NAMESPACE.svc.cluster.local:8080/certificate/debug"
+      nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
+  minionCertificateVerifier:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  minionCertificateManager:
+    caSecretName: root-ca-certificate
+    mtlsSecretName: client-root-ca-certificate
+    enabled: true
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  inventory:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  alert:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  notification: 
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+  events:
+    resources:
+      limits:
+        cpu: "0"
+        memory: "0"
+      requests:
+        cpu: "0"
+        memory: "0"
+keycloak:
+  adminUsername: admin
+  adminPassword: admin
+mailServer:
+  enabled: true
+citus:
+  enabled: true
+

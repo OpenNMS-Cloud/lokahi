@@ -22,7 +22,6 @@
         <feature>icmp-plugins</feature>
         <feature>icmp-rpc</feature>
         <feature>snmp-plugins</feature>
-        <feature>snmp-rpc</feature>
         <feature>minion-traps</feature>
         <feature>minion-flows</feature>
         <feature>azure-plugins</feature>

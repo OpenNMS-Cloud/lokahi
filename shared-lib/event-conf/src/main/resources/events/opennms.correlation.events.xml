@@ -1,0 +1,12 @@
+<events xmlns="http://xmlns.opennms.org/xsd/eventconf">
+   <event>
+      <uei>uei.opennms.org/correlation/serviceFlapping</uei>
+      <event-label>OpenNMS-defined correlator event: A service has been detected to be in a flapping state</event-label>
+      <descr>This event is sent when a correlation rule has detected that a service is flapping.</descr>
+      <logmsg dest="logndisplay">
+            The service: %service% has been correlated to indicate a flapping state.
+        </logmsg>
+      <severity>Minor</severity>
+      <alert-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%service%" alert-type="3" auto-clean="false"/>
+   </event>
+</events>

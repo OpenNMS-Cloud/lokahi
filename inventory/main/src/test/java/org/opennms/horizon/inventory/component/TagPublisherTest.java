@@ -1,33 +1,31 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.component;
 
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,12 +42,6 @@ import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TagPublisherTest {
@@ -78,7 +70,8 @@ class TagPublisherTest {
         when(tagRepository.findAll()).thenReturn(testTagList);
         tagPublisher.publishAllTags();
 
-        var matcher = prepareTagOperationKafkaMessageMatcher((tagOperationProto) -> tagListMatchesTagOperationList(testFilteredTagList, tagOperationProto));
+        var matcher = prepareTagOperationKafkaMessageMatcher(
+                (tagOperationProto) -> tagListMatchesTagOperationList(testFilteredTagList, tagOperationProto));
 
         verify(kafkaTemplate).send(Mockito.argThat(matcher));
     }
@@ -88,11 +81,9 @@ class TagPublisherTest {
         //
         // Setup Test Data and Interactions
         //
-        List<TagOperationProto> opList =
-            List.of(
+        List<TagOperationProto> opList = List.of(
                 TagOperationProto.newBuilder().setTagName("x-tag-name1-x").build(),
-                TagOperationProto.newBuilder().setTagName("x-tag-name2-x").build()
-            );
+                TagOperationProto.newBuilder().setTagName("x-tag-name2-x").build());
 
         //
         // Execute
@@ -106,9 +97,9 @@ class TagPublisherTest {
         verify(kafkaTemplate, timeout(3000)).send(Mockito.argThat(matcher));
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
     private void setupTestTagList() {
         Tag t1 = mock(Tag.class);
@@ -121,11 +112,13 @@ class TagPublisherTest {
         testFilteredTagList = List.of(t2);
     }
 
-    private ArgumentMatcher<ProducerRecord<String, byte[]>> prepareTagOperationKafkaMessageMatcher(Predicate<List<TagOperationProto>> tagOperationListMatcher) {
+    private ArgumentMatcher<ProducerRecord<String, byte[]>> prepareTagOperationKafkaMessageMatcher(
+            Predicate<List<TagOperationProto>> tagOperationListMatcher) {
         return (argument) -> tagOperationKafkaMessageMatches(argument, tagOperationListMatcher);
     }
 
-    private boolean tagOperationKafkaMessageMatches(ProducerRecord<String, byte[]> producerRecord, Predicate<List<TagOperationProto>> tagOperationListMatcher) {
+    private boolean tagOperationKafkaMessageMatches(
+            ProducerRecord<String, byte[]> producerRecord, Predicate<List<TagOperationProto>> tagOperationListMatcher) {
         try {
             byte[] payload = producerRecord.value();
             TagOperationList tagOperationList = TagOperationList.parseFrom(payload);
@@ -148,7 +141,7 @@ class TagPublisherTest {
             var tag = tagList.get(cur);
             var tagOperation = tagOperationProtoList.get(cur);
 
-            if (! tagMatchesTagOperation(tag, tagOperation)) {
+            if (!tagMatchesTagOperation(tag, tagOperation)) {
                 return false;
             }
 
@@ -159,11 +152,9 @@ class TagPublisherTest {
     }
 
     private boolean tagMatchesTagOperation(Tag expectedTag, TagOperationProto actualTag) {
-        return (
-            (Objects.equals(expectedTag.getName(), actualTag.getTagName())) &&
-            (Objects.equals(expectedTag.getTenantId(), actualTag.getTenantId())) &&
-            tagNodeIdsMatch(expectedTag.getNodes(), actualTag.getNodeIdList())
-        );
+        return ((Objects.equals(expectedTag.getName(), actualTag.getTagName()))
+                && (Objects.equals(expectedTag.getTenantId(), actualTag.getTenantId()))
+                && tagNodeIdsMatch(expectedTag.getNodes(), actualTag.getNodeIdList()));
     }
 
     private boolean tagNodeIdsMatch(List<Node> expectedNodeList, List<Long> actualNodeIdList) {

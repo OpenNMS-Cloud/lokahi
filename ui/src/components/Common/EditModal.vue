@@ -34,7 +34,7 @@
 import { fncArgVoid } from '@/types'
 
 const input = ref()
-const newValue = ref("")
+const newValue = ref('')
 const isCalling = ref(false)
 
 const props = defineProps<{

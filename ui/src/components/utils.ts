@@ -102,7 +102,7 @@ export const humanFileSize = (bytes: number, si = true, dp = 1) => {
     ++u
   } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1)
 
-  return bytes.toFixed(dp) + ' ' + units[u];
+  return bytes.toFixed(dp) + ' ' + units[u]
 }
 
 export const addOpacity = (hex: string, opacity: number) => {
@@ -190,5 +190,5 @@ export const humanFileSizeFromBits = (bits: number, dp = 1) => {
     ++u
   } while (Math.round(Math.abs(bits) * r) / r >= thresh && u < units.length - 1)
 
-   return bits.toFixed(dp) + ' ' + units[u]
+  return bits.toFixed(dp) + ' ' + units[u]
 }

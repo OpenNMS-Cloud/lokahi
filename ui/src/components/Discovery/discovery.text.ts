@@ -5,7 +5,7 @@ export default {
       add: 'Add Discovery'
     },
     empty: 'No discoveries performed.'
-  },
+  }
 }
 
 export const Instructions = {

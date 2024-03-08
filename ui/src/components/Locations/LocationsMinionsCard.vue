@@ -85,6 +85,7 @@ const latencyThreshold = (latency: number) => {
 
 let statusPill = reactive({} as Pill)
 let latencyPill = reactive({} as Pill)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let ipPill = reactive({} as Pill)
 
 const minion = computed(() => {
@@ -94,8 +95,8 @@ const minion = computed(() => {
   }
 
   latencyPill = {
-    label: `${props.item.latency?.value || 0}ms`, //Latency is not on this Object
-    style: latencyThreshold(props.item.latency?.value || 0) //.match(/\d+/g))
+    label: `${props.item.latency?.value || 0}ms`, // Latency is not on this Object
+    style: latencyThreshold(props.item.latency?.value || 0) // .match(/\d+/g))
   }
 
   ipPill = {

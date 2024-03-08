@@ -48,7 +48,7 @@ describe('LocationsList', () => {
   })
 
   test('Should have a header', () => {
-    let elem = wrapper.get('[data-test="header"]')
+    const elem = wrapper.get('[data-test="header"]')
     expect(elem.exists()).toBeTruthy()
   })
 

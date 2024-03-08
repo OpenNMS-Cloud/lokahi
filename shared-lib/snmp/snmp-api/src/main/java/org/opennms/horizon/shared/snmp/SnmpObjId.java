@@ -1,37 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp;
 
 import java.util.StringTokenizer;
 
 public class SnmpObjId implements Comparable<SnmpObjId> {
-    
+
     /* FIXME: Change the implementation of this to cache oids and share common prefixes
      * This should enhance the amount of garbage we generate a great deal at least for
      * this class.
@@ -39,56 +32,56 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
 
     private int[] m_ids;
 
-    protected  SnmpObjId() {
+    protected SnmpObjId() {
         // No-arg constructor for JAXB
         m_ids = new int[0];
     }
 
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     public SnmpObjId(int[] ids, boolean clone) {
         m_ids = (clone ? cloneIds(ids) : ids);
     }
-    
+
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     protected SnmpObjId(int[] ids) {
         this(ids, true);
     }
 
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     public SnmpObjId(String oid) {
         this(convertStringToInts(oid), false);
     }
-    
+
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     protected SnmpObjId(SnmpObjId oid) {
         this(oid.m_ids);
     }
-    
+
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     private SnmpObjId(String objId, String instance) {
         this(appendArrays(convertStringToInts(objId), convertStringToInts(instance)), false);
     }
-    
+
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     private SnmpObjId(SnmpObjId objId, String instance) {
         this(appendArrays(objId.m_ids, convertStringToInts(instance)), false);
     }
-    
+
     /**
      * These constructors are private.  The get method should be called to create a new oid
-     */ 
+     */
     private SnmpObjId(SnmpObjId objId, SnmpObjId instance) {
         this(appendArrays(objId.m_ids, instance.m_ids), false);
     }
@@ -96,24 +89,24 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     public int[] getIds() {
         return cloneIds(m_ids);
     }
-    
+
     private static int[] cloneIds(int[] ids) {
         return cloneIds(ids, ids.length);
     }
-    
+
     private static int[] cloneIds(int[] ids, int lengthToClone) {
         int len = Math.min(lengthToClone, ids.length);
         int[] newIds = new int[len];
         System.arraycopy(ids, 0, newIds, 0, len);
         return newIds;
     }
-    
+
     public static int[] convertStringToInts(String oid) {
         oid = oid.trim();
         if (oid.startsWith(".")) {
             oid = oid.substring(1);
         }
-        
+
         final StringTokenizer tokenizer = new StringTokenizer(oid, ".");
         int[] ids = new int[tokenizer.countTokens()];
         int index = 0;
@@ -121,42 +114,40 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
             try {
                 String tok = tokenizer.nextToken();
                 long value = Long.parseLong(tok);
-                ids[index] = (int)value;
+                ids[index] = (int) value;
                 if (value < 0)
-                    throw new IllegalArgumentException("String "+oid+" could not be converted to a SnmpObjId. It has a negative for subId "+index);
+                    throw new IllegalArgumentException("String " + oid
+                            + " could not be converted to a SnmpObjId. It has a negative for subId " + index);
                 index++;
-            } catch(NumberFormatException e) {
-                throw new IllegalArgumentException("String "+oid+" could not be converted to a SnmpObjId at subId "+index);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(
+                        "String " + oid + " could not be converted to a SnmpObjId at subId " + index);
             }
         }
         return ids;
     }
-    
-    
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof SnmpObjId)
-            return compareTo((SnmpObjId)obj) == 0;
-        else
-            return false;
+        if (obj instanceof SnmpObjId) return compareTo((SnmpObjId) obj) == 0;
+        else return false;
     }
 
     @Override
     public int hashCode() {
         int h = 31;
-        for(int i = 0; i < m_ids.length; i++) {
-            h = h + 37*m_ids[i];
+        for (int i = 0; i < m_ids.length; i++) {
+            h = h + 37 * m_ids[i];
         }
         return h;
     }
 
     @Override
     public String toString() {
-        final StringBuilder buf = new StringBuilder(length()*2+10); // a guess at the str len
-        for(int i = 0; i < length(); i++) {
+        final StringBuilder buf = new StringBuilder(length() * 2 + 10); // a guess at the str len
+        for (int i = 0; i < length(); i++) {
             if (i > 0 || addPrefixDotInToString()) {
-                buf.append('.');  
+                buf.append('.');
             }
             // we use toLong to account for unsigned ints > Integer.MAX_INT
             buf.append(toLong(m_ids[i]));
@@ -165,7 +156,7 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     }
 
     private long toLong(int subid) {
-        return subid >= 0 ? subid : 0xffffffffL & ((long)subid);
+        return subid >= 0 ? subid : 0xffffffffL & ((long) subid);
     }
 
     protected boolean addPrefixDotInToString() {
@@ -175,29 +166,28 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     @Override
     public int compareTo(SnmpObjId o) {
         if (o == null) throw new NullPointerException("o is null");
-        SnmpObjId other = (SnmpObjId)o;
+        SnmpObjId other = (SnmpObjId) o;
 
         // compare each element in order for as much length as they have in common
         // which is the entire length of one or both oids
         int minLen = Math.min(length(), other.length());
-        for(int i = 0; i < minLen; i++) {
+        for (int i = 0; i < minLen; i++) {
             long diff = toLong(m_ids[i]) - toLong(other.m_ids[i]);
             // the first one that is not equal indicates which is bigger
             if (diff != 0) {
                 return diff > 0 ? 1 : -1;
             }
         }
-        
+
         // if they get to hear then both are identifical for their common length
         // so which ever is longer is then greater
         return length() - other.length();
     }
-    
 
     public SnmpObjId append(String inst) {
         return append(convertStringToInts(inst));
     }
-    
+
     public SnmpObjId append(SnmpObjId inst) {
         return append(inst.m_ids);
     }
@@ -208,7 +198,7 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     }
 
     private static int[] appendArrays(int[] objIds, int[] instIds) {
-        int[] ids = new int[objIds.length+instIds.length];
+        int[] ids = new int[objIds.length + instIds.length];
         System.arraycopy(objIds, 0, ids, 0, objIds.length);
         System.arraycopy(instIds, 0, ids, objIds.length, instIds.length);
         return ids;
@@ -239,20 +229,18 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     }
 
     public boolean isPrefixOf(final SnmpObjId other) {
-    	if (other == null || length() > other.length())
-            return false;
-        
-        for(int i = 0; i < m_ids.length; i++) {
-            if (m_ids[i] != other.m_ids[i])
-                return false;
+        if (other == null || length() > other.length()) return false;
+
+        for (int i = 0; i < m_ids.length; i++) {
+            if (m_ids[i] != other.m_ids[i]) return false;
         }
-        
+
         return true;
     }
 
     public SnmpInstId getInstance(SnmpObjId base) {
         if (!base.isPrefixOf(this)) return null;
-        
+
         int[] instanceIds = new int[length() - base.length()];
         System.arraycopy(m_ids, base.length(), instanceIds, 0, instanceIds.length);
         return new SnmpInstId(instanceIds);
@@ -261,32 +249,30 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     public int length() {
         return m_ids.length;
     }
-    
+
     public SnmpObjId getPrefix(int length) {
-    	if (length >= length()) {
-    		throw new IllegalArgumentException("Invalid length: " + length +" is longer than length of ObjId");
-    	}
-    	
-    	int[] newIds = cloneIds(m_ids, length);
+        if (length >= length()) {
+            throw new IllegalArgumentException("Invalid length: " + length + " is longer than length of ObjId");
+        }
+
+        int[] newIds = cloneIds(m_ids, length);
         return new SnmpObjId(newIds, false);
-    	
     }
-    
+
     public int getSubIdAt(int index) {
         return m_ids[index];
     }
-    
+
     public int getLastSubId() {
-        return getSubIdAt(length()-1);
+        return getSubIdAt(length() - 1);
     }
 
     public SnmpObjId decrement() {
         if (getLastSubId() == 0) {
             return new SnmpObjId(cloneIds(m_ids, length() - 1), false);
-        }
-        else {
+        } else {
             int[] newIds = cloneIds(m_ids, length());
-            newIds[newIds.length-1] -= 1;
+            newIds[newIds.length - 1] -= 1;
             return new SnmpObjId(newIds, false);
         }
     }
@@ -304,5 +290,4 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
     public boolean isSuccessorOf(SnmpObjId base) {
         return compareTo(base) > 0;
     }
-
 }

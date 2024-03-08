@@ -1,38 +1,40 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.flows;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.leangen.graphql.execution.ResolutionEnvironment;
+import java.util.List;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,40 +57,48 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
 class GrpcFlowServiceTest {
     private final String tenantId = "tenantId";
 
     @MockBean(name = "flowQuerier")
     private ManagedChannel channel;
+
     @MockBean
     private FlowClient mockFlowClient;
+
     @MockBean
     private InventoryClient mockInventoryClient;
+
     @MockBean
     private ServerHeaderUtil mockHeaderUtil;
 
     private GraphQLWebTestClient webClient;
     private String accessToken;
     private IpInterfaceDTO ipInterfaceDTO = IpInterfaceDTO.newBuilder()
-        .setId(1L).setNodeId(1L).setIpAddress("127.0.0.1").setHostname("localhost").setSnmpPrimary(true)
-        .setSnmpInterfaceId(2).build();
-    private NodeDTO nodeDTO = NodeDTO.newBuilder().setId(1L).setNodeLabel("label")
-        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(1).setIfIndex(1).setIfName("eth0").setIfAdminStatus(1)
-            .setIfOperatorStatus(1))
-        .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder().setId(2).setIfIndex(2).setIfName("eth1").setIfAdminStatus(1)
-            .setIfOperatorStatus(1))
-        .build();
+            .setId(1L)
+            .setNodeId(1L)
+            .setIpAddress("127.0.0.1")
+            .setHostname("localhost")
+            .setSnmpPrimary(true)
+            .setSnmpInterfaceId(2)
+            .build();
+    private NodeDTO nodeDTO = NodeDTO.newBuilder()
+            .setId(1L)
+            .setNodeLabel("label")
+            .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder()
+                    .setId(1)
+                    .setIfIndex(1)
+                    .setIfName("eth0")
+                    .setIfAdminStatus(1)
+                    .setIfOperatorStatus(1))
+            .addSnmpInterfaces(SnmpInterfaceDTO.newBuilder()
+                    .setId(2)
+                    .setIfIndex(2)
+                    .setIfName("eth1")
+                    .setIfAdminStatus(1)
+                    .setIfOperatorStatus(1))
+            .build();
 
     @BeforeEach
     public void setUp(@Autowired WebTestClient webTestClient) {
@@ -113,10 +123,12 @@ class GrpcFlowServiceTest {
         ArgumentCaptor<String> tenantIdArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> accessTokenArg = ArgumentCaptor.forClass(String.class);
         // id = 2 is invalid
-        doReturn(List.of(1L, 2L)).when(mockFlowClient)
-            .findExporters(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
+        doReturn(List.of(1L, 2L))
+                .when(mockFlowClient)
+                .findExporters(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
 
-        String request = """
+        String request =
+                """
             query {
               findExporters(
                 requestCriteria: {
@@ -141,16 +153,23 @@ class GrpcFlowServiceTest {
             }
             """;
 
-        var matchedSnmpInterface = nodeDTO.getSnmpInterfacesList().stream().filter(s -> s.getId() == ipInterfaceDTO.getSnmpInterfaceId()).findFirst();
+        var matchedSnmpInterface = nodeDTO.getSnmpInterfacesList().stream()
+                .filter(s -> s.getId() == ipInterfaceDTO.getSnmpInterfaceId())
+                .findFirst();
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            // id = 2 is expected to skip silently
-            .jsonPath("$.data.findExporters.size()").isEqualTo(1)
-            .jsonPath("$.data.findExporters[0].node.nodeLabel").isEqualTo(nodeDTO.getNodeLabel())
-            .jsonPath("$.data.findExporters[0].ipInterface.ipAddress").isEqualTo(ipInterfaceDTO.getIpAddress())
-            .jsonPath("$.data.findExporters[0].snmpInterface.ifName").isEqualTo(matchedSnmpInterface.get().getIfName())
-            .jsonPath("$.data.findExporters[0].snmpInterface.ifIndex").isEqualTo(matchedSnmpInterface.get().getIfIndex());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                // id = 2 is expected to skip silently
+                .jsonPath("$.data.findExporters.size()")
+                .isEqualTo(1)
+                .jsonPath("$.data.findExporters[0].node.nodeLabel")
+                .isEqualTo(nodeDTO.getNodeLabel())
+                .jsonPath("$.data.findExporters[0].ipInterface.ipAddress")
+                .isEqualTo(ipInterfaceDTO.getIpAddress())
+                .jsonPath("$.data.findExporters[0].snmpInterface.ifName")
+                .isEqualTo(matchedSnmpInterface.get().getIfName())
+                .jsonPath("$.data.findExporters[0].snmpInterface.ifIndex")
+                .isEqualTo(matchedSnmpInterface.get().getIfIndex());
         assertEquals(tenantId, tenantIdArg.getValue());
         assertEquals(accessToken, accessTokenArg.getValue());
     }
@@ -160,10 +179,12 @@ class GrpcFlowServiceTest {
         ArgumentCaptor<String> tenantIdArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> accessTokenArg = ArgumentCaptor.forClass(String.class);
         List<String> applications = List.of("http", "mysql");
-        doReturn(applications).when(mockFlowClient)
-            .findApplications(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
+        doReturn(applications)
+                .when(mockFlowClient)
+                .findApplications(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
 
-        String request = """
+        String request =
+                """
             query {
               findApplications(
                 requestCriteria: {
@@ -174,10 +195,12 @@ class GrpcFlowServiceTest {
             """;
 
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findApplications.size()").isEqualTo(applications.size())
-            .jsonPath("$.data.findApplications[0]").isEqualTo(applications.get(0));
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findApplications.size()")
+                .isEqualTo(applications.size())
+                .jsonPath("$.data.findApplications[0]")
+                .isEqualTo(applications.get(0));
         assertEquals(tenantId, tenantIdArg.getValue());
         assertEquals(accessToken, accessTokenArg.getValue());
     }
@@ -186,12 +209,18 @@ class GrpcFlowServiceTest {
     void testFindApplicationSummaries() throws JSONException {
         ArgumentCaptor<String> tenantIdArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> accessTokenArg = ArgumentCaptor.forClass(String.class);
-        Summaries summaries = Summaries.newBuilder().addSummaries(TrafficSummary.newBuilder()
-            .setApplication("http").setBytesIn(10).setBytesOut(20)).build();
-        doReturn(summaries).when(mockFlowClient)
-            .getApplicationSummaries(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
+        Summaries summaries = Summaries.newBuilder()
+                .addSummaries(TrafficSummary.newBuilder()
+                        .setApplication("http")
+                        .setBytesIn(10)
+                        .setBytesOut(20))
+                .build();
+        doReturn(summaries)
+                .when(mockFlowClient)
+                .getApplicationSummaries(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
 
-        String request = """
+        String request =
+                """
             query {
               findApplicationSummaries(
                 requestCriteria: {
@@ -206,10 +235,12 @@ class GrpcFlowServiceTest {
             """;
 
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findApplicationSummaries.size()").isEqualTo(summaries.getSummariesCount())
-            .jsonPath("$.data.findApplicationSummaries[0].label").isEqualTo(summaries.getSummaries(0).getApplication());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findApplicationSummaries.size()")
+                .isEqualTo(summaries.getSummariesCount())
+                .jsonPath("$.data.findApplicationSummaries[0].label")
+                .isEqualTo(summaries.getSummaries(0).getApplication());
         assertEquals(tenantId, tenantIdArg.getValue());
         assertEquals(accessToken, accessTokenArg.getValue());
     }
@@ -219,15 +250,23 @@ class GrpcFlowServiceTest {
         ArgumentCaptor<String> tenantIdArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> accessTokenArg = ArgumentCaptor.forClass(String.class);
         Series flowingPoints = Series.newBuilder()
-            .addPoint(FlowingPoint.newBuilder().setApplication("http").setDirection(Direction.INGRESS).setValue(100L)
-                .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis())))
-            .addPoint(FlowingPoint.newBuilder().setApplication("http").setDirection(Direction.INGRESS).setValue(100L)
-                .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis() + 1)))
-            .build();
-        doReturn(flowingPoints).when(mockFlowClient)
-            .getApplicationSeries(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
+                .addPoint(FlowingPoint.newBuilder()
+                        .setApplication("http")
+                        .setDirection(Direction.INGRESS)
+                        .setValue(100L)
+                        .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis())))
+                .addPoint(FlowingPoint.newBuilder()
+                        .setApplication("http")
+                        .setDirection(Direction.INGRESS)
+                        .setValue(100L)
+                        .setTimestamp(Timestamp.newBuilder().setSeconds(System.currentTimeMillis() + 1)))
+                .build();
+        doReturn(flowingPoints)
+                .when(mockFlowClient)
+                .getApplicationSeries(any(RequestCriteria.class), tenantIdArg.capture(), accessTokenArg.capture());
 
-        String request = """
+        String request =
+                """
             query {
               findApplicationSeries(
                 requestCriteria: {
@@ -243,10 +282,12 @@ class GrpcFlowServiceTest {
             """;
 
         webClient
-            .exchangeGraphQLQuery(request)
-            .expectCleanResponse()
-            .jsonPath("$.data.findApplicationSeries.size()").isEqualTo(flowingPoints.getPointCount())
-            .jsonPath("$.data.findApplicationSeries[0].label").isEqualTo(flowingPoints.getPoint(0).getApplication());
+                .exchangeGraphQLQuery(request)
+                .expectCleanResponse()
+                .jsonPath("$.data.findApplicationSeries.size()")
+                .isEqualTo(flowingPoints.getPointCount())
+                .jsonPath("$.data.findApplicationSeries[0].label")
+                .isEqualTo(flowingPoints.getPoint(0).getApplication());
         assertEquals(tenantId, tenantIdArg.getValue());
         assertEquals(accessToken, accessTokenArg.getValue());
     }

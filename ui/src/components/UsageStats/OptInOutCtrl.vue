@@ -15,7 +15,7 @@
 
       <FeatherExpansionPanel
         class="expansion"
-        v-if="!state.showModalOnLoad" 
+        v-if="!state.showModalOnLoad"
         title="Show me what is being sent.">
         <pre>
           <code>
@@ -26,15 +26,15 @@
     </template>
 
     <template v-slot:footer>
-      <FeatherButton 
-        data-test="opt-out-btn" 
-        secondary 
+      <FeatherButton
+        data-test="opt-out-btn"
+        secondary
         @click="opt()">
           Opt-out
       </FeatherButton>
-      
-      <FeatherButton 
-        data-test="opt-in-btn" 
+
+      <FeatherButton
+        data-test="opt-in-btn"
         primary
         @click="opt(true)">
           Opt-in
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import Settings from "@featherds/icon/action/Settings"
+import Settings from '@featherds/icon/action/Settings'
 import useModal from '@/composables/useModal'
 // import { useUsageStatsMutations } from '@/store/Mutations/usageStatsMutations'
 // import { useUsageStatsQueries } from '@/store/Queries/usageStatsQueries'
@@ -57,10 +57,11 @@ const state = useStorage<{ showModalOnLoad: boolean } >('first-load', {
   showModalOnLoad: true
 })
 
-const opt = (choice: boolean = false) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const opt = (choice = false) => {
   state.value.showModalOnLoad = false
 
-  // usageStatsMutations.toggleUsageStats({ 
+  // usageStatsMutations.toggleUsageStats({
   //   toggleDataChoices: {
   //     toggle: choice
   //   }

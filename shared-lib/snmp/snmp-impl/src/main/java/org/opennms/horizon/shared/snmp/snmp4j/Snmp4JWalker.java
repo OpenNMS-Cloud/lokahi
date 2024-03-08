@@ -1,35 +1,27 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2011-2017 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2017 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.snmp.snmp4j;
 
 import java.io.IOException;
-
 import org.opennms.horizon.shared.snmp.CollectionTracker;
 import org.opennms.horizon.shared.snmp.SnmpException;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
@@ -47,17 +39,17 @@ import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
 
 public class Snmp4JWalker extends SnmpWalker {
-	
-	private static final transient Logger LOG = LoggerFactory.getLogger(Snmp4JWalker.class);
-	
-	public static abstract class Snmp4JPduBuilder extends WalkerPduBuilder {
+
+    private static final transient Logger LOG = LoggerFactory.getLogger(Snmp4JWalker.class);
+
+    public abstract static class Snmp4JPduBuilder extends WalkerPduBuilder {
         public Snmp4JPduBuilder(int maxVarsPerPdu) {
             super(maxVarsPerPdu);
         }
-        
+
         public abstract PDU getPdu();
     }
-    
+
     public class GetNextBuilder extends Snmp4JPduBuilder {
 
         private PDU m_nextPdu = null;
@@ -66,7 +58,7 @@ public class Snmp4JWalker extends SnmpWalker {
             super(maxVarsPerPdu);
             reset();
         }
-        
+
         @Override
         public void reset() {
             m_nextPdu = m_agentConfig.createPdu(PDU.GETNEXT);
@@ -76,7 +68,7 @@ public class Snmp4JWalker extends SnmpWalker {
         public PDU getPdu() {
             return m_nextPdu;
         }
-        
+
         @Override
         public void addOid(SnmpObjId snmpObjId) {
             VariableBinding varBind = new VariableBinding(new OID(snmpObjId.getIds()));
@@ -84,15 +76,12 @@ public class Snmp4JWalker extends SnmpWalker {
         }
 
         @Override
-        public void setNonRepeaters(int numNonRepeaters) {
-        }
+        public void setNonRepeaters(int numNonRepeaters) {}
 
         @Override
-        public void setMaxRepetitions(int maxRepititions) {
-        }
-        
+        public void setMaxRepetitions(int maxRepititions) {}
     }
-    
+
     public class GetBulkBuilder extends Snmp4JPduBuilder {
 
         private PDU m_bulkPdu;
@@ -101,7 +90,7 @@ public class Snmp4JWalker extends SnmpWalker {
             super(maxVarsPerPdu);
             reset();
         }
-        
+
         @Override
         public void reset() {
             m_bulkPdu = m_agentConfig.createPdu(PDU.GETBULK);
@@ -127,7 +116,6 @@ public class Snmp4JWalker extends SnmpWalker {
         public void setMaxRepetitions(int maxRepetitions) {
             m_bulkPdu.setMaxRepetitions(maxRepetitions);
         }
-        
     }
 
     /**
@@ -137,17 +125,27 @@ public class Snmp4JWalker extends SnmpWalker {
 
         private void processResponse(final PDU response) throws SnmpException {
             try {
-                LOG.debug("Received a tracker PDU of type {} from {} of size {}, errorStatus = {}, errorStatusText = {}, errorIndex = {}", PDU.getTypeString(response.getType()), getAddress(), response.size(), response.getErrorStatus(), response.getErrorStatusText(), response.getErrorIndex());
+                LOG.debug(
+                        "Received a tracker PDU of type {} from {} of size {}, errorStatus = {}, errorStatusText = {}, errorIndex = {}",
+                        PDU.getTypeString(response.getType()),
+                        getAddress(),
+                        response.size(),
+                        response.getErrorStatus(),
+                        response.getErrorStatusText(),
+                        response.getErrorIndex());
                 if (response.getType() == PDU.REPORT) {
-                    handleAuthError("A REPORT PDU was returned from the agent.  This is most likely an authentication problem.  Please check the config");
+                    handleAuthError(
+                            "A REPORT PDU was returned from the agent.  This is most likely an authentication problem.  Please check the config");
                 } else {
                     if (!processErrors(response.getErrorStatus(), response.getErrorIndex())) {
                         if (response.size() == 0) { // NMS-6484
-                            handleError("A PDU with no errors and 0 varbinds was returned from the agent at " + getAddress() + ". This seems to be related with a broken SNMP agent.");
+                            handleError("A PDU with no errors and 0 varbinds was returned from the agent at "
+                                    + getAddress() + ". This seems to be related with a broken SNMP agent.");
                         } else {
                             for (int i = 0; i < response.size(); i++) {
                                 final VariableBinding vb = response.get(i);
-                                final SnmpObjId receivedOid = SnmpObjId.get(vb.getOid().getValue());
+                                final SnmpObjId receivedOid =
+                                        SnmpObjId.get(vb.getOid().getValue());
                                 final SnmpValue val = new Snmp4JValue(vb.getVariable());
                                 Snmp4JWalker.this.processResponse(receivedOid, val);
                             }
@@ -155,7 +153,7 @@ public class Snmp4JWalker extends SnmpWalker {
                     }
                     buildAndSendNextPdu();
                 }
-            } catch (final RuntimeException|SnmpException e) {
+            } catch (final RuntimeException | SnmpException e) {
                 handleFatalError(e);
             }
         }
@@ -167,14 +165,18 @@ public class Snmp4JWalker extends SnmpWalker {
 
             // Check to see if we got an interrupted exception
             if (responseEvent.getError() instanceof InterruptedException) {
-                LOG.debug("Interruption event.  We have probably tried to close the session due to an error", responseEvent.getError());
-            // Check to see if the response is null, indicating a timeout
+                LOG.debug(
+                        "Interruption event.  We have probably tried to close the session due to an error",
+                        responseEvent.getError());
+                // Check to see if the response is null, indicating a timeout
             } else if (responseEvent.getResponse() == null) {
-                handleTimeout(getName()+": snmpTimeoutError for: " + getAddress());
-            // Check to see if we got any kind of error
-            } else if (responseEvent.getError() != null){
-                handleError(getName()+": snmpInternalError: " + responseEvent.getError() + " for: " + getAddress(), responseEvent.getError());
-            // If we have a PDU in the response, process it
+                handleTimeout(getName() + ": snmpTimeoutError for: " + getAddress());
+                // Check to see if we got any kind of error
+            } else if (responseEvent.getError() != null) {
+                handleError(
+                        getName() + ": snmpInternalError: " + responseEvent.getError() + " for: " + getAddress(),
+                        responseEvent.getError());
+                // If we have a PDU in the response, process it
             } else {
                 try {
                     processResponse(responseEvent.getResponse());
@@ -182,44 +184,52 @@ public class Snmp4JWalker extends SnmpWalker {
                     handleFatalError(e);
                 }
             }
-            
         }
-        
-        
     }
-    
+
     private Snmp m_session;
     private final Target m_tgt;
     private final ResponseListener m_listener;
     private final Snmp4JAgentConfig m_agentConfig;
 
     public Snmp4JWalker(Snmp4JAgentConfig agentConfig, String name, CollectionTracker tracker) {
-        super(agentConfig.getInetAddress(), name, agentConfig.getMaxVarsPerPdu(), agentConfig.getMaxRepetitions(), agentConfig.getRetries(), tracker);
-        
+        super(
+                agentConfig.getInetAddress(),
+                name,
+                agentConfig.getMaxVarsPerPdu(),
+                agentConfig.getMaxRepetitions(),
+                agentConfig.getRetries(),
+                tracker);
+
         m_agentConfig = agentConfig;
-        
+
         m_tgt = agentConfig.getTarget();
         m_listener = new Snmp4JResponseListener();
     }
-    
-        @Override
+
+    @Override
     public void start() {
-        
-        LOG.debug("Walking {} for {} using version {} with config: {}", getName(), getAddress(), m_agentConfig.getVersionString(), m_agentConfig);
-            
+
+        LOG.debug(
+                "Walking {} for {} using version {} with config: {}",
+                getName(),
+                getAddress(),
+                m_agentConfig.getVersionString(),
+                m_agentConfig);
+
         super.start();
     }
 
-        @Override
+    @Override
     protected WalkerPduBuilder createPduBuilder(int maxVarsPerPdu) {
-        return (getVersion() == SnmpConstants.version1 
-                ? (WalkerPduBuilder)new GetNextBuilder(maxVarsPerPdu) 
-                : (WalkerPduBuilder)new GetBulkBuilder(maxVarsPerPdu));
+        return (getVersion() == SnmpConstants.version1
+                ? (WalkerPduBuilder) new GetNextBuilder(maxVarsPerPdu)
+                : (WalkerPduBuilder) new GetBulkBuilder(maxVarsPerPdu));
     }
 
-        @Override
+    @Override
     protected void sendNextPdu(WalkerPduBuilder pduBuilder) throws SnmpException {
-        Snmp4JPduBuilder snmp4JPduBuilder = (Snmp4JPduBuilder)pduBuilder;
+        Snmp4JPduBuilder snmp4JPduBuilder = (Snmp4JPduBuilder) pduBuilder;
         try {
             if (m_session == null) {
                 m_session = m_agentConfig.createSnmpSession();
@@ -240,7 +250,7 @@ public class Snmp4JWalker extends SnmpWalker {
             throw new SnmpException(e);
         }
     }
-    
+
     protected int getVersion() {
         return m_tgt.getVersion();
     }

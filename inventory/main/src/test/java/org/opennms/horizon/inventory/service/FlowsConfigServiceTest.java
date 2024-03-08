@@ -1,33 +1,32 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022-2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import nl.altindag.log.LogCaptor;
 import nl.altindag.log.model.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,13 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opennms.horizon.inventory.dto.MonitoringLocationDTO;
 import org.opennms.horizon.inventory.service.taskset.publisher.TaskSetPublisher;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FlowsConfigServiceTest {
 
@@ -69,11 +61,15 @@ public class FlowsConfigServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testLocationList =
-            List.of(
-                MonitoringLocationDTO.newBuilder().setTenantId(TEST_TENANT_ID).setId(TEST_LOCATION_ID1).build(),
-                MonitoringLocationDTO.newBuilder().setTenantId(TEST_TENANT_ID).setId(TEST_LOCATION_ID2).build()
-            );
+        var testLocationList = List.of(
+                MonitoringLocationDTO.newBuilder()
+                        .setTenantId(TEST_TENANT_ID)
+                        .setId(TEST_LOCATION_ID1)
+                        .build(),
+                MonitoringLocationDTO.newBuilder()
+                        .setTenantId(TEST_TENANT_ID)
+                        .setId(TEST_LOCATION_ID2)
+                        .build());
 
         Mockito.when(mockMonitoringLocationService.findAll()).thenReturn(testLocationList);
 
@@ -86,21 +82,21 @@ public class FlowsConfigServiceTest {
         // Verify the Results
         //
         Mockito.verify(mockTaskSetPublisher)
-            .publishNewTasks(
-                Mockito.eq(TEST_TENANT_ID),
-                Mockito.eq(TEST_LOCATION_ID1),
-                Mockito.argThat(
-                    argument -> ( argument.size() == 1 ) && ( argument.get(0).getId().equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID1) )
-                )
-            );
+                .publishNewTasks(
+                        Mockito.eq(TEST_TENANT_ID),
+                        Mockito.eq(TEST_LOCATION_ID1),
+                        Mockito.argThat(argument -> (argument.size() == 1)
+                                && (argument.get(0)
+                                        .getId()
+                                        .equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID1))));
         Mockito.verify(mockTaskSetPublisher)
-            .publishNewTasks(
-                Mockito.eq(TEST_TENANT_ID),
-                Mockito.eq(TEST_LOCATION_ID2),
-                Mockito.argThat(
-                    argument -> ( argument.size() == 1 ) && ( argument.get(0).getId().equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID2) )
-                )
-            );
+                .publishNewTasks(
+                        Mockito.eq(TEST_TENANT_ID),
+                        Mockito.eq(TEST_LOCATION_ID2),
+                        Mockito.argThat(argument -> (argument.size() == 1)
+                                && (argument.get(0)
+                                        .getId()
+                                        .equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID2))));
     }
 
     @Test
@@ -108,19 +104,23 @@ public class FlowsConfigServiceTest {
         //
         // Setup Test Data and Interactions
         //
-        var testLocationList =
-            List.of(
-                MonitoringLocationDTO.newBuilder().setTenantId(TEST_TENANT_ID).setId(TEST_LOCATION_ID1).setLocation(TEST_LOCATION_ID1_NAME).build(),
-                MonitoringLocationDTO.newBuilder().setTenantId(TEST_TENANT_ID).setId(TEST_LOCATION_ID2).setLocation(TEST_LOCATION_ID2_NAME).build()
-            );
+        var testLocationList = List.of(
+                MonitoringLocationDTO.newBuilder()
+                        .setTenantId(TEST_TENANT_ID)
+                        .setId(TEST_LOCATION_ID1)
+                        .setLocation(TEST_LOCATION_ID1_NAME)
+                        .build(),
+                MonitoringLocationDTO.newBuilder()
+                        .setTenantId(TEST_TENANT_ID)
+                        .setId(TEST_LOCATION_ID2)
+                        .setLocation(TEST_LOCATION_ID2_NAME)
+                        .build());
         Mockito.when(mockMonitoringLocationService.findAll()).thenReturn(testLocationList);
 
         var testException = new RuntimeException("x-test-exception-x");
-        Mockito.doThrow(testException).when(mockTaskSetPublisher)
-            .publishNewTasks(
-                Mockito.anyString(),
-                Mockito.eq(TEST_LOCATION_ID1),
-                Mockito.any(List.class));
+        Mockito.doThrow(testException)
+                .when(mockTaskSetPublisher)
+                .publishNewTasks(Mockito.anyString(), Mockito.eq(TEST_LOCATION_ID1), Mockito.any(List.class));
 
         //
         // Execute
@@ -132,23 +132,22 @@ public class FlowsConfigServiceTest {
             // Verify the Results
             //
             var matcher = createLogEventMatcher(
-                "Failed to send flow config: tenant={}; location={}",
-                testException,
-                tenant -> Objects.equals(TEST_TENANT_ID, tenant),
-                location -> Objects.equals(TEST_LOCATION_ID1_NAME, location)
-            );
+                    "Failed to send flow config: tenant={}; location={}",
+                    testException,
+                    tenant -> Objects.equals(TEST_TENANT_ID, tenant),
+                    location -> Objects.equals(TEST_LOCATION_ID1_NAME, location));
 
             assertTrue(logCaptor.getLogEvents().stream().anyMatch(matcher));
             assertEquals(1, logCaptor.getLogEvents().size());
 
             Mockito.verify(mockTaskSetPublisher)
-                .publishNewTasks(
-                    Mockito.eq(TEST_TENANT_ID),
-                    Mockito.eq(TEST_LOCATION_ID2),
-                    Mockito.argThat(
-                        argument -> ( argument.size() == 1 ) && ( argument.get(0).getId().equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID2) )
-                    )
-                );
+                    .publishNewTasks(
+                            Mockito.eq(TEST_TENANT_ID),
+                            Mockito.eq(TEST_LOCATION_ID2),
+                            Mockito.argThat(argument -> (argument.size() == 1)
+                                    && (argument.get(0)
+                                            .getId()
+                                            .equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID2))));
         }
     }
 
@@ -167,27 +166,24 @@ public class FlowsConfigServiceTest {
         // Verify the Results
         //
         Mockito.verify(mockTaskSetPublisher)
-            .publishNewTasks(
-                Mockito.eq(TEST_TENANT_ID),
-                Mockito.eq(TEST_LOCATION_ID1),
-                Mockito.argThat(
-                    argument -> ( argument.size() == 1 ) && ( argument.get(0).getId().equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID1) )
-                )
-            );
+                .publishNewTasks(
+                        Mockito.eq(TEST_TENANT_ID),
+                        Mockito.eq(TEST_LOCATION_ID1),
+                        Mockito.argThat(argument -> (argument.size() == 1)
+                                && (argument.get(0)
+                                        .getId()
+                                        .equals(FlowsConfigService.FLOWS_CONFIG + "@" + TEST_LOCATION_ID1))));
     }
 
-//========================================
-// Internals
-//----------------------------------------
+    // ========================================
+    // Internals
+    // ----------------------------------------
 
-    private Predicate<LogEvent> createLogEventMatcher(String logString, Exception expectedException, Predicate<Object>... expectedArgMatchers) {
-        Predicate<LogEvent> matcher =
-            (logEvent) ->
-                (
-                    ( Objects.equals(logString, logEvent.getMessage()) ) &&
-                    ( argumentsMatch(logEvent, expectedArgMatchers) ) &&
-                    ( logEvent.getThrowable().orElse(null) == expectedException )
-                );
+    private Predicate<LogEvent> createLogEventMatcher(
+            String logString, Exception expectedException, Predicate<Object>... expectedArgMatchers) {
+        Predicate<LogEvent> matcher = (logEvent) -> ((Objects.equals(logString, logEvent.getMessage()))
+                && (argumentsMatch(logEvent, expectedArgMatchers))
+                && (logEvent.getThrowable().orElse(null) == expectedException));
 
         return matcher;
     }

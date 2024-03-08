@@ -109,6 +109,7 @@ const props = defineProps<{
   index: number
 }>()
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit = defineEmits(['updateCondition', 'deleteCondition'])
 const alertCondition = ref<ThresholdCondition>(props.condition)
 

@@ -1,41 +1,36 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.flows;
 
 import com.codahale.metrics.MetricRegistry;
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLException;
 import org.opennms.horizon.flows.classification.ClassificationEngine;
 import org.opennms.horizon.flows.classification.ClassificationRuleProvider;
 import org.opennms.horizon.flows.classification.FilterService;
@@ -58,12 +53,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.SSLException;
 
 @Configuration
 @Profile("!test")
@@ -108,17 +97,20 @@ public class FlowsApplicationConfig {
     @Bean(name = "inventoryChannel")
     public ManagedChannel createInventoryChannel() {
         return ManagedChannelBuilder.forTarget(inventoryGrpcAddress)
-            .keepAliveWithoutCalls(true)
-            .usePlaintext().build();
+                .keepAliveWithoutCalls(true)
+                .usePlaintext()
+                .build();
     }
 
     @Bean(name = "ingestorChannel")
     public ManagedChannel createIngestorChannel() throws SSLException {
         var builder = NettyChannelBuilder.forTarget(ingestorGrpcAddress)
-            .keepAliveTime(10, TimeUnit.SECONDS)
-            .keepAliveTimeout(15, TimeUnit.SECONDS);
+                .keepAliveTime(10, TimeUnit.SECONDS)
+                .keepAliveTimeout(15, TimeUnit.SECONDS);
         if (flowTlsEnabled) {
-            builder.sslContext(GrpcSslContexts.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build());
+            builder.sslContext(GrpcSslContexts.forClient()
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .build());
         } else {
             builder.usePlaintext();
         }
@@ -131,13 +123,16 @@ public class FlowsApplicationConfig {
     }
 
     @Bean(destroyMethod = "shutdown", initMethod = "initStubs")
-    public IngestorClient createIngestorClient(@Qualifier("ingestorChannel") ManagedChannel channel, RetryTemplate retryTemplate) {
+    public IngestorClient createIngestorClient(
+            @Qualifier("ingestorChannel") ManagedChannel channel, RetryTemplate retryTemplate) {
         return new IngestorClient(channel, deadline, retryTemplate);
     }
 
     @Bean
-    public Pipeline createPipeLine(final MetricRegistry metricRegistry, final DocumentEnricherImpl documentEnricher,
-                                   final FlowRepository flowRepository) {
+    public Pipeline createPipeLine(
+            final MetricRegistry metricRegistry,
+            final DocumentEnricherImpl documentEnricher,
+            final FlowRepository flowRepository) {
         var pipeLine = new PipelineImpl(metricRegistry, documentEnricher);
         var properties = new HashMap<>();
         properties.put(PipelineImpl.REPOSITORY_ID, "DataPlatform");
@@ -152,21 +147,21 @@ public class FlowsApplicationConfig {
 
     @Bean
     public ClassificationEngine createClassificationEngine() throws InterruptedException, IOException {
-        final var rules = CsvImporter.parseCSV(
-            FlowProcessor.class.getResourceAsStream("/pre-defined-rules.csv"),
-            true);
+        final var rules = CsvImporter.parseCSV(FlowProcessor.class.getResourceAsStream("/pre-defined-rules.csv"), true);
 
-        return new DefaultClassificationEngine(
-            ClassificationRuleProvider.forList(rules),
-            FilterService.NOOP);
+        return new DefaultClassificationEngine(ClassificationRuleProvider.forList(rules), FilterService.NOOP);
     }
 
     @Bean
-    public DocumentEnricherImpl createDocumentEnricher(InventoryClient inventoryClient,
-                                                       ClassificationEngine classificationEngine,
-                                                       FlowDocumentClassificationRequestMapper flowDocumentClassificationRequestMapper
-    ) {
-        return new DocumentEnricherImpl(inventoryClient, classificationEngine, flowDocumentClassificationRequestMapper, clockSkewCorrectionThreshold);
+    public DocumentEnricherImpl createDocumentEnricher(
+            InventoryClient inventoryClient,
+            ClassificationEngine classificationEngine,
+            FlowDocumentClassificationRequestMapper flowDocumentClassificationRequestMapper) {
+        return new DocumentEnricherImpl(
+                inventoryClient,
+                classificationEngine,
+                flowDocumentClassificationRequestMapper,
+                clockSkewCorrectionThreshold);
     }
 
     @Bean

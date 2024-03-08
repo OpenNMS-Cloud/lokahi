@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.icmp;
 
 import com.google.common.base.Throwables;
@@ -33,6 +26,18 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponse;
 import org.opennms.horizon.minion.plugin.api.ScanResultsResponseImpl;
 import org.opennms.horizon.minion.plugin.api.Scanner;
@@ -48,19 +53,6 @@ import org.opennms.taskset.contract.DiscoveryScanResult;
 import org.opennms.taskset.contract.PingResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class PingScan implements Scanner {
 
@@ -79,7 +71,8 @@ public class PingScan implements Scanner {
     public CompletableFuture<ScanResultsResponse> scan(Any config) {
 
         if (!config.is(PingSweepRequest.class)) {
-            throw new IllegalArgumentException("configuration must be an PingSweepRequest; type-url=" + config.getTypeUrl());
+            throw new IllegalArgumentException(
+                    "configuration must be an PingSweepRequest; type-url=" + config.getTypeUrl());
         }
         var future = new CompletableFuture<ScanResultsResponse>();
         try {
@@ -93,60 +86,68 @@ public class PingScan implements Scanner {
             var ipRanges = request.getIpRangeList();
             List<IPPollRange> ranges = new ArrayList<>();
             for (IpRange dto : request.getIpRangeList()) {
-                IPPollRange pollRange = new IPPollRange(null, null, dto.getBegin(), dto.getEnd(),
-                    request.getTimeout(), request.getRetries());
+                IPPollRange pollRange = new IPPollRange(
+                        null, null, dto.getBegin(), dto.getEnd(), request.getTimeout(), request.getRetries());
                 ranges.add(pollRange);
             }
 
             // Use a RateLimiter to limit the ping packets per second that we send
             RateLimiter limiter = RateLimiter.create(request.getPacketsPerSecond());
 
-            List<IPPollAddress> addresses = StreamSupport.stream(getAddresses(ranges).spliterator(), false)
-                .filter(j -> j.address() != null).collect(Collectors.toList());
+            List<IPPollAddress> addresses = StreamSupport.stream(
+                            getAddresses(ranges).spliterator(), false)
+                    .filter(j -> j.address() != null)
+                    .collect(Collectors.toList());
 
-           var response = CompletableFuture.supplyAsync(() -> {
-                addresses.forEach(pollAddress -> {
-                    try {
-                        tracker.expectCallbackFor(pollAddress.address());
-                        limiter.acquire();
-                        pinger.ping(pollAddress.address(),
-                            pollAddress.timeout(), pollAddress.retries(), packetSize, 1, tracker);
-                    } catch (Exception e) {
-                        tracker.handleError(pollAddress.address(), null, e);
-                        tracker.completeExceptionally(e);
-                    }
-                });
+            var response = CompletableFuture.supplyAsync(
+                    () -> {
+                        addresses.forEach(pollAddress -> {
+                            try {
+                                tracker.expectCallbackFor(pollAddress.address());
+                                limiter.acquire();
+                                pinger.ping(
+                                        pollAddress.address(),
+                                        pollAddress.timeout(),
+                                        pollAddress.retries(),
+                                        packetSize,
+                                        1,
+                                        tracker);
+                            } catch (Exception e) {
+                                tracker.handleError(pollAddress.address(), null, e);
+                                tracker.completeExceptionally(e);
+                            }
+                        });
 
-                try {
-                    tracker.getLatch().await();
-                } catch (InterruptedException e) {
-                    throw Throwables.propagate(e);
-                }
-                tracker.complete();
-                return tracker.getPingSweepResponse();
-            } , executor);
+                        try {
+                            tracker.getLatch().await();
+                        } catch (InterruptedException e) {
+                            throw Throwables.propagate(e);
+                        }
+                        tracker.complete();
+                        return tracker.getPingSweepResponse();
+                    },
+                    executor);
 
             var builder = ScanResultsResponseImpl.builder();
 
-           response.whenComplete(((pingSweepResponse, throwable) -> {
-               if(throwable != null) {
-                   builder.reason(throwable.getMessage());
-               } else {
-                   var discoveryResultBuilder = DiscoveryScanResult.newBuilder();
-                   pingSweepResponse.getPingResults().forEach(result -> {
-                       var pingResponse = PingResponse.newBuilder();
-                       pingResponse.setIpAddress(InetAddressUtils.toIpAddrString(result.address()));
-                       pingResponse.setRtt(result.rtt());
-                       discoveryResultBuilder.setActiveDiscoveryId(request.getActiveDiscoveryId());
-                       discoveryResultBuilder.addPingResponse(pingResponse);
-                   });
-                   builder.results(discoveryResultBuilder.build());
-                   future.complete(builder.build());
-               }
-           }
-           ));
+            response.whenComplete(((pingSweepResponse, throwable) -> {
+                if (throwable != null) {
+                    builder.reason(throwable.getMessage());
+                } else {
+                    var discoveryResultBuilder = DiscoveryScanResult.newBuilder();
+                    pingSweepResponse.getPingResults().forEach(result -> {
+                        var pingResponse = PingResponse.newBuilder();
+                        pingResponse.setIpAddress(InetAddressUtils.toIpAddrString(result.address()));
+                        pingResponse.setRtt(result.rtt());
+                        discoveryResultBuilder.setActiveDiscoveryId(request.getActiveDiscoveryId());
+                        discoveryResultBuilder.addPingResponse(pingResponse);
+                    });
+                    builder.results(discoveryResultBuilder.build());
+                    future.complete(builder.build());
+                }
+            }));
 
-           return future;
+            return future;
 
         } catch (InvalidProtocolBufferException | UnknownHostException e) {
 
@@ -156,9 +157,8 @@ public class PingScan implements Scanner {
         return future;
     }
 
-
     private static class PingSweepResultTracker extends CompletableFuture<PingSweepResponse>
-        implements PingResponseCallback {
+            implements PingResponseCallback {
 
         private final Set<InetAddress> waitingFor = Sets.newConcurrentHashSet();
         private final CountDownLatch m_doneSignal = new CountDownLatch(1);
@@ -207,12 +207,11 @@ public class PingScan implements Scanner {
         public CountDownLatch getLatch() {
             return m_doneSignal;
         }
-
     }
 
     public Iterable<IPPollAddress> getAddresses(List<IPPollRange> ranges) {
         final List<Iterator<IPPollAddress>> iters = new ArrayList<>();
-        for(final IPPollRange range : ranges) {
+        for (final IPPollRange range : ranges) {
             iters.add(range.iterator());
         }
         return IteratorUtils.concatIterators(iters);

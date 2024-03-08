@@ -1,4 +1,4 @@
-<!-- 
+<!--
   Custom stepper built with feather components.
   Usage:
 
@@ -8,7 +8,7 @@
       <CustomFeatherStep @slideNext="callApi">Step 3 Content</CustomFeatherStep>
       <CustomFeatherStep nextBtnText="Exit">Step 4 content</CustomFeatherStep>
     </CustomFeatherStepper>
-  
+
   Optional event hooks for CustomFeatherStep:
   @slideNext
   @slidePrev
@@ -23,12 +23,12 @@
 <template>
   <div class="container">
     <div class="stepper-container">
-      <template v-for="stepNum of stepNumbers">
+      <template v-for="stepNum of stepNumbers" :key="stepNum">
         <!-- circular step element with number -->
-        <div class="step" 
-          :class="{ 
-            'step-active': currentStep === stepNum, 
-            'step-complete': currentStep > stepNum 
+        <div class="step"
+          :class="{
+            'step-active': currentStep === stepNum,
+            'step-complete': currentStep > stepNum
           }"
         >
           {{ stepNum }}
@@ -57,26 +57,30 @@
 </template>
 
 <script setup lang="ts">
-import { render, VNode } from "vue"
+import { render, VNode } from 'vue'
+
 const slots = useSlots()
 const stepNumbers = ref<number[]>([])
 const currentStep = ref(1)
 const currentContent = ref<VNode>()
 
 const prevBtnText = computed(() => currentContent.value?.props?.prevBtnText || 'Prev')
+
 const nextBtnText = computed(() => {
   let text = 'Next'
   if (currentStep.value === stepNumbers.value.length) text = 'Finish'
   return currentContent.value?.props?.nextBtnText || text
 })
+
 const hideNextBtn = computed(() => {
-  if (slots.default){
+  if (slots.default) {
     // must call default slot to keep hideNextBtn prop reactive
     return slots.default()[currentStep.value - 1].props?.hideNextBtn
   }
 })
+
 const disableNextBtn = computed(() => {
-  if (slots.default){
+  if (slots.default) {
     // must call default slot to keep disableNextBtn prop reactive
     return slots.default()[currentStep.value - 1].props?.disableNextBtn
   }
@@ -88,6 +92,7 @@ const next = () => {
   currentStep.value++
   updateContent()
 }
+
 // exposed for explicit manual use
 const prev = () => {
   if (currentStep.value === 1) return

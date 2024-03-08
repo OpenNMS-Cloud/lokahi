@@ -1,49 +1,75 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.server.service.AlertGraphQLService;
-import org.opennms.horizon.server.service.EventGraphQLService;
+import org.opennms.horizon.server.service.GrpcAlertService;
+import org.opennms.horizon.server.service.GrpcEventService;
+import org.opennms.horizon.server.service.GrpcLocationService;
 import org.opennms.horizon.server.service.GrpcMinionService;
-import org.opennms.horizon.server.service.NodeGraphQLService;
-import org.opennms.horizon.server.service.LocationGraphQLService;
-import org.opennms.horizon.server.service.MinionGraphQLService;
-import org.opennms.horizon.server.service.NotificationGraphQLService;
-import org.opennms.horizon.server.service.discovery.AzureActiveDiscoveryGraphQLService;
-import org.opennms.horizon.server.service.flows.FlowGraphQLService;
+import org.opennms.horizon.server.service.GrpcNodeService;
+import org.opennms.horizon.server.service.NotificationService;
+import org.opennms.horizon.server.service.discovery.GrpcAzureActiveDiscoveryService;
+import org.opennms.horizon.server.service.flows.GrpcFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class RestServerApplicationTests {
     @Autowired
-    private NotificationGraphQLService notificationGraphQLService;
-    @Autowired
-    private MinionGraphQLService grpcMinionService;
-    @Autowired
-    private EventGraphQLService eventGraphQLService;
-    @Autowired
-    private NodeGraphQLService grpcNodeService;
-    @Autowired
-    private LocationGraphQLService locationGraphQLService;
-    @Autowired
-    private AlertGraphQLService alertGraphQLService;
-    @Autowired
-    private AzureActiveDiscoveryGraphQLService azureActiveDiscoveryGraphQLService;
-    @Autowired
-    private FlowGraphQLService flowGraphQLService;
+    private NotificationService notificationService;
 
-	@Test
-	void contextLoads() {
+    @Autowired
+    private GrpcMinionService grpcMinionService;
+
+    @Autowired
+    private GrpcEventService grpcEventService;
+
+    @Autowired
+    private GrpcNodeService grpcNodeService;
+
+    @Autowired
+    private GrpcLocationService grpcLocationService;
+
+    @Autowired
+    private GrpcAlertService grpcAlertService;
+
+    @Autowired
+    private GrpcAzureActiveDiscoveryService grpcAzureActiveDiscoveryService;
+
+    @Autowired
+    private GrpcFlowService grpcFlowService;
+
+    @Test
+    void contextLoads() {
         assertNotNull(grpcMinionService);
-        assertNotNull(notificationGraphQLService);
-        assertNotNull(locationGraphQLService);
-        assertNotNull(eventGraphQLService);
+        assertNotNull(notificationService);
+        assertNotNull(grpcLocationService);
+        assertNotNull(grpcEventService);
         assertNotNull(grpcNodeService);
-        assertNotNull(alertGraphQLService);
-        assertNotNull(azureActiveDiscoveryGraphQLService);
-        assertNotNull(flowGraphQLService);
-	}
-
+        assertNotNull(grpcAlertService);
+        assertNotNull(grpcAzureActiveDiscoveryService);
+        assertNotNull(grpcFlowService);
+    }
 }

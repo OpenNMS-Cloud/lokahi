@@ -42,7 +42,7 @@ onMounted(async () => {
   await store.getNetworkTrafficOutValues()
 })
 
-//format data for the graph
+// format data for the graph
 const formatValues = (list: [number, number][]): [number, number][] =>
   list.map((i) => {
     const transformTimeStampToMillis = (val: number) => val * 1000
@@ -71,7 +71,7 @@ const createConfigGraph = (list: number[]) => {
     },
     ticks: {
       callback(val, index): string {
-        //show date at the beginning and at the end
+        // show date at the beginning and at the end
         const lastIndex = store.totalNetworkTrafficIn.length - 1
 
         if ((index === 0 || index === lastIndex) && list[index]) {
@@ -123,7 +123,7 @@ watchEffect(() => {
   networkTrafficIn.value = formatValues(totalTrafficIn)
   networkTrafficOut.value = formatValues(totalTrafficOut)
   dataGraph.value = createData(networkTrafficIn.value)
-  const dates = store.totalNetworkTrafficIn.map((v) => v[0]) //dates before format
+  const dates = store.totalNetworkTrafficIn.map((v) => v[0]) // dates before format
   configGraph.value = createConfigGraph(dates)
 })
 

@@ -6,6 +6,7 @@
     <div
       class="list"
       v-for="item in list"
+      :key="item.id"
     >
       <div
         class="card"

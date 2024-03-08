@@ -1,31 +1,24 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2016 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2016 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.shared.icmp.proxy;
 
 import java.util.List;
@@ -43,25 +36,26 @@ public class PingStringUtils {
             builder.append(String.format("Request timeout for icmp_seq %s", sequence.getSequenceNumber()));
         }
         if (sequence.isError()) {
-            builder.append(
-                    String.format("Request error for icmp_seq %s: %s",
-                            sequence.getSequenceNumber(),
-                            sequence.getError().getMessage()));
+            builder.append(String.format(
+                    "Request error for icmp_seq %s: %s",
+                    sequence.getSequenceNumber(), sequence.getError().getMessage()));
         }
         if (sequence.isSuccess()) {
-            builder.append(
-                    String.format("%s bytes from %s: icmp_seq=%d time=%.3f ms",
-                            request.getPacketSize(),
-                            request.getInetAddress(),
-                            sequence.getSequenceNumber(),
-                            sequence.getResponse().getRtt()));
+            builder.append(String.format(
+                    "%s bytes from %s: icmp_seq=%d time=%.3f ms",
+                    request.getPacketSize(),
+                    request.getInetAddress(),
+                    sequence.getSequenceNumber(),
+                    sequence.getResponse().getRtt()));
         }
 
         return builder.toString();
     }
 
     public static String renderHeader(PingSummary summary) {
-        return String.format("PING %s: %d data bytes",  summary.getRequest().getInetAddress(), summary.getRequest().getPacketSize()-8);
+        return String.format(
+                "PING %s: %d data bytes",
+                summary.getRequest().getInetAddress(), summary.getRequest().getPacketSize() - 8);
     }
 
     public static String renderAll(PingSummary summary) {
@@ -83,11 +77,19 @@ public class PingStringUtils {
         final StringBuilder builder = new StringBuilder();
         PingSummaryCalculator calculator = new PingSummaryCalculator(summary.getSequences());
         builder.append("\n");
-        builder.append(String.format("--- %s ping statistics ---", summary.getRequest().getInetAddress()));
+        builder.append(
+                String.format("--- %s ping statistics ---", summary.getRequest().getInetAddress()));
         builder.append("\n");
-        builder.append(String.format("%d packets transmitted, %d packets received, %.2f%% packet loss", calculator.getPacketsTransmitted(), calculator.getPacketsReceived(), calculator.getPacketLoss()));
+        builder.append(String.format(
+                "%d packets transmitted, %d packets received, %.2f%% packet loss",
+                calculator.getPacketsTransmitted(), calculator.getPacketsReceived(), calculator.getPacketLoss()));
         builder.append("\n");
-        builder.append(String.format("round-trip min/avg/max/stddev = %.2f/%.2f/%.2f/%.2f ms", (double) calculator.getMin(), calculator.getAvg(), (double) calculator.getMax(), calculator.getStdDev()));
+        builder.append(String.format(
+                "round-trip min/avg/max/stddev = %.2f/%.2f/%.2f/%.2f ms",
+                (double) calculator.getMin(),
+                calculator.getAvg(),
+                (double) calculator.getMax(),
+                calculator.getStdDev()));
         builder.append("\n");
         return builder.toString();
     }

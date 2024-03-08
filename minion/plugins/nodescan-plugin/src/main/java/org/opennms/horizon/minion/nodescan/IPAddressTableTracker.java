@@ -1,37 +1,29 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.nodescan;
 
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Optional;
-
 import org.opennms.horizon.shared.snmp.RowCallback;
 import org.opennms.horizon.shared.snmp.SnmpInstId;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
@@ -60,21 +52,18 @@ public class IPAddressTableTracker extends TableTracker {
     public static final SnmpObjId IP_ADDRESS_LAST_CHANGED_INDEX = SnmpObjId.get(IP_ADDRESS_TABLE_ENTRY, "9");
     public static final SnmpObjId IP_ADDRESS_ROW_STATUS_INDEX = SnmpObjId.get(IP_ADDRESS_TABLE_ENTRY, "10");
     public static final SnmpObjId IP_ADDRESS_STORAGE_TYPE_INDEX = SnmpObjId.get(IP_ADDRESS_TABLE_ENTRY, "11");
-    public static final int TYPE_IPV4  = 1;
-    public static final int TYPE_IPV6  = 2;
+    public static final int TYPE_IPV4 = 1;
+    public static final int TYPE_IPV6 = 2;
     public static final int TYPE_IPV4Z = 3;
     public static final int TYPE_IPV6Z = 4;
-    public static final int TYPE_DNS   = 16;
+    public static final int TYPE_DNS = 16;
 
     private static final int IP_ADDRESS_TYPE_UNICAST = 1;
     // private static final int IP_ADDRESS_TYPE_ANYCAST = 2;
     // private static final int IP_ADDRESS_TYPE_BROADCAST = 3;
 
-    private static SnmpObjId[] s_tableColumns = new SnmpObjId[] {
-        IP_ADDRESS_IF_INDEX,
-        IP_ADDRESS_PREFIX_INDEX,
-        IP_ADDRESS_TYPE_INDEX
-    };
+    private static SnmpObjId[] s_tableColumns =
+            new SnmpObjId[] {IP_ADDRESS_IF_INDEX, IP_ADDRESS_PREFIX_INDEX, IP_ADDRESS_TYPE_INDEX};
 
     public static class IPAddressRow extends SnmpRowResult {
 
@@ -103,18 +92,21 @@ public class IPAddressTableTracker extends TableTracker {
             int addressLength = instanceIds[1];
             // Begin NMS-4906 Lame Force 10 agent!
             if (addressType == TYPE_IPV4 && instanceIds.length != 6) {
-                LOG.warn("BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
+                LOG.warn(
+                        "BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
                 addressIndex = instanceIds.length - 4;
                 addressLength = 4;
             }
             if (addressType == TYPE_IPV6 && instanceIds.length != 18) {
-                LOG.warn("BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
+                LOG.warn(
+                        "BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
                 addressIndex = instanceIds.length - 16;
                 addressLength = 16;
             }
             // End NMS-4906 Lame Force 10 agent!
 
-            // we ignore zones anyways, make sure we truncate to just the address part, since InetAddress doesn't know how to parse zone bytes
+            // we ignore zones anyways, make sure we truncate to just the address part, since InetAddress doesn't know
+            // how to parse zone bytes
             if (addressType == TYPE_IPV4Z) {
                 addressLength = 4;
             } else if (addressType == TYPE_IPV6Z) {
@@ -122,16 +114,24 @@ public class IPAddressTableTracker extends TableTracker {
             }
 
             if (addressIndex < 0 || addressIndex + addressLength > instanceIds.length) {
-                LOG.warn("BAD AGENT: Returned instanceId {} does not enough bytes to contain address!. Skipping.", instance);
+                LOG.warn(
+                        "BAD AGENT: Returned instanceId {} does not enough bytes to contain address!. Skipping.",
+                        instance);
                 return null;
             }
 
             if (addressType == TYPE_IPV4 || addressType == TYPE_IPV6 || addressType == TYPE_IPV6Z) {
                 try {
-                    final InetAddress address = InetAddressUtils.getInetAddress(instanceIds, addressIndex, addressLength);
+                    final InetAddress address =
+                            InetAddressUtils.getInetAddress(instanceIds, addressIndex, addressLength);
                     return InetAddressUtils.str(address);
                 } catch (final IllegalArgumentException e) {
-                    LOG.warn("Failed to parse address: {}, index {}, length {}", Arrays.toString(instanceIds), addressIndex, addressLength, e);
+                    LOG.warn(
+                            "Failed to parse address: {}, index {}, length {}",
+                            Arrays.toString(instanceIds),
+                            addressIndex,
+                            addressLength,
+                            e);
                 }
             }
             return null;
@@ -161,24 +161,28 @@ public class IPAddressTableTracker extends TableTracker {
             int addressIndex = 3;
 
             // Begin NMS-4906 Lame Force 10 agent!
-            if (addressType == TYPE_IPV4 && rawIds.length != 1+6+1) {
-                LOG.warn("BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
-                addressIndex = rawIds.length - (4+1);
+            if (addressType == TYPE_IPV4 && rawIds.length != 1 + 6 + 1) {
+                LOG.warn(
+                        "BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
+                addressIndex = rawIds.length - (4 + 1);
                 addressLength = 4;
             }
-            if (addressType == TYPE_IPV6 && rawIds.length != 1+18+1) {
-                LOG.warn("BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
+            if (addressType == TYPE_IPV6 && rawIds.length != 1 + 18 + 1) {
+                LOG.warn(
+                        "BAD AGENT: Does not conform to RFC 4001 Section 4.1 Table Indexing!!! Report them immediately.  Making a best guess!");
                 addressIndex = rawIds.length - (16 + 1);
                 addressLength = 16;
             }
             // End NMS-4906 Lame Force 10 agent!
 
             if (addressIndex < 0 || addressIndex + addressLength > rawIds.length) {
-                LOG.warn("BAD AGENT: Returned instanceId {} does not enough bytes to contain address!. Skipping.", netmaskRef);
+                LOG.warn(
+                        "BAD AGENT: Returned instanceId {} does not enough bytes to contain address!. Skipping.",
+                        netmaskRef);
                 return null;
             }
 
-            //final InetAddress address = getInetAddress(rawIds, addressIndex, addressLength);
+            // final InetAddress address = getInetAddress(rawIds, addressIndex, addressLength);
 
             if (addressType == TYPE_IPV4) {
                 return InetAddressUtils.convertCidrToInetAddressV4(mask);
@@ -197,7 +201,12 @@ public class IPAddressTableTracker extends TableTracker {
             final Integer type = getType();
             final InetAddress netMask = getNetMask();
 
-            LOG.debug("createInterfaceFromRow: ifIndex = {}, ipAddress = {}, type = {}, netmask = {}", ifIndex, ipAddr, type, netMask);
+            LOG.debug(
+                    "createInterfaceFromRow: ifIndex = {}, ipAddress = {}, type = {}, netmask = {}",
+                    ifIndex,
+                    ipAddr,
+                    type,
+                    netMask);
 
             if (type != IP_ADDRESS_TYPE_UNICAST || ipAddr == null) {
                 return Optional.empty();
@@ -205,7 +214,10 @@ public class IPAddressTableTracker extends TableTracker {
 
             final InetAddress inetAddress = InetAddressUtils.addr(ipAddr);
 
-            if (inetAddress.isAnyLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress() || inetAddress.isMulticastAddress()) {
+            if (inetAddress.isAnyLocalAddress()
+                    || inetAddress.isLoopbackAddress()
+                    || inetAddress.isLinkLocalAddress()
+                    || inetAddress.isMulticastAddress()) {
                 return Optional.empty();
             }
 
@@ -213,14 +225,14 @@ public class IPAddressTableTracker extends TableTracker {
             ipInterfaceBuilder.setIpAddress(inetAddress.getHostAddress());
             ipInterfaceBuilder.setNetmask(netMask.getHostAddress());
             ipInterfaceBuilder.setIpHostName(inetAddress.getHostName());
-            if(ifIndex != null) {
+            if (ifIndex != null) {
                 ipInterfaceBuilder.setIfIndex(ifIndex);
             }
             return Optional.of(ipInterfaceBuilder.build());
         }
 
         private SnmpResult getResult(final SnmpObjId base) {
-            for(final SnmpResult result : getResults()) {
+            for (final SnmpResult result : getResults()) {
                 if (base.equals(result.getBase())) {
                     return result;
                 }
@@ -228,7 +240,6 @@ public class IPAddressTableTracker extends TableTracker {
 
             return null;
         }
-
     }
 
     /**
@@ -251,11 +262,8 @@ public class IPAddressTableTracker extends TableTracker {
     /** {@inheritDoc} */
     @Override
     public void rowCompleted(final SnmpRowResult row) {
-        processIPAddressRow((IPAddressRow)row);
+        processIPAddressRow((IPAddressRow) row);
     }
 
-    public void processIPAddressRow(final IPAddressRow row) {
-
-    }
-
+    public void processIPAddressRow(final IPAddressRow row) {}
 }

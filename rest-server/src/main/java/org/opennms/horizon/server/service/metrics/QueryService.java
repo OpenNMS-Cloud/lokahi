@@ -1,48 +1,25 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.server.service.metrics;
-
-import com.google.common.base.Strings;
-import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.server.model.TimeRangeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.opennms.horizon.server.service.metrics.Constants.AVG_RESPONSE_TIME;
 import static org.opennms.horizon.server.service.metrics.Constants.AZURE_SCAN_TYPE;
@@ -67,6 +44,21 @@ import static org.opennms.horizon.server.service.metrics.Constants.REACHABILITY_
 import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_IN;
 import static org.opennms.horizon.server.service.metrics.Constants.TOTAL_NETWORK_BITS_OUT;
 
+import com.google.common.base.Strings;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.opennms.horizon.server.model.TimeRangeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 @Component
 @RequiredArgsConstructor
 public class QueryService {
@@ -80,23 +72,38 @@ public class QueryService {
     }
 
     public boolean isRangeQuery(String metricName) {
-        return TOTAL_NETWORK_BITS_IN.equals(metricName) || TOTAL_NETWORK_BITS_OUT.equals(metricName)
-            || NETWORK_IN_BITS.equals(metricName) || NETWORK_OUT_BITS.equals(metricName)
-            || BW_IN_PERCENTAGE.equals(metricName) || BW_OUT_PERCENTAGE.equals(metricName)
-            || NETWORK_ERRORS_IN.equals(metricName) || NETWORK_ERRORS_OUT.equals(metricName);
+        return TOTAL_NETWORK_BITS_IN.equals(metricName)
+                || TOTAL_NETWORK_BITS_OUT.equals(metricName)
+                || NETWORK_IN_BITS.equals(metricName)
+                || NETWORK_OUT_BITS.equals(metricName)
+                || BW_IN_PERCENTAGE.equals(metricName)
+                || BW_OUT_PERCENTAGE.equals(metricName)
+                || NETWORK_ERRORS_IN.equals(metricName)
+                || NETWORK_ERRORS_OUT.equals(metricName);
     }
-    
-    public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
-                                 Integer timeRange, TimeRangeUnit timeRangeUnit) {
+
+    public String getQueryString(
+            Optional<NodeDTO> node,
+            String metricName,
+            Map<String, String> labels,
+            Integer timeRange,
+            TimeRangeUnit timeRangeUnit) {
         return getQueryString(node, metricName, labels, timeRange, timeRangeUnit, System.currentTimeMillis() / 1000L);
     }
 
-    public String getQueryString(Optional<NodeDTO> node, String metricName, Map<String, String> labels,
-            Integer timeRange, TimeRangeUnit timeRangeUnit, long end) {
+    public String getQueryString(
+            Optional<NodeDTO> node,
+            String metricName,
+            Map<String, String> labels,
+            Integer timeRange,
+            TimeRangeUnit timeRangeUnit,
+            long end) {
         if (isRangeQuery(metricName)) {
-            long start = end - getDuration(timeRange, timeRangeUnit).orElse(Duration.ofHours(24)).getSeconds();
-            String rangeQuerySuffix = "&start=" + start + "&end=" + end +
-                "&step=2m";
+            long start = end
+                    - getDuration(timeRange, timeRangeUnit)
+                            .orElse(Duration.ofHours(24))
+                            .getSeconds();
+            String rangeQuerySuffix = "&start=" + start + "&end=" + end + "&step=2m";
             switch (metricName) {
                 case TOTAL_NETWORK_BITS_IN:
                     return QUERY_PREFIX + encode(QUERY_FOR_TOTAL_NETWORK_BITS_IN) + rangeQuerySuffix;
@@ -148,22 +155,25 @@ public class QueryService {
                     }
             }
         } else if (REACHABILITY_PERCENTAGE.equals(metricName)) {
-                String query = "response_time_msec" + getLabelsQueryString(labels);
-                query = addTimeRange(timeRange, timeRangeUnit, query);
-                return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
-                    numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
+            String query = "response_time_msec" + getLabelsQueryString(labels);
+            query = addTimeRange(timeRange, timeRangeUnit, query);
+            return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/"
+                    + numOfMinutesInDuration(timeRange, timeRangeUnit) + ")" + "*100" + " or vector(0)";
         } else if (AVG_RESPONSE_TIME.equals(metricName)) {
             String query = "response_time_msec" + getLabelsQueryString(labels);
             query = addTimeRange(timeRange, timeRangeUnit, query);
-            return  QUERY_PREFIX + "avg_over_time" + "(" + query + ")";
+            return QUERY_PREFIX + "avg_over_time" + "(" + query + ")";
         }
         String queryString = getQueryString(metricName, labels);
         return addTimeRange(timeRange, timeRangeUnit, queryString);
-
     }
 
-    public String getCustomQueryString(String metricName, Map<String, String> labels,
-                                 Integer timeRange, TimeRangeUnit timeRangeUnit, Map<String, String> optionalParams) {
+    public String getCustomQueryString(
+            String metricName,
+            Map<String, String> labels,
+            Integer timeRange,
+            TimeRangeUnit timeRangeUnit,
+            Map<String, String> optionalParams) {
 
         if (REACHABILITY_PERCENTAGE.equals(metricName)) {
             String query = "response_time_msec" + getLabelsQueryString(labels);
@@ -177,15 +187,15 @@ public class QueryService {
                 if (samplesCount < 1) {
                     samplesCount = 1;
                 }
-                return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" +
-                    samplesCount + ")" + "*100" + " or vector(0)";
+                return QUERY_PREFIX + "(" + "count_over_time" + "(" + query + ")" + "/" + samplesCount + ")" + "*100"
+                        + " or vector(0)";
             }
         }
         throw new IllegalArgumentException("Custom query not supported for " + metricName);
-
     }
 
-    private long getTotalSamples(Integer timeRange, TimeRangeUnit timeRangeUnit, Integer samplingPeriodInSecs, long firstObservationTime) {
+    private long getTotalSamples(
+            Integer timeRange, TimeRangeUnit timeRangeUnit, Integer samplingPeriodInSecs, long firstObservationTime) {
         var duration = getDuration(timeRange, timeRangeUnit).orElseThrow();
         var totalDuration = Duration.ofMillis(Instant.now().toEpochMilli() - firstObservationTime);
         if (totalDuration.toMillis() < duration.toMillis()) {
@@ -194,7 +204,6 @@ public class QueryService {
             return duration.toSeconds() / samplingPeriodInSecs;
         }
     }
-
 
     public String getQueryString(Map<String, String> queryParams) {
         StringBuilder sb = new StringBuilder(QUERY_PREFIX + "{");
@@ -257,12 +266,11 @@ public class QueryService {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private boolean isAzureNode(Optional<NodeDTO> node){
+    private boolean isAzureNode(Optional<NodeDTO> node) {
         return isNodeScanType(node, AZURE_SCAN_TYPE);
     }
 
     private boolean isNodeScanType(Optional<NodeDTO> node, String scanType) {
         return node.map(NodeDTO::getScanType).orElse("").equals(scanType);
     }
-
 }

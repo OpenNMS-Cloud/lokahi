@@ -1,17 +1,20 @@
 import { defineStore } from 'pinia'
+import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
-import { useNodeMutations } from '../Mutations/nodeMutations'
 import { AZURE_SCAN, DeepPartial } from '@/types'
 import { Exporter, NodeUpdateInput, RequestCriteriaInput } from '@/types/graphql'
+import { useNodeMutations } from '../Mutations/nodeMutations'
 
 export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
   const exporters = ref<DeepPartial<Exporter>[]>([])
+  const nodeId = ref()
 
   const setNodeId = (id: number) => {
     nodeStatusQueries.setNodeId(id)
+    nodeId.value = id
   }
 
   const fetchExporters = async (id: number) => {
@@ -29,8 +32,13 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
         endTime
       }
     }
-    const data = await nodeStatusQueries.fetchExporters(payload)
-    exporters.value = data.value?.findExporters || []
+
+    if (FLOWS_ENABLED) {
+      const data = await nodeStatusQueries.fetchExporters(payload)
+      exporters.value = data.value?.findExporters || []
+    } else {
+      exporters.value = []
+    }
   }
 
   // add the exporter object to the matching node snmp interface (match on ifIndex)
@@ -70,6 +78,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     isAzure: computed(() => fetchedData.value.node.scanType === AZURE_SCAN),
     fetchExporters,
     exporters,
-    node
+    node,
+    nodeId
   }
 })

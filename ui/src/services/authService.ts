@@ -1,9 +1,7 @@
 import axios, { AxiosRequestHeaders } from 'axios'
-import useSpinner from '@/composables/useSpinner'
 import keycloakConfig from '../../keycloak.config'
 import useKeycloak from '@/composables/useKeycloak'
 
-const { startSpinner, stopSpinner } = useSpinner()
 const { keycloak } = useKeycloak()
 
 const auth = axios.create({

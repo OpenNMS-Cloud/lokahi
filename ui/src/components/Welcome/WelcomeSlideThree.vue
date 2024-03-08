@@ -48,9 +48,11 @@
 <script lang="ts" setup>
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import ItemPreview from '../Common/ItemPreview.vue'
+
 defineProps({
-    visible: { type: Boolean, default: false }
+  visible: { type: Boolean, default: false }
 })
+
 const welcomeStore = useWelcomeStore()
 </script>
 <style lang="scss" scoped>

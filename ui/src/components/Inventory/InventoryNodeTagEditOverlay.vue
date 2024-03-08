@@ -42,8 +42,7 @@ const props = defineProps({
 
 const isChecked = computed(() => !!inventoryStore.nodesSelected.find((d) => d.id === props.node.id) || false)
 
-
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const storage: IIcon = {
   image: Storage,
   title: 'Node',
@@ -56,7 +55,6 @@ const storage: IIcon = {
 @use '@/styles/vars';
 
 .overlay {
-
   position: absolute;
   left: 0;
   top: 0;

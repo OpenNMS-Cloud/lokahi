@@ -39,6 +39,23 @@ Feature: Monitor policy gRPC Functionality
     Then List policy should contain 1
     Then Verify monitoring policy for tenant "test-tenant" is sent to Kafka
 
+  Scenario: Create duplicate monitor policy name
+    Given Tenant id "test-tenant"
+    Given A monitoring policy named "test-policy" with tag "tag1", notifying by email
+    Given The policy has a rule named "new-rule" with component type "NODE" and trap definitions
+      | trigger_event_name | count | overtime | overtime_unit | severity | clear_event_name |
+      | SNMP Cold Start    | 1     | 3        | MINUTE        | MAJOR    |                  |
+    And The policy is created in the tenant
+    Then Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate monitoring policy with name test-policy"
+
+  Scenario: Create duplicate monitor rule name
+    Given Tenant id "test-tenant"
+    Given A monitoring policy named "duplicate-rule-policy" with tag "tag1", notifying by email
+    Given The policy has a simple rule named "rule1" with component type "NODE"
+    Given The policy has a simple rule named "rule1" with component type "NODE"
+    And The policy is created in the tenant
+    Then Verify exception "StatusRuntimeException" thrown with message "INVALID_ARGUMENT: Duplicate monitoring rule with name rule1"
+
   Scenario: Delete a monitor policy
     Given Tenant id "test-tenant1"
     Given A monitoring policy named "test-policy1" with tag "tag1", notifying by email
@@ -70,3 +87,17 @@ Feature: Monitor policy gRPC Functionality
     Then List policy should contain 1
     Then List alerts for the tenant, until JSON response matches the following JSON path expressions
       | alerts.size() == 0     |
+
+  Scenario: All Event Definitions are loaded by default
+    Given Tenant id "any-tenant"
+    Then Validate whether we have loaded all event definitions of size greater than or equal to 17267
+
+  Scenario: Able to load all vendors
+    Given Tenant id "any-tenant"
+    Then Validate whether we can load vendors of size greater than or equal to 175
+
+  @event-defs-by-vendor
+  Scenario: Fetch event definitions for a given vendor
+    Given Tenant id "any-tenant"
+    Then Fetch event defs for vendor "generic" and verify size is greater than or equal to 7
+    Then Fetch event defs for event type "INTERNAL" and verify size is greater than or equal to 1

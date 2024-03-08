@@ -1,36 +1,28 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.minion.nodescan;
 
 import java.net.InetAddress;
 import java.util.Optional;
-
 import org.opennms.horizon.shared.snmp.RowCallback;
 import org.opennms.horizon.shared.snmp.SnmpInstId;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
@@ -57,13 +49,8 @@ public class IPAddrTracker extends TableTracker {
     /** Constant <code>IP_ADDR_ENT_BCASTADDR</code> */
     public static final SnmpObjId IP_ADDR_ENT_BCASTADDR = SnmpObjId.get(IP_ADDR_TABLE_ENTRY, "4");
 
-
-    private static SnmpObjId[] s_tableColumns = new SnmpObjId[] {
-        IP_ADDR_ENT_ADDR,
-        IP_ADDR_IF_INDEX,
-        IP_ADDR_ENT_NETMASK,
-        IP_ADDR_ENT_BCASTADDR
-    };
+    private static SnmpObjId[] s_tableColumns =
+            new SnmpObjId[] {IP_ADDR_ENT_ADDR, IP_ADDR_IF_INDEX, IP_ADDR_ENT_NETMASK, IP_ADDR_ENT_BCASTADDR};
 
     static class IPInterfaceRow extends SnmpRowResult {
 
@@ -86,7 +73,7 @@ public class IPAddrTracker extends TableTracker {
                 if (inst != null) {
                     final String addr = InetAddressUtils.normalize(inst.toString());
                     if (addr == null) {
-                        throw new IllegalArgumentException("cannot convert "+inst+" to an InetAddress");
+                        throw new IllegalArgumentException("cannot convert " + inst + " to an InetAddress");
                     }
                     return addr;
                 } else {
@@ -114,7 +101,10 @@ public class IPAddrTracker extends TableTracker {
 
             final InetAddress inetAddress = InetAddressUtils.addr(ipAddr);
 
-            if (inetAddress.isAnyLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress() || inetAddress.isMulticastAddress()) {
+            if (inetAddress.isAnyLocalAddress()
+                    || inetAddress.isLoopbackAddress()
+                    || inetAddress.isLinkLocalAddress()
+                    || inetAddress.isMulticastAddress()) {
                 return Optional.empty();
             }
 
@@ -122,7 +112,7 @@ public class IPAddrTracker extends TableTracker {
             ipInterFaceBuilder.setIpAddress(inetAddress.getHostAddress());
             ipInterFaceBuilder.setNetmask(netMask.getHostAddress());
             ipInterFaceBuilder.setIpHostName(inetAddress.getHostName());
-            if(ifIndex != null) {
+            if (ifIndex != null) {
                 ipInterFaceBuilder.setIfIndex(ifIndex);
             }
             return Optional.of(ipInterFaceBuilder.build());
@@ -154,7 +144,7 @@ public class IPAddrTracker extends TableTracker {
     /** {@inheritDoc} */
     @Override
     public void rowCompleted(SnmpRowResult row) {
-        processIPInterfaceRow((IPInterfaceRow)row);
+        processIPInterfaceRow((IPInterfaceRow) row);
     }
 
     /**
@@ -162,7 +152,5 @@ public class IPAddrTracker extends TableTracker {
      *
      *
      */
-    public void processIPInterfaceRow(IPInterfaceRow row) {
-
-    }
+    public void processIPInterfaceRow(IPInterfaceRow row) {}
 }

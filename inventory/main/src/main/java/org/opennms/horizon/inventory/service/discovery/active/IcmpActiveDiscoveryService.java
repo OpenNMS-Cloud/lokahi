@@ -1,34 +1,30 @@
-/*******************************************************************************
- * This file is part of OpenNMS(R).
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Copyright (C) 2023 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
  *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
  *
- * OpenNMS(R) is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * OpenNMS(R) is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
- *
- * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- *******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service.discovery.active;
 
 import com.google.protobuf.Int64Value;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
@@ -37,37 +33,45 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
+import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
+import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class IcmpActiveDiscoveryService {
+public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationService {
 
     private final IcmpActiveDiscoveryRepository repository;
+    private final NodeRepository nodeRepository;
+    private final ActiveDiscoveryRepository activeDiscoveryRepository;
+    private final MonitoringLocationService monitoringLocationService;
     private final IcmpActiveDiscoveryMapper mapper;
     private final TagService tagService;
 
     @Transactional
     public IcmpActiveDiscoveryDTO createActiveDiscovery(IcmpActiveDiscoveryCreateDTO request, String tenantId) {
+        validateActiveDiscoveryName(request.getName(), tenantId);
+        validateLocation(request.getLocationId(), tenantId);
+
         IcmpActiveDiscovery discovery = mapper.dtoToModel(request);
         discovery.setTenantId(tenantId);
         discovery.setCreateTime(LocalDateTime.now());
         discovery = repository.save(discovery);
-        tagService.addTags(tenantId, TagCreateListDTO.newBuilder()
-            .addEntityIds(TagEntityIdDTO.newBuilder()
-                .setActiveDiscoveryId(discovery.getId()))
-            .addAllTags(request.getTagsList())
-            .build());
+        tagService.addTags(
+                tenantId,
+                TagCreateListDTO.newBuilder()
+                        .addEntityIds(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(discovery.getId()))
+                        .addAllTags(request.getTagsList())
+                        .build());
 
         return mapper.modelToDto(discovery);
     }
@@ -80,14 +84,20 @@ public class IcmpActiveDiscoveryService {
                 throw new IllegalArgumentException("Discovery with Id" + request.getId() + " doesn't exist");
             }
             var discovery = optionalDiscovery.get();
+            validateActiveDiscoveryName(request.getName(), discovery.getId(), tenantId);
+
+            if (!String.valueOf(discovery.getLocationId()).equals(request.getLocationId())) {
+                validateLocation(request.getLocationId(), tenantId);
+            }
             mapper.updateFromDto(request, discovery);
             discovery.setCreateTime(LocalDateTime.now());
             repository.save(discovery);
-            tagService.updateTags(tenantId, TagCreateListDTO.newBuilder()
-                .addEntityIds(TagEntityIdDTO.newBuilder()
-                    .setActiveDiscoveryId(discovery.getId()))
-                .addAllTags(request.getTagsList())
-                .build());
+            tagService.updateTags(
+                    tenantId,
+                    TagCreateListDTO.newBuilder()
+                            .addEntityIds(TagEntityIdDTO.newBuilder().setActiveDiscoveryId(discovery.getId()))
+                            .addAllTags(request.getTagsList())
+                            .build());
             return mapper.modelToDto(discovery);
         } else {
             return createActiveDiscovery(request, tenantId);
@@ -103,13 +113,26 @@ public class IcmpActiveDiscoveryService {
             }
             var icmpActiveDiscovery = discovery.get();
             var tags = icmpActiveDiscovery.getTags();
-            tagService.removeTags(tenantId, TagRemoveListDTO.newBuilder()
-                    .addEntityIds(TagEntityIdDTO.newBuilder()
-                        .setActiveDiscoveryId(icmpActiveDiscovery.getId())
-                        .build())
-                    .addAllTagIds(tags.stream().map(Tag::getId).map(Int64Value::of).toList())
-                .build());
+            tagService.removeTags(
+                    tenantId,
+                    TagRemoveListDTO.newBuilder()
+                            .addEntityIds(TagEntityIdDTO.newBuilder()
+                                    .setActiveDiscoveryId(icmpActiveDiscovery.getId())
+                                    .build())
+                            .addAllTagIds(tags.stream()
+                                    .map(Tag::getId)
+                                    .map(Int64Value::of)
+                                    .toList())
+                            .build());
             repository.deleteById(icmpActiveDiscovery.getId());
+            // updating nodes containing discovery id
+            List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
+                    .filter(node -> node.getDiscoveryIds().contains(id))
+                    .toList();
+            if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
+                nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+                nodeRepository.saveAll(nodeList);
+            }
             return true;
         } catch (Exception e) {
             log.error("Exception while deleting active discovery with id {}", id, e);
@@ -117,15 +140,23 @@ public class IcmpActiveDiscoveryService {
         }
     }
 
-
     public List<IcmpActiveDiscoveryDTO> getActiveDiscoveries(String tenantId) {
         var entities = repository.findByTenantId(tenantId);
         return entities.stream().map(mapper::modelToDto).toList();
     }
 
-
     public Optional<IcmpActiveDiscoveryDTO> getDiscoveryById(long id, String tenantId) {
         var optional = repository.findByIdAndTenantId(id, tenantId);
         return optional.map(mapper::modelToDto);
+    }
+
+    @Override
+    public ActiveDiscoveryRepository getActiveDiscoveryRepository() {
+        return activeDiscoveryRepository;
+    }
+
+    @Override
+    public MonitoringLocationService getMonitoringLocationService() {
+        return monitoringLocationService;
     }
 }

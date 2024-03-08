@@ -90,6 +90,7 @@
             >
             <ButtonWithSpinner
               text
+              v-if="discoveryStore.selectedDiscovery.name"
               :disabled="isOverallDisabled"
               :click="discoveryStore.saveSelectedDiscovery"
               :isFetching="discoveryStore.loading"
@@ -105,7 +106,7 @@
           :modelValue="discoveryStore.selectedDiscovery.name"
           :error="discoveryStore.validationErrors.name"
           :disabled="isOverallDisabled"
-          @update:model-value="(name: any) => discoveryStore.setSelectedDiscoveryValue('name', name)"
+          @update:model-value="(name: any) => discoveryStore.setSelectedDiscoveryValue('name', (name || '').trim())"
         />
 
         <div class="auto-with-chips">
@@ -238,6 +239,7 @@
 
             <ButtonWithSpinner
               primary
+              v-if="discoveryStore.selectedDiscovery.name"
               :disabled="isOverallDisabled"
               :click="discoveryStore.saveSelectedDiscovery"
               :isFetching="discoveryStore.loading"
@@ -264,7 +266,51 @@ import { useDiscoveryStore } from '@/store/Views/discoveryStore'
 import CancelIcon from '@featherds/icon/navigation/Cancel'
 import { FeatherTabContainer } from '@featherds/tabs'
 import { sortDiscoveriesByName } from '@/dtos/discovery.dto'
+import { NewOrUpdatedDiscovery } from '@/types/discovery'
+
+const typeVisible = false
 const selectedTab = ref()
+const isHelpVisible = ref(false)
+const helpType = ref(InstructionsType.Active)
+
+const route = useRoute()
+const discoveryStore = useDiscoveryStore()
+
+const activeDiscoveryTypes = [
+  DiscoveryType.Azure,
+  DiscoveryType.ICMP,
+  DiscoveryType.ICMPV3Auth,
+  DiscoveryType.ICMPV3AuthPrivacy,
+  DiscoveryType.ICMPV3NoAuth
+]
+
+const typeOptions = computed(() => {
+  let options = [
+    { value: DiscoveryType.ICMP, _text: 'ICMP/SNMP' },
+    { value: DiscoveryType.Azure, _text: 'Azure' },
+    { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Traps' }
+  ]
+
+  if (discoveryStore.snmpV3Enabled) {
+    options = options.concat([
+      { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
+      { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
+      { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' }
+    ])
+  }
+
+  return options
+})
+
+const selectedTypeOption = computed(() => {
+  return typeOptions.value.find((d) => d.value === discoveryStore.selectedDiscovery.type)
+})
+
+const openInstructions = (type: InstructionsType) => {
+  isHelpVisible.value = true
+  helpType.value = type
+}
+
 const changeSnmpType = (type: any) => {
   if (type === 0) {
     discoveryStore.setSelectedDiscoveryValue('type', DiscoveryType.ICMP)
@@ -272,7 +318,7 @@ const changeSnmpType = (type: any) => {
     discoveryStore.setSelectedDiscoveryValue('type', DiscoveryType.ICMPV3NoAuth)
   }
 }
-const discoveryStore = useDiscoveryStore()
+
 const isOverallDisabled = computed(
   () =>
     !!(
@@ -280,6 +326,7 @@ const isOverallDisabled = computed(
       discoveryStore.loading
     )
 )
+
 const discoveryCopy = computed(() => {
   const copy = { title: '', button: 'Save Discovery' }
   let title = discoveryStore.selectedDiscovery.id ? 'Edit' : 'New'
@@ -294,52 +341,31 @@ const discoveryCopy = computed(() => {
   } else if (discoveryStore.selectedDiscovery.type === DiscoveryType.ICMP) {
     title += ' Active'
   }
+
   copy.title = title + ' Discovery'
   return copy
 })
+
 const isICMPOrPassive = computed(
   () =>
     discoveryStore.selectedDiscovery.type === DiscoveryType.ICMP ||
     discoveryStore.selectedDiscovery.type === DiscoveryType.SyslogSNMPTraps
 )
-const typeVisible = false
+
+watchEffect(() => {
+  if (discoveryStore.loadedDiscoveries.length > 0 && route?.params?.id) {
+    const filteredDiscovery = discoveryStore.loadedDiscoveries.find((item: NewOrUpdatedDiscovery) => item.id === Number(route.params.id))
+    discoveryStore.editDiscovery(filteredDiscovery)
+  }
+})
+
 onMounted(() => {
   discoveryStore.init()
 })
+
 onUnmounted(() => {
   discoveryStore.$reset()
 })
-const typeOptions = ref([
-  { value: DiscoveryType.ICMP, _text: 'ICMP/SNMP' },
-  { value: DiscoveryType.Azure, _text: 'Azure' },
-  { value: DiscoveryType.SyslogSNMPTraps, _text: 'Passive Traps' }
-])
-if (discoveryStore.snmpV3Enabled) {
-  typeOptions.value = typeOptions.value.concat([
-    { value: DiscoveryType.ICMPV3NoAuth, _text: 'ICMP V3 No Auth' },
-    { value: DiscoveryType.ICMPV3Auth, _text: 'ICMP V3 Auth' },
-    { value: DiscoveryType.ICMPV3AuthPrivacy, _text: 'ICMP V3 Auth + Privacy' }
-  ])
-}
-const selectedTypeOption = computed(() => {
-  return typeOptions.value.find((d) => d.value === discoveryStore.selectedDiscovery.type)
-})
-
-const isHelpVisible = ref(false)
-const helpType = ref(InstructionsType.Active)
-
-const openInstructions = (type: InstructionsType) => {
-  isHelpVisible.value = true
-  helpType.value = type
-}
-
-const activeDiscoveryTypes = [
-  DiscoveryType.Azure,
-  DiscoveryType.ICMP,
-  DiscoveryType.ICMPV3Auth,
-  DiscoveryType.ICMPV3AuthPrivacy,
-  DiscoveryType.ICMPV3NoAuth
-]
 </script>
 <style lang="scss">
 .app-layout {

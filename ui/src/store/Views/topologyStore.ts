@@ -155,6 +155,7 @@ export const useTopologyStore = defineStore('topologyStore', {
       let resp: false | VerticesAndEdges
 
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const SZLRequest: SZLRequest = {
           semanticZoomLevel: this.semanticZoomLevel,
           verticesInFocus: this.focusObjects.map((obj) => obj.id)

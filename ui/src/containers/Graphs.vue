@@ -27,10 +27,13 @@ const store = useGraphsQueries()
 const isAzure = computed(() => {
   return store.node.scanType === AZURE_SCAN
 })
+
 const instance = computed(() => {
   const snmpPrimaryIpAddress = store.node.ipInterfaces?.filter(({ snmpPrimary }) => snmpPrimary === true)[0]?.ipAddress
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return isAzure.value ? `azure-node-${store.node.id}` : snmpPrimaryIpAddress!
 })
+
 const monitor = computed(() => {
   return isAzure.value ? 'AZURE' : 'ICMP'
 })
@@ -97,6 +100,7 @@ const azureNodeBytesInOut = computed<GraphProps>(() => {
 
 const onDownload = () => {
   const page = document.getElementById('graphs-container') as HTMLElement
+  // eslint-disable-next-line no-undef
   const canvases = document.getElementsByClassName('canvas') as HTMLCollectionOf<HTMLCanvasElement>
   downloadMultipleCanvases(page, canvases)
 }

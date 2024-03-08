@@ -1,20 +1,44 @@
+/*
+ * Licensed to The OpenNMS Group, Inc (TOG) under one or more
+ * contributor license agreements.  See the LICENSE.md file
+ * distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * TOG licenses this file to You under the GNU Affero General
+ * Public License Version 3 (the "License") or (at your option)
+ * any later version.  You may not use this file except in
+ * compliance with the License.  You may obtain a copy of the
+ * License at:
+ *
+ *      https://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific
+ * language governing permissions and limitations under the
+ * License.
+ */
 package org.opennms.horizon.inventory.service.discovery.active;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.mapper.discovery.ActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @RequiredArgsConstructor
 public class ActiveDiscoveryService {
     private final ActiveDiscoveryRepository repository;
+    private final NodeRepository nodeRepository;
     private final ActiveDiscoveryMapper mapper;
 
     @Transactional(readOnly = true)
@@ -25,9 +49,16 @@ public class ActiveDiscoveryService {
 
     @Transactional
     public void deleteActiveDiscovery(String tenantId, long id) {
-        repository.findByTenantIdAndId(tenantId, id).ifPresentOrElse(repository::delete,
-            () -> {
-                throw new EntityNotFoundException(String.format("active discovery id %d not found", id));
-            });
+        repository.findByTenantIdAndId(tenantId, id).ifPresentOrElse(repository::delete, () -> {
+            throw new EntityNotFoundException(String.format("active discovery id %d not found", id));
+        });
+        // updating nodes containing discovery id
+        List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
+                .filter(node -> node.getDiscoveryIds().contains(id))
+                .toList();
+        if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
+            nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+            nodeRepository.saveAll(nodeList);
+        }
     }
 }

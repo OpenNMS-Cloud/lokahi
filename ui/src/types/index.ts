@@ -1,6 +1,5 @@
 import { SORT } from '@featherds/table'
 import { PointerAlignment, PopoverPlacement } from '@featherds/popover'
-// import { ComputedRef } from 'vue'
 
 export * from './flows.d'
 export * from './inventory.d'

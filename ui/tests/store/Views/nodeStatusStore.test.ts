@@ -12,7 +12,8 @@ describe('Node Status Store', () => {
     vi.restoreAllMocks()
   })
 
-  it('Correctly calls the fetch exports query', async () => {
+  // Skipping this test until flows are fully enabled
+  it.skip('Correctly calls the fetch exports query', async () => {
     setActiveClient(useClient({ url: 'http://test/graphql' }))
 
     const store = useNodeStatusStore()
@@ -20,16 +21,17 @@ describe('Node Status Store', () => {
 
     const capturedNowInMs = new Date().getTime()
     const testDate = new Date(capturedNowInMs)
-    
+
     global.Date = vitest.fn().mockImplementation(() => testDate) as any
     global.Date.now = vitest.fn().mockImplementation(() => capturedNowInMs)
-    
+
     const endTime = Date.now()
     const startTime = endTime - 1000 * 60 * 60 * 24 * 7 // endTime - 7 days
 
     await store.fetchExporters(1)
 
     expect(queries.fetchExporters).toHaveBeenCalledOnce()
+
     expect(queries.fetchExporters).toHaveBeenCalledWith({
       exporter: [
         {

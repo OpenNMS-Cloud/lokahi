@@ -1,4 +1,4 @@
-<!-- 
+<!--
   Props:
     - items: actionable item list
       - default: empty list
@@ -24,6 +24,7 @@
     </template>
     <FeatherDropdownItem
       v-for="item in items"
+      :key="item.label"
       data-test="dropdownItem"
       @click="item.handler"
     >

@@ -41,14 +41,15 @@
         </div>
 
         <FeatherInput
-          v-model="store.selectedPolicy.name"
+          v-model.trim="store.selectedPolicy.name"
           label="New Policy Name"
           v-focus
           data-test="policy-name-input"
+          :error="store.validationErrors.policyName"
           :readonly="store.selectedPolicy.isDefault"
         />
         <FeatherTextarea
-          v-model="store.selectedPolicy.memo"
+          v-model.trim="store.selectedPolicy.memo"
           label="Memo"
           :maxlength="100"
           :disabled="store.selectedPolicy.isDefault"
@@ -131,9 +132,19 @@ const icons = markRaw({
   Delete
 })
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => tag.name))
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: string) => ({ name: tag, id: tag })))
+const route = useRoute()
+
+watchEffect(() => {
+  if (store.monitoringPolicies.length > 0 && route?.params?.id) {
+    const filteredPolicy = store.monitoringPolicies.find((item: Policy) => item.id === Number(route.params.id))
+    populateForm(filteredPolicy as Policy)
+  }
+})
 
 const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   if (policy?.id) {
@@ -143,8 +154,8 @@ const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   openModal()
 }
 
-const deleteMsg = computed(() => 
-`Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
+const deleteMsg = computed(() =>
+  `Deleting monitoring policy ${store.selectedPolicy?.name} removes ${store.numOfAlertsForPolicy} associated alerts. Do you wish to proceed?`
 )
 </script>
 

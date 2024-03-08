@@ -22,12 +22,13 @@ import WelcomeSlideTwo from '../components/Welcome/WelcomeSlideTwo.vue'
 import WelcomeSlideThree from '../components/Welcome/WelcomeSlideThree.vue'
 import { useWelcomeStore } from '@/store/Views/welcomeStore'
 import useTheme from '@/composables/useTheme'
+
 const welcomeStore = useWelcomeStore()
-const { isDark } = useTheme();
+const { isDark } = useTheme()
 
 const fullSequence = ['ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight', 'ArrowRight']
 const inputtedSequence = ref<string[]>([])
-const router = useRouter();
+const router = useRouter()
 
 /**
  * Used to verify if we should be overriding the Welcome Guide
@@ -41,23 +42,25 @@ const router = useRouter();
  * @param keyValue A keyboard event from 'keyup' on addEventListener
  */
 const overrideChecker = (keyValue: KeyboardEvent) => {
-  let clear = false;
-  let totalExact = 0;
+  let clear = false
+  let totalExact = 0
 
   // Store the keypress key
   inputtedSequence.value.push(keyValue.key)
   for (let i = 0; i < inputtedSequence.value.length; i++) {
     // If we have something that doesn't match, we clear the sequence so the user can restart.
     if (inputtedSequence.value[i] !== fullSequence[i]) {
-      clear = true;
+      clear = true
     } else {
       totalExact += 1
     }
   }
+
   // We found an incorrect value in the sequence, reset.
   if (clear) {
     inputtedSequence.value = []
   }
+
   // The sequence is identical. Toggle the override value.
   if (totalExact === fullSequence.length) {
     if (sessionStorage.getItem('welcomeOverride') === 'true') {
@@ -68,17 +71,19 @@ const overrideChecker = (keyValue: KeyboardEvent) => {
     }
   }
 }
+
 onMounted(() => {
   window.addEventListener('keyup', overrideChecker)
   if (sessionStorage.getItem('welcomeOverride') === 'true') {
-    welcomeStore.init();
+    welcomeStore.init()
   }
 })
+
 onUnmounted(() => {
   window.removeEventListener('keyup', overrideChecker)
 })
-
 </script>
+
 <style lang="scss" scoped>
 @import '@featherds/styles/themes/variables';
 @import '@featherds/styles/mixins/typography';

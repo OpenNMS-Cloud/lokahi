@@ -1,0 +1,64 @@
+syntax = "proto3";
+package opennms.syslog.api;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.syslog.api";
+
+enum SyslogFacility {
+  KERNEL = 0;
+  USER  = 1;
+  MAIL = 2 ;
+  SYSTEM = 3;
+  AUTH = 4;
+  SYSLOG = 5;
+  LPD = 6;
+  NEWS = 7;
+  UUCP = 8;
+  CLOCK = 9;
+  AUTHPRIV = 10;
+  FTP = 11;
+  NTP = 12 ;
+  AUDIT = 13;
+  ALERT = 14;
+  CRON = 15;
+  LOCAL0 = 16;
+  LOCAL1 = 17;
+  LOCAL2 = 18;
+  LOCAL3 = 19;
+  LOCAL4 = 20;
+  LOCAL5 = 21;
+  LOCAL6 = 22;
+  LOCAL7 = 23;
+  UNKNOWN = 99;
+}
+enum SyslogSeverity {
+  EMERGENCY = 0;
+  ALERT = 1;
+  CRITICAL = 2;
+  ERROR = 3;
+  WARNING = 4;
+  NOTICE = 5;
+  INFORMATIONAL = 6;
+  DEBUG = 7;
+  ALL = 8;
+  UNKNOWN =99;
+}
+message SyslogMessage {
+  SyslogFacility m_facility = 1;
+  SyslogSeverity m_severity = 2;
+  int32 m_version = 3 ;
+  string m_date = 4;
+  int32 m_year = 5;
+  int32 m_month = 6;
+  int32 m_dayOfMonth = 7;
+  int32 m_hourOfDay = 8;
+  int32 m_minute = 9;
+  int32 m_second = 10;
+  int32 m_millisecond = 11;
+  string m_zoneId = 12 ;
+  string m_hostname = 13;
+  string m_processName = 14;
+  string m_processId = 15;
+  string m_messageId = 16;
+  string m_message = 17;
+  }

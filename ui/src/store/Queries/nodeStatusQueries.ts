@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import {  AlertsNodeByDocument, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import {  AlertsByNode, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
 export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   const variables = ref<Variables>({})
-  const fetchNodeByAlertData = ref({} as ListAlertResponse)
+  const fetchAlertsByNodeData = ref({} as ListAlertResponse)
   const setNodeId = (id: number) => {
     variables.value.id = id
   }
@@ -34,9 +34,9 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     return data
   }
 
-  const getNodeByAlertsQuery = async (sortFilter: AlertsFilters, paginationFilter: Pagination) => {
+  const getAlertsByNodeQuery = async (sortFilter: AlertsFilters, paginationFilter: Pagination) => {
     const { data, execute } = useQuery({
-      query: AlertsNodeByDocument,
+      query: AlertsByNode,
       variables: {
         page: paginationFilter.page,
         pageSize: paginationFilter.pageSize,
@@ -47,11 +47,11 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
       cachePolicy: 'network-only'
     })
     await execute()
-    
+
     if (data?.value?.getAlertsByNode) {
-      fetchNodeByAlertData.value = {...data?.value?.getAlertsByNode } as ListAlertResponse
+      fetchAlertsByNodeData.value = {...data?.value?.getAlertsByNode } as ListAlertResponse
     } else {
-      fetchNodeByAlertData.value = defaultListAlertResponse()
+      fetchAlertsByNodeData.value = defaultListAlertResponse()
     }
   }
 
@@ -60,7 +60,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     fetchedData,
     fetchExporters,
     fetchNodeStatus,
-    getNodeByAlertsQuery,
-    fetchNodeByAlertData
+    getAlertsByNodeQuery,
+    fetchAlertsByNodeData
   }
 })

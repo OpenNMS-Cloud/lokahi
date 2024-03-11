@@ -112,12 +112,12 @@ const showSeverity = (value: any) => {
   return { style: value as string }
 }
 
-const fetchNodeByAlertsList = async () => {
+const fetchAlertsByNodeList = async () => {
   await nodeStatusStore.getNodeByAlerts()
 }
 
 onMounted(() => {
-  fetchNodeByAlertsList()
+  fetchAlertsByNodeList()
 })
 
 const data = computed(() => nodeStatusStore.fetchNodeByAlertData || [])

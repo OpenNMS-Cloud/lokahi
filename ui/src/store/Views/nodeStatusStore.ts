@@ -99,9 +99,9 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
       ...alertsPagination.value,
       page
     }
-    await nodeStatusQueries.getNodeByAlertsQuery(alertsFilter.value, pagination)
+    await nodeStatusQueries.getAlertsByNodeQuery(alertsFilter.value, pagination)
 
-    fetchNodeByAlertData.value = nodeStatusQueries.fetchNodeByAlertData
+    fetchNodeByAlertData.value = nodeStatusQueries.fetchAlertsByNodeData
 
     if (fetchNodeByAlertData.value.totalAlerts != alertsPagination.value.total) {
       alertsPagination.value = {

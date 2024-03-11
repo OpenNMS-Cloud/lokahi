@@ -2,8 +2,9 @@ import { defineStore } from 'pinia'
 import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
+import { Exporter, DownloadFormat, DownloadIpInterfacesVariables, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
+import { createAndDownloadBlobFile } from '@/components/utils'
 import { AlertsFilters, Pagination } from '@/types/alerts'
 import { cloneDeep } from 'lodash'
 
@@ -110,6 +111,15 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
       }
     }
   }
+  const downloadIpInterfacesToCsv = async (searchTerm: string) => {
+    const downloadTopNQueryVariables: DownloadIpInterfacesVariables = {
+      nodeId: nodeId.value,
+      searchTerm: searchTerm,
+      downloadFormat: DownloadFormat.Csv
+    }
+    const bytes = await nodeStatusQueries.downloadIpInterfaces(downloadTopNQueryVariables)
+    createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
+  }
 
   return {
     updateNodeAlias,
@@ -122,6 +132,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     nodeId,
     getNodeByAlerts,
     fetchAlertsByNodeData,
-    alertsPagination
+    alertsPagination,
+    downloadIpInterfacesToCsv
   }
 })

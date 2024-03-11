@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import {  AlertsByNodeDocument, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import {  AlertsByNodeDocument, DownloadIpInterfacesVariables, DownloadIpInterfacesDocument, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
@@ -55,6 +55,16 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
       fetchAlertsByNodeData.value = defaultListAlertResponse()
     }
   }
+  const downloadIpInterfaces = async (requestCriteria: DownloadIpInterfacesVariables) => {
+    const { execute, data } = useQuery({
+      query: DownloadIpInterfacesDocument,
+      variables: requestCriteria,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.downloadIpInterfacesByNodeAndSearchTerm?.ipInterfaces
+  }
 
   return {
     setNodeId,
@@ -62,6 +72,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     fetchExporters,
     fetchNodeStatus,
     getAlertsByNodeQuery,
-    fetchAlertsByNodeData
+    fetchAlertsByNodeData,
+    downloadIpInterfaces
   }
 })

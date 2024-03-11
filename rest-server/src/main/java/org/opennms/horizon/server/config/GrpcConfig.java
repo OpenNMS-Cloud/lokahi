@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.server.mapper.alert.AlertEventDefinitionMapper;
 import org.opennms.horizon.server.mapper.alert.AlertsCountMapper;
+import org.opennms.horizon.server.mapper.alert.EventDefinitionByVendorMapper;
 import org.opennms.horizon.server.mapper.alert.MonitorPolicyMapper;
 import org.opennms.horizon.server.service.flows.FlowClient;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
@@ -64,6 +65,8 @@ public class GrpcConfig {
     private final AlertEventDefinitionMapper alertEventDefinitionMapper;
 
     private final AlertsCountMapper alertsCountMapper;
+
+    private final EventDefinitionByVendorMapper eventDefinitionByVendorMapper;
 
     @Value("${grpc.url.flows}")
     private String flowsQuerierGrpcAddress;
@@ -145,7 +148,13 @@ public class GrpcConfig {
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")
     public AlertsClient createAlertsClient(@Qualifier("alerts") ManagedChannel channel) {
-        return new AlertsClient(channel, deadline, policyMapper, alertEventDefinitionMapper, alertsCountMapper);
+        return new AlertsClient(
+                channel,
+                deadline,
+                policyMapper,
+                alertEventDefinitionMapper,
+                alertsCountMapper,
+                eventDefinitionByVendorMapper);
     }
 
     @Bean(destroyMethod = "shutdown", initMethod = "initialStubs")

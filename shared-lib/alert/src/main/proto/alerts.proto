@@ -131,6 +131,7 @@ message Alert {
   string label = 21;
   repeated string rule_name = 22;
   repeated string policy_name = 23;
+  uint64 node_id=24;
 }
 
 message EventMatch {
@@ -218,6 +219,13 @@ message AlertError {
   string error = 2;
 }
 
+message AlertRequestByNode {
+  int64 node_id = 1;
+  int32 page_size = 2;
+  int32 page = 3;
+  string sort_by = 5;
+  bool sort_ascending = 6;
+}
 service AlertService {
   rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {};
   rpc acknowledgeAlert(AlertRequest) returns (AlertResponse) {};
@@ -227,6 +235,7 @@ service AlertService {
   rpc deleteAlert(AlertRequest) returns(DeleteAlertResponse) {};
   rpc countAlerts(ListAlertsRequest) returns (CountAlertResponse) {};
   rpc alertCounts(google.protobuf.Empty) returns (AlertCount) {};
+  rpc getAlertsByNode(AlertRequestByNode)  returns (ListAlertsResponse) {};
 }
 
 // Proto for Monitoring policy
@@ -300,6 +309,8 @@ message AlertEventDefinitionProto {
   string reductionKey = 4;
   string clearKey = 5;
   EventType eventType = 6;
+  string vendor = 7;
+  string enterpriseId = 8;
 }
 
 enum EventType {
@@ -315,6 +326,26 @@ message ListAlertEventDefinitionsResponse {
   repeated AlertEventDefinitionProto alertEventDefinitions = 1;
 }
 
+message VendorList {
+  repeated string  vendor = 1;
+}
+
+message EventDefinitionsByVendor {
+  string  vendor = 1;
+  repeated AlertEventDefinitionProto eventDefinition = 2;
+}
+
+message EventDefsByVendorRequest {
+  EventType eventType = 1;
+  string  vendor = 2;
+}
+
+message ListEventDefinitionsByVendor {
+  repeated  EventDefinitionsByVendor eventDefinitionByVendor = 1;
+}
+
 service AlertEventDefinitionService {
   rpc listAlertEventDefinitions(ListAlertEventDefinitionsRequest) returns(ListAlertEventDefinitionsResponse);
+  rpc listVendors(google.protobuf.Empty) returns (VendorList);
+  rpc listAlertEventDefinitionsByVendor(EventDefsByVendorRequest) returns(EventDefinitionsByVendor);
 }

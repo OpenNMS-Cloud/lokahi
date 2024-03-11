@@ -76,3 +76,17 @@ query findExportersForNodeStatus($requestCriteria: RequestCriteriaInput!) {
     }
   }
 }
+
+query DownloadIpInterfacesByNodeAndSearchTerm(
+  $nodeId: Long!
+  $searchTerm: String!
+  $downloadFormat: DownloadFormat
+) {
+  downloadIpInterfacesByNodeAndSearchTerm(
+    nodeId: $nodeId
+    searchTerm: $searchTerm
+    downloadFormat: $downloadFormat
+  ) {
+    ipInterfaces
+  }
+}

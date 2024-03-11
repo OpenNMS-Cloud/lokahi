@@ -19,36 +19,14 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.server.model.alerts;
+package org.opennms.horizon.server.model.inventory;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import org.opennms.horizon.alerts.proto.Severity;
 
+@AllArgsConstructor
 @Getter
-@Setter
-public class Alert {
-    private long databaseId;
-    private String uei;
-    private String reductionKey;
-    private String clearKey;
-    private AlertType type;
-    private long counter;
-    private Severity severity;
-    private String description;
-    private String logMessage;
-    private String location;
-    private ManagedObject managedObject;
-    private long firstEventTimeMs;
-    private long lastEventId;
-    private long lastUpdateTimeMs;
-    private boolean isAcknowledged;
-    private String ackUser;
-    private long ackTimeMs;
-    private String nodeName;
-    private String label;
-    private List<String> ruleNameList;
-    private List<String> policyNameList;
-    private long nodeId;
+public class SnmpInterfaceResponse {
+    private byte[] snmpInterfaceBytes;
+    private DownloadFormat downloadFormat;
 }

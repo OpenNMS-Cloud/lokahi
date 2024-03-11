@@ -52,6 +52,7 @@ public interface NodeMapper extends DateTimeMapper {
         @Mapping(source = "ipInterfaces", target = "ipInterfacesList"),
         @Mapping(source = "snmpInterfaces", target = "snmpInterfacesList"),
         @Mapping(source = "azureInterfaces", target = "azureInterfacesList"),
+        @Mapping(source = "discoveryIds", target = "discoveryIdsList"),
         @Mapping(source = "tags", target = "tagsList"),
         @Mapping(source = "monitoringLocation.location", target = "location")
     })

@@ -19,32 +19,21 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.server.model.inventory;
+package org.opennms.horizon.server.mapper.alert;
 
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
-import org.opennms.horizon.server.model.inventory.tag.Tag;
+import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
+import org.opennms.horizon.server.model.alerts.EventDefinitionsByVendor;
 
-@Getter
-@Setter
-public class Node {
-    private long id;
-    private String nodeLabel;
-    private String nodeAlias;
-    private String scanType;
-    private String monitoredState;
-    private long createTime;
-    private long monitoringLocationId;
-    private List<Tag> tags;
-    private List<IpInterface> ipInterfaces;
-    private List<SnmpInterface> snmpInterfaces;
-    private List<AzureInterface> azureInterfaces;
-    private String objectId;
-    private String systemName;
-    private String systemDescr;
-    private String systemLocation;
-    private String systemContact;
-    private String location;
-    private List<Long> discoveryIds;
+@Mapper(
+        componentModel = "spring",
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+        collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
+        uses = {AlertEventDefinitionMapper.class})
+public interface EventDefinitionByVendorMapper {
+
+    @Mapping(source = "eventDefinitionList", target = "alertEventDefinitionList")
+    EventDefinitionsByVendor protoToEventDefinition(org.opennms.horizon.alerts.proto.EventDefinitionsByVendor proto);
 }

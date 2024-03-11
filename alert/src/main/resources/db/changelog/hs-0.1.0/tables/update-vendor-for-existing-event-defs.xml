@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="hs-0.1.0-update-vendor-event-defs" author="cgorantla">
+        <sql>
+            UPDATE event_definition
+            SET vendor = 'generic'
+            WHERE name IS NOT NULL AND
+            event_type = 'SNMP_TRAP' AND
+            event_uei LIKE '%generic%';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

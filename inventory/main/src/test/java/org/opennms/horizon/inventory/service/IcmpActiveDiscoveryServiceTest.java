@@ -37,6 +37,7 @@ import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
@@ -44,6 +45,7 @@ import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscover
 class IcmpActiveDiscoveryServiceTest {
     IcmpActiveDiscoveryService icmpActiveDiscoveryService;
     private IcmpActiveDiscoveryRepository icmpActiveDiscoveryRepository;
+    private NodeRepository nodeRepository;
     private ActiveDiscoveryRepository activeDiscoveryRepository;
     private TagService tagService;
 
@@ -60,6 +62,7 @@ class IcmpActiveDiscoveryServiceTest {
         monitoringLocationService = mock(MonitoringLocationService.class);
         icmpActiveDiscoveryService = new IcmpActiveDiscoveryService(
                 icmpActiveDiscoveryRepository,
+                nodeRepository,
                 activeDiscoveryRepository,
                 monitoringLocationService,
                 icmpActiveDiscoveryMapper,

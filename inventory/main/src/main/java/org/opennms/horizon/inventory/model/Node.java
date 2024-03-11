@@ -42,6 +42,8 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.opennms.horizon.inventory.component.NodeKafkaProducer;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.taskset.contract.ScanType;
@@ -59,6 +61,10 @@ public class Node {
     @NotNull
     @Column(name = "tenant_id")
     private String tenantId;
+
+    @Column(name = "active_discovery_ids", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<Long> discoveryIds = new ArrayList<>();
 
     @NotNull
     @Column(name = "node_label")

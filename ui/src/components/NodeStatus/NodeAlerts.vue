@@ -84,7 +84,7 @@ const icons = markRaw({
 })
 
 const alertsData = ref<IAlert[]>([])
-const { fetchNodeByAlertData, getNodeByAlerts } = useNodeStatusStore()
+const nodeStatusStore = useNodeStatusStore()
 
 const columns = [
   { id: 'alertType', label: 'Alert Type' },
@@ -113,22 +113,27 @@ const showSeverity = (value: any) => {
 }
 
 const fetchNodeByAlertsList = async () => {
-  await getNodeByAlerts()
+  await nodeStatusStore.getNodeByAlerts()
 }
 
-onBeforeMount(() => {
+onMounted(() => {
   fetchNodeByAlertsList()
 })
 
-const data = computed(() => fetchNodeByAlertData.value)
+const data = computed(() => nodeStatusStore.fetchNodeByAlertData || [])
 
-const isAlertsLength = computed(() => data.value?.length > 0)
+const isAlertsLength = computed(() => {
+  const alerts = data.value?.alerts || []
+  return alerts.length > 0
+})
 
-watch(() => fetchNodeByAlertData.value, () => {
+watch(() => nodeStatusStore.fetchNodeByAlertData, () => {
   if (isAlertsLength.value) {
-    alertsData.value = [...data.value]
+    const alerts = data.value?.alerts || []
+    alertsData.value = [...alerts]
   }
 })
+
 </script>
 
 <style lang="scss" scoped>
@@ -167,7 +172,6 @@ watch(() => fetchNodeByAlertData.value, () => {
 
 .container {
   display: block;
-  overflow-x: auto;
   table {
     width: 100%;
     @include table.table;

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { Exporter, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
+import { Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { AlertsFilters, Pagination } from '@/types/alerts'
 import { cloneDeep } from 'lodash'
@@ -28,10 +28,10 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
-  const fetchNodeByAlertData = ref()
-  fetchNodeByAlertData.value = computed(() => nodeStatusQueries.fetchNodeByAlertData)
+  const fetchNodeByAlertData = ref({} as ListAlertResponse)
   const exporters = ref<DeepPartial<Exporter>[]>([])
   const nodeId = ref()
+
   const setNodeId = (id: number) => {
     nodeStatusQueries.setNodeId(id)
     nodeId.value = id
@@ -92,7 +92,23 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   }
 
   const getNodeByAlerts = async () => {
-    await nodeStatusQueries.getNodeByAlertsQuery(alertsFilter.value, alertsPagination.value)
+
+    const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
+
+    const pagination = {
+      ...alertsPagination.value,
+      page
+    }
+    await nodeStatusQueries.getNodeByAlertsQuery(alertsFilter.value, pagination)
+
+    fetchNodeByAlertData.value = nodeStatusQueries.fetchNodeByAlertData
+
+    if (fetchNodeByAlertData.value.totalAlerts != alertsPagination.value.total) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        total: fetchNodeByAlertData.value.totalAlerts
+      }
+    }
   }
 
   return {
@@ -105,6 +121,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     node,
     nodeId,
     getNodeByAlerts,
-    fetchNodeByAlertData
+    fetchNodeByAlertData,
+    alertsPagination
   }
 })

@@ -27,7 +27,7 @@ fragment AlertsParts on Query {
   }
 }
 
-fragment AlertsPartsList on Query {
+fragment AlertsByNode on Query {
   getAlertsByNode(
     page?: $page
     pageSize?: $pageSize

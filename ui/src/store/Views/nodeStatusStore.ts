@@ -28,7 +28,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
-  const fetchNodeByAlertData = ref({} as ListAlertResponse)
+  const fetchAlertsByNodeData = ref({} as ListAlertResponse)
   const exporters = ref<DeepPartial<Exporter>[]>([])
   const nodeId = ref()
 
@@ -101,12 +101,12 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     }
     await nodeStatusQueries.getAlertsByNodeQuery(alertsFilter.value, pagination)
 
-    fetchNodeByAlertData.value = nodeStatusQueries.fetchAlertsByNodeData
+    fetchAlertsByNodeData.value = nodeStatusQueries.fetchAlertsByNodeData
 
-    if (fetchNodeByAlertData.value.totalAlerts != alertsPagination.value.total) {
+    if (fetchAlertsByNodeData.value.totalAlerts != alertsPagination.value.total) {
       alertsPagination.value = {
         ...alertsPagination.value,
-        total: fetchNodeByAlertData.value.totalAlerts
+        total: fetchAlertsByNodeData.value.totalAlerts
       }
     }
   }
@@ -121,7 +121,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     node,
     nodeId,
     getNodeByAlerts,
-    fetchNodeByAlertData,
+    fetchAlertsByNodeData,
     alertsPagination
   }
 })

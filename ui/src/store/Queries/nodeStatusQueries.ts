@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import {  AlertsByNode, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import {  AlertsByNodeDocument, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
@@ -36,13 +36,14 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
 
   const getAlertsByNodeQuery = async (sortFilter: AlertsFilters, paginationFilter: Pagination) => {
     const { data, execute } = useQuery({
-      query: AlertsByNode,
+      query: AlertsByNodeDocument,
       variables: {
         page: paginationFilter.page,
         pageSize: paginationFilter.pageSize,
         sortBy: sortFilter.sortBy,
         sortAscending: sortFilter.sortAscending,
         nodeId: variables.value.id
+
       },
       cachePolicy: 'network-only'
     })

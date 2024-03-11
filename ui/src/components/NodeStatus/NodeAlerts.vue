@@ -120,14 +120,14 @@ onMounted(() => {
   fetchAlertsByNodeList()
 })
 
-const data = computed(() => nodeStatusStore.fetchNodeByAlertData || [])
+const data = computed(() => nodeStatusStore.fetchAlertsByNodeData || [])
 
 const isAlertsLength = computed(() => {
   const alerts = data.value?.alerts || []
   return alerts.length > 0
 })
 
-watch(() => nodeStatusStore.fetchNodeByAlertData, () => {
+watch(() => nodeStatusStore.fetchAlertsByNodeData, () => {
   if (isAlertsLength.value) {
     const alerts = data.value?.alerts || []
     alertsData.value = [...alerts]

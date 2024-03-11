@@ -38,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.inventory.component.TagPublisher;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -47,15 +49,19 @@ import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
+import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
+import org.opennms.horizon.inventory.mapper.discovery.ActiveDiscoveryMapper;
 import org.opennms.horizon.inventory.model.IpInterface;
 import org.opennms.horizon.inventory.model.MonitoringLocation;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
+import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.inventory.repository.MonitoringLocationRepository;
 import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.TagRepository;
+import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.taskset.CollectorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.MonitorTaskSetService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
@@ -83,7 +89,7 @@ public class NodeService {
     private final NodeRepository nodeRepository;
     private final MonitoringLocationRepository monitoringLocationRepository;
     private final IpInterfaceRepository ipInterfaceRepository;
-    private final ConfigUpdateService configUpdateService;
+    private final ActiveDiscoveryRepository discoveryRepository;
     private final CollectorTaskSetService collectorTaskSetService;
     private final MonitorTaskSetService monitorTaskSetService;
     private final ScannerTaskSetService scannerTaskSetService;
@@ -92,6 +98,8 @@ public class NodeService {
     private final NodeMapper mapper;
     private final TagPublisher tagPublisher;
     private final TagRepository tagRepository;
+    private final IpInterfaceMapper ipInterfaceMapper;
+    private final ActiveDiscoveryMapper discoveryMapper;
 
     @Transactional(readOnly = true)
     public List<NodeDTO> findByTenantId(String tenantId) {
@@ -109,6 +117,20 @@ public class NodeService {
         return nodeRepository.findByTenantIdAndMonitoredStateEquals(tenantId, monitoredState).stream()
                 .map(mapper::modelToDTO)
                 .toList();
+    }
+
+    public void updateNodeDiscoveryIds(long id, String tenantId, List<Long> discoveryIds) {
+        Optional<Node> nodeOptional = nodeRepository.findByIdAndTenantId(id, tenantId);
+        if (nodeOptional.isPresent()) {
+            final Node node = nodeOptional.get();
+            node.setDiscoveryIds(discoveryIds);
+            nodeRepository.save(node);
+        }
+    }
+
+    public List<ActiveDiscoveryDTO> getActiveDiscoveriesByIdList(String tenantId, List<Long> ids) {
+        List<ActiveDiscovery> discoveries = discoveryRepository.findByTenantIdAndIdIn(tenantId, ids);
+        return discoveryMapper.modelToDto(discoveries);
     }
 
     @Transactional(readOnly = true)
@@ -158,6 +180,7 @@ public class NodeService {
 
         node.setTenantId(tenantId);
         node.setNodeLabel(request.getLabel());
+        node.setDiscoveryIds(request.getDiscoveryIdsList());
         node.setScanType(scanType);
         if (request.hasMonitoredState()) {
             node.setMonitoredState(request.getMonitoredState());
@@ -215,6 +238,7 @@ public class NodeService {
                 throw new InventoryRuntimeException("Duplicate node alias with name " + alias);
             }
             node.setNodeAlias(request.getNodeAlias());
+            node.setDiscoveryIds(request.getDiscoveryIdsList());
         }
         return nodeRepository.save(node).getId();
     }
@@ -383,5 +407,15 @@ public class NodeService {
         return nodeRepository.findByTenantIdAndTagNamesIn(tenantId, tags).stream()
                 .map(mapper::modelToDTO)
                 .toList();
+    }
+
+    public List<IpInterfaceDTO> searchIpInterfacesByNodeAndSearchTerm(
+            String tenantId, Long nodeId, String searchIpInterfaceTerm) {
+
+        return ipInterfaceRepository
+                .findAllByTenantIdAndNodeIdAndSearchTerm(tenantId, nodeId, searchIpInterfaceTerm)
+                .stream()
+                .map(ipInterfaceMapper::modelToDTO)
+                .collect(Collectors.toList());
     }
 }

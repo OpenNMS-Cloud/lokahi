@@ -36,19 +36,30 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.dataloader.DataLoader;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.server.config.DataLoaderFactory;
+import org.opennms.horizon.server.mapper.IpInterfaceMapper;
 import org.opennms.horizon.server.mapper.NodeMapper;
+import org.opennms.horizon.server.mapper.SnmpInterfaceMapper;
+import org.opennms.horizon.server.mapper.discovery.ActiveDiscoveryMapper;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.inventory.DownloadFormat;
+import org.opennms.horizon.server.model.inventory.IpInterface;
+import org.opennms.horizon.server.model.inventory.IpInterfaceResponse;
 import org.opennms.horizon.server.model.inventory.MonitoringLocation;
 import org.opennms.horizon.server.model.inventory.Node;
 import org.opennms.horizon.server.model.inventory.NodeCreate;
 import org.opennms.horizon.server.model.inventory.NodeUpdate;
+import org.opennms.horizon.server.model.inventory.SnmpInterface;
+import org.opennms.horizon.server.model.inventory.SnmpInterfaceResponse;
 import org.opennms.horizon.server.model.inventory.TopNNode;
 import org.opennms.horizon.server.model.inventory.TopNResponse;
+import org.opennms.horizon.server.model.inventory.discovery.active.ActiveDiscovery;
 import org.opennms.horizon.server.model.status.NodeStatus;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -58,11 +69,15 @@ import reactor.core.publisher.Mono;
 @Service
 public class GrpcNodeService {
     private static final String ICMP_MONITOR_TYPE = "ICMP";
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcNodeService.class);
 
     private final InventoryClient client;
     private final NodeMapper mapper;
+    private final IpInterfaceMapper ipInterfaceMapper;
+    private final ActiveDiscoveryMapper activeDiscoveryMapper;
     private final ServerHeaderUtil headerUtil;
     private final NodeStatusService nodeStatusService;
+    private final SnmpInterfaceMapper snmpInterfaceMapper;
 
     @GraphQLQuery
     public Flux<Node> findAllNodes(@GraphQLEnvironment ResolutionEnvironment env) {
@@ -103,6 +118,15 @@ public class GrpcNodeService {
     public Mono<Node> findNodeById(
             @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
         return Mono.just(mapper.protoToNode(client.getNodeById(id, headerUtil.getAuthHeader(env))));
+    }
+
+    @GraphQLQuery(name = "getDiscoveriesByNode")
+    public Flux<ActiveDiscovery> getDiscoveriesByNode(
+            @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(
+                client.getDiscoveriesByNode(id, headerUtil.getAuthHeader(env)).getActiveDiscoveriesList().stream()
+                        .map(activeDiscoveryMapper::dtoToActiveDiscovery)
+                        .toList());
     }
 
     @GraphQLMutation
@@ -192,6 +216,32 @@ public class GrpcNodeService {
                 });
     }
 
+    @GraphQLQuery(name = "searchSnmpInterfaces")
+    public Flux<SnmpInterface> searchSnmpInterfaces(
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.listSnmpInterfaces(searchTerm, nodeId, headerUtil.getAuthHeader(env)).stream()
+                .map(snmpInterfaceMapper::protobufToSnmpInterface)
+                .toList());
+    }
+
+    @GraphQLQuery(name = "downloadSnmpInterfaces")
+    public Mono<SnmpInterfaceResponse> downloadSnmpInterfaces(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        List<SnmpInterfaceDTO> list = client.listSnmpInterfaces(searchTerm, nodeId, headerUtil.getAuthHeader(env));
+
+        try {
+            return Mono.just(generateDownloadableSnmpInterfaceResponse(list, downloadFormat));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to download Snmp Interface List");
+        }
+    }
+
     private static TopNResponse generateDownloadableTopNResponse(
             List<TopNNode> topNNodes, DownloadFormat downloadFormat) throws IOException {
         if (downloadFormat == null) {
@@ -203,16 +253,117 @@ public class GrpcNodeService {
                     .setHeader("Node Label", "Location", "Avg Response Time", "Reachability")
                     .build();
 
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (TopNNode topNNode : topNNodes) {
+                    csvPrinter.printRecord(
+                            topNNode.getNodeLabel(),
+                            topNNode.getLocation(),
+                            topNNode.getAvgResponseTime(),
+                            topNNode.getReachability());
+                }
+                csvPrinter.flush();
+            } catch (Exception e) {
+                LOG.error("Exception while printing records", e);
+            }
+            return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
+    }
+
+    private static SnmpInterfaceResponse generateDownloadableSnmpInterfaceResponse(
+            List<SnmpInterfaceDTO> snmpInterfaceDTOs, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                    .setHeader(
+                            "ALIAS",
+                            "PHYSICAL ADDR",
+                            "INDEX",
+                            "DESC",
+                            "TYPE",
+                            "NAME",
+                            "SPEED",
+                            "ADMIN STATUS",
+                            "OPERATOR STATUS")
+                    .build();
+
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (SnmpInterfaceDTO dto : snmpInterfaceDTOs) {
+                    csvPrinter.printRecord(
+                            dto.getIfAlias(),
+                            dto.getPhysicalAddr(),
+                            dto.getIfIndex(),
+                            dto.getIfDescr(),
+                            dto.getIfType(),
+                            dto.getIfName(),
+                            dto.getIfSpeed(),
+                            dto.getIfAdminStatus(),
+                            dto.getIfOperatorStatus());
+                }
+                csvPrinter.flush();
+            } catch (Exception e) {
+                LOG.error("Exception while printing records", e);
+            }
+            return new SnmpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
+    }
+
+    @GraphQLQuery(name = "listIpInterfacesByNodeSearch")
+    public Flux<IpInterface> searchIpInterfacesByNodeAndSearchTerm(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm) {
+
+        return Flux.fromIterable(
+                client.searchIpInterfacesByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                        .map(ipInterfaceMapper::protoToIpInterface)
+                        .toList());
+    }
+
+    @GraphQLQuery(name = "downloadIpInterfacesByNodeAndSearchTerm")
+    public Mono<IpInterfaceResponse> downloadIpInterfacesByNodeAndSearchTerm(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        List<IpInterface> ipInterfaces =
+                client.searchIpInterfacesByNodeAndSearchTerm(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                        .map(ipInterfaceMapper::protoToIpInterface)
+                        .toList();
+
+        try {
+            return Mono.just(generateDownloadableIpInterfacesResponse(ipInterfaces, downloadFormat));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to download IP interfaces", e);
+        }
+    }
+
+    private static IpInterfaceResponse generateDownloadableIpInterfacesResponse(
+            List<IpInterface> ipInterfaceList, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                    .setHeader("IP ADDRESS", "IP HOSTNAME", "NETMASK", "PRIMARY")
+                    .build();
+
             CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
-            for (TopNNode topNNode : topNNodes) {
+            for (IpInterface ipInterface : ipInterfaceList) {
                 csvPrinter.printRecord(
-                        topNNode.getNodeLabel(),
-                        topNNode.getLocation(),
-                        topNNode.getAvgResponseTime(),
-                        topNNode.getReachability());
+                        ipInterface.getIpAddress(),
+                        ipInterface.getHostname(),
+                        ipInterface.getNetmask(),
+                        ipInterface.getSnmpPrimary());
             }
             csvPrinter.flush();
-            return new TopNResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+            return new IpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }

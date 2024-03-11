@@ -33,6 +33,7 @@ import "ipInterface.proto";
 import "snmpInterface.proto";
 import "azureInterface.proto";
 import "tag.proto";
+import "activeDiscovery.proto";
 
 package opennms.inventory;
 option java_multiple_files = true;
@@ -57,6 +58,7 @@ message NodeDTO {
   repeated opennms.inventory.TagDTO tags = 16;
   string location = 17;
   optional string node_alias = 18;
+  repeated int64 discovery_ids = 19;
 }
 
 message NodeCreateDTO {
@@ -65,12 +67,14 @@ message NodeCreateDTO {
   optional string management_ip = 3;
   repeated opennms.inventory.TagCreateDTO tags = 4;
   optional MonitoredState monitored_state = 5; // optional for now - may change
+  repeated int64 discovery_ids = 6;
 }
 
 message NodeUpdateDTO {
   int64 id = 1;
   string tenant_id = 2;
   optional string node_alias = 3;
+  repeated int64 discovery_ids = 4;
 }
 
 enum MonitoredState {
@@ -104,6 +108,19 @@ message NodeIdList {
   repeated int64 ids = 1;
 }
 
+message  SearchIpInterfaceQuery{
+  int64  node_id = 1;
+  string search_term = 2;
+}
+
+message SearchBy {
+  string search_term = 1;
+  int64 node_id = 2;
+}
+message SnmpInterfacesList {
+  repeated opennms.inventory.SnmpInterfaceDTO snmp_interfaces = 1;
+}
+
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
   rpc updateNode(NodeUpdateDTO) returns (google.protobuf.Int64Value) {};
@@ -118,4 +135,7 @@ service NodeService {
   rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
   rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
+  rpc searchIpInterfaces(SearchIpInterfaceQuery) returns (IpInterfaceList) {};
+  rpc listSnmpInterfaces(SearchBy) returns (SnmpInterfacesList) {};
+  rpc getDiscoveriesByNode(google.protobuf.Int64Value) returns (ActiveDiscoveryList) {};
 }

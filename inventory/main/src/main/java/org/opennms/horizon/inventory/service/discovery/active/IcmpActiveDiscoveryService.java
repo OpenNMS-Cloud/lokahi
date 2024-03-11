@@ -33,14 +33,17 @@ import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.mapper.discovery.IcmpActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.Tag;
 import org.opennms.horizon.inventory.model.discovery.active.IcmpActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.IcmpActiveDiscoveryRepository;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -48,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationService {
 
     private final IcmpActiveDiscoveryRepository repository;
+    private final NodeRepository nodeRepository;
     private final ActiveDiscoveryRepository activeDiscoveryRepository;
     private final MonitoringLocationService monitoringLocationService;
     private final IcmpActiveDiscoveryMapper mapper;
@@ -121,6 +125,14 @@ public class IcmpActiveDiscoveryService implements ActiveDiscoveryValidationServ
                                     .toList())
                             .build());
             repository.deleteById(icmpActiveDiscovery.getId());
+            // updating nodes containing discovery id
+            List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
+                    .filter(node -> node.getDiscoveryIds().contains(id))
+                    .toList();
+            if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
+                nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+                nodeRepository.saveAll(nodeList);
+            }
             return true;
         } catch (Exception e) {
             log.error("Exception while deleting active discovery with id {}", id, e);

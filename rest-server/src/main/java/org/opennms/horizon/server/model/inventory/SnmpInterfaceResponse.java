@@ -21,30 +21,12 @@
  */
 package org.opennms.horizon.server.model.inventory;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import org.opennms.horizon.server.model.inventory.tag.Tag;
 
+@AllArgsConstructor
 @Getter
-@Setter
-public class Node {
-    private long id;
-    private String nodeLabel;
-    private String nodeAlias;
-    private String scanType;
-    private String monitoredState;
-    private long createTime;
-    private long monitoringLocationId;
-    private List<Tag> tags;
-    private List<IpInterface> ipInterfaces;
-    private List<SnmpInterface> snmpInterfaces;
-    private List<AzureInterface> azureInterfaces;
-    private String objectId;
-    private String systemName;
-    private String systemDescr;
-    private String systemLocation;
-    private String systemContact;
-    private String location;
-    private List<Long> discoveryIds;
+public class SnmpInterfaceResponse {
+    private byte[] snmpInterfaceBytes;
+    private DownloadFormat downloadFormat;
 }

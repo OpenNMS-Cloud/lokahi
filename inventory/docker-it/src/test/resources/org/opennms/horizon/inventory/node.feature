@@ -35,3 +35,7 @@ Feature: Node
   Scenario: Add a node
     Given a new node with node_alias "node", label "label", ip address "127.0.0.1" in location named "Default"
     Then fetch the list of nodes response not equal to 0
+
+  Scenario: Search IpInterfaces by Node
+    Given a new node with IpInterface along with node label "my-label" ip address "128.0.0.1" in location named "Default"
+    Then fetch a list of IpInterfaces by node using search term "128.0.0.1" that has size greater than 0

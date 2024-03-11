@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
+import { defaultListAlertResponse } from './alertsQueries'
 
 export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
-  const variables = ref({})
-
+  const variables = ref<Variables>({})
+  const fetchAlertsByNodeData = ref({} as ListAlertResponse)
   const setNodeId = (id: number) => {
     variables.value = { id }
   }
@@ -32,6 +34,28 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     return data
   }
 
+  const getAlertsByNodeQuery = async (sortFilter: AlertsFilters, paginationFilter: Pagination) => {
+    const { data, execute } = useQuery({
+      query: AlertsByNodeDocument,
+      variables: {
+        page: paginationFilter.page,
+        pageSize: paginationFilter.pageSize,
+        sortBy: sortFilter.sortBy,
+        sortAscending: sortFilter.sortAscending,
+        nodeId: variables.value.id
+
+      },
+      cachePolicy: 'network-only'
+    })
+    await execute()
+
+    if (data?.value?.getAlertsByNode) {
+      fetchAlertsByNodeData.value = {...data?.value?.getAlertsByNode } as ListAlertResponse
+    } else {
+      fetchAlertsByNodeData.value = defaultListAlertResponse()
+    }
+  }
+
   const downloadIpInterfaces = async (requestCriteria: DownloadIpInterfacesVariables) => {
     const { execute, data } = useQuery({
       query: DownloadIpInterfacesDocument,
@@ -48,6 +72,8 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     fetchedData,
     fetchExporters,
     fetchNodeStatus,
-    downloadIpInterfaces
+    downloadIpInterfaces,
+    getAlertsByNodeQuery,
+    fetchAlertsByNodeData
   }
 })

@@ -2,14 +2,34 @@ import { defineStore } from 'pinia'
 import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { DownloadFormat, DownloadIpInterfacesVariables, Exporter, NodeUpdateInput, RequestCriteriaInput } from '@/types/graphql'
+import { DownloadFormat, DownloadIpInterfacesVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { createAndDownloadBlobFile } from '@/components/utils'
+import { AlertsFilters, Pagination } from '@/types/alerts'
+import { cloneDeep } from 'lodash'
+
+const alertsFilterDefault: AlertsFilters = {
+  timeRange: TimeRange.All,
+  nodeLabel: '',
+  severities: [],
+  sortAscending: false,
+  sortBy: 'lastEventTime',
+  nodeId: 1
+}
+
+const alertsPaginationDefault: Pagination = {
+  page: 0, // FE pagination component has base 1 (first page)
+  pageSize: 10,
+  total: 0
+}
 
 export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
+  const alertsFilter = ref(cloneDeep(alertsFilterDefault))
+  const alertsPagination = ref(cloneDeep(alertsPaginationDefault))
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
+  const fetchAlertsByNodeData = ref({} as ListAlertResponse)
   const exporters = ref<DeepPartial<Exporter>[]>([])
   const nodeId = ref()
 
@@ -82,6 +102,26 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
   }
 
+  const getNodeByAlerts = async () => {
+
+    const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
+
+    const pagination = {
+      ...alertsPagination.value,
+      page
+    }
+    await nodeStatusQueries.getAlertsByNodeQuery(alertsFilter.value, pagination)
+
+    fetchAlertsByNodeData.value = nodeStatusQueries.fetchAlertsByNodeData
+
+    if (fetchAlertsByNodeData.value.totalAlerts != alertsPagination.value.total) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        total: fetchAlertsByNodeData.value.totalAlerts
+      }
+    }
+  }
+
   return {
     updateNodeAlias,
     fetchedData,
@@ -91,6 +131,9 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     exporters,
     node,
     nodeId,
-    downloadIpInterfacesToCsv
+    downloadIpInterfacesToCsv,
+    getNodeByAlerts,
+    fetchAlertsByNodeData,
+    alertsPagination
   }
 })

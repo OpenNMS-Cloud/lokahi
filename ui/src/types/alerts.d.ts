@@ -19,5 +19,10 @@ interface AlertsFilters {
   severities?: string[]
   sortAscending: boolean
   sortBy?: string
-  nodeLabel: string
+  nodeLabel?: string,
+  nodeId?: number
+}
+
+interface Variables {
+  id?: number;
 }

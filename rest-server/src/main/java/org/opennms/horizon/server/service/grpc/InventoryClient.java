@@ -534,4 +534,12 @@ public class InventoryClient {
                 .getNodeCount(Empty.newBuilder().build())
                 .getValue();
     }
+
+    public List<Integer> getMonitoringPoliciesByNode(Long nodeId , String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+            .getMonitoringPoliciesByNode(Int64Value.of(nodeId))
+            .getIdsList();
+    }
 }

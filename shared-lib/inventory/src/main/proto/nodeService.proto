@@ -103,6 +103,9 @@ message NodeLabelSearchQuery {
 message NodeIdList {
   repeated int64 ids = 1;
 }
+message MonitoringPolicies {
+  repeated int32 ids = 1;
+}
 
 service NodeService {
   rpc createNode(NodeCreateDTO) returns (NodeDTO) {};
@@ -118,4 +121,5 @@ service NodeService {
   rpc getIpInterfaceById(google.protobuf.Int64Value) returns (IpInterfaceDTO) {};
   rpc getIpInterfaceFromQuery(NodeIdQuery) returns (IpInterfaceDTO) {};
   rpc getNodeCount(google.protobuf.Empty) returns (google.protobuf.Int64Value) {};
+  rpc getMonitoringPoliciesByNode(google.protobuf.Int64Value) returns (MonitoringPolicies) {};
 }

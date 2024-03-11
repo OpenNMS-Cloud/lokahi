@@ -45,17 +45,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdList;
-import org.opennms.horizon.inventory.dto.NodeIdQuery;
-import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
-import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
-import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
-import org.opennms.horizon.inventory.dto.TagNameQuery;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -64,6 +54,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
@@ -92,6 +83,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final TenantLookup tenantLookup;
     private final ScannerTaskSetService scannerService;
     private final MonitoringLocationService monitoringLocationService;
+    private final TagService tagService;
 
     private final ThreadFactory threadFactory =
             new ThreadFactoryBuilder().setNameFormat("send-taskset-for-node-%d").build();
@@ -478,5 +470,36 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         for (Map.Entry<Long, List<NodeDTO>> entry : locationNodes.entrySet()) {
             scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
+    }
+
+    @Override
+    public void getMonitoringPoliciesByNode(Int64Value request, StreamObserver<MonitoringPolicies> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(
+                tenantId -> {
+                    try {
+                        List<Integer> monitoredPolicies =
+                                tagService.getMonitoringPoliciesByNodeId(tenantId, request.getValue());
+                        responseObserver.onNext(MonitoringPolicies.newBuilder()
+                                .addAllIds(monitoredPolicies)
+                                .build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
+
+                        Status status = Status.newBuilder()
+                                .setCode(Code.INTERNAL_VALUE)
+                                .setMessage(e.getMessage())
+                                .build();
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    }
+                },
+                () -> {
+                    Status status = Status.newBuilder()
+                            .setCode(Code.INVALID_ARGUMENT_VALUE)
+                            .setMessage(EMPTY_TENANT_ID_MSG)
+                            .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                });
     }
 }

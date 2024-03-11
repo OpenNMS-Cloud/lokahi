@@ -247,7 +247,14 @@ public class GrpcAlertService {
         if (downloadFormat.equals(DownloadFormat.CSV)) {
             StringBuilder csvData = new StringBuilder();
             var csvformat = CSVFormat.Builder.create()
-                    .setHeader("Node Name", "Alert Type", "Severity", "Description", "Date", "Time")
+                    .setHeader(
+                            "Node Name",
+                            "Alert Type",
+                            "Severity",
+                            "Description",
+                            "Date",
+                            "Time",
+                            "Acknowledged/Unacknowledged")
                     .build();
 
             try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
@@ -258,7 +265,8 @@ public class GrpcAlertService {
                             alert.getSeverity(),
                             alert.getDescription(),
                             new SimpleDateFormat("MM/dd/yyyy").format(alert.getLastUpdateTimeMs()),
-                            new SimpleDateFormat("hh:mm:ss a z").format(alert.getLastUpdateTimeMs()));
+                            new SimpleDateFormat("hh:mm:ss a z").format(alert.getLastUpdateTimeMs()),
+                            alert.isAcknowledged());
                 }
                 csvPrinter.flush();
             } catch (Exception e) {

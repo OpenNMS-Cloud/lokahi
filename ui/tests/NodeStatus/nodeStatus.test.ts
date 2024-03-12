@@ -1,37 +1,26 @@
 import NodeStatus from '@/containers/NodeStatus.vue'
 import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
-import { createRouter, createWebHistory } from 'vue-router'
-import { RouterLinkStub } from '@vue/test-utils'
+import router from '@/router'
 
 let wrapper: any
-const mockRouter = createRouter({ history: createWebHistory(), routes: [ 
-{  path: '/:pathMatch(.*)*',
-  name: 'NotFoundPage',
-  component: NodeStatus,
-},         ] })
-mockRouter.currentRoute.value.params = { id: '1' }
-await mockRouter.isReady()
-describe('Inventory page', () => {
+
+describe('Node Status page', () => {
   afterAll(() => {
     wrapper.unmount()
   })
-
-  it('should have the required components', () => {
+  beforeAll(() => {
     wrapper = mountWithPiniaVillus({
       component: NodeStatus,
       global: {
-        plugins: [mockRouter],
-        stubs: {
-          RouterLink: RouterLinkStub
-        }
+        plugins: [router]
+
       },
       shallow: true
     })
-
+  })
+  it('should have the required components', () => {
     const pageHeader = wrapper.get('[data-test="title"]')
     expect(pageHeader.exists()).toBe(true)
 
-    // const featherTabContainer = wrapper.getComponent('[data-test="tab-container"]')
-    // expect(featherTabContainer.exists()).toBe(true)
   })
 })

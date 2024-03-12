@@ -49,8 +49,11 @@
                       data-test="severity-label"
                   />
                 </td>
-                <td class="date headline" data-test="date">
-                  {{ fnsFormat(alert?.lastUpdateTimeMs, 'M/dd/yyyy HH:mm:ssxxx') }}
+                <td  class="date headline"
+                  data-test="date"> {{ fnsFormat(alert?.lastUpdateTimeMs, 'M/dd/yyyy') }}
+                </td>
+                <td  class="time"
+                  data-test="time">{{ fnsFormat(alert?.lastUpdateTimeMs, 'HH:mm:ssxxx') }}
                 </td>
               </tr>
             </TransitionGroup>
@@ -104,7 +107,8 @@ const nodeStatusStore = useNodeStatusStore()
 const columns = [
   { id: 'alertType', label: 'Alert Type' },
   { id: 'severity', label: 'Severity' },
-  { id: 'Time', label: 'time' }
+  { id: 'date', label: 'Date' },
+  { id: 'time', label: 'Time' }
 ]
 
 const emptyListContent = {

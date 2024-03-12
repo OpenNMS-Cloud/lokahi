@@ -76,7 +76,13 @@ message EventParameter {
   string encoding = 4;
 }
 
+message EventsSearchBy {
+  int64 node_id = 1;
+  string searchTerm = 2;
+}
+
 service EventService {
   rpc listEvents(google.protobuf.Empty) returns (EventLog) {};
   rpc getEventsByNodeId(google.protobuf.UInt64Value) returns (EventLog) {};
+  rpc searchEvents(EventsSearchBy) returns (EventLog) {};
 }

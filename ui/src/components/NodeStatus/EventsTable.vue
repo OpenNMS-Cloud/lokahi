@@ -26,6 +26,7 @@
             <FeatherButton
               primary
               icon="Refresh"
+              @click="nodeStatusQueries.fetchNodeStatus"
             >
               <FeatherIcon :icon="icons.Refresh"/>
             </FeatherButton>
@@ -80,10 +81,13 @@
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
+import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
 import { sortBy } from 'lodash'
+
+const nodeStatusQueries = useNodeStatusQueries()
 
 const nodeStatusStore = useNodeStatusStore()
 

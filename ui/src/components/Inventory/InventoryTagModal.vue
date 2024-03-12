@@ -1,9 +1,19 @@
 <template>
   <PrimaryModal :visible="visible" :title="title" :class="[modal.cssClass, 'inventory-tag-modal']">
     <template #content>
-      <h3>Tags</h3>
+      <section class="feather-row">
+          <h3 class="feather-col-6">Manage Tags</h3>
+        <div class=" feather-col-6">
+          <FeatherIcon  :icon="deleteIcon" @click="closeModalHandler" class="pointer" />
+        </div>
+      </section>
+     <section class="node-labels">
       <h4 class="subhead-1">{{ node.nodeLabel }}</h4>
+        <p class="subhead-2">
+          A tag is an optional label that you can associate with a node to filter and group devices.
+        </p>
       <h4 class="subhead-1 existing-tags">Existing Tags</h4>
+     </section>
       <FeatherChipList label="Tags">
         <FeatherChip v-for="(tag) in tagStore.filteredTags" :key="tag.id"
           :class="{ selected: tagsForDeletion.some((t) => t.id === tag.id) }">
@@ -20,7 +30,7 @@
               :results="tagQueries.tagsSearched.filter((t) => { return !tagStore.filteredTags.find((d) => d.name === t.name) }).map((d) => d.name)" :inputValue="inputValue" :textChanged="textChanged" />
     </template>
     <template #footer>
-      <FeatherButton secondary @click="closeModal">
+      <FeatherButton secondary @click="closeModalHandler">
         {{ modal.cancelLabel }}
       </FeatherButton>
       <FeatherButton primary @click="tagStore.saveFilteredTagsToNode">
@@ -73,6 +83,9 @@ const modal = ref<ModalPrimary>({
   hideTitle: true
 })
 
+const filteredTagsLength = computed(() => tagStore.filteredTags.length)
+const originalTagsLength = computed(() => tagStore.originalTags.length)
+
 watchEffect(() => {
   if (props.visible && props.node && props.node.tags) {
     modal.value.saveLabel = 'Apply'
@@ -84,10 +97,24 @@ watchEffect(() => {
   }
 })
 
+const closeModalHandler = () => {
+  if (filteredTagsLength.value !== originalTagsLength.value) {
+    tagStore.isCheckedTagsList()
+  }
+  tagStore.closeModal()
+}
 
 </script>
 <style lang="scss">
-
+.inventory-tag-modal {
+margin-bottom: var(--feather-spacing-s);
+}
+.node-labels{
+  margin-top: var(--feather-spacing-s);
+}
+.dialog-footer{
+  padding: 1.5rem 0.5rem !important;
+}
 .inventory-tag-modal .dialog-body header {
   margin-bottom: 0;
 }
@@ -99,15 +126,33 @@ watchEffect(() => {
 </style>
 
 <style lang="scss" scoped>
-.inventory-tag-modal h3 {
-  margin-bottom: var(--feather-spacing-m);
+
+.tag-modal-complete {
+  margin-bottom: var(--feather-spacing-s);
+  }
+
+.feather-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+    .feather-col-6 {
+      h3 {
+        margin-bottom: var(--feather-spacing-m);
+      }
+      :deep(.feather-icon) {
+        width: 1.5em;
+        height: 2em;
+        margin-top: 5px;
+      }
+    }
 }
 
 .existing-tags {
   margin-top: var(--feather-spacing-m);
 }
 .add-tags {
-  margin-top: var(--feather-spacing-l);
+  margin-top: var(--feather-spacing-xl);
   margin-bottom: var(--feather-spacing-s);
 }
 </style>

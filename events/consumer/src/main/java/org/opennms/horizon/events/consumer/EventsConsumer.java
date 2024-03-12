@@ -126,6 +126,10 @@ public class EventsConsumer {
         eventParameters.setParameters(paramsList);
         event.setEventParameters(eventParameters);
         event.setEventInfo(eventProto.getInfo().toByteArray());
+        event.setLocationName(eventProto.getLocationName());
+        event.setDescription(eventProto.getDescription());
+        event.setLogMessage(eventProto.getLogMessage());
+
         return event;
     }
 

@@ -27,4 +27,10 @@ public class Constants {
 
     public static final int SNMP_PORT_MIN = 1;
     public static final int SNMP_PORT_MAX = 65536;
+    public static final String SNMP_INTERFACE_COL_NAME = "ifName";
+    public static final String SNMP_INTERFACE_COL_DESCR = "ifDescr";
+    public static final String SNMP_INTERFACE_COL_ALIAS = "ifAlias";
+    public static final String SNMP_INTERFACE_COL_PHY_ADDR = "physicalAddr";
+    public static final String SNMP_INTERFACE_COL_NODE_ID = "id";
+    public static final String SNMP_INTERFACE_COL_TENANT_ID = "tenantId";
 }

@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
+import org.opennms.horizon.events.proto.EventsSearchBy;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 @RequiredArgsConstructor
@@ -67,6 +68,20 @@ public class EventsClient {
                 .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .getEventsByNodeId(UInt64Value.of(nodeId))
+                .getEventsList();
+    }
+
+    public List<Event> searchEvents(Long nodeId, String searchTerm, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        EventsSearchBy searchEventsRequest = EventsSearchBy.newBuilder()
+                .setNodeId(nodeId)
+                .setSearchTerm(searchTerm)
+                .build();
+        return eventsStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
+                .searchEvents(searchEventsRequest)
                 .getEventsList();
     }
 }

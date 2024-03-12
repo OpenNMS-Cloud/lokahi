@@ -30,4 +30,5 @@
     <include file="db/changelog/hs-0.1.0/tables/monitored-service-state.xml" />
     <include file="db/changelog/hs-0.1.0/tables/azure-interface.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/node-alias.xml"/>
+    <include file="db/changelog/hs-0.1.0/tables/node-active-discovery-ids.xml"/>
 </databaseChangeLog>

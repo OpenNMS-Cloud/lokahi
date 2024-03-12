@@ -25,19 +25,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.opennms.horizon.inventory.dto.SearchBy;
 import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.mapper.SnmpInterfaceMapper;
 import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.SnmpInterfaceRepository;
+import org.opennms.horizon.inventory.repository.SnmpInterfaceSpecifications;
 import org.opennms.node.scan.contract.SnmpInterfaceResult;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class SnmpInterfaceService {
     private final SnmpInterfaceRepository modelRepo;
-
     private final SnmpInterfaceMapper mapper;
 
     public List<SnmpInterfaceDTO> findByTenantId(String tenantId) {
@@ -59,5 +61,15 @@ public class SnmpInterfaceService {
                     snmp.setTenantId(tenantId);
                     return modelRepo.save(snmp);
                 });
+    }
+
+    public List<SnmpInterfaceDTO> searchBy(SearchBy searchBy, String tenantId) {
+
+        Specification<SnmpInterface> spec = SnmpInterfaceSpecifications.buildSpecification(
+                searchBy.getSearchTerm(), searchBy.getNodeId(), tenantId);
+        return modelRepo.findAll(spec).stream()
+                .map(mapper::modelToDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

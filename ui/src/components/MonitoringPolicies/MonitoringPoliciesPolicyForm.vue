@@ -45,6 +45,7 @@
           label="New Policy Name"
           v-focus
           data-test="policy-name-input"
+          :error="store.validationErrors.policyName"
           :readonly="store.selectedPolicy.isDefault"
         />
         <FeatherTextarea

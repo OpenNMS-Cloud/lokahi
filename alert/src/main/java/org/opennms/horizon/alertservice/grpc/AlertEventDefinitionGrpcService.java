@@ -21,22 +21,32 @@
  */
 package org.opennms.horizon.alertservice.grpc;
 
+import com.google.rpc.Code;
+import com.google.rpc.Status;
+import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionProto;
 import org.opennms.horizon.alerts.proto.AlertEventDefinitionServiceGrpc;
+import org.opennms.horizon.alerts.proto.EventDefinitionsByVendor;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsRequest;
 import org.opennms.horizon.alerts.proto.ListAlertEventDefinitionsResponse;
+import org.opennms.horizon.alerts.proto.VendorList;
 import org.opennms.horizon.alertservice.db.entity.EventDefinition;
 import org.opennms.horizon.alertservice.db.repository.EventDefinitionRepository;
 import org.opennms.horizon.alertservice.mapper.EventDefinitionMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class AlertEventDefinitionGrpcService
         extends AlertEventDefinitionServiceGrpc.AlertEventDefinitionServiceImplBase {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AlertEventDefinitionGrpcService.class);
 
     private final EventDefinitionRepository eventDefinitionRepository;
 
@@ -55,5 +65,59 @@ public class AlertEventDefinitionGrpcService
                 .build();
         responseObserver.onNext(result);
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listVendors(
+            com.google.protobuf.Empty request,
+            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.VendorList> responseObserver) {
+
+        try {
+            var listOfVendors = eventDefinitionRepository.findDistinctVendors();
+            var vendorListProto =
+                    VendorList.newBuilder().addAllVendor(listOfVendors).build();
+            responseObserver.onNext(vendorListProto);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            LOG.error("Exception while retrieving vendors", e);
+            var status = Status.newBuilder()
+                    .setCode(Code.INTERNAL.getNumber())
+                    .setMessage("failed to retrieve vendors")
+                    .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        }
+    }
+
+    @Override
+    public void listAlertEventDefinitionsByVendor(
+            org.opennms.horizon.alerts.proto.EventDefsByVendorRequest request,
+            io.grpc.stub.StreamObserver<org.opennms.horizon.alerts.proto.EventDefinitionsByVendor> responseObserver) {
+
+        try {
+            List<EventDefinition> eventDefinitions;
+            if (StringUtils.isNotBlank(request.getVendor())) {
+                eventDefinitions =
+                        eventDefinitionRepository.findByEventTypeAndVendor(request.getEventType(), request.getVendor());
+            } else {
+                eventDefinitions = eventDefinitionRepository.findByEventType(request.getEventType());
+            }
+
+            var eventDefinitionList = eventDefinitions.stream()
+                    .filter(eventDefinition -> eventDefinition.getReductionKey() != null)
+                    .map(eventDefinitionMapper::entityToProto)
+                    .toList();
+            responseObserver.onNext(EventDefinitionsByVendor.newBuilder()
+                    .setVendor(request.getVendor())
+                    .addAllEventDefinition(eventDefinitionList)
+                    .build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            LOG.error("Exception while retrieving eventDefinitions by vendor", e);
+            var status = Status.newBuilder()
+                    .setCode(Code.INTERNAL.getNumber())
+                    .setMessage("failed to retrieve eventDefinitions by vendor")
+                    .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        }
     }
 }

@@ -65,6 +65,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
@@ -88,6 +89,7 @@ class NodeGrpcServiceTest {
     private MonitoringLocationService mockMonitoringLocationService;
     private NodeGrpcService target;
 
+    private SnmpInterfaceService mockSnmpInterfaceService;
     private Node testNode;
     private NodeDTO testNodeDTO1;
     private NodeDTO testNodeDTO2A;
@@ -151,6 +153,7 @@ class NodeGrpcServiceTest {
                 mockTenantLookup,
                 mockScannerTaskSetService,
                 mockMonitoringLocationService,
+                mockSnmpInterfaceService,
                 mockTagService);
 
         //

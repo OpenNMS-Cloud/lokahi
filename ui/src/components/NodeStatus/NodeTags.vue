@@ -2,7 +2,7 @@
   <div class="node-tag-section">
     <section class="feather-row">
       <h3 data-test="heading" class="feather-col-6">Tags</h3>
-      <FeatherButton text class="feather-col-6 btn">Manage</FeatherButton>
+      <FeatherButton text class="feather-col-6 btn" @click="openModalForDeletingTags">Manage</FeatherButton>
     </section>
     <section class="node-component-content">
       <FeatherChipList
@@ -22,6 +22,7 @@
         </FeatherChip>
     </FeatherChipList>
   </section>
+  <InventoryNodeTagEditOverlay v-if="tagStore.isTagEditMode" :node="tagStore?.activeNode" />
   </div>
   </template>
 
@@ -39,9 +40,12 @@ const tagStore = useTagStore()
 
 const removeTagFromNode = async (tag: any) => {
   if (tag?.id) {
-    const deleteTagResult = await nodeMutations.removeTagsFromNodes({ nodeIds: nodeStatusStore.nodeId, tagIds: tag?.id })
+    const deleteTagResult = await nodeMutations.removeTagsFromNodes({ nodeIds: nodeStatusStore.nodeId, tagIds: tag.id })
     if (!deleteTagResult.error) {
+
       tagStore.filterTag(tag)
+      tagStore.saveFilteredTagsToNode()
+
       showSnackbar({
         msg: 'Tag successfully removed from node.'
       })
@@ -51,6 +55,10 @@ const removeTagFromNode = async (tag: any) => {
       })
     }
   }
+}
+
+const openModalForDeletingTags = () => {
+  tagStore.openModal()
 }
 </script>
 

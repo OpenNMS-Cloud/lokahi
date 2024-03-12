@@ -34,4 +34,6 @@ public class AlertEventDefinition {
     private String reductionKey;
     private String clearKey;
     private EventType eventType;
+    private String vendor;
+    private String enterpriseId;
 }

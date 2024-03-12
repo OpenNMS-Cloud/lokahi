@@ -7,5 +7,5 @@
 
     <include file="db/changelog/hs-0.1.0/tables/event.xml"/>
     <include file="/db/changelog/hs-0.1.0/tables/eventTenantKey.xml"/>
-
+    <include file="/db/changelog/hs-0.1.0/tables/event-add-new-columns.xml"/>
 </databaseChangeLog>

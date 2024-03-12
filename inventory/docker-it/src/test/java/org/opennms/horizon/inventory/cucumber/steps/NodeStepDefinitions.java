@@ -340,24 +340,26 @@ public class NodeStepDefinitions {
     public void aNewNodeWithTheNodeLabelIpAddressInLocationNamed(String nodeLabel, String ipAddress, String location) {
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
         nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
-            .setLabel(nodeLabel)
-            .setManagementIp(ipAddress)
-            .setLocationId(backgroundHelper.findLocationId(location))
-            .build());
-    }
-    @Then("add a new record with the location named {string} the node label {string} and with the same IP address {string} it should fail with exception message {string}")
-    public void addANewRecordWithTheLocationNamedTheNodeLabelAndWithTheSameIPAddressItShouldFailWithExceptionMessage(String location, String nodeLabel, String ipAddress, String message) {
-
-        try {
-            var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
-            nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
                 .setLabel(nodeLabel)
                 .setManagementIp(ipAddress)
                 .setLocationId(backgroundHelper.findLocationId(location))
                 .build());
-        } catch (Exception e) {
-            assertEquals(message,e.getMessage());
-        }
+    }
 
+    @Then(
+            "add a new record with the location named {string} the node label {string} and with the same IP address {string} it should fail with exception message {string}")
+    public void addANewRecordWithTheLocationNamedTheNodeLabelAndWithTheSameIPAddressItShouldFailWithExceptionMessage(
+            String location, String nodeLabel, String ipAddress, String message) {
+
+        try {
+            var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+            nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                    .setLabel(nodeLabel)
+                    .setManagementIp(ipAddress)
+                    .setLocationId(backgroundHelper.findLocationId(location))
+                    .build());
+        } catch (Exception e) {
+            assertEquals(message, e.getMessage());
+        }
     }
 }

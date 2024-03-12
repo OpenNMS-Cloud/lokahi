@@ -137,7 +137,7 @@ const showSeverity = (value: any) => {
 
 const fetchAlertsByNodeList = async () => {
   startSpinner()
-  await nodeStatusStore.getNodeByAlerts()
+  await nodeStatusStore.getAlertsByNode()
   stopSpinner()
 }
 

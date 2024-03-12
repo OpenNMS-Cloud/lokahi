@@ -30,7 +30,7 @@
                 scope="col"
                 :property="col.id"
                 :sort="(sort as any)[col.id]"
-                v-on:sort-changed="sortChanged"
+                v-on:sort-changed="sortChanged(col.id, $event)"
               >
                 {{ col.label }}
               </FeatherSortHeader>
@@ -40,7 +40,7 @@
               <tr v-for="alert in alertsData" :key="alert.label as string" data-test="data-item">
                 <td class="alert-type">
                   <router-link to="#">
-                  {{ alert?.label || 'Unknown' }}
+                  {{ alert?.type || 'Unknown' }}
                   </router-link>
                 </td>
                 <td>
@@ -49,11 +49,19 @@
                       data-test="severity-label"
                   />
                 </td>
-                <td  class="date headline"
-                  data-test="date"> {{ fnsFormat(alert?.lastUpdateTimeMs, 'M/dd/yyyy') }}
-                </td>
-                <td  class="time"
-                  data-test="time">{{ fnsFormat(alert?.lastUpdateTimeMs, 'HH:mm:ssxxx') }}
+                <td  class="date-time">
+                  <div
+                    class="date headline"
+                    data-test="date"
+                  >
+                   <span>{{ fnsFormat(alert.lastUpdateTimeMs, 'M/dd/yyyy') }}</span>
+                  </div>
+                  <div
+                    class="time"
+                    data-test="time"
+                  >
+                    <span>{{ fnsFormat(alert.lastUpdateTimeMs, 'HH:mm:ssxxx') }}</span>
+                  </div>
                 </td>
               </tr>
             </TransitionGroup>
@@ -105,17 +113,14 @@ const { startSpinner, stopSpinner } = useSpinner()
 const nodeStatusStore = useNodeStatusStore()
 
 const columns = [
-  { id: 'alertType', label: 'Alert Type' },
+  { id: 'type', label: 'Alert Type' },
   { id: 'severity', label: 'Severity' },
-  { id: 'date', label: 'Date' },
-  { id: 'time', label: 'Time' }
+  { id: 'lastEventTime', label: 'Time' }
 ]
 
 const emptyListContent = {
   msg: 'No results found.'
 }
-
-
 const sort = reactive({
   alertType: SORT.NONE,
   severity: SORT.NONE,
@@ -123,12 +128,27 @@ const sort = reactive({
   time: SORT.ASCENDING
 }) as any
 
-const sortChanged = (sortObj: Record<string, string>) => {
+const sortChanged = (columnId: string, sortObj: Record<string, string>) => {
+
+  startSpinner()
+
+  if (sortObj.value === 'asc' || sortObj.value === 'desc') {
+    const sortAscending  = sortObj.value === 'asc' ? true : false
+    const sortByAlerts = { sortAscending, sortBy: columnId }
+    nodeStatusStore.sortChanged(sortByAlerts)
+
+  } else {
+    const sortAscending  = true
+    const sortByAlerts = { sortAscending, sortBy: 'id' }
+    nodeStatusStore.sortChanged(sortByAlerts)
+
+  }
 
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
   sort[sortObj.property] = sortObj.value
+
 }
 
 const showSeverity = (value: any) => {
@@ -219,6 +239,9 @@ watch(() => nodeStatusStore.fetchAlertsByNodeData, () => {
       text-transform: uppercase;
     }
    tr {
+    .date-time {
+      width: 15%;
+     }
     td {
       white-space: nowrap;
       a {

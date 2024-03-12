@@ -5,15 +5,15 @@ import { AZURE_SCAN, DeepPartial } from '@/types'
 import { DownloadFormat, DownloadIpInterfacesVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { createAndDownloadBlobFile } from '@/components/utils'
-import { AlertsFilters, Pagination } from '@/types/alerts'
+import { AlertsFilters, AlertsSort, Pagination } from '@/types/alerts'
 import { cloneDeep } from 'lodash'
 
 const alertsFilterDefault: AlertsFilters = {
   timeRange: TimeRange.All,
   nodeLabel: '',
   severities: [],
-  sortAscending: false,
-  sortBy: 'lastEventTime',
+  sortAscending: true,
+  sortBy: 'id',
   nodeId: 1
 }
 
@@ -145,6 +145,25 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     getAlertsByNode()
   }
 
+  const sortChanged = (sortObj: AlertsSort) => {
+
+    alertsFilter.value = {
+      ...alertsFilter.value,
+      sortBy: sortObj.sortBy,
+      sortAscending: sortObj.sortAscending
+    }
+
+    if (alertsPagination.value.page !== 1 || alertsPagination.value.total !== fetchAlertsByNodeData.value.totalAlerts) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page: 1, // always request first page on change
+        total: fetchAlertsByNodeData.value.totalAlerts
+      }
+    }
+
+    getAlertsByNode()
+  }
+
   return {
     updateNodeAlias,
     fetchedData,
@@ -159,6 +178,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     fetchAlertsByNodeData,
     alertsPagination,
     setPageSize,
-    setPage
+    setPage,
+    sortChanged
   }
 })

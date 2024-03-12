@@ -26,3 +26,5 @@ interface AlertsFilters {
 interface Variables {
   id?: number;
 }
+
+type AlertsSort = Pick<AlertsFilters, 'sortAscending' | 'sortBy'>

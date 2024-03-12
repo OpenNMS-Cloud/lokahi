@@ -39,3 +39,7 @@ Feature: Node
   Scenario: Search IpInterfaces by Node
     Given a new node with IpInterface along with node label "my-label" ip address "128.0.0.1" in location named "Default"
     Then fetch a list of IpInterfaces by node using search term "128.0.0.1" that has size greater than 0
+
+  Scenario: Attempt to insert duplicate IP address
+    Given a new node with the node label "my-node" ip address "172.16.8.1" in location named "Default"
+    Then add a new record with the location named "Default" the node label "node-1" and with the same IP address "172.16.8.1" it should fail with exception message "ALREADY_EXISTS: Ip address already exists for location"

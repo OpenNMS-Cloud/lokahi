@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="add_fk_to_ipinterface" author="tbigg">
+
+        <addColumn tableName="ip_interface">
+            <column name="location_id" type="bigint"/>
+        </addColumn>
+
+
+        <addForeignKeyConstraint baseTableName="ip_interface"
+                                 baseColumnNames="location_id"
+                                 constraintName="fk_ipinterface_location_id"
+                                 referencedTableName="monitoring_location"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="add_unique_constraint_to_ipinterface" author="tbigg">
+        <addUniqueConstraint tableName="ip_interface"
+                             constraintName="uniq_ipaddress_location"
+                             columnNames="ip_address, location_id"/>
+    </changeSet>
+
+</databaseChangeLog>

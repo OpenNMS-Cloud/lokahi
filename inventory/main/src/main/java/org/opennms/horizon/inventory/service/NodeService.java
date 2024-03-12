@@ -159,6 +159,7 @@ public class NodeService {
             ipInterface.setTenantId(tenantId);
             ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
             ipInterface.setSnmpPrimary(true);
+            ipInterface.setLocation(node.getMonitoringLocation());
             ipInterfaceRepository.save(ipInterface);
             node.setIpInterfaces(List.of(ipInterface));
         }

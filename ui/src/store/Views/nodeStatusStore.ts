@@ -122,6 +122,29 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     }
   }
 
+  const setPage = (page: number): void => {
+    if (page !== Number(alertsPagination.value.page)) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page
+      }
+    }
+
+    getNodeByAlerts()
+  }
+
+  const setPageSize = (pageSize: number): void => {
+    if (pageSize !== alertsPagination.value.pageSize) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page: 1, // always request first page on change
+        pageSize
+      }
+    }
+
+    getNodeByAlerts()
+  }
+
   return {
     updateNodeAlias,
     fetchedData,
@@ -134,6 +157,8 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     downloadIpInterfacesToCsv,
     getNodeByAlerts,
     fetchAlertsByNodeData,
-    alertsPagination
+    alertsPagination,
+    setPageSize,
+    setPage
   }
 })

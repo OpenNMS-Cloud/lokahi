@@ -33,7 +33,7 @@ enum SyslogFacility {
 }
 enum SyslogSeverity {
   EMERGENCY = 0;
-  ALERT = 1;
+  ALERTT = 1;
   CRITICAL = 2;
   ERROR = 3;
   WARNING = 4;
@@ -41,7 +41,7 @@ enum SyslogSeverity {
   INFORMATIONAL = 6;
   DEBUG = 7;
   ALL = 8;
-  UNKNOWN =99;
+  UNKNOWNN =99;
 }
 message SyslogMessageDTO {
   SyslogFacility m_facility = 1;
@@ -127,4 +127,8 @@ message SyslogMessageLogDTO {
   string location = 4;
   repeated SyslogMessageDTO messages = 5;
 }
-
+message SyslogConnection {
+  int32 max_packet_size = 1 ;
+  string source = 2 ;
+  bytes buffer = 3;
+}

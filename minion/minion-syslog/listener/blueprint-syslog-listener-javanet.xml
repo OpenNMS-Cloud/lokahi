@@ -24,7 +24,7 @@
 		</cm:default-properties>
 	</cm:property-placeholder>
 
-	<bean id="syslogConfig" class="listener.syslog.SyslogConfigBean">
+	<bean id="syslogConfig" class="org.opennms.horizon.minion.syslog.SyslogConfigBean">
 		<property name="syslogPort" value="${syslog.listen.port}" />
 		<property name="listenAddress" value="${syslog.listen.interface}" />
 		<property name="numThreads" value="${syslog.threads}" />
@@ -33,11 +33,11 @@
 		<property name="batchIntervalMs" value="${syslog.batch.interval}" />
 	</bean>
 
-	<reference id="distPollerDao" interface="listener.syslog.DistPollerDao"/>
+	<reference id="distPollerDao" interface="org.opennms.horizon.minion.syslog.DistPollerDao"/>
 
-	<reference id="messageDispatcherFactory" interface="listener.syslog.MessageDispatcherFactory" />
+	<reference id="messageDispatcherFactory" interface="org.opennms.horizon.minion.syslog.MessageDispatcherFactory" />
 
-	<bean id="syslogReceiverJavaNet" class="listener.syslog.SyslogReceiverJavaNetImpl" destroy-method="stop">
+	<bean id="syslogReceiverJavaNet" class="org.opennms.horizon.minion.syslog.SyslogReceiverJavaNetImpl" destroy-method="stop">
 		<argument ref="syslogConfig" />
 		<property name="distPollerDao" ref="distPollerDao"/>
 		<property name="messageDispatcherFactory" ref="messageDispatcherFactory" />
@@ -47,6 +47,6 @@
 		<argument ref="syslogReceiverJavaNet"/>
 	</bean>
 
-	<service interface="listener.syslog.SyslogReceiver" ref="syslogReceiverJavaNet"/>
+	<service interface="org.opennms.horizon.minion.syslog.SyslogReceiver" ref="syslogReceiverJavaNet"/>
 
 </blueprint>

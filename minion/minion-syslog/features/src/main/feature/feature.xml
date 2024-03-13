@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-traps-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+    <feature name="minion-syslog" version="${project.version}">
+        <feature>ipc-minion</feature>
+        <feature>snmp-snmp4j</feature>
+        <feature>plugins-api</feature>
+        <bundle>mvn:org.opennms.lokahi.minion/syslog-listener/${project.version}</bundle>
+    </feature>
+
+</features>

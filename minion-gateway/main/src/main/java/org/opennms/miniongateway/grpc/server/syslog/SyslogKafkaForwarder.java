@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SyslogKafkaForwarder implements MessageConsumer<SyslogMessageLogDTO, SyslogMessageLogDTO> {
 
-    public static final String DEFAULT_TRAP_RESULTS_TOPIC = "traps";
+    public static final String DEFAULT_TRAP_RESULTS_TOPIC = "syslog";
 
     private final SinkMessageKafkaPublisher<SyslogMessageLogDTO, TenantLocationSpecificSysLogDTO> kafkaPublisher;
 
@@ -26,7 +26,7 @@ public class SyslogKafkaForwarder implements MessageConsumer<SyslogMessageLogDTO
     public SyslogKafkaForwarder(
         SinkMessageKafkaPublisherFactory messagePublisherFactory,
         TenantLocationSpecificSysLogDTOMapper mapper,
-        @Value("${traps.results.kafka-topic:" + DEFAULT_TRAP_RESULTS_TOPIC + "}") String kafkaTopic) {
+        @Value("${syslog.results.kafka-topic:" + DEFAULT_TRAP_RESULTS_TOPIC + "}") String kafkaTopic) {
         this.kafkaPublisher = messagePublisherFactory.create(mapper::mapBareToTenanted, kafkaTopic);
     }
 

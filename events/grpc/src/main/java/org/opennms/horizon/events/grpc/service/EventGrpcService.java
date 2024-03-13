@@ -37,6 +37,7 @@ import org.opennms.horizon.events.persistence.service.EventService;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
+import org.opennms.horizon.events.proto.EventsSearchBy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -85,5 +86,15 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
     private Status createStatus(int code, String msg) {
         return Status.newBuilder().setCode(code).setMessage(msg).build();
+    }
+
+    @Override
+    public void searchEvents(EventsSearchBy request, StreamObserver<EventLog> responseObserver) {
+        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+        List<Event> events = eventService.searchEvents(tenantId, request);
+        EventLog eventList =
+                EventLog.newBuilder().setTenantId(tenantId).addAllEvents(events).build();
+        responseObserver.onNext(eventList);
+        responseObserver.onCompleted();
     }
 }

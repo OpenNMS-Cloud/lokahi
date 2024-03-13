@@ -24,6 +24,7 @@
           <FeatherButton
               primary
               icon="Download"
+              @click.prevent="download"
             >
               <FeatherIcon :icon="fsIcons.DownloadFile"> </FeatherIcon>
             </FeatherButton>
@@ -244,6 +245,9 @@ const updatePageSize = (v: number) => {
 }
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
+}
+const download = () => {
+  nodeStatusStore.downloadIpInterfacesToCsv(searchVal.value)
 }
 const searchPageObjects = (searchTerm: any) => {
   return ipInterfaces.value.filter((item: IpInterface) => {

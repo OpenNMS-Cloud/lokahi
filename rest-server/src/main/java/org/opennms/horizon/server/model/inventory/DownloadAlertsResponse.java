@@ -19,23 +19,15 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.server.model.events;
+package org.opennms.horizon.server.model.inventory;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
-@Setter
-public class Event {
-    private int id;
-    private String uei;
-    private int nodeId;
-    private String ipAddress;
-    private long producedTime;
-    private List<EventParameter> eventParams;
-    private EventInfo eventInfo;
-    private String description;
-    private String locationName;
-    private String logMessage;
+public class DownloadAlertsResponse {
+
+    private byte[] alertsBytes;
+    private DownloadFormat format;
 }

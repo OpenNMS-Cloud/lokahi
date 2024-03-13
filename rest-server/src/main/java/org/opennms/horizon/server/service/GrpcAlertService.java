@@ -27,10 +27,17 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.opennms.horizon.alerts.proto.EventType;
 import org.opennms.horizon.server.mapper.alert.AlertMapper;
+import org.opennms.horizon.server.model.alerts.Alert;
 import org.opennms.horizon.server.model.alerts.AlertCount;
 import org.opennms.horizon.server.model.alerts.AlertEventDefinition;
 import org.opennms.horizon.server.model.alerts.AlertResponse;
@@ -41,8 +48,12 @@ import org.opennms.horizon.server.model.alerts.EventDefsByVendorRequest;
 import org.opennms.horizon.server.model.alerts.ListAlertResponse;
 import org.opennms.horizon.server.model.alerts.MonitorPolicy;
 import org.opennms.horizon.server.model.alerts.TimeRange;
+import org.opennms.horizon.server.model.inventory.DownloadAlertsResponse;
+import org.opennms.horizon.server.model.inventory.DownloadFormat;
 import org.opennms.horizon.server.service.grpc.AlertsClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -51,6 +62,8 @@ import reactor.core.publisher.Mono;
 @GraphQLApi
 @Service
 public class GrpcAlertService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcNodeService.class);
 
     private final AlertsClient alertsClient;
     private final ServerHeaderUtil headerUtil;
@@ -200,5 +213,59 @@ public class GrpcAlertService {
         return Mono.just(alertsClient.getAlertsByNode(
                         pageSize, page, sortBy, sortAscending, nodeId, headerUtil.getAuthHeader(env)))
                 .map(mapper::protoToAlertResponse);
+    }
+
+    @GraphQLQuery(name = "downloadRecentAlertsByNode")
+    public Mono<DownloadAlertsResponse> downloadRecentAlertsByNode(
+            @GraphQLArgument(name = "pageSize") Integer pageSize,
+            @GraphQLArgument(name = "page") int page,
+            @GraphQLArgument(name = "sortBy") String sortBy,
+            @GraphQLArgument(name = "sortAscending") boolean sortAscending,
+            @GraphQLArgument(name = "nodeId") long nodeId,
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        List<Alert> alerts = alertsClient
+                .getAlertsByNode(pageSize, page, sortBy, sortAscending, nodeId, headerUtil.getAuthHeader(env))
+                .getAlertsList()
+                .stream()
+                .map(mapper::protoToAlert)
+                .collect(Collectors.toList());
+
+        try {
+            return Mono.just(generateDownloadableAlertsResponse(alerts, downloadFormat));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to download Recent Alert List");
+        }
+    }
+
+    private static DownloadAlertsResponse generateDownloadableAlertsResponse(
+            List<Alert> alertList, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                    .setHeader("Node Name", "Alert Type", "Severity", "Description", "Last Updated", "Acknowledged")
+                    .build();
+
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (Alert alert : alertList) {
+                    csvPrinter.printRecord(
+                            alert.getNodeName(),
+                            alert.getType(),
+                            alert.getSeverity(),
+                            alert.getDescription(),
+                            new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a z").format(alert.getLastUpdateTimeMs()),
+                            alert.isAcknowledged());
+                }
+                csvPrinter.flush();
+            } catch (Exception e) {
+                LOG.error("Exception while printing records", e);
+            }
+            return new DownloadAlertsResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 }

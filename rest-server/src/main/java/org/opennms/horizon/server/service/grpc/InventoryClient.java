@@ -574,11 +574,11 @@ public class InventoryClient {
                 .getSnmpInterfacesList();
     }
 
-    public List<Integer> getMonitoringPoliciesByNode(Long nodeId , String accessToken) {
+    public List<Integer> getMonitoringPoliciesByNode(Long nodeId, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
         return nodeStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
-            .getMonitoringPoliciesByNode(Int64Value.of(nodeId))
-            .getIdsList();
+                .getMonitoringPoliciesByNode(Int64Value.of(nodeId))
+                .getIdsList();
     }
 }

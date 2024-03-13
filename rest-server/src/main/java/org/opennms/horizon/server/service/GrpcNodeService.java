@@ -242,10 +242,10 @@ public class GrpcNodeService {
         }
     }
 
-
     @GraphQLQuery(name = "monitoringPoliciesByNode")
-    public Flux<Integer> monitoringPoliciesByNode( @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.getMonitoringPoliciesByNode(id,headerUtil.getAuthHeader(env)));
+    public Flux<Integer> monitoringPoliciesByNode(
+            @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.getMonitoringPoliciesByNode(id, headerUtil.getAuthHeader(env)));
     }
 
     private static TopNResponse generateDownloadableTopNResponse(

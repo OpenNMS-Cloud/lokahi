@@ -63,7 +63,7 @@
 
       <div v-if="ruleStates[rule.id]">
         <div class="alert-title">Alert Conditions</div>
-        <MonitoringPoliciesCardEventConditionTable
+        <MonitoringPoliciesCardEventConditionTableLegacy
           :eventConditions="rule.alertConditions as AlertCondition[]"
         />
 <!--    TODO: Bring this back when thresholding is implemented

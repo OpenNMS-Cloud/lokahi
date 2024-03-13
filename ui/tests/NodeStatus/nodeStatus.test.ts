@@ -1,6 +1,6 @@
+import { createRouter, createWebHistory } from 'vue-router'
 import NodeStatus from '@/containers/NodeStatus.vue'
 import mountWithPiniaVillus from 'tests/mountWithPiniaVillus'
-import { createRouter, createWebHistory } from 'vue-router'
 
 let wrapper: any
 let router: any
@@ -15,18 +15,22 @@ describe('Node Status page', () => {
   beforeEach(async () => {
     router = createRouter({
       history: createWebHistory(),
-      routes: []
+      routes: [
+        {
+          path: '/node-status/:id',
+          name: 'Node Status',
+          component: NodeStatus
+        }
+      ]
     })
 
-    router.currentRoute.value.params = { id: '1' }
-    router.push('/')
+    router.push('/node-status/1')
     await router.isReady()
 
     wrapper = mountWithPiniaVillus({
       component: NodeStatus,
       global: {
         plugins: [router]
-
       },
       shallow: true
     })

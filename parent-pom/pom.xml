@@ -44,7 +44,7 @@
         <sonar.projectKey/>
 
         <!-- Dependency properties -->
-        <activemq.version>5.17.1</activemq.version>
+        <activemq.version>5.17.6</activemq.version>
         <auth0.jwt.version>4.3.0</auth0.jwt.version>
         <aries.jax.rs.whiteboard.version>2.0.2</aries.jax.rs.whiteboard.version>
         <aries.jpa.api.version>2.7.3</aries.jpa.api.version>

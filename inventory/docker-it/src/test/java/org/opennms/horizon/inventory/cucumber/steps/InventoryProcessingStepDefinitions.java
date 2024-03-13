@@ -44,6 +44,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -57,16 +58,7 @@ import org.opennms.horizon.inventory.cucumber.InventoryBackgroundHelper;
 import org.opennms.horizon.inventory.cucumber.kafkahelper.KafkaConsumerRunner;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.SNMPConfigDTO;
-import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
-import org.opennms.horizon.inventory.dto.MonitoringSystemQuery;
-import org.opennms.horizon.inventory.dto.NodeCreateDTO;
-import org.opennms.horizon.inventory.dto.NodeDTO;
-import org.opennms.horizon.inventory.dto.NodeIdQuery;
-import org.opennms.horizon.inventory.dto.NodeList;
-import org.opennms.horizon.inventory.dto.SearchBy;
-import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
-import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
-import org.opennms.horizon.inventory.dto.TagListParamsDTO;
+import org.opennms.horizon.inventory.dto.*;
 import org.opennms.horizon.shared.common.tag.proto.Operation;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationList;
 import org.opennms.horizon.shared.common.tag.proto.TagOperationProto;
@@ -110,6 +102,18 @@ public class InventoryProcessingStepDefinitions {
     private IcmpActiveDiscoveryCreateDTO icmpDiscovery;
     private long activeDiscoveryId;
     private DiscoveryScanResult discoveryScanResult;
+
+    @Then("Add a device with IP address = {string} with label {string}")
+    public void addADeviceWithIPAddressWithLabel(String ipAddress, String label) {
+
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
+                .setLabel(label)
+                .setLocationId(locationId)
+                .setManagementIp(ipAddress)
+                .build());
+        assertNotNull(node);
+    }
 
     public enum PublishType {
         UPDATE,
@@ -606,14 +610,18 @@ public class InventoryProcessingStepDefinitions {
         });
     }
 
-    @Then("Add a device with IP address = {string} with label {string}")
-    public void addADeviceWithIPAddressWithLabel(String ipAddress, String label) {
+    @Then("Add a device with IP address = {string} with label {string} with tags {string}")
+    public void addADeviceWithIPAddressWithLabel(String ipAddress, String label, String tags) {
 
         var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+        var tagsList = tags.split(",");
         node = nodeServiceBlockingStub.createNode(NodeCreateDTO.newBuilder()
                 .setLabel(label)
                 .setLocationId(locationId)
                 .setManagementIp(ipAddress)
+                .addAllTags(Stream.of(tagsList)
+                        .map(tag -> TagCreateDTO.newBuilder().setName(tag).build())
+                        .toList())
                 .build());
         assertNotNull(node);
     }

@@ -1,4 +1,4 @@
-/*
+package org.opennms.horizon.minion.syslog.listener;/*
  * Licensed to The OpenNMS Group, Inc (TOG) under one or more
  * contributor license agreements.  See the LICENSE.md file
  * distributed with this work for additional information

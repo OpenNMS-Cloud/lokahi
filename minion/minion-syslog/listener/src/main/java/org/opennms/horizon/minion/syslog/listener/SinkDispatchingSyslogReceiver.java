@@ -43,7 +43,7 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
 
     @Override
     public void run() {
-
+        final SyslogSinkModule syslogSinkModule = new SyslogSinkModule(m_config);
     }
 
     @Override

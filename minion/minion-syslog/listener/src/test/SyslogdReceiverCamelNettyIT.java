@@ -19,13 +19,15 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.netmgt.syslogd;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
+import com.google.common.util.concurrent.RateLimiter;
+import io.netty.util.ResourceLeakDetector;
+import org.junit.*;
+import org.mockito.Mockito;
+import org.opennms.horizon.minion.syslog.listener.SyslogConnection;
+import org.opennms.horizon.minion.syslog.listener.SyslogReceiverCamelNettyImpl;
+import org.opennms.horizon.minion.syslog.listener.SyslogdConfig;
+
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -35,22 +37,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Mockito;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-
-
-
-import com.google.common.util.concurrent.RateLimiter;
-
-import io.netty.util.ResourceLeakDetector;
-import org.opennms.horizon.grpc.syslog.contract.SyslogConnection;
-import org.opennms.horizon.minion.syslog.listener.SyslogReceiverCamelNettyImpl;
-import org.opennms.horizon.minion.syslog.listener.SyslogdConfig;
+import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
 
 public class SyslogdReceiverCamelNettyIT {
 
@@ -86,25 +77,63 @@ public class SyslogdReceiverCamelNettyIT {
 
         SyslogdConfig syslogdConfig = mock(SyslogdConfig.class);
 
-        when(syslogdConfig.getNumThreads()).thenReturn(NUM_CONSUMER_THREADS);
-        when(syslogdConfig.getQueueSize()).thenReturn(MESSAGE_QUEUE_SIZE);
-
 
         SyslogReceiverCamelNettyImpl syslogReceiver = new SyslogReceiverCamelNettyImpl(syslogdConfig);
 
         syslogReceiver.run();
+        // Fire up the syslog generators
+        List<SyslogGenerator> generators = new ArrayList<>(NUM_GENERATORS);
+        for (int k = 0; k < NUM_GENERATORS; k++) {
+            SyslogGenerator generator = new SyslogGenerator(addr("127.0.0.1"), k, MESSAGE_RATE_PER_GENERATOR);
+            generator.start();
+            generators.add(generator);
+        }
 
-
-
-
-
-        // Now all of the threads are locked, and the queue is full
-        // Let's continue generating traffic for a few seconds
-        Thread.sleep(SECONDS.toMillis(10));
 
 
 
     }
 
+    public static class SyslogGenerator {
+        Thread thread;
+
+        final InetAddress targetHost;
+        final double rate;
+        final int id;
+        final AtomicBoolean stopped = new AtomicBoolean(false);
+
+        public SyslogGenerator(InetAddress targetHost, int id, double rate) {
+            this.targetHost = targetHost;
+            this.id = id;
+            this.rate = rate;
+        }
+
+        public synchronized void start() {
+            stopped.set(false);
+            final RateLimiter rateLimiter = RateLimiter.create(rate);
+            thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final String testPduFormat = "2016-12-08 localhost gen%d: load test %d on tty1";
+                    final SyslogClient sc = new SyslogClient(null, 10, SyslogClient.LOG_DEBUG, targetHost);
+                    int k = 0;
+                    while(!stopped.get()) {
+                        k++;
+                        rateLimiter.acquire();
+                        sc.syslog(SyslogClient.LOG_DEBUG, String.format(testPduFormat, id, k));
+                    }
+                }
+            });
+            thread.start();
+        }
+
+        public synchronized void stop() throws InterruptedException {
+            stopped.set(true);
+            if (thread != null) {
+                thread.join();
+                thread = null;
+            }
+        }
+    }
 
 }

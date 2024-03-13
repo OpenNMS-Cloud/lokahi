@@ -49,7 +49,7 @@
     "@material-design-icons/svg": "^0.14.2",
     "@vueform/slider": "^2.1.7",
     "@vueuse/core": "^9.11.1",
-    "axios": "^1.2.3",
+    "axios": "^1.6.0",
     "chart.js": "^4.2.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.0.0",

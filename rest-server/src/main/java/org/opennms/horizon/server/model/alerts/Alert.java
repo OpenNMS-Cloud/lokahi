@@ -50,4 +50,5 @@ public class Alert {
     private String label;
     private List<String> ruleNameList;
     private List<String> policyNameList;
+    private long nodeId;
 }

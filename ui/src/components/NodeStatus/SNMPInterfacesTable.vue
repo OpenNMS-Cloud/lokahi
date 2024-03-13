@@ -13,6 +13,7 @@
             v-model.trim="searchVal"
             type="search"
             data-test="search-input"
+            @update:model-value="onSearchChange"
           >
             <template #pre>
               <FeatherIcon :icon="icons.Search" />
@@ -133,13 +134,14 @@
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { DeepPartial } from '@/types'
-import { Exporter } from '@/types/graphql'
+import { Exporter, SnmpInterface } from '@/types/graphql'
 import DownloadFile from '@featherds/icon/action/DownloadFile'
 import Search from '@featherds/icon/action/Search'
 import Flows from '@featherds/icon/action/SendWorkflow'
 import Traffic from '@featherds/icon/action/Workflow'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import { SORT } from '@featherds/table'
+import { sortBy } from 'lodash'
 
 const router = useRouter()
 const flowsStore = useFlowsStore()
@@ -149,20 +151,22 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const pageObjects = ref([] as any[])
+const clonedInterfaces = ref([] as any[])
 const searchLabel = ref('Search SNMP Interfaces')
 const searchVal = ref('')
+const searchableAttributes = ['ifName', 'ifDescr', 'ifAlias', 'physicalAddr']
 const metricsModal = ref()
 const emptyListContent = {
   msg: 'No results found.'
 }
+const hasSNMPInterfaces = computed(() => {
+  return nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0
+})
 const snmpInterfaces = computed(() => {
-  if (nodeStatusStore.node.snmpInterfaces && nodeStatusStore.node.snmpInterfaces.length > 0) {
+  if (hasSNMPInterfaces.value) {
     return nodeStatusStore.node.snmpInterfaces
   }
   return []
-})
-const hasSNMPInterfaces = computed(() => {
-  return snmpInterfaces.value && snmpInterfaces.value.length > 0
 })
 const icons = markRaw({
   Traffic,
@@ -200,6 +204,7 @@ const sort = reactive({
 const updateSNMPInterfaces = () => {
   if (hasSNMPInterfaces.value) {
     total.value = snmpInterfaces.value.length
+    clonedInterfaces.value = snmpInterfaces.value
     pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
 }
@@ -216,6 +221,18 @@ const getPageObjects = (array: Array<any>, pageNumber: number, pageSize: number)
   return array.slice(startIndex, endIndex)
 }
 const sortChanged = (sortObj: Record<string, string>) => {
+  if (sortObj.value === 'asc') {
+    clonedInterfaces.value = sortBy(snmpInterfaces.value, sortObj.property)
+  }
+  if (sortObj.value === 'desc') {
+    clonedInterfaces.value = sortBy(snmpInterfaces.value, sortObj.property).reverse()
+  }
+  if (sortObj.value === 'none') {
+    clonedInterfaces.value = sortBy(snmpInterfaces.value, 'id')
+  }
+
+  page.value = 1
+  pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, pageSize.value)
   for (const prop in sort) {
     sort[prop] = SORT.NONE
   }
@@ -223,14 +240,37 @@ const sortChanged = (sortObj: Record<string, string>) => {
 }
 const updatePage = (v: number) => {
   if (hasSNMPInterfaces.value) {
-    total.value = snmpInterfaces.value.length
-    pageObjects.value = getPageObjects(snmpInterfaces.value, v, pageSize.value)
+    page.value = v
+    pageObjects.value = getPageObjects(clonedInterfaces.value, v, pageSize.value)
   }
 }
 const updatePageSize = (v: number) => {
   if (hasSNMPInterfaces.value) {
     pageSize.value = v
-    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, v)
+    pageObjects.value = getPageObjects(clonedInterfaces.value, page.value, v)
+  }
+}
+const searchPageObjects = (searchTerm: any) => {
+  return snmpInterfaces.value.filter((item: SnmpInterface) => {
+    return searchableAttributes.some((attr) => {
+      const value = item[attr as unknown as keyof SnmpInterface]
+      return value.toLowerCase().includes(searchTerm.toLowerCase())
+    })
+  })
+}
+const onSearchChange = (searchTerm: any) => {
+  if (searchTerm.trim().length > 0) {
+    const searchObjects = searchPageObjects(searchTerm)
+
+    page.value = 1
+    total.value = searchObjects.length
+    clonedInterfaces.value = searchObjects
+    pageObjects.value = getPageObjects(searchObjects, page.value, pageSize.value)
+  } else {
+    page.value = 1
+    total.value = snmpInterfaces.value.length
+    clonedInterfaces.value = snmpInterfaces.value
+    pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
 }
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {

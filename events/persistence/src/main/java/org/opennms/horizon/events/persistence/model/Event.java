@@ -73,6 +73,15 @@ public class Event {
     @JdbcTypeCode(SqlTypes.VARBINARY)
     private byte[] eventInfo;
 
+    @Column(name = "location_name")
+    private String locationName;
+
+    @Column
+    private String description;
+
+    @Column(name = "log_message")
+    private String logMessage;
+
     public EventParameters getEventParameters() {
         return eventParameters;
     }
@@ -143,5 +152,29 @@ public class Event {
 
     public void setEventInfo(byte[] eventInfo) {
         this.eventInfo = eventInfo;
+    }
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLogMessage() {
+        return logMessage;
+    }
+
+    public void setLogMessage(String logMessage) {
+        this.logMessage = logMessage;
     }
 }

@@ -45,7 +45,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryList;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.IpInterfaceList;
 import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -55,6 +58,10 @@ import org.opennms.horizon.inventory.dto.NodeLabelSearchQuery;
 import org.opennms.horizon.inventory.dto.NodeList;
 import org.opennms.horizon.inventory.dto.NodeServiceGrpc;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
+import org.opennms.horizon.inventory.dto.SearchBy;
+import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
+import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
+import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
@@ -64,6 +71,7 @@ import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
+import org.opennms.horizon.inventory.service.SnmpInterfaceService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
@@ -92,7 +100,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final TenantLookup tenantLookup;
     private final ScannerTaskSetService scannerService;
     private final MonitoringLocationService monitoringLocationService;
-
+    private final SnmpInterfaceService snmpInterfaceService;
     private final ThreadFactory threadFactory =
             new ThreadFactoryBuilder().setNameFormat("send-taskset-for-node-%d").build();
     // Add setter for unit testing
@@ -436,6 +444,28 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         }
     }
 
+    @Override
+    public void listSnmpInterfaces(SearchBy searchBy, StreamObserver<SnmpInterfacesList> responseObserver) {
+        try {
+            Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+            if (tenantIdOptional.isPresent()) {
+                List<SnmpInterfaceDTO> list = snmpInterfaceService.searchBy(searchBy, tenantIdOptional.get());
+
+                responseObserver.onNext(SnmpInterfacesList.newBuilder()
+                        .addAllSnmpInterfaces(list)
+                        .build());
+                responseObserver.onCompleted();
+            }
+        } catch (Exception e) {
+            LOG.error("Error while getting snmpInterfaces", e);
+            Status status = Status.newBuilder()
+                    .setCode(Code.INTERNAL_VALUE)
+                    .setMessage("Error while getting snmpInterfaces")
+                    .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+        }
+    }
+
     private Status createTenantIdMissingStatus() {
         return Status.newBuilder()
                 .setCode(Code.INVALID_ARGUMENT_VALUE)
@@ -478,5 +508,74 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
         for (Map.Entry<Long, List<NodeDTO>> entry : locationNodes.entrySet()) {
             scannerService.sendNodeScannerTask(entry.getValue(), entry.getKey(), tenantId);
         }
+    }
+
+    @Override
+    public void searchIpInterfaces(SearchIpInterfaceQuery request, StreamObserver<IpInterfaceList> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(
+                tenantId -> {
+                    try {
+                        List<IpInterfaceDTO> ipInterfaceList = nodeService.searchIpInterfacesByNodeAndSearchTerm(
+                                tenantId, request.getNodeId(), request.getSearchTerm());
+                        responseObserver.onNext(IpInterfaceList.newBuilder()
+                                .addAllIpInterface(ipInterfaceList)
+                                .build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
+                        LOG.error("Error while searching IpInterfaces ", e);
+                        Status status = Status.newBuilder()
+                                .setCode(Code.INTERNAL_VALUE)
+                                .setMessage(e.getMessage())
+                                .build();
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    }
+                },
+                () -> {
+                    Status status = Status.newBuilder()
+                            .setCode(Code.INVALID_ARGUMENT_VALUE)
+                            .setMessage(EMPTY_TENANT_ID_MSG)
+                            .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                });
+    }
+
+    /**
+     * * Get Discoveries by nodeId
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void getDiscoveriesByNode(Int64Value request, StreamObserver<ActiveDiscoveryList> responseObserver) {
+
+        Optional<NodeDTO> node = tenantLookup
+                .lookupTenantId(Context.current())
+                .map(tenantId -> nodeService.getByIdAndTenantId(request.getValue(), tenantId))
+                .orElseThrow();
+        node.ifPresentOrElse(
+                nodeDTO -> {
+                    try {
+                        List<ActiveDiscoveryDTO> discoveries = nodeService.getActiveDiscoveriesByIdList(
+                                nodeDTO.getTenantId(), nodeDTO.getDiscoveryIdsList());
+                        responseObserver.onNext(ActiveDiscoveryList.newBuilder()
+                                .addAllActiveDiscoveries(discoveries)
+                                .build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
+                        Status status = Status.newBuilder()
+                                .setCode(Code.INTERNAL_VALUE)
+                                .setMessage(e.getMessage())
+                                .build();
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    }
+                },
+                () -> {
+                    Status status = Status.newBuilder()
+                            .setCode(Code.NOT_FOUND_VALUE)
+                            .setMessage("Node not found")
+                            .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                });
     }
 }

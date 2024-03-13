@@ -31,11 +31,23 @@ export const useTagStore = defineStore('tagStore', () => {
     updateTagEditMode()
   }
 
+  const isCheckedTagsList = () => {
+    const previousNodeTags = originalTags.value.filter((d) => filteredTags.value.some((e) => e.id === d.id))
+    setFilteredTags(previousNodeTags)
+  }
+
   const addFilteredTag = (tag: Tag) => {
-    if (!filteredTags.value.find((t) => t.name === tag.name)) {
+    const snackbar = useSnackbar()
+    const isDuplicate = filteredTags.value.some(
+      (t) => t.name?.toLocaleLowerCase().trim() === tag.name?.toLocaleLowerCase().trim()
+    )
+    if (!isDuplicate) {
       filteredTags.value = [...filteredTags.value].concat([tag])
+    } else {
+      snackbar.showSnackbar({msg: 'Cannot add duplicate tags.', error: true})
     }
   }
+
   const updateAllNodeTypes = async () => {
     const inventoryQueries = useInventoryQueries()
     inventoryQueries.buildNetworkInventory()
@@ -162,9 +174,11 @@ export const useTagStore = defineStore('tagStore', () => {
     toggleTagsSelected,
     deactivateTag,
     filteredTags,
+    originalTags,
     updateTagEditMode,
     setFilteredTags,
     addFilteredTag,
+    isCheckedTagsList,
     saveFilteredTagsToNode,
     setActiveNode
   }

@@ -21,6 +21,7 @@
  */
 package org.opennms.horizon.server.model.inventory;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,4 +30,5 @@ import lombok.Setter;
 public class NodeUpdate {
     private long id;
     private String nodeAlias;
+    private List<Long> discoveryIds;
 }

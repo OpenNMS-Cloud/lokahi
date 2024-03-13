@@ -27,6 +27,34 @@ fragment AlertsParts on Query {
   }
 }
 
+fragment AlertsByNode on Query {
+  getAlertsByNode(
+    page?: $page
+    pageSize?: $pageSize
+    sortAscending?: $sortAscending
+    sortBy?: $sortBy
+    nodeId?: $nodeId
+  ) {
+    lastPage
+    nextPage
+    totalAlerts
+    alerts {
+      acknowledged
+      type,
+      description
+      firstEventTimeMs
+      lastUpdateTimeMs
+      severity
+      label
+      nodeName
+      databaseId
+      location
+      ruleNameList
+      policyNameList
+    }
+  }
+}
+
 query AlertsList(
   $page: Int!
   $pageSize: Int

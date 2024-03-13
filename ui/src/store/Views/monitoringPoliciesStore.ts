@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { cloneDeep, findIndex } from 'lodash'
+import { cloneDeep } from 'lodash'
 import { Condition, Policy, ThresholdCondition } from '@/types/policies'
 import { useMonitoringPoliciesMutations } from '../Mutations/monitoringPoliciesMutations'
 import { useMonitoringPoliciesQueries } from '../Queries/monitoringPoliciesQueries'
@@ -25,6 +25,7 @@ type TState = {
   monitoringPolicies: MonitorPolicy[],
   numOfAlertsForPolicy: number
   numOfAlertsForRule: number
+  validationErrors: any
 }
 
 const defaultPolicy: Policy = {
@@ -84,7 +85,8 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     selectedRule: undefined,
     monitoringPolicies: [],
     numOfAlertsForPolicy: 0,
-    numOfAlertsForRule: 0
+    numOfAlertsForRule: 0,
+    validationErrors: {}
   }),
   actions: {
     // used for initial population of policies
@@ -141,9 +143,49 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
         (c: AlertCondition) => c.id !== id
       )
     },
+    validateRule(rule: PolicyRule) {
+      this.validationErrors.ruleName = ''
+
+      let isValid = true
+      const name = (rule.name?.trim() || '').toLowerCase()
+
+      if (!name) {
+        this.validationErrors.ruleName = 'Rule name cannot be blank.'
+        isValid = false
+      } else {
+        if (this.selectedPolicy?.rules?.some(r => (r.id !== rule.id) && (name === r.name?.toLowerCase()))) {
+          this.validationErrors.ruleName = 'Duplicate rule name.'
+          isValid = false
+        }
+      }
+
+      return isValid
+    },
+    validateMonitoringPolicy(policy: Policy) {
+      this.validationErrors.policyName = ''
+
+      let isValid = true
+      const name = (policy.name?.trim() || '').toLowerCase()
+
+      if (!name) {
+        this.validationErrors.policyName = 'Policy name cannot be blank.'
+        isValid = false
+      } else {
+        if (this.monitoringPolicies.some(p => (p.id !== policy.id) && (name === p.name?.toLowerCase()))) {
+          this.validationErrors.policyName = 'Duplicate policy name.'
+          isValid = false
+        }
+      }
+
+      return isValid
+    },
     async saveRule() {
+      if (this.selectedRule && !this.validateRule(this.selectedRule)) {
+        return
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const existingItemIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
+      const existingItemIndex = this.selectedPolicy!.rules?.findIndex(rule => rule.id === this.selectedRule!.id) ?? -1
 
       if (existingItemIndex !== -1) {
         // replace existing rule
@@ -161,9 +203,14 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
     async savePolicy() {
       const { addMonitoringPolicy, error } = useMonitoringPoliciesMutations()
 
+      if (!this.selectedPolicy || !this.validateMonitoringPolicy(this.selectedPolicy)) {
+        return false
+      }
+
       // modify payload to comply with current BE format
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const policy = cloneDeep(this.selectedPolicy!)
+
       policy.rules = policy.rules?.map((rule) => {
         rule.alertConditions = rule.alertConditions?.map((condition) => {
           if (!policy.id) delete condition.id // don't send generated ids
@@ -185,6 +232,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       if (!error.value) {
         this.selectedPolicy = undefined
         this.selectedRule = undefined
+        this.validationErrors = {}
         this.getMonitoringPolicies()
         showSnackbar({ msg: 'Policy successfully applied.' })
       }
@@ -203,7 +251,7 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       await deleteRule({ id: this.selectedRule?.id })
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const ruleIndex = findIndex(this.selectedPolicy!.rules, { id: this.selectedRule!.id })
+      const ruleIndex = this.selectedPolicy!.rules?.findIndex(rule => rule.id === this.selectedRule!.id) ?? -1
 
       if (ruleIndex !== -1) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

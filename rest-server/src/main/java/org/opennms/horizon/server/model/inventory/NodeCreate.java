@@ -33,4 +33,5 @@ public class NodeCreate {
     private String locationId;
     private String managementIp;
     private List<TagCreate> tags;
+    private List<Long> discoveryIds;
 }

@@ -24,6 +24,7 @@ package org.opennms.horizon.inventory.service.taskset.response;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceDTO;
 import org.opennms.horizon.inventory.dto.MonitoredServiceTypeDTO;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
+import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.TagCreateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
@@ -141,6 +143,7 @@ public class ScannerResponseService {
                         .setManagementIp(pingResponse.getIpAddress())
                         .setLabel(pingResponse.getIpAddress())
                         .addAllTags(getTagCreateDTO(icmpDiscovery.getId(), tenantId))
+                        .addDiscoveryIds(icmpDiscovery.getId())
                         .build();
                 try {
                     var optionalNode = nodeService.getNode(pingResponse.getIpAddress(), locationId, tenantId);
@@ -153,6 +156,8 @@ public class ScannerResponseService {
                                                 TagEntityIdDTO.newBuilder().setNodeId(nodeDTO.getId()))
                                         .addAllTags(createDTO.getTagsList())
                                         .build());
+
+                        updateNodeWithDiscoveryIds(nodeDTO, icmpDiscovery.getId());
                         nodeService.updateNodeMonitoredState(nodeDTO.getId(), nodeDTO.getTenantId());
                         nodeService.sendNewNodeTaskSetAsync(nodeDTO, locationId, icmpDiscovery);
                     } else {
@@ -169,6 +174,15 @@ public class ScannerResponseService {
                             e);
                 }
             }
+        }
+    }
+
+    private void updateNodeWithDiscoveryIds(NodeDTO nodeDTO, Long discoveryId) {
+        List<Long> discoveryIdsList = new ArrayList<>(nodeDTO.getDiscoveryIdsList());
+
+        if (!discoveryIdsList.contains(discoveryId)) {
+            discoveryIdsList.add(discoveryId);
+            nodeService.updateNodeDiscoveryIds(nodeDTO.getId(), nodeDTO.getTenantId(), discoveryIdsList);
         }
     }
 

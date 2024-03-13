@@ -26,15 +26,19 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.mapper.discovery.ActiveDiscoveryMapper;
+import org.opennms.horizon.inventory.model.Node;
 import org.opennms.horizon.inventory.model.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.inventory.repository.NodeRepository;
 import org.opennms.horizon.inventory.repository.discovery.active.ActiveDiscoveryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @RequiredArgsConstructor
 public class ActiveDiscoveryService {
     private final ActiveDiscoveryRepository repository;
+    private final NodeRepository nodeRepository;
     private final ActiveDiscoveryMapper mapper;
 
     @Transactional(readOnly = true)
@@ -48,5 +52,13 @@ public class ActiveDiscoveryService {
         repository.findByTenantIdAndId(tenantId, id).ifPresentOrElse(repository::delete, () -> {
             throw new EntityNotFoundException(String.format("active discovery id %d not found", id));
         });
+        // updating nodes containing discovery id
+        List<Node> nodeList = nodeRepository.findByTenantId(tenantId).stream()
+                .filter(node -> node.getDiscoveryIds().contains(id))
+                .toList();
+        if (Boolean.FALSE.equals(CollectionUtils.isEmpty(nodeList))) {
+            nodeList.forEach(entity -> entity.getDiscoveryIds().remove(id));
+            nodeRepository.saveAll(nodeList);
+        }
     }
 }

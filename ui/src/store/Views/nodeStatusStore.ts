@@ -5,15 +5,15 @@ import { AZURE_SCAN, DeepPartial } from '@/types'
 import { DownloadFormat, DownloadIpInterfacesVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { createAndDownloadBlobFile } from '@/components/utils'
-import { AlertsFilters, Pagination } from '@/types/alerts'
+import { AlertsFilters, AlertsSort, Pagination } from '@/types/alerts'
 import { cloneDeep } from 'lodash'
 
 const alertsFilterDefault: AlertsFilters = {
   timeRange: TimeRange.All,
   nodeLabel: '',
   severities: [],
-  sortAscending: false,
-  sortBy: 'lastEventTime',
+  sortAscending: true,
+  sortBy: 'id',
   nodeId: 1
 }
 
@@ -102,7 +102,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
   }
 
-  const getNodeByAlerts = async () => {
+  const getAlertsByNode = async () => {
 
     const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
 
@@ -122,6 +122,48 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     }
   }
 
+  const setAlertsByNodePage = (page: number): void => {
+    if (page !== Number(alertsPagination.value.page)) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page
+      }
+    }
+
+    getAlertsByNode()
+  }
+
+  const setAlertsByNodePageSize = (pageSize: number): void => {
+    if (pageSize !== alertsPagination.value.pageSize) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page: 1, // always request first page on change
+        pageSize
+      }
+    }
+
+    getAlertsByNode()
+  }
+
+  const alertsByNodeSortChanged = (sortObj: AlertsSort) => {
+
+    alertsFilter.value = {
+      ...alertsFilter.value,
+      sortBy: sortObj.sortBy,
+      sortAscending: sortObj.sortAscending
+    }
+
+    if (alertsPagination.value.page !== 1 || alertsPagination.value.total !== fetchAlertsByNodeData.value.totalAlerts) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page: 1, // always request first page on change
+        total: fetchAlertsByNodeData.value.totalAlerts
+      }
+    }
+
+    getAlertsByNode()
+  }
+
   return {
     updateNodeAlias,
     fetchedData,
@@ -132,8 +174,11 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     node,
     nodeId,
     downloadIpInterfacesToCsv,
-    getNodeByAlerts,
+    getAlertsByNode,
     fetchAlertsByNodeData,
-    alertsPagination
+    alertsPagination,
+    setAlertsByNodePageSize,
+    setAlertsByNodePage,
+    alertsByNodeSortChanged
   }
 })

@@ -37,10 +37,17 @@ export const useTagStore = defineStore('tagStore', () => {
   }
 
   const addFilteredTag = (tag: Tag) => {
-    if (!filteredTags.value.find((t) => t.name === tag.name)) {
+    const snackbar = useSnackbar()
+    const isDuplicate = filteredTags.value.some(
+      (t) => t.name?.toLocaleLowerCase().trim() === tag.name?.toLocaleLowerCase().trim()
+    )
+    if (!isDuplicate) {
       filteredTags.value = [...filteredTags.value].concat([tag])
+    } else {
+      snackbar.showSnackbar({msg: 'Cannot add duplicate tags.', error: true})
     }
   }
+
   const updateAllNodeTypes = async () => {
     const inventoryQueries = useInventoryQueries()
     inventoryQueries.buildNetworkInventory()

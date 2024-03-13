@@ -59,7 +59,7 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
         Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
 
         tenantIdOptional.ifPresentOrElse(
-               tenantId -> {
+                tenantId -> {
                     try {
                         List<TagDTO> tags = service.addTags(tenantId, request);
                         request.getEntityIdsList().forEach(entityIdDTO -> {
@@ -71,8 +71,8 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                         responseObserver.onNext(
                                 TagListDTO.newBuilder().addAllTags(tags).build());
                         responseObserver.onCompleted();
-                    } catch (Exception  e) {
-                        GrpcConstraintVoilationExceptionHandler.handleException(e , responseObserver);
+                    } catch (Exception e) {
+                        GrpcConstraintVoilationExceptionHandler.handleException(e, responseObserver);
                     }
                 },
                 () -> responseObserver.onError(

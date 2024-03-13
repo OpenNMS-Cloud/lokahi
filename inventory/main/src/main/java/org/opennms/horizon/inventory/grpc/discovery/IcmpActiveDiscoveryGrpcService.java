@@ -150,7 +150,7 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                 }
             } catch (InventoryRuntimeException | IllegalArgumentException | DataIntegrityViolationException e) {
                 log.error("Exception while validating active discovery", e);
-                 GrpcConstraintVoilationExceptionHandler.handleException(e , responseObserver);
+                GrpcConstraintVoilationExceptionHandler.handleException(e, responseObserver);
                 return;
             }
 

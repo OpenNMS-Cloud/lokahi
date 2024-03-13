@@ -122,7 +122,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     }
   }
 
-  const setPage = (page: number): void => {
+  const setAlertsByNodePage = (page: number): void => {
     if (page !== Number(alertsPagination.value.page)) {
       alertsPagination.value = {
         ...alertsPagination.value,
@@ -133,7 +133,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     getAlertsByNode()
   }
 
-  const setPageSize = (pageSize: number): void => {
+  const setAlertsByNodePageSize = (pageSize: number): void => {
     if (pageSize !== alertsPagination.value.pageSize) {
       alertsPagination.value = {
         ...alertsPagination.value,
@@ -145,7 +145,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     getAlertsByNode()
   }
 
-  const sortChanged = (sortObj: AlertsSort) => {
+  const alertsByNodeSortChanged = (sortObj: AlertsSort) => {
 
     alertsFilter.value = {
       ...alertsFilter.value,
@@ -177,8 +177,8 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     getAlertsByNode,
     fetchAlertsByNodeData,
     alertsPagination,
-    setPageSize,
-    setPage,
-    sortChanged
+    setAlertsByNodePageSize,
+    setAlertsByNodePage,
+    alertsByNodeSortChanged
   }
 })

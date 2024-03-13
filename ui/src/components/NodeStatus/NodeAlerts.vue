@@ -135,12 +135,12 @@ const sortChanged = (columnId: string, sortObj: Record<string, string>) => {
   if (sortObj.value === 'asc' || sortObj.value === 'desc') {
     const sortAscending  = sortObj.value === 'asc' ? true : false
     const sortByAlerts = { sortAscending, sortBy: columnId }
-    nodeStatusStore.sortChanged(sortByAlerts)
+    nodeStatusStore.alertsByNodeSortChanged(sortByAlerts)
 
   } else {
     const sortAscending  = true
     const sortByAlerts = { sortAscending, sortBy: 'id' }
-    nodeStatusStore.sortChanged(sortByAlerts)
+    nodeStatusStore.alertsByNodeSortChanged(sortByAlerts)
 
   }
 
@@ -172,12 +172,12 @@ const data = computed(() => nodeStatusStore.fetchAlertsByNodeData || [])
 
 const onPageChanged = (p: number) => {
   startSpinner()
-  nodeStatusStore.setPage(p)
+  nodeStatusStore.setAlertsByNodePage(p)
 }
 
 const onPageSizeChanged = (p: number) => {
   startSpinner()
-  nodeStatusStore.setPageSize(p)
+  nodeStatusStore.setAlertsByNodePageSize(p)
 }
 
 const isAlertsLength = computed(() => {

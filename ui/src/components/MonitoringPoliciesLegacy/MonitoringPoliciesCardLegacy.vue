@@ -68,11 +68,11 @@
         />
 <!--    TODO: Bring this back when thresholding is implemented
           https://opennms.atlassian.net/browse/HS-750
-        <MonitoringPoliciesCardEventConditionTable
+        <MonitoringPoliciesCardEventConditionTableLegacy
           v-if="rule.detectionMethod === DetectionMethod.EVENT"
           :eventConditions="rule.alertConditions"
         />
-        <MonitoringPoliciesCardThresholdConditionTable
+        <MonitoringPoliciesCardThresholdConditionTableLegacy
           v-else-if="rule.detectionMethod === DetectionMethod.THRESHOLD"
           :thresholdConditions="[]"
         />-->

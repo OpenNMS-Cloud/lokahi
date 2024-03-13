@@ -12,7 +12,7 @@
         <FeatherIcon :icon="icons.addIcon" />
         New Rule
       </FeatherButton>
-      <MonitoringPoliciesExistingItems
+      <MonitoringPoliciesExistingItemsLegacy
         title="Existing Rules"
         :list="store.selectedPolicy.rules as PolicyRule[]"
         :selectedItemId="store.selectedRule?.id"
@@ -97,12 +97,12 @@
           <div class="col">
             <div class="form-title">Set Alert Conditions</div>
             <template v-if="store.selectedRule!.detectionMethod === DetectionMethod.Threshold">
-              <MonitoringPoliciesThresholdCondition
+              <MonitoringPoliciesThresholdConditionLegacy
                 v-for="(cond, index) in store.selectedRule!.alertConditions"
                 :key="cond.id"
                 :index="Number(index)"
                 :condition="(cond as ThresholdCondition)"
-                @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+                @updateCondition="(condition: ThresholdCondition) => store.updateCondition(cond.id, condition)"
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
               />
             </template>
@@ -110,14 +110,14 @@
               v-else-if="store.selectedRule!.detectionMethod === DetectionMethod.Event
                                  && store.selectedRule?.eventType"
             >
-              <MonitoringPoliciesEventCondition
+              <MonitoringPoliciesEventConditionLegacy
                 v-for="(cond, index) in store.selectedRule!.alertConditions"
                 :key="cond.id"
                 :condition="(cond as AlertCondition)"
                 :event-type="store.selectedRule?.eventType"
                 :index="Number(index)"
                 :isDisabled="store.selectedPolicy?.isDefault === true"
-                @updateCondition="(condition) => store.updateCondition(cond.id, condition)"
+                @updateCondition="(condition: ThresholdCondition) => store.updateCondition(cond.id, condition)"
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
               />
             </template>
@@ -153,14 +153,14 @@
 </template>
 
 <script setup lang="ts">
-import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
-import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
-import { ThresholdCondition } from '@/types/policies'
 import Add from '@featherds/icon/action/Add'
 import Delete from '@featherds/icon/action/Delete'
-import { ThresholdMetrics } from './monitoringPolicies.constants'
-import { AlertCondition, DetectionMethod, EventType, ManagedObjectType, PolicyRule } from '@/types/graphql'
 import useModal from '@/composables/useModal'
+import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
+import { AlertCondition, DetectionMethod, EventType, ManagedObjectType, PolicyRule } from '@/types/graphql'
+import { ThresholdCondition } from '@/types/policies'
+import { ThresholdMetrics } from './monitoringPoliciesLegacy.constants'
 
 const { openModal, closeModal, isVisible } = useModal()
 const store = useMonitoringPoliciesStore()

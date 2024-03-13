@@ -19,30 +19,27 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog;
 
 /**
- * Defines the behavior of asynchronous dispatching.
+ * <p>MessageDiscardedException class.</p>
  *
- * @author jwhite
+ * @author ranger
+ * @version $Id: $
  */
-public interface AsyncPolicy {
+public class MessageDiscardedException extends Exception {
+    static final long serialVersionUID = 2L;
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+    public MessageDiscardedException() {
+        super();
+    }
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
+    public MessageDiscardedException(final Throwable t) {
+        super(t);
+    }
 
-    boolean isBlockWhenFull();
+    public MessageDiscardedException(final String string) {
+        super(string);
+    }
+
 }

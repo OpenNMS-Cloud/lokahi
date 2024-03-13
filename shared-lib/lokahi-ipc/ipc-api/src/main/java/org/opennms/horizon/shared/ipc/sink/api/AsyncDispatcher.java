@@ -21,6 +21,7 @@
  */
 package org.opennms.horizon.shared.ipc.sink.api;
 
+
 import com.google.protobuf.Message;
 
 /**

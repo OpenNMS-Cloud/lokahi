@@ -19,30 +19,22 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.api;
 
 /**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
+ * For a given context, encrypt/decrypt text.
+ * (alias,password) is stored in SCV as Credentials with the specified alias.
  */
-public interface AsyncPolicy {
+public interface TextEncryptor {
 
     /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
+     * Encrypt text for the given context
      */
-    int getQueueSize();
+    String encrypt(String alias, String text);
 
     /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
+     * Decrypt encrypted for the given context
      */
-    int getNumThreads();
+    String decrypt(String alias, String encrypted);
 
-    boolean isBlockWhenFull();
 }

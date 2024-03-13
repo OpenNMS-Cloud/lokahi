@@ -19,30 +19,22 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.daemon;
+
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Defines the behavior of asynchronous dispatching.
+ * <p>SpringServiceDaemon interface.</p>
  *
- * @author jwhite
+ * @author <a href="mailto:brozow@opennms.org">Mathew Brozowski</a>
+ * @author <a href="mailto:dj@opennms.org">DJ Gregor</a>
  */
-public interface AsyncPolicy {
-
+public interface SpringServiceDaemon extends InitializingBean, DisposableBean {
     /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
+     * <p>start</p>
      *
-     * @return queue size
+     * @throws Exception if any.
      */
-    int getQueueSize();
-
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
+    void start() throws Exception;
 }

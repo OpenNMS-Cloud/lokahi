@@ -19,30 +19,44 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.api;
+
+import java.util.Objects;
 
 /**
- * Defines the behavior of asynchronous dispatching.
+ * A {@link ConfigurationProvider} that uses a fixed object.
  *
  * @author jwhite
+ * @param <T>
  */
-public interface AsyncPolicy {
+public class BeanConfigurationProvider<T> implements ConfigurationProvider {
+    private final T object;
+    private final long createdAt = System.currentTimeMillis();
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+    public BeanConfigurationProvider(T object) {
+        this.object = Objects.requireNonNull(object);
+    }
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
+    @Override
+    public Class<?> getType() {
+        return object.getClass();
+    }
 
-    boolean isBlockWhenFull();
+    @Override
+    public T getObject() {
+        return object;
+    }
+
+    @Override
+    public long getLastUpdate() {
+        return createdAt;
+    }
+
+    @Override
+    public void registeredToConfigReloadContainer() {
+    }
+
+    @Override
+    public void deregisteredFromConfigReloadContainer() {
+    }
 }

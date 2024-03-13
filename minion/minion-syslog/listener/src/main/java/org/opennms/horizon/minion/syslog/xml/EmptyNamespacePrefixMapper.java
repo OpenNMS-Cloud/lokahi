@@ -19,30 +19,13 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.xml;
 
-/**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
- */
-public interface AsyncPolicy {
+import org.eclipse.persistence.oxm.NamespacePrefixMapper;
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
-
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
+public class EmptyNamespacePrefixMapper extends NamespacePrefixMapper {
+    @Override
+    public String getPreferredPrefix(final String namespaceUri, final String suggestion, final boolean requirePrefix) {
+        return "";
+    }
 }

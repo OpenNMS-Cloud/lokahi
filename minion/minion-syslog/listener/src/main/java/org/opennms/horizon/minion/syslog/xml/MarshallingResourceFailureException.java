@@ -19,30 +19,19 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.xml;
 
-/**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
- */
-public interface AsyncPolicy {
+import org.springframework.dao.DataAccessResourceFailureException;
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+public class MarshallingResourceFailureException extends DataAccessResourceFailureException {
+    private static final long serialVersionUID = -3634878517879877803L;
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
+    public MarshallingResourceFailureException(final String msg) {
+        super(msg);
+    }
 
-    boolean isBlockWhenFull();
+    public MarshallingResourceFailureException(final String msg, final Throwable cause) {
+        super(msg, cause);
+    }
+
 }

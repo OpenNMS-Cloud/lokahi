@@ -19,30 +19,13 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.model;
+
+import java.util.List;
 
 /**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
+ * A definition corresponding to POJO '{@link org.opennms.netmgt.xml.event.Mask}'.
  */
-public interface AsyncPolicy {
-
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
-
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
+public interface IMask {
+    List<IMaskElement> getMaskelementCollection();
 }

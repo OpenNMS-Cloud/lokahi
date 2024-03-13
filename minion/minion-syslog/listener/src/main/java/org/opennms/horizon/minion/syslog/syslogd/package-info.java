@@ -19,30 +19,13 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
-
-/**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
- */
-public interface AsyncPolicy {
-
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
-
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
-}
+@XmlSchema(
+           namespace = "http://xmlns.opennms.org/xsd/config/syslog",
+           elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED,
+           xmlns={
+                   @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/config/syslog"),
+           }
+        )
+package org.opennms.horizon.minion.syslog.syslogd;
+import javax.xml.bind.annotation.XmlNs;
+import javax.xml.bind.annotation.XmlSchema;

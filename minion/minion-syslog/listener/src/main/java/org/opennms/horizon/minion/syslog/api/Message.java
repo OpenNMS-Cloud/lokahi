@@ -19,30 +19,16 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.api;
 
 /**
- * Defines the behavior of asynchronous dispatching.
+ * Marker interface for messages that are produced and consumed by a {@link SinkModule}.
  *
  * @author jwhite
  */
-public interface AsyncPolicy {
+public interface Message {
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
+    static final String SINK_METRIC_CONSUMER_DOMAIN = "org.opennms.core.ipc.sink.consumer";
 }

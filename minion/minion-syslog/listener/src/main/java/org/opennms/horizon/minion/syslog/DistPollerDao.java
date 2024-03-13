@@ -19,30 +19,24 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog;
+
+
 
 /**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
+ * <p>DistPollerDao interface.</p>
  */
-public interface AsyncPolicy {
+public interface DistPollerDao  {
 
     /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
+     * This function returns the {@link OnmsDistPoller} identity of the
+     * local system so that events and other objects can be associated with
+     * the local system.
+     * 
+     * @see https://en.wikipedia.org/wiki/Whoami
+     * 
+     * @return
      */
-    int getQueueSize();
+    Object whoami();
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
 }

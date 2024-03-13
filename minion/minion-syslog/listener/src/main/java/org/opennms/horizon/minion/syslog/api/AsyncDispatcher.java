@@ -19,30 +19,45 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.api;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Defines the behavior of asynchronous dispatching.
+ * Used to asynchronously dispatch messages.
+ *
+ * Instances of these should be created by the {@link MessageDispatcherFactory}.
  *
  * @author jwhite
  */
-public interface AsyncPolicy {
+public interface AsyncDispatcher<S extends Message> extends AutoCloseable {
 
     /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
+     * Asynchronously send the given message.
      *
-     * @return queue size
+     * @param message the message to send
+     * @return a future that is resolved once the message was dispatched or queued
+     */
+    CompletableFuture<DispatchStatus> send(S message);
+
+    /**
+     * Returns the number of messages that are currently queued
+     * awaiting for dispatch.
+     *
+     * @return current queue size
      */
     int getQueueSize();
+    
+    enum DispatchStatus {
+        /**
+         * The message was actually dispatched.
+         */
+        DISPATCHED,
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
+        /**
+         * The message has been queued to be dispatched later.
+         */
+        QUEUED
+    }
 
-    boolean isBlockWhenFull();
 }

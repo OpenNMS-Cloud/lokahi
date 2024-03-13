@@ -19,30 +19,14 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.api;
 
 /**
- * Defines the behavior of asynchronous dispatching.
+ * Used to synchronously dispatch messages.
+ *
+ * Instances of these should be created by the {@link MessageDispatcherFactory}.
  *
  * @author jwhite
  */
-public interface AsyncPolicy {
-
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
-
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
-
-    boolean isBlockWhenFull();
+public interface SyncDispatcher<S extends Message> extends MessageDispatcher<S> {
 }

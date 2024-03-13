@@ -19,30 +19,21 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog;
+
+import java.io.IOException;
 
 /**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
+ * @author Seth
  */
-public interface AsyncPolicy {
+public interface SyslogReceiver extends Runnable {
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+    @Override
+    void run();
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
+    String getName();
 
-    boolean isBlockWhenFull();
+    void stop() throws InterruptedException;
+
+    void reload() throws IOException;
 }

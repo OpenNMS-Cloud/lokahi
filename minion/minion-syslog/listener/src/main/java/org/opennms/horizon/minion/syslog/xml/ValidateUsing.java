@@ -19,30 +19,25 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog.xml;
 
-/**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
- */
-public interface AsyncPolicy {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface ValidateUsing {
 
     /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
+     * The name of the XSD file associated with this JAXB-compatible object.
+     * This will be used by JAXBUtils to validate the XML when passing through
+     * the system.
+     * 
+     * @return The name of the XSD file, without paths.  This file is expected
+     * to be in the classpath, in /xsds/.
      */
-    int getNumThreads();
+    String value();
 
-    boolean isBlockWhenFull();
 }

@@ -19,30 +19,26 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.shared.ipc.sink.api;
+package org.opennms.horizon.minion.syslog;
 
-/**
- * Defines the behavior of asynchronous dispatching.
- *
- * @author jwhite
- */
-public interface AsyncPolicy {
+public class SyslogParserException extends Exception {
 
-    /**
-     * Maximum number of messages that can be queued awaiting
-     * for dispatch.
-     *
-     * @return queue size
-     */
-    int getQueueSize();
+    private static final long serialVersionUID = 8185991282482412701L;
 
-    /**
-     * Number of background threads that will be used to
-     * dispatch messages from the queue.
-     *
-     * @return number of threads
-     */
-    int getNumThreads();
+    public SyslogParserException() {
+        super();
+    }
 
-    boolean isBlockWhenFull();
+    public SyslogParserException(final String message) {
+        super(message);
+    }
+
+    public SyslogParserException(final Throwable cause) {
+        super(cause);
+    }
+
+    public SyslogParserException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
 }

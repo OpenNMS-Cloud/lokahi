@@ -102,7 +102,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
   }
 
-  const getNodeByAlerts = async () => {
+  const getAlertsByNode = async () => {
 
     const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
 
@@ -122,6 +122,29 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     }
   }
 
+  const setPage = (page: number): void => {
+    if (page !== Number(alertsPagination.value.page)) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page
+      }
+    }
+
+    getAlertsByNode()
+  }
+
+  const setPageSize = (pageSize: number): void => {
+    if (pageSize !== alertsPagination.value.pageSize) {
+      alertsPagination.value = {
+        ...alertsPagination.value,
+        page: 1, // always request first page on change
+        pageSize
+      }
+    }
+
+    getAlertsByNode()
+  }
+
   return {
     updateNodeAlias,
     fetchedData,
@@ -132,8 +155,10 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     node,
     nodeId,
     downloadIpInterfacesToCsv,
-    getNodeByAlerts,
+    getAlertsByNode,
     fetchAlertsByNodeData,
-    alertsPagination
+    alertsPagination,
+    setPageSize,
+    setPage
   }
 })

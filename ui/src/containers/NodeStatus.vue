@@ -8,7 +8,7 @@
     />
     <div class="header-wrapper">
       <div class="header">
-        <div class="pre-title">Node Status</div>
+        <div class="pre-title" data-test="title">Node Status</div>
         <div class="page-headline">
           {{ nodeStatusStore.node.nodeAlias || nodeStatusStore.node.nodeLabel }}
           <FeatherButton

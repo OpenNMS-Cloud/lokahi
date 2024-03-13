@@ -122,6 +122,9 @@ spec:
             - name: netflow9
               protocol: UDP
               containerPort: {{ .Values.OpenNMS.minion.netflow9ListenerPort }}
+            - name: syslog
+              protocol: UDP
+              containerPort: { { .Values.OpenNMS.Minion.SysLogListenerPort } }
           volumeMounts:
             - name: minion-secrets
               subPath: "minion.p12"

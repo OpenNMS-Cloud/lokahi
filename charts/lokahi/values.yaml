@@ -92,6 +92,7 @@ OpenNMS: # we might be able to remove this
     port: 8181
     sshPort: 8101
     TrapsListenerPort: 1162
+    SysLogListenerPort: 10514
     netflow5ListenerPort: 8877
     netflow9ListenerPort: 4729
     netflowListenerPort: 9999

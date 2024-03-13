@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
-    <changeSet id="add-unique-constraint" author="your_name">
-        <addUniqueConstraint constraintName="unique_tag_per_tenant" tableName="tag" columnNames="name,tenant_id"/>
+    <changeSet id="0.1.0-teanent-id-unique-tag-name" author="Mohammad-Junid">
+        <addUniqueConstraint constraintName="unique_tag_name-for_tenant" tableName="tag" columnNames="name,tenant_id"/>
     </changeSet>
 </databaseChangeLog>

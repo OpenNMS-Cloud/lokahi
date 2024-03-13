@@ -44,5 +44,4 @@ public interface AsyncPolicy {
      */
     int getNumThreads();
 
-    boolean isBlockWhenFull();
 }

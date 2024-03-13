@@ -44,7 +44,7 @@ export const useTagStore = defineStore('tagStore', () => {
     if (!isDuplicate) {
       filteredTags.value = [...filteredTags.value].concat([tag])
     } else {
-      snackbar.showSnackbar({msg: 'Don\'t add duplicate tags !', error: true})
+      snackbar.showSnackbar({msg: 'Cannot add duplicate tags.', error: true})
     }
   }
 

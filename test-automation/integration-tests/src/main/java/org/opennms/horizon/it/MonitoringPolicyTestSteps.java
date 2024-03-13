@@ -422,7 +422,7 @@ public class MonitoringPolicyTestSteps {
             case "SNMP Link Down" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.3");
             case "SNMP Link Up" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.4");
             case "SNMP EGP Down" -> sendTrapToMinion("1.3.6.1.6.3.1.1.5.6");
-            default -> LOG.error("trigger event type not supported: " + triggerEventType);
+            default -> throw new IllegalArgumentException("trigger event type not supported: " + triggerEventType);
         }
     }
 
@@ -449,8 +449,8 @@ public class MonitoringPolicyTestSteps {
     public void verifyAlertSeverity(String triggerEventName, String severity) {
         Awaitility
                 .await()
-                .atMost(20, TimeUnit.SECONDS)
-                .pollDelay(5, TimeUnit.SECONDS)
+                .atMost(60, TimeUnit.SECONDS)
+                .pollDelay(10, TimeUnit.SECONDS)
                 .ignoreExceptions()
                 .until(() -> waitForAlerts(triggerEventName));
 

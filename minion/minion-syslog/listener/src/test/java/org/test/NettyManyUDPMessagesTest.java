@@ -43,25 +43,11 @@ public class NettyManyUDPMessagesTest extends CamelTestSupport {
         CamelContext camelContext = new DefaultCamelContext();
 
         // Add a route that receives messages from a file endpoint and logs them
-        camelContext.addRoutes(new RouteBuilder() {
-            @Override
-            public void configure() throws Exception {
-                from("netty:tcp://127.0.0.1:10154")
-                    .log("Received message: ${body}");
-            }
-        });
-        boolean isHttpRegistered = camelContext.getComponentNames().contains("netty");
- /*       Set<String> components = camelContext.getComponentNames();
-        for(String str : components) {
-            System.out.println(str);
-        }*/
-        // Start Camel context
+        camelContext.addRoutes(new MyNettyRoute());
         camelContext.start();
+        Thread.sleep(Long.MAX_VALUE); // Keep the application running
 
-        // Keep the application running until terminated
-      //  Thread.sleep(Long.MAX_VALUE);
 
-        // Stop Camel context
         camelContext.stop();
 
     }

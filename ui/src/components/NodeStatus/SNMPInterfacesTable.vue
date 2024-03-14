@@ -32,6 +32,7 @@
           <FeatherButton
               primary
               icon="Refresh"
+              @click.prevent="refresh"
             >
               <FeatherIcon :icon="icons.Refresh"> </FeatherIcon>
             </FeatherButton>
@@ -131,6 +132,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useFlowsStore } from '@/store/Views/flowsStore'
 import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { DeepPartial } from '@/types'
@@ -146,6 +148,7 @@ import { sortBy } from 'lodash'
 const router = useRouter()
 const flowsStore = useFlowsStore()
 const nodeStatusStore = useNodeStatusStore()
+const nodeStatusQueries = useNodeStatusQueries()
 
 const page = ref(1)
 const pageSize = ref(10)
@@ -272,6 +275,9 @@ const onSearchChange = (searchTerm: any) => {
     clonedInterfaces.value = snmpInterfaces.value
     pageObjects.value = getPageObjects(snmpInterfaces.value, page.value, pageSize.value)
   }
+}
+const refresh = () => {
+  nodeStatusQueries.fetchNodeStatus()
 }
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {
   const { id: nodeId, nodeLabel } = nodeStatusStore.node

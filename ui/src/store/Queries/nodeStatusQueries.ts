@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeEventsDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
@@ -17,9 +17,18 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     cachePolicy: 'network-only'
   })
 
+  const { data: events, execute: fetchEvents } = useQuery({
+    query: ListNodeEventsDocument,
+    variables,
+    cachePolicy: 'network-only'
+  })
+
   const fetchedData = computed(() => ({
-    events: data.value?.events || ([] as Event[]),
     node: data.value?.node || ({} as Node)
+  }))
+
+  const fetchedEventsData = computed(() => ({
+    events: events.value?.events || ([] as Event[])
   }))
 
   const fetchExporters = async (requestCriteria: RequestCriteriaInput) => {
@@ -70,8 +79,10 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   return {
     setNodeId,
     fetchedData,
+    fetchedEventsData,
     fetchExporters,
     fetchNodeStatus,
+    fetchEvents,
     downloadIpInterfaces,
     getAlertsByNodeQuery,
     fetchAlertsByNodeData

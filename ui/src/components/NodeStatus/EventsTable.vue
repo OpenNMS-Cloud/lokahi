@@ -26,7 +26,7 @@
             <FeatherButton
               primary
               icon="Refresh"
-              @click="nodeStatusQueries.fetchNodeStatus"
+              @click="nodeStatusQueries.fetchEvents"
             >
               <FeatherIcon :icon="icons.Refresh"/>
             </FeatherButton>
@@ -86,6 +86,7 @@ import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
 import { sortBy } from 'lodash'
+import { Event } from '@/types/graphql'
 
 const nodeStatusQueries = useNodeStatusQueries()
 
@@ -130,7 +131,7 @@ const pageInfo = reactive({
 })
 
 const eventData = computed(() => {
-  const events = nodeStatusStore.fetchedData?.events || []
+  const events = nodeStatusStore.fetchedEventsData.events as any || ([] as Event[])
   pageInfo.total = events.length || 0
   return {
     events

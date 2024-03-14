@@ -17,9 +17,18 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     cachePolicy: 'network-only'
   })
 
+  const { data: events, execute: fetchEvents } = useQuery({
+    query: ListNodeEventsDocument,
+    variables,
+    cachePolicy: 'network-only'
+  })
+
   const fetchedData = computed(() => ({
-    events: data.value?.events || ([] as Event[]),
     node: data.value?.node || ({} as Node)
+  }))
+
+  const fetchedEventsData = computed(() => ({
+    events: events.value?.events || ([] as Event[])
   }))
 
   const fetchExporters = async (requestCriteria: RequestCriteriaInput) => {
@@ -87,8 +96,10 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   return {
     setNodeId,
     fetchedData,
+    fetchedEventsData,
     fetchExporters,
     fetchNodeStatus,
+    fetchEvents,
     downloadIpInterfaces,
     getAlertsByNodeQuery,
     fetchAlertsByNodeData,

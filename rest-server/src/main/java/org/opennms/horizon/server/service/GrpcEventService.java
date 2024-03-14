@@ -39,6 +39,8 @@ import org.opennms.horizon.server.model.inventory.SearchEventsResponse;
 import org.opennms.horizon.server.service.grpc.EventsClient;
 import org.opennms.horizon.server.utils.DateTimeUtil;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -50,7 +52,7 @@ public class GrpcEventService {
     private final EventsClient client;
     private final EventMapper mapper;
     private final ServerHeaderUtil headerUtil;
-
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcEventService.class);
     @GraphQLQuery
     public Flux<Event> findAllEvents(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listEvents(headerUtil.getAuthHeader(env)).stream()
@@ -77,7 +79,7 @@ public class GrpcEventService {
     }
 
     @GraphQLQuery(name = "downloadEvents")
-    public Mono<SearchEventsResponse> downloadSnmpInterfaces(
+    public Mono<SearchEventsResponse> downloadEvents(
             @GraphQLEnvironment ResolutionEnvironment env,
             @GraphQLArgument(name = "searchTerm") String searchTerm,
             @GraphQLArgument(name = "nodeId") Long nodeId,
@@ -105,15 +107,18 @@ public class GrpcEventService {
                     .setHeader("Time", "UEI", "Description")
                     .build();
 
-            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
-            for (Event event : events) {
-                csvPrinter.printRecord(
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (Event event : events) {
+                    csvPrinter.printRecord(
                         DateTimeUtil.convertAndFormatLongDate(
-                                event.getProducedTime(), DateTimeUtil.D_MM_YYYY_HH_MM_SS_SSS),
+                            event.getProducedTime(), DateTimeUtil.D_MM_YYYY_HH_MM_SS_SSS),
                         event.getUei(),
                         event.getDescription());
+                }
+                csvPrinter.flush();
+            }  catch (Exception e) {
+                LOG.error("Exception while printing records", e);
             }
-            csvPrinter.flush();
             return new SearchEventsResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);

@@ -354,15 +354,18 @@ public class GrpcNodeService {
                     .setHeader("IP ADDRESS", "IP HOSTNAME", "NETMASK", "PRIMARY")
                     .build();
 
-            CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat);
-            for (IpInterface ipInterface : ipInterfaceList) {
-                csvPrinter.printRecord(
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (IpInterface ipInterface : ipInterfaceList) {
+                    csvPrinter.printRecord(
                         ipInterface.getIpAddress(),
                         ipInterface.getHostname(),
                         ipInterface.getNetmask(),
                         ipInterface.getSnmpPrimary());
+                }
+                csvPrinter.flush();
+            }  catch (Exception e) {
+                LOG.error("Exception while printing records", e);
             }
-            csvPrinter.flush();
             return new IpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
         }
         throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);

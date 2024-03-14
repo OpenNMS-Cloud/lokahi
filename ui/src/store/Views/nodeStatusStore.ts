@@ -29,7 +29,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
-  const fetchEvents = computed(() => nodeStatusQueries.fetchEventsData)
+  const fetchedEventsData = computed(() => nodeStatusQueries.fetchedEventsData)
   const fetchAlertsByNodeData = ref({} as ListAlertResponse)
   const exporters = ref<DeepPartial<Exporter>[]>([])
   const nodeId = ref()
@@ -126,7 +126,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   return {
     updateNodeAlias,
     fetchedData,
-    fetchEvents,
+    fetchedEventsData,
     setNodeId,
     isAzure: computed(() => fetchedData.value.node.scanType === AZURE_SCAN),
     fetchExporters,

@@ -17,7 +17,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     cachePolicy: 'network-only'
   })
 
-  const {data: events, execute: fetchEvents} = useQuery({
+  const { data: events, execute: fetchEvents } = useQuery({
     query: ListNodeEventsDocument,
     variables,
     cachePolicy: 'network-only'
@@ -27,7 +27,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     node: data.value?.node || ({} as Node)
   }))
 
-  const fetchEventsData = computed(() => ({
+  const fetchedEventsData = computed(() => ({
     events: events.value?.events || ([] as Event[])
   }))
 
@@ -79,7 +79,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
   return {
     setNodeId,
     fetchedData,
-    fetchEventsData,
+    fetchedEventsData,
     fetchExporters,
     fetchNodeStatus,
     fetchEvents,

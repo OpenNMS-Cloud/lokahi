@@ -131,7 +131,7 @@ const pageInfo = reactive({
 })
 
 const eventData = computed(() => {
-  const events = nodeStatusStore.fetchEvents.events as any || ([] as Event[])
+  const events = nodeStatusStore.fetchedEventsData.events as any || ([] as Event[])
   pageInfo.total = events.length || 0
   return {
     events

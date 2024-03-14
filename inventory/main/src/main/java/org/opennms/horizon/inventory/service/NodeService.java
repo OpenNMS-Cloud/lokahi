@@ -74,6 +74,8 @@ import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.TaskDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +85,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class NodeService {
     private static final String DEFAULT_TAG = "default";
+
+    private static final Logger LOG = LoggerFactory.getLogger(NodeService.class);
     private final ThreadFactory threadFactory = new ThreadFactoryBuilder()
             .setNameFormat("delete-node-task-publish-%d")
             .build();
@@ -167,7 +171,7 @@ public class NodeService {
                 node.setIpInterfaces(List.of(ipInterface));
             }
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityViolationException("Ip address already exists for a given location", e);
+            LOG.error("Ip address already exists for a given location", e.getMessage());
         }
     }
 

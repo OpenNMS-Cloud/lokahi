@@ -42,8 +42,8 @@ public class NodeKafkaProducer {
     @Setter // Testability
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
-        @PostUpdate
-        @PostPersist
+    @PostUpdate
+    @PostPersist
     public void sendNode(Node node) {
         // Not all fields are included in this proto, since the Alerts service doesn't care about all of them.
         NodeDTO proto = NodeDTO.newBuilder()

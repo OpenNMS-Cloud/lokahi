@@ -76,6 +76,7 @@ import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -128,6 +129,12 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                 Status status = Status.newBuilder()
                         .setCode(Code.NOT_FOUND_VALUE)
                         .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
+                        .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            } catch (DataIntegrityViolationException e) {
+                Status status = Status.newBuilder()
+                        .setCode(Code.ALREADY_EXISTS_VALUE)
+                        .setMessage(IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG)
                         .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }

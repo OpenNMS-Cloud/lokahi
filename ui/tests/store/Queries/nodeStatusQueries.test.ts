@@ -28,6 +28,6 @@ describe('Events queries', () => {
     const expectedFetchedData = {
       events: eventsFixture()
     }
-    expect(nodeStatusQueries.fetchEventsData).toStrictEqual(expectedFetchedData)
+    expect(nodeStatusQueries.fetchedEventsData).toStrictEqual(expectedFetchedData)
   })
 })

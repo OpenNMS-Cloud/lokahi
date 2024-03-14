@@ -33,151 +33,49 @@
   <name>OpenNMS Lokahi :: Minion :: Syslog :: Listener</name>
 
     <properties>
-    <camelVersion>2.21.5</camelVersion>
+    <camelVersion>3.20.0</camelVersion>
     </properties>
   <dependencies>
-    <dependency>
-      <groupId>org.opennms.lokahi.shared</groupId>
-      <artifactId>ipc-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
       <dependency>
           <groupId>org.apache.camel</groupId>
           <artifactId>camel-core</artifactId>
           <version>${camelVersion}</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>javax.xml.bind</groupId>
-                  <artifactId>jaxb-api</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-core</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-impl</artifactId>
-              </exclusion>
-          </exclusions>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.camel</groupId>
-          <artifactId>camel-http</artifactId>
-          <version>${camelVersion}</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>commons-logging</groupId>
-                  <artifactId>commons-logging</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>javax.xml.bind</groupId>
-                  <artifactId>jaxb-api</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-core</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-impl</artifactId>
-              </exclusion>
-          </exclusions>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.camel</groupId>
-          <artifactId>camel-netty4</artifactId>
-          <version>${camelVersion}</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>commons-logging</groupId>
-                  <artifactId>commons-logging</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>javax.xml.bind</groupId>
-                  <artifactId>jaxb-api</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-core</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-impl</artifactId>
-              </exclusion>
-          </exclusions>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.camel</groupId>
-          <artifactId>camel-blueprint</artifactId>
-          <version>${camelVersion}</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>javax.xml.bind</groupId>
-                  <artifactId>jaxb-api</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-core</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-impl</artifactId>
-              </exclusion>
-          </exclusions>
-      </dependency>
-    <dependency>
-      <groupId>org.opennms.lokahi.shared</groupId>
-      <artifactId>snmp-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opennms.lokahi.minion</groupId>
-      <artifactId>twin-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opennms.lokahi.shared</groupId>
-      <artifactId>snmp-impl</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-      <dependency>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-          <version>2.3.1</version> <!-- or the version compatible with your Java platform -->
-      </dependency>
+        </dependency>
 
       <dependency>
-      <groupId>org.opennms.lokahi.minion</groupId>
-      <artifactId>plugins-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-      <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-      <version>4.2.9.RELEASE_1</version>
-      </dependency>
-      <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-core</artifactId>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-test</artifactId>
+          <version>${camel.version}</version>
           <scope>test</scope>
       </dependency>
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-core</artifactId>
-          <version>6.1.4</version>
-          <scope>test</scope>
-      </dependency>
+      <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
       <dependency>
           <groupId>javax.xml.bind</groupId>
           <artifactId>jaxb-api</artifactId>
           <version>2.3.1</version>
-          <scope>compile</scope>
       </dependency>
+      <dependency>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-api</artifactId>
+          <version>${camel.version}</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-netty</artifactId>
+          <version>${camel.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter</artifactId>
+          <version>RELEASE</version>
+          <scope>test</scope>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.apache.camel/camel-jms -->
+
+
+
   </dependencies>
 </project>

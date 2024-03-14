@@ -357,13 +357,13 @@ public class GrpcNodeService {
             try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
                 for (IpInterface ipInterface : ipInterfaceList) {
                     csvPrinter.printRecord(
-                        ipInterface.getIpAddress(),
-                        ipInterface.getHostname(),
-                        ipInterface.getNetmask(),
-                        ipInterface.getSnmpPrimary());
+                            ipInterface.getIpAddress(),
+                            ipInterface.getHostname(),
+                            ipInterface.getNetmask(),
+                            ipInterface.getSnmpPrimary());
                 }
                 csvPrinter.flush();
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 LOG.error("Exception while printing records", e);
             }
             return new IpInterfaceResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);

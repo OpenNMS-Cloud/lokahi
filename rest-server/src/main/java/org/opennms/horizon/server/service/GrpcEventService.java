@@ -53,6 +53,7 @@ public class GrpcEventService {
     private final EventMapper mapper;
     private final ServerHeaderUtil headerUtil;
     private static final Logger LOG = LoggerFactory.getLogger(GrpcEventService.class);
+
     @GraphQLQuery
     public Flux<Event> findAllEvents(@GraphQLEnvironment ResolutionEnvironment env) {
         return Flux.fromIterable(client.listEvents(headerUtil.getAuthHeader(env)).stream()
@@ -110,13 +111,13 @@ public class GrpcEventService {
             try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
                 for (Event event : events) {
                     csvPrinter.printRecord(
-                        DateTimeUtil.convertAndFormatLongDate(
-                            event.getProducedTime(), DateTimeUtil.D_MM_YYYY_HH_MM_SS_SSS),
-                        event.getUei(),
-                        event.getDescription());
+                            DateTimeUtil.convertAndFormatLongDate(
+                                    event.getProducedTime(), DateTimeUtil.D_MM_YYYY_HH_MM_SS_SSS),
+                            event.getUei(),
+                            event.getDescription());
                 }
                 csvPrinter.flush();
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 LOG.error("Exception while printing records", e);
             }
             return new SearchEventsResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);

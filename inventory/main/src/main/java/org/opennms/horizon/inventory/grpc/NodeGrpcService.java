@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.opennms.horizon.inventory.dto.*;
@@ -575,7 +576,9 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                         List<Integer> monitoredPolicies =
                                 tagService.getMonitoringPoliciesByNodeId(tenantId, request.getValue());
                         responseObserver.onNext(MonitoringPolicies.newBuilder()
-                                .addAllIds(monitoredPolicies)
+                                .addAllIds(monitoredPolicies.stream()
+                                        .map(Long::valueOf)
+                                        .collect(Collectors.toList()))
                                 .build());
                         responseObserver.onCompleted();
                     } catch (Exception e) {

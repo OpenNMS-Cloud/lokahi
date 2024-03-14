@@ -589,7 +589,7 @@ public class TagService {
             throw new InventoryRuntimeException("Node not found for id: " + nodeId);
         }
         return repository.findByTenantIdAndNodeId(tenantId, nodeId).stream()
-                .flatMap(mp -> mp.getMonitorPolicyIds().stream())
+                .flatMap(tag -> tag.getMonitorPolicyIds().stream())
                 .distinct()
                 .collect(Collectors.toList())
                 .stream()

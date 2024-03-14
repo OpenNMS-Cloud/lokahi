@@ -108,7 +108,7 @@ message NodeIdList {
   repeated int64 ids = 1;
 }
 message MonitoringPolicies {
-  repeated int32 ids = 1;
+  repeated int64 ids = 1;
 }
 
 message  SearchIpInterfaceQuery{

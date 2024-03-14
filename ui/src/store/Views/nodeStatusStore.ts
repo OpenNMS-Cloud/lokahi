@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { DownloadFormat, DownloadCsvVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
+import { DownloadFormat, DownloadIpInterfacesVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { createAndDownloadBlobFile } from '@/components/utils'
 import { AlertsFilters, AlertsSort, Pagination } from '@/types/alerts'
@@ -94,25 +94,13 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   }
 
   const downloadIpInterfacesToCsv = async (searchTerm: string) => {
-    const downloadTopNQueryVariables: DownloadCsvVariables = {
+    const downloadTopNQueryVariables: DownloadIpInterfacesVariables = {
       nodeId: nodeId.value,
       searchTerm: searchTerm,
       downloadFormat: DownloadFormat.Csv
     }
     const bytes = await nodeStatusQueries.downloadIpInterfaces(downloadTopNQueryVariables)
     createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
-  }
-
-  const downloadAlertsByNodesToCsv = async () => {
-    const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
-    const pagination = {
-      ...alertsPagination.value,
-      page
-    }
-
-    const bytes = await nodeStatusQueries.downloadAlertsByNode(alertsFilter.value, pagination, { downloadFormat: DownloadFormat.Csv })
-    const filename = `${node.value.nodeLabel}-recent-alerts.csv`
-    createAndDownloadBlobFile(bytes || [], filename)
   }
 
   const getAlertsByNode = async () => {
@@ -193,7 +181,6 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     alertsPagination,
     setAlertsByNodePageSize,
     setAlertsByNodePage,
-    alertsByNodeSortChanged,
-    downloadAlertsByNodesToCsv
+    alertsByNodeSortChanged
   }
 })

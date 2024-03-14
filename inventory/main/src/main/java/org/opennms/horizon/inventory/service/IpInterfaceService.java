@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -106,16 +107,22 @@ public class IpInterfaceService {
             String tenantId,
             Node node,
             AzureInterface azureInterface,
-            AzureScanNetworkInterfaceItem networkInterfaceItem) {
-        Objects.requireNonNull(azureInterface);
+            AzureScanNetworkInterfaceItem networkInterfaceItem)
+            throws DataIntegrityViolationException {
+        try {
+            Objects.requireNonNull(azureInterface);
 
-        IpInterface ipInterface = new IpInterface();
-        ipInterface.setNode(node);
-        ipInterface.setTenantId(tenantId);
-        ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
-        ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
-        ipInterface.setAzureInterface(azureInterface);
-        modelRepo.save(ipInterface);
+            IpInterface ipInterface = new IpInterface();
+            ipInterface.setNode(node);
+            ipInterface.setTenantId(tenantId);
+            ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
+            ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
+            ipInterface.setAzureInterface(azureInterface);
+            ipInterface.setLocation(node.getMonitoringLocation());
+            modelRepo.save(ipInterface);
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityViolationException("Ip address already exists for a given location", e);
+        }
     }
 
     public IpInterface getPrimaryInterfaceForNode(long nodeId) {

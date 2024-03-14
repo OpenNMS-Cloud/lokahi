@@ -74,6 +74,7 @@ import org.opennms.node.scan.contract.NodeInfoResult;
 import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.TaskDefinition;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,16 +153,21 @@ public class NodeService {
                 .findFirst();
     }
 
-    private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) {
-        if (request.hasManagementIp()) {
-            IpInterface ipInterface = new IpInterface();
-            ipInterface.setNode(node);
-            ipInterface.setTenantId(tenantId);
-            ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
-            ipInterface.setSnmpPrimary(true);
-            ipInterface.setLocation(node.getMonitoringLocation());
-            ipInterfaceRepository.save(ipInterface);
-            node.setIpInterfaces(List.of(ipInterface));
+    private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId)
+            throws DataIntegrityViolationException {
+        try {
+            if (request.hasManagementIp()) {
+                IpInterface ipInterface = new IpInterface();
+                ipInterface.setNode(node);
+                ipInterface.setTenantId(tenantId);
+                ipInterface.setIpAddress(InetAddressUtils.getInetAddress(request.getManagementIp()));
+                ipInterface.setSnmpPrimary(true);
+                ipInterface.setLocation(node.getMonitoringLocation());
+                ipInterfaceRepository.save(ipInterface);
+                node.setIpInterfaces(List.of(ipInterface));
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityViolationException("Ip address already exists for a given location", e);
         }
     }
 
@@ -195,7 +201,7 @@ public class NodeService {
 
     @Transactional
     public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId)
-            throws EntityExistException, LocationNotFoundException {
+            throws EntityExistException, LocationNotFoundException, DataIntegrityViolationException {
         if (request.hasManagementIp()) { // Do we really want to create a node without managed IP?
             Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(
                     InetAddressUtils.getInetAddress(request.getManagementIp()),

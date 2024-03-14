@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeEventsDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadCsvVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeEventsDocument, ListNodeStatusDocument, Node, RequestCriteriaInput, DownloadAlertsByNodeDocument } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
@@ -65,7 +65,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     }
   }
 
-  const downloadIpInterfaces = async (requestCriteria: DownloadIpInterfacesVariables) => {
+  const downloadIpInterfaces = async (requestCriteria: DownloadCsvVariables) => {
     const { execute, data } = useQuery({
       query: DownloadIpInterfacesDocument,
       variables: requestCriteria,
@@ -74,6 +74,24 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     })
     await execute()
     return data.value?.downloadIpInterfacesByNodeAndSearchTerm?.ipInterfaces
+  }
+
+  const downloadAlertsByNode = async ({sortBy, sortAscending}: AlertsFilters, {page, pageSize}: Pagination, downloadFormat: DownloadCsvVariables) => {
+    const { execute, data } = useQuery({
+      query: DownloadAlertsByNodeDocument,
+      variables: {
+        nodeId: variables.value.id,
+        sortAscending,
+        page,
+        pageSize,
+        sortBy,
+        downloadFormat: downloadFormat.downloadFormat
+      },
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.downloadRecentAlertsByNode?.alertsBytes || []
   }
 
   return {
@@ -85,6 +103,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     fetchEvents,
     downloadIpInterfaces,
     getAlertsByNodeQuery,
-    fetchAlertsByNodeData
+    fetchAlertsByNodeData,
+    downloadAlertsByNode
   }
 })

@@ -12,7 +12,7 @@
     <artifactId>minion-syslog</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>listener</module>
+     <!--   <module>listener</module>-->
         <module>features</module>
     </modules>
 

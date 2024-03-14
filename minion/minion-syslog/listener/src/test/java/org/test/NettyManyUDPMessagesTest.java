@@ -18,9 +18,11 @@ import org.apache.camel.test.AvailablePortFinder;
 
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.jupiter.api.Test;
+import org.springframework.stereotype.Component;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Component
 public class NettyManyUDPMessagesTest extends CamelTestSupport {
     DefaultCamelContext m_camel;
     InetAddress m_host = null;
@@ -44,15 +46,15 @@ public class NettyManyUDPMessagesTest extends CamelTestSupport {
         camelContext.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                from("netty:tcp://0.0.0.0:9090")
+                from("netty:tcp://127.0.0.1:10154")
                     .log("Received message: ${body}");
             }
         });
         boolean isHttpRegistered = camelContext.getComponentNames().contains("netty");
-        Set<String> components = camelContext.getComponentNames();
+ /*       Set<String> components = camelContext.getComponentNames();
         for(String str : components) {
             System.out.println(str);
-        }
+        }*/
         // Start Camel context
         camelContext.start();
 

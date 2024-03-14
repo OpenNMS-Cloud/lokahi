@@ -60,7 +60,6 @@ describe('Node Status Store', () => {
   })
 
 
-
   it('calls mutations.updateNode with correct parameters', async () => {
     const store = useNodeStatusStore()
     const mutations = useNodeMutations()
@@ -73,6 +72,4 @@ describe('Node Status Store', () => {
       }
     })
   })
-
-
 })

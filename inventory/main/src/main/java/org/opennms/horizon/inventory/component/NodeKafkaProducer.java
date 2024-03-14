@@ -21,6 +21,8 @@
  */
 package org.opennms.horizon.inventory.component;
 
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
 import lombok.Setter;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.opennms.horizon.inventory.dto.NodeDTO;
@@ -40,8 +42,8 @@ public class NodeKafkaProducer {
     @Setter // Testability
     private KafkaTemplate<String, byte[]> kafkaTemplate;
 
-    //    @PostUpdate
-    //    @PostPersist
+        @PostUpdate
+        @PostPersist
     public void sendNode(Node node) {
         // Not all fields are included in this proto, since the Alerts service doesn't care about all of them.
         NodeDTO proto = NodeDTO.newBuilder()

@@ -46,7 +46,7 @@ describe('Node Status Store', () => {
       }
     })
   })
-  
+
 
   it('calls nodeStatusQueries.setNodeId with correct parameter and sets nodeId', async () => {
     const store = useNodeStatusStore()

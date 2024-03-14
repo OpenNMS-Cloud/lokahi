@@ -23,6 +23,7 @@ package org.opennms.horizon.events.grpc.config;
 
 import io.grpc.BindableService;
 import io.grpc.Server;
+import io.grpc.ServerInterceptor;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GrpcServerManager {
     private Server grpcServer;
     private final int port;
-    private final EventServerInterceptor interceptor;
+    private final ServerInterceptor interceptor;
 
     public synchronized void startServer(BindableService... services) {
         NettyServerBuilder serverBuilder = NettyServerBuilder.forAddress(new InetSocketAddress(port))

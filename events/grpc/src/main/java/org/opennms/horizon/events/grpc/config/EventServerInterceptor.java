@@ -51,19 +51,6 @@ public class EventServerInterceptor implements ServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
             ServerCall<ReqT, RespT> serverCall, Metadata headers, ServerCallHandler<ReqT, RespT> callHandler) {
 
-        // TODO: Remove this once we have inter-service authentication in place
-        if (headers.containsKey(GrpcConstants.AUTHORIZATION_BYPASS_KEY)) {
-
-            if (headers.containsKey(GrpcConstants.TENANT_ID_BYPASS_KEY)) {
-                String tenantId = headers.get(GrpcConstants.TENANT_ID_BYPASS_KEY);
-                log.info("Bypassing authorization with tenant id: {}", tenantId);
-
-                Context context = Context.current().withValue(GrpcConstants.TENANT_ID_CONTEXT_KEY, tenantId);
-                return Contexts.interceptCall(context, serverCall, headers, callHandler);
-            }
-            return callHandler.startCall(serverCall, headers);
-        }
-
         log.debug("Received metadata: {}", headers);
         String authHeader = headers.get(GrpcConstants.AUTHORIZATION_METADATA_KEY);
         try {

@@ -26,7 +26,7 @@
             <FeatherButton
               primary
               icon="Refresh"
-              @click="nodeStatusQueries.fetchNodeStatus"
+              @click="nodeStatusQueries.fetchEvents"
             >
               <FeatherIcon :icon="icons.Refresh"/>
             </FeatherButton>

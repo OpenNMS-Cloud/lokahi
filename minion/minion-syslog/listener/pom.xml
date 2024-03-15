@@ -22,19 +22,16 @@
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.0</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <groupId>org.opennms.lokahi.minion</groupId>
+        <artifactId>minion-syslog</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
-    <groupId>io.pratik</groupId>
-    <packaging>jar</packaging>
-    <artifactId>camelapp</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>camelapp</name>
-    <description>Demo project camel with Spring Boot</description>
+
+    <artifactId>syslog-listener</artifactId>
+    <packaging>bundle</packaging>
+    <name>OpenNMS Lokahi :: Minion :: Syslog :: Listener</name>
+
     <properties>
         <camel.version>3.6.0</camel.version>
             <project.build.targetJdk>17</project.build.targetJdk>
@@ -79,47 +76,73 @@
             <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-all -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>5.16.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-support</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.camel/camel-netty4 -->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-netty4</artifactId>
+            <version>3.0.0-M4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>lokahi-common-utils</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>2.7.7</version> <!-- Replace with the appropriate version -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.lokahi.shared</groupId>
+            <artifactId>event-conf</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.2 -->
+        <dependency>
+            <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.jaxws-api-2.2</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
+
     </dependencies>
-    <dependencyManagement>
 
-        <dependencies>
-            <!-- Camel BOM -->
-            <dependency>
-                <groupId>org.apache.camel.springboot</groupId>
-                <artifactId>camel-spring-boot-bom</artifactId>
-                <version>3.10.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
 
-    </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.5.0</version>
-                <configuration>
-                    <mainClass>org.test.App</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 
 </project>

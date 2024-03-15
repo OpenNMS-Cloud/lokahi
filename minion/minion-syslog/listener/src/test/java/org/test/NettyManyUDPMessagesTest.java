@@ -17,12 +17,12 @@ import org.apache.camel.spi.DataFormat;
 import org.apache.camel.test.AvailablePortFinder;
 
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.junit.jupiter.api.Test;
-import org.springframework.stereotype.Component;
+import org.testng.annotations.Test;
+
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Component
+
 public class NettyManyUDPMessagesTest extends CamelTestSupport {
     DefaultCamelContext m_camel;
     InetAddress m_host = null;
@@ -31,9 +31,7 @@ public class NettyManyUDPMessagesTest extends CamelTestSupport {
     private static int serverPort=514;
     private final int messageCount = 100;
     private final String message
-        = "<165>Aug  4 05:34:00 mymachine myproc[10]: %% It's\n         time to make the do-nuts.  %%  Ingredients: Mix=OK, Jelly=OK #\n"
-        + "         Devices: Mixer=OK, Jelly_Injector=OK, Frier=OK # Transport:\n"
-        + "         Conveyer1=OK, Conveyer2=OK # %%";
+        = "test";
 
 
 

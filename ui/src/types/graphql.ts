@@ -996,6 +996,10 @@ export type IpInterfaceResponse = {
   ipInterfaces?: Maybe<Scalars['Base64String']>;
 }
 
+export type RecentAlerts = {
+  __typename?: 'RecentAlerts';
+  alertsBytes?: Maybe<Scalars['Base64String']>;
+}
 
 export type TrafficSummary = {
   __typename?: 'TrafficSummary';
@@ -1334,10 +1338,14 @@ export type DownloadTopNQueryVariables = Exact<{
 }>
 
 export type DownloadCsvVariables = Exact<{
-  nodeId: Scalars['Long'];
-  searchTerm: InputMaybe<Scalars['String']>;
-  downloadFormat: DownloadFormat;
+  nodeId?: Scalars['Long'];
+  searchTerm?: InputMaybe<Scalars['String']>;
+  downloadFormat?: DownloadFormat;
 }>
+
+export type AlertsNodeByListVariablesExtended = AlertsNodeByListVariables & {
+  downloadFormat?: DownloadFormat;
+}
 
 export type DownloadTopNQuery = { __typename?: 'Query', downloadTopN?: { __typename?: 'TopNResponse', topNBytes?: any } }
 
@@ -1346,6 +1354,8 @@ export type DownloadIpInterfacesByNodeAndSearchTermQuery = { __typename?: 'Query
 export type ListLocationsForDiscoveryQueryVariables = Exact<{ [key: string]: never; }>
 
 export type ListLocationsForDiscoveryQuery = { __typename?: 'Query', findAllLocations?: Array<{ __typename?: 'MonitoringLocation', id: any, location?: string, address?: string, longitude?: number, latitude?: number }> }
+
+export type DownloadAlertsByNodeAndSearchTermQuery = { __typename?: 'Query', downloadRecentAlertsByNode?: { __typename?: 'RecentAlerts', alertsBytes?: any } }
 
 export type ListDiscoveriesQueryVariables = Exact<{ [key: string]: never; }>
 
@@ -1587,4 +1597,5 @@ export const FindDevicesForWelcomeDocument = {'kind':'Document','definitions':[{
 export const FindMinionsForWelcomeDocument = {'kind':'Document','definitions':[{'kind':'OperationDefinition','operation':'query','name':{'kind':'Name','value':'FindMinionsForWelcome'},'variableDefinitions':[{'kind':'VariableDefinition','variable':{'kind':'Variable','name':{'kind':'Name','value':'locationId'}},'type':{'kind':'NonNullType','type':{'kind':'NamedType','name':{'kind':'Name','value':'Long'}}}}],'selectionSet':{'kind':'SelectionSet','selections':[{'kind':'Field','name':{'kind':'Name','value':'findMinionsByLocationId'},'arguments':[{'kind':'Argument','name':{'kind':'Name','value':'locationId'},'value':{'kind':'Variable','name':{'kind':'Name','value':'locationId'}}}],'selectionSet':{'kind':'SelectionSet','selections':[{'kind':'Field','name':{'kind':'Name','value':'id'}}]}}]}}]} as unknown as DocumentNode<FindMinionsForWelcomeQuery, FindMinionsForWelcomeQueryVariables>
 export const DownloadMinionCertificateForWelcomeDocument = {'kind':'Document','definitions':[{'kind':'OperationDefinition','operation':'query','name':{'kind':'Name','value':'DownloadMinionCertificateForWelcome'},'variableDefinitions':[{'kind':'VariableDefinition','variable':{'kind':'Variable','name':{'kind':'Name','value':'location'}},'type':{'kind':'NamedType','name':{'kind':'Name','value':'Long'}}}],'selectionSet':{'kind':'SelectionSet','selections':[{'kind':'Field','name':{'kind':'Name','value':'getMinionCertificate'},'arguments':[{'kind':'Argument','name':{'kind':'Name','value':'locationId'},'value':{'kind':'Variable','name':{'kind':'Name','value':'location'}}}],'selectionSet':{'kind':'SelectionSet','selections':[{'kind':'Field','name':{'kind':'Name','value':'password'}},{'kind':'Field','name':{'kind':'Name','value':'certificate'}}]}}]}}]} as unknown as DocumentNode<DownloadMinionCertificateForWelcomeQuery, DownloadMinionCertificateForWelcomeQueryVariables>
 export const AlertsByNodeDocument = { 'kind': 'Document', 'definitions': [{ 'kind': 'OperationDefinition', 'operation': 'query', 'name': { 'kind': 'Name', 'value': 'AlertsByNode' }, 'variableDefinitions': [{ 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'page' } }, 'type': { 'kind': 'NonNullType', 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Int' } } } }, { 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'pageSize' } }, 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Int' } } }, { 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'sortAscending' } }, 'type': { 'kind': 'NonNullType', 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Boolean' } } } }, { 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'sortBy' } }, 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'String' } } }, { kind: 'VariableDefinition', variable: { kind: 'Variable', name: { kind: 'Name', value: 'nodeId' } }, type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Long' } } } }], 'selectionSet': { 'kind': 'SelectionSet', 'selections': [{ 'kind': 'FragmentSpread', 'name': { 'kind': 'Name', 'value': 'AlertsByNode' } }] } }, ...AlertsPartsList.definitions] } as unknown as DocumentNode<AlertsByNodeListQuery, AlertsNodeByListVariables>
+export const DownloadAlertsByNodeDocument = { 'kind': 'Document', 'definitions': [{ 'kind': 'OperationDefinition', 'operation': 'query', 'name': { 'kind': 'Name', 'value': 'downloadRecentAlertsByNode' }, 'variableDefinitions': [{ 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'nodeId' } }, 'type': { 'kind': 'NonNullType', 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Long' } } } }, { 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'page' } }, 'type': { 'kind': 'NonNullType', 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Int' } } } }, { 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'pageSize' } }, 'type': { 'kind': 'NonNullType', 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Int' } } } }, { kind: 'VariableDefinition', variable: { kind: 'Variable', name: { kind: 'Name', value: 'sortBy' } }, type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } } } }, { kind: 'VariableDefinition', variable: { kind: 'Variable', name: { kind: 'Name', value: 'downloadFormat' } }, type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'DownloadFormat' } } } }, { 'kind': 'VariableDefinition', 'variable': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'sortAscending' } }, 'type': { 'kind': 'NonNullType', 'type': { 'kind': 'NamedType', 'name': { 'kind': 'Name', 'value': 'Boolean' } } } }], 'selectionSet': { 'kind': 'SelectionSet', 'selections': [{ 'kind': 'Field', 'name': { 'kind': 'Name', 'value': 'downloadRecentAlertsByNode' }, 'arguments': [{ 'kind': 'Argument', 'name': { 'kind': 'Name', 'value': 'nodeId' }, 'value': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'nodeId' } } }, { kind: 'Argument', name: { kind: 'Name', value: 'pageSize' }, value: { kind: 'Variable', name: { kind: 'Name', value: 'pageSize' } } }, { kind: 'Argument', name: { kind: 'Name', value: 'sortBy' }, value: { kind: 'Variable', name: { kind: 'Name', value: 'sortBy' } } }, { kind: 'Argument', name: { kind: 'Name', value: 'sortAscending' }, value: { kind: 'Variable', name: { kind: 'Name', value: 'sortAscending' } } }, { 'kind': 'Argument', 'name': { 'kind': 'Name', 'value': 'page' }, 'value': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'page' } } }, { 'kind': 'Argument', 'name': { 'kind': 'Name', 'value': 'downloadFormat' }, 'value': { 'kind': 'Variable', 'name': { 'kind': 'Name', 'value': 'downloadFormat' } } }], 'selectionSet': { 'kind': 'SelectionSet', 'selections': [{ 'kind': 'Field', 'name': { 'kind': 'Name', 'value': 'alertsBytes' } }] } }] } }] } as unknown as DocumentNode<DownloadAlertsByNodeAndSearchTermQuery, AlertsNodeByListVariablesExtended>
 /* eslint-enable @stylistic/comma-spacing, @stylistic/key-spacing */

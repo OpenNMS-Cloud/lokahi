@@ -48,14 +48,20 @@
             <phase>verify</phase>
             <configuration>
               <descriptors>
-
+                  <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                  <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                  <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
               </descriptors>
+                <features>
+                    <feature>minion-syslog</feature>
+                </features>
              </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+
+
 
 </project>

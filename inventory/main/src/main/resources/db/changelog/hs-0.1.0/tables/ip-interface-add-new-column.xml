@@ -4,7 +4,7 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <changeSet id="0.1.0-add_fk_to_ipinterface" author="Junaid-Khan-Nant">
+    <changeSet id="0.1.0-add_column_to_ipinterface" author="Junaid-Khan-Nant">
 
         <addColumn tableName="ip_interface">
             <column name="location_id" type="bigint">
@@ -12,16 +12,29 @@
             </column>
         </addColumn>
 
-
         <addForeignKeyConstraint baseTableName="ip_interface"
                                  baseColumnNames="location_id"
                                  constraintName="fk_ipinterface_location_id"
                                  referencedTableName="monitoring_location"
                                  referencedColumnNames="id"
                                  onDelete="CASCADE"/>
+
     </changeSet>
 
-    <changeSet id="0.1.0-add_unique_constraint_to_ipinterface" author="Junaid-Khan-Nant">
+
+    <changeSet id="0.1.1-ip_interface" author="Junaid-Khan-Nant">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="0.1.0-add_column_to_ipinterface" author="Junaid-Khan-Nant" changeLogFile="db/changelog/hs-0.1.0/tables/ip-interface-add-new-column.xml"/>
+        </preConditions>
+        <sql>
+            UPDATE inventory.ip_interface SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM inventory.monitoring_location) AS locations
+            WHERE ip_interface.location_id=locations.id AND ip_interface.tenant_id=locations.tenant_id
+        </sql>
+
+    </changeSet>
+
+
+    <changeSet id="0.1.2-add_unique_constraint_to_ipinterface" author="Junaid-Khan-Nant">
         <addUniqueConstraint tableName="ip_interface"
                              constraintName="uniq_ipaddress_location"
                              columnNames="ip_address, location_id"/>

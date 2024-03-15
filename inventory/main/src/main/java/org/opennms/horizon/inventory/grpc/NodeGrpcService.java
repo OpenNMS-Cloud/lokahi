@@ -131,7 +131,7 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                         .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
                         .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-            } catch (DataIntegrityViolationException e) {
+            } catch (RuntimeException e) {
                 Status status = Status.newBuilder()
                         .setCode(Code.ALREADY_EXISTS_VALUE)
                         .setMessage(IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG)

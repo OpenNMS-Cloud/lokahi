@@ -53,7 +53,7 @@
     <module>minion-flows</module>
     <module>testtools</module>
     <module>docker-it</module>
-      <module>minion-syslog</module>
+    <module>minion-syslog</module>
   </modules>
 
   <properties>

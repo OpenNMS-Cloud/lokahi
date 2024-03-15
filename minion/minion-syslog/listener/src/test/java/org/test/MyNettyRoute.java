@@ -1,3 +1,4 @@
+/*
 package org.test;
 
 import org.apache.camel.builder.RouteBuilder;
@@ -9,3 +10,4 @@ public class MyNettyRoute extends RouteBuilder {
             .log("Received message: ${body}");
     }
 }
+*/

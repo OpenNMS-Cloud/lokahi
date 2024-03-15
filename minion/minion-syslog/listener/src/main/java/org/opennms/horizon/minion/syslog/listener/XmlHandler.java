@@ -51,8 +51,6 @@ public class XmlHandler<U> {
             context = JaxbUtils.getContextFor(clazz);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
-        } catch (jakarta.xml.bind.JAXBException e) {
-            throw new RuntimeException(e);
         }
         this.marshaller = JaxbUtils.getMarshallerFor(clazz, context);
         this.unmarshaller = JaxbUtils.getUnmarshallerFor(clazz, context, false);

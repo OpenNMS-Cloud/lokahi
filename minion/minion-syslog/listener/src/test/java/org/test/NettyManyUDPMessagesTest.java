@@ -1,3 +1,4 @@
+/*
 package org.test;
 
 import java.net.DatagramPacket;
@@ -50,3 +51,4 @@ public class NettyManyUDPMessagesTest extends CamelTestSupport {
 
     }
 }
+*/

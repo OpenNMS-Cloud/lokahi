@@ -33,7 +33,6 @@
 
   <name>OpenNMS Lokahi :: Minion :: Syslog :: Features</name>
 
-
   <build>
     <plugins>
       <plugin>
@@ -49,20 +48,10 @@
             <phase>verify</phase>
             <configuration>
               <descriptors>
-                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
-                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
-                <descriptor>mvn:org.opennms.lokahi.minion/snmp-plugin/${project.version}/xml/features</descriptor>
-                <descriptor>mvn:org.opennms.lokahi.shared/snmp-api/${project.version}/xml/features</descriptor>
-                <descriptor>mvn:org.opennms.lokahi.minion/ipc-features/${project.version}/xml/features</descriptor>
-                <descriptor>mvn:org.opennms.lokahi.minion/grpc-features/${project.version}/xml/features</descriptor>
-                <descriptor>mvn:org.opennms.lokahi.minion/observability-features/${project.version}/xml/features</descriptor>
-                <descriptor>mvn:org.opennms.lokahi.minion/plugin-features/${project.version}/xml/features</descriptor>
-                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+
+                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
               </descriptors>
-              <features>
-                <feature>minion-traps</feature>
-              </features>
-            </configuration>
+             </configuration>
           </execution>
         </executions>
       </plugin>

@@ -333,8 +333,6 @@ public abstract class JaxbUtils {
             return marshaller;
         } catch (final JAXBException e) {
             throw null;
-        } catch (jakarta.xml.bind.JAXBException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -370,7 +368,7 @@ public abstract class JaxbUtils {
                 } else {
                     unmarshaller = jaxbContext.createUnmarshaller();
                 }
-            } catch (final JAXBException | jakarta.xml.bind.JAXBException e) {
+            } catch (final JAXBException e) {
                 throw null;
             }
         }
@@ -405,7 +403,7 @@ public abstract class JaxbUtils {
         return classes;
     }
 
-    public static JAXBContext getContextFor(final Class<?> clazz) throws JAXBException,  JAXBException, jakarta.xml.bind.JAXBException {
+    public static JAXBContext getContextFor(final Class<?> clazz) throws JAXBException,  JAXBException {
         LOG.trace("Getting context for class {}", clazz);
         JAXBContext context = null;
         if (m_contexts.containsKey(clazz)) {

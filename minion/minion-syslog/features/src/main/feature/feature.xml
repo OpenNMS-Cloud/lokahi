@@ -2,8 +2,18 @@
 <features name="minion-syslog-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <feature name="minion-syslog" version="${project.version}">
+        <bundle>mvn:org.apache.camel/camel-core/${camel.version}</bundle>
+         <bundle>mvn:io.netty/netty-all/${netty4.version}</bundle>
+        <bundle>mvn:org.opennms.lokahi.shared/lokahi-common-utils/${project.version}</bundle>
+        <bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 
-      <!--  <bundle>mvn:org.opennms.lokahi.minion/syslog-listener/${project.version}</bundle>-->
+        <bundle>mvn:io.netty/netty-buffer/${netty4.version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty4.version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty4.version}</bundle>
+        <bundle>mvn:io.netty/netty-resolver/${netty4.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty4.version}</bundle>
+
+       <bundle>mvn:org.opennms.lokahi.minion/syslog-listener/${project.version}</bundle>
     </feature>
 
 </features>

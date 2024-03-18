@@ -21,15 +21,10 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
-import org.apache.commons.io.IOUtils;
-import org.eclipse.persistence.jaxb.MarshallerProperties;
-import org.opennms.horizon.events.util.EmptyNamespacePrefixMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.io.Resource;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
@@ -107,26 +102,7 @@ public abstract class JaxbUtils {
         final Class<?> existing = m_elementClasses.get(elementName);
         if (existing != null) return existing;
 
-        final ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
-        scanner.addIncludeFilter(new AnnotationTypeFilter(XmlRootElement.class));
-        for (final BeanDefinition bd : scanner.findCandidateComponents("org.opennms")) {
-            final String className = bd.getBeanClassName();
-            try {
-                final Class<?> clazz = Class.forName(className);
-                final XmlRootElement annotation = clazz.getAnnotation(XmlRootElement.class);
-                if (annotation == null) {
-                    LOG.warn("Somehow found class {} but it has no @XmlRootElement annotation! Skipping.", className);
-                    continue;
-                }
-                if (elementName.equalsIgnoreCase(annotation.name())) {
-                    LOG.trace("Found class {} for element name {}", className, elementName);
-                    m_elementClasses.put(elementName, clazz);
-                    return clazz;
-                }
-            } catch (final ClassNotFoundException e) {
-                LOG.warn("Unable to get class object from class name {}. Skipping.", className, e);
-            }
-        }
+
         return null;
     }
 
@@ -198,10 +174,7 @@ public abstract class JaxbUtils {
             marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-            if (context.getClass().getName().startsWith("org.eclipse.persistence.jaxb")) {
-                marshaller.setProperty(MarshallerProperties.NAMESPACE_PREFIX_MAPPER, new EmptyNamespacePrefixMapper());
-                marshaller.setProperty(MarshallerProperties.JSON_MARSHAL_EMPTY_COLLECTIONS, true);
-            }
+
             final Schema schema = getValidatorFor(clazz);
             marshaller.setSchema(schema);
             if (jaxbContext == null) marshallers.put(clazz, marshaller);

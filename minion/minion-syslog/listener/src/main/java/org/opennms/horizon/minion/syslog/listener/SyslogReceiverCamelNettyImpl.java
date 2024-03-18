@@ -31,9 +31,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.netty4.NettyComponent;
 import org.apache.camel.component.netty4.NettyConstants;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.DefaultManagementNameStrategy;
 
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.impl.engine.DefaultManagementNameStrategy;
 import org.apache.camel.support.SimpleRegistry;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 
@@ -173,7 +173,17 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                             return false;
                         }
 
+                        @Override
+                        public CompletableFuture<Exchange> processAsync(Exchange exchange) {
+                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
 
+                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
+                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
+                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
+
+                            System.out.println(source.getHostName());
+                            return null;
+                        }
 
 
                     });

@@ -27,92 +27,18 @@ package org.opennms.horizon.minion.syslog.listener;
 import java.net.InetSocketAddress;
 import java.util.Objects;
 
-public class SyslogSinkModule extends AbstractXmlSinkModule<SyslogConnection, SyslogMessageLogDTO> {
+public class SyslogSinkModule {
 
     public static final String MODULE_ID = "Syslog";
 
     private final SyslogdConfig config;
 
     public SyslogSinkModule(SyslogdConfig config) {
-        super(SyslogMessageLogDTO.class);
+
         this.config = Objects.requireNonNull(config);
 
     }
 
-    @Override
-    public String getId() {
-        return MODULE_ID;
-    }
-
-    @Override
-    public int getNumConsumerThreads() {
-        return config.getNumThreads();
-    }
-
-    @Override
-    public AggregationPolicy<SyslogConnection, SyslogMessageLogDTO, SyslogMessageLogDTO> getAggregationPolicy() {
-        final String systemId = "test";
-        final String systemLocation = "test";
-        return new AggregationPolicy<SyslogConnection, SyslogMessageLogDTO, SyslogMessageLogDTO>() {
-            @Override
-            public int getCompletionSize() {
-                return config.getBatchSize();
-            }
-
-            @Override
-            public int getCompletionIntervalMs() {
-                return config.getBatchIntervalMs();
-            }
-
-            @Override
-            public Object key(SyslogConnection syslogConnection) {
-                return syslogConnection.getSource();
-            }
-
-            @Override
-            public SyslogMessageLogDTO aggregate(SyslogMessageLogDTO accumulator, SyslogConnection connection) {
-                if (accumulator == null) {
-                    accumulator = new SyslogMessageLogDTO(systemLocation, systemId, connection.getSource());
-                }
-                SyslogMessageDTO messageDTO = new SyslogMessageDTO(connection.getBuffer());
-                accumulator.getMessages().add(messageDTO);
-                return accumulator;
-            }
-
-            @Override
-            public SyslogMessageLogDTO build(SyslogMessageLogDTO accumulator) {
-                return accumulator;
-            }
-        };
-    }
-
-    @Override
-    public AsyncPolicy getAsyncPolicy() {
-        return new AsyncPolicy() {
-            @Override
-            public int getQueueSize() {
-                return config.getQueueSize();
-            }
-
-            @Override
-            public int getNumThreads() {
-                return config.getNumThreads();
-            }
-
-            @Override
-            public boolean isBlockWhenFull() {
-                return true;
-            }
-        };
-    }
-
-    @Override
-    public SyslogConnection unmarshalSingleMessage(byte[] bytes) {
-        SyslogMessageLogDTO syslogMessageLogDTO = unmarshal(bytes);
-        SyslogMessageDTO syslogMessageDTO = syslogMessageLogDTO.getMessages().get(0);
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(syslogMessageLogDTO.getSourceAddress(), syslogMessageLogDTO.getSourcePort());
-        return new SyslogConnection(inetSocketAddress, syslogMessageDTO.getBytes());
-    }
 
     /**
      * Used for testing.

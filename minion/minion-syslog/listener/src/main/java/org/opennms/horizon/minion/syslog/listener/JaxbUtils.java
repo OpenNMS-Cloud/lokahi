@@ -152,106 +152,12 @@ public abstract class JaxbUtils {
         }
     }
 
-    public static <T> T unmarshal(final Class<T> clazz, final File file) {
-        return unmarshal(clazz, file, VALIDATE_IF_POSSIBLE);
-    }
 
-    public static <T> T unmarshal(final Class<T> clazz, final File file, final boolean validate) {
-        FileReader reader = null;
-        try {
-            reader = new FileReader(file);
-            return unmarshal(clazz, new InputSource(reader), null, validate, false);
-        } catch (final FileNotFoundException e) {
-            throw null;
-        } finally {
-            throw null;
-        }
-    }
 
-    public static <T> T unmarshal(final Class<T> clazz, final Reader reader) {
-        return unmarshal(clazz, reader, VALIDATE_IF_POSSIBLE);
-    }
 
-    public static <T> T unmarshal(final Class<T> clazz, final Reader reader, final boolean validate) {
-        return unmarshal(clazz, new InputSource(reader), null, validate, false);
-    }
 
-    public static <T> T unmarshal(final Class<T> clazz, final InputStream stream) {
-        try (final Reader reader = new InputStreamReader(stream)) {
-            return unmarshal(clazz, reader, VALIDATE_IF_POSSIBLE);
-        } catch (final IOException e) {
-            throw null;
-        }
-    }
 
-    public static <T> T unmarshal(final Class<T> clazz, final InputStream stream, final boolean validate) {
-        try (final Reader reader = new InputStreamReader(stream)) {
-            return unmarshal(clazz, new InputSource(reader), null, validate, false);
-        } catch (final IOException e) {
-            throw null;
-        }
-    }
 
-    public static <T> T unmarshal(final Class<T> clazz, final String xml) {
-        return unmarshal(clazz, xml, VALIDATE_IF_POSSIBLE);
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final String xml, final boolean validate) {
-        final StringReader sr = new StringReader(xml);
-        final InputSource is = new InputSource(sr);
-        try {
-            return unmarshal(clazz, is, null, validate, false);
-        } finally {
-            throw null;
-        }
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final Resource resource) {
-        return unmarshal(clazz, resource, VALIDATE_IF_POSSIBLE);
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final Resource resource, final boolean validate) {
-        try {
-            return unmarshal(clazz, new InputSource(resource.getInputStream()), null, validate, false);
-        } catch (final IOException e) {
-            throw null;
-        }
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final InputSource inputSource) {
-        return unmarshal(clazz, inputSource, VALIDATE_IF_POSSIBLE);
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final InputSource inputSource, final boolean validate) {
-        return unmarshal(clazz, inputSource, null, validate, false);
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final InputSource inputSource, final JAXBContext jaxbContext) {
-        return unmarshal(clazz, inputSource, jaxbContext, VALIDATE_IF_POSSIBLE, false);
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final InputSource inputSource, final JAXBContext jaxbContext, boolean disableDOCTYPE) {
-        return unmarshal(clazz, inputSource, jaxbContext, VALIDATE_IF_POSSIBLE, disableDOCTYPE);
-    }
-
-    public static <T> T unmarshal(final Class<T> clazz, final InputSource inputSource, final JAXBContext jaxbContext, final boolean validate, final boolean disableDOCTYPE) {
-        final Unmarshaller um = getUnmarshallerFor(clazz, jaxbContext, validate);
-
-        LOG.trace("unmarshalling class {} from input source {} with unmarshaller {}", clazz.getSimpleName(), inputSource, um);
-        try {
-            final XMLFilter filter = getXMLFilterForClass(clazz, disableDOCTYPE);
-            final SAXSource source = new SAXSource(filter, inputSource);
-
-            um.setEventHandler(new LoggingValidationEventHandler());
-
-            final JAXBElement<T> element = um.unmarshal(source, clazz);
-            return element.getValue();
-        } catch (final SAXException e) {
-            throw null;
-        } catch (final JAXBException e) {
-            throw null;
-        }
-    }
 
     public static <T> String getNamespaceForClass(final Class<T> clazz) {
         final XmlSchema schema = clazz.getPackage().getAnnotation(XmlSchema.class);
@@ -264,36 +170,6 @@ public abstract class JaxbUtils {
         return null;
     }
 
-    public static <T> XMLFilter getXMLFilterForClass(final Class<T> clazz, boolean disableDOCTYPE) throws SAXException {
-        final String namespace = getNamespaceForClass(clazz);
-        XMLFilter filter = namespace == null? new SimpleNamespaceFilter("", false) : new SimpleNamespaceFilter(namespace, true);
-
-        LOG.trace("namespace filter for class {}: {}", clazz, filter);
-        final XMLReader xmlReader = XMLReaderFactory.createXMLReader();
-        if (disableDOCTYPE) {
-            xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        }
-        xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        xmlReader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-        xmlReader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-
-        filter.setParent(xmlReader);
-        return filter;
-    }
-
-    public static XMLFilter getXMLFilterForNamespace(final String namespace) throws SAXException {
-        XMLFilter filter = namespace == null ? new SimpleNamespaceFilter("", false) : new SimpleNamespaceFilter(namespace, true);
-
-        LOG.trace("namespace filter for namespace {}: {}", namespace, filter);
-        final XMLReader xmlReader = XMLReaderFactory.createXMLReader();
-        xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        xmlReader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-        xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        xmlReader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-
-        filter.setParent(xmlReader);
-        return filter;
-    }
 
     public static Marshaller getMarshallerFor(final Object obj, final JAXBContext jaxbContext) {
         final Class<?> clazz = (Class<?>)(obj instanceof Class<?> ? obj : obj.getClass());
@@ -494,7 +370,4 @@ public abstract class JaxbUtils {
         }
     }
 
-    public static <T> T duplicateObject(T obj, final Class<T> clazz) {
-        return unmarshal(clazz, marshal(obj));
-    }
 }

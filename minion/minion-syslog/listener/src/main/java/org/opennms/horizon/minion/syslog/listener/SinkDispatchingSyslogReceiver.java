@@ -34,13 +34,9 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
     private static final Logger LOG = LoggerFactory.getLogger(SinkDispatchingSyslogReceiver.class);
 
 
-
-
-    private MessageDispatcherFactory m_messageDispatcherFactory;
-
     private final SyslogdConfig m_config;
 
-    protected AsyncDispatcher<SyslogConnection> m_dispatcher;
+
 
     public SinkDispatchingSyslogReceiver(SyslogdConfig config) {
         m_config = Objects.requireNonNull(config);
@@ -52,23 +48,17 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
 
         // Create an asynchronous dispatcher
         final SyslogSinkModule syslogSinkModule = new SyslogSinkModule(m_config);
-        m_dispatcher = m_messageDispatcherFactory.createAsyncDispatcher(syslogSinkModule);
+
     }
 
     @Override
     public void stop() throws InterruptedException {
         try {
-            if (m_dispatcher != null) {
-                m_dispatcher.close();
-                m_dispatcher = null;
-            }
+
         } catch (Exception e) {
             LOG.warn("Exception while closing dispatcher.", e);
         }
     }
 
-    public void setMessageDispatcherFactory(MessageDispatcherFactory messageDispatcherFactory) {
-        m_messageDispatcherFactory = messageDispatcherFactory;
-    }
 }
 

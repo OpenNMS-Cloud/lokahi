@@ -18,7 +18,7 @@
  * either express or implied.  See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *//*
+ */
 
 package org.opennms.horizon.events.util;
 
@@ -142,4 +142,4 @@ public class SimpleNamespaceFilter extends XMLFilterImpl {
         return "SimpleNamespaceFilter[namespaceUri=" + m_namespaceUri + ",addNamespace=" + m_addNamespace + "]";
     }
 }
-*/
+

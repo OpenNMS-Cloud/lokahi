@@ -41,10 +41,7 @@ import org.opennms.horizon.events.persistence.model.Event;
 import org.opennms.horizon.events.persistence.model.EventParameter;
 import org.opennms.horizon.events.persistence.model.EventParameters;
 import org.opennms.horizon.events.persistence.repository.EventRepository;
-import org.opennms.horizon.events.proto.EventInfo;
-import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.events.proto.EventServiceGrpc;
-import org.opennms.horizon.events.proto.SnmpInfo;
+import org.opennms.horizon.events.proto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -157,7 +154,10 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(2);
         }
 
-        EventLog eventLog1 = serviceStub.getEventsByNodeId(UInt64Value.of(1));
+        /*EventLog eventLog1 = serviceStub.getEventsByNodeId(UInt64Value.of(1));*/
+        EventLog eventLog1 = serviceStub.getEventsByNodeId(EventsRequestByNode.newBuilder()
+                .setNodeId(1l)
+            .build());
         List<org.opennms.horizon.events.proto.Event> eventsNode1 = eventLog1.getEventsList();
 
         assertNotNull(eventsNode1);
@@ -167,7 +167,12 @@ class EventGrpcIntTest extends GrpcTestBase {
             assertEvent(event);
         }
 
-        EventLog eventLog2 = serviceStub.getEventsByNodeId(UInt64Value.of(2));
+        /*EventLog eventLog2 = serviceStub.getEventsByNodeId(UInt64Value.of(2));*/
+        EventLog eventLog2 = serviceStub.getEventsByNodeId(
+            EventsRequestByNode.newBuilder()
+                .setNodeId(2l)
+                .build()
+        );
         List<org.opennms.horizon.events.proto.Event> eventsNode2 = eventLog2.getEventsList();
 
         assertNotNull(eventsNode2);
@@ -187,7 +192,10 @@ class EventGrpcIntTest extends GrpcTestBase {
             populateDatabase(1);
         }
 
-        EventLog eventLog = serviceStub.getEventsByNodeId(UInt64Value.of(1));
+        /*EventLog eventLog = serviceStub.getEventsByNodeId(UInt64Value.of(1));*/
+        EventLog eventLog = serviceStub.getEventsByNodeId(EventsRequestByNode.newBuilder()
+            .setNodeId(1l)
+            .build());
         List<org.opennms.horizon.events.proto.Event> eventsNode1 = eventLog.getEventsList();
 
         assertEquals(0, eventsNode1.size());

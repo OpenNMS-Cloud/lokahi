@@ -51,8 +51,12 @@ public class GrpcEventService {
 
     @GraphQLQuery
     public Flux<Event> findEventsByNodeId(
-            @GraphQLArgument(name = "id") Long id, @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.getEventsByNodeId(id, headerUtil.getAuthHeader(env)).stream()
+            @GraphQLArgument(name = "id") Long id,
+            @GraphQLArgument(name = "pageSize") Integer pageSize,
+            @GraphQLArgument(name = "page") int page,
+            @GraphQLArgument(name = "sortBy") String sortBy,
+            @GraphQLArgument(name = "sortAscending") boolean sortAscending, @GraphQLEnvironment ResolutionEnvironment env) {
+        return Flux.fromIterable(client.getEventsByNodeId(id,pageSize,page,sortBy,sortAscending, headerUtil.getAuthHeader(env)).stream()
                 .map(mapper::protoToEvent)
                 .toList());
     }

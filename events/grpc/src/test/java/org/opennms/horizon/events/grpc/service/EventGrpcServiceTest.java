@@ -47,10 +47,7 @@ import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.opennms.horizon.events.grpc.config.GrpcTenantLookupImpl;
 import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.events.persistence.service.EventService;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.events.proto.EventServiceGrpc;
-import org.opennms.horizon.events.proto.EventsSearchBy;
+import org.opennms.horizon.events.proto.*;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -117,7 +114,10 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 .thenReturn(List.of(e1, e2));
 
         EventLog result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
-                .getEventsByNodeId(UInt64Value.of(TEST_NODEID));
+                //.getEventsByNodeId(UInt64Value.of(TEST_NODEID));
+                    .getEventsByNodeId(EventsRequestByNode.newBuilder()
+                        .setNodeId(TEST_NODEID)
+                           .build());
 
         assertThat(result.getEventsList()).hasSize(2);
         assertThat(result.getEventsList().get(0).getDescription().equals("desc1"));
@@ -139,9 +139,12 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
         Mockito.when(mockInventoryClient.getNodeById(TEST_TENANTID, TEST_NODEID))
                 .thenThrow(new StatusRuntimeException(status));
 
+
         var stubWithHeader = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()));
         var statusException =
-                Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(nodeId));
+                /*Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(nodeId));*/
+            Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(EventsRequestByNode
+                .newBuilder().setNodeId(TEST_NODEID).build()));
 
         assertThat(statusException.getStatus().getCode()).isEqualTo(status.getCode());
         assertThat(statusException.getStatus().getDescription()).isEqualTo(status.getDescription());
@@ -163,7 +166,9 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders("Bearer fake")));
 
         var statusException =
-                Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(nodeId));
+                /*Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(nodeId));*/
+            Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(EventsRequestByNode
+                .newBuilder().setNodeId(TEST_NODEID).build()));
 
         assertThat(statusException.getStatus().getCode().value()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
         Mockito.verify(spyInterceptor).verifyAccessToken("Bearer fake");

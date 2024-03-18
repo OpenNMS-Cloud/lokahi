@@ -34,10 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.events.persistence.service.EventService;
-import org.opennms.horizon.events.proto.Event;
-import org.opennms.horizon.events.proto.EventLog;
-import org.opennms.horizon.events.proto.EventServiceGrpc;
-import org.opennms.horizon.events.proto.EventsSearchBy;
+import org.opennms.horizon.events.proto.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -59,7 +56,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    @Override
+   /* @Override
     public void getEventsByNodeId(UInt64Value nodeId, StreamObserver<EventLog> responseObserver) {
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
 
@@ -82,6 +79,12 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
         responseObserver.onNext(eventList);
         responseObserver.onCompleted();
+    }
+*/
+
+    @Override
+    public void getEventsByNodeId(EventsRequestByNode request, StreamObserver<EventLog> responseObserver) {
+        super.getEventsByNodeId(request, responseObserver);
     }
 
     private Status createStatus(int code, String msg) {

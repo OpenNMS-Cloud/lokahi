@@ -14,6 +14,7 @@
         <bundle>mvn:io.netty/netty-codec/${netty4.version}</bundle>
 
        <bundle>mvn:org.opennms.lokahi.minion/syslog-listener/${project.version}</bundle>
+
     </feature>
 
 </features>

@@ -33,7 +33,12 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
+import org.opennms.horizon.events.traps.TrapsProducer;
+import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
+import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
 import org.opennms.horizon.shared.constants.GrpcConstants;
+import org.opennms.horizon.shared.grpc.traps.contract.mapper.TenantLocationSpecificTrapLogDTOMapper;
+import org.opennms.horizon.shared.grpc.traps.contract.mapper.impl.TenantLocationSpecificTrapLogDTOMapperImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +49,7 @@ public class EventsBackgroundHelper {
     private static final String LOCALHOST = "localhost";
     private String tenantId;
     private EventServiceGrpc.EventServiceBlockingStub eventServiceBlockingStub;
+    private TrapsProducer trapsProducer;
 
     private Integer externalGrpcPort;
     private final Map<String, String> grpcHeaders = new TreeMap<>();
@@ -84,5 +90,18 @@ public class EventsBackgroundHelper {
 
     public int getEventCount() {
         return eventServiceBlockingStub.listEvents(Empty.newBuilder().build()).getEventsCount();
+    }
+
+    public void initializeTrapProducer() {
+        this.trapsProducer = new TrapsProducer();
+    }
+
+    public void sendTrapDataToKafkaListenerViaProducerWithTenantIdAndLocationId(String tenantId, String locationId) {
+        TenantLocationSpecificTrapLogDTOMapper tenantLocationSpecificTrapLogDTOMapper =
+                new TenantLocationSpecificTrapLogDTOMapperImpl();
+        TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO =
+                tenantLocationSpecificTrapLogDTOMapper.mapBareToTenanted(
+                        tenantId, locationId, TrapLogDTO.newBuilder().build());
+        this.trapsProducer.produce("traps", tenantLocationSpecificTrapLogDTO);
     }
 }

@@ -8,3 +8,7 @@ Feature: Event Service Basic Functionality
 
     Scenario: Get event numbers
       Then verify there are 0 events
+
+    Scenario:
+      When Initialize Trap Producer
+      Then Send Trap Data to Kafka Listener via Producer with TenantId "event-tenant-stream" and LocationId "jahanzeb-loc"

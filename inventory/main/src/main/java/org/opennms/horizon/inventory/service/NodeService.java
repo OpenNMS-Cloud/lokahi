@@ -46,10 +46,10 @@ import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeUpdateDTO;
 import org.opennms.horizon.inventory.dto.TagCreateListDTO;
 import org.opennms.horizon.inventory.dto.TagEntityIdDTO;
-import org.opennms.horizon.inventory.exception.DuplicateDataException;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
+import org.opennms.horizon.inventory.exception.UniqueConstraintsException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.mapper.NodeMapper;
 import org.opennms.horizon.inventory.mapper.discovery.ActiveDiscoveryMapper;
@@ -158,8 +158,7 @@ public class NodeService {
                 .findFirst();
     }
 
-    private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId)
-            throws DuplicateDataException {
+    private void saveIpInterfaces(NodeCreateDTO request, Node node, String tenantId) throws UniqueConstraintsException {
         try {
             if (request.hasManagementIp()) {
                 IpInterface ipInterface = new IpInterface();
@@ -173,7 +172,7 @@ public class NodeService {
             }
         } catch (DataIntegrityViolationException e) {
             LOG.error("Ip address already exists for a given location :", e.getMessage());
-            throw new DuplicateDataException("Ip address already exists for a given location :"+e.getMessage());
+            throw new UniqueConstraintsException("Ip address already exists for a given location :" + e.getMessage());
         }
     }
 
@@ -207,7 +206,7 @@ public class NodeService {
 
     @Transactional
     public Node createNode(NodeCreateDTO request, ScanType scanType, String tenantId)
-            throws EntityExistException, LocationNotFoundException, DuplicateDataException {
+            throws EntityExistException, LocationNotFoundException, UniqueConstraintsException {
         if (request.hasManagementIp()) { // Do we really want to create a node without managed IP?
             Optional<IpInterface> ipInterfaceOpt = ipInterfaceRepository.findByIpLocationIdTenantAndScanType(
                     InetAddressUtils.getInetAddress(request.getManagementIp()),

@@ -8,7 +8,6 @@
 
         <addColumn tableName="ip_interface">
             <column name="location_id" type="bigint">
-                <constraints nullable="false"/>
             </column>
         </addColumn>
 
@@ -29,7 +28,7 @@
         <sql>
             UPDATE inventory.ip_interface SET location_id = (select distinct(n.monitoring_location_id)  from inventory.node n JOIN inventory.monitoring_location m On n.monitoring_location_id=m.id JOIN inventory.ip_interface i ON i.node_id=n.id);
         </sql>
-
+        <addNotNullConstraint tableName="ip_interface" columnName="location_id" />
     </changeSet>
 
 

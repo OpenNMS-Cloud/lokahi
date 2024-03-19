@@ -27,8 +27,7 @@
             <changeSetExecuted id="0.1.0-add_column_to_ipinterface" author="Junaid-Khan-Nant" changeLogFile="db/changelog/hs-0.1.0/tables/ip-interface-add-new-column.xml"/>
         </preConditions>
         <sql>
-            UPDATE inventory.ip_interface SET location_id=locations.id FROM (SELECT id, tenant_id, location FROM inventory.monitoring_location) AS locations
-            WHERE ip_interface.location_id=locations.id AND ip_interface.tenant_id=locations.tenant_id
+            UPDATE inventory.ip_interface SET location_id = (select distinct(n.monitoring_location_id)  from inventory.node n JOIN inventory.monitoring_location m On n.monitoring_location_id=m.id JOIN inventory.ip_interface i ON i.node_id=n.id);
         </sql>
 
     </changeSet>

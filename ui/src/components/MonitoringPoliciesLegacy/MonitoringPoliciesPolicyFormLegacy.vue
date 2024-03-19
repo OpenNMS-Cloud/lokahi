@@ -9,7 +9,7 @@
         <FeatherIcon :icon="icons.Add" />
         New Policy
       </FeatherButton>
-      <MonitoringPoliciesExistingItems
+      <MonitoringPoliciesExistingItemsLegacy
         title="Existing Policies"
         :list="store.monitoringPolicies"
         :selectedItemId="store.selectedPolicy?.id"
@@ -89,7 +89,7 @@
         v-else
         class="mp-card-container"
       >
-        <MonitoringPoliciesCard
+        <MonitoringPoliciesCardLegacy
           v-for="(policy, index) in store.monitoringPolicies"
           :key="policy.id"
           :policy="(policy as Policy)"
@@ -135,6 +135,7 @@ const icons = markRaw({
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const selectTags = (tags: TagSelectItem[]) => (store.selectedPolicy!.tags = tags.map((tag) => tag.name))
 const populateForm = (policy: Policy) => store.displayPolicyForm(policy)
+
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const formattedTags = computed(() => store.selectedPolicy!.tags!.map((tag: string) => ({ name: tag, id: tag })))
 const route = useRoute()
@@ -150,6 +151,7 @@ const countAlertsAndOpenDeleteModal = async (policy?: Policy) => {
   if (policy?.id) {
     store.selectedPolicy = policy
   }
+
   await store.countAlerts()
   openModal()
 }

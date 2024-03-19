@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
@@ -50,6 +51,7 @@ import org.opennms.horizon.inventory.dto.ActiveDiscoveryList;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.IpInterfaceList;
 import org.opennms.horizon.inventory.dto.MonitoredStateQuery;
+import org.opennms.horizon.inventory.dto.MonitoringPolicies;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeIdList;
@@ -72,6 +74,7 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.slf4j.Logger;
@@ -101,6 +104,8 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
     private final ScannerTaskSetService scannerService;
     private final MonitoringLocationService monitoringLocationService;
     private final SnmpInterfaceService snmpInterfaceService;
+    private final TagService tagService;
+
     private final ThreadFactory threadFactory =
             new ThreadFactoryBuilder().setNameFormat("send-taskset-for-node-%d").build();
     // Add setter for unit testing
@@ -574,6 +579,39 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                     Status status = Status.newBuilder()
                             .setCode(Code.NOT_FOUND_VALUE)
                             .setMessage("Node not found")
+                            .build();
+                    responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                });
+    }
+
+    @Override
+    public void getMonitoringPoliciesByNode(Int64Value request, StreamObserver<MonitoringPolicies> responseObserver) {
+        Optional<String> tenantIdOptional = tenantLookup.lookupTenantId(Context.current());
+
+        tenantIdOptional.ifPresentOrElse(
+                tenantId -> {
+                    try {
+                        List<Integer> monitoredPolicies =
+                                tagService.getMonitoringPoliciesByNodeId(tenantId, request.getValue());
+                        responseObserver.onNext(MonitoringPolicies.newBuilder()
+                                .addAllIds(monitoredPolicies.stream()
+                                        .map(Long::valueOf)
+                                        .collect(Collectors.toList()))
+                                .build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
+
+                        Status status = Status.newBuilder()
+                                .setCode(Code.INTERNAL_VALUE)
+                                .setMessage(e.getMessage())
+                                .build();
+                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                    }
+                },
+                () -> {
+                    Status status = Status.newBuilder()
+                            .setCode(Code.INVALID_ARGUMENT_VALUE)
+                            .setMessage(EMPTY_TENANT_ID_MSG)
                             .build();
                     responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                 });

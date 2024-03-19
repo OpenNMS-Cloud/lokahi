@@ -122,7 +122,7 @@
         <protobuf.version>3.19.6</protobuf.version>   <!-- WARNING: this also controls the version of the protobuf compiler, change at your risk!-->
         <rate.limitted.logger.version>2.0.2</rate.limitted.logger.version>
         <rest-assured.version>5.3.0</rest-assured.version>
-        <slf4j.version>2.0.6</slf4j.version>
+        <slf4j.version>2.0.12</slf4j.version>
         <slf4j.karaf.version>1.7.36</slf4j.karaf.version>
         <snmp4j.version>2.5.5</snmp4j.version>
         <snmp4j.agent.version>2.5.3</snmp4j.agent.version>
@@ -142,7 +142,7 @@
         <surefire.version>3.1.0</surefire.version>
         <failsafe.version>3.1.0</failsafe.version>
         <zjsonpatch.version>0.4.12</zjsonpatch.version>
-        <jetty.version>9.4.43.v20210629</jetty.version>
+        <jetty.version>11.0.20</jetty.version>
         <cron-utils.version>9.1.6</cron-utils.version>
         <eos.version>1.2.0</eos.version>
         <okhttp.version>3.14.0</okhttp.version>

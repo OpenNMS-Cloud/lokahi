@@ -38,11 +38,21 @@ const router = createRouter({
     {
       path: '/monitoring-policies',
       name: 'Monitoring Policies',
-      component: () => import('@/containers/MonitoringPolicies.vue')
+      component: () => import('@/containers/MonitoringPoliciesLegacy.vue')
     },
     {
       path: '/monitoring-policies/:id',
       name: 'Monitoring Policies Selected',
+      component: () => import('@/containers/MonitoringPoliciesLegacy.vue')
+    },
+    {
+      path: '/monitoring-policies-new',
+      name: 'Monitoring Policies New',
+      component: () => import('@/containers/MonitoringPolicies.vue')
+    },
+    {
+      path: '/monitoring-policies-new/:id',
+      name: 'Monitoring Policies New Selected',
       component: () => import('@/containers/MonitoringPolicies.vue')
     },
     {

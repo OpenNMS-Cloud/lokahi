@@ -1,6 +1,7 @@
 import { createTestingPinia } from '@pinia/testing'
 import { useAlertsStore } from '../../../src/store/Views/alertsStore'
 import { setActiveClient, useClient } from 'villus'
+import { TimeRange } from '@/types/graphql'
 
 
 describe('Alerts Store', () => {
@@ -53,5 +54,66 @@ describe('Alerts Store', () => {
     vi.spyOn(alertsStore, 'acknowledgeSelectedAlerts')
     await alertsStore.acknowledgeSelectedAlerts()
     expect(alertsStore.acknowledgeSelectedAlerts).toHaveBeenCalled()
+  })
+
+
+
+  it('should fetch alerts', async () => {
+    vi.spyOn(alertsStore, 'fetchAlerts')
+    await alertsStore.fetchAlerts()
+    expect(alertsStore.fetchAlerts).toHaveBeenCalled()
+  })
+
+  it('should reset pagination and fetch alerts', async () => {
+    vi.spyOn(alertsStore, 'fetchAlerts')
+    vi.spyOn(alertsStore, 'resetPaginationAndFetchAlerts')
+    await alertsStore.fetchAlerts()
+    await alertsStore.resetPaginationAndFetchAlerts()
+    expect(alertsStore.resetPaginationAndFetchAlerts).toHaveBeenCalled()
+    expect(alertsStore.fetchAlerts).toHaveBeenCalled()
+  })
+
+  it('should toggle severity', () => {
+    const initialFilter = { ...alertsStore.alertsFilter }
+    alertsStore.toggleSeverity('high')
+    expect(alertsStore.alertsFilter.severities).toContain('high')
+    alertsStore.toggleSeverity('high')
+    expect(alertsStore.alertsFilter).toEqual(initialFilter)
+  })
+
+  it('should select time range', () => {
+    const initialFilter = { ...alertsStore.alertsFilter }
+    alertsStore.selectTime(TimeRange.All)
+    expect(alertsStore.alertsFilter.timeRange).toBe(TimeRange.All)
+    alertsStore.selectTime(TimeRange.All)
+    expect(alertsStore.alertsFilter).toEqual(initialFilter)
+  })
+
+  it('should clear all filters', () => {
+    alertsStore.alertsFilter.severities = ['high']
+    alertsStore.clearAllFilters()
+    expect(alertsStore.alertsFilter).toEqual({
+      timeRange: TimeRange.All,
+      nodeLabel: '',
+      severities: [],
+      sortAscending: false,
+      sortBy: 'lastEventTime'
+    })
+  })
+
+  it('should set page', async () => {
+    vi.spyOn(alertsStore, 'fetchAlerts')
+    alertsStore.setPage(2)
+    expect(alertsStore.alertsPagination.page).toBe(2)
+    await alertsStore.fetchAlerts()
+    expect(alertsStore.fetchAlerts).toHaveBeenCalled()
+  })
+
+  it('should set page size', async () => {
+    vi.spyOn(alertsStore, 'fetchAlerts')
+    alertsStore.setPageSize(20)
+    expect(alertsStore.alertsPagination.pageSize).toBe(20)
+    await alertsStore.fetchAlerts()
+    expect(alertsStore.fetchAlerts).toHaveBeenCalled()
   })
 })

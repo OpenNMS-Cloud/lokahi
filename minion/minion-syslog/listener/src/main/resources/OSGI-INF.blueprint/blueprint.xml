@@ -39,7 +39,6 @@
 
     <bean id="syslogReceiverCamelNetty" class="org.opennms.horizon.minion.syslog.listener.SyslogReceiverCamelNettyImpl" destroy-method="stop">
         <argument ref="syslogConfig" />
-        <property name="messageDispatcherFactory" ref="messageDispatcherFactory" />
     </bean>
 
     <bean class="java.lang.Thread" init-method="start">

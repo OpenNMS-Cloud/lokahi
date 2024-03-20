@@ -21,26 +21,21 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
-
-
-
 import io.netty.buffer.ByteBuf;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.netty4.NettyComponent;
-import org.apache.camel.component.netty4.NettyConstants;
 
+import org.apache.camel.component.netty.NettyComponent;
+import org.apache.camel.component.netty.NettyConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.engine.DefaultManagementNameStrategy;
 import org.apache.camel.support.SimpleRegistry;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -112,84 +107,15 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
         // Setup logging and create the dispatcher
         super.run();
 
-        SimpleRegistry registry = new SimpleRegistry();
-
-        //Adding netty component to camel in order to resolve OSGi loading issues
-        NettyComponent nettyComponent = new NettyComponent();
-        m_camel = new DefaultCamelContext(registry);
-
-        // Set the context name so that it shows up nicely in JMX
-        //
-        // @see org.apache.camel.management.DefaultManagementNamingStrategy
-        //
-        //m_camel.setManagementName("org.opennms.features.events.syslog.listener");
-        m_camel.setName("syslogdListenerCamelNettyContext");
-        m_camel.setManagementNameStrategy(new DefaultManagementNameStrategy(m_camel, "#name#", null));
-
-        m_camel.addComponent("netty4", nettyComponent);
-
-        m_camel.getShutdownStrategy().setShutdownNowOnTimeout(true);
-        m_camel.getShutdownStrategy().setTimeout(15);
-        m_camel.getShutdownStrategy().setTimeUnit(TimeUnit.SECONDS);
 
         try {
-            m_camel.addRoutes(new RouteBuilder() {
-                @Override
-                public void configure() throws Exception {
-                    String from = String.format("netty4:udp://%s:%d?sync=false&allowDefaultCodec=false&receiveBufferSize=%d&connectTimeout=%d",
-                        InetAddressUtils.str(m_host),
-                        m_port,
-                        Integer.MAX_VALUE,
-                        SOCKET_TIMEOUT
-                    );
-                    from(from)
-                    // Polled via JMX
-                    .routeId("syslogListen")
-                    .process(new AsyncProcessor() {
+            DefaultCamelContext camelContext = new DefaultCamelContext();
+            camelContext.addRoutes(new MyCamelRoute());
+            camelContext.start();
 
-                        @Override
-                        public void process(Exchange exchange) throws Exception {
-                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
+            // Keep the JVM running to keep the routes active
+            Thread.sleep(Long.MAX_VALUE);
 
-                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
-                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
-                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
-
-                          System.out.println(source.getHostName());
-                        }
-
-                        @Override
-                        public boolean process(Exchange exchange, AsyncCallback callback) {
-                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
-
-                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
-                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
-                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
-
-                            ByteBuffer bufferCopy = ByteBuffer.allocate(buffer.readableBytes());
-                            buffer.getBytes(buffer.readerIndex(), bufferCopy);
-
-                            System.out.println(source.getHostName());
-                            return false;
-                        }
-
-                        @Override
-                        public CompletableFuture<Exchange> processAsync(Exchange exchange) {
-                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
-
-                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
-                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
-                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
-
-                            System.out.println(source.getHostName());
-                            return null;
-                        }
-
-
-                    });
-                }
-            });
-            m_camel.start();
         } catch (Throwable e) {
             LOG.error("Could not configure Camel routes for syslog receiver", e);
         }

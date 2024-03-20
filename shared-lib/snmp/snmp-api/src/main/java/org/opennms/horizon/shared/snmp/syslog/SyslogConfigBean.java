@@ -19,16 +19,33 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.minion.syslog.listener;
+package org.opennms.horizon.shared.snmp.syslog;
+
+
+
+import java.io.IOException;
+import java.util.TimeZone;
 
 /**
- * Marker interface for messages that are produced and consumed by a {@link SinkModule}.
- *
- * @author jwhite
+ * This is a bean container that can be used as a {@link SyslogdConfig}
+ * service.
  */
-public interface Message {
+public final class SyslogConfigBean  {
 
-    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
+	private Integer m_syslogPort;
+	private String m_listenAddress;
+	private String m_forwardingRegexp;
+	private Integer m_matchingGroupHost;
+	private Integer m_matchingGroupMessage;
+	private String m_parser;
+	private String m_discardUei;
+	private boolean m_newSuspectOnMessage;
+	private int m_numThreads;
+	private int m_queueSize;
+	private int m_batchSize;
+	private int m_batchIntervalMs;
+	private TimeZone timeZone;
+	private boolean includeRawSyslogmessage;
 
-    static final String SINK_METRIC_CONSUMER_DOMAIN = "org.opennms.core.ipc.sink.consumer";
+
 }

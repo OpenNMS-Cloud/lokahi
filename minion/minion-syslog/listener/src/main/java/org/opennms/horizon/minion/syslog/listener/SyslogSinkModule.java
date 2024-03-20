@@ -23,40 +23,24 @@ package org.opennms.horizon.minion.syslog.listener;
 
 
 
-
 import java.net.InetSocketAddress;
 import java.util.Objects;
 
-public class SyslogSinkModule {
+public class SyslogSinkModule  {
 
     public static final String MODULE_ID = "Syslog";
 
     private final SyslogdConfig config;
 
-    public SyslogSinkModule(SyslogdConfig config) {
+
+    public SyslogSinkModule(SyslogdConfig config ){
 
         this.config = Objects.requireNonNull(config);
 
     }
 
 
-    /**
-     * Used for testing.
-     */
-    public SyslogMessageLogDTO toMessageLog(SyslogConnection... connections) {
-        final String systemId = "test";
-        final String systemLocation = "test";
-        if (connections.length < 1) {
-            throw new IllegalArgumentException("One or more connection are required.");
-        }
-        final SyslogMessageLogDTO messageLog = new SyslogMessageLogDTO(systemLocation, systemId,
-                connections[0].getSource());
-        for (SyslogConnection connection : connections) {
-            final SyslogMessageDTO messageDTO = new SyslogMessageDTO(connection.getBuffer());
-            messageLog.getMessages().add(messageDTO);
-        }
-        return messageLog;
-    }
+
 
     @Override
     public int hashCode() {

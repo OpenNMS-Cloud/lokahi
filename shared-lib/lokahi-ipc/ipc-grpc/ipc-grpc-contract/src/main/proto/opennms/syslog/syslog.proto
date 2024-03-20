@@ -1,0 +1,35 @@
+syntax = "proto3";
+package opennms.sink.syslog;
+
+option java_multiple_files = true;
+option java_package = "org.opennms.horizon.grpc.syslog.contract";
+
+import "snmp-api.proto";
+import "opennms_minion_ipc.proto";
+
+
+message SyslogIdentity {
+  int32 generic = 1;
+  int32 specific = 2;
+  string enterpriseId = 3;
+  string syslogOID = 4;
+}
+
+message SyslogDTO {
+  string agentAddress = 1;
+  string community = 2;
+  string version = 3;
+  int64 timestamp = 4;
+  int32 pduLength = 5;
+  int64 creationTime = 6;
+  bytes rawMessage = 7;
+  string syslogAddress = 8;
+  SyslogIdentity syslogIdentity = 9;
+  repeated opennms.snmp.api.SnmpResult snmpResults = 10;
+}
+
+message SyslogLogDTO {
+  minion.Identity identity = 1;
+  string syslogAddress = 2;
+  repeated SyslogDTO syslogDTO = 3;
+}

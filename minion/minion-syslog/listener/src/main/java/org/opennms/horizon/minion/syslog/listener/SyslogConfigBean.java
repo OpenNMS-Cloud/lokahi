@@ -22,7 +22,6 @@
 package org.opennms.horizon.minion.syslog.listener;
 
 
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

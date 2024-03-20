@@ -58,6 +58,7 @@ import org.opennms.horizon.shared.snmp.SnmpV3User;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SnmpValueFactory;
 import org.opennms.horizon.shared.snmp.SnmpWalker;
+import org.opennms.horizon.shared.snmp.syslog.SyslogNotificationListener;
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 import org.opennms.horizon.shared.utils.SystemInfoUtils;
 import org.slf4j.Logger;
@@ -759,12 +760,31 @@ public class Snmp4JStrategy implements SnmpStrategy {
     }
 
     @Override
+    public void registerForSyslog(SyslogNotificationListener listener, InetAddress address, int snmpTrapPort) throws IOException {
+        registerForSyslog(listener, null, snmpTrapPort);
+    }
+
+    @Override
     public void registerForTraps(final TrapNotificationListener listener, final int snmpTrapPort) throws IOException {
         registerForTraps(listener, null, snmpTrapPort);
     }
 
     @Override
     public void unregisterForTraps(final TrapNotificationListener listener) throws IOException {
+        final RegistrationInfo info = s_registrations.remove(listener);
+        final Snmp session = info.getSession();
+        try {
+            session.close();
+        } catch (final IOException e) {
+            LOG.error("session error unregistering for traps", e);
+            throw e;
+        } finally {
+            Snmp4JStrategy.reapSession(session);
+        }
+    }
+
+    @Override
+    public void unregisterForSyslog(SyslogNotificationListener listener) throws IOException {
         final RegistrationInfo info = s_registrations.remove(listener);
         final Snmp session = info.getSession();
         try {

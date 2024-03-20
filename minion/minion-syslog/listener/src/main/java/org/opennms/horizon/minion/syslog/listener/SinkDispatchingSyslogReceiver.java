@@ -19,7 +19,6 @@
  * language governing permissions and limitations under the
  * License.
  */
-
 package org.opennms.horizon.minion.syslog.listener;
 
 
@@ -48,7 +47,6 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
 
         // Create an asynchronous dispatcher
         final SyslogSinkModule syslogSinkModule = new SyslogSinkModule(m_config);
-
     }
 
     @Override
@@ -60,5 +58,6 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
         }
     }
 
-}
 
+
+}

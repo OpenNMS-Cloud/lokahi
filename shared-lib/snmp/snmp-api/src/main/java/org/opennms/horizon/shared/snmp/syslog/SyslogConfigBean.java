@@ -21,40 +21,14 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
+/**
+ * Marker interface for messages that are produced and consumed by a {@link SinkModule}.
+ *
+ * @author jwhite
+ */
+public interface Message {
 
+    static final String SINK_METRIC_PRODUCER_DOMAIN = "org.opennms.core.ipc.sink.producer";
 
-import java.net.InetSocketAddress;
-import java.util.Objects;
-
-public class SyslogSinkModule  {
-
-    public static final String MODULE_ID = "Syslog";
-
-    private final SyslogdConfig config;
-
-
-    public SyslogSinkModule(SyslogdConfig config ){
-
-        this.config = Objects.requireNonNull(config);
-
-    }
-
-
-
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(MODULE_ID);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        return true;
-    }
+    static final String SINK_METRIC_CONSUMER_DOMAIN = "org.opennms.core.ipc.sink.consumer";
 }

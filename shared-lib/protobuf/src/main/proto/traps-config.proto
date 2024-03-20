@@ -43,6 +43,16 @@ message TrapConfig {
   ListenerConfig listener_config = 7;
 }
 
+message SyslogConfig {
+  string syslog_address = 1;
+  int32 syslog_port = 2;
+  bool new_suspect_on_trap = 3;
+  bool include_raw_message = 4;
+  bool use_address_from_varbind = 5;
+  repeated SnmpV3User snmp_v3_user = 6;
+  ListenerConfig listener_config = 7;
+}
+
 message SnmpV3User {
   string engine_id = 1;
   string security_name = 2;

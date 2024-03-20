@@ -30,6 +30,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import org.opennms.horizon.shared.snmp.syslog.SyslogNotificationListener;
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +167,11 @@ public class SnmpHelperImpl implements SnmpHelper {
     }
 
     @Override
+    public void registerForSyslog(SyslogNotificationListener listener, InetAddress address, int snmpTrapPort, List<SnmpV3User> snmpUsers) throws IOException {
+        getStrategy().registerForSyslog(listener, address, snmpTrapPort);
+    }
+
+    @Override
     public void registerForTraps(
             final TrapNotificationListener listener, final InetAddress address, final int snmpTrapPort)
             throws IOException {
@@ -174,6 +181,11 @@ public class SnmpHelperImpl implements SnmpHelper {
     @Override
     public void unregisterForTraps(final TrapNotificationListener listener) throws IOException {
         getStrategy().unregisterForTraps(listener);
+    }
+
+    @Override
+    public void unregisterForSyslog(SyslogNotificationListener listener) throws IOException {
+        getStrategy().unregisterForSyslog(listener);
     }
 
     @Override

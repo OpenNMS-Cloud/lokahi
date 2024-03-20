@@ -21,13 +21,15 @@
  */
 package org.opennms.horizon.events;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.google.protobuf.Empty;
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.MetadataUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,9 +47,6 @@ import org.opennms.horizon.shared.grpc.traps.contract.mapper.TenantLocationSpeci
 import org.opennms.horizon.shared.grpc.traps.contract.mapper.impl.TenantLocationSpecificTrapLogDTOMapperImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Getter
 public class EventsBackgroundHelper {
@@ -74,7 +73,7 @@ public class EventsBackgroundHelper {
         managedChannel.getState(true);
         eventServiceBlockingStub = EventServiceGrpc.newBlockingStub(managedChannel)
                 .withInterceptors(prepareGrpcHeaderInterceptor())
-                .withDeadlineAfter(DEADLINE_DURATION+10000, TimeUnit.SECONDS);
+                .withDeadlineAfter(DEADLINE_DURATION + 10000, TimeUnit.SECONDS);
     }
 
     private ClientInterceptor prepareGrpcHeaderInterceptor() {
@@ -121,7 +120,8 @@ public class EventsBackgroundHelper {
                 .setNodeId(nodeId)
                 .setSearchTerm(location)
                 .build();
-        List<Event> searchEvents = eventServiceBlockingStub.searchEvents(searchEventByLocationName).getEventsList();
+        List<Event> searchEvents =
+                eventServiceBlockingStub.searchEvents(searchEventByLocationName).getEventsList();
 
         assertNotNull(searchEvents);
         assertEquals(eventsCount, searchEvents.size());

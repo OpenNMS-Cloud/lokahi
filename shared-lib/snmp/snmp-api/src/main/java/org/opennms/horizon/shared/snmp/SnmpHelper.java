@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.opennms.horizon.shared.snmp.syslog.SyslogNotificationListener;
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 
 public interface SnmpHelper {
@@ -82,15 +81,9 @@ public interface SnmpHelper {
             TrapNotificationListener listener, InetAddress address, int snmpTrapPort, List<SnmpV3User> snmpUsers)
             throws IOException;
 
-    void registerForSyslog(
-        SyslogNotificationListener listener, InetAddress address, int snmpTrapPort, List<SnmpV3User> snmpUsers)
-        throws IOException;
-
     void registerForTraps(TrapNotificationListener listener, InetAddress address, int snmpTrapPort) throws IOException;
 
     void unregisterForTraps(TrapNotificationListener listener) throws IOException;
-
-    void unregisterForSyslog(SyslogNotificationListener listener) throws IOException;
 
     SnmpValueFactory getValueFactory();
 

@@ -26,8 +26,6 @@ import org.opennms.horizon.shared.snmp.SnmpException;
 import org.opennms.horizon.shared.snmp.SnmpObjId;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.horizon.shared.snmp.SnmpVarBindDTO;
-import org.opennms.horizon.shared.snmp.syslog.SyslogIdentity;
-import org.opennms.horizon.shared.snmp.syslog.SyslogInformation;
 import org.opennms.horizon.shared.snmp.traps.TrapIdentity;
 import org.opennms.horizon.shared.snmp.traps.TrapInformation;
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
@@ -57,90 +55,6 @@ public class Snmp4JTrapNotifier implements CommandResponder {
     public Snmp4JTrapNotifier(TrapNotificationListener listener) {
         m_listener = listener;
     }
-
-
-    public static class Snmp4JV1SyslogInformation extends SyslogInformation {
-
-
-            private PDUv1 m_pdu;
-
-        public Snmp4JV1SyslogInformation(InetAddress agent, String community, PDUv1 pdu) {
-            super(agent, community);
-            m_pdu = pdu;
-        }
-
-            /**
-             * Returns the Protocol Data Unit that was encapsulated within the SNMP
-             * Trap message
-             */
-            public PDUv1 getPdu() {
-            return m_pdu;
-        }
-
-            /**
-             * @return The {@link InetAddress} of the agent that generated the trap
-             * as found in the SNMPv1 AgentAddress field. This can vary from the value
-             * of {@link #getAgentAddress()} if the SNMPv1 trap has been forwarded.
-             */
-            @Override
-            public InetAddress getTrapAddress() {
-            return m_pdu.getAgentAddress().getInetAddress();
-        }
-
-            @Override
-            public String getVersion() {
-            return "v1";
-        }
-
-            @Override
-            public int getPduLength() {
-            return m_pdu.getVariableBindings().size();
-        }
-
-            @Override
-            public long getTimeStamp() {
-            return m_pdu.getTimestamp();
-        }
-
-            @Override
-            public SyslogIdentity getSyslogIdentity() {
-            return new SyslogIdentity(
-                SnmpObjId.get(m_pdu.getEnterprise().getValue()), m_pdu.getGenericTrap(), m_pdu.getSpecificTrap());
-        }
-
-            protected VariableBinding getVarBindAt(int i) {
-            return m_pdu.get(i);
-        }
-
-            @Override
-            public SnmpVarBindDTO getSnmpVarBindDTO(int i) {
-            SnmpObjId name = SnmpObjId.get(getVarBindAt(i).getOid().getValue());
-            SnmpValue value = new Snmp4JValue(getVarBindAt(i).getVariable());
-            return new SnmpVarBindDTO(name, value);
-        }
-
-            @Override
-            protected Integer getRequestId() {
-            return m_pdu.getRequestID().toInt();
-        }
-
-            @Override
-            public String toString() {
-            final StringBuilder sb = new StringBuilder("[");
-            sb.append("Version=")
-                .append(getVersion())
-                .append(", Agent-Addr=")
-                .append(getTrapAddress().getHostAddress())
-                .append(", Length=")
-                .append(getPduLength())
-                .append(", Identity=")
-                .append(getSyslogIdentity().toString())
-                .append(", Request-ID=")
-                .append(getRequestId())
-                .append("]");
-            return sb.toString();
-        }
-        }
 
     public static class Snmp4JV1TrapInformation extends TrapInformation {
 

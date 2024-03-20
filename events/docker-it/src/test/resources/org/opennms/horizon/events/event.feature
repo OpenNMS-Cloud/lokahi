@@ -10,5 +10,7 @@ Feature: Event Service Basic Functionality
       Then verify there are 0 events
 
     Scenario:
-      When Initialize Trap Producer
-      Then Send Trap Data to Kafka Listener via Producer with TenantId "event-tenant-stream" and LocationId "jahanzeb-loc"
+      Given Initialize Trap Producer
+      When Send Trap Data to Kafka Listener via Producer with TenantId "event-tenant-stream" and LocationId "1"
+      Then Close the Trap Producer
+      Then Check If There are 1 Events with NodeId 1 and Location "default"

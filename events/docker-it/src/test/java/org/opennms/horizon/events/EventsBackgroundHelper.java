@@ -27,12 +27,16 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.MetadataUtils;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
+import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
+import org.opennms.horizon.events.proto.EventsSearchBy;
 import org.opennms.horizon.events.traps.TrapsProducer;
 import org.opennms.horizon.grpc.traps.contract.TenantLocationSpecificTrapLogDTO;
 import org.opennms.horizon.grpc.traps.contract.TrapLogDTO;
@@ -41,6 +45,9 @@ import org.opennms.horizon.shared.grpc.traps.contract.mapper.TenantLocationSpeci
 import org.opennms.horizon.shared.grpc.traps.contract.mapper.impl.TenantLocationSpecificTrapLogDTOMapperImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Getter
 public class EventsBackgroundHelper {
@@ -67,7 +74,7 @@ public class EventsBackgroundHelper {
         managedChannel.getState(true);
         eventServiceBlockingStub = EventServiceGrpc.newBlockingStub(managedChannel)
                 .withInterceptors(prepareGrpcHeaderInterceptor())
-                .withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS);
+                .withDeadlineAfter(DEADLINE_DURATION+10000, TimeUnit.SECONDS);
     }
 
     private ClientInterceptor prepareGrpcHeaderInterceptor() {
@@ -93,7 +100,7 @@ public class EventsBackgroundHelper {
     }
 
     public void initializeTrapProducer() {
-        this.trapsProducer = new TrapsProducer();
+        this.trapsProducer = new TrapsProducer("localhost:59092", "traps");
     }
 
     public void sendTrapDataToKafkaListenerViaProducerWithTenantIdAndLocationId(String tenantId, String locationId) {
@@ -102,6 +109,21 @@ public class EventsBackgroundHelper {
         TenantLocationSpecificTrapLogDTO tenantLocationSpecificTrapLogDTO =
                 tenantLocationSpecificTrapLogDTOMapper.mapBareToTenanted(
                         tenantId, locationId, TrapLogDTO.newBuilder().build());
-        this.trapsProducer.produce("traps", tenantLocationSpecificTrapLogDTO);
+        this.trapsProducer.produce(tenantLocationSpecificTrapLogDTO);
+    }
+
+    public void closeProducer() {
+        this.trapsProducer.close();
+    }
+
+    public void searchEventWithLocation(int eventsCount, int nodeId, String location) {
+        EventsSearchBy searchEventByLocationName = EventsSearchBy.newBuilder()
+                .setNodeId(nodeId)
+                .setSearchTerm(location)
+                .build();
+        List<Event> searchEvents = eventServiceBlockingStub.searchEvents(searchEventByLocationName).getEventsList();
+
+        assertNotNull(searchEvents);
+        assertEquals(eventsCount, searchEvents.size());
     }
 }

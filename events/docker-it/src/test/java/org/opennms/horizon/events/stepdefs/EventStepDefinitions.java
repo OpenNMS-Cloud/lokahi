@@ -21,15 +21,15 @@
  */
 package org.opennms.horizon.events.stepdefs;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opennms.horizon.events.EventsBackgroundHelper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -64,13 +64,23 @@ public class EventStepDefinitions {
         }
     }
 
-    @When("Initialize Trap Producer")
+    @Given("Initialize Trap Producer")
     public void initializeTrapProducer() {
         backgroundHelper.initializeTrapProducer();
     }
 
-    @Then("Send Trap Data to Kafka Listener via Producer with TenantId {string} and LocationId {string}")
+    @When("Send Trap Data to Kafka Listener via Producer with TenantId {string} and LocationId {string}")
     public void sendTrapDataToKafkaListenerViaProducerWithTenantIdAndLocationId(String tenantId, String locationId) {
         backgroundHelper.sendTrapDataToKafkaListenerViaProducerWithTenantIdAndLocationId(tenantId, locationId);
+    }
+
+    @Then("Close the Trap Producer")
+    public void closeTheTrapProducer() {
+        backgroundHelper.closeProducer();
+    }
+
+    @Then("Check If There are {int} Events with NodeId {int} and Location {string}")
+    public void checkIfThereAreEventsWithNodeIdAndLocation(int eventsCount, int nodeId, String location) {
+        backgroundHelper.searchEventWithLocation(eventsCount, nodeId, location);
     }
 }

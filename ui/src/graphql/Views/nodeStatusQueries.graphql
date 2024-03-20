@@ -100,3 +100,13 @@ query FindEventsByNodeId($id: Long!) {
     producedTime
   }
 }
+
+query { 
+  downloadEvents(
+  $nodeId: Long!
+  $searchTerm: String!
+  $downloadFormat: DownloadFormat
+) {
+      searchEventsBytes
+  }
+}

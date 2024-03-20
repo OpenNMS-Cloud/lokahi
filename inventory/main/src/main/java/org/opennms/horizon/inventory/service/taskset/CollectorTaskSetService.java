@@ -88,7 +88,7 @@ public class CollectorTaskSetService {
             ifIndexMap.put(ipInterface.getIfIndex(), anInterface);
         }
 
-        // TODO fooker: Can we remove the simple interface type and replace it with data from the collection parts
+        // TODO LOK-2402: Remove the simple interface type and replace it with data from the collection parts
         // below?
         List<SnmpInterfaceElement> snmpInterfaceElements = new ArrayList<>();
         for (SnmpInterface snmpInterface : snmpInterfaces) {

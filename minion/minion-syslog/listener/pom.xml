@@ -37,14 +37,12 @@
      <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
-            <version>${camel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
-            <artifactId>camel-netty4</artifactId>
-            <version>3.0.0-M4</version>
+            <artifactId>camel-netty</artifactId>
         </dependency>
-        <dependency>
+          <dependency>
             <groupId>org.opennms.lokahi.shared</groupId>
             <artifactId>lokahi-common-utils</artifactId>
             <version>0.1.0-SNAPSHOT</version>
@@ -56,13 +54,38 @@
             <version>2.3.1</version>
             <scope>compile</scope>
         </dependency>
-<!--      <dependency>
-            <groupId>org.opennms.lokahi.shared</groupId>
-            <artifactId>event-conf</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>-->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-netty</artifactId>
+            <version>3.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Define the version of Apache Camel you want to use -->
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-bom</artifactId>
+                <version> ${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 
 </project>

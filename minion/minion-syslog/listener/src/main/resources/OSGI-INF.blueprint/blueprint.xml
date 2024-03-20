@@ -34,9 +34,6 @@
     </bean>
 
 
-
-    <reference id="messageDispatcherFactory" interface="org.opennms.horizon.minion.syslog.listener.MessageDispatcherFactory" />
-
     <bean id="syslogReceiverCamelNetty" class="org.opennms.horizon.minion.syslog.listener.SyslogReceiverCamelNettyImpl" destroy-method="stop">
         <argument ref="syslogConfig" />
         <property name="messageDispatcherFactory" ref="messageDispatcherFactory" />

@@ -40,23 +40,7 @@ public class SyslogSinkModule {
     }
 
 
-    /**
-     * Used for testing.
-     */
-    public SyslogMessageLogDTO toMessageLog(SyslogConnection... connections) {
-        final String systemId = "test";
-        final String systemLocation = "test";
-        if (connections.length < 1) {
-            throw new IllegalArgumentException("One or more connection are required.");
-        }
-        final SyslogMessageLogDTO messageLog = new SyslogMessageLogDTO(systemLocation, systemId,
-                connections[0].getSource());
-        for (SyslogConnection connection : connections) {
-            final SyslogMessageDTO messageDTO = new SyslogMessageDTO(connection.getBuffer());
-            messageLog.getMessages().add(messageDTO);
-        }
-        return messageLog;
-    }
+
 
     @Override
     public int hashCode() {

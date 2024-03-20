@@ -29,9 +29,8 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.netty4.NettyComponent;
-import org.apache.camel.component.netty4.NettyConstants;
-
+import org.apache.camel.component.netty.NettyComponent;
+import org.apache.camel.component.netty.NettyConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.engine.DefaultManagementNameStrategy;
 import org.apache.camel.support.SimpleRegistry;
@@ -126,7 +125,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
         m_camel.setName("syslogdListenerCamelNettyContext");
         m_camel.setManagementNameStrategy(new DefaultManagementNameStrategy(m_camel, "#name#", null));
 
-        m_camel.addComponent("netty4", nettyComponent);
+        m_camel.addComponent("netty", nettyComponent);
 
         m_camel.getShutdownStrategy().setShutdownNowOnTimeout(true);
         m_camel.getShutdownStrategy().setTimeout(15);
@@ -136,7 +135,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
             m_camel.addRoutes(new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    String from = String.format("netty4:udp://%s:%d?sync=false&allowDefaultCodec=false&receiveBufferSize=%d&connectTimeout=%d",
+                    String from = String.format("netty:udp://%s:%d?sync=false&allowDefaultCodec=false&receiveBufferSize=%d&connectTimeout=%d",
                         InetAddressUtils.str(m_host),
                         m_port,
                         Integer.MAX_VALUE,
@@ -181,7 +180,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                             // we are listening on an InetAddress, it will always be of type InetAddressSocket
                             InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                            System.out.println(source.getHostName());
+                            System.out.println(source.getHostName() +source.getPort());
                             return null;
                         }
 
@@ -190,6 +189,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                 }
             });
             m_camel.start();
+            Thread.sleep(Long.MAX_VALUE);
         } catch (Throwable e) {
             LOG.error("Could not configure Camel routes for syslog receiver", e);
         }

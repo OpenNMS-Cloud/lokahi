@@ -92,4 +92,8 @@ public class IpInterface {
 
     @Column(name = "if_index")
     private int ifIndex;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
+    private MonitoringLocation location;
 }

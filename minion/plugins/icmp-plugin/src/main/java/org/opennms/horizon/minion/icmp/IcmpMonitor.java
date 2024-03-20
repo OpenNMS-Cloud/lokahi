@@ -24,13 +24,11 @@ package org.opennms.horizon.minion.icmp;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import java.net.InetAddress;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
-import org.opennms.horizon.minion.plugin.api.MonitoredService;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.opennms.horizon.minion.plugin.api.*;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
 import org.opennms.horizon.shared.icmp.EchoPacket;
 import org.opennms.horizon.shared.icmp.PingConstants;
 import org.opennms.horizon.shared.icmp.PingResponseCallback;
@@ -56,18 +54,18 @@ public class IcmpMonitor extends AbstractServiceMonitor {
         this.pingerFactory = pingerFactory;
 
         Descriptors.Descriptor echoMonitorRequestDescriptor =
-                IcmpMonitorRequest.getDefaultInstance().getDescriptorForType();
+            IcmpMonitorRequest.getDefaultInstance().getDescriptorForType();
 
         allowFragmentationFieldDescriptor =
-                echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.ALLOW_FRAGMENTATION_FIELD_NUMBER);
+            echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.ALLOW_FRAGMENTATION_FIELD_NUMBER);
         dscpFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.DSCP_FIELD_NUMBER);
         hostFieldDescriptor = echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.HOST_FIELD_NUMBER);
         packetSizeFieldDescriptor =
-                echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.PACKET_SIZE_FIELD_NUMBER);
+            echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.PACKET_SIZE_FIELD_NUMBER);
         retriesFieldDescriptor =
-                echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.RETRIES_FIELD_NUMBER);
+            echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.RETRIES_FIELD_NUMBER);
         timeoutFieldDescriptor =
-                echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.TIMEOUT_FIELD_NUMBER);
+            echoMonitorRequestDescriptor.findFieldByNumber(IcmpMonitorRequest.TIMEOUT_FIELD_NUMBER);
     }
 
     // ========================================
@@ -75,14 +73,13 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     // ----------------------------------------
 
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
-
-        CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
+    public  ServiceMonitorResponse poll(MonitoredService svc, Any config) {
+        AtomicReference<ServiceMonitorResponse> responseHolder = new AtomicReference<>(null);
 
         try {
             if (!config.is(IcmpMonitorRequest.class)) {
                 throw new IllegalArgumentException(
-                        "configuration must be an IcmpMonitorRequest; type-url=" + config.getTypeUrl());
+                    "configuration must be an IcmpMonitorRequest; type-url=" + config.getTypeUrl());
             }
 
             IcmpMonitorRequest icmpMonitorRequest = config.unpack(IcmpMonitorRequest.class);
@@ -93,19 +90,31 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
             boolean allowFragmentation = effectiveRequest.getAllowFragmentation();
 
+            ServiceMonitorCallback callback = new ServiceMonitorCallback() {
+                @Override
+                public void onResponse(ServiceMonitorResponse response) {
+                    responseHolder.set(response);
+                }
+            };
+
             Pinger pinger = pingerFactory.getInstance(effectiveRequest.getDscp(), allowFragmentation);
 
             pinger.ping(
-                    host,
-                    effectiveRequest.getTimeout(),
-                    effectiveRequest.getRetries(),
-                    effectiveRequest.getPacketSize(),
-                    new MyPingResponseCallback(future, svc.getNodeId(), svc.getMonitorServiceId()));
+                host,
+                effectiveRequest.getTimeout(),
+                effectiveRequest.getRetries(),
+                effectiveRequest.getPacketSize(),
+                new MyPingResponseCallback(callback, svc.getNodeId(), svc.getMonitorServiceId()));
         } catch (Exception e) {
-            future.completeExceptionally(e);
+            responseHolder.set(ServiceMonitorResponseImpl.builder()
+                .reason("Failed to monitor for azure resource: " + e.getMessage())
+                .monitorType(MonitorType.AZURE)
+                .status(ServiceMonitorResponse.Status.Down)
+                .nodeId(svc.getNodeId())
+                .build());
         }
 
-        return future;
+        return responseHolder.get();
     }
 
     // ========================================
@@ -144,13 +153,14 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
     private static class MyPingResponseCallback implements PingResponseCallback {
         private final Logger logger = LoggerFactory.getLogger(MyPingResponseCallback.class);
-        private final CompletableFuture<ServiceMonitorResponse> future;
+        private ServiceMonitorResponse serviceMonitorResponse;
         private final long nodeId;
         private final long monitoredServiceId;
+        final  ServiceMonitorCallback serviceMonitorCallback;
 
         public MyPingResponseCallback(
-                CompletableFuture<ServiceMonitorResponse> future, long nodeId, long monitoredServiceId) {
-            this.future = future;
+            ServiceMonitorCallback serviceMonitorCallback, long nodeId, long monitoredServiceId) {
+            this.serviceMonitorCallback = serviceMonitorCallback;
             this.nodeId = nodeId;
             this.monitoredServiceId = monitoredServiceId;
         }
@@ -159,39 +169,41 @@ public class IcmpMonitor extends AbstractServiceMonitor {
         public void handleResponse(InetAddress inetAddress, EchoPacket response) {
             double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
             double responseTimeMillis = responseTimeMicros / 1000.0;
-
-            future.complete(ServiceMonitorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .status(Status.Up)
-                    .responseTime(responseTimeMillis)
-                    .nodeId(nodeId)
-                    .monitoredServiceId(monitoredServiceId)
-                    .ipAddress(inetAddress.getHostAddress())
-                    .build());
+            serviceMonitorResponse = ServiceMonitorResponseImpl.builder()
+                .monitorType(MonitorType.ICMP)
+                .status(Status.Up)
+                .responseTime(responseTimeMillis)
+                .nodeId(nodeId)
+                .monitoredServiceId(monitoredServiceId)
+                .ipAddress(inetAddress.getHostAddress())
+                .build();
+            serviceMonitorCallback.onResponse(serviceMonitorResponse);
         }
 
         @Override
         public void handleTimeout(InetAddress inetAddress, EchoPacket echoPacket) {
-            future.complete(ServiceMonitorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .status(Status.Unknown)
-                    .nodeId(nodeId)
-                    .monitoredServiceId(monitoredServiceId)
-                    .reason("timeout")
-                    .ipAddress(inetAddress.getHostAddress())
-                    .build());
+            serviceMonitorResponse = ServiceMonitorResponseImpl.builder()
+                .monitorType(MonitorType.ICMP)
+                .status(Status.Unknown)
+                .nodeId(nodeId)
+                .monitoredServiceId(monitoredServiceId)
+                .reason("timeout")
+                .ipAddress(inetAddress.getHostAddress())
+                .build();
+            serviceMonitorCallback.onResponse(serviceMonitorResponse);
         }
 
         @Override
         public void handleError(InetAddress inetAddress, EchoPacket echoPacket, Throwable throwable) {
-            future.complete(ServiceMonitorResponseImpl.builder()
-                    .monitorType(MonitorType.ICMP)
-                    .status(Status.Down)
-                    .nodeId(nodeId)
-                    .reason(throwable.getMessage())
-                    .monitoredServiceId(monitoredServiceId)
-                    .ipAddress(inetAddress.getHostAddress())
-                    .build());
+            serviceMonitorResponse = ServiceMonitorResponseImpl.builder()
+                .monitorType(MonitorType.ICMP)
+                .status(Status.Down)
+                .nodeId(nodeId)
+                .reason(throwable.getMessage())
+                .monitoredServiceId(monitoredServiceId)
+                .ipAddress(inetAddress.getHostAddress())
+                .build();
+            serviceMonitorCallback.onResponse(serviceMonitorResponse);
         }
     }
 }

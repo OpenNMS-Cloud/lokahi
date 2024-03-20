@@ -22,6 +22,8 @@
 package org.opennms.horizon.minion.taskset.worker.impl;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
@@ -43,6 +45,8 @@ import org.slf4j.LoggerFactory;
  *  problems due to serialization/deserialization.
  */
 public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalService {
+
+    private ExecutorService executor;
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(TaskExecutorLocalMonitorServiceImpl.class);
 
@@ -66,6 +70,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
         this.monitorRegistry = monitorRegistry;
+        this.executor = Executors.newFixedThreadPool(10);
     }
 
     // ========================================
@@ -132,9 +137,14 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             if (monitor != null) {
                 // TBD888: populate host, or stop?
                 MonitoredService monitoredService = configureMonitoredService(taskDefinition);
-                CompletableFuture<ServiceMonitorResponse> future =
-                        monitor.poll(monitoredService, taskDefinition.getConfiguration());
-                future.whenComplete(this::handleExecutionComplete);
+                executor.submit(() -> {
+                    try {
+                        ServiceMonitorResponse response = monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                        handleExecutionComplete(response);
+                    } catch (Throwable throwable) {
+                        logExceptionOnExecutionComplete(throwable);
+                    }
+                });
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor="
                         + taskDefinition.getPluginName());
@@ -149,22 +159,20 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         }
     }
 
-    private void handleExecutionComplete(ServiceMonitorResponse serviceMonitorResponse, Throwable exc) {
+    public void logExceptionOnExecutionComplete(Throwable exc) {
+        if (log.isDebugEnabled()) {
+            log.debug("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
+        } else {
+            log.warn(
+                "error executing workflow; workflow-uuid= {}, message = {}",
+                taskDefinition.getId(),
+                exc.getMessage());
+        }
+    }
+    private void handleExecutionComplete(ServiceMonitorResponse serviceMonitorResponse) {
         log.trace("Completed execution: workflow-uuid={}", taskDefinition.getId());
         active.set(false);
-
-        if (exc == null) {
-            resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
-            } else {
-                log.warn(
-                        "error executing workflow; workflow-uuid= {}, message = {}",
-                        taskDefinition.getId(),
-                        exc.getMessage());
-            }
-        }
+        resultProcessor.queueSendResult(taskDefinition.getId(), serviceMonitorResponse);
     }
 
     private MonitoredService configureMonitoredService(TaskDefinition taskDefinition) {

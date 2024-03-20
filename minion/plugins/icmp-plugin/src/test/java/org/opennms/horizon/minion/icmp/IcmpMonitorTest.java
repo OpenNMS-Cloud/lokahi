@@ -74,9 +74,8 @@ public class IcmpMonitorTest {
     @Test
     public void poll() throws Exception {
         icmpMonitor = getIcmpMonitor(false, false);
-        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
 
-        ServiceMonitorResponse serviceMonitorResponse = response.get();
+        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);;
 
         assertEquals(Status.Up, serviceMonitorResponse.getStatus());
         assertTrue(serviceMonitorResponse.getResponseTime() > 0.0);
@@ -86,9 +85,8 @@ public class IcmpMonitorTest {
     public void testTimeout() throws Exception {
         icmpMonitor = getIcmpMonitor(false, true);
 
-        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
 
-        ServiceMonitorResponse serviceMonitorResponse = response.get();
+        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);;
 
         assertEquals(Status.Unknown, serviceMonitorResponse.getStatus());
         assertEquals("timeout", serviceMonitorResponse.getReason());
@@ -99,9 +97,7 @@ public class IcmpMonitorTest {
     public void testError() throws Exception {
         icmpMonitor = getIcmpMonitor(true, false);
 
-        CompletableFuture<ServiceMonitorResponse> response = icmpMonitor.poll(monitoredService, testConfig);
-
-        ServiceMonitorResponse serviceMonitorResponse = response.get();
+        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);;
 
         assertEquals(Status.Down, serviceMonitorResponse.getStatus());
         assertEquals("Failed to ping", serviceMonitorResponse.getReason());

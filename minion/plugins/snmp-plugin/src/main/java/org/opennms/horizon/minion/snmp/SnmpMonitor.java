@@ -114,9 +114,9 @@ public class SnmpMonitor extends AbstractServiceMonitor {
      *                Thrown for any unrecoverable errors.
      */
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
+    public ServiceMonitorResponse poll(MonitoredService svc, Any config) {
 
-        CompletableFuture<ServiceMonitorResponse> future = null;
+       ServiceMonitorResponse serviceMonitorResponse = null;
         String hostAddress = null;
 
         // Establish SNMP session with interface
@@ -147,7 +147,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
 
             long startTimestamp = System.nanoTime();
 
-            future = snmpHelper
+            CompletableFuture<ServiceMonitorResponse> future = snmpHelper
                     .getAsync(agentConfig, new SnmpObjId[] {snmpObjectId})
                     .thenApply(result -> processSnmpResponse(
                             result,
@@ -164,32 +164,32 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                             TimeUnit.MILLISECONDS)
                     .exceptionally(thrown -> this.createExceptionResponse(
                             thrown, finalHostAddress, svc.getMonitorServiceId(), svc.getNodeId()));
-
-            return future;
+             serviceMonitorResponse = future.join();
+            return serviceMonitorResponse;
         } catch (NumberFormatException e) {
             LOG.debug("Number operator used in a non-number evaluation", e);
-            return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
+            return ServiceMonitorResponseImpl.builder()
                     .reason(e.getMessage())
                     .nodeId(svc.getNodeId())
                     .monitoredServiceId(svc.getMonitorServiceId())
                     .status(Status.Unknown)
-                    .build());
+                    .build();
         } catch (IllegalArgumentException e) {
             LOG.debug("Invalid SNMP Criteria", e);
-            return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
+            return ServiceMonitorResponseImpl.builder()
                     .reason(e.getMessage())
                     .nodeId(svc.getNodeId())
                     .monitoredServiceId(svc.getMonitorServiceId())
                     .status(Status.Unknown)
-                    .build());
+                    .build();
         } catch (Throwable t) {
             LOG.debug("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
-            return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
+            return ServiceMonitorResponseImpl.builder()
                     .reason(t.getMessage())
                     .nodeId(svc.getNodeId())
                     .monitoredServiceId(svc.getMonitorServiceId())
                     .status(Status.Unknown)
-                    .build());
+                    .build();
         }
     }
 

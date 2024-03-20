@@ -45,9 +45,9 @@ public class AzureMonitor extends AbstractServiceMonitor {
     }
 
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
+    public ServiceMonitorResponse poll(MonitoredService svc, Any config) {
 
-        CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
+        ServiceMonitorResponse response = null;
 
         try {
             if (!config.is(AzureMonitorRequest.class)) {
@@ -76,32 +76,33 @@ public class AzureMonitor extends AbstractServiceMonitor {
 
             if (instanceView.isUp()) {
 
-                future.complete(ServiceMonitorResponseImpl.builder()
+                response = ServiceMonitorResponseImpl.builder()
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
                         .nodeId(svc.getNodeId())
                         .ipAddress("azure-node-" + svc.getNodeId())
-                        .build());
+                        .build();
             } else {
-                future.complete(ServiceMonitorResponseImpl.builder()
-                        .monitorType(MonitorType.AZURE)
-                        .status(ServiceMonitorResponse.Status.Down)
-                        .nodeId(svc.getNodeId())
-                        .ipAddress("azure-node-" + svc.getNodeId())
-                        .build());
+                response = ServiceMonitorResponseImpl.builder()
+                    .monitorType(MonitorType.AZURE)
+                    .status(ServiceMonitorResponse.Status.Down)
+                    .nodeId(svc.getNodeId())
+                    .ipAddress("azure-node-" + svc.getNodeId())
+                    .build();
             }
 
         } catch (Exception e) {
+
             log.error("Failed to monitor for azure resource", e);
-            future.complete(ServiceMonitorResponseImpl.builder()
+            response = ServiceMonitorResponseImpl.builder()
                     .reason("Failed to monitor for azure resource: " + e.getMessage())
                     .monitorType(MonitorType.AZURE)
                     .status(ServiceMonitorResponse.Status.Down)
                     .nodeId(svc.getNodeId())
-                    .build());
+                    .build();
         }
 
-        return future;
+        return response;
     }
 }

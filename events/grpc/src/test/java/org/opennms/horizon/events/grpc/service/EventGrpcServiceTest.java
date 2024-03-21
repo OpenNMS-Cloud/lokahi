@@ -44,8 +44,6 @@ import org.keycloak.common.VerificationException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
-import org.opennms.horizon.events.grpc.config.GrpcTenantLookupImpl;
-import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.events.persistence.service.EventService;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
@@ -61,8 +59,6 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
     private EventGrpcService eventGrpcService;
     private InventoryClient mockInventoryClient;
     private ManagedChannel channel;
-    protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
-
     public static final String TEST_TENANTID = "test-tenant";
     public static final long TEST_NODEID = 1L;
 
@@ -72,7 +68,7 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
     public void prepareTest() throws VerificationException, IOException {
         mockEventService = Mockito.mock(EventService.class);
         mockInventoryClient = Mockito.mock(InventoryClient.class);
-        eventGrpcService = new EventGrpcService(mockEventService, mockInventoryClient, tenantLookup);
+        eventGrpcService = new EventGrpcService(mockEventService, mockInventoryClient);
 
         startServer(eventGrpcService);
         channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();

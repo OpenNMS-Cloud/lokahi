@@ -47,11 +47,6 @@ public class GrpcConfig {
     private String keycloakRealm;
 
     @Bean
-    public TenantLookup createTenantLookup() {
-        return new GrpcTenantLookupImpl();
-    }
-
-    @Bean
     public KeycloakDeployment createKeycloak() {
         AdapterConfig config = new AdapterConfig();
         config.setAllowAnyHostname(true);

@@ -36,13 +36,10 @@ import java.util.concurrent.TimeUnit;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.common.VerificationException;
 import org.opennms.horizon.events.grpc.config.EventServerInterceptor;
-import org.opennms.horizon.events.grpc.config.GrpcTenantLookupImpl;
-import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.shared.constants.GrpcConstants;
 
 public abstract class AbstractGrpcUnitTest {
 
-    protected TenantLookup tenantLookup = new GrpcTenantLookupImpl();
     protected String serverName;
     protected Server server;
 

@@ -27,10 +27,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import com.google.protobuf.Any;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -44,7 +42,8 @@ import org.opennms.icmp.contract.IcmpMonitorRequest;
 
 public class IcmpMonitorTest {
     private static final String TEST_LOCALHOST_IP_VALUE = "127.0.0.1";
-   private ExecutorService executor = Executors.newFixedThreadPool(10);
+    private ExecutorService executor = Executors.newFixedThreadPool(10);
+
     @Mock
     MonitoredService monitoredService;
 
@@ -78,14 +77,15 @@ public class IcmpMonitorTest {
     public void poll() throws Exception {
         icmpMonitor = getIcmpMonitor(false, false);
 
-        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);;
+        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);
+        ;
 
         assertEquals(Status.Up, serviceMonitorResponse.getStatus());
         assertTrue(serviceMonitorResponse.getResponseTime() > 0.0);
     }
 
     @Test
-    public  void pollThroughThread() {
+    public void pollThroughThread() {
         executor.submit(() -> {
             try {
                 poll();
@@ -94,18 +94,20 @@ public class IcmpMonitorTest {
             }
         });
     }
+
     @Test
     public void testTimeout() throws Exception {
         icmpMonitor = getIcmpMonitor(false, true);
 
-
-        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);;
+        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);
+        ;
 
         assertEquals(Status.Unknown, serviceMonitorResponse.getStatus());
         assertEquals("timeout", serviceMonitorResponse.getReason());
         assertEquals(0.0d, serviceMonitorResponse.getResponseTime(), 0);
     }
-@Test
+
+    @Test
     public void testTimeOutThroughThreadPoll() {
         executor.submit(() -> {
             try {
@@ -120,7 +122,8 @@ public class IcmpMonitorTest {
     public void testError() throws Exception {
         icmpMonitor = getIcmpMonitor(true, false);
 
-        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);;
+        ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);
+        ;
 
         assertEquals(Status.Down, serviceMonitorResponse.getStatus());
         assertEquals("Failed to ping", serviceMonitorResponse.getReason());

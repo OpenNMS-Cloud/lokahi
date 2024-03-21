@@ -21,7 +21,6 @@
  */
 package org.opennms.horizon.minion.taskset.worker.impl;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -139,7 +138,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
                 MonitoredService monitoredService = configureMonitoredService(taskDefinition);
                 executor.submit(() -> {
                     try {
-                        ServiceMonitorResponse response = monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                        ServiceMonitorResponse response =
+                                monitor.poll(monitoredService, taskDefinition.getConfiguration());
                         handleExecutionComplete(response);
                     } catch (Throwable throwable) {
                         logExceptionOnExecutionComplete(throwable);
@@ -164,11 +164,12 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             log.debug("error executing workflow; workflow-uuid= {}", taskDefinition.getId(), exc);
         } else {
             log.warn(
-                "error executing workflow; workflow-uuid= {}, message = {}",
-                taskDefinition.getId(),
-                exc.getMessage());
+                    "error executing workflow; workflow-uuid= {}, message = {}",
+                    taskDefinition.getId(),
+                    exc.getMessage());
         }
     }
+
     private void handleExecutionComplete(ServiceMonitorResponse serviceMonitorResponse) {
         log.trace("Completed execution: workflow-uuid={}", taskDefinition.getId());
         active.set(false);

@@ -116,7 +116,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
     @Override
     public ServiceMonitorResponse poll(MonitoredService svc, Any config) {
 
-       ServiceMonitorResponse serviceMonitorResponse = null;
+        ServiceMonitorResponse serviceMonitorResponse = null;
         String hostAddress = null;
 
         // Establish SNMP session with interface
@@ -164,7 +164,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                             TimeUnit.MILLISECONDS)
                     .exceptionally(thrown -> this.createExceptionResponse(
                             thrown, finalHostAddress, svc.getMonitorServiceId(), svc.getNodeId()));
-             serviceMonitorResponse = future.join();
+            serviceMonitorResponse = future.join();
             return serviceMonitorResponse;
         } catch (NumberFormatException e) {
             LOG.debug("Number operator used in a non-number evaluation", e);

@@ -22,7 +22,6 @@
 package org.opennms.horizon.minion.azure;
 
 import com.google.protobuf.Any;
-import java.util.concurrent.CompletableFuture;
 import org.opennms.azure.contract.AzureMonitorRequest;
 import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
@@ -85,11 +84,11 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .build();
             } else {
                 response = ServiceMonitorResponseImpl.builder()
-                    .monitorType(MonitorType.AZURE)
-                    .status(ServiceMonitorResponse.Status.Down)
-                    .nodeId(svc.getNodeId())
-                    .ipAddress("azure-node-" + svc.getNodeId())
-                    .build();
+                        .monitorType(MonitorType.AZURE)
+                        .status(ServiceMonitorResponse.Status.Down)
+                        .nodeId(svc.getNodeId())
+                        .ipAddress("azure-node-" + svc.getNodeId())
+                        .build();
             }
 
         } catch (Exception e) {

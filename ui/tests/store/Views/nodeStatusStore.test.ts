@@ -3,6 +3,7 @@ import { setActiveClient, useClient } from 'villus'
 import { createTestingPinia } from '@pinia/testing'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { useNodeMutations } from '@/store/Mutations/nodeMutations'
+import { DownloadCsvVariables, DownloadFormat } from '@/types/graphql'
 
 describe('Node Status Store', () => {
   beforeEach(() => {
@@ -70,5 +71,27 @@ describe('Node Status Store', () => {
         nodeAlias: mockNodeAlias
       }
     })
+  })
+
+  it('calls store.downloadIpInterfacesToCsv with correct parameters', async () => {
+    const queries = useNodeStatusQueries()
+    const mockSearchTerm: DownloadCsvVariables = {
+      nodeId: 12,
+      searchTerm: '123',
+      downloadFormat: DownloadFormat.Csv
+    }
+    vi.spyOn(queries, 'downloadIpInterfaces')
+    await queries.downloadIpInterfaces(mockSearchTerm)
+    expect(queries.downloadIpInterfaces).toHaveBeenCalledWith(mockSearchTerm)
+  })
+
+  it('should create and download a blob file with valid parameters', async () => {
+    const mockBytes = 'SVAgQUREUkVTUyxJUCBIT1NUTkFNRSxORVRNQVNLLFBSSU1BUlkNCjEyNy4wLjAuMSwsLHRydWUNCg=='
+    const mockName = '127.0.0.1-ip-interfaces.csv'
+    window.URL.createObjectURL = vi.fn()
+    const utils = await import('@/components/utils')
+    vi.spyOn(utils, 'createAndDownloadBlobFile')
+    utils.createAndDownloadBlobFile(mockBytes, mockName)
+    expect(utils.createAndDownloadBlobFile).toHaveBeenCalledWith(mockBytes, mockName)
   })
 })

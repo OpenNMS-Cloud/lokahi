@@ -21,7 +21,7 @@
               primary
               icon="Download"
             >
-              <FeatherIcon :icon="icons.DownloadFile"/>
+              <FeatherIcon :icon="icons.DownloadFile" @click.prevent = "download"/>
             </FeatherButton>
             <FeatherButton
               primary
@@ -216,6 +216,10 @@ const onSearchChanged = (searchTerm: any) => {
   pageInfo.total = searchObjects?.length
 
   updatePaginatedEvents(searchObjects, pageInfo.page, pageInfo.pageSize)
+}
+
+const download = () => {
+  nodeStatusStore?.downloadEvents(searchEvents.value)
 }
 
 </script>

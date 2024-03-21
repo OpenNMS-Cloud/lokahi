@@ -28,6 +28,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.protobuf.Any;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -41,7 +44,7 @@ import org.opennms.icmp.contract.IcmpMonitorRequest;
 
 public class IcmpMonitorTest {
     private static final String TEST_LOCALHOST_IP_VALUE = "127.0.0.1";
-
+   private ExecutorService executor = Executors.newFixedThreadPool(10);
     @Mock
     MonitoredService monitoredService;
 
@@ -82,6 +85,16 @@ public class IcmpMonitorTest {
     }
 
     @Test
+    public  void pollThroughThread() {
+        executor.submit(() -> {
+            try {
+                poll();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    @Test
     public void testTimeout() throws Exception {
         icmpMonitor = getIcmpMonitor(false, true);
 
@@ -91,6 +104,16 @@ public class IcmpMonitorTest {
         assertEquals(Status.Unknown, serviceMonitorResponse.getStatus());
         assertEquals("timeout", serviceMonitorResponse.getReason());
         assertEquals(0.0d, serviceMonitorResponse.getResponseTime(), 0);
+    }
+@Test
+    public void testTimeOutThroughThreadPoll() {
+        executor.submit(() -> {
+            try {
+                testTimeout();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Test
@@ -102,5 +125,15 @@ public class IcmpMonitorTest {
         assertEquals(Status.Down, serviceMonitorResponse.getStatus());
         assertEquals("Failed to ping", serviceMonitorResponse.getReason());
         assertEquals(0.0d, serviceMonitorResponse.getResponseTime(), 0);
+    }
+
+    public void TestErrorThroughTHreadPoll() throws Exception {
+        executor.submit(() -> {
+            try {
+                testError();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

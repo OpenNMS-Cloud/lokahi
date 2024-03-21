@@ -56,7 +56,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
         responseObserver.onCompleted();
     }
 
-   /* @Override
+    @Override
     public void getEventsByNodeId(UInt64Value nodeId, StreamObserver<EventLog> responseObserver) {
         String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
 
@@ -79,12 +79,6 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
         responseObserver.onNext(eventList);
         responseObserver.onCompleted();
-    }
-*/
-
-    @Override
-    public void getEventsByNodeId(EventsRequestByNode request, StreamObserver<EventLog> responseObserver) {
-        super.getEventsByNodeId(request, responseObserver);
     }
 
     private Status createStatus(int code, String msg) {

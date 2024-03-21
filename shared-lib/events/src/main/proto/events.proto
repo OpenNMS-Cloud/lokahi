@@ -81,18 +81,8 @@ message EventsSearchBy {
   string searchTerm = 2;
 }
 
-message EventsRequestByNode {
-  int64 node_id = 1;
-  int32 page_size = 2;
-  int32 page = 3;
-  string sort_by = 4;
-  bool sort_ascending = 5;
-}
-
-
 service EventService {
   rpc listEvents(google.protobuf.Empty) returns (EventLog) {};
-  /*rpc getEventsByNodeId(google.protobuf.UInt64Value) returns (EventLog) {};*/
-  rpc getEventsByNodeId(EventsRequestByNode) returns (EventLog) {};
+  rpc getEventsByNodeId(google.protobuf.UInt64Value) returns (EventLog) {};
   rpc searchEvents(EventsSearchBy) returns (EventLog) {};
 }

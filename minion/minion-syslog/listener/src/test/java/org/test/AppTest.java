@@ -1,3 +1,4 @@
+/*
 package org.test;
 
 import org.apache.camel.impl.DefaultCamelContext;
@@ -13,3 +14,4 @@ public class AppTest {
         Thread.sleep(Long.MAX_VALUE);
     }
 }
+*/

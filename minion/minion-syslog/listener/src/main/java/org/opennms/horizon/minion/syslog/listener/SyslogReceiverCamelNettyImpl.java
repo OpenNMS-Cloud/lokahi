@@ -180,7 +180,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                             // we are listening on an InetAddress, it will always be of type InetAddressSocket
                             InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                            System.out.println(source.getHostName() +source.getPort());
+                            System.out.println(source.getHostName());
                             return null;
                         }
 
@@ -189,7 +189,6 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                 }
             });
             m_camel.start();
-            Thread.sleep(Long.MAX_VALUE);
         } catch (Throwable e) {
             LOG.error("Could not configure Camel routes for syslog receiver", e);
         }

@@ -101,6 +101,21 @@ query FindEventsByNodeId($id: Long!) {
   }
 }
 
+query DownloadSnmpInterfaces(
+  $nodeId: Long!
+  $searchTerm: String!
+  $downloadFormat: DownloadFormat
+) {
+  downloadSnmpInterfaces(
+    nodeId: $nodeId
+    searchTerm: $searchTerm
+    downloadFormat: $downloadFormat
+  ) {
+    downloadFormat
+    snmpInterfaceBytes
+  }
+}
+
 query { 
   downloadEvents(
   $nodeId: Long!

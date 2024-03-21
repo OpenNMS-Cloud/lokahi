@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { DownloadAlertsByNodeDocument, AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadCsvVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeEventsDocument, ListNodeStatusDocument, Node, RequestCriteriaInput, DownloadEventsDocument } from '@/types/graphql'
+import { DownloadAlertsByNodeDocument, AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadCsvVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeEventsDocument, ListNodeStatusDocument, Node, RequestCriteriaInput, DownloadEventsDocument, DownloadSNMPInterfacesDocument } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
@@ -76,6 +76,17 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     return data.value?.downloadIpInterfacesByNodeAndSearchTerm?.ipInterfaces
   }
 
+  const downloadSNMPInterfaces = async (requestCriteria: DownloadCsvVariables) => {
+    const { execute, data } = useQuery({
+      query: DownloadSNMPInterfacesDocument,
+      variables: requestCriteria,
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.downloadSnmpInterfaces?.snmpInterfaceBytes
+  }
+
   const downloadAlertsByNode = async ({sortBy, sortAscending}: AlertsFilters, {page, pageSize}: Pagination, downloadFormat: DownloadCsvVariables) => {
     const { execute, data } = useQuery({
       query: DownloadAlertsByNodeDocument,
@@ -114,6 +125,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     fetchNodeStatus,
     fetchEvents,
     downloadIpInterfaces,
+    downloadSNMPInterfaces,
     getAlertsByNodeQuery,
     fetchAlertsByNodeData,
     downloadAlertsByNode,

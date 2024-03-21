@@ -24,6 +24,7 @@
           <FeatherButton
               primary
               icon="Download"
+              @click.prevent="download"
             >
               <FeatherIcon :icon="icons.DownloadFile"> </FeatherIcon>
             </FeatherButton>
@@ -278,6 +279,9 @@ const onSearchChange = (searchTerm: any) => {
 }
 const refresh = () => {
   nodeStatusQueries.fetchNodeStatus()
+}
+const download = () => {
+  nodeStatusStore.downloadSNMPInterfacesToCsv(searchVal.value)
 }
 const routeToFlows = (exporter: DeepPartial<Exporter>) => {
   const { id: nodeId, nodeLabel } = nodeStatusStore.node

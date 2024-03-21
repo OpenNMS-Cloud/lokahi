@@ -71,12 +71,18 @@ public class EventsClient {
                 .getEventsList();
     }
 
-    public List<Event> searchEvents(Long nodeId, String searchTerm, String accessToken) {
+    public List<Event> searchEvents(Long nodeId, String searchTerm, int pageSize, int page, String sortBy, boolean sortAscending, String accessToken) {
         Metadata metadata = new Metadata();
         metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+
+
         EventsSearchBy searchEventsRequest = EventsSearchBy.newBuilder()
                 .setNodeId(nodeId)
                 .setSearchTerm(searchTerm)
+            .setPageSize(pageSize)
+            .setPage(page)
+            .setSortBy(sortBy)
+            .setSortAscending(sortAscending)
                 .build();
         return eventsStub
                 .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))

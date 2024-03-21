@@ -23,6 +23,8 @@ package org.opennms.horizon.events.persistence.repository;
 
 import java.util.List;
 import org.opennms.horizon.events.persistence.model.Event;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,15 +36,21 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByTenantIdAndNodeId(String tenantId, long nodeId);
 
-    @Query("SELECT e " + "FROM Event e "
-            + " WHERE e.tenantId = :tenantId "
-            + " AND e.nodeId = :nodeId "
-            + " AND ( e.eventUei LIKE %:searchTerm% "
-            + " OR e.locationName LIKE %:searchTerm% "
-            + " OR e.description LIKE %:searchTerm% "
-            + " OR e.logMessage LIKE %:searchTerm% "
-            + " OR CAST( e.ipAddress  AS  string) LIKE %:searchTerm% )"
-            + " ORDER BY e.id")
-    List<Event> findByNodeIdAndSearchTermAndTenantId(
-            @Param("tenantId") String tenantId, @Param("nodeId") Long nodeId, @Param("searchTerm") String searchTerm);
+    @Query(
+            value = "SELECT e " + "FROM Event e "
+                    + " WHERE e.tenantId = :tenantId "
+                    + " AND e.nodeId = :nodeId "
+                    + " AND ( e.eventUei LIKE %:searchTerm% "
+                    + " OR e.locationName LIKE %:searchTerm% "
+                    + " OR e.description LIKE %:searchTerm% "
+                    + " OR e.logMessage LIKE %:searchTerm% "
+                    + " OR CAST( e.ipAddress  AS  string) LIKE %:searchTerm% )"
+                    + " ORDER BY e.id",
+            countQuery =
+                    "SELECT count(e) " + "FROM Event e " + "WHERE e.tenantId = :tenantId " + "AND e.nodeId = :nodeId ")
+    Page<Event> findByNodeIdAndSearchTermAndTenantId(
+            @Param("tenantId") String tenantId,
+            @Param("nodeId") Long nodeId,
+            @Param("searchTerm") String searchTerm,
+            Pageable pageable);
 }

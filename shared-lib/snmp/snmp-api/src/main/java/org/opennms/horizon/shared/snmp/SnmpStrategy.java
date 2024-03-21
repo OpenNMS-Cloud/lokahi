@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 
 public interface SnmpStrategy {
@@ -53,10 +52,10 @@ public interface SnmpStrategy {
             throws IOException;
 
     void registerForTraps(TrapNotificationListener listener, InetAddress address, int snmpTrapPort) throws IOException;
+
     void registerForTraps(TrapNotificationListener listener, int snmpTrapPort) throws IOException;
 
     void unregisterForTraps(TrapNotificationListener listener) throws IOException;
-
 
     SnmpValueFactory getValueFactory();
 

@@ -19,7 +19,6 @@
  * language governing permissions and limitations under the
  * License.
  */
-
 package org.opennms.horizon.events.util;
 
 import org.slf4j.Logger;
@@ -142,4 +141,3 @@ public class SimpleNamespaceFilter extends XMLFilterImpl {
         return "SimpleNamespaceFilter[namespaceUri=" + m_namespaceUri + ",addNamespace=" + m_addNamespace + "]";
     }
 }
-

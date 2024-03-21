@@ -26,7 +26,6 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import org.opennms.horizon.shared.snmp.traps.TrapNotificationListener;
 
 public interface SnmpHelper {

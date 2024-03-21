@@ -21,10 +21,15 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
-
-
+import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
 
 import io.netty.buffer.ByteBuf;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Exchange;
@@ -35,20 +40,8 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.engine.DefaultManagementNameStrategy;
 import org.apache.camel.support.SimpleRegistry;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
-import static org.opennms.horizon.shared.utils.InetAddressUtils.addr;
-
 
 /**
  * @author Seth
@@ -75,7 +68,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
 
     @Override
     public String getName() {
-        String listenAddress = m_config.getListenAddress() == null? "0.0.0.0" : m_config.getListenAddress();
+        String listenAddress = m_config.getListenAddress() == null ? "0.0.0.0" : m_config.getListenAddress();
         return getClass().getSimpleName() + " [" + listenAddress + ":" + m_config.getSyslogPort() + "]";
     }
 
@@ -113,7 +106,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
 
         SimpleRegistry registry = new SimpleRegistry();
 
-        //Adding netty component to camel in order to resolve OSGi loading issues
+        // Adding netty component to camel in order to resolve OSGi loading issues
         NettyComponent nettyComponent = new NettyComponent();
         m_camel = new DefaultCamelContext(registry);
 
@@ -121,7 +114,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
         //
         // @see org.apache.camel.management.DefaultManagementNamingStrategy
         //
-        //m_camel.setManagementName("org.opennms.features.events.syslog.listener");
+        // m_camel.setManagementName("org.opennms.features.events.syslog.listener");
         m_camel.setName("syslogdListenerCamelNettyContext");
         m_camel.setManagementNameStrategy(new DefaultManagementNameStrategy(m_camel, "#name#", null));
 
@@ -135,57 +128,55 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
             m_camel.addRoutes(new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
-                    String from = String.format("netty:udp://%s:%d?sync=false&allowDefaultCodec=false&receiveBufferSize=%d&connectTimeout=%d",
-                        InetAddressUtils.str(m_host),
-                        m_port,
-                        Integer.MAX_VALUE,
-                        SOCKET_TIMEOUT
-                    );
+                    String from = String.format(
+                            "netty:udp://%s:%d?sync=false&allowDefaultCodec=false&receiveBufferSize=%d&connectTimeout=%d",
+                            InetAddressUtils.str(m_host), m_port, Integer.MAX_VALUE, SOCKET_TIMEOUT);
                     from(from)
-                    // Polled via JMX
-                    .routeId("syslogListen")
-                    .process(new AsyncProcessor() {
+                            // Polled via JMX
+                            .routeId("syslogListen")
+                            .process(new AsyncProcessor() {
 
-                        @Override
-                        public void process(Exchange exchange) throws Exception {
-                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
+                                @Override
+                                public void process(Exchange exchange) throws Exception {
+                                    final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
 
-                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
-                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
-                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
+                                    // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
+                                    // we are listening on an InetAddress, it will always be of type InetAddressSocket
+                                    InetSocketAddress source = (InetSocketAddress)
+                                            exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                          System.out.println(source.getHostName());
-                        }
+                                    System.out.println(source.getHostName());
+                                }
 
-                        @Override
-                        public boolean process(Exchange exchange, AsyncCallback callback) {
-                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
+                                @Override
+                                public boolean process(Exchange exchange, AsyncCallback callback) {
+                                    final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
 
-                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
-                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
-                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
+                                    // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
+                                    // we are listening on an InetAddress, it will always be of type InetAddressSocket
+                                    InetSocketAddress source = (InetSocketAddress)
+                                            exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                            ByteBuffer bufferCopy = ByteBuffer.allocate(buffer.readableBytes());
-                            buffer.getBytes(buffer.readerIndex(), bufferCopy);
+                                    ByteBuffer bufferCopy = ByteBuffer.allocate(buffer.readableBytes());
+                                    buffer.getBytes(buffer.readerIndex(), bufferCopy);
 
-                            System.out.println(source.getHostName());
-                            return false;
-                        }
+                                    System.out.println(source.getHostName());
+                                    return false;
+                                }
 
-                        @Override
-                        public CompletableFuture<Exchange> processAsync(Exchange exchange) {
-                            final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
+                                @Override
+                                public CompletableFuture<Exchange> processAsync(Exchange exchange) {
+                                    final ByteBuf buffer = exchange.getIn().getBody(ByteBuf.class);
 
-                            // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
-                            // we are listening on an InetAddress, it will always be of type InetAddressSocket
-                            InetSocketAddress source = (InetSocketAddress)exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
+                                    // NettyConstants.NETTY_REMOTE_ADDRESS is a SocketAddress type but because
+                                    // we are listening on an InetAddress, it will always be of type InetAddressSocket
+                                    InetSocketAddress source = (InetSocketAddress)
+                                            exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                            System.out.println(source.getHostName());
-                            return null;
-                        }
-
-
-                    });
+                                    System.out.println(source.getHostName());
+                                    return null;
+                                }
+                            });
                 }
             });
             m_camel.start();
@@ -195,7 +186,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
     }
 
     private void setHostAndPort() {
-        m_host = addr(m_config.getListenAddress() == null? "0.0.0.0" : m_config.getListenAddress());
+        m_host = addr(m_config.getListenAddress() == null ? "0.0.0.0" : m_config.getListenAddress());
         m_port = m_config.getSyslogPort();
     }
 

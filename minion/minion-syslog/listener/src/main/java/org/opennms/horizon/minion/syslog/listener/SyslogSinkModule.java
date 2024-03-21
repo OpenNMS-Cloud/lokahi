@@ -21,26 +21,18 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
-
-
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
-public class SyslogSinkModule  {
+public class SyslogSinkModule {
 
     public static final String MODULE_ID = "Syslog";
 
     private final SyslogdConfig config;
 
-
-    public SyslogSinkModule(SyslogdConfig config ){
+    public SyslogSinkModule(SyslogdConfig config) {
 
         this.config = Objects.requireNonNull(config);
-
     }
-
-
-
 
     @Override
     public int hashCode() {
@@ -49,12 +41,9 @@ public class SyslogSinkModule  {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         return true;
     }
 }

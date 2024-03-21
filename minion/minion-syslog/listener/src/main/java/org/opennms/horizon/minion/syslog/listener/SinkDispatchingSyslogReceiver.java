@@ -21,21 +21,15 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
-
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
-import java.util.Objects;
 
 public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
 
     private static final Logger LOG = LoggerFactory.getLogger(SinkDispatchingSyslogReceiver.class);
 
-
     private final SyslogdConfig m_config;
-
-
 
     public SinkDispatchingSyslogReceiver(SyslogdConfig config) {
         m_config = Objects.requireNonNull(config);
@@ -43,7 +37,6 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
 
     @Override
     public void run() {
-
 
         // Create an asynchronous dispatcher
         final SyslogSinkModule syslogSinkModule = new SyslogSinkModule(m_config);
@@ -57,7 +50,4 @@ public abstract class SinkDispatchingSyslogReceiver implements SyslogReceiver {
             LOG.warn("Exception while closing dispatcher.", e);
         }
     }
-
-
-
 }

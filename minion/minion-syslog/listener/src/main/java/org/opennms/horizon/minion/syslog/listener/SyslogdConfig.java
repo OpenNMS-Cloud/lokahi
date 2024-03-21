@@ -21,10 +21,7 @@
  */
 package org.opennms.horizon.minion.syslog.listener;
 
-
-
 import java.io.IOException;
-import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -48,7 +45,7 @@ public interface SyslogdConfig {
      * @since 1.8.1
      */
     String getListenAddress();
-    
+
     /**
      * <p>getNewSuspectOnMessage</p>
      *

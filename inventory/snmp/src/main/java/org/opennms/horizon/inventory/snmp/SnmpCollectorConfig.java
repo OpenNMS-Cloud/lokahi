@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import lombok.Value;
 import org.opennms.horizon.inventory.snmp.config.Configuration;
 import org.opennms.horizon.inventory.snmp.config.Group;
+import org.opennms.horizon.inventory.snmp.config.MibObj;
 import org.opennms.horizon.inventory.snmp.config.ResourceType;
 import org.opennms.horizon.inventory.snmp.config.SystemDefChoice;
 import org.opennms.horizon.inventory.snmp.part.Part;
@@ -139,8 +140,12 @@ public class SnmpCollectorConfig {
 
         } else {
             // Not all instances are integer - ensure they are all equal and build a table
-            assert group.getMibObjects().stream().distinct().count() <= 1
-                    : "SNMP collection group with differing instances";
+            assert group.getMibObjects().stream()
+                                    .map(MibObj::getInstance)
+                                    .distinct()
+                                    .count()
+                            <= 1
+                    : "SNMP collection group with differing instances: " + group.getName();
 
             final var builder = TablePart.builder();
 

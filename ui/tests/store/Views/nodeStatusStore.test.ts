@@ -2,10 +2,12 @@ import { useNodeStatusStore } from '@/store/Views/nodeStatusStore'
 import { setActiveClient, useClient } from 'villus'
 import { createTestingPinia } from '@pinia/testing'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
+import { useNodeMutations } from '@/store/Mutations/nodeMutations'
 
 describe('Node Status Store', () => {
   beforeEach(() => {
     createTestingPinia({ stubActions: false })
+    setActiveClient(useClient({ url: 'http://test/graphql' })) // Create and set a client
   })
 
   afterEach(() => {
@@ -41,6 +43,31 @@ describe('Node Status Store', () => {
       timeRange: {
         startTime,
         endTime
+      }
+    })
+  })
+
+
+  it('calls nodeStatusQueries.setNodeId with correct parameter and sets nodeId', async () => {
+    const store = useNodeStatusStore()
+    const queries = useNodeStatusQueries()
+    const mockNodeId = 123
+    vi.spyOn(queries, 'setNodeId')
+    await store.setNodeId(mockNodeId)
+    expect(queries.setNodeId).toHaveBeenCalledWith(mockNodeId)
+    expect(store.nodeId).toBe(mockNodeId)
+  })
+
+
+  it('calls mutations.updateNode with correct parameters', async () => {
+    const store = useNodeStatusStore()
+    const mutations = useNodeMutations()
+    const mockNodeAlias = 'New Node Alias'
+    vi.spyOn(mutations, 'updateNode')
+    await store.updateNodeAlias(mockNodeAlias)
+    expect(mutations.updateNode).toHaveBeenCalledWith({
+      node: {
+        nodeAlias: mockNodeAlias
       }
     })
   })

@@ -1,12 +1,17 @@
 <template>
   <div class="full-page-container">
     <HeadlinePage text="Monitoring Policies" />
+    <MonitoringPoliciesPolicyFormLegacy />
+    <MonitoringPoliciesRuleFormLegacy />
+    <MonitoringPoliciesSaveButtonsLegacy />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
+
 const store = useMonitoringPoliciesStore()
+
 onMounted(() => store.getMonitoringPolicies())
 </script>
 

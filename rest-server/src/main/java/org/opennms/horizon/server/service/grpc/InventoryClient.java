@@ -29,6 +29,7 @@ import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
@@ -572,5 +573,17 @@ public class InventoryClient {
                 .withDeadlineAfter(deadline, TimeUnit.MILLISECONDS)
                 .listSnmpInterfaces(query)
                 .getSnmpInterfacesList();
+    }
+
+    public List<Integer> getMonitoringPoliciesByNode(Long nodeId, String accessToken) {
+        Metadata metadata = new Metadata();
+        metadata.put(GrpcConstants.AUTHORIZATION_METADATA_KEY, accessToken);
+        return nodeStub
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+                .getMonitoringPoliciesByNode(Int64Value.of(nodeId))
+                .getIdsList()
+                .stream()
+                .map(Long::intValue)
+                .collect(Collectors.toList());
     }
 }

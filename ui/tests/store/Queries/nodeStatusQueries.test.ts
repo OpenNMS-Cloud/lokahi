@@ -1,7 +1,6 @@
 import { createTestingPinia } from '@pinia/testing'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { eventsFixture } from '../../fixture/events'
-import { nodeFixture } from '../../fixture/nodes'
 
 describe('Events queries', () => {
   beforeEach(() => {
@@ -17,20 +16,18 @@ describe('Events queries', () => {
       useQuery: vi.fn().mockImplementation(() => ({
         data: {
           value: {
-            events: eventsFixture(),
-            node: nodeFixture()
+            events: eventsFixture()
           }
         }
       }))
     }))
 
     const nodeStatusQueries = useNodeStatusQueries()
-    nodeStatusQueries.setNodeId(2)
+    nodeStatusQueries.setNodeId(1)
 
     const expectedFetchedData = {
-      events: eventsFixture(),
-      node: nodeFixture()
+      events: eventsFixture()
     }
-    expect(nodeStatusQueries.fetchedData).toStrictEqual(expectedFetchedData)
+    expect(nodeStatusQueries.fetchedEventsData).toStrictEqual(expectedFetchedData)
   })
 })

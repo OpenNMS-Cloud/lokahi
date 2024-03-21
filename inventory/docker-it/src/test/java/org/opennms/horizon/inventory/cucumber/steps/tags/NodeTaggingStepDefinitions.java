@@ -49,6 +49,7 @@ import org.opennms.horizon.inventory.dto.DeleteTagsDTO;
 import org.opennms.horizon.inventory.dto.ListAllTagsParamsDTO;
 import org.opennms.horizon.inventory.dto.ListTagsByEntityIdParamsDTO;
 import org.opennms.horizon.inventory.dto.MonitoredState;
+import org.opennms.horizon.inventory.dto.MonitoringPolicies;
 import org.opennms.horizon.inventory.dto.NodeCreateDTO;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.opennms.horizon.inventory.dto.NodeList;
@@ -74,6 +75,7 @@ public class NodeTaggingStepDefinitions {
     private NodeList fetchedNodeList;
     private long tagMessageFilterTime;
     private String locationId;
+    MonitoringPolicies monitoringPolicies;
 
     public NodeTaggingStepDefinitions(InventoryBackgroundHelper backgroundHelper) {
         this.backgroundHelper = backgroundHelper;
@@ -459,5 +461,24 @@ public class NodeTaggingStepDefinitions {
                 assertEquals(1, top.getNodeIdList().size());
             });
         });
+    }
+
+    @When("A GRPC request to get monitoring Policies Ids by node")
+    public void aGRPCRequestToGetMonitoringPoliciesIdsByNode() {
+        var nodeServiceBlockingStub = backgroundHelper.getNodeServiceBlockingStub();
+
+        monitoringPolicies = nodeServiceBlockingStub.getMonitoringPoliciesByNode(Int64Value.of(node1.getId()));
+    }
+
+    @Then("Verify response should contain a list of monitoring Policy Ids")
+    public void verifyResponseShouldContainAListOfMonitoringPolicyIds() {
+        assertNotNull(monitoringPolicies.getIdsList());
+        assertEquals(1, monitoringPolicies.getIdsList().size());
+    }
+
+    @Then("The response should contain an empty list  of monitoring Policy Ids")
+    public void theResponseShouldContainAnEmptyListOfMonitoringPolicyIds() {
+        assertNotNull(monitoringPolicies);
+        assertEquals(0, monitoringPolicies.getIdsList().size());
     }
 }

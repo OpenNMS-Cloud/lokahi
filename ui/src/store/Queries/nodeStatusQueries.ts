@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useQuery } from 'villus'
-import { AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadIpInterfacesVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
+import { DownloadAlertsByNodeDocument, AlertsByNodeDocument, DownloadIpInterfacesDocument, DownloadCsvVariables, Event, FindExportersForNodeStatusDocument, ListAlertResponse, ListNodeEventsDocument, ListNodeStatusDocument, Node, RequestCriteriaInput } from '@/types/graphql'
 import { AlertsFilters, Pagination, Variables } from '@/types/alerts'
 import { defaultListAlertResponse } from './alertsQueries'
 
@@ -17,9 +17,18 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     cachePolicy: 'network-only'
   })
 
+  const { data: events, execute: fetchEvents } = useQuery({
+    query: ListNodeEventsDocument,
+    variables,
+    cachePolicy: 'network-only'
+  })
+
   const fetchedData = computed(() => ({
-    events: data.value?.events || ([] as Event[]),
     node: data.value?.node || ({} as Node)
+  }))
+
+  const fetchedEventsData = computed(() => ({
+    events: events.value?.events || ([] as Event[])
   }))
 
   const fetchExporters = async (requestCriteria: RequestCriteriaInput) => {
@@ -56,7 +65,7 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     }
   }
 
-  const downloadIpInterfaces = async (requestCriteria: DownloadIpInterfacesVariables) => {
+  const downloadIpInterfaces = async (requestCriteria: DownloadCsvVariables) => {
     const { execute, data } = useQuery({
       query: DownloadIpInterfacesDocument,
       variables: requestCriteria,
@@ -67,13 +76,34 @@ export const useNodeStatusQueries = defineStore('nodeStatusQueries', () => {
     return data.value?.downloadIpInterfacesByNodeAndSearchTerm?.ipInterfaces
   }
 
+  const downloadAlertsByNode = async ({sortBy, sortAscending}: AlertsFilters, {page, pageSize}: Pagination, downloadFormat: DownloadCsvVariables) => {
+    const { execute, data } = useQuery({
+      query: DownloadAlertsByNodeDocument,
+      variables: {
+        nodeId: variables.value.id,
+        sortAscending,
+        page,
+        pageSize,
+        sortBy,
+        downloadFormat: downloadFormat.downloadFormat
+      },
+      cachePolicy: 'network-only',
+      fetchOnMount: false
+    })
+    await execute()
+    return data.value?.downloadRecentAlertsByNode?.alertsBytes || []
+  }
+
   return {
     setNodeId,
     fetchedData,
+    fetchedEventsData,
     fetchExporters,
     fetchNodeStatus,
+    fetchEvents,
     downloadIpInterfaces,
     getAlertsByNodeQuery,
-    fetchAlertsByNodeData
+    fetchAlertsByNodeData,
+    downloadAlertsByNode
   }
 })

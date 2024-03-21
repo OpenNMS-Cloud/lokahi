@@ -583,4 +583,17 @@ public class TagService {
             return false;
         }
     }
+
+    public List<Integer> getMonitoringPoliciesByNodeId(String tenantId, long nodeId) {
+        if (nodeRepository.findByIdAndTenantId(nodeId, tenantId).isEmpty()) {
+            throw new InventoryRuntimeException("Node not found for id: " + nodeId);
+        }
+        return repository.findByTenantIdAndNodeId(tenantId, nodeId).stream()
+                .flatMap(tag -> tag.getMonitorPolicyIds().stream())
+                .distinct()
+                .collect(Collectors.toList())
+                .stream()
+                .map(Long::intValue)
+                .collect(Collectors.toList());
+    }
 }

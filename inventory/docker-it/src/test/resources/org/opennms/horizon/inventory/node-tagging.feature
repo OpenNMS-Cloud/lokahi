@@ -87,3 +87,15 @@ Feature: Node Tagging
     Given Another node with tags "cde,defg"
     When A GRPC request to fetch all tags with name like "xyz"
     Then The response should contain an empty list of tags
+
+
+  Scenario: Get a list of MonitoringPoliciesIds by node
+    Given A new node with tags "my-new-tag"
+    Given A new monitoring policy with tags "my-new-tag"
+    When A GRPC request to get monitoring Policies Ids by node
+    Then Verify response should contain a list of monitoring Policy Ids
+
+  Scenario: Get an empty list of MonitoringPoliciesIds by node
+    Given A new node with tags "my-new-tag"
+    When A GRPC request to get monitoring Policies Ids by node
+    Then The response should contain an empty list  of monitoring Policy Ids

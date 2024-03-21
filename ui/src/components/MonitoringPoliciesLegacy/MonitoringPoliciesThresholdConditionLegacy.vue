@@ -4,7 +4,7 @@
     <div
       v-if="index !== 0"
       class="delete"
-      @click="$emit('deleteCondition', alertCondition.id)"
+      @click="emit('deleteCondition', alertCondition.id.toString())"
     >
       Delete condition {{ conditionLetters[index].toUpperCase() }}
     </div>
@@ -19,7 +19,7 @@
         :list="levelOptions"
         @item-selected="(val: string) => {
           alertCondition.level = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
         :selectedId="alertCondition.level"
       />
@@ -35,7 +35,7 @@
         :format="(num: number) => num + '%'"
         @change="(val: number) => {
           alertCondition.percentage = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
       />
     </div>
@@ -45,7 +45,7 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="() => $emit('updateCondition', alertCondition)"
+        @update:model-value="() => emit('updateCondition', alertCondition)"
         v-model="alertCondition.forAny"
       />
     </div>
@@ -56,7 +56,7 @@
         :list="durationOptions"
         @item-selected="(val: string) => {
           alertCondition.durationUnit = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
         :selectedId="alertCondition.durationUnit"
       />
@@ -67,7 +67,7 @@
       <FeatherInput
         label=""
         hideLabel
-        @update:model-value="() => $emit('updateCondition', alertCondition)"
+        @update:model-value="() => emit('updateCondition', alertCondition)"
         v-model="alertCondition.duringLast"
       />
     </div>
@@ -78,7 +78,7 @@
         :list="durationOptions"
         @item-selected="(val: string) => {
           alertCondition.periodUnit = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
         :selectedId="alertCondition.periodUnit"
       />
@@ -90,7 +90,7 @@
         :list="severityList"
         @item-selected="(val: string) => {
           alertCondition.severity = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
         :selectedId="alertCondition.severity"
       />
@@ -109,7 +109,7 @@ const props = defineProps<{
   index: number
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'updateCondition', alertCondition: ThresholdCondition): void,
   (e: 'deleteCondition', id: string): void
 }>()

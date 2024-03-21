@@ -4,7 +4,7 @@
     <Doughnut
       :data="data"
       :options="options"
-      :plugins="plugins"
+      :plugins="plugins as any"
       class="graph"
       v-if="display"
     />

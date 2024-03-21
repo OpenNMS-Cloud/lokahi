@@ -14,7 +14,7 @@
       <FeatherButton
         icon="Edit"
         class="edit"
-        @click="$emit('selectPolicy', policy)"
+        @click="emit('selectPolicy', policy)"
         data-test="policy-edit-btn"
         v-if="!policy.isDefault"
       >
@@ -23,7 +23,7 @@
       <FeatherButton
         icon="Copy"
         class="copy"
-        @click="$emit('copyPolicy', policy)"
+        @click="emit('copyPolicy', policy)"
         data-test="policy-copy-btn"
       >
         <FeatherIcon :icon="icons.ContentCopy" />
@@ -31,7 +31,7 @@
       <FeatherButton
         icon="Delete"
         class="delete"
-        @click="$emit('deletePolicy', policy)"
+        @click="emit('deletePolicy', policy)"
         data-test="policy-delete-btn"
         v-if="!policy.isDefault"
       >
@@ -103,7 +103,11 @@ const props = defineProps<{
   index: number
 }>()
 
-defineEmits(['select-policy', 'copy-policy', 'delete-policy'])
+const emit = defineEmits<{
+  (e: 'copyPolicy', policy: Policy): void,
+  (e: 'deletePolicy', policy: Policy): void,
+  (e: 'selectPolicy', policy: Policy): void
+}>()
 
 const ruleStates = reactive<{ [x: string]: boolean }>({})
 const triggerRuleState = (ruleId: string) => (ruleStates[ruleId] = !ruleStates[ruleId])

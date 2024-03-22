@@ -83,7 +83,8 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
                                 .build();
                         responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                     } catch (Exception e) {
-                        GrpcConstraintVoilationExceptionHandler.handleException(e,responseObserver);
+                        GrpcConstraintVoilationExceptionHandler.handleException(
+                                e, responseObserver, Code.INTERNAL_VALUE);
                     }
                 },
                 () -> {

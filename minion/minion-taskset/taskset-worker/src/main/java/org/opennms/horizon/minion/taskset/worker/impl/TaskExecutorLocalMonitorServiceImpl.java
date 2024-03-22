@@ -156,8 +156,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
     public void submitExecutor(MonitoredService monitoredService, TaskDefinition taskDefinition) {
         executor.submit(() -> {
             try {
-                ServiceMonitorResponse response =
-                    monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                ServiceMonitorResponse response = monitor.poll(monitoredService, taskDefinition.getConfiguration());
                 handleExecutionComplete(response);
             } catch (Throwable throwable) {
                 logExceptionOnExecutionComplete(throwable);

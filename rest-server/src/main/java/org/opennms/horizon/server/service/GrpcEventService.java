@@ -93,10 +93,9 @@ public class GrpcEventService {
                         .toList());
     }
 
-    @GraphQLQuery(name = "downloadEvents")
-    public Mono<SearchEventsResponse> downloadEvents(
+    @GraphQLQuery(name = "downloadEventsByNodeId")
+    public Mono<SearchEventsResponse> downloadEventsByNodeId(
             @GraphQLEnvironment ResolutionEnvironment env,
-            @GraphQLArgument(name = "searchTerm") String searchTerm,
             @GraphQLArgument(name = "nodeId") Long nodeId,
             @GraphQLArgument(name = "pageSize") Integer pageSize,
             @GraphQLArgument(name = "page") int page,
@@ -105,7 +104,7 @@ public class GrpcEventService {
             @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
 
         List<Event> events = client
-                .searchEvents(nodeId, searchTerm, pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
+                .searchEvents(nodeId, "", pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
                 .stream()
                 .map(mapper::protoToEvent)
                 .toList();

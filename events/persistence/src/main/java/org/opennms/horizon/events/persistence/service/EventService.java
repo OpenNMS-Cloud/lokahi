@@ -58,12 +58,12 @@ public class EventService {
         var eventPage = eventRepository.findByNodeIdAndSearchTermAndTenantId(
                 tenantId, searchBy.getNodeId(), searchBy.getSearchTerm(), pageRequest);
 
-        List<Event> collect = eventPage.getContent().stream()
+        List<Event> events = eventPage.getContent().stream()
                 .map(eventMapper::modelToDtoWithParams)
                 .collect(Collectors.toList());
 
         EventLogListResponse.Builder responseBuilder =
-                EventLogListResponse.newBuilder().addAllEvents(collect);
+                EventLogListResponse.newBuilder().addAllEvents(events);
 
         if (eventPage.hasNext()) {
             responseBuilder.setNextPage(eventPage.nextPageable().getPageNumber());

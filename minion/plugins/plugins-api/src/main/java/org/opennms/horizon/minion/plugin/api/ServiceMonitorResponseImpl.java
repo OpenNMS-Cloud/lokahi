@@ -34,7 +34,7 @@ public class ServiceMonitorResponseImpl implements ServiceMonitorResponse {
     private String ipAddress;
     private double responseTime;
     private DeviceConfig deviceConfig;
-    private Map<String, Number> properties;
+    private Map<String, Number> additionalMetrics;
     private MonitorType monitorType;
     private long nodeId;
     private long monitoredServiceId;

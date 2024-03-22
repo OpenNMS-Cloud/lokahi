@@ -267,7 +267,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
             LOG.debug(reason);
         }
 
-        builder.properties(metrics);
+        builder.additionalMetrics(metrics);
         return builder.build();
     }
 

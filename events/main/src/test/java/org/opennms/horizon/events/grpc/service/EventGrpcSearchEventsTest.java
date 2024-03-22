@@ -249,4 +249,59 @@ public class EventGrpcSearchEventsTest extends GrpcTestBase {
         assertEquals(TEST_COMMUNITY, snmpInfo.getCommunity());
         assertEquals(TEST_GENERIC, snmpInfo.getGeneric());
     }
+
+
+    @Test
+    void testPaginationSearchEventsByNodeIdAndDifferentSearchTerm() throws UnknownHostException {
+        setupGrpc();
+        initStub();
+
+        // persist data in event table.
+        for (int index = 0; index < 5; index++) {
+            populateEventDatabase(1);
+        }
+        // Search for nodeId 1 and logMessage "timeout"
+        EventsSearchBy searchEventByNodeIdAndLogMessage = EventsSearchBy.newBuilder()
+            .setNodeId(1)
+            .setSearchTerm(TEST_LOG_MESSAGE)
+            .setPage(0)
+            .setPageSize(2)
+            .setSortBy("id")
+            .setSortAscending(true)
+            .build();
+
+        ListEventLogsResponse eventLog1 = serviceStub.searchEvents(searchEventByNodeIdAndLogMessage);
+
+        assertNotNull(eventLog1);
+        assertEquals(2,eventLog1.getEventsCount());
+
+        EventsSearchBy searchEventByNodeIdAndDescription = EventsSearchBy.newBuilder()
+            .setNodeId(1)
+            .setSearchTerm(TEST_DESCRIPTION)
+            .setPage(1)
+            .setPageSize(2)
+            .setSortBy("id")
+            .setSortAscending(true)
+            .build();
+
+        ListEventLogsResponse eventLog2 = serviceStub.searchEvents(searchEventByNodeIdAndDescription);
+
+        assertNotNull(eventLog2);
+        assertEquals(2,eventLog2.getEventsCount());
+
+        EventsSearchBy searchEventByNodeIdAndLocationName = EventsSearchBy.newBuilder()
+            .setNodeId(1)
+            .setSearchTerm(TEST_DESCRIPTION)
+            .setPage(2)
+            .setPageSize(2)
+            .setSortBy("id")
+            .setSortAscending(true)
+            .build();
+
+        ListEventLogsResponse eventLog3 = serviceStub.searchEvents(searchEventByNodeIdAndLocationName);
+
+        assertNotNull(eventLog3);
+        assertEquals(1,eventLog3.getEventsCount());
+
+    }
 }

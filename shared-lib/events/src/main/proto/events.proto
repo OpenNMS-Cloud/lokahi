@@ -86,7 +86,7 @@ message EventsSearchBy {
 
 }
 
-message ListEventLogsResponse {
+message EventLogListResponse {
   string tenant_id = 1;
   repeated Event events = 2;
   int32 next_page = 3;
@@ -98,5 +98,5 @@ message ListEventLogsResponse {
 service EventService {
   rpc listEvents(google.protobuf.Empty) returns (EventLog) {};
   rpc getEventsByNodeId(google.protobuf.UInt64Value) returns (EventLog) {};
-  rpc searchEvents(EventsSearchBy) returns (ListEventLogsResponse) {};
+  rpc searchEvents(EventsSearchBy) returns (EventLogListResponse) {};
 }

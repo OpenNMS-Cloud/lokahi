@@ -49,9 +49,9 @@ import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.events.persistence.service.EventService;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
+import org.opennms.horizon.events.proto.EventLogListResponse;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
 import org.opennms.horizon.events.proto.EventsSearchBy;
-import org.opennms.horizon.events.proto.ListEventLogsResponse;
 import org.opennms.horizon.inventory.dto.NodeDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -209,12 +209,12 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 .setIpAddress("127.0.0.1")
                 .build();
 
-        ListEventLogsResponse listEventLogsResponse =
-                ListEventLogsResponse.newBuilder().addAllEvents(List.of(e1, e2)).build();
+        EventLogListResponse listEventLogsResponse =
+                EventLogListResponse.newBuilder().addAllEvents(List.of(e1, e2)).build();
         Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY, pageRequest))
                 .thenReturn(listEventLogsResponse);
 
-        ListEventLogsResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        EventLogListResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .searchEvents(searchBY);
 
         assertThat(result.getEventsList()).hasSize(2);

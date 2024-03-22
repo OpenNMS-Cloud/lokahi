@@ -36,9 +36,9 @@ import org.opennms.horizon.events.grpc.config.TenantLookup;
 import org.opennms.horizon.events.persistence.service.EventService;
 import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
+import org.opennms.horizon.events.proto.EventLogListResponse;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
 import org.opennms.horizon.events.proto.EventsSearchBy;
-import org.opennms.horizon.events.proto.ListEventLogsResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -96,7 +96,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     }
 
     @Override
-    public void searchEvents(EventsSearchBy request, StreamObserver<ListEventLogsResponse> responseObserver) {
+    public void searchEvents(EventsSearchBy request, StreamObserver<EventLogListResponse> responseObserver) {
 
         int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
         int page = request.getPage();

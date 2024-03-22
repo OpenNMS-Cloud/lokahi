@@ -55,6 +55,19 @@ fragment AlertsByNode on Query {
   }
 }
 
+query {
+  downloadRecentAlertsByNode(
+    $nodeId: Long!, 
+    $sortAscending: Boolean!, 
+    $page: Int!, 
+    $pageSize: Int,
+    $sortBy: String, 
+    $downloadFormat: DownloadFormat
+  ) {
+    alertsBytes
+  }
+}
+
 query AlertsList(
   $page: Int!
   $pageSize: Int

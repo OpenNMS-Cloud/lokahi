@@ -8,8 +8,4 @@ const mockData: Event = {
   producedTime: '2022-09-20T09:25:44Z'
 }
 
-const eventsFixture = (props: Partial<Event> = {}) => ({
-  events: [{ ...mockData, ...props }]
-})
-
-export { eventsFixture }
+export const eventsFixture = (props: Partial<Event> = {}) => ([{ ...mockData, ...props }])

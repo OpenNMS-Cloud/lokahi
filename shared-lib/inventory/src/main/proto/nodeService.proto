@@ -107,6 +107,9 @@ message NodeLabelSearchQuery {
 message NodeIdList {
   repeated int64 ids = 1;
 }
+message MonitoringPolicies {
+  repeated int64 ids = 1;
+}
 
 message  SearchIpInterfaceQuery{
   int64  node_id = 1;
@@ -138,4 +141,5 @@ service NodeService {
   rpc searchIpInterfaces(SearchIpInterfaceQuery) returns (IpInterfaceList) {};
   rpc listSnmpInterfaces(SearchBy) returns (SnmpInterfacesList) {};
   rpc getDiscoveriesByNode(google.protobuf.Int64Value) returns (ActiveDiscoveryList) {};
+  rpc getMonitoringPoliciesByNode(google.protobuf.Int64Value) returns (MonitoringPolicies) {};
 }

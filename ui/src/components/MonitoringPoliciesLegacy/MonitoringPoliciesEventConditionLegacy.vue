@@ -90,12 +90,13 @@
 </template>
 
 <script lang="ts" setup>
-import { conditionLetters, Unknowns } from './monitoringPolicies.constants'
-import { AlertCondition, EventType, Severity, TimeRangeUnit } from '@/types/graphql'
 import { Ref } from 'vue'
 import { ISelectItemType } from '@featherds/select'
-import { useAlertEventDefinitionQueries } from '@/store/Queries/alertEventDefinitionQueries'
 import useSnackbar from '@/composables/useSnackbar'
+import { conditionLetters, Unknowns } from './monitoringPoliciesLegacy.constants'
+import { useAlertEventDefinitionQueries } from '@/store/Queries/alertEventDefinitionQueries'
+import { AlertCondition, EventType, Severity, TimeRangeUnit } from '@/types/graphql'
+import { ThresholdCondition } from '@/types/policies'
 
 const { showSnackbar } = useSnackbar()
 
@@ -108,8 +109,10 @@ const props = defineProps<{
 
 const alertEventDefinitionStore = useAlertEventDefinitionQueries()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const emit = defineEmits(['updateCondition', 'deleteCondition'])
+defineEmits<{
+  (e: 'updateCondition', alertCondition: ThresholdCondition): void,
+  (e: 'deleteCondition', id: string): void
+}>()
 
 const alertCondition = ref(props.condition)
 

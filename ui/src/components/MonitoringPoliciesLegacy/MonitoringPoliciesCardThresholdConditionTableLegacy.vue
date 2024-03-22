@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { ThresholdCondition } from '@/types/policies'
-import { conditionLetters } from './monitoringPolicies.constants'
+import { conditionLetters } from './monitoringPoliciesLegacy.constants'
 
 defineProps<{
   thresholdConditions: ThresholdCondition[]

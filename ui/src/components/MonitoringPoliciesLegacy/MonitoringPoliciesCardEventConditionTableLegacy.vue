@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { conditionLetters, Unknowns } from './monitoringPolicies.constants'
+import { conditionLetters, Unknowns } from './monitoringPoliciesLegacy.constants'
 import { snakeToTitleCase } from '../utils'
 import { AlertCondition } from '@/types/graphql'
 

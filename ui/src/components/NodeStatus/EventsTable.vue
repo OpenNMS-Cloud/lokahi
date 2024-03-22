@@ -21,12 +21,12 @@
               primary
               icon="Download"
             >
-              <FeatherIcon :icon="icons.DownloadFile"/>
+              <FeatherIcon :icon="icons.DownloadFile" @click.prevent = "download"/>
             </FeatherButton>
             <FeatherButton
               primary
               icon="Refresh"
-              @click="nodeStatusQueries.fetchNodeStatus"
+              @click="nodeStatusQueries.fetchEvents"
             >
               <FeatherIcon :icon="icons.Refresh"/>
             </FeatherButton>
@@ -86,6 +86,7 @@ import { format as fnsFormat } from 'date-fns'
 import { SORT } from '@featherds/table'
 import Search from '@featherds/icon/action/Search'
 import { sortBy } from 'lodash'
+import { Event } from '@/types/graphql'
 
 const nodeStatusQueries = useNodeStatusQueries()
 
@@ -130,7 +131,7 @@ const pageInfo = reactive({
 })
 
 const eventData = computed(() => {
-  const events = nodeStatusStore.fetchedData?.events || []
+  const events = nodeStatusStore.fetchedEventsData.events as any || ([] as Event[])
   pageInfo.total = events.length || 0
   return {
     events
@@ -215,6 +216,10 @@ const onSearchChanged = (searchTerm: any) => {
   pageInfo.total = searchObjects?.length
 
   updatePaginatedEvents(searchObjects, pageInfo.page, pageInfo.pageSize)
+}
+
+const download = () => {
+  nodeStatusStore?.downloadEvents(searchEvents.value)
 }
 
 </script>

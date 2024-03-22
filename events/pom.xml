@@ -43,6 +43,7 @@
     <module>traps</module>
     <module>consumer</module>
     <module>grpc</module>
+    <module>docker-it</module>
   </modules>
 
   <properties>

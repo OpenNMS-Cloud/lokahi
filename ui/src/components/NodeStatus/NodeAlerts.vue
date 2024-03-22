@@ -7,7 +7,7 @@
           primary
           icon="Download"
           >
-        <FeatherIcon :icon="icons.DownloadFile"/>
+        <FeatherIcon :icon="icons.DownloadFile" @click.prevent="nodeStatusStore.downloadAlertsByNodesToCsv"/>
           </FeatherButton>
           <FeatherButton
             primary

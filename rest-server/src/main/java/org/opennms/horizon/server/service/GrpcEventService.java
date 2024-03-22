@@ -26,13 +26,24 @@ import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.opennms.horizon.server.mapper.EventMapper;
 import org.opennms.horizon.server.model.events.Event;
+import org.opennms.horizon.server.model.inventory.DownloadFormat;
+import org.opennms.horizon.server.model.inventory.SearchEventsResponse;
 import org.opennms.horizon.server.service.grpc.EventsClient;
+import org.opennms.horizon.server.utils.DateTimeUtil;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @GraphQLApi
@@ -41,6 +52,7 @@ public class GrpcEventService {
     private final EventsClient client;
     private final EventMapper mapper;
     private final ServerHeaderUtil headerUtil;
+    private static final Logger LOG = LoggerFactory.getLogger(GrpcEventService.class);
 
     @GraphQLQuery
     public Flux<Event> findAllEvents(@GraphQLEnvironment ResolutionEnvironment env) {
@@ -65,5 +77,51 @@ public class GrpcEventService {
         return Flux.fromIterable(client.searchEvents(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
                 .map(mapper::protoToEvent)
                 .toList());
+    }
+
+    @GraphQLQuery(name = "downloadEvents")
+    public Mono<SearchEventsResponse> downloadEvents(
+            @GraphQLEnvironment ResolutionEnvironment env,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
+            @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
+
+        List<Event> events = client.searchEvents(nodeId, searchTerm, headerUtil.getAuthHeader(env)).stream()
+                .map(mapper::protoToEvent)
+                .toList();
+
+        try {
+            return Mono.just(generateDownloadableEventsResponse(events, downloadFormat));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to download search events.");
+        }
+    }
+
+    private static SearchEventsResponse generateDownloadableEventsResponse(
+            List<Event> events, DownloadFormat downloadFormat) throws IOException {
+        if (downloadFormat == null) {
+            downloadFormat = DownloadFormat.CSV;
+        }
+        if (downloadFormat.equals(DownloadFormat.CSV)) {
+            StringBuilder csvData = new StringBuilder();
+            var csvformat = CSVFormat.Builder.create()
+                    .setHeader("Time", "UEI", "Description")
+                    .build();
+
+            try (CSVPrinter csvPrinter = new CSVPrinter(csvData, csvformat)) {
+                for (Event event : events) {
+                    csvPrinter.printRecord(
+                            DateTimeUtil.convertAndFormatLongDate(
+                                    event.getProducedTime(), DateTimeUtil.D_MM_YYYY_HH_MM_SS_SSS),
+                            event.getUei(),
+                            event.getDescription());
+                }
+                csvPrinter.flush();
+            } catch (Exception e) {
+                LOG.error("Exception while printing records", e);
+            }
+            return new SearchEventsResponse(csvData.toString().getBytes(StandardCharsets.UTF_8), downloadFormat);
+        }
+        throw new IllegalArgumentException("Invalid download format" + downloadFormat.value);
     }
 }

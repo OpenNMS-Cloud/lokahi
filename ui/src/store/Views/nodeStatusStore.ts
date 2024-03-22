@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { FLOWS_ENABLED } from '@/constants'
 import { useNodeStatusQueries } from '@/store/Queries/nodeStatusQueries'
 import { AZURE_SCAN, DeepPartial } from '@/types'
-import { DownloadFormat, DownloadIpInterfacesVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
+import { DownloadFormat, DownloadCsvVariables, Exporter, ListAlertResponse, NodeUpdateInput, RequestCriteriaInput, TimeRange } from '@/types/graphql'
 import { useNodeMutations } from '../Mutations/nodeMutations'
 import { createAndDownloadBlobFile } from '@/components/utils'
 import { AlertsFilters, AlertsSort, Pagination } from '@/types/alerts'
@@ -29,6 +29,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const nodeStatusQueries = useNodeStatusQueries()
   const mutations = useNodeMutations()
   const fetchedData = computed(() => nodeStatusQueries.fetchedData)
+  const fetchedEventsData = computed(() => nodeStatusQueries.fetchedEventsData)
   const fetchAlertsByNodeData = ref({} as ListAlertResponse)
   const exporters = ref<DeepPartial<Exporter>[]>([])
   const nodeId = ref()
@@ -67,11 +68,11 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const node = computed(() => {
     const node = nodeStatusQueries.fetchedData.node
 
-    const azureInterfaces = new Map(node.azureInterfaces?.map((azureInterface) => {
+    const azureInterfaces = new Map(node.azureInterfaces?.map((azureInterface: any) => {
       return [azureInterface.id, azureInterface]
     }))
 
-    const snmpInterfaces = node.snmpInterfaces?.map((snmpInterface) => {
+    const snmpInterfaces = node.snmpInterfaces?.map((snmpInterface: any) => {
       for (const exporter of exporters.value) {
         if (exporter.snmpInterface?.ifIndex === snmpInterface.ifIndex) {
           return { ...snmpInterface, exporter }
@@ -93,13 +94,36 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   }
 
   const downloadIpInterfacesToCsv = async (searchTerm: string) => {
-    const downloadTopNQueryVariables: DownloadIpInterfacesVariables = {
+    const downloadTopNQueryVariables: DownloadCsvVariables = {
       nodeId: nodeId.value,
       searchTerm: searchTerm,
       downloadFormat: DownloadFormat.Csv
     }
     const bytes = await nodeStatusQueries.downloadIpInterfaces(downloadTopNQueryVariables)
     createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
+  }
+
+  const downloadAlertsByNodesToCsv = async () => {
+    const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
+    const pagination = {
+      ...alertsPagination.value,
+      page
+    }
+
+    const bytes = await nodeStatusQueries.downloadAlertsByNode(alertsFilter.value, pagination, { downloadFormat: DownloadFormat.Csv })
+    const filename = `${node.value.nodeLabel}-recent-alerts.csv`
+    createAndDownloadBlobFile(bytes || [], filename)
+  }
+
+  const downloadEvents = async (searchTerm: string) => {
+    const queryVariables: DownloadCsvVariables = {
+      nodeId: nodeId.value,
+      searchTerm: searchTerm || '',
+      downloadFormat: DownloadFormat.Csv
+    }
+    const bytes = await nodeStatusQueries.downloadEvents(queryVariables)
+    const fileName = `${node.value.nodeLabel}-events.csv`
+    createAndDownloadBlobFile(bytes, fileName)
   }
 
   const getAlertsByNode = async () => {
@@ -167,6 +191,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   return {
     updateNodeAlias,
     fetchedData,
+    fetchedEventsData,
     setNodeId,
     isAzure: computed(() => fetchedData.value.node.scanType === AZURE_SCAN),
     fetchExporters,
@@ -179,6 +204,8 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     alertsPagination,
     setAlertsByNodePageSize,
     setAlertsByNodePage,
-    alertsByNodeSortChanged
+    alertsByNodeSortChanged,
+    downloadAlertsByNodesToCsv,
+    downloadEvents
   }
 })

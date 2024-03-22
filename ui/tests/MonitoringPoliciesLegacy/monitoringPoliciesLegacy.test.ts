@@ -1,11 +1,10 @@
 import mount from 'tests/mountWithPiniaVillus'
-
-import { Unknowns } from '@/components/MonitoringPolicies/monitoringPolicies.constants'
-import MonitoringPolicies from '@/containers/MonitoringPolicies.vue'
+import { Unknowns } from '@/components/MonitoringPoliciesLegacy/monitoringPoliciesLegacy.constants'
+import MonitoringPoliciesLegacy from '@/containers/MonitoringPoliciesLegacy.vue'
+import featherInputFocusDirective from '@/directives/v-focus'
 import { useMonitoringPoliciesStore } from '@/store/Views/monitoringPoliciesStore'
 import { useMonitoringPoliciesMutations } from '@/store/Mutations/monitoringPoliciesMutations'
 import { DetectionMethod, EventType, ManagedObjectType, MonitorPolicy, Severity } from '@/types/graphql'
-import featherInputFocusDirective from '@/directives/v-focus'
 import { buildFetchList } from '../utils'
 
 const testingPayload: MonitorPolicy = {
@@ -49,7 +48,7 @@ global.fetch = buildFetchList({
 })
 
 const wrapper = mount({
-  component: MonitoringPolicies,
+  component: MonitoringPoliciesLegacy,
   shallow: false,
   stubActions: false,
   global: {
@@ -59,8 +58,8 @@ const wrapper = mount({
   }
 })
 
-// TODO: Skipping for now until we build out functionality with the new components
-describe.skip('Monitoring Policies', () => {
+describe('Monitoring Policies Legacy', () => {
+
   test('The Monitoring Policies page container mounts correctly', () => {
     expect(wrapper).toBeTruthy()
   })

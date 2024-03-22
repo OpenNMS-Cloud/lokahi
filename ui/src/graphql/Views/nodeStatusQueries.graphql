@@ -90,3 +90,23 @@ query DownloadIpInterfacesByNodeAndSearchTerm(
     ipInterfaces
   }
 }
+
+query FindEventsByNodeId($id: Long!) {
+  events: findEventsByNodeId(id: $id) {
+    id
+    uei
+    nodeId
+    ipAddress
+    producedTime
+  }
+}
+
+query { 
+  downloadEvents(
+  $nodeId: Long!
+  $searchTerm: String!
+  $downloadFormat: DownloadFormat
+) {
+      searchEventsBytes
+  }
+}

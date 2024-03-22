@@ -66,6 +66,7 @@ import org.opennms.horizon.inventory.service.IpInterfaceService;
 import org.opennms.horizon.inventory.service.MonitoringLocationService;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.SnmpInterfaceService;
+import org.opennms.horizon.inventory.service.TagService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.taskset.contract.ScanType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -97,6 +98,8 @@ class NodeGrpcServiceTest {
     private MonitoringLocation testMonitoringLocation;
     private Optional<String> testTenantIdOptional;
     private List<NodeDTO> testNodeDTOList;
+
+    private TagService mockTagService;
 
     @BeforeEach
     void setUp() {
@@ -133,6 +136,7 @@ class NodeGrpcServiceTest {
         mockBoolValueStreamObserver = Mockito.mock(StreamObserver.class);
         mockExecutorService = Mockito.mock(ExecutorService.class);
         mockMonitoringLocationService = Mockito.mock(MonitoringLocationService.class);
+        mockTagService = Mockito.mock(TagService.class);
 
         Optional<MonitoringLocationDTO> locationDto = Optional.of(MonitoringLocationDTO.newBuilder()
                 .setId(TEST_LOCATION_ID)
@@ -149,7 +153,8 @@ class NodeGrpcServiceTest {
                 mockTenantLookup,
                 mockScannerTaskSetService,
                 mockMonitoringLocationService,
-                mockSnmpInterfaceService);
+                mockSnmpInterfaceService,
+                mockTagService);
 
         //
         // Common test interactions

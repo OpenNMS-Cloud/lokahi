@@ -100,17 +100,20 @@
 
 <script lang="ts" setup>
 import Slider from '@vueform/slider'
-import { ThresholdCondition } from '@/types/policies'
-import { conditionLetters, ThresholdLevels, Unknowns } from './monitoringPolicies.constants'
 import { Severity, TimeRangeUnit } from '@/types/graphql'
+import { ThresholdCondition } from '@/types/policies'
+import { conditionLetters, ThresholdLevels, Unknowns } from './monitoringPoliciesLegacy.constants'
 
 const props = defineProps<{
   condition: ThresholdCondition
   index: number
 }>()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const emit = defineEmits(['updateCondition', 'deleteCondition'])
+defineEmits<{
+  (e: 'updateCondition', alertCondition: ThresholdCondition): void,
+  (e: 'deleteCondition', id: string): void
+}>()
+
 const alertCondition = ref<ThresholdCondition>(props.condition)
 
 const levelOptions = [

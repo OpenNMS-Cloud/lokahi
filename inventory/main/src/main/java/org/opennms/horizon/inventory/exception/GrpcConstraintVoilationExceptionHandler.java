@@ -51,7 +51,7 @@ public class GrpcConstraintVoilationExceptionHandler {
 
     private static <T> void handleInternalError(Throwable throwable, StreamObserver<T> responseObserver) {
         com.google.rpc.Status status = Status.newBuilder()
-                .setCode(Code.INTERNAL_VALUE)
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage(throwable.getMessage())
                 .build();
         responseObserver.onError(StatusProto.toStatusRuntimeException(status));

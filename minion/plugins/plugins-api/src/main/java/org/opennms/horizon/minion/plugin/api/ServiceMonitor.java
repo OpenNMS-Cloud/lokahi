@@ -56,7 +56,7 @@ public interface ServiceMonitor {
      * @see PollStatus#SERVICE_AVAILABLE
      * @see PollStatus#SERVICE_UNAVAILABLE
      */
-    public ServiceMonitorResponse poll(MonitoredService svc, Any config);
+    public ServiceMonitorResponse poll(MonitoredService monitoredService, Any config);
 
     /**
      * Allows the monitor to override the location at which it should be run.

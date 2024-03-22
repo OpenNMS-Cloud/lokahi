@@ -72,7 +72,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
     // ----------------------------------------
 
     @Override
-    public ServiceMonitorResponse poll(MonitoredService svc, Any config) {
+    public ServiceMonitorResponse poll(MonitoredService monitoredService, Any config) {
         AtomicReference<ServiceMonitorResponse> responseHolder = new AtomicReference<>(null);
 
         try {
@@ -103,13 +103,14 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                     effectiveRequest.getTimeout(),
                     effectiveRequest.getRetries(),
                     effectiveRequest.getPacketSize(),
-                    new MyPingResponseCallback(callback, svc.getNodeId(), svc.getMonitorServiceId()));
+                    new MyPingResponseCallback(
+                            callback, monitoredService.getNodeId(), monitoredService.getMonitorServiceId()));
         } catch (Exception e) {
             responseHolder.set(ServiceMonitorResponseImpl.builder()
                     .reason("Failed to monitor for azure resource: " + e.getMessage())
                     .monitorType(MonitorType.AZURE)
                     .status(ServiceMonitorResponse.Status.Down)
-                    .nodeId(svc.getNodeId())
+                    .nodeId(monitoredService.getNodeId())
                     .build());
         }
 

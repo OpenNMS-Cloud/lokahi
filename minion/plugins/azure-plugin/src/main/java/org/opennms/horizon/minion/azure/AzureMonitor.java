@@ -44,7 +44,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
     }
 
     @Override
-    public ServiceMonitorResponse poll(MonitoredService svc, Any config) {
+    public ServiceMonitorResponse poll(MonitoredService monitoredService, Any config) {
 
         ServiceMonitorResponse response = null;
 
@@ -79,15 +79,15 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
-                        .nodeId(svc.getNodeId())
-                        .ipAddress("azure-node-" + svc.getNodeId())
+                        .nodeId(monitoredService.getNodeId())
+                        .ipAddress("azure-node-" + monitoredService.getNodeId())
                         .build();
             } else {
                 response = ServiceMonitorResponseImpl.builder()
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Down)
-                        .nodeId(svc.getNodeId())
-                        .ipAddress("azure-node-" + svc.getNodeId())
+                        .nodeId(monitoredService.getNodeId())
+                        .ipAddress("azure-node-" + monitoredService.getNodeId())
                         .build();
             }
 
@@ -98,7 +98,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
                     .reason("Failed to monitor for azure resource: " + e.getMessage())
                     .monitorType(MonitorType.AZURE)
                     .status(ServiceMonitorResponse.Status.Down)
-                    .nodeId(svc.getNodeId())
+                    .nodeId(monitoredService.getNodeId())
                     .build();
         }
 

@@ -114,7 +114,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
      *                Thrown for any unrecoverable errors.
      */
     @Override
-    public ServiceMonitorResponse poll(MonitoredService svc, Any config) {
+    public ServiceMonitorResponse poll(MonitoredService monitoredService, Any config) {
 
         ServiceMonitorResponse serviceMonitorResponse = null;
         String hostAddress = null;
@@ -156,38 +156,44 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                             operator,
                             operand,
                             startTimestamp,
-                            svc.getNodeId(),
-                            svc.getMonitorServiceId()))
+                            monitoredService.getNodeId(),
+                            monitoredService.getMonitorServiceId()))
                     .completeOnTimeout(
-                            this.createTimeoutResponse(finalHostAddress, svc.getMonitorServiceId(), svc.getNodeId()),
+                            this.createTimeoutResponse(
+                                    finalHostAddress,
+                                    monitoredService.getMonitorServiceId(),
+                                    monitoredService.getNodeId()),
                             agentConfig.getTimeout(),
                             TimeUnit.MILLISECONDS)
                     .exceptionally(thrown -> this.createExceptionResponse(
-                            thrown, finalHostAddress, svc.getMonitorServiceId(), svc.getNodeId()));
+                            thrown,
+                            finalHostAddress,
+                            monitoredService.getMonitorServiceId(),
+                            monitoredService.getNodeId()));
             serviceMonitorResponse = future.join();
             return serviceMonitorResponse;
         } catch (NumberFormatException e) {
             LOG.debug("Number operator used in a non-number evaluation", e);
             return ServiceMonitorResponseImpl.builder()
                     .reason(e.getMessage())
-                    .nodeId(svc.getNodeId())
-                    .monitoredServiceId(svc.getMonitorServiceId())
+                    .nodeId(monitoredService.getNodeId())
+                    .monitoredServiceId(monitoredService.getMonitorServiceId())
                     .status(Status.Unknown)
                     .build();
         } catch (IllegalArgumentException e) {
             LOG.debug("Invalid SNMP Criteria", e);
             return ServiceMonitorResponseImpl.builder()
                     .reason(e.getMessage())
-                    .nodeId(svc.getNodeId())
-                    .monitoredServiceId(svc.getMonitorServiceId())
+                    .nodeId(monitoredService.getNodeId())
+                    .monitoredServiceId(monitoredService.getMonitorServiceId())
                     .status(Status.Unknown)
                     .build();
         } catch (Throwable t) {
             LOG.debug("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
             return ServiceMonitorResponseImpl.builder()
                     .reason(t.getMessage())
-                    .nodeId(svc.getNodeId())
-                    .monitoredServiceId(svc.getMonitorServiceId())
+                    .nodeId(monitoredService.getNodeId())
+                    .monitoredServiceId(monitoredService.getMonitorServiceId())
                     .status(Status.Unknown)
                     .build();
         }

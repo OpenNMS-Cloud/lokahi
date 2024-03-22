@@ -78,7 +78,6 @@ public class IcmpMonitorTest {
         icmpMonitor = getIcmpMonitor(false, false);
 
         ServiceMonitorResponse serviceMonitorResponse = icmpMonitor.poll(monitoredService, testConfig);
-        ;
 
         assertEquals(Status.Up, serviceMonitorResponse.getStatus());
         assertTrue(serviceMonitorResponse.getResponseTime() > 0.0);

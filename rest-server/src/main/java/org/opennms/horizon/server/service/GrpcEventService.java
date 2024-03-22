@@ -78,9 +78,19 @@ public class GrpcEventService {
             @GraphQLArgument(name = "sortBy") String sortBy,
             @GraphQLArgument(name = "sortAscending") boolean sortAscending,
             @GraphQLEnvironment ResolutionEnvironment env) {
-        return Flux.fromIterable(client.searchEvents(nodeId, searchTerm, pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env)).stream()
-                .map(mapper::protoToEvent)
-                .toList());
+        return Flux.fromIterable(
+                client
+                        .searchEvents(
+                                nodeId,
+                                searchTerm,
+                                pageSize,
+                                page,
+                                sortBy,
+                                sortAscending,
+                                headerUtil.getAuthHeader(env))
+                        .stream()
+                        .map(mapper::protoToEvent)
+                        .toList());
     }
 
     @GraphQLQuery(name = "downloadEvents")
@@ -94,7 +104,9 @@ public class GrpcEventService {
             @GraphQLArgument(name = "sortAscending") boolean sortAscending,
             @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
 
-        List<Event> events = client.searchEvents(nodeId, searchTerm, pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env)).stream()
+        List<Event> events = client
+                .searchEvents(nodeId, searchTerm, pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
+                .stream()
                 .map(mapper::protoToEvent)
                 .toList();
 

@@ -75,7 +75,7 @@ public class TagRepositoryTest {
     }
 
     @Test
-     void throwExceptionOnDuplicateTagForTenant() {
+    void throwExceptionOnDuplicateTagForTenant() {
 
         tagRepository.save(createTag(DEFAULT_TAG_NAME, DEFAULT_TENANT_ID));
 

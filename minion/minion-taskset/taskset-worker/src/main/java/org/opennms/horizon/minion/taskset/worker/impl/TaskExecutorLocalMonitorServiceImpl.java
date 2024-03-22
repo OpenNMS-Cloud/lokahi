@@ -60,6 +60,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
 
     private AtomicBoolean active = new AtomicBoolean(false);
 
+    private final int POOL_SIZE = 10;
+
     public TaskExecutorLocalMonitorServiceImpl(
             OpennmsScheduler scheduler,
             TaskDefinition taskDefinition,
@@ -69,7 +71,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         this.scheduler = scheduler;
         this.resultProcessor = resultProcessor;
         this.monitorRegistry = monitorRegistry;
-        this.executor = Executors.newFixedThreadPool(10);
+        this.executor = Executors.newFixedThreadPool(POOL_SIZE);
     }
 
     // ========================================
@@ -136,15 +138,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
             if (monitor != null) {
                 // TBD888: populate host, or stop?
                 MonitoredService monitoredService = configureMonitoredService(taskDefinition);
-                executor.submit(() -> {
-                    try {
-                        ServiceMonitorResponse response =
-                                monitor.poll(monitoredService, taskDefinition.getConfiguration());
-                        handleExecutionComplete(response);
-                    } catch (Throwable throwable) {
-                        logExceptionOnExecutionComplete(throwable);
-                    }
-                });
+                submitExecutor(monitoredService, taskDefinition);
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor="
                         + taskDefinition.getPluginName());
@@ -157,6 +151,18 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
                 log.warn("error executing workflow {} , message = {}", taskDefinition.getId(), exc.getMessage());
             }
         }
+    }
+
+    public void submitExecutor(MonitoredService monitoredService, TaskDefinition taskDefinition) {
+        executor.submit(() -> {
+            try {
+                ServiceMonitorResponse response =
+                    monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                handleExecutionComplete(response);
+            } catch (Throwable throwable) {
+                logExceptionOnExecutionComplete(throwable);
+            }
+        });
     }
 
     public void logExceptionOnExecutionComplete(Throwable exc) {

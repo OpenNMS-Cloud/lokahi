@@ -103,11 +103,12 @@ public class GrpcEventService {
             @GraphQLArgument(name = "sortAscending") boolean sortAscending,
             @GraphQLArgument(name = "downloadFormat") DownloadFormat downloadFormat) {
 
-        List<Event> events = client
-                .searchEvents(nodeId, "", pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
-                .stream()
-                .map(mapper::protoToEvent)
-                .toList();
+        List<Event> events =
+                client
+                        .searchEvents(nodeId, "", pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
+                        .stream()
+                        .map(mapper::protoToEvent)
+                        .toList();
 
         try {
             return Mono.just(generateDownloadableEventsResponse(events, downloadFormat));

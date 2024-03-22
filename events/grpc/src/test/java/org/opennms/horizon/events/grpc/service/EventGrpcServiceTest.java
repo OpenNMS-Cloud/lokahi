@@ -51,7 +51,11 @@ import org.opennms.horizon.events.proto.Event;
 import org.opennms.horizon.events.proto.EventLog;
 import org.opennms.horizon.events.proto.EventServiceGrpc;
 import org.opennms.horizon.events.proto.EventsSearchBy;
+import org.opennms.horizon.events.proto.ListEventLogsResponse;
 import org.opennms.horizon.inventory.dto.NodeDTO;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -176,10 +180,16 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
 
     @Test
     void testSearchEventsByNodeIdAndSearchTerm() throws VerificationException {
+        Pageable pageRequest = PageRequest.of(1, 5, Sort.by(Sort.Direction.ASC, "id"));
         var searchBY = EventsSearchBy.newBuilder()
                 .setNodeId(TEST_NODEID)
                 .setSearchTerm(SEARCH_TERM)
+                .setPageSize(5)
+                .setPage(1)
+                .setSortBy("id")
+                .setSortAscending(true)
                 .build();
+
         Event e1 = Event.newBuilder()
                 .setNodeId(TEST_NODEID)
                 .setTenantId(TEST_TENANTID)
@@ -198,13 +208,17 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 .setDescription("desc1")
                 .setIpAddress("127.0.0.1")
                 .build();
-        Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY)).thenReturn(List.of(e1, e2));
 
-        EventLog result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
+        ListEventLogsResponse listEventLogsResponse = ListEventLogsResponse.newBuilder()
+                .addAllEvents(List.of(e1,e2))
+                    .build();
+        Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY,pageRequest)).thenReturn(listEventLogsResponse);
+
+        ListEventLogsResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .searchEvents(searchBY);
 
         assertThat(result.getEventsList()).hasSize(2);
-        Mockito.verify(mockEventService, Mockito.times(1)).searchEvents(tenantId, searchBY);
+        Mockito.verify(mockEventService, Mockito.times(1)).searchEvents(tenantId, searchBY,pageRequest);
 
         Mockito.verify(spyInterceptor).verifyAccessToken(authHeader);
         Mockito.verify(spyInterceptor)

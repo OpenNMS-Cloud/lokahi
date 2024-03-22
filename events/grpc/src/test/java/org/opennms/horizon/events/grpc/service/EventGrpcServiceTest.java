@@ -209,16 +209,16 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
                 .setIpAddress("127.0.0.1")
                 .build();
 
-        ListEventLogsResponse listEventLogsResponse = ListEventLogsResponse.newBuilder()
-                .addAllEvents(List.of(e1,e2))
-                    .build();
-        Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY,pageRequest)).thenReturn(listEventLogsResponse);
+        ListEventLogsResponse listEventLogsResponse =
+                ListEventLogsResponse.newBuilder().addAllEvents(List.of(e1, e2)).build();
+        Mockito.when(mockEventService.searchEvents(TEST_TENANTID, searchBY, pageRequest))
+                .thenReturn(listEventLogsResponse);
 
         ListEventLogsResponse result = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(createHeaders()))
                 .searchEvents(searchBY);
 
         assertThat(result.getEventsList()).hasSize(2);
-        Mockito.verify(mockEventService, Mockito.times(1)).searchEvents(tenantId, searchBY,pageRequest);
+        Mockito.verify(mockEventService, Mockito.times(1)).searchEvents(tenantId, searchBY, pageRequest);
 
         Mockito.verify(spyInterceptor).verifyAccessToken(authHeader);
         Mockito.verify(spyInterceptor)

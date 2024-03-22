@@ -29,7 +29,6 @@ import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,7 +105,7 @@ public class EventGrpcSearchEventsTest extends GrpcTestBase {
 
     @Test
     void testSearchEventsByNodeIdAndDifferentSearchTerm() throws UnknownHostException {
-         setupGrpc();
+        setupGrpc();
         initStub();
 
         // persist data in event table.
@@ -250,7 +249,6 @@ public class EventGrpcSearchEventsTest extends GrpcTestBase {
         assertEquals(TEST_GENERIC, snmpInfo.getGeneric());
     }
 
-
     @Test
     void testPaginationSearchEventsByNodeIdAndDifferentSearchTerm() throws UnknownHostException {
         setupGrpc();
@@ -262,46 +260,45 @@ public class EventGrpcSearchEventsTest extends GrpcTestBase {
         }
         // Search for nodeId 1 and logMessage "timeout"
         EventsSearchBy searchEventByNodeIdAndLogMessage = EventsSearchBy.newBuilder()
-            .setNodeId(1)
-            .setSearchTerm(TEST_LOG_MESSAGE)
-            .setPage(0)
-            .setPageSize(2)
-            .setSortBy("id")
-            .setSortAscending(true)
-            .build();
+                .setNodeId(1)
+                .setSearchTerm(TEST_LOG_MESSAGE)
+                .setPage(0)
+                .setPageSize(2)
+                .setSortBy("id")
+                .setSortAscending(true)
+                .build();
 
         ListEventLogsResponse eventLog1 = serviceStub.searchEvents(searchEventByNodeIdAndLogMessage);
 
         assertNotNull(eventLog1);
-        assertEquals(2,eventLog1.getEventsCount());
+        assertEquals(2, eventLog1.getEventsCount());
 
         EventsSearchBy searchEventByNodeIdAndDescription = EventsSearchBy.newBuilder()
-            .setNodeId(1)
-            .setSearchTerm(TEST_DESCRIPTION)
-            .setPage(1)
-            .setPageSize(2)
-            .setSortBy("id")
-            .setSortAscending(true)
-            .build();
+                .setNodeId(1)
+                .setSearchTerm(TEST_DESCRIPTION)
+                .setPage(1)
+                .setPageSize(2)
+                .setSortBy("id")
+                .setSortAscending(true)
+                .build();
 
         ListEventLogsResponse eventLog2 = serviceStub.searchEvents(searchEventByNodeIdAndDescription);
 
         assertNotNull(eventLog2);
-        assertEquals(2,eventLog2.getEventsCount());
+        assertEquals(2, eventLog2.getEventsCount());
 
         EventsSearchBy searchEventByNodeIdAndLocationName = EventsSearchBy.newBuilder()
-            .setNodeId(1)
-            .setSearchTerm(TEST_DESCRIPTION)
-            .setPage(2)
-            .setPageSize(2)
-            .setSortBy("id")
-            .setSortAscending(true)
-            .build();
+                .setNodeId(1)
+                .setSearchTerm(TEST_DESCRIPTION)
+                .setPage(2)
+                .setPageSize(2)
+                .setSortBy("id")
+                .setSortAscending(true)
+                .build();
 
         ListEventLogsResponse eventLog3 = serviceStub.searchEvents(searchEventByNodeIdAndLocationName);
 
         assertNotNull(eventLog3);
-        assertEquals(1,eventLog3.getEventsCount());
-
+        assertEquals(1, eventLog3.getEventsCount());
     }
 }

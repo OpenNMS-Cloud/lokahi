@@ -30,7 +30,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 public class GrpcConstraintVoilationExceptionHandler {
 
-    public static <T> void handleException(Throwable throwable, StreamObserver<T> responseObserver) {
+    public static <T> void handleException(Throwable throwable, StreamObserver<T> responseObserver, final int code) {
         if (throwable instanceof DataIntegrityViolationException dataIntegrityException) {
             Throwable rootCause = dataIntegrityException.getRootCause();
             if (rootCause instanceof PSQLException psqlException) {
@@ -38,7 +38,7 @@ public class GrpcConstraintVoilationExceptionHandler {
                 return;
             }
         }
-        handleInternalError(throwable, responseObserver);
+        handleInternalError(throwable, responseObserver, code);
     }
 
     private static <T> void handlePSQLException(PSQLException psqlException, StreamObserver<T> responseObserver) {
@@ -49,9 +49,10 @@ public class GrpcConstraintVoilationExceptionHandler {
         responseObserver.onError(StatusProto.toStatusRuntimeException(status));
     }
 
-    private static <T> void handleInternalError(Throwable throwable, StreamObserver<T> responseObserver) {
+    private static <T> void handleInternalError(
+            Throwable throwable, StreamObserver<T> responseObserver, final int code) {
         com.google.rpc.Status status = Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                .setCode(code)
                 .setMessage(throwable.getMessage())
                 .build();
         responseObserver.onError(StatusProto.toStatusRuntimeException(status));

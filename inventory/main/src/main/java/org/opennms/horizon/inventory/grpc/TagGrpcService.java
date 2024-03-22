@@ -72,7 +72,8 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                                 TagListDTO.newBuilder().addAllTags(tags).build());
                         responseObserver.onCompleted();
                     } catch (Exception e) {
-                        GrpcConstraintVoilationExceptionHandler.handleException(e, responseObserver);
+                        GrpcConstraintVoilationExceptionHandler.handleException(
+                                e, responseObserver, Code.INTERNAL_VALUE);
                     }
                 },
                 () -> responseObserver.onError(

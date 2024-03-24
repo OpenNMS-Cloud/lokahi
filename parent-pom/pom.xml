@@ -86,7 +86,7 @@
         <jexl.version>2.1.1</jexl.version>
         <jicmp.version>3.0.0</jicmp.version>
         <jicmp6.version>2.0.1</jicmp6.version>
-        <jna.version>4.4.0</jna.version>
+        <jna.version>5.14.0</jna.version>
         <joda.time.version>2.1</joda.time.version>
         <junit.version>4.13.2</junit.version>
         <jsonPatch.version>1.13</jsonPatch.version>

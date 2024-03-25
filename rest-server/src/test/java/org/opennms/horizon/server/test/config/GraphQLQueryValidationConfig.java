@@ -25,8 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opennms.horizon.server.service.GrpcAlertService;
-import org.opennms.horizon.server.service.GrpcEventService;
+import org.opennms.horizon.server.service.GraphQLAlertService;
+import org.opennms.horizon.server.service.GraphQLEventService;
 import org.opennms.horizon.server.service.GrpcLocationService;
 import org.opennms.horizon.server.service.GrpcMinionCertificateManager;
 import org.opennms.horizon.server.service.GrpcMinionService;
@@ -51,14 +51,14 @@ public class GraphQLQueryValidationConfig {
 
     @Bean
     @Primary
-    public GrpcAlertService grpcAlertService() {
-        return Mockito.mock(GrpcAlertService.class, new GraphQLAnswer());
+    public GraphQLAlertService grpcAlertService() {
+        return Mockito.mock(GraphQLAlertService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GrpcEventService grpcEventService() {
-        return Mockito.mock(GrpcEventService.class, new GraphQLAnswer());
+    public GraphQLEventService grpcEventService() {
+        return Mockito.mock(GraphQLEventService.class, new GraphQLAnswer());
     }
 
     @Bean

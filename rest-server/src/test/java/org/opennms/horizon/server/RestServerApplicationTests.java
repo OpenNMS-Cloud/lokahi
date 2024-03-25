@@ -24,8 +24,8 @@ package org.opennms.horizon.server;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.server.service.GrpcAlertService;
-import org.opennms.horizon.server.service.GrpcEventService;
+import org.opennms.horizon.server.service.GraphQLAlertService;
+import org.opennms.horizon.server.service.GraphQLEventService;
 import org.opennms.horizon.server.service.GrpcLocationService;
 import org.opennms.horizon.server.service.GrpcMinionService;
 import org.opennms.horizon.server.service.GrpcNodeService;
@@ -44,7 +44,7 @@ class RestServerApplicationTests {
     private GrpcMinionService grpcMinionService;
 
     @Autowired
-    private GrpcEventService grpcEventService;
+    private GraphQLEventService graphQLEventService;
 
     @Autowired
     private GrpcNodeService grpcNodeService;
@@ -53,7 +53,7 @@ class RestServerApplicationTests {
     private GrpcLocationService grpcLocationService;
 
     @Autowired
-    private GrpcAlertService grpcAlertService;
+    private GraphQLAlertService graphQLAlertService;
 
     @Autowired
     private GrpcAzureActiveDiscoveryService grpcAzureActiveDiscoveryService;
@@ -66,9 +66,9 @@ class RestServerApplicationTests {
         assertNotNull(grpcMinionService);
         assertNotNull(notificationService);
         assertNotNull(grpcLocationService);
-        assertNotNull(grpcEventService);
+        assertNotNull(graphQLEventService);
         assertNotNull(grpcNodeService);
-        assertNotNull(grpcAlertService);
+        assertNotNull(graphQLAlertService);
         assertNotNull(grpcAzureActiveDiscoveryService);
         assertNotNull(grpcFlowService);
     }

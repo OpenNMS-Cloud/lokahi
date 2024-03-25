@@ -48,11 +48,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcEventService {
+public class GraphQLEventService {
     private final EventsClient client;
     private final EventMapper mapper;
     private final ServerHeaderUtil headerUtil;
-    private static final Logger LOG = LoggerFactory.getLogger(GrpcEventService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GraphQLEventService.class);
 
     @GraphQLQuery
     public Flux<Event> findAllEvents(@GraphQLEnvironment ResolutionEnvironment env) {

@@ -155,7 +155,7 @@ public class TaskExecutionResultProcessorImpl implements TaskExecutionResultProc
                         .map(ServiceMonitorResponse::getReason)
                         .orElse(MonitorResponse.getDefaultInstance().getReason()))
                 .putAllMetrics(Optional.of(smr)
-                        .map(ServiceMonitorResponse::getProperties)
+                        .map(ServiceMonitorResponse::getAdditionalMetrics)
                         .orElse(Collections.EMPTY_MAP))
                 .setNodeId(smr.getNodeId())
                 .setMonitorServiceId(smr.getMonitoredServiceId())

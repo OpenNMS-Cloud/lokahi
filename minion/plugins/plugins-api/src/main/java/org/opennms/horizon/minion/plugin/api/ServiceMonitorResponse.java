@@ -60,7 +60,7 @@ public interface ServiceMonitorResponse {
      */
     double getResponseTime();
 
-    Map<String, Number> getProperties();
+    Map<String, Number> getAdditionalMetrics();
 
     /**
      * TECHDEBT: Was originally added to the monitor interface to take advantage of poller's scheduling and

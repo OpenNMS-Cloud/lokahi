@@ -11,12 +11,12 @@ describe('Node Status Store', () => {
   let store: any
   beforeEach(() => {
     createTestingPinia({ stubActions: false })
-    setActiveClient(useClient({ url: 'http://test/graphql' })) // Create and set a client
+    setActiveClient(useClient({ url: 'http://test/graphql' })) 
 
     store = useNodeStatusStore()
     store.fetchAlertsByNodeData.value = {
-      totalAlerts: 20, // Set some initial total alerts for testing pagination
-      alerts: [] // You can add some dummy data for testing if needed
+      totalAlerts: 20, 
+      alerts: [] 
     }
   })
 

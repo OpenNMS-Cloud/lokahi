@@ -28,5 +28,4 @@ public class DBConstraintsException extends DataIntegrityViolationException {
     public DBConstraintsException(String message) {
         super(message);
     }
-
 }

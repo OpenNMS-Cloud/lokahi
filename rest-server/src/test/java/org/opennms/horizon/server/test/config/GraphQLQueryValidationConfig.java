@@ -51,79 +51,79 @@ public class GraphQLQueryValidationConfig {
 
     @Bean
     @Primary
-    public GraphQLAlertService grpcAlertService() {
+    public GraphQLAlertService graphQLAlertService() {
         return Mockito.mock(GraphQLAlertService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLEventService grpcEventService() {
+    public GraphQLEventService graphQLEventService() {
         return Mockito.mock(GraphQLEventService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLLocationService grpcLocationService() {
+    public GraphQLLocationService graphQLLocationService() {
         return Mockito.mock(GraphQLLocationService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLMinionCertificateManager grpcMinionCertificateManager() {
+    public GraphQLMinionCertificateManager graphQLMinionCertificateManager() {
         return Mockito.mock(GraphQLMinionCertificateManager.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLMinionService grpcMinionService() {
+    public GraphQLMinionService graphQLMinionService() {
         return Mockito.mock(GraphQLMinionService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLNodeService grpcNodeService() {
+    public GraphQLNodeService graphQLNodeService() {
         return Mockito.mock(GraphQLNodeService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLTagService grpcTagService() {
+    public GraphQLTagService graphQLTagService() {
         return Mockito.mock(GraphQLTagService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLNotificationService notificationService() {
+    public GraphQLNotificationService graphQLNotificationService() {
         return Mockito.mock(GraphQLNotificationService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLActiveDiscoveryService grpcActiveDiscoveryService() {
+    public GraphQLActiveDiscoveryService graphQLActiveDiscoveryService() {
         return Mockito.mock(GraphQLActiveDiscoveryService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLAzureActiveDiscoveryService grpcAzureActiveDiscoveryService() {
+    public GraphQLAzureActiveDiscoveryService graphQLAzureActiveDiscoveryService() {
         return Mockito.mock(GraphQLAzureActiveDiscoveryService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLIcmpActiveDiscoveryService grpcIcmpActiveDiscoveryService() {
+    public GraphQLIcmpActiveDiscoveryService graphQLIcmpActiveDiscoveryService() {
         return Mockito.mock(GraphQLIcmpActiveDiscoveryService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLPassiveDiscoveryService grpcPassiveDiscoveryService() {
+    public GraphQLPassiveDiscoveryService graphQLPassiveDiscoveryService() {
         return Mockito.mock(GraphQLPassiveDiscoveryService.class, new GraphQLAnswer());
     }
 
     @Bean
     @Primary
-    public GraphQLFlowService grpcFlowService() {
+    public GraphQLFlowService graphQLFlowService() {
         return Mockito.mock(GraphQLFlowService.class, new GraphQLAnswer());
     }
 

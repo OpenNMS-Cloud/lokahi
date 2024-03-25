@@ -40,7 +40,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcIcmpActiveDiscoveryService {
+public class GraphQLIcmpActiveDiscoveryService {
     private final IcmpActiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;
     private final InventoryClient client;

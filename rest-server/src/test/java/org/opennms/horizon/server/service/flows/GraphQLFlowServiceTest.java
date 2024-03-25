@@ -58,7 +58,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = RestServerApplication.class)
-class GrpcFlowServiceTest {
+class GraphQLFlowServiceTest {
     private final String tenantId = "tenantId";
 
     @MockBean(name = "flowQuerier")

@@ -40,7 +40,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcMinionCertificateManager {
+public class GraphQLMinionCertificateManager {
     private final MinionCertificateManagerClient client;
     private final ServerHeaderUtil headerUtil;
     private final CertificateMapper mapper;

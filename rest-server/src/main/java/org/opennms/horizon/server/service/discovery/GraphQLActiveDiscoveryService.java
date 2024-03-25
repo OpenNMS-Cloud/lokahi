@@ -19,38 +19,34 @@
  * language governing permissions and limitations under the
  * License.
  */
-package org.opennms.horizon.server.service;
+package org.opennms.horizon.server.service.discovery;
 
 import io.leangen.graphql.annotations.GraphQLEnvironment;
-import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.opennms.horizon.notifications.dto.PagerDutyConfigDTO;
-import org.opennms.horizon.server.mapper.PagerDutyConfigMapper;
-import org.opennms.horizon.server.model.notification.PagerDutyConfig;
-import org.opennms.horizon.server.service.grpc.NotificationClient;
+import org.opennms.horizon.inventory.dto.ActiveDiscoveryDTO;
+import org.opennms.horizon.server.mapper.discovery.ActiveDiscoveryMapper;
+import org.opennms.horizon.server.model.inventory.discovery.active.ActiveDiscovery;
+import org.opennms.horizon.server.service.grpc.InventoryClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class NotificationService {
-    private final NotificationClient client;
-    private final PagerDutyConfigMapper mapper;
+public class GraphQLActiveDiscoveryService {
+    private final InventoryClient client;
+    private final ActiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;
 
-    @GraphQLMutation
-    public Mono<Void> savePagerDutyConfig(PagerDutyConfig config, @GraphQLEnvironment ResolutionEnvironment env) {
-        PagerDutyConfigDTO protoConfigDTO = mapper.pagerDutyConfigToProto(config);
-
-        String tenantId = headerUtil.extractTenant(env);
-        PagerDutyConfigDTO.Builder dtoBuilder = PagerDutyConfigDTO.newBuilder(protoConfigDTO);
-        dtoBuilder.setTenantId(tenantId);
-
-        client.postPagerDutyConfig(dtoBuilder.build(), headerUtil.getAuthHeader(env));
-        return Mono.empty();
+    @GraphQLQuery
+    public Flux<ActiveDiscovery> listActiveDiscovery(@GraphQLEnvironment ResolutionEnvironment env) {
+        List<ActiveDiscoveryDTO> discoveriesDto = client.listActiveDiscoveries(headerUtil.getAuthHeader(env));
+        return Flux.fromIterable(
+                discoveriesDto.stream().map(mapper::dtoToActiveDiscovery).toList());
     }
 }

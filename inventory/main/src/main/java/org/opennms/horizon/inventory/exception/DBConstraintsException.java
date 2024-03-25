@@ -23,9 +23,10 @@ package org.opennms.horizon.inventory.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
-public class UniqueConstraintsException extends DataIntegrityViolationException {
+public class DBConstraintsException extends DataIntegrityViolationException {
 
-    public UniqueConstraintsException(String message) {
+    public DBConstraintsException(String message) {
         super(message);
     }
+
 }

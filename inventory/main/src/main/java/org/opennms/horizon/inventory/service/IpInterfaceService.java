@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
-import org.opennms.horizon.inventory.exception.UniqueConstraintsException;
+import org.opennms.horizon.inventory.exception.DBConstraintsException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -126,7 +126,7 @@ public class IpInterfaceService {
             modelRepo.save(ipInterface);
         } catch (DataIntegrityViolationException e) {
             LOG.error("Ip address already exists for a given location :", e.getMessage());
-            throw new UniqueConstraintsException("Ip address already exists for a given location :" + e.getMessage());
+            throw new DBConstraintsException("Ip address already exists for a given location :" + e.getMessage());
         }
     }
 

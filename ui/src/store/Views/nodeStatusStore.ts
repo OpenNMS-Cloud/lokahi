@@ -68,11 +68,11 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
   const node = computed(() => {
     const node = nodeStatusQueries.fetchedData.node
 
-    const azureInterfaces = new Map(node.azureInterfaces?.map((azureInterface) => {
+    const azureInterfaces = new Map(node.azureInterfaces?.map((azureInterface: any) => {
       return [azureInterface.id, azureInterface]
     }))
 
-    const snmpInterfaces = node.snmpInterfaces?.map((snmpInterface) => {
+    const snmpInterfaces = node.snmpInterfaces?.map((snmpInterface: any) => {
       for (const exporter of exporters.value) {
         if (exporter.snmpInterface?.ifIndex === snmpInterface.ifIndex) {
           return { ...snmpInterface, exporter }
@@ -115,6 +115,16 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     createAndDownloadBlobFile(bytes || [], filename)
   }
 
+  const downloadEvents = async (searchTerm: string) => {
+    const queryVariables: DownloadCsvVariables = {
+      nodeId: nodeId.value,
+      searchTerm: searchTerm || '',
+      downloadFormat: DownloadFormat.Csv
+    }
+    const bytes = await nodeStatusQueries.downloadEvents(queryVariables)
+    const fileName = `${node.value.nodeLabel}-events.csv`
+    createAndDownloadBlobFile(bytes, fileName)
+  }
 
   const getAlertsByNode = async () => {
 
@@ -195,6 +205,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     setAlertsByNodePageSize,
     setAlertsByNodePage,
     alertsByNodeSortChanged,
-    downloadAlertsByNodesToCsv
+    downloadAlertsByNodesToCsv,
+    downloadEvents
   }
 })

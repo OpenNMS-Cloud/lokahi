@@ -91,7 +91,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Import-Package>!io.netty.buffer,!org.apache.camel,!org.apache.camel.builder,!org.apache.camel.component.netty,*</Import-Package>
+            <Import-Package>!io.netty.buffer,
+                !org.apache.camel.*,
+                !org.opennms.horizon.shared.utils,*
+                </Import-Package>
             <Embed-Dependency></Embed-Dependency>
           </instructions>
         </configuration>

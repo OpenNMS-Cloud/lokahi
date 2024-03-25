@@ -129,7 +129,7 @@ public class GraphQLQueryValidationConfig {
 
     @Bean
     @Primary
-    public GraphQLTSDBMetricsService TSDBMetricsService() {
+    public GraphQLTSDBMetricsService graphQLTSDBMetricsService() {
         return Mockito.mock(GraphQLTSDBMetricsService.class, new GraphQLAnswer());
     }
 

@@ -97,6 +97,7 @@ public class GraphQLEventService {
     public Mono<SearchEventsResponse> downloadEventsByNodeId(
             @GraphQLEnvironment ResolutionEnvironment env,
             @GraphQLArgument(name = "nodeId") Long nodeId,
+            @GraphQLArgument(name = "searchTerm") String searchTerm,
             @GraphQLArgument(name = "pageSize") Integer pageSize,
             @GraphQLArgument(name = "page") int page,
             @GraphQLArgument(name = "sortBy") String sortBy,
@@ -105,7 +106,7 @@ public class GraphQLEventService {
 
         List<Event> events =
                 client
-                        .searchEvents(nodeId, "", pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
+                        .searchEvents(nodeId, searchTerm, pageSize, page, sortBy, sortAscending, headerUtil.getAuthHeader(env))
                         .stream()
                         .map(mapper::protoToEvent)
                         .toList();

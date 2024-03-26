@@ -112,7 +112,6 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
             Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
 
-
             var events = eventService.searchEvents(tenantId, request, pageRequest);
 
             responseObserver.onNext(events);

@@ -35,6 +35,7 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -224,6 +225,24 @@ class EventGrpcServiceTest extends AbstractGrpcUnitTest {
 
         assertThat(statusException.getStatus().getCode().value()).isEqualTo(Code.UNAUTHENTICATED_VALUE);
         Mockito.verify(spyInterceptor).verifyAccessToken("Bearer fake");
+        Mockito.verify(spyInterceptor)
+                .interceptCall(
+                        ArgumentMatchers.any(ServerCall.class),
+                        ArgumentMatchers.any(Metadata.class),
+                        ArgumentMatchers.any(ServerCallHandler.class));
+    }
+
+    @Test
+    void testGetEventsByNodeIdAuthWithoutTenantID() throws NoSuchElementException, VerificationException {
+        var nodeId = UInt64Value.of(TEST_NODEID);
+        var stubWithHeader = stub.withInterceptors(
+                MetadataUtils.newAttachHeadersInterceptor(createHeaders(authHeaderWithoutTenantId)));
+
+        var statusException =
+                Assertions.assertThrows(StatusRuntimeException.class, () -> stubWithHeader.getEventsByNodeId(nodeId));
+
+        assertThat(statusException.getStatus().getCode().value()).isEqualTo(Code.NOT_FOUND.getNumber());
+        Mockito.verify(spyInterceptor).verifyAccessToken(authHeaderWithoutTenantId);
         Mockito.verify(spyInterceptor)
                 .interceptCall(
                         ArgumentMatchers.any(ServerCall.class),

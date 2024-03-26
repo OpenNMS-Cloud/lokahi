@@ -101,7 +101,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     @Override
     public void searchEvents(EventsSearchBy request, StreamObserver<EventLogListResponse> responseObserver) {
 
-        try {
+
             String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
             int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
             int page = request.getPage();
@@ -116,13 +116,6 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
             responseObserver.onNext(events);
             responseObserver.onCompleted();
-        } catch (Exception e) {
-            LOG.error("Error while getting events by nodeId {}", request.getNodeId(), e);
-            Status status = Status.newBuilder()
-                    .setCode(Code.INTERNAL_VALUE)
-                    .setMessage("Error while getting alerts with nodeId {} " + request.getNodeId() + e.getMessage())
-                    .build();
-            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
-        }
+
     }
 }

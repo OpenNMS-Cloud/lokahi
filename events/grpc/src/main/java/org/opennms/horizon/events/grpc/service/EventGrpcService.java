@@ -29,7 +29,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.events.grpc.client.InventoryClient;
 import org.opennms.horizon.events.persistence.service.EventService;
@@ -48,8 +48,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
     @Override
     public void listEvents(Empty request, StreamObserver<EventLog> responseObserver) {
-        String tenantId =
-                Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get()).orElseThrow();
+        String tenantId = Objects.requireNonNull(GrpcConstants.TENANT_ID_CONTEXT_KEY.get());
 
         List<Event> events = eventService.findEvents(tenantId);
         EventLog eventList =
@@ -61,8 +60,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
     @Override
     public void getEventsByNodeId(UInt64Value nodeId, StreamObserver<EventLog> responseObserver) {
-        String tenantId =
-                Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get()).orElseThrow();
+        String tenantId = Objects.requireNonNull(GrpcConstants.TENANT_ID_CONTEXT_KEY.get());
 
         try {
             inventoryClient.getNodeById(tenantId, nodeId.getValue());
@@ -91,8 +89,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
     @Override
     public void searchEvents(EventsSearchBy request, StreamObserver<EventLog> responseObserver) {
-        String tenantId =
-                Optional.ofNullable(GrpcConstants.TENANT_ID_CONTEXT_KEY.get()).orElseThrow();
+        String tenantId = Objects.requireNonNull(GrpcConstants.TENANT_ID_CONTEXT_KEY.get());
         List<Event> events = eventService.searchEvents(tenantId, request);
         EventLog eventList =
                 EventLog.newBuilder().setTenantId(tenantId).addAllEvents(events).build();

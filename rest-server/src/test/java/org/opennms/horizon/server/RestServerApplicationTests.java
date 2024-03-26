@@ -24,52 +24,52 @@ package org.opennms.horizon.server;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
-import org.opennms.horizon.server.service.GrpcAlertService;
-import org.opennms.horizon.server.service.GrpcEventService;
-import org.opennms.horizon.server.service.GrpcLocationService;
-import org.opennms.horizon.server.service.GrpcMinionService;
-import org.opennms.horizon.server.service.GrpcNodeService;
-import org.opennms.horizon.server.service.NotificationService;
-import org.opennms.horizon.server.service.discovery.GrpcAzureActiveDiscoveryService;
-import org.opennms.horizon.server.service.flows.GrpcFlowService;
+import org.opennms.horizon.server.service.GraphQLAlertService;
+import org.opennms.horizon.server.service.GraphQLEventService;
+import org.opennms.horizon.server.service.GraphQLLocationService;
+import org.opennms.horizon.server.service.GraphQLMinionService;
+import org.opennms.horizon.server.service.GraphQLNodeService;
+import org.opennms.horizon.server.service.GraphQLNotificationService;
+import org.opennms.horizon.server.service.discovery.GraphQLAzureActiveDiscoveryService;
+import org.opennms.horizon.server.service.flows.GraphQLFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class RestServerApplicationTests {
     @Autowired
-    private NotificationService notificationService;
+    private GraphQLNotificationService graphQLNotificationService;
 
     @Autowired
-    private GrpcMinionService grpcMinionService;
+    private GraphQLMinionService graphQLMinionService;
 
     @Autowired
-    private GrpcEventService grpcEventService;
+    private GraphQLEventService graphQLEventService;
 
     @Autowired
-    private GrpcNodeService grpcNodeService;
+    private GraphQLNodeService graphQLNodeService;
 
     @Autowired
-    private GrpcLocationService grpcLocationService;
+    private GraphQLLocationService graphQLLocationService;
 
     @Autowired
-    private GrpcAlertService grpcAlertService;
+    private GraphQLAlertService graphQLAlertService;
 
     @Autowired
-    private GrpcAzureActiveDiscoveryService grpcAzureActiveDiscoveryService;
+    private GraphQLAzureActiveDiscoveryService graphQLAzureActiveDiscoveryService;
 
     @Autowired
-    private GrpcFlowService grpcFlowService;
+    private GraphQLFlowService graphQLFlowService;
 
     @Test
     void contextLoads() {
-        assertNotNull(grpcMinionService);
-        assertNotNull(notificationService);
-        assertNotNull(grpcLocationService);
-        assertNotNull(grpcEventService);
-        assertNotNull(grpcNodeService);
-        assertNotNull(grpcAlertService);
-        assertNotNull(grpcAzureActiveDiscoveryService);
-        assertNotNull(grpcFlowService);
+        assertNotNull(graphQLMinionService);
+        assertNotNull(graphQLNotificationService);
+        assertNotNull(graphQLLocationService);
+        assertNotNull(graphQLEventService);
+        assertNotNull(graphQLNodeService);
+        assertNotNull(graphQLAlertService);
+        assertNotNull(graphQLAzureActiveDiscoveryService);
+        assertNotNull(graphQLFlowService);
     }
 }

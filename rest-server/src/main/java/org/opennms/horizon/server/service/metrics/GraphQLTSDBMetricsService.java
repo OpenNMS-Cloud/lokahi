@@ -44,7 +44,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @GraphQLApi
 @Service
-public class TSDBMetricsService {
+public class GraphQLTSDBMetricsService {
 
     private static final String QUERY_ENDPOINT = "/query";
     private static final String QUERY_RANGE_ENDPOINT = "/query_range";
@@ -56,7 +56,7 @@ public class TSDBMetricsService {
     private final WebClient tsdbQueryWebClient;
     private final WebClient tsdbrangeQueryWebClient;
 
-    public TSDBMetricsService(
+    public GraphQLTSDBMetricsService(
             ServerHeaderUtil headerUtil,
             MetricLabelUtils metricLabelUtils,
             QueryService queryService,

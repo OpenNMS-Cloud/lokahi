@@ -101,21 +101,19 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     @Override
     public void searchEvents(EventsSearchBy request, StreamObserver<EventLogListResponse> responseObserver) {
 
+        String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+        int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
+        int page = request.getPage();
 
-            String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
-            int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
-            int page = request.getPage();
+        String sortBy = !request.getSortBy().isEmpty() ? request.getSortBy() : SORT_BY_DEFAULT;
+        boolean sortAscending = request.getSortAscending();
 
-            String sortBy = !request.getSortBy().isEmpty() ? request.getSortBy() : SORT_BY_DEFAULT;
-            boolean sortAscending = request.getSortAscending();
+        Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
 
-            Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
-            Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
+        var events = eventService.searchEvents(tenantId, request, pageRequest);
 
-            var events = eventService.searchEvents(tenantId, request, pageRequest);
-
-            responseObserver.onNext(events);
-            responseObserver.onCompleted();
-
+        responseObserver.onNext(events);
+        responseObserver.onCompleted();
     }
 }

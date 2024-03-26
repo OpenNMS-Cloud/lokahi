@@ -144,8 +144,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                                     // we are listening on an InetAddress, it will always be of type InetAddressSocket
                                     InetSocketAddress source = (InetSocketAddress)
                                             exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
-
-                                  }
+                                }
 
                                 @Override
                                 public boolean process(Exchange exchange, AsyncCallback callback) {
@@ -158,7 +157,6 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
 
                                     ByteBuffer bufferCopy = ByteBuffer.allocate(buffer.readableBytes());
                                     buffer.getBytes(buffer.readerIndex(), bufferCopy);
-
 
                                     return false;
                                 }

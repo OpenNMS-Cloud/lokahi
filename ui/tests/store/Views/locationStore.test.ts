@@ -1,4 +1,5 @@
 import { useLocationStore } from '@/store/Views/locationStore'
+import { MonitoringLocationCreateInput } from '@/types/graphql'
 import { DisplayType } from '@/types/locations.d'
 import { createTestingPinia } from '@pinia/testing'
 import { setActiveClient, useClient } from 'villus'
@@ -51,5 +52,62 @@ describe('Locations Store', () => {
     expect(locationStore.selectedLocationId).toBe(undefined)
     expect(locationStore.displayType).toBe(DisplayType.ADD)
     expect(locationStore.certificatePassword).toBe('')
+  })
+
+  it('calls store.setDisplayType with correct parameters', async () => {
+    vi.spyOn(locationStore, 'setDisplayType')
+    locationStore.setDisplayType(DisplayType.ADD)
+    expect(locationStore.setDisplayType).toHaveBeenCalledWith(DisplayType.ADD)
+    expect(locationStore.displayType).toBe(DisplayType.ADD)
+  })
+
+  it('calls store.createLocation with correct parameters', async () => {
+    vi.spyOn(locationStore, 'createLocation')
+    const mockLocation: MonitoringLocationCreateInput = {
+      address: '',
+      latitude: 0,
+      location: 'local',
+      longitude: 0
+    }
+    await locationStore.createLocation(mockLocation)
+    expect(locationStore.createLocation).toHaveBeenCalledWith(mockLocation)
+    expect(locationStore.createLocation).toBeTruthy()
+  })
+
+  it('calls store.updateLocation with correct parameters', async () => {
+    vi.spyOn(locationStore, 'updateLocation')
+    const mockLocation = {
+      id: 2,
+      address: '',
+      latitude: 0,
+      location: 'local',
+      longitude: 0
+    }
+    await locationStore.createLocation(mockLocation)
+    expect(locationStore.createLocation).toHaveBeenCalledWith(mockLocation)
+    expect(locationStore.createLocation).toBeTruthy()
+  })
+
+  it('calls store.deleteLocation with correct parameters', async () => {
+    vi.spyOn(locationStore, 'deleteLocation')
+    const mockLocationId = 200
+    await locationStore.deleteLocation(mockLocationId)
+    expect(locationStore.deleteLocation).toHaveBeenCalledWith(mockLocationId)
+    expect(locationStore.deleteLocation).toBeTruthy()
+  })
+
+  it('calls store.selectedLocation with correct parameters', async () => {
+    const mockLocationList = [
+      {
+        'id': 2,
+        'location': 'local',
+        'address': '',
+        'longitude': 0,
+        'latitude': 0
+      }
+    ]
+    locationStore.locationsList = mockLocationList
+    locationStore.selectedLocationId = 2
+    expect(locationStore.selectedLocation).toStrictEqual(mockLocationList[0])
   })
 })

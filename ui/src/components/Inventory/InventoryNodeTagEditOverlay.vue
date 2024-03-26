@@ -70,7 +70,7 @@ const storage: IIcon = {
     top: var(variables.$spacing-s);
     right: var(variables.$spacing-s);
 
-    :deep {
+    :deep() {
       label {
         display: none;
       }
@@ -121,7 +121,7 @@ const storage: IIcon = {
       margin-top: var(variables.$spacing-s);
       display: inline;
 
-      :deep {
+      :deep() {
         .chip {
           background-color: var(variables.$primary);
 

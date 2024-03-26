@@ -117,7 +117,7 @@
                 :event-type="store.selectedRule?.eventType"
                 :index="Number(index)"
                 :isDisabled="store.selectedPolicy?.isDefault === true"
-                @updateCondition="(condition: ThresholdCondition) => store.updateCondition(cond.id, condition)"
+                @updateCondition="(condition: AlertCondition) => store.updateCondition(cond.id, condition)"
                 @deleteCondition="(id: string) => store.deleteCondition(id)"
               />
             </template>

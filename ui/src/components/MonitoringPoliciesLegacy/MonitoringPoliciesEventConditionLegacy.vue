@@ -4,7 +4,7 @@
     <div
       v-if="index !== 0 && !isDisabled"
       class="delete"
-      @click="$emit('deleteCondition', alertCondition.id)"
+      @click="emit('deleteCondition', alertCondition.id)"
     >
       Delete condition {{ conditionLetters[index].toUpperCase() }}
     </div>
@@ -19,7 +19,7 @@
         text-prop="name"
         v-model="alertCondition.triggerEvent"
         :disabled="isDisabled"
-        @update:modelValue="$emit('updateCondition', alertCondition)"
+        @update:modelValue="emit('updateCondition', alertCondition)"
       />
     </div>
 
@@ -31,7 +31,7 @@
         v-model="alertCondition.count"
         type="number"
         :disabled="isDisabled"
-        @update:modelValue="$emit('updateCondition', alertCondition)"
+        @update:modelValue="emit('updateCondition', alertCondition)"
       />
     </div>
 
@@ -43,7 +43,7 @@
         v-model="alertCondition.overtime"
         type="number"
         :disabled="isDisabled"
-        @update:modelValue="$emit('updateCondition', alertCondition)"
+        @update:modelValue="emit('updateCondition', alertCondition)"
       />
     </div>
 
@@ -53,7 +53,7 @@
         :list="durationOptions"
         @item-selected="(val: string) => {
           alertCondition.overtimeUnit = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
         :selectedId="alertCondition.overtimeUnit"
         :disabled="isDisabled"
@@ -66,7 +66,7 @@
         :list="severityOptions"
         @item-selected="(val: string) => {
           alertCondition.severity = val
-          $emit('updateCondition', alertCondition)
+          emit('updateCondition', alertCondition)
         }"
         :selectedId="alertCondition.severity"
         :disabled="isDisabled"
@@ -80,7 +80,7 @@
         hideLabel
         :options="clearEventDefinitionOptions"
         text-prop="name"
-        @update:modelValue="$emit('updateCondition', alertCondition)"
+        @update:modelValue="emit('updateCondition', alertCondition)"
         v-model="alertCondition.clearEvent"
         :disabled="isDisabled"
         clear="Remove"
@@ -109,8 +109,8 @@ const props = defineProps<{
 
 const alertEventDefinitionStore = useAlertEventDefinitionQueries()
 
-defineEmits<{
-  (e: 'updateCondition', alertCondition: ThresholdCondition): void,
+const emit = defineEmits<{
+  (e: 'updateCondition', alertCondition: AlertCondition | ThresholdCondition): void,
   (e: 'deleteCondition', id: string): void
 }>()
 

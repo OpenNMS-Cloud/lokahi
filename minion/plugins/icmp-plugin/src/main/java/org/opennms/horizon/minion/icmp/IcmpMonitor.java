@@ -24,11 +24,10 @@ package org.opennms.horizon.minion.icmp;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import java.net.InetAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.MonitoredService;
-import org.opennms.horizon.minion.plugin.api.ServiceMonitorCallback;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
@@ -77,7 +76,7 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
     @Override
     public ServiceMonitorResponse poll(MonitoredService monitoredService, Any config) {
-        AtomicReference<ServiceMonitorResponse> responseHolder = new AtomicReference<>(null);
+        CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
 
         try {
             if (!config.is(IcmpMonitorRequest.class)) {
@@ -93,13 +92,6 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
             boolean allowFragmentation = effectiveRequest.getAllowFragmentation();
 
-            ServiceMonitorCallback callback = new ServiceMonitorCallback() {
-                @Override
-                public void onResponse(ServiceMonitorResponse response) {
-                    responseHolder.set(response);
-                }
-            };
-
             Pinger pinger = pingerFactory.getInstance(effectiveRequest.getDscp(), allowFragmentation);
 
             pinger.ping(
@@ -108,17 +100,17 @@ public class IcmpMonitor extends AbstractServiceMonitor {
                     effectiveRequest.getRetries(),
                     effectiveRequest.getPacketSize(),
                     new MyPingResponseCallback(
-                            callback, monitoredService.getNodeId(), monitoredService.getMonitorServiceId()));
+                            future, monitoredService.getNodeId(), monitoredService.getMonitorServiceId()));
+            return future.get();
         } catch (Exception e) {
-            responseHolder.set(ServiceMonitorResponseImpl.builder()
-                    .reason("Failed to monitor for azure resource: " + e.getMessage())
-                    .monitorType(MonitorType.AZURE)
-                    .status(ServiceMonitorResponse.Status.Down)
+            future.completeExceptionally(e);
+            return ServiceMonitorResponseImpl.builder()
+                    .reason(e.getMessage())
                     .nodeId(monitoredService.getNodeId())
-                    .build());
+                    .monitoredServiceId(monitoredService.getMonitorServiceId())
+                    .status(Status.Down)
+                    .build();
         }
-
-        return responseHolder.get();
     }
 
     // ========================================
@@ -157,14 +149,13 @@ public class IcmpMonitor extends AbstractServiceMonitor {
 
     private static class MyPingResponseCallback implements PingResponseCallback {
         private final Logger logger = LoggerFactory.getLogger(MyPingResponseCallback.class);
-        private ServiceMonitorResponse serviceMonitorResponse;
+        private final CompletableFuture<ServiceMonitorResponse> future;
         private final long nodeId;
         private final long monitoredServiceId;
-        final ServiceMonitorCallback serviceMonitorCallback;
 
         public MyPingResponseCallback(
-                ServiceMonitorCallback serviceMonitorCallback, long nodeId, long monitoredServiceId) {
-            this.serviceMonitorCallback = serviceMonitorCallback;
+                CompletableFuture<ServiceMonitorResponse> future, long nodeId, long monitoredServiceId) {
+            this.future = future;
             this.nodeId = nodeId;
             this.monitoredServiceId = monitoredServiceId;
         }
@@ -173,41 +164,38 @@ public class IcmpMonitor extends AbstractServiceMonitor {
         public void handleResponse(InetAddress inetAddress, EchoPacket response) {
             double responseTimeMicros = Math.round(response.elapsedTime(TimeUnit.MICROSECONDS));
             double responseTimeMillis = responseTimeMicros / 1000.0;
-            serviceMonitorResponse = ServiceMonitorResponseImpl.builder()
+            future.complete(ServiceMonitorResponseImpl.builder()
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Up)
                     .responseTime(responseTimeMillis)
                     .nodeId(nodeId)
                     .monitoredServiceId(monitoredServiceId)
                     .ipAddress(inetAddress.getHostAddress())
-                    .build();
-            serviceMonitorCallback.onResponse(serviceMonitorResponse);
+                    .build());
         }
 
         @Override
         public void handleTimeout(InetAddress inetAddress, EchoPacket echoPacket) {
-            serviceMonitorResponse = ServiceMonitorResponseImpl.builder()
+            future.complete(ServiceMonitorResponseImpl.builder()
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Unknown)
                     .nodeId(nodeId)
                     .monitoredServiceId(monitoredServiceId)
                     .reason("timeout")
                     .ipAddress(inetAddress.getHostAddress())
-                    .build();
-            serviceMonitorCallback.onResponse(serviceMonitorResponse);
+                    .build());
         }
 
         @Override
         public void handleError(InetAddress inetAddress, EchoPacket echoPacket, Throwable throwable) {
-            serviceMonitorResponse = ServiceMonitorResponseImpl.builder()
+            future.complete(ServiceMonitorResponseImpl.builder()
                     .monitorType(MonitorType.ICMP)
                     .status(Status.Down)
                     .nodeId(nodeId)
                     .reason(throwable.getMessage())
                     .monitoredServiceId(monitoredServiceId)
                     .ipAddress(inetAddress.getHostAddress())
-                    .build();
-            serviceMonitorCallback.onResponse(serviceMonitorResponse);
+                    .build());
         }
     }
 }

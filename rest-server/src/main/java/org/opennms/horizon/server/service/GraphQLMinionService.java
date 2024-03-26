@@ -44,7 +44,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcMinionService {
+public class GraphQLMinionService {
     private final InventoryClient client;
     private final MinionMapper mapper;
     private final ServerHeaderUtil headerUtil;

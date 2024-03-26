@@ -50,8 +50,8 @@ import reactor.core.publisher.Flux;
 @GraphQLApi
 @Service
 @RequiredArgsConstructor
-public class GrpcFlowService {
-    private static final Logger LOG = LoggerFactory.getLogger(GrpcFlowService.class);
+public class GraphQLFlowService {
+    private static final Logger LOG = LoggerFactory.getLogger(GraphQLFlowService.class);
     private final ServerHeaderUtil headerUtil;
     private final FlowClient flowClient;
     private final InventoryClient inventoryClient;

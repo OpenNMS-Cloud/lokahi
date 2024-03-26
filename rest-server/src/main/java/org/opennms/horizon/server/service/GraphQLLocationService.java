@@ -42,7 +42,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcLocationService { // TODO: rename to GraphQL...Service; there is no GRPC in this code
+public class GraphQLLocationService {
     private final InventoryClient inventoryClient;
     private final MinionCertificateManagerClient certificateManagerClient;
     private final MonitoringLocationMapper mapper;

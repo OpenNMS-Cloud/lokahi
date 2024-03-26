@@ -67,9 +67,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcNodeService {
+public class GraphQLNodeService {
     private static final String ICMP_MONITOR_TYPE = "ICMP";
-    private static final Logger LOG = LoggerFactory.getLogger(GrpcNodeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GraphQLNodeService.class);
 
     private final InventoryClient client;
     private final NodeMapper mapper;

@@ -47,7 +47,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcTagService {
+public class GraphQLTagService {
     private final InventoryClient client;
     private final TagMapper mapper;
     private final ServerHeaderUtil headerUtil;

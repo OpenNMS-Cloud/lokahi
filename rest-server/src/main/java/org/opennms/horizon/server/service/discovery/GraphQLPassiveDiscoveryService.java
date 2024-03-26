@@ -43,7 +43,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcPassiveDiscoveryService {
+public class GraphQLPassiveDiscoveryService {
     private final InventoryClient client;
     private final PassiveDiscoveryMapper mapper;
     private final ServerHeaderUtil headerUtil;

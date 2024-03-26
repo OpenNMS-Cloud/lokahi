@@ -61,9 +61,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @GraphQLApi
 @Service
-public class GrpcAlertService {
+public class GraphQLAlertService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GrpcNodeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GraphQLNodeService.class);
 
     private final AlertsClient alertsClient;
     private final ServerHeaderUtil headerUtil;

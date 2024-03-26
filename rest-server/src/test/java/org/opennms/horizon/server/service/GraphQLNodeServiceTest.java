@@ -58,7 +58,7 @@ import org.opennms.horizon.server.model.TSResult;
 import org.opennms.horizon.server.model.TimeRangeUnit;
 import org.opennms.horizon.server.model.TimeSeriesQueryResult;
 import org.opennms.horizon.server.service.grpc.InventoryClient;
-import org.opennms.horizon.server.service.metrics.TSDBMetricsService;
+import org.opennms.horizon.server.service.metrics.GraphQLTSDBMetricsService;
 import org.opennms.horizon.server.test.util.GraphQLWebTestClient;
 import org.opennms.horizon.server.utils.ServerHeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class GraphQLNodeServiceTest {
     private ServerHeaderUtil mockHeaderUtil;
 
     @MockBean
-    private TSDBMetricsService tsdbMetricsService;
+    private GraphQLTSDBMetricsService graphQLTSDBMetricsService;
 
     private GraphQLWebTestClient webClient;
     private String accessToken;
@@ -287,7 +287,7 @@ public class GraphQLNodeServiceTest {
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
         doReturn(Mono.just(tsQueryResult))
-                .when(tsdbMetricsService)
+                .when(graphQLTSDBMetricsService)
                 .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());
@@ -308,7 +308,7 @@ public class GraphQLNodeServiceTest {
 
         doReturn(nodeDTO4).when(mockClient).getNodeById(anyLong(), eq(accessToken));
         doReturn(Mono.just(tsQueryResult))
-                .when(tsdbMetricsService)
+                .when(graphQLTSDBMetricsService)
                 .getMetric(any(ResolutionEnvironment.class), anyString(), anyMap(), anyInt(), any(TimeRangeUnit.class));
 
         String query = String.format("query { nodeStatus(id: %d) { id, status }}", nodeDTO4.getId());

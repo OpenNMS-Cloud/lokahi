@@ -162,13 +162,13 @@ const updatePaginatedEvents = (events: Array<any>, pageNumber: number, pageSize:
 }
 
 const onPageChanged = (v: number) => {
-  if (hasEvents) {
+  if (hasEvents.value) {
     updatePaginatedEvents(eventData.value.events, v, pageInfo.pageSize)
   }
 }
 
 const onPageSizeChanged = (v: number) => {
-  if (hasEvents) {
+  if (hasEvents.value) {
     pageInfo.pageSize = v
     updatePaginatedEvents(eventData.value.events, pageInfo.page, v)
   }

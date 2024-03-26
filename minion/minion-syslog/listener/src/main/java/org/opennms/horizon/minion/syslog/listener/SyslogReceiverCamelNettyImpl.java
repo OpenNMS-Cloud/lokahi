@@ -145,8 +145,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                                     InetSocketAddress source = (InetSocketAddress)
                                             exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                                    System.out.println(source.getHostName());
-                                }
+                                  }
 
                                 @Override
                                 public boolean process(Exchange exchange, AsyncCallback callback) {
@@ -160,7 +159,7 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                                     ByteBuffer bufferCopy = ByteBuffer.allocate(buffer.readableBytes());
                                     buffer.getBytes(buffer.readerIndex(), bufferCopy);
 
-                                    System.out.println(source.getHostName());
+
                                     return false;
                                 }
 
@@ -173,7 +172,6 @@ public class SyslogReceiverCamelNettyImpl extends SinkDispatchingSyslogReceiver 
                                     InetSocketAddress source = (InetSocketAddress)
                                             exchange.getIn().getHeader(NettyConstants.NETTY_REMOTE_ADDRESS);
 
-                                    System.out.println(source.getHostName());
                                     return null;
                                 }
                             });

@@ -102,6 +102,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     public void searchEvents(EventsSearchBy request, StreamObserver<EventLogListResponse> responseObserver) {
 
         try {
+            String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
             int pageSize = request.getPageSize() != 0 ? request.getPageSize() : PAGE_SIZE_DEFAULT;
             int page = request.getPage();
 
@@ -110,7 +111,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
 
             Sort.Direction sortDirection = sortAscending ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageRequest = PageRequest.of(page, pageSize, Sort.by(sortDirection, sortBy));
-            String tenantId = tenantLookup.lookupTenantId(Context.current()).orElseThrow();
+
 
             var events = eventService.searchEvents(tenantId, request, pageRequest);
 

@@ -37,9 +37,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByTenantIdAndNodeId(String tenantId, long nodeId);
 
     @Query(
-            value = "SELECT e " + "FROM Event e "
-                    + " WHERE e.tenantId = :tenantId "
-                    + " AND e.nodeId = :nodeId "
+            value = "SELECT e FROM Event e WHERE e.tenantId = :tenantId AND e.nodeId = :nodeId "
                     + " AND ( e.eventUei LIKE %:searchTerm% "
                     + " OR e.locationName LIKE %:searchTerm% "
                     + " OR e.description LIKE %:searchTerm% "
@@ -47,7 +45,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                     + " OR CAST( e.ipAddress  AS  string) LIKE %:searchTerm% )"
                     + " ORDER BY e.id",
             countQuery =
-                    "SELECT count(e) " + "FROM Event e " + "WHERE e.tenantId = :tenantId " + "AND e.nodeId = :nodeId ")
+                    "SELECT count(e)  FROM Event e  WHERE e.tenantId = :tenantId AND e.nodeId = :nodeId ")
     Page<Event> findByNodeIdAndSearchTermAndTenantId(
             @Param("tenantId") String tenantId,
             @Param("nodeId") Long nodeId,

@@ -27,12 +27,12 @@
   <parent>
     <groupId>org.opennms.lokahi.minion</groupId>
     <artifactId>testtools</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>org.opennms.lokahi.minion</groupId>
   <artifactId>minion-gateway-wiremock</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
 
   <name>OpenNMS Lokahi :: Minion :: TestTools :: Minion Gateway Wiremock</name>

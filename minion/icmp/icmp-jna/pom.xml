@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.opennms.lokahi.minion</groupId>
     <artifactId>icmp</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <artifactId>icmp-jna</artifactId>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.opennms.lokahi.shared</groupId>
       <artifactId>lokahi-common-utils</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>

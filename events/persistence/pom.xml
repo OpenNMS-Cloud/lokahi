@@ -25,12 +25,12 @@
   <parent>
     <groupId>org.opennms.lokahi</groupId>
     <artifactId>events</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>org.opennms.lokahi.events</groupId>
   <artifactId>persistence</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>OpenNMS Lokahi :: Events :: Persistence</name>
 
   <properties>

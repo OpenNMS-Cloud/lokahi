@@ -31,7 +31,7 @@
   </parent>
 
   <artifactId>rest-server</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <name>OpenNMS Lokahi :: BFF</name>
   <description>A microservice that provides a GraphQL API for the Vue.js frontend.
@@ -149,7 +149,7 @@
     <dependency>
       <groupId>org.opennms.lokahi.shared</groupId>
       <artifactId>minion-certificate-manager-api</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

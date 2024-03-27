@@ -84,7 +84,6 @@ describe('Inventory Store', () => {
     }
     vi.spyOn(inventoryStore, 'addRemoveNodesSelected')
     inventoryStore.addRemoveNodesSelected(mockNewInventoryNode)
-    console.log(inventoryStore.nodesSelected, 'inventory store selected node')
     expect(inventoryStore.addRemoveNodesSelected).toBeCalled()
     expect(inventoryStore.nodesSelected).toStrictEqual([mockNewInventoryNode])
   })
@@ -121,7 +120,6 @@ describe('Inventory Store', () => {
     }
     vi.spyOn(inventoryStore, 'selectAll')
     inventoryStore.selectAll([mockNewInventoryNode])
-    console.log(inventoryStore.nodesSelected, 'inventory store selected node')
     expect(inventoryStore.selectAll).toBeCalled()
     expect(inventoryStore.nodesSelected).toStrictEqual([mockNewInventoryNode])
   })

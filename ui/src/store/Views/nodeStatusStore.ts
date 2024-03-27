@@ -103,6 +103,16 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-ip-interfaces.csv`)
   }
 
+  const downloadSNMPInterfacesToCsv = async (searchTerm: string) => {
+    const downloadTopNQueryVariables: DownloadCsvVariables = {
+      nodeId: nodeId.value,
+      searchTerm: searchTerm,
+      downloadFormat: DownloadFormat.Csv
+    }
+    const bytes = await nodeStatusQueries.downloadSNMPInterfaces(downloadTopNQueryVariables)
+    createAndDownloadBlobFile(bytes, `${node.value.nodeLabel}-snmp-interfaces.csv`)
+  }
+
   const downloadAlertsByNodesToCsv = async () => {
     const page = alertsPagination.value.page > 0 ? alertsPagination.value.page - 1 : 0
     const pagination = {
@@ -199,6 +209,7 @@ export const useNodeStatusStore = defineStore('nodeStatusStore', () => {
     node,
     nodeId,
     downloadIpInterfacesToCsv,
+    downloadSNMPInterfacesToCsv,
     getAlertsByNode,
     fetchAlertsByNodeData,
     alertsPagination,

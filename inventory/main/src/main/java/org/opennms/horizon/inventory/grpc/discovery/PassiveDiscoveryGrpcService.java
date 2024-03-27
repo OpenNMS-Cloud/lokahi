@@ -38,6 +38,7 @@ import org.opennms.horizon.inventory.dto.PassiveDiscoveryListDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryServiceGrpc;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryToggleDTO;
 import org.opennms.horizon.inventory.dto.PassiveDiscoveryUpsertDTO;
+import org.opennms.horizon.inventory.exception.GrpcConstraintVoilationExceptionHandler;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
@@ -82,11 +83,8 @@ public class PassiveDiscoveryGrpcService extends PassiveDiscoveryServiceGrpc.Pas
                                 .build();
                         responseObserver.onError(StatusProto.toStatusRuntimeException(status));
                     } catch (Exception e) {
-                        Status status = Status.newBuilder()
-                                .setCode(Code.INTERNAL_VALUE)
-                                .setMessage(e.getMessage())
-                                .build();
-                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                        GrpcConstraintVoilationExceptionHandler.handleException(
+                                e, responseObserver, Code.INTERNAL_VALUE);
                     }
                 },
                 () -> {

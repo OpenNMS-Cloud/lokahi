@@ -40,6 +40,7 @@ import org.opennms.horizon.inventory.dto.TagDTO;
 import org.opennms.horizon.inventory.dto.TagListDTO;
 import org.opennms.horizon.inventory.dto.TagRemoveListDTO;
 import org.opennms.horizon.inventory.dto.TagServiceGrpc;
+import org.opennms.horizon.inventory.exception.GrpcConstraintVoilationExceptionHandler;
 import org.opennms.horizon.inventory.service.NodeService;
 import org.opennms.horizon.inventory.service.TagService;
 import org.springframework.stereotype.Component;
@@ -71,11 +72,8 @@ public class TagGrpcService extends TagServiceGrpc.TagServiceImplBase {
                                 TagListDTO.newBuilder().addAllTags(tags).build());
                         responseObserver.onCompleted();
                     } catch (Exception e) {
-                        Status status = Status.newBuilder()
-                                .setCode(Code.INTERNAL_VALUE)
-                                .setMessage(e.getMessage())
-                                .build();
-                        responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+                        GrpcConstraintVoilationExceptionHandler.handleException(
+                                e, responseObserver, Code.INTERNAL_VALUE);
                     }
                 },
                 () -> responseObserver.onError(

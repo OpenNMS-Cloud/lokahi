@@ -54,7 +54,7 @@ onMounted(() => store.getMonitoringPolicies())
 }
 
 .content {
-  width: vars.$max-width-constrained;
+  width: 88%;
   margin-right: var(variables.$spacing-l);
   margin-left: var(variables.$spacing-l);
 }

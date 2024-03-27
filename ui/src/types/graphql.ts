@@ -311,6 +311,7 @@ export type MonitorPolicy = {
   notifyInstruction?: Maybe<Scalars['String']>;
   rules?: Maybe<Array<Maybe<PolicyRule>>>;
   tags?: Maybe<Array<Maybe<Scalars['String']>>>;
+  enabled?: Maybe<Scalars['Boolean']>;
 }
 
 export type MonitorPolicyInput = {

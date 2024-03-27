@@ -17,10 +17,6 @@ export const useAlertEventDefinitionQueries = defineStore('alertEventDefinitionQ
     })
 
     await execute()
-
-    console.log(data, '111111111111111111111111111111')
-
-
     return data
   }
 

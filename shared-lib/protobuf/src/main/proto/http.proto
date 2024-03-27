@@ -39,14 +39,13 @@ message HttpMonitorRequest {
   string inetAddress = 3;
   repeated int32 port = 4;
   repeated Header headers = 5;
-  repeated string response = 6;
+  string response = 6;
   string responseText = 7;
   string url = 8;
   int32 retry = 9;
   int64 timeout = 10;
   string userAgent= 11;
   bool verbose = 12;
-
 }
 
 message AuthParams {

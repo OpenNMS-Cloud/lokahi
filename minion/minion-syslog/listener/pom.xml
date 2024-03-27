@@ -31,26 +31,17 @@
   <artifactId>syslog-listener</artifactId>
   <packaging>bundle</packaging>
   <name>OpenNMS Lokahi :: Minion :: Syslog :: Listener</name>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-bom</artifactId>
-        <version>${camel.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>
+       <version>${camel.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-netty</artifactId>
+       <version>${camel.version}</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
@@ -69,10 +60,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-core-engine</artifactId>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -82,23 +69,6 @@
       <artifactId>mockito-core</artifactId>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Import-Package>!io.netty.buffer,
-                !org.apache.camel.*,
-                !org.opennms.horizon.shared.utils</Import-Package>
-            <Embed-Dependency></Embed-Dependency>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+
 
 </project>

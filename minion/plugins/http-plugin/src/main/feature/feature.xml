@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features name="minion-plugin-http-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+
+
+    <feature name="http-shared-libs" hidden="true">
+        <feature>aries-blueprint</feature>
+        <feature>grpc-contract</feature>
+        <bundle dependency="true">mvn:org.opennms.lokahi.shared/lokahi-common-logging/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.lokahi.shared/lokahi-common-utils/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.lib/org.opennms.lib.tracker/0.7</bundle>
+    </feature>
+
+    <feature name="http-plugins" version="${project.version}">
+        <feature>plugins-api</feature>
+        <bundle>mvn:org.opennms.lokahi.minion/http-plugin/${project.version}</bundle>
+    </feature>
+
+</features>
+

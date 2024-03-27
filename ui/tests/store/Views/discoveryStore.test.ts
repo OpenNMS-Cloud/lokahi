@@ -1,12 +1,7 @@
 import { createTestingPinia } from '@pinia/testing'
-import { useInventoryStore } from '../../../src/store/Views/inventoryStore'
 import { setActiveClient, useClient } from 'villus'
-import {NewInventoryNode, RawMetrics } from '@/types'
-import { useInventoryQueries } from '@/store/Queries/inventoryQueries'
 import { useDiscoveryStore } from '@/store/Views/discoveryStore'
-import DiscoveryMetaInformation from '@/components/Discovery/DiscoveryMetaInformation.vue'
-import { DiscoveryType } from '@/components/Discovery/discovery.constants'
-import {DiscoveryMeta} from '../../../src/types/discovery'
+
 
 describe('Discovery Store', () => {
   beforeEach(() => {
@@ -102,7 +97,7 @@ describe('Discovery Store', () => {
 
       expect(discoveryStore.discoveryTypePageActive).toBe(true)
       expect(discoveryStore.discoveryFormActive).toBe(false)
-   
+
     } else {
       expect(discoveryStore.discoveryTypePageActive).toBe(true)
     }
@@ -126,8 +121,8 @@ describe('Discovery Store', () => {
   it('Test for applyDefaultLocation', () => {
     const discoveryStore = useDiscoveryStore()
     vi.spyOn(discoveryStore, 'applyDefaultLocation')
-    discoveryStore.applyDefaultLocation([] , undefined)
-    expect(discoveryStore.applyDefaultLocation).toBeCalledWith([] , undefined)
+    discoveryStore.applyDefaultLocation([], undefined)
+    expect(discoveryStore.applyDefaultLocation).toBeCalledWith([], undefined)
   })
 
   it('Test for closeDeleteModal', () => {
@@ -197,23 +192,23 @@ describe('Discovery Store', () => {
   it('Test for setMetaSelectedDiscoveryValue', () => {
     const discoveryStore = useDiscoveryStore()
     vi.spyOn(discoveryStore, 'setMetaSelectedDiscoveryValue')
-    discoveryStore.setMetaSelectedDiscoveryValue('testing' ,1)
-    expect(discoveryStore.setMetaSelectedDiscoveryValue).toBeCalledWith('testing' , 1)
+    discoveryStore.setMetaSelectedDiscoveryValue('testing', 1)
+    expect(discoveryStore.setMetaSelectedDiscoveryValue).toBeCalledWith('testing', 1)
   })
 
   it('Test for setSelectedDiscoveryValue', () => {
     const discoveryStore = useDiscoveryStore()
     vi.spyOn(discoveryStore, 'setSelectedDiscoveryValue')
-    discoveryStore.setSelectedDiscoveryValue('testing' ,1)
-    expect(discoveryStore.setSelectedDiscoveryValue).toBeCalledWith('testing' , 1)
+    discoveryStore.setSelectedDiscoveryValue('testing', 1)
+    expect(discoveryStore.setSelectedDiscoveryValue).toBeCalledWith('testing', 1)
   })
 
 
   it('Test for activateForm', () => {
     const discoveryStore = useDiscoveryStore()
     vi.spyOn(discoveryStore, 'activateForm')
-    discoveryStore.activateForm('testing' ,1)
-    expect(discoveryStore.activateForm).toBeCalledWith('testing' , 1)
+    discoveryStore.activateForm('testing', 1)
+    expect(discoveryStore.activateForm).toBeCalledWith('testing', 1)
     expect(discoveryStore.discoveryTypePageActive).toBe(false)
     expect(discoveryStore.discoveryFormActive).toBe(true)
   })
@@ -230,19 +225,19 @@ describe('Discovery Store', () => {
   it('Test for toggleDiscovery', () => {
     const discoveryStore = useDiscoveryStore()
     vi.spyOn(discoveryStore, 'toggleDiscovery')
-   
-    discoveryStore.toggleDiscovery({id:1,name:'faizan',tags:[], locations:[],type:'',meta: { communityStrings: '',
-    udpPorts: '',
-    toggle: { toggle: false, id: 1 },
-    ipRanges: '',
-  
-  } })
-    expect(discoveryStore.toggleDiscovery).toBeCalledWith({id:1,name:'faizan',tags:[], locations:[],type:'',meta: { communityStrings: '',
-    udpPorts: '',
-    toggle: { toggle: false, id: 1 },
-    ipRanges: '',
-  
-  } })
+
+    discoveryStore.toggleDiscovery({id: 1, name: 'faizan', tags: [], locations: [], type: '', meta: { communityStrings: '',
+      udpPorts: '',
+      toggle: { toggle: false, id: 1 },
+      ipRanges: ''
+
+    } })
+    expect(discoveryStore.toggleDiscovery).toBeCalledWith({id: 1, name: 'faizan', tags: [], locations: [], type: '', meta: { communityStrings: '',
+      udpPorts: '',
+      toggle: { toggle: false, id: 1 },
+      ipRanges: ''
+
+    } })
   })
 
 
@@ -268,22 +263,22 @@ describe('Discovery Store', () => {
     discoveryStore.customValidator({
       id: 1,
       name: '',
-      tags:[],
-      locations:[],
+      tags: [],
+      locations: [],
       type: '',
       meta: {  communityStrings: '',
         udpPorts: '',
-        toggle: { toggle: false, id: 1 }},
+        toggle: { toggle: false, id: 1 }}
     })
     expect(discoveryStore.customValidator).toBeCalledWith( {
       id: 1,
       name: '',
-      tags:[],
-      locations:[],
+      tags: [],
+      locations: [],
       type: '',
       meta: {  communityStrings: '',
         udpPorts: '',
-        toggle: { toggle: false, id: 1 }},
+        toggle: { toggle: false, id: 1 }}
     })
   })
 

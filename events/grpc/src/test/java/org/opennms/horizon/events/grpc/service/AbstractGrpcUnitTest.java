@@ -48,6 +48,7 @@ package org.opennms.horizon.events.grpc.service;
  *     http://www.opennms.com/
  *******************************************************************************/
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
@@ -57,6 +58,7 @@ import io.grpc.Server;
 import io.grpc.ServerInterceptors;
 import io.grpc.inprocess.InProcessServerBuilder;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -72,6 +74,7 @@ public abstract class AbstractGrpcUnitTest {
 
     protected final String tenantId = "test-tenant";
     protected final String authHeader = "Bearer esgs12345";
+    protected final String authHeaderWithoutTenantId = "Bearer esgs12345 no tenant";
 
     protected void startServer(BindableService service) throws IOException, VerificationException {
         spyInterceptor = spy(new EventServerInterceptor(mock(KeycloakDeployment.class)));
@@ -82,6 +85,7 @@ public abstract class AbstractGrpcUnitTest {
                 .build();
         server.start();
         doReturn(Optional.of(tenantId)).when(spyInterceptor).verifyAccessToken(authHeader);
+        doThrow(new NoSuchElementException()).when(spyInterceptor).verifyAccessToken(authHeaderWithoutTenantId);
     }
 
     protected void stopServer() throws InterruptedException {

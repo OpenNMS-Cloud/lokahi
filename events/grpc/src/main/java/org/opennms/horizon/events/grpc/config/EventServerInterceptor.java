@@ -77,7 +77,7 @@ public class EventServerInterceptor implements ServerInterceptor {
             serverCall.close(Status.UNAUTHENTICATED.withDescription("Invalid access token"), new Metadata());
             return new ServerCall.Listener<>() {};
         } catch (NoSuchElementException e) {
-            serverCall.close(Status.UNAUTHENTICATED.withDescription("Missing tenant id"), new Metadata());
+            serverCall.close(Status.NOT_FOUND.withDescription("Missing tenant id"), new Metadata());
             return new ServerCall.Listener<>() {};
         }
     }

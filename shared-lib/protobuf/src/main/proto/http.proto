@@ -1,0 +1,67 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package opennms.icmp;
+option java_multiple_files = true;
+option java_package = "org.opennms.monitors.http.contract";
+
+message HttpMonitorRequest {
+  AuthParams auth_params = 1;
+  string hostname = 2;
+  string inetAddress = 3;
+  repeated int32 port = 4;
+  repeated Header headers = 5;
+  string response = 6;
+  string responseText = 7;
+  string url = 8;
+  int32 retry = 9;
+  int64 timeout = 10;
+  string userAgent= 11;
+  bool verbose = 12;
+}
+
+message AuthParams {
+  oneof auth {
+    BasicAuthParams basic_auth_params = 1;
+  }
+}
+
+message BasicAuthParams {
+  string username = 1;
+  string password = 2;
+}
+
+message Header {
+  string key = 1;
+  string value = 2;
+}
+
+

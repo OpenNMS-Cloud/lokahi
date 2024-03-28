@@ -42,6 +42,7 @@
     <module>features</module>
     <module>nodescan-plugin</module>
     <module>shell-commands</module>
+      <module>http-plugin</module>
   </modules>
 
 </project>

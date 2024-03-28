@@ -1,0 +1,20 @@
+<blueprint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:camel="http://camel.apache.org/schema/blueprint"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <cm:property-placeholder persistent-id="org.opennms.minion.plugins.http" update-strategy="reload">
+        <cm:default-properties>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="httpMonitorManager" class="org.opennms.horizon.minion.http.HttpMonitorManager"/>
+
+    <service ref="httpMonitorManager" interface="org.opennms.horizon.minion.plugin.api.ServiceMonitorManager">
+        <service-properties>
+            <entry key="monitor.name" value="HTTPMonitor"/>
+        </service-properties>
+    </service>
+
+</blueprint>

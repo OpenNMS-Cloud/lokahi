@@ -205,6 +205,11 @@
       <artifactId>commons-net</artifactId>
       <version>${commons.net.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>inventory-snmp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <!-- Test Dependencies -->
     <dependency>
@@ -270,7 +275,6 @@
       <version>2.7.10</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-core</artifactId>

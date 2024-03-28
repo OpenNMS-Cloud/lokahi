@@ -91,6 +91,22 @@ public class SnmpCollector implements ServiceCollector {
             String ipAddress = snmpRequest.getHost();
             snmpCollectionSet.addDefaultTrackers();
 
+            for (final var part : snmpRequest.getPartList()) {
+                if (part.hasScalar()) {
+                    final var scalar = part.getScalar();
+                    final var collectable = SnmpScalarCollector.forScalar(scalar, builder);
+
+                    snmpCollectionSet.getTrackers().add(collectable);
+                }
+
+                if (part.hasTable()) {
+                    final var table = part.getTable();
+                    final var collectable = SnmpTableCollector.forTable(table, builder);
+
+                    snmpCollectionSet.getTrackers().add(collectable);
+                }
+            }
+
             for (SnmpInterfaceElement element : snmpRequest.getSnmpInterfaceList()) {
                 var interfaceMetricsTracker = new InterfaceMetricsTracker(
                         element.getIfIndex(), element.getIfName(), element.getIpAddress(), builder);

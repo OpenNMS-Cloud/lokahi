@@ -228,7 +228,7 @@ public class TaskSetCollectorSnmpResponseProcessorTest {
         }
 
         private boolean labelMatches(PrometheusTypes.TimeSeries timeseriesBuilder) {
-            if (timeseriesBuilder.getLabelsCount() == 6) {
+            if (timeseriesBuilder.getLabelsCount() >= 6) {
                 Map<String, String> labelMap = new HashMap<>();
                 for (var label : timeseriesBuilder.getLabelsList()) {
                     labelMap.put(label.getName(), label.getValue());

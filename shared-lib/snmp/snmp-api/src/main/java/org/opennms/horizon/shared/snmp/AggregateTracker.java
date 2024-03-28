@@ -226,14 +226,14 @@ public class AggregateTracker extends CollectionTracker {
         }
     }
 
-    private CollectionTracker[] m_children;
+    private final CollectionTracker[] m_children;
 
-    public AggregateTracker(Collection<Collectable> children) {
+    public AggregateTracker(Collection<? extends Collectable> children) {
         this(children, null);
     }
 
-    public AggregateTracker(Collection<Collectable> children, CollectionTracker parent) {
-        this(children.toArray(new Collectable[children.size()]), parent);
+    public AggregateTracker(Collection<? extends Collectable> children, CollectionTracker parent) {
+        this(children.toArray(Collectable[]::new), parent);
     }
 
     public AggregateTracker(Collectable[] children) {

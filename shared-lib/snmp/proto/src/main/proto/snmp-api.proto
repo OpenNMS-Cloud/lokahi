@@ -57,8 +57,9 @@ message SnmpResultMetric {
   string instance = 2;
   SnmpValueMetric value = 3;
   string alias = 4;
-  optional string if_name = 5;
-  optional string ip_address = 6;
+  optional string if_name = 5; // TODO LOK-2404: encode in labels
+  optional string ip_address = 6; // TODO LOK-2404: encode in labels
+  map<string, string> labels = 7;
 }
 
 message SnmpResponseMetric {

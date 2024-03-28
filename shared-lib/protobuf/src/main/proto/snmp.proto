@@ -53,10 +53,36 @@ message SnmpCollectorRequest {
   uint64  node_id = 3;
   uint32 if_index = 4; // deprecated
   repeated SnmpInterfaceElement snmp_interface = 5;
+  repeated SnmpCollectorPart part = 6;
 }
 
 message SnmpInterfaceElement {
   string if_name = 1;
   uint32 if_index = 2;
   optional string ip_address = 3;
+}
+
+message SnmpCollectorPart {
+  message Element {
+    string oid = 1;
+    string alias = 2;
+    string type = 3;
+  }
+
+  message Scalar {
+    repeated Element element = 1;
+  }
+
+  message Table {
+    string instance = 1;
+
+    repeated Element element = 2;
+
+    optional string persist_filter_expr = 3;
+  }
+
+  oneof part {
+    Scalar scalar = 1;
+    Table table = 2;
+  }
 }

@@ -277,6 +277,10 @@ public class SnmpObjId implements Comparable<SnmpObjId> {
         }
     }
 
+    public SnmpObjId parent() {
+        return new SnmpObjId(cloneIds(m_ids, length() - 1), false);
+    }
+
     /**
      * If requesting a GETNEXT on the given base OID, would the
      * current OID be expected in a response?

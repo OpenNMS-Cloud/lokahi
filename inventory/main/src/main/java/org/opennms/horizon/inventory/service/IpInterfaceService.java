@@ -160,6 +160,7 @@ public class IpInterfaceService {
                             ipInterface.setSnmpPrimary(false);
                             ipInterface.setHostname(result.getIpHostName());
                             ipInterface.setIfIndex(result.getIfIndex());
+                            ipInterface.setLocation(node.getMonitoringLocation());
                             var snmpInterface = ifIndexSNMPMap.get(result.getIfIndex());
                             if (snmpInterface != null) {
                                 ipInterface.setSnmpInterface(snmpInterface);

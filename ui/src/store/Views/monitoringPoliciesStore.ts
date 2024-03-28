@@ -94,6 +94,16 @@ export const useMonitoringPoliciesStore = defineStore('monitoringPoliciesStore',
       const queries = useMonitoringPoliciesQueries()
       await queries.listMonitoringPolicies()
       this.monitoringPolicies = queries.monitoringPolicies
+
+      // we are setting this to true until the back end supports enable/disable.
+      //  Then this component can just display the status.
+      //  Once back end adds ability to enable/disable, then we will add another issue to implement it here and elsewhere.
+
+      for (let i = 0; i < this.monitoringPolicies.length; i++) {
+        if (!('enabled' in  this.monitoringPolicies[i])) {
+          this.monitoringPolicies[i].enabled = true
+        }
+      }
     },
     displayPolicyForm(policy?: Policy) {
       this.selectedPolicy = policy ? cloneDeep(policy) : cloneDeep(defaultPolicy)

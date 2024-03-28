@@ -128,16 +128,6 @@ const sort = reactive({
   affectedNodes: SORT.ASCENDING
 }) as any
 
-const policiesLength = computed(() => store.monitoringPolicies.length)
-
-watch(() => policiesLength.value, () => {
-  for (let i = 0; i < policiesLength.value; i++) {
-
-    if (!('enabled' in store.monitoringPolicies[i])) {
-      store.monitoringPolicies[i].enabled = true
-    }
-  }
-})
 const sortChanged = (sortObj: Record<string, string>) => {
   // store.setTopNNodesTableSort(sortObj)
 
@@ -150,9 +140,6 @@ const sortChanged = (sortObj: Record<string, string>) => {
 
 const onSelectPolicy = (id: string) => {
   console.log(`onSelectPolicy, id: ${id}`)
-
-  const index = store.monitoringPolicies.findIndex((item: Policy) => item.id === Number(id))
-  store.monitoringPolicies[index].enabled = !store.monitoringPolicies[index].enabled
 
   const selectedPolicy = store.monitoringPolicies.find((item: Policy) => item.id === Number(id))
 
@@ -170,11 +157,6 @@ const onRefresh = () => {
   console.log('refresh clicked')
   store.getMonitoringPolicies()
 }
-
-// onMounted(async () => await store.getTopNNodes())
-onMounted(() => {
-  console.log('In MonitoringPoliciesTable v1')
-})
 
 </script>
 

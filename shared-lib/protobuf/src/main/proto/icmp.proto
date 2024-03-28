@@ -50,6 +50,8 @@ message IcmpMonitorRequest {
   bool allow_fragmentation = 4;
   int32 packet_size = 5;
   int32 retries = 6;
+  int64 nodeId = 7;
+  int64 monitorServiceId = 8;
 }
 
 message PingSweepRequest {

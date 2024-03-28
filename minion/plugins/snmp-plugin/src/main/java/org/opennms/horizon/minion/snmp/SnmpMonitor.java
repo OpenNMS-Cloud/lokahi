@@ -30,8 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
-import org.opennms.horizon.minion.plugin.api.MonitoredService;
+import org.opennms.horizon.minion.plugin.api.ServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse.Status;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
@@ -64,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * @author <A HREF="mailto:mike@opennms.org">Mike Davidson </A>
  * @author <A HREF="http://www.opennms.org/">OpenNMS </A>
  */
-public class SnmpMonitor extends AbstractServiceMonitor {
+public class SnmpMonitor implements ServiceMonitor {
 
     public static final long NANOSECOND_PER_MILLISECOND = 1_000_000;
 
@@ -114,7 +113,7 @@ public class SnmpMonitor extends AbstractServiceMonitor {
      *                Thrown for any unrecoverable errors.
      */
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
+    public CompletableFuture<ServiceMonitorResponse> poll(Any config) {
 
         CompletableFuture<ServiceMonitorResponse> future = null;
         String hostAddress = null;
@@ -156,38 +155,32 @@ public class SnmpMonitor extends AbstractServiceMonitor {
                             operator,
                             operand,
                             startTimestamp,
-                            svc.getNodeId(),
-                            svc.getMonitorServiceId()))
+                        snmpMonitorRequest.getNodeId(),
+                        snmpMonitorRequest.getMonitorServiceId()))
                     .completeOnTimeout(
-                            this.createTimeoutResponse(finalHostAddress, svc.getMonitorServiceId(), svc.getNodeId()),
+                            this.createTimeoutResponse(finalHostAddress, snmpMonitorRequest.getMonitorServiceId(), snmpMonitorRequest.getNodeId()),
                             agentConfig.getTimeout(),
                             TimeUnit.MILLISECONDS)
                     .exceptionally(thrown -> this.createExceptionResponse(
-                            thrown, finalHostAddress, svc.getMonitorServiceId(), svc.getNodeId()));
+                            thrown, finalHostAddress, snmpMonitorRequest.getMonitorServiceId(), snmpMonitorRequest.getNodeId()));
 
             return future;
         } catch (NumberFormatException e) {
             LOG.debug("Number operator used in a non-number evaluation", e);
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                     .reason(e.getMessage())
-                    .nodeId(svc.getNodeId())
-                    .monitoredServiceId(svc.getMonitorServiceId())
                     .status(Status.Unknown)
                     .build());
         } catch (IllegalArgumentException e) {
             LOG.debug("Invalid SNMP Criteria", e);
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                     .reason(e.getMessage())
-                    .nodeId(svc.getNodeId())
-                    .monitoredServiceId(svc.getMonitorServiceId())
                     .status(Status.Unknown)
                     .build());
         } catch (Throwable t) {
             LOG.debug("Unexpected exception during SNMP poll of interface {}", hostAddress, t);
             return CompletableFuture.completedFuture(ServiceMonitorResponseImpl.builder()
                     .reason(t.getMessage())
-                    .nodeId(svc.getNodeId())
-                    .monitoredServiceId(svc.getMonitorServiceId())
                     .status(Status.Unknown)
                     .build());
         }
@@ -196,17 +189,6 @@ public class SnmpMonitor extends AbstractServiceMonitor {
     // ========================================
     // Internal Methods
     // ----------------------------------------
-
-    private SnmpAgentConfig mapAgentConfig(SnmpMonitorRequest snmpMonitorRequest) {
-        var agentConfig = new SnmpAgentConfig(
-                InetAddressUtils.getInetAddress(snmpMonitorRequest.getHost()), SnmpAgentConfig.DEFAULTS);
-        if (snmpMonitorRequest.hasAgentConfig()) {
-            agentConfig.setReadCommunity(snmpMonitorRequest.getAgentConfig().getReadCommunity());
-            agentConfig.setPort(snmpMonitorRequest.getAgentConfig().getPort());
-            // TODO: Expand config further.
-        }
-        return agentConfig;
-    }
 
     private String protobufDefaultNullHelper(Message msg, Descriptors.FieldDescriptor fieldDescriptor) {
         if (!msg.hasField(fieldDescriptor)) {

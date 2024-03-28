@@ -26,7 +26,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 import lombok.Setter;
-import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.shared.snmp.SnmpAgentConfig;
 import org.opennms.horizon.shared.snmp.SnmpValue;
 import org.opennms.snmp.contract.SnmpMonitorRequest;
@@ -67,18 +66,11 @@ public class SnmpMonitorUtils {
     private FunctionWithException<String, InetAddress, UnknownHostException> inetLookupOperation =
             InetAddress::getByName;
 
-    public SnmpAgentConfig getAgentConfig(MonitoredService svc, SnmpMonitorRequest snmpMonitorRequest)
-            throws UnknownHostException {
-        // return getKeyedInstance(parameters, "agent", () -> { return new SnmpAgentConfig(svc.getAddress()); });
-        return new SnmpAgentConfig(inetLookupOperation.call(snmpMonitorRequest.getHost()));
-    }
-
     public static String getStringValue(SnmpValue result) {
         // TODO: what is hex ?
         if (hex) return result.toHexString();
         return result.toString();
     }
-
     /**
      * Verifies that the result of the SNMP query meets the criteria specified
      * by the operator and the operand from the configuration file.

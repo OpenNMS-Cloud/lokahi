@@ -63,24 +63,12 @@ public interface ServiceMonitorResponse {
     Map<String, Number> getAdditionalMetrics();
 
     /**
-     * TECHDEBT: Was originally added to the monitor interface to take advantage of poller's scheduling and
-     * configuration mechanism.
-     */
-    DeviceConfig getDeviceConfig();
-
-    /**
      * Returns timestamp when response time was actually generated.
      *
      * @return Timestamp of a response.
      */
     long getTimestamp();
 
-    interface DeviceConfig {
-
-        byte[] getContent();
-
-        String getFilename();
-    }
 
     enum Status {
         /**

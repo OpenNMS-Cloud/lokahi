@@ -40,7 +40,7 @@
     <div class="hs-card">
         <div id="hs-header">
             <div id="hs-header-wrapper" class="hs-logo"></div>
-            <span class="typography-button" id="hs-stream-title">Horizon Stream</span>
+            <span class="typography-button" id="hs-stream-title">Lōkahi</span>
         </div>
 
         <header>

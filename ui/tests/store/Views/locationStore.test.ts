@@ -110,4 +110,32 @@ describe('Locations Store', () => {
     locationStore.selectedLocationId = 2
     expect(locationStore.selectedLocation).toStrictEqual(mockLocationList[0])
   })
+
+  it('calls store.getMinionsForLocationId with correct parameters', async () => {
+    vi.spyOn(locationStore, 'getMinionsForLocationId')
+    const mockLocationId = 200
+    await locationStore.getMinionsForLocationId(mockLocationId)
+    expect(locationStore.getMinionsForLocationId).toHaveBeenCalledWith(mockLocationId)
+    expect(locationStore.displayType).toBe(DisplayType.LIST)
+    expect(locationStore.selectedLocationId).toBe(mockLocationId)
+  })
+
+  it('calls store.getMinionCertificate with correct parameters', async () => {
+    vi.spyOn(locationStore, 'getMinionCertificate')
+    await locationStore.getMinionCertificate()
+    expect(locationStore.getMinionCertificate).toHaveBeenCalledOnce()
+  })
+
+  it('calls store.revokeMinionCertificate with correct parameters', async () => {
+    vi.spyOn(locationStore, 'revokeMinionCertificate')
+    await locationStore.revokeMinionCertificate()
+    expect(locationStore.revokeMinionCertificate).toHaveBeenCalledOnce()
+  })
+
+  it('calls store.setCertificatePassword with correct parameters', async () => {
+    vi.spyOn(locationStore, 'setCertificatePassword')
+    const mockPassword = 'test'
+    await locationStore.setCertificatePassword(mockPassword)
+    expect(locationStore.certificatePassword).toBe(mockPassword)
+  })
 })

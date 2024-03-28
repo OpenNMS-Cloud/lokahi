@@ -15,7 +15,7 @@
     <repository>mvn:org.opennms.lokahi.minion/flows-features/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.lokahi.minion/azure-plugin/${project.version}/xml/features</repository>
     <repository>mvn:org.opennms.lokahi.minion/nodescan-plugin/${project.version}/xml/features</repository>
-
+    <repository>mvn:org.opennms.lokahi.minion/syslog-features/${project.version}/xml/features</repository>
 
     <feature name="minion-ng">
         <feature>taskset-minion</feature>
@@ -27,6 +27,7 @@
         <feature>azure-plugins</feature>
         <feature>node-scan-plugin</feature>
         <feature>plugins-shell-commands</feature>
+        <feature>minion-syslog</feature>
     </feature>
 
 

@@ -38,11 +38,13 @@ import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryCreateDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryDTO;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryList;
 import org.opennms.horizon.inventory.discovery.IcmpActiveDiscoveryServiceGrpc;
+import org.opennms.horizon.inventory.exception.GrpcConstraintVoilationExceptionHandler;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.grpc.TenantLookup;
 import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscoveryService;
 import org.opennms.horizon.inventory.service.taskset.ScannerTaskSetService;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -146,10 +148,10 @@ public class IcmpActiveDiscoveryGrpcService extends IcmpActiveDiscoveryServiceGr
                             Long.parseLong(icmpDiscovery.getLocationId()), icmpDiscovery.getId(), tenant.get());
                     activeDiscoveryConfig = discoveryService.upsertActiveDiscovery(request, tenant.get());
                 }
-            } catch (InventoryRuntimeException | IllegalArgumentException e) {
+            } catch (InventoryRuntimeException | IllegalArgumentException | DataIntegrityViolationException e) {
                 log.error("Exception while validating active discovery", e);
-                responseObserver.onError(
-                        StatusProto.toStatusRuntimeException(createInvalidDiscoveryInput(e.getMessage())));
+                GrpcConstraintVoilationExceptionHandler.handleException(
+                        e, responseObserver, Code.INVALID_ARGUMENT_VALUE);
                 return;
             }
 

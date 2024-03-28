@@ -45,6 +45,8 @@ message SnmpMonitorRequest {
   string operator = 3;
   string operand = 4;
   opennms.snmp.api.SnmpConfiguration agent_config = 5;
+  int64 nodeId = 7;
+  int64 monitorServiceId = 8;
 }
 
 message SnmpCollectorRequest {

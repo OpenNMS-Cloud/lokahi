@@ -24,7 +24,6 @@ package org.opennms.horizon.minion.taskset.worker.impl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.opennms.horizon.minion.plugin.api.MonitoredService;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorManager;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
@@ -130,10 +129,8 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
                 }
             }
             if (monitor != null) {
-                // TBD888: populate host, or stop?
-                MonitoredService monitoredService = configureMonitoredService(taskDefinition);
                 CompletableFuture<ServiceMonitorResponse> future =
-                        monitor.poll(monitoredService, taskDefinition.getConfiguration());
+                        monitor.poll(taskDefinition.getConfiguration());
                 future.whenComplete(this::handleExecutionComplete);
             } else {
                 log.info("Skipping service monitor execution; monitor not found: monitor="
@@ -167,10 +164,7 @@ public class TaskExecutorLocalMonitorServiceImpl implements TaskExecutorLocalSer
         }
     }
 
-    private MonitoredService configureMonitoredService(TaskDefinition taskDefinition) {
-        return new GeneralMonitoredService(
-                "TBD", "TBD", taskDefinition.getNodeId(), "TBD", "TBD", null, taskDefinition.getMonitorServiceId());
-    }
+
 
     private ServiceMonitor lookupMonitor(TaskDefinition taskDefinition) {
         String pluginName = taskDefinition.getPluginName();

@@ -24,8 +24,7 @@ package org.opennms.horizon.minion.azure;
 import com.google.protobuf.Any;
 import java.util.concurrent.CompletableFuture;
 import org.opennms.azure.contract.AzureMonitorRequest;
-import org.opennms.horizon.minion.plugin.api.AbstractServiceMonitor;
-import org.opennms.horizon.minion.plugin.api.MonitoredService;
+import org.opennms.horizon.minion.plugin.api.ServiceMonitor;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponse;
 import org.opennms.horizon.minion.plugin.api.ServiceMonitorResponseImpl;
 import org.opennms.horizon.shared.azure.http.AzureHttpClient;
@@ -35,7 +34,7 @@ import org.opennms.taskset.contract.MonitorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AzureMonitor extends AbstractServiceMonitor {
+public class AzureMonitor implements ServiceMonitor {
     private static final Logger log = LoggerFactory.getLogger(AzureMonitor.class);
 
     private final AzureHttpClient client;
@@ -45,7 +44,7 @@ public class AzureMonitor extends AbstractServiceMonitor {
     }
 
     @Override
-    public CompletableFuture<ServiceMonitorResponse> poll(MonitoredService svc, Any config) {
+    public CompletableFuture<ServiceMonitorResponse> poll(Any config) {
 
         CompletableFuture<ServiceMonitorResponse> future = new CompletableFuture<>();
 
@@ -80,15 +79,15 @@ public class AzureMonitor extends AbstractServiceMonitor {
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Up)
                         .responseTime(System.currentTimeMillis() - startMs)
-                        .nodeId(svc.getNodeId())
-                        .ipAddress("azure-node-" + svc.getNodeId())
+                        .nodeId(request.getNodeId())
+                        .ipAddress("azure-node-" + request.getNodeId())
                         .build());
             } else {
                 future.complete(ServiceMonitorResponseImpl.builder()
                         .monitorType(MonitorType.AZURE)
                         .status(ServiceMonitorResponse.Status.Down)
-                        .nodeId(svc.getNodeId())
-                        .ipAddress("azure-node-" + svc.getNodeId())
+                        .nodeId(request.getNodeId())
+                        .ipAddress("azure-node-" + request.getNodeId())
                         .build());
             }
 
@@ -98,7 +97,6 @@ public class AzureMonitor extends AbstractServiceMonitor {
                     .reason("Failed to monitor for azure resource: " + e.getMessage())
                     .monitorType(MonitorType.AZURE)
                     .status(ServiceMonitorResponse.Status.Down)
-                    .nodeId(svc.getNodeId())
                     .build());
         }
 

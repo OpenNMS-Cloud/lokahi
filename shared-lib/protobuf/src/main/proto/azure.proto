@@ -52,6 +52,7 @@ message AzureMonitorRequest {
   string directory_id = 6;
   int32 retries = 7;
   int64 timeout_ms = 8;
+  int64 nodeId = 9;
 }
 
 message AzureCollectorResourcesRequest {

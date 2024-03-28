@@ -89,7 +89,8 @@ public class TaskSetCollectorSnmpResponseProcessor {
                             .setValue(CortexTSS.sanitizeLabelValue(e.getValue())));
                 }
 
-                if (snmpResult.hasIpAddress()) {
+                if (snmpResult.hasIpAddress()
+                        && !snmpResult.getIpAddress().isEmpty()) { // TODO LOK-2404: encode in labels
                     builder.addLabels(PrometheusTypes.Label.newBuilder()
                             .setName("ip_address")
                             .setValue(snmpResult.getIpAddress()));

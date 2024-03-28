@@ -81,9 +81,13 @@ public class SnmpTableCollector extends TableTracker {
 
             for (int i = 0; i < row.getColumnCount(); i++) {
                 final var element = this.elements.get(i);
-                context.setVariable(
-                        element.getAlias(),
-                        row.getValue(SnmpObjId.get(element.getOid())).toDisplayString());
+
+                final var value = row.getValue(SnmpObjId.get(element.getOid()));
+                if (value == null) {
+                    continue;
+                }
+
+                context.setVariable(element.getAlias(), value.toDisplayString());
             }
 
             context.setVariable("instance", this.instance);

@@ -64,7 +64,6 @@ public class CollectorTaskSetService {
     private final SnmpInterfaceRepository snmpInterfaceRepository;
     private final SnmpCollectorConfig snmpCollectorConfig;
 
-    @Transactional
     public TaskDefinition getCollectorTask(
             MonitorType monitorType, IpInterface ipInterface, long nodeId, SnmpConfiguration snmpConfiguration) {
         if (MonitorType.SNMP.equals(monitorType)) {
@@ -73,7 +72,6 @@ public class CollectorTaskSetService {
         return null;
     }
 
-    @Transactional
     public TaskDefinition addSnmpCollectorTask(
             IpInterface ipInterface, long nodeId, SnmpConfiguration snmpConfiguration) {
         String monitorTypeValue = MonitorType.SNMP.name();

@@ -75,6 +75,7 @@ import org.opennms.taskset.contract.MonitorType;
 import org.opennms.taskset.contract.PingResponse;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -247,6 +248,8 @@ public class ScannerResponseService {
                         "Location not found while adding new Azure device for tenantId={}; locationId={}",
                         tenantId,
                         locationId);
+            } catch (DataIntegrityViolationException e) {
+                log.error("Ip address already exists for a given location", e.getMessage());
             }
         }
     }

@@ -65,6 +65,7 @@ import org.opennms.horizon.inventory.dto.SearchIpInterfaceQuery;
 import org.opennms.horizon.inventory.dto.SnmpInterfaceDTO;
 import org.opennms.horizon.inventory.dto.SnmpInterfacesList;
 import org.opennms.horizon.inventory.dto.TagNameQuery;
+import org.opennms.horizon.inventory.exception.DBConstraintsException;
 import org.opennms.horizon.inventory.exception.EntityExistException;
 import org.opennms.horizon.inventory.exception.InventoryRuntimeException;
 import org.opennms.horizon.inventory.exception.LocationNotFoundException;
@@ -133,6 +134,12 @@ public class NodeGrpcService extends NodeServiceGrpc.NodeServiceImplBase {
                 Status status = Status.newBuilder()
                         .setCode(Code.NOT_FOUND_VALUE)
                         .setMessage(INVALID_REQUEST_LOCATION_AND_IP_NOT_EMPTY_MSG)
+                        .build();
+                responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            } catch (DBConstraintsException e) {
+                Status status = Status.newBuilder()
+                        .setCode(Code.ABORTED_VALUE)
+                        .setMessage(IP_ADDRESS_ALREADY_EXISTS_FOR_LOCATION_MSG)
                         .build();
                 responseObserver.onError(StatusProto.toStatusRuntimeException(status));
             }

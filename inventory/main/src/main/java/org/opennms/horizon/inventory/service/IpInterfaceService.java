@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.opennms.horizon.azure.api.AzureScanNetworkInterfaceItem;
 import org.opennms.horizon.inventory.dto.IpInterfaceDTO;
+import org.opennms.horizon.inventory.exception.DBConstraintsException;
 import org.opennms.horizon.inventory.mapper.IpInterfaceMapper;
 import org.opennms.horizon.inventory.model.AzureInterface;
 import org.opennms.horizon.inventory.model.IpInterface;
@@ -38,6 +39,9 @@ import org.opennms.horizon.inventory.model.SnmpInterface;
 import org.opennms.horizon.inventory.repository.IpInterfaceRepository;
 import org.opennms.horizon.shared.utils.InetAddressUtils;
 import org.opennms.node.scan.contract.IpInterfaceResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -52,6 +56,8 @@ public class IpInterfaceService {
     private final IpInterfaceRepository modelRepo;
 
     private final IpInterfaceMapper mapper;
+
+    private static final Logger LOG = LoggerFactory.getLogger(IpInterfaceService.class);
 
     public List<IpInterfaceDTO> findByTenantId(String tenantId) {
         List<IpInterface> all = modelRepo.findByTenantId(tenantId);
@@ -107,15 +113,21 @@ public class IpInterfaceService {
             Node node,
             AzureInterface azureInterface,
             AzureScanNetworkInterfaceItem networkInterfaceItem) {
-        Objects.requireNonNull(azureInterface);
+        try {
+            Objects.requireNonNull(azureInterface);
 
-        IpInterface ipInterface = new IpInterface();
-        ipInterface.setNode(node);
-        ipInterface.setTenantId(tenantId);
-        ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
-        ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
-        ipInterface.setAzureInterface(azureInterface);
-        modelRepo.save(ipInterface);
+            IpInterface ipInterface = new IpInterface();
+            ipInterface.setNode(node);
+            ipInterface.setTenantId(tenantId);
+            ipInterface.setSnmpPrimary(networkInterfaceItem.getIsPrimary());
+            ipInterface.setIpAddress(InetAddressUtils.getInetAddress(networkInterfaceItem.getIpAddress()));
+            ipInterface.setAzureInterface(azureInterface);
+            ipInterface.setLocation(node.getMonitoringLocation());
+            modelRepo.save(ipInterface);
+        } catch (DataIntegrityViolationException e) {
+            LOG.error("Ip address already exists for a given location :", e.getMessage());
+            throw new DBConstraintsException("Ip address already exists for a given location :" + e.getMessage());
+        }
     }
 
     public IpInterface getPrimaryInterfaceForNode(long nodeId) {
@@ -148,6 +160,7 @@ public class IpInterfaceService {
                             ipInterface.setSnmpPrimary(false);
                             ipInterface.setHostname(result.getIpHostName());
                             ipInterface.setIfIndex(result.getIfIndex());
+                            ipInterface.setLocation(node.getMonitoringLocation());
                             var snmpInterface = ifIndexSNMPMap.get(result.getIfIndex());
                             if (snmpInterface != null) {
                                 ipInterface.setSnmpInterface(snmpInterface);

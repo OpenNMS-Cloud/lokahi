@@ -33,4 +33,5 @@
     <include file="db/changelog/hs-0.1.0/tables/node-active-discovery-ids.xml"/>
     <include file="db/changelog/hs-0.1.0/tables/tag-teanent-constraint.xml"/>
 
+    <include file="db/changelog/hs-0.1.0/tables/ip-interface-add-new-column.xml"/>
 </databaseChangeLog>

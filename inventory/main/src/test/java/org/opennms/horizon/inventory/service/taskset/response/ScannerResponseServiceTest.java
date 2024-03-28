@@ -59,6 +59,7 @@ import org.opennms.horizon.inventory.service.discovery.active.IcmpActiveDiscover
 import org.opennms.horizon.inventory.service.taskset.TaskSetHandler;
 import org.opennms.taskset.contract.ScanType;
 import org.opennms.taskset.contract.ScannerResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 
 public class ScannerResponseServiceTest {
     private final AzureActiveDiscoveryRepository azureActiveDiscoveryRepository =
@@ -99,7 +100,9 @@ public class ScannerResponseServiceTest {
     public static final String TENANT_ID = "tenantId";
 
     @Test
-    void testAzureResponse() throws InvalidProtocolBufferException, EntityExistException, LocationNotFoundException {
+    void testAzureResponse()
+            throws InvalidProtocolBufferException, EntityExistException, LocationNotFoundException,
+                    DataIntegrityViolationException {
         // prepare
         AzureActiveDiscovery discovery = new AzureActiveDiscovery();
         discovery.setId(discoveryId);
